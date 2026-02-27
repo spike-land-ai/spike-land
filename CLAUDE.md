@@ -95,6 +95,43 @@ Multiple MCP servers following a common pattern: `@modelcontextprotocol/sdk` + Z
 - Changesets for versioning and publishing on main branch push
 - spike.land has its own extensive CI: ESLint, TypeScript, Vitest (4 shards), Next.js build, AWS ECS deploy
 
+## Dependency Cascade System
+
+When any `@spike-land-ai/*` package publishes, consuming repos automatically receive a PR bumping the version.
+
+### How it works
+1. `ci-publish.yml` `notify` job fires after Changesets publishes
+2. Reads `.github/dependency-map.json` to find downstream repos
+3. Sends `repository_dispatch` (type: `dependency-updated`) to each consumer
+4. Consumer's `receive-dispatch.yml` calls `bump-dependency.yml` (reusable)
+5. `bump-dependency.yml` patches `package.json` and opens a PR with auto-merge
+
+### Dependency graph (source → consumers)
+| Source package | Consuming repos |
+|----------------|-----------------|
+| `@spike-land-ai/esbuild-wasm` | esbuild-wasm-mcp, code, transpile, spike-land-backend, spike.land |
+| `@spike-land-ai/esbuild-wasm-mcp` | code, spike-land-backend |
+| `@spike-land-ai/code` | transpile, spike-land-backend |
+| `@spike-land-ai/shared` | code, transpile, spike-land-backend, spike.land |
+| `@spike-land-ai/react-ts-worker` | spike.land |
+| `@spike-land-ai/spike-cli` | spike.land |
+
+### Key files
+- `.github/dependency-map.json` — source-of-truth DAG
+- `.github/.github/workflows/bump-dependency.yml` — reusable bump workflow
+- `.github/.github/workflows/dep-sync-sweep.yml` — nightly safety-net (06:00 UTC)
+- `.github/scripts/verify-deps.sh` — run locally to check for drift
+- `.github/SETUP.md` — PAT setup instructions and how to add new packages
+
+### Verify drift locally
+```bash
+bash .github/scripts/verify-deps.sh
+```
+
+### Excluded repos
+- `vinext.spike.land` — uses git-SHA deps, not registry versions
+- Leaf MCP servers (hackernews-mcp, mcp-pixel, openclaw-mcp, spike-review, vibe-dev) — no internal deps
+
 ## Key Conventions
 
 - TypeScript strict mode across all packages
