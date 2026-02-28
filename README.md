@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://spike.land">
-    <img src=".github/assets/hero-banner.svg" alt="spike.land — AI-Native Development Platform" width="100%" />
+    <img src="https://raw.githubusercontent.com/spike-land-ai/.github/main/assets/hero-banner.svg" alt="spike.land — AI-Native Development Platform" width="100%" />
   </a>
 </p>
 
@@ -35,19 +35,19 @@ spike-land-ai is an AI-native development platform built across 15 independent r
 ---
 
 <p align="center">
-  <img src=".github/assets/stats-dashboard.svg" alt="Platform Stats" width="100%" />
+  <img src="https://raw.githubusercontent.com/spike-land-ai/.github/main/assets/stats-dashboard.svg" alt="Platform Stats" width="100%" />
 </p>
 
 ## Architecture
 
 <p align="center">
-  <img src=".github/assets/architecture.svg" alt="Architecture Diagram" width="100%" />
+  <img src="https://raw.githubusercontent.com/spike-land-ai/.github/main/assets/architecture.svg" alt="Architecture Diagram" width="100%" />
 </p>
 
 ## MCP Ecosystem
 
 <p align="center">
-  <img src=".github/assets/mcp-ecosystem.svg" alt="MCP Tool Ecosystem" width="680" />
+  <img src="https://raw.githubusercontent.com/spike-land-ai/.github/main/assets/mcp-ecosystem.svg" alt="MCP Tool Ecosystem" width="680" />
 </p>
 
 ## Packages
@@ -113,7 +113,7 @@ make health
 ## CI/CD Pipeline
 
 <p align="center">
-  <img src=".github/assets/ci-pipeline.svg" alt="CI/CD Pipeline" width="100%" />
+  <img src="https://raw.githubusercontent.com/spike-land-ai/.github/main/assets/ci-pipeline.svg" alt="CI/CD Pipeline" width="100%" />
 </p>
 
 All repos share a reusable workflow at `.github/.github/workflows/ci-publish.yml` running on Node 24. Changesets manages versioning; packages publish to GitHub Packages on every merge to `main`. spike.land uses its own extended pipeline: ESLint, TypeScript, Vitest (4 shards), Next.js build, then AWS ECS deploy via Depot remote builds.
@@ -121,7 +121,7 @@ All repos share a reusable workflow at `.github/.github/workflows/ci-publish.yml
 ## Dependency Cascade
 
 <p align="center">
-  <img src=".github/assets/dependency-flow.svg" alt="Dependency Cascade" width="100%" />
+  <img src="https://raw.githubusercontent.com/spike-land-ai/.github/main/assets/dependency-flow.svg" alt="Dependency Cascade" width="100%" />
 </p>
 
 Publishing any `@spike-land-ai/*` package triggers automated PRs in downstream repos. The DAG is defined in `.github/dependency-map.json`. Check for drift locally:
