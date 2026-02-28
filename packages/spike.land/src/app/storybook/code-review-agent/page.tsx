@@ -56,7 +56,7 @@ const mockIssues = [
   },
   {
     severity: "suggestion" as const,
-    filePath: "src/lib/mcp/server/tools/chess-tournament.ts",
+    filePath: "src/lib/mcp/server/tools/chess/tournament.ts",
     message: "Extract repeated ELO calculation logic into a shared utility function",
     ruleId: "prefer-shared-utils",
   },

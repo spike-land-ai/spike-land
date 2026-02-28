@@ -6,8 +6,8 @@
 
 import { z } from "zod";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolRegistry } from "../tool-registry";
-import { safeToolCall, textResult } from "./tool-helpers";
+import type { ToolRegistry } from "../../tool-registry";
+import { safeToolCall, textResult } from "../tool-helpers";
 import {
   addState,
   addTransition,
@@ -25,10 +25,10 @@ import {
   shareMachine,
   validateMachine,
 } from "@/lib/state-machine/engine";
-import { registerStateMachineVizTools } from "./state-machine-viz";
+import { registerStateMachineVizTools } from "./viz";
 
 export { clearMachines } from "@/lib/state-machine/engine";
-export { generateMermaidDiagram } from "./state-machine-viz";
+export { generateMermaidDiagram } from "./viz";
 
 export function registerStateMachineTools(
   registry: ToolRegistry,

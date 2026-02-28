@@ -67,10 +67,10 @@ import { registerLearnItTools } from "./tools/learnit";
 import { registerAdminTools } from "./tools/admin";
 import { registerAuthTools } from "./tools/auth";
 import { registerSkillStoreTools } from "./tools/skill-store";
-import { registerStoreAppsTools } from "./tools/store-apps";
-import { registerStoreInstallTools } from "./tools/store-install";
-import { registerStoreSearchTools } from "./tools/store-search";
-import { registerStoreSkillsTools } from "./tools/store-skills";
+import { registerStoreAppsTools } from "./tools/store/apps";
+import { registerStoreInstallTools } from "./tools/store/install";
+import { registerStoreSearchTools } from "./tools/store/search";
+import { registerStoreSkillsTools } from "./tools/store/skills";
 import { registerWorkspacesTools } from "./tools/workspaces";
 import { registerAgentManagementTools } from "./tools/agent-management";
 import { registerBillingTools } from "./tools/billing";
@@ -85,13 +85,13 @@ import { registerTtsTools } from "./tools/tts";
 import { registerCapabilitiesTools } from "./tools/capabilities";
 
 // --- BAZDMEG tools ---
-import { registerBazdmegFaqTools } from "./tools/bazdmeg-faq";
-import { registerBazdmegTools } from "./tools/bazdmeg";
-import { registerBazdmegMemoryTools } from "./tools/bazdmeg-memory";
-import { registerBazdmegWorkflowTools } from "./tools/bazdmeg-workflow";
-import { registerBazdmegTelemetryTools } from "./tools/bazdmeg-telemetry";
-import { registerBazdmegGatesTools } from "./tools/bazdmeg-gates";
-import { registerBazdmegSkillSyncTools } from "./tools/bazdmeg-skill-sync";
+import { registerBazdmegFaqTools } from "./tools/bazdmeg/faq";
+import { registerBazdmegTools } from "./tools/bazdmeg/index";
+import { registerBazdmegMemoryTools } from "./tools/bazdmeg/memory";
+import { registerBazdmegWorkflowTools } from "./tools/bazdmeg/workflow";
+import { registerBazdmegTelemetryTools } from "./tools/bazdmeg/telemetry";
+import { registerBazdmegGatesTools } from "./tools/bazdmeg/gates";
+import { registerBazdmegSkillSyncTools } from "./tools/bazdmeg/skill-sync";
 
 // --- Reactive tool graphs ---
 import { registerReactionsTools } from "./tools/reactions";
@@ -121,7 +121,7 @@ import { isJulesAvailable, registerJulesTools } from "./tools/jules";
 import { isGatewayAvailable, registerGatewayTools } from "./tools/gateway";
 
 // --- Store A/B testing ---
-import { registerStoreAbTools } from "./tools/store-ab";
+import { registerStoreAbTools } from "./tools/store/ab";
 
 // --- Platform infrastructure ---
 import { registerAuditTools } from "./tools/audit";

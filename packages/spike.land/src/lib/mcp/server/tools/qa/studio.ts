@@ -19,10 +19,10 @@
  */
 
 import { z } from "zod";
-import type { ToolRegistry } from "../tool-registry";
+import type { ToolRegistry } from "../../tool-registry";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { execFileSync } from "node:child_process";
-import { registerQaStudioRunnerTools } from "./qa-studio-runner";
+import { registerQaStudioRunnerTools } from "./runner";
 
 const CATEGORY = "qa-studio";
 const TIER = "free" as const;
