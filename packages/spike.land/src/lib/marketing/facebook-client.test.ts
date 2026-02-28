@@ -710,17 +710,16 @@ describe("FacebookMarketingClient – listCampaigns", () => {
   });
 
   it("sets budgetType LIFETIME when only lifetime_budget is present", async () => {
+    const { daily_budget: _, ...noDailyBudget } = makeFacebookCampaign({
+      lifetime_budget: "100000",
+    });
     const mockFetch = vi.fn()
       .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
       .mockResolvedValueOnce({
         ok: true,
         json: () =>
           Promise.resolve({
-            data: [
-              makeFacebookCampaign({
-                lifetime_budget: "100000",
-              }),
-            ],
+            data: [noDailyBudget],
           }),
       });
 
@@ -734,15 +733,14 @@ describe("FacebookMarketingClient – listCampaigns", () => {
   });
 
   it("sets budgetType UNKNOWN when no budget fields present", async () => {
+    const { daily_budget: _, ...noBudget } = makeFacebookCampaign({});
     const mockFetch = vi.fn()
       .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
       .mockResolvedValueOnce({
         ok: true,
         json: () =>
           Promise.resolve({
-            data: [
-              makeFacebookCampaign({}),
-            ],
+            data: [noBudget],
           }),
       });
 

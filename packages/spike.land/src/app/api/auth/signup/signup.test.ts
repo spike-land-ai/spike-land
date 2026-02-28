@@ -288,7 +288,7 @@ describe("signup route", () => {
         makeRequest({ email: "  USER@EXAMPLE.COM  ", password: "12345678" }),
       );
       expect(mockSignUpEmail).toHaveBeenCalledWith({
-        body: { email: "user@example.com", password: "12345678", name: "" },
+        body: { email: "user@example.com", password: "12345678", name: "", role: "" },
       });
     });
   });
