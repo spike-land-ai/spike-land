@@ -157,8 +157,8 @@ export function StateMachineApp() {
         ) {
           if (stateId === parsed.definition.initial) continue; // initial state is auto-created
           await sm.addState(newId, stateId, stateNode.type, {
-            parent: stateNode.parent,
-            initial: stateNode.initial,
+            ...(stateNode.parent !== undefined ? { parent: stateNode.parent } : {}),
+            ...(stateNode.initial !== undefined ? { initial: stateNode.initial } : {}),
           });
         }
 
@@ -167,15 +167,16 @@ export function StateMachineApp() {
 
         // Add all transitions
         for (const transition of parsed.definition.transitions) {
+          const guardExpr = transition.guard?.expression;
           await sm.addTransition(
             newId,
             transition.source,
             transition.target,
             transition.event,
             {
-              guard_expression: transition.guard?.expression,
-              actions: transition.actions,
-              internal: transition.internal,
+              ...(guardExpr !== undefined ? { guard_expression: guardExpr } : {}),
+              ...(transition.actions !== undefined ? { actions: transition.actions } : {}),
+              ...(transition.internal !== undefined ? { internal: transition.internal } : {}),
             },
           );
         }
@@ -200,8 +201,8 @@ export function StateMachineApp() {
       // Add all states (including initial - engine only enters it after reset)
       for (const state of template.states) {
         await sm.addState(newId, state.id, state.type, {
-          parent: state.parent,
-          initial: state.initial,
+          ...(state.parent !== undefined ? { parent: state.parent } : {}),
+          ...(state.initial !== undefined ? { initial: state.initial } : {}),
         });
       }
 
@@ -211,8 +212,8 @@ export function StateMachineApp() {
       // Add transitions
       for (const t of template.transitions) {
         await sm.addTransition(newId, t.source, t.target, t.event, {
-          guard_expression: t.guard_expression,
-          actions: t.actions,
+          ...(t.guard_expression !== undefined ? { guard_expression: t.guard_expression } : {}),
+          ...(t.actions !== undefined ? { actions: t.actions } : {}),
         });
       }
 
@@ -273,8 +274,8 @@ export function StateMachineApp() {
 
       for (const state of generated.states) {
         await sm.addState(newId, state.id, state.type, {
-          parent: state.parent,
-          initial: state.initial,
+          ...(state.parent !== undefined ? { parent: state.parent } : {}),
+          ...(state.initial !== undefined ? { initial: state.initial } : {}),
         });
       }
 
@@ -283,7 +284,7 @@ export function StateMachineApp() {
 
       for (const t of generated.transitions) {
         await sm.addTransition(newId, t.source, t.target, t.event, {
-          guard_expression: t.guard_expression,
+          ...(t.guard_expression !== undefined ? { guard_expression: t.guard_expression } : {}),
         });
       }
 

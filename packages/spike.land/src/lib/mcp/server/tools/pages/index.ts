@@ -166,9 +166,7 @@ export function registerPagesTools(
             description: description ?? null,
             layout,
             status: "DRAFT",
-            themeData: themeData
-              ? (themeData as Prisma.InputJsonValue)
-              : null,
+            ...(themeData ? { themeData: themeData as Prisma.InputJsonValue } : {}),
             tags: tags ?? [],
             customCss: customCss ? sanitizeCss(customCss) : null,
             userId,
@@ -584,9 +582,7 @@ export function registerPagesTools(
             description: source.description,
             layout: source.layout,
             status: "DRAFT",
-            themeData: source.themeData
-              ? (source.themeData as Prisma.InputJsonValue)
-              : null,
+            ...(source.themeData ? { themeData: source.themeData as Prisma.InputJsonValue } : {}),
             tags: source.tags,
             customCss: source.customCss ? sanitizeCss(source.customCss) : null,
             seoTitle: source.seoTitle,

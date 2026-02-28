@@ -288,9 +288,7 @@ export function BlendrClient({ isAnonymous = false }: BlendrClientProps) {
             image={image1}
             onImageSelect={handleImage1Select}
             onImageClear={handleClearImage1}
-            onOpenGallery={isAnonymous
-              ? undefined
-              : () => handleOpenGallery("image1")}
+            {...(!isAnonymous ? { onOpenGallery: () => handleOpenGallery("image1") } : {})}
             disabled={activeJobId !== null}
           />
           <BlendrImageSlot
@@ -298,9 +296,7 @@ export function BlendrClient({ isAnonymous = false }: BlendrClientProps) {
             image={image2}
             onImageSelect={handleImage2Select}
             onImageClear={handleClearImage2}
-            onOpenGallery={isAnonymous
-              ? undefined
-              : () => handleOpenGallery("image2")}
+            {...(!isAnonymous ? { onOpenGallery: () => handleOpenGallery("image2") } : {})}
             disabled={activeJobId !== null}
           />
         </div>
