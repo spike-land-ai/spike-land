@@ -12,23 +12,23 @@
 import type { ToolRegistry } from "./tool-registry";
 
 // --- Store apps adapter ---
-import { fromStandalone } from "../../../../packages/store-apps/shared/adapter";
+import { fromStandalone } from "@store-apps/shared/adapter";
 
 // --- Store app tool imports ---
-import { chessArenaTools } from "../../../../packages/store-apps/chess-arena/tools";
-import { tabletopSimTools } from "../../../../packages/store-apps/tabletop-sim/tools";
-import { audioStudioTools } from "../../../../packages/store-apps/audio-studio/tools";
-import { pageBuilderTools } from "../../../../packages/store-apps/page-builder/tools";
-import { contentHubTools } from "../../../../packages/store-apps/content-hub/tools";
-import { mcpExplorerTools } from "../../../../packages/store-apps/mcp-explorer/tools";
-import { codespaceTools } from "../../../../packages/store-apps/codespace/tools";
-import { qaStudioTools as qaStudioStandaloneTools } from "../../../../packages/store-apps/qa-studio/tools";
-import { stateMachineTools as stateMachineStandaloneTools } from "../../../../packages/store-apps/state-machine/tools";
-import { cleansweepTools } from "../../../../packages/store-apps/cleansweep/tools";
-import { careerNavigatorTools } from "../../../../packages/store-apps/career-navigator/tools";
-import { beUniqTools } from "../../../../packages/store-apps/be-uniq/tools";
-import { aiOrchestratorTools } from "../../../../packages/store-apps/ai-orchestrator/tools";
-import { codeReviewAgentTools } from "../../../../packages/store-apps/code-review-agent/tools";
+import { chessArenaTools } from "@store-apps/chess-arena/tools";
+import { tabletopSimTools } from "@store-apps/tabletop-sim/tools";
+import { audioStudioTools } from "@store-apps/audio-studio/tools";
+import { pageBuilderTools } from "@store-apps/page-builder/tools";
+import { contentHubTools } from "@store-apps/content-hub/tools";
+import { mcpExplorerTools } from "@store-apps/mcp-explorer/tools";
+import { codespaceTools } from "@store-apps/codespace/tools";
+import { qaStudioTools as qaStudioStandaloneTools } from "@store-apps/qa-studio/tools";
+import { stateMachineTools as stateMachineStandaloneTools } from "@store-apps/state-machine/tools";
+import { cleansweepTools } from "@store-apps/cleansweep/tools";
+import { careerNavigatorTools } from "@store-apps/career-navigator/tools";
+import { beUniqTools } from "@store-apps/be-uniq/tools";
+import { aiOrchestratorTools } from "@store-apps/ai-orchestrator/tools";
+import { codeReviewAgentTools } from "@store-apps/code-review-agent/tools";
 
 // --- Gateway meta (always-on) ---
 import { registerGatewayMetaTools } from "./tools/gateway-meta";

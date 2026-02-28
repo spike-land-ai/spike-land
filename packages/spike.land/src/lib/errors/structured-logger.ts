@@ -123,7 +123,7 @@ class StructuredLogger {
   private output(entry: LogEntry): void {
     if (this.enableJson) {
       // In production, output JSON for log aggregation services
-      console.log(JSON.stringify(entry));
+      console.warn(JSON.stringify(entry));
     } else if (this.enableConsole) {
       // In development, output formatted console logs
       const formatted = this.formatForConsole(entry);

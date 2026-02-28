@@ -5,13 +5,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   GameProvider,
   useGame,
-} from "../../../../../../apps/tabletop-simulator/components/providers/GameProvider";
-import { ControlsPanel } from "../../../../../../apps/tabletop-simulator/components/ui/ControlsPanel";
-import { GameSidebar } from "../../../../../../apps/tabletop-simulator/components/ui/GameSidebar";
-import { HandDrawer } from "../../../../../../apps/tabletop-simulator/components/ui/HandDrawer";
-import { TopAppBar } from "../../../../../../apps/tabletop-simulator/components/ui/TopAppBar";
-import { VideoOverlay } from "../../../../../../apps/tabletop-simulator/components/ui/VideoOverlay";
-import { useYjsState } from "../../../../../../apps/tabletop-simulator/hooks/useYjsState";
+} from "@apps/tabletop-simulator/components/providers/GameProvider";
+import { ControlsPanel } from "@apps/tabletop-simulator/components/ui/ControlsPanel";
+import { GameSidebar } from "@apps/tabletop-simulator/components/ui/GameSidebar";
+import { HandDrawer } from "@apps/tabletop-simulator/components/ui/HandDrawer";
+import { TopAppBar } from "@apps/tabletop-simulator/components/ui/TopAppBar";
+import { VideoOverlay } from "@apps/tabletop-simulator/components/ui/VideoOverlay";
+import { useYjsState } from "@apps/tabletop-simulator/hooks/useYjsState";
 import {
   addDice,
   addMessage,
@@ -24,15 +24,15 @@ import {
   releaseCard,
   settleDice,
   updateDeck,
-} from "../../../../../../apps/tabletop-simulator/lib/crdt/game-document";
+} from "@apps/tabletop-simulator/lib/crdt/game-document";
 import {
   createStandardDeck,
   shuffleDeck,
-} from "../../../../../../apps/tabletop-simulator/lib/game-logic/deck";
-import type { DiceType } from "../../../../../../apps/tabletop-simulator/types/dice";
+} from "@apps/tabletop-simulator/lib/game-logic/deck";
+import type { DiceType } from "@apps/tabletop-simulator/types/dice";
 
 const GameScene = dynamic(
-  () => import("../../../../../../apps/tabletop-simulator/components/GameScene"),
+  () => import("@apps/tabletop-simulator/components/GameScene"),
   {
     ssr: false,
     loading: () => <div className="text-white p-4">Loading 3D Engine...</div>,

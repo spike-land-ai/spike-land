@@ -1,3 +1,21 @@
+/**
+ * Convention-Based Code Review MCP Tools (legacy standalone module)
+ *
+ * PURPOSE: Provides 9 tools for in-process code review against named convention
+ * sets: create/list/get convention sets, review code, analyze cyclomatic
+ * complexity, retrieve reports, estimate refactoring effort, and fetch built-in
+ * project rules.
+ *
+ * DISTINCTION FROM review-pr.ts: This file handles *stateful, convention-driven*
+ * review workflows (report storage, custom rule sets, complexity metrics).
+ * review-pr.ts handles *PR-integrated* review (diff fetching, fix suggestions,
+ * file-level convention checks, security scanning).
+ *
+ * CANONICAL SOURCE: Both this file and review-pr.ts have been consolidated into
+ * packages/store-apps/code-review-agent/tools.ts, which is the active
+ * implementation registered in the MCP tool manifest via fromStandalone().
+ * This file is retained for its standalone test suite (review.test.ts).
+ */
 import { z } from "zod";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { jsonResult, safeToolCall } from "./tool-helpers";

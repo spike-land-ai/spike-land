@@ -60,7 +60,6 @@ export default function ContestEntry() {
     setSubmitted(true);
 
     // TODO: Add your contest entry submission logic here
-    console.log('Contest entry submitted:', formData);
   };
 
   const handleChange = (

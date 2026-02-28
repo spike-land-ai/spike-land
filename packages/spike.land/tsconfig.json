@@ -46,6 +46,9 @@
       "@apps/*": [
         "./apps/*"
       ],
+      "@store-apps/*": [
+        "./packages/store-apps/*"
+      ],
       "@prisma/client": [
         "./src/generated/prisma"
       ],

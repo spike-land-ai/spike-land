@@ -74,7 +74,7 @@ export type LogContext = Record<string, unknown>;
 export const logger = {
   info: (message: string, context?: LogContext) => {
     const sanitizedContext = sanitizeLogData(context);
-    console.log(JSON.stringify({
+    console.warn(JSON.stringify({
       level: "info",
       timestamp: new Date().toISOString(),
       message: sanitizeLogData(message),

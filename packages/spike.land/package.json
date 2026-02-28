@@ -76,7 +76,6 @@
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "0.2.63",
     "@anthropic-ai/sdk": "0.78.0",
-    "@auth/prisma-adapter": "2.11.1",
     "@aws-sdk/client-ec2": "3.1000.0",
     "@aws-sdk/client-s3": "3.1000.0",
     "@aws-sdk/lib-storage": "3.1000.0",
@@ -108,7 +107,7 @@
     "@radix-ui/react-tabs": "1.1.13",
     "@radix-ui/react-toggle-group": "1.1.11",
     "@radix-ui/react-tooltip": "1.2.8",
-    "@radix-ui/react-visually-hidden": "1.2.4",
+
     "@react-email/components": "1.0.8",
     "@react-spring/three": "10.0.3",
     "@react-three/drei": "10.7.7",
@@ -117,8 +116,7 @@
     "@spike-land-ai/esbuild-wasm": "workspace:*",
     "@spike-land-ai/react-ts-worker": "workspace:*",
     "@spike-land-ai/spike-cli": "workspace:*",
-    "@stripe/react-stripe-js": "5.6.0",
-    "@stripe/stripe-js": "8.8.0",
+
     "@tanstack/react-query": "5.90.21",
     "@types/qrcode": "1.5.6",
     "@upstash/redis": "1.36.3",
@@ -127,6 +125,7 @@
     "@xterm/addon-web-links": "0.12.0",
     "@xterm/xterm": "6.0.0",
     "bcryptjs": "3.0.3",
+    "better-auth": "1.1.20",
     "chess.js": "1.4.0",
     "chokidar": "5.0.0",
     "class-variance-authority": "0.7.1",
@@ -134,7 +133,7 @@
     "date-fns": "4.1.0",
     "diff": "8.0.3",
     "exif-reader": "2.0.3",
-    "fast-xml-parser": "5.4.1",
+
     "framer-motion": "12.34.3",
     "fuse.js": "7.1.0",
     "gray-matter": "4.0.3",
@@ -146,7 +145,6 @@
     "minisearch": "7.2.0",
     "nanoid": "5.1.6",
     "next": "16.1.6",
-    "next-auth": "5.0.0-beta.30",
     "next-mdx-remote": "6.0.0",
     "next-themes": "0.4.6",
     "next-view-transitions": "0.3.5",

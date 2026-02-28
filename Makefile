@@ -10,7 +10,8 @@
 SHELL := /bin/bash
 ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-.PHONY: build-all test-all lint-all check-all health status validate
+.PHONY: build-all test-all lint-all check-all health status validate \
+        build test test-watch test-coverage typecheck lint
 
 build-all:
 	yarn workspaces foreach -Apt run build
@@ -32,6 +33,17 @@ health:
 
 validate:
 	node "$(ROOT).github/scripts/validate-workspace-graph.mjs"
+
+# Short aliases
+build: build-all
+test: test-all
+test-watch:
+	yarn workspaces foreach -Ap run test:watch
+test-coverage:
+	yarn workspaces foreach -Ap run test:coverage
+typecheck:
+	yarn workspaces foreach -Apt run typecheck
+lint: lint-all
 
 status:
 	@for dir in $$(yarn workspaces list --json 2>/dev/null | node -e "\

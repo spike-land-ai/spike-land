@@ -37,7 +37,6 @@ export default function InteractivePoll() {
     setHasVoted(true);
 
     // TODO: Save vote to backend
-    console.log('Voted for option:', optionId);
   };
 
   const getPercentage = (votes: number) => {

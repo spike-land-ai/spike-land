@@ -23,7 +23,6 @@ export default function CampaignLanding() {
     setSubmitted(true);
 
     // TODO: Add your email capture logic here
-    console.log('Email submitted:', email);
   };
 
   if (submitted) {

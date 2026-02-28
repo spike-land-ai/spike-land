@@ -107,7 +107,7 @@ server.on("upgrade", async (req, socket, head) => {
 });
 
 server.listen(8080, "127.0.0.1", () => {
-  console.log("VNC token proxy listening on 127.0.0.1:8080");
+  console.warn("VNC token proxy listening on 127.0.0.1:8080");
 });
 PROXYJS
 

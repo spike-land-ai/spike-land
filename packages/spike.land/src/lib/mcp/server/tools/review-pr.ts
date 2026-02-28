@@ -1,8 +1,20 @@
 /**
- * Review PR MCP Tools
+ * PR-Integrated Code Review MCP Tools (legacy standalone module)
  *
- * Tools for PR-integrated code review: fetching diffs, suggesting fixes,
- * checking project conventions, and scanning for security vulnerabilities.
+ * PURPOSE: Provides 4 tools for pull-request-level code review: fetching diffs
+ * (by PR number or branch), suggesting concrete code fixes, checking files
+ * against project conventions, and scanning for security vulnerabilities with
+ * CWE references.
+ *
+ * DISTINCTION FROM review.ts: This file handles *PR-integrated* review
+ * (diff fetching, fix suggestions, file-level convention checks, security
+ * scanning). review.ts handles *stateful, convention-driven* review workflows
+ * (report storage, custom rule sets, complexity metrics, effort estimation).
+ *
+ * CANONICAL SOURCE: Both this file and review.ts have been consolidated into
+ * packages/store-apps/code-review-agent/tools.ts, which is the active
+ * implementation registered in the MCP tool manifest via fromStandalone().
+ * This file is retained for its standalone test suite (review-pr.test.ts).
  */
 
 import { z } from "zod";
