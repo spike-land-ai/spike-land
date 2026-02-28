@@ -1,0 +1,16 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="150"
+  height="50"
+  viewBox="0 0 150 50"
+>
+  <style>
+  .text {
+    font-family: "Montserrat", sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+    fill: #171717;
+  }
+  </style>
+  <text x="10" y="34" class="text">spike.land</text>
+</svg>

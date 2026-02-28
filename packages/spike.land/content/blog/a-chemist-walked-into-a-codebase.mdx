@@ -1,0 +1,262 @@
+---
+title: "A Chemist Walked Into a Codebase"
+slug: "a-chemist-walked-into-a-codebase"
+description: "How a chemist with no coding experience built a flawless coaching platform by writing business logic as MCP servers first — and what that means for the future of software."
+date: "2026-02-16"
+author: "Zoltan Erdos"
+category: "Developer Experience"
+tags: ["mcp", "vibe-coding", "bazdmeg", "agents", "architecture", "beginners"]
+featured: true
+---
+
+## The Phone Call
+
+Gianluca sent me a video.
+
+No context. No preamble. Just a screen recording of a coaching platform doing
+exactly what it was supposed to do. Calendar bookings flowing into a state
+machine. Coaching frameworks loading dynamically based on session type. An AI
+chat that understood the client's history. Multiple backend integrations
+talking to each other without a single error.
+
+I stared at it for a full minute before responding.
+
+Gianluca Lopez is a chemist. Not the kind who dabbles in code on weekends and
+calls himself a developer. A chemist. His background is molecular structures
+and lab work. He has been teaching himself programming for years, studying
+frameworks and patterns the way you study for an exam you are not sure you
+will ever take. No professional coding job. No team experience. No shipped
+products.
+
+And he just built something that would take a senior full-stack team weeks to
+deliver.
+
+It worked flawlessly. On the first real test.
+
+I said a word in Hungarian.
+
+## The Wrong Abstraction
+
+Here is what most developers do when they start a project.
+
+They pick a framework. They scaffold a project structure. They think about
+components and routes and state management libraries. They build from the
+inside out: file by file, component by component, import by import.
+
+Gianluca did not do any of that.
+
+He could not. He did not have the mental model. When you have spent years
+thinking about chemical reactions and coaching methodologies, you do not think
+in terms of React components or API routes. You think in terms of what the
+thing *does*.
+
+The app needs to book sessions. The app needs to track coaching frameworks.
+The app needs an AI chat that remembers context. The app needs to manage
+client progress across multiple sessions.
+
+These are not technical specifications. They are capabilities. Business
+functions described in plain language. The kind of thing a product manager
+writes on a whiteboard, not the kind of thing a developer puts in a Jira
+ticket.
+
+This turned out to be exactly the right abstraction for MCP-first development.
+
+He did not build a React app that called APIs. He built MCP servers that
+described what the app could do. Then he wrapped a UI around them.
+
+The "wrong" abstraction was the right one all along.
+
+## MCP-First Development
+
+The core insight is simple enough that it fits in one sentence: your business
+logic IS your MCP server.
+
+When you write your business logic as MCP tools first — typed input schemas,
+structured output, clear descriptions — something remarkable happens. Claude
+Code can use your business logic during development. Not after development.
+During it.
+
+Think about what that means.
+
+The agent is building your frontend. It needs to know what the booking API
+returns. In the traditional approach, it reads your API documentation. Maybe
+it looks at some TypeScript types. Maybe it guesses based on the endpoint
+name. It writes the component, runs it, discovers the API returns a different
+shape than expected, rewrites the component, runs it again.
+
+In the MCP-first approach, the agent calls the booking tool. Right there.
+During planning. It sees the exact response shape. It validates the contract.
+It knows precisely what it is building against because it just tested the
+dependency in real time.
+
+<Callout type="info">
+When your agent can test its own dependencies during planning, you get three
+things simultaneously: faster development, more tests, and higher coverage.
+Not as trade-offs. All three at once. The testing is a natural consequence of
+the agent exploring the tools it depends on.
+</Callout>
+
+spike.land exposes MCPs via the platform API. The same tools that agents use
+during development become the production API. There is no translation layer.
+No mock server that drifts from reality. No API documentation that was
+accurate three sprints ago. One interface. Three consumers: the agent during
+development, the tests during validation, the app during production.
+
+Contrast this with the traditional workflow. Write the API. Write tests for
+the API. Write the frontend. Discover the API does not quite fit. Refactor
+the API. Update the tests. Update the frontend. Repeat until deadline.
+
+MCP-first: the contract is testable from minute one. The agent validates the
+contract during planning. The tests validate it during CI. The app validates
+it during runtime. Same contract. Same code. Same truth.
+
+## What Gianluca Actually Built
+
+A coaching platform. The kind of app that sounds simple when you describe it
+and reveals its complexity the moment you start building it.
+
+Calendar integration with availability management. A booking system that
+handles time zones, cancellations, and rescheduling. Multiple coaching
+frameworks — different methodologies loaded dynamically based on session type
+and client needs. An AI chat that maintains context across sessions and
+understands the coaching relationship. Client progress tracking across
+multiple engagements.
+
+Each of these features would be a sprint in a traditional team. Together they
+form a complex state machine where every feature interacts with every other
+feature. A booking affects the calendar. A coaching framework selection
+affects the AI chat context. A session completion updates progress tracking
+which affects future framework recommendations.
+
+The kind of app that breaks at the seams. The kind where integration bugs
+hide for weeks and surface in production at the worst possible moment.
+
+Gianluca built it using spike.land's MCP infrastructure. Agents deploy pages.
+They consume MCPs through the platform. The same tools that power the
+development workflow power the production application.
+
+One hundred percent code coverage.
+
+Not as an afterthought. Not as a box-checking exercise mandated by a
+technical lead. It happened naturally because the agent wrote the tests as
+part of understanding the tools. When you build by exploring capabilities
+first, testing is not a separate phase. It is the phase.
+
+The agent wrote the tests because it understood the tools it was testing. It
+understood the tools because it used them to build. The testing and the
+building were the same activity.
+
+## The BAZDMEG Connection
+
+Two days before Gianluca sent me that video, I published the
+[BAZDMEG Method](/blog/it-feels-like-cheating). Seven principles for
+building software in the age of AI agents. Born from pain. Tested in
+production. Named after a Hungarian word I will not translate.
+
+Gianluca's coaching platform is the method in action. Not because he read the
+article and followed the steps. Because the method describes what naturally
+happens when you stop thinking about code and start thinking about
+capabilities.
+
+**Principle 1: Requirements Are The Product.** Gianluca defined capabilities.
+Book a session. Track a framework. Chat with context. He never wrote a
+technical spec. He wrote descriptions of what the app should do. Those
+descriptions became MCP tool definitions. The requirements were literally the
+product.
+
+**Principle 4: Test The Lies.** The MCP-first approach makes testing the
+default, not an extra step. The agent tests every tool it touches during
+development. The tests are a byproduct of the building process. You do not
+need discipline to write tests when the act of building requires testing.
+
+**Principle 5: Orchestrate, Do Not Operate.** Gianluca orchestrated agents.
+He described capabilities. He validated outputs. He never wrote a React
+component by hand. He never debugged a state machine. He never traced a null
+pointer through six levels of abstraction. He told the agents what to build
+and they built it.
+
+The method works especially well for people who think in problems, not in
+code. Gianluca's "disadvantage" — no professional coding experience — turned
+out to be a superpower. He had no bad habits to unlearn. No instinct to reach
+for a familiar framework. No muscle memory pulling him toward
+implementation details when he should have been thinking about capabilities.
+
+He added the BAZDMEG skill to his Claude Code setup. The method became part
+of his workflow. The skill was created from the principles. Gianluca used it
+to enforce the discipline automatically.
+
+## The Store
+
+spike.land now has 135+ MCP tools integrated into the platform.
+
+Every tool is typed. Every tool is tested. Every tool is usable by agents
+during development and by apps during production. The same interface. The
+same contract.
+
+We built a curated app store on top of this: [spike.land/store](https://spike.land/store).
+
+Full-stack applications, all powered by MCPs as their API layer. Creative
+tools. Productivity apps. Developer utilities. Communication platforms.
+Lifestyle tools. AI agent configurations.
+
+This is vibe coding done right. Not hope-and-pray generation. Not "let the
+AI figure it out." Structured capabilities with typed contracts, tested
+automatically, deployed safely.
+
+The apps are free. They are continuously improved. They are agent-accessible.
+You can use them through the UI or through MCP tools. Same app. Same logic.
+Different interface.
+
+Browse the collection at [spike.land/store](https://spike.land/store).
+
+## The Vibeathon
+
+This infrastructure was built for the
+[BridgeMind Vibeathon](https://www.bridgemind.ai/vibeathon).
+
+A competition where builders create real applications using AI-first
+development methods. Not demos. Not mockups. Real applications solving real
+problems. The kind of competition where Gianluca's coaching platform fits
+perfectly — complex, functional, built by someone who thinks about the
+problem space rather than the technology stack.
+
+Voting is still open. If what you have read resonates — if you believe that
+the future of software is about capabilities rather than code — go check it
+out and vote.
+
+## Hit Him Up
+
+Gianluca Lopez is looking for his first IT job or project.
+
+Let me be direct about what you would be getting.
+
+A chemist who taught himself to build production-grade software by thinking
+in capabilities rather than code. Someone who naturally gravitates toward
+the abstraction layer that makes AI development fastest. An MCP
+mastermind who understands intuitively what most senior developers are still
+learning to accept: the code is disposable, the requirements are the product.
+
+He built a complex, fully tested coaching platform without a team, without
+professional experience, without the safety net of "the way we have always
+done it." He built it because he understood the problem and he described it
+precisely enough for agents to build it correctly.
+
+That skill — understanding problems deeply enough to describe them precisely
+— is the most valuable skill in software right now. It has always been
+valuable. It just used to be buried under the expectation that you also had
+to type the code yourself.
+
+Find him on [LinkedIn](https://www.linkedin.com/in/gianlpz/).
+
+The future belongs to people who can think clearly about what software should
+do. The agents handle the rest.
+
+---
+
+*Try the method: [spike.land/bazdmeg](https://spike.land/bazdmeg)*
+
+*Browse the store: [spike.land/store](https://spike.land/store)*
+
+*Zoltan Erdos is a developer based in Brighton, UK, building
+[spike.land](https://spike.land). He believes the best developers will be
+the ones who never learned to think in code.*

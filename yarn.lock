@@ -7610,9 +7610,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@spike-land-ai/store-apps@workspace:spike.land/packages/store-apps":
+"@spike-land-ai/store-apps@workspace:packages/spike.land/packages/store-apps":
   version: 0.0.0-use.local
-  resolution: "@spike-land-ai/store-apps@workspace:spike.land/packages/store-apps"
+  resolution: "@spike-land-ai/store-apps@workspace:packages/spike.land/packages/store-apps"
   dependencies:
     tsx: "npm:4.21.0"
   languageName: unknown
@@ -7685,9 +7685,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@spike-land/hono-api@workspace:spike.land/hono-api":
+"@spike-land/hono-api@workspace:packages/spike.land/hono-api":
   version: 0.0.0-use.local
-  resolution: "@spike-land/hono-api@workspace:spike.land/hono-api"
+  resolution: "@spike-land/hono-api@workspace:packages/spike.land/hono-api"
   dependencies:
     "@hono/node-server": "npm:^1.19.9"
     "@modelcontextprotocol/sdk": "npm:1.27.1"
@@ -20875,9 +20875,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"spike-land@workspace:spike.land":
+"spike-land@workspace:packages/spike.land":
   version: 0.0.0-use.local
-  resolution: "spike-land@workspace:spike.land"
+  resolution: "spike-land@workspace:packages/spike.land"
   dependencies:
     "@anthropic-ai/claude-agent-sdk": "npm:0.2.62"
     "@anthropic-ai/sdk": "npm:0.78.0"

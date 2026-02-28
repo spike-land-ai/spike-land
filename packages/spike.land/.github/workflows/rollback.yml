@@ -1,0 +1,204 @@
+name: Rollback Deployment
+
+permissions:
+  contents: read
+  id-token: write # OIDC auth to AWS
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to rollback"
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+      service:
+        description: "Service to rollback (or all)"
+        required: true
+        type: choice
+        options:
+          - all
+          - nextjs
+          - workerd
+      revision_offset:
+        description: "Number of revisions to roll back (1 = previous)"
+        required: false
+        default: "1"
+        type: string
+
+concurrency:
+  group: rollback-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  rollback:
+    name: Rollback ${{ github.event.inputs.service }} in ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    timeout-minutes: 15
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set cluster and service names
+        id: names
+        env:
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
+        run: |
+          if [ "$ENVIRONMENT" = "production" ]; then
+            echo "cluster=production-spike-land" >> "$GITHUB_OUTPUT"
+            echo "workerd_service=production-workerd" >> "$GITHUB_OUTPUT"
+            echo "nextjs_service=production-nextjs" >> "$GITHUB_OUTPUT"
+          else
+            echo "cluster=staging-spike-land" >> "$GITHUB_OUTPUT"
+            echo "workerd_service=staging-workerd" >> "$GITHUB_OUTPUT"
+            echo "nextjs_service=staging-nextjs" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine target services
+        id: services
+        env:
+          SERVICE_INPUT: ${{ github.event.inputs.service }}
+          WORKERD_SERVICE: ${{ steps.names.outputs.workerd_service }}
+          NEXTJS_SERVICE: ${{ steps.names.outputs.nextjs_service }}
+        run: |
+          if [ "$SERVICE_INPUT" = "all" ]; then
+            echo "list=${WORKERD_SERVICE} ${NEXTJS_SERVICE}" >> "$GITHUB_OUTPUT"
+          elif [ "$SERVICE_INPUT" = "workerd" ]; then
+            echo "list=${WORKERD_SERVICE}" >> "$GITHUB_OUTPUT"
+          else
+            echo "list=${NEXTJS_SERVICE}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Rollback ECS services
+        env:
+          CLUSTER: ${{ steps.names.outputs.cluster }}
+          SERVICES: ${{ steps.services.outputs.list }}
+          OFFSET: ${{ github.event.inputs.revision_offset }}
+        run: |
+          for SERVICE in $SERVICES; do
+            echo "=== Rolling back $SERVICE ==="
+
+            # Get current task definition family
+            CURRENT_TD=$(aws ecs describe-services \
+              --cluster "$CLUSTER" \
+              --services "$SERVICE" \
+              --query 'services[0].taskDefinition' \
+              --output text)
+
+            FAMILY=$(echo "$CURRENT_TD" | sed 's/:.*$//' | sed 's|.*/||')
+            CURRENT_REV=$(echo "$CURRENT_TD" | grep -o '[0-9]*$')
+            TARGET_REV=$((CURRENT_REV - OFFSET))
+
+            echo "Current: ${FAMILY}:${CURRENT_REV}"
+            echo "Target:  ${FAMILY}:${TARGET_REV}"
+
+            # Verify target revision exists
+            if ! aws ecs describe-task-definition \
+              --task-definition "${FAMILY}:${TARGET_REV}" \
+              --query 'taskDefinition.taskDefinitionArn' \
+              --output text > /dev/null 2>&1; then
+              echo "ERROR: Task definition ${FAMILY}:${TARGET_REV} not found"
+              exit 1
+            fi
+
+            # Update service to use the previous revision
+            aws ecs update-service \
+              --cluster "$CLUSTER" \
+              --service "$SERVICE" \
+              --task-definition "${FAMILY}:${TARGET_REV}" \
+              --force-new-deployment \
+              --query 'service.serviceName' \
+              --output text
+
+            echo "Initiated rollback for $SERVICE to revision $TARGET_REV"
+          done
+
+      - name: Wait for service stability
+        env:
+          CLUSTER: ${{ steps.names.outputs.cluster }}
+          SERVICES: ${{ steps.services.outputs.list }}
+        run: |
+          echo "Waiting for services to stabilize..."
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER" \
+            --services $SERVICES
+          echo "All services stable"
+
+      - name: Health checks
+        env:
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
+          SERVICE_INPUT: ${{ github.event.inputs.service }}
+        run: |
+          if [ "$ENVIRONMENT" = "production" ]; then
+            NEXTJS_URL="https://spike.land/api/health"
+            WORKERD_URL="https://workerd.spike.land/ping"
+          else
+            NEXTJS_URL="https://staging.spike.land/api/health"
+            WORKERD_URL="https://staging-workerd.spike.land/ping"
+          fi
+
+          if [ "$SERVICE_INPUT" = "all" ] || [ "$SERVICE_INPUT" = "nextjs" ]; then
+            echo "Checking Next.js health..."
+            for i in $(seq 1 10); do
+              if curl -sf --max-time 10 "$NEXTJS_URL"; then
+                echo ""
+                echo "✓ Next.js health check passed"
+                break
+              fi
+              if [ "$i" -eq 10 ]; then
+                echo "✗ Next.js health check failed after 10 attempts"
+                exit 1
+              fi
+              echo "Attempt $i failed, waiting 5s..."
+              sleep 5
+            done
+          fi
+
+          if [ "$SERVICE_INPUT" = "all" ] || [ "$SERVICE_INPUT" = "workerd" ]; then
+            echo "Checking workerd health..."
+            for i in $(seq 1 10); do
+              if curl -sf --max-time 10 "$WORKERD_URL"; then
+                echo ""
+                echo "✓ workerd health check passed"
+                break
+              fi
+              if [ "$i" -eq 10 ]; then
+                echo "✗ workerd health check failed after 10 attempts"
+                exit 1
+              fi
+              echo "Attempt $i failed, waiting 5s..."
+              sleep 5
+            done
+          fi
+
+      - name: Rollback summary
+        if: always()
+        env:
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
+          SERVICE_INPUT: ${{ github.event.inputs.service }}
+          OFFSET: ${{ github.event.inputs.revision_offset }}
+          ACTOR: ${{ github.actor }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          STATUS_ICON="✅"
+          if [ "$JOB_STATUS" != "success" ]; then STATUS_ICON="❌"; fi
+
+          echo "## ${STATUS_ICON} ECS Rollback Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Environment | \`${ENVIRONMENT}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Service | \`${SERVICE_INPUT}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Revisions back | ${OFFSET} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Triggered by | @${ACTOR} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Status | ${JOB_STATUS} |" >> "$GITHUB_STEP_SUMMARY"

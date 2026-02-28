@@ -1,0 +1,64 @@
+# Gitleaks configuration for spike-land
+# See: https://github.com/gitleaks/gitleaks#configuration
+#
+# This file configures secret detection patterns and allows for
+# project-specific customization of gitleaks rules.
+
+title = "Spike Land Gitleaks Configuration"
+
+# Use the default gitleaks rules as a base
+# We only add project-specific allowlists here
+
+# Allowlist for known false positives
+# Use sparingly - each entry should be documented
+[allowlist]
+description = "Known false positives and safe patterns"
+
+# Example placeholder values in documentation
+regexTarget = "match"
+regexes = [
+  # Placeholder values in .env.example files
+  '''your-.*-here''',
+  '''sk_test_.*placeholder''',
+  '''pk_test_.*placeholder''',
+  # Example database URLs with dummy credentials
+  '''postgresql://dummy:dummy@localhost''',
+  '''postgresql://postgres:password@localhost''',
+]
+
+# Files that are allowed to contain example/placeholder secrets
+paths = [
+  '''\.env\.example$''',
+  '''\.env\.local\.example$''',
+  '''docs/.*\.md$''',
+  '''README\.md$''',
+]
+
+# Extend default rules with stricter patterns for this project
+# Comment out if using only default rules
+[[rules]]
+id = "stripe-live-key"
+description = "Stripe Live API Key (CRITICAL)"
+regex = '''sk_live_[a-zA-Z0-9]{24,}'''
+keywords = ["sk_live"]
+entropy = 3.5
+
+[[rules]]
+id = "stripe-live-restricted-key"
+description = "Stripe Live Restricted API Key (CRITICAL)"
+regex = '''rk_live_[a-zA-Z0-9]{24,}'''
+keywords = ["rk_live"]
+entropy = 3.5
+
+[[rules]]
+id = "neon-database-url"
+description = "Neon Database Connection String"
+regex = '''postgres(ql)?://[^:]+:[^@]+@[^/]*neon\.tech'''
+keywords = ["neon.tech"]
+
+[[rules]]
+id = "cloudflare-r2-secret"
+description = "Cloudflare R2 Secret Access Key"
+regex = '''[a-f0-9]{64}'''
+keywords = ["CLOUDFLARE_R2_SECRET", "R2_SECRET"]
+entropy = 4.0

@@ -1,0 +1,144 @@
+name: CI/CD Pipeline
+
+permissions:
+  contents: read
+  packages: read        # Read @spike-land-ai/* packages from GitHub Packages
+  pull-requests: write  # For PR comments
+
+# Cancel in-progress runs for the same PR/branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+on:
+  push:
+    branches:
+      - "main"
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "CLAUDE.md"
+  pull_request:
+    branches:
+      - "main"
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  schedule:
+    - cron: "0 3 * * *" # 3 AM UTC nightly — full suite + coverage
+
+# Deployment Strategy:
+# - Staging: Auto-deployed to ECS via deploy.yml after tests pass (push to main)
+# - Production: Multi-region ECS deployment via deploy.yml (push to main)
+# - See docs/architecture/AWS_MIGRATION.md for full details
+
+# NOTE: This project uses Yarn 4 with node-modules linker.
+# Setup is managed by .github/actions/setup composite action which caches:
+# - node_modules (keyed on yarn.lock + .yarnrc.yml)
+# - .yarn/cache (fallback for cold installs)
+# - Prisma client (keyed on schema.prisma)
+jobs:
+  # ============================================================================
+  # TIER 1: All these jobs run in PARALLEL immediately (no dependencies)
+  # ============================================================================
+  quality-checks:
+    name: Quality Checks (Lint + TypeCheck + Security)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Depot
+        uses: depot/setup-action@v1
+        continue-on-error: true
+        id: depot-setup
+
+      - name: Run lint + tsc via Depot
+        if: steps.depot-setup.outcome == 'success'
+        uses: depot/build-push-action@v1
+        with:
+          project: tccng0cpjr
+          target: quality
+          push: false
+          secrets: |
+            NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+        env:
+          DEPOT_TOKEN: ${{ secrets.DEPOT_TOKEN }}
+
+      - name: Run lint + tsc via Docker (fallback)
+        if: steps.depot-setup.outcome != 'success'
+        uses: docker/build-push-action@v6
+        with:
+          target: quality
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          secrets: |
+            NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/setup
+        with:
+          generate-prisma: "true"
+
+      - name: Run security audit
+        run: yarn npm audit --all --severity moderate
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  unit-tests:
+    name: unit-tests-${{ matrix.shard }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+        with:
+          generate-prisma: "true"
+          generate-docs: "true"
+
+      - name: Fetch main branch for comparison
+        if: github.ref != 'refs/heads/main'
+        run: git fetch origin main:main
+
+      - name: Run tests (shard ${{ matrix.shard }}/4)
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            # Nightly schedule: run full suite with coverage (thresholds disabled per-shard, merged by Codecov)
+            yarn vitest run --coverage --coverage.thresholds.lines=0 --coverage.thresholds.functions=0 --coverage.thresholds.branches=0 --coverage.thresholds.statements=0 --shard=${{ matrix.shard }}/4 --reporter=default --reporter=github-actions
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            # On main push: run only tests affected by this commit (fast, trunk-based)
+            yarn test:run --changed HEAD^1 --shard=${{ matrix.shard }}/4 --reporter=default --reporter=github-actions
+          else
+            # On PR/feature branch: run only changed tests vs main
+            yarn test:run --changed main --shard=${{ matrix.shard }}/4 --reporter=default --reporter=github-actions
+          fi
+        env:
+          # Provide dummy DATABASE_URL for Prisma 7 client engine initialization
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy?schema=public
+          NODE_OPTIONS: "--max-old-space-size=4096"
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v5
+        # Only upload if coverage was generated (skipped when --changed finds no tests)
+        if: always() && hashFiles('./coverage/lcov.info') != ''
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-shard-${{ matrix.shard }}
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  # ============================================================================
+  # NOTE: Staging deployment is now handled by deploy.yml (ECS Fargate).
+  # The Vercel deploy-staging job was removed as part of the AWS migration.
+  # See: docs/architecture/AWS_MIGRATION.md
+  # ============================================================================

@@ -1,0 +1,185 @@
+name: Reset Staging Database
+
+# Resets the staging Aurora database by restoring from a production snapshot.
+# This ensures staging always has fresh, production-like data for testing.
+#
+# Runs automatically at 3 AM UTC daily, or can be triggered manually.
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # Daily at 3 AM UTC
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type 'RESET' to confirm staging database reset"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write # OIDC auth to AWS
+
+env:
+  AWS_REGION: us-east-1
+  PRODUCTION_CLUSTER: production-spike-land-aurora
+  STAGING_CLUSTER: staging-spike-land-aurora
+
+jobs:
+  reset-staging:
+    name: Reset Staging Aurora
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # Manual runs require confirmation; scheduled runs always execute
+    if: >-
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.confirm == 'RESET')
+
+    steps:
+      - name: Validate manual confirmation
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.confirm != 'RESET'
+        run: |
+          echo "::error::Confirmation failed. You must type 'RESET' to confirm."
+          exit 1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Create production snapshot
+        id: snapshot
+        run: |
+          TIMESTAMP=$(date -u +%Y%m%d-%H%M%S)
+          SNAPSHOT_ID="staging-reset-${TIMESTAMP}"
+          echo "snapshot_id=${SNAPSHOT_ID}" >> "$GITHUB_OUTPUT"
+
+          echo "Creating snapshot of production cluster..."
+          aws rds create-db-cluster-snapshot \
+            --db-cluster-identifier "$PRODUCTION_CLUSTER" \
+            --db-cluster-snapshot-identifier "$SNAPSHOT_ID" \
+            --tags Key=Purpose,Value=staging-reset Key=ManagedBy,Value=github-actions
+
+          echo "Waiting for snapshot to be available..."
+          aws rds wait db-cluster-snapshot-available \
+            --db-cluster-snapshot-identifier "$SNAPSHOT_ID"
+
+          echo "✅ Snapshot ${SNAPSHOT_ID} is ready"
+
+      - name: Delete staging cluster
+        run: |
+          echo "Checking if staging cluster exists..."
+          if aws rds describe-db-clusters \
+            --db-cluster-identifier "$STAGING_CLUSTER" > /dev/null 2>&1; then
+
+            # Delete instances first
+            INSTANCES=$(aws rds describe-db-clusters \
+              --db-cluster-identifier "$STAGING_CLUSTER" \
+              --query 'DBClusters[0].DBClusterMembers[*].DBInstanceIdentifier' \
+              --output text)
+
+            for INSTANCE in $INSTANCES; do
+              echo "Deleting instance: $INSTANCE"
+              aws rds delete-db-instance \
+                --db-instance-identifier "$INSTANCE" \
+                --skip-final-snapshot || true
+            done
+
+            # Wait for instances to be deleted
+            for INSTANCE in $INSTANCES; do
+              echo "Waiting for instance $INSTANCE to be deleted..."
+              aws rds wait db-instance-deleted \
+                --db-instance-identifier "$INSTANCE" 2>/dev/null || true
+            done
+
+            # Delete cluster
+            echo "Deleting staging cluster..."
+            aws rds delete-db-cluster \
+              --db-cluster-identifier "$STAGING_CLUSTER" \
+              --skip-final-snapshot || true
+
+            echo "Waiting for cluster deletion..."
+            aws rds wait db-cluster-deleted \
+              --db-cluster-identifier "$STAGING_CLUSTER" 2>/dev/null || true
+          else
+            echo "No existing staging cluster found"
+          fi
+
+      - name: Restore staging from snapshot
+        env:
+          SNAPSHOT_ID: ${{ steps.snapshot.outputs.snapshot_id }}
+          STAGING_SUBNET_GROUP: ${{ secrets.STAGING_DB_SUBNET_GROUP }}
+          STAGING_SECURITY_GROUP: ${{ secrets.STAGING_DB_SECURITY_GROUP }}
+        run: |
+          echo "Restoring staging cluster from snapshot ${SNAPSHOT_ID}..."
+          aws rds restore-db-cluster-from-snapshot \
+            --db-cluster-identifier "$STAGING_CLUSTER" \
+            --snapshot-identifier "$SNAPSHOT_ID" \
+            --engine aurora-postgresql \
+            --engine-version "16.4" \
+            --db-subnet-group-name "$STAGING_SUBNET_GROUP" \
+            --vpc-security-group-ids "$STAGING_SECURITY_GROUP" \
+            --tags Key=Environment,Value=staging Key=Project,Value=spike-land Key=ManagedBy,Value=terraform
+
+          echo "Waiting for cluster to be available..."
+          aws rds wait db-cluster-available \
+            --db-cluster-identifier "$STAGING_CLUSTER"
+
+          # Create an instance in the restored cluster
+          echo "Creating staging instance..."
+          aws rds create-db-instance \
+            --db-instance-identifier "${STAGING_CLUSTER}-1" \
+            --db-cluster-identifier "$STAGING_CLUSTER" \
+            --db-instance-class "db.t4g.medium" \
+            --engine aurora-postgresql
+
+          echo "Waiting for instance to be available..."
+          aws rds wait db-instance-available \
+            --db-instance-identifier "${STAGING_CLUSTER}-1"
+
+          echo "✅ Staging cluster restored successfully"
+
+      - name: Clean up old snapshots
+        run: |
+          echo "Cleaning up staging-reset snapshots older than 7 days..."
+          CUTOFF=$(date -u -d '7 days ago' +%Y-%m-%dT%H:%M:%S 2>/dev/null || date -u -v-7d +%Y-%m-%dT%H:%M:%S)
+
+          aws rds describe-db-cluster-snapshots \
+            --db-cluster-identifier "$PRODUCTION_CLUSTER" \
+            --snapshot-type manual \
+            --query "DBClusterSnapshots[?starts_with(DBClusterSnapshotIdentifier, 'staging-reset-') && SnapshotCreateTime<='${CUTOFF}'].DBClusterSnapshotIdentifier" \
+            --output text | tr '\t' '\n' | while read -r SNAP; do
+              if [ -n "$SNAP" ]; then
+                echo "Deleting old snapshot: $SNAP"
+                aws rds delete-db-cluster-snapshot \
+                  --db-cluster-snapshot-identifier "$SNAP" || true
+              fi
+            done
+
+      - name: Summary
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+          ACTOR: ${{ github.actor }}
+          EVENT_NAME: ${{ github.event_name }}
+          SNAPSHOT_ID: ${{ steps.snapshot.outputs.snapshot_id }}
+        run: |
+          STATUS_ICON="✅"
+          if [ "$JOB_STATUS" != "success" ]; then STATUS_ICON="❌"; fi
+
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            TRIGGERED_BY="Scheduled (3 AM UTC)"
+          else
+            TRIGGERED_BY="$ACTOR"
+          fi
+
+          echo "## ${STATUS_ICON} Staging Database Reset" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Triggered by | ${TRIGGERED_BY} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Snapshot | \`${SNAPSHOT_ID}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Source | \`${PRODUCTION_CLUSTER}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Target | \`${STAGING_CLUSTER}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Status | ${JOB_STATUS} |" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,198 @@
+# Docker Compose for spike-land development
+#
+# PERFORMANCE TIP: Disable "Use containerd for pulling and storing images"
+# in Docker Desktop > Settings > General. The classic image store exports
+# the 9GB dev image ~3x faster (~40s vs ~126s).
+#
+# Usage:
+#   docker compose up dev --build                  # Next.js development server
+#   docker compose up production --build           # Production server on port 3001
+#   docker compose logs -f dev                     # Follow logs
+#   docker compose down                            # Stop and remove containers
+
+services:
+  # ──────────────────────────────────────────────────────────────────────
+  # Next.js development server
+  # ──────────────────────────────────────────────────────────────────────
+  dev:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    volumes:
+      # Mount source directories for hot reload (read-write for workflow package)
+      - ./src:/app/src
+      - ./apps:/app/apps
+      - ./public:/app/public
+      - ./content:/app/content
+      - dev_next_cache:/app/.next
+    environment:
+      - NODE_ENV=development
+      - NEXTAUTH_URL=http://localhost:3000
+      - SKIP_ENV_VALIDATION=true
+      - DATABASE_URL=postgresql://dev:dev@postgres:5432/spike_land
+      - REDIS_URL=redis://redis:6379
+      # Use in-process MCP tools (no external child processes needed)
+      - USE_INPROCESS_MCP=1
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN:-}
+      - MCP_API_KEY=${MCP_API_KEY:-}
+      - SPIKE_PROD_API_KEY=${SPIKE_PROD_API_KEY:-}
+      - GH_PAT_TOKEN=${GH_PAT_TOKEN:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [
+        "CMD",
+        "node",
+        "-e",
+        "fetch('http://localhost:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+      ]
+      interval: 30s
+      timeout: 3s
+      start_period: 45s
+      retries: 3
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Production server (uses standalone build) - runs on port 3001
+  # ──────────────────────────────────────────────────────────────────────
+  production:
+    build:
+      context: .
+      target: production
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: [
+        "CMD",
+        "node",
+        "-e",
+        "fetch('http://localhost:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+      ]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+    profiles:
+      - production
+
+  # ──────────────────────────────────────────────────────────────────────
+  # CI pipeline
+  # ──────────────────────────────────────────────────────────────────────
+  ci:
+    build:
+      context: .
+      target: ci
+    env_file:
+      - .env.local
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - NODE_ENV=development
+      - NEXTAUTH_URL=http://localhost:3000
+      - SKIP_ENV_VALIDATION=true
+    profiles:
+      - ci
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Infrastructure: LocalStack (S3 + DynamoDB)
+  # ──────────────────────────────────────────────────────────────────────
+  localstack:
+    image: localstack/localstack:3
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: s3,dynamodb
+      DEFAULT_REGION: us-east-1
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - ./scripts/localstack-init.sh:/etc/localstack/init/ready.d/init.sh
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 3s
+      start_period: 15s
+      retries: 5
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Infrastructure: Redis REST Proxy (Upstash-compatible HTTP interface)
+  # ──────────────────────────────────────────────────────────────────────
+  redis-rest-proxy:
+    build: ./scripts/redis-rest-proxy
+    ports:
+      - "8079:8079"
+    environment:
+      - REDIS_HOST=redis
+      - PORT=8079
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: [
+        "CMD",
+        "node",
+        "-e",
+        "fetch('http://localhost:8079').then(r=>process.exit(r.status===405?0:1)).catch(()=>process.exit(1))",
+      ]
+      interval: 10s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Infrastructure: PostgreSQL
+  # ──────────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: spike_land
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d spike_land"]
+      interval: 10s
+      timeout: 3s
+      start_period: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────────────────────────────
+  # Infrastructure: Redis
+  # ──────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  dev_next_cache:
+  postgres_data:
+  redis_data:
+  localstack_data:

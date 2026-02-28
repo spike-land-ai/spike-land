@@ -1,0 +1,19 @@
+{
+  "name": "@spike-land-ai/store-apps",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./shared": "./shared/index.ts",
+    "./shared/*": "./shared/*.ts",
+    "./*/tools": "./**/tools.ts",
+    "./*": "./**/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "tsx": "4.21.0"
+  }
+}

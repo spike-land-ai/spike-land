@@ -1,0 +1,119 @@
+name: Terraform Apply
+
+on:
+  push:
+    branches: [main]
+    paths: ["infra/terraform/**"]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to apply"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+concurrency:
+  group: terraform-apply
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  apply-staging:
+    if: >-
+      github.event_name == 'push' ||
+      contains(github.event.inputs.environment, 'staging')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: staging
+    defaults:
+      run:
+        working-directory: infra/terraform/environments/staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: "~> 1.7"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        with:
+          role-to-assume: ${{ secrets.AWS_TERRAFORM_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        run: terraform init -no-color
+
+      - name: Force unlock stale locks
+        run: |
+          # Run terraform plan to grab the lock ID if it fails due to a locked state
+          LOCK_INFO=$(terraform plan -lock-timeout=1s -no-color 2>&1 || true)
+          LOCK_ID=$(echo "$LOCK_INFO" | grep -Eo 'ID:\s+[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | grep -Eo '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -n 1 || true)
+          if [ -n "$LOCK_ID" ]; then
+            echo "Found stale lock: $LOCK_ID — unlocking..."
+            terraform force-unlock -force "$LOCK_ID" || true
+          fi
+        continue-on-error: true
+
+      - name: Terraform Apply
+        env:
+          TF_VAR_certificate_arn: ${{ secrets.TF_VAR_CERTIFICATE_ARN }}
+          TF_VAR_cloudfront_certificate_arn: ${{ secrets.TF_VAR_CLOUDFRONT_CERTIFICATE_ARN }}
+          TF_VAR_db_master_username: ${{ secrets.TF_VAR_DB_MASTER_USERNAME }}
+          TF_VAR_db_master_password: ${{ secrets.TF_VAR_DB_MASTER_PASSWORD }}
+        run: terraform apply -auto-approve -no-color -lock-timeout=5m
+
+  apply-production:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      contains(github.event.inputs.environment, 'production')
+    needs: apply-staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    defaults:
+      run:
+        working-directory: infra/terraform/environments/production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: "~> 1.7"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
+        with:
+          role-to-assume: ${{ secrets.AWS_TERRAFORM_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        run: terraform init -no-color
+
+      - name: Force unlock stale locks
+        run: |
+          LOCK_INFO=$(terraform plan -lock-timeout=1s -no-color 2>&1 || true)
+          LOCK_ID=$(echo "$LOCK_INFO" | grep -Eo 'ID:\s+[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | grep -Eo '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | head -n 1 || true)
+          if [ -n "$LOCK_ID" ]; then
+            echo "Found stale lock: $LOCK_ID — unlocking..."
+            terraform force-unlock -force "$LOCK_ID" || true
+          fi
+        continue-on-error: true
+
+      - name: Terraform Apply
+        env:
+          TF_VAR_primary_certificate_arn: ${{ secrets.TF_VAR_PRIMARY_CERTIFICATE_ARN }}
+          TF_VAR_secondary_certificate_arn: ${{ secrets.TF_VAR_SECONDARY_CERTIFICATE_ARN }}
+          TF_VAR_cloudfront_certificate_arn: ${{ secrets.TF_VAR_CLOUDFRONT_CERTIFICATE_ARN }}
+          TF_VAR_db_master_username: ${{ secrets.TF_VAR_DB_MASTER_USERNAME }}
+          TF_VAR_db_master_password: ${{ secrets.TF_VAR_DB_MASTER_PASSWORD }}
+        run: terraform apply -auto-approve -no-color -lock-timeout=5m

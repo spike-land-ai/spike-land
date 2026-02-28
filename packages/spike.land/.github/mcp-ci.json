@@ -1,0 +1,15 @@
+{
+  "$comment": "CI-safe MCP config - excludes localhost servers that crash in CI",
+  "mcpServers": {
+    "vitest": {
+      "type": "stdio",
+      "command": "yarn",
+      "args": ["vitest-mcp"]
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "yarn",
+      "args": ["@playwright/mcp"]
+    }
+  }
+}

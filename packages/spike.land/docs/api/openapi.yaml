@@ -1,0 +1,2052 @@
+openapi: 3.0.3
+info:
+  title: Spike Land API
+  description: |
+    API for Spike Land - AI-Powered App Platform with Image Enhancement
+
+    ## Platform Overview
+    Spike Land is a platform where users create, fork, and manage AI-powered applications.
+    The flagship application, Pixel, provides AI-powered image enhancement.
+
+    ## Authentication
+    All protected endpoints require a valid session cookie from NextAuth.js.
+    Alternatively, you can use Bearer token authentication for API requests:
+    ```
+    Authorization: Bearer {session_token}
+    ```
+
+    ## Token Economy
+    Users have a platform-wide token balance used for:
+    - Image enhancement operations (cost depends on resolution tier)
+    - Premium features in apps
+
+    Token costs for Pixel image enhancement:
+    - TIER_1K: 2 tokens
+    - TIER_2K: 5 tokens
+    - TIER_4K: 10 tokens
+
+    Tokens regenerate automatically (1 token per 15 minutes, max 100).
+
+    ## Rate Limiting
+    Most endpoints are rate-limited per user. Rate limit information is included in response headers:
+    - X-RateLimit-Remaining: Requests remaining in current window
+    - X-RateLimit-Reset: Unix timestamp when limit resets
+
+    Example rate limits:
+    - Image enhancement: 3 requests per minute
+    - Image upload: 10 requests per minute
+    - Album operations: 10 requests per minute
+
+    ## Error Handling
+    The API uses standard HTTP status codes:
+    - 200 OK: Successful request
+    - 201 Created: Resource created
+    - 400 Bad Request: Invalid input
+    - 401 Unauthorized: Authentication required or failed
+    - 403 Forbidden: Insufficient permissions
+    - 404 Not Found: Resource not found
+    - 429 Too Many Requests: Rate limit exceeded
+    - 500 Internal Server Error: Server error
+
+    Error responses include:
+    - error: Human-readable error message
+    - code: Machine-readable error code (optional)
+    - details: Additional error context (optional)
+
+    ## Base URL
+    - Production: https://spike.land/api
+    - Development: http://localhost:3000/api
+  version: 1.0.0
+  contact:
+    name: Spike Land Support
+    email: support@spike.land
+    url: https://spike.land
+  license:
+    name: Proprietary
+    url: https://spike.land/legal/terms
+
+servers:
+  - url: https://spike.land/api
+    description: Production server
+  - url: http://localhost:3000/api
+    description: Development server
+
+tags:
+  - name: Health
+    description: Service health checks
+  - name: Authentication
+    description: User authentication (NextAuth.js)
+  - name: Tokens
+    description: Token balance and transaction management
+  - name: Images
+    description: Image upload and management
+  - name: Enhancement
+    description: Image enhancement operations
+  - name: Albums
+    description: Image album management
+  - name: Batch Operations
+    description: Batch image processing
+  - name: Jobs
+    description: Enhancement job tracking and streaming
+  - name: Gallery
+    description: Public gallery and featured images
+  - name: Referral
+    description: Referral program management
+  - name: Vouchers
+    description: Token voucher management
+  - name: Stripe
+    description: Payment processing with Stripe
+  - name: Apps
+    description: App creation and management (future)
+  - name: Admin
+    description: Administrative operations (requires admin role)
+  - name: Public
+    description: Public endpoints (no authentication required)
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: next-auth.session-token
+      description: NextAuth.js session cookie (automatically set after login)
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Bearer token for API requests
+
+  schemas:
+    # ========================================
+    # Error Responses
+    # ========================================
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+          example: "Unauthorized"
+        code:
+          type: string
+          description: Machine-readable error code
+          example: "UNAUTHORIZED"
+        details:
+          type: object
+          description: Additional error context
+          example: { "field": "email", "reason": "invalid format" }
+        title:
+          type: string
+          description: Short error title
+          example: "Authentication Failed"
+        suggestion:
+          type: string
+          description: Suggested action to resolve the error
+          example: "Please log in again"
+
+    ValidationError:
+      type: object
+      required:
+        - error
+        - field
+      properties:
+        error:
+          type: string
+          description: Validation error message
+          example: "Invalid input"
+        field:
+          type: string
+          description: Field that failed validation
+          example: "email"
+        code:
+          type: string
+          enum:
+            - REQUIRED_FIELD
+            - INVALID_FORMAT
+            - FILE_TOO_LARGE
+            - UNSUPPORTED_FORMAT
+          description: Validation error code
+          example: "INVALID_FORMAT"
+
+    # ========================================
+    # Enumerations
+    # ========================================
+    EnhancementTier:
+      type: string
+      enum:
+        - TIER_1K
+        - TIER_2K
+        - TIER_4K
+      description: Image enhancement resolution tier
+      example: TIER_2K
+
+    JobStatus:
+      type: string
+      enum:
+        - PENDING
+        - PROCESSING
+        - COMPLETED
+        - FAILED
+        - REFUNDED
+        - CANCELLED
+      description: Status of an enhancement job
+      example: PROCESSING
+
+    AlbumPrivacy:
+      type: string
+      enum:
+        - PRIVATE
+        - UNLISTED
+        - PUBLIC
+      description: Album visibility level
+      example: UNLISTED
+
+    ExportFormat:
+      type: string
+      enum:
+        - JPEG
+        - PNG
+        - WebP
+      description: Image export format
+      example: PNG
+
+    UserRole:
+      type: string
+      enum:
+        - USER
+        - ADMIN
+        - SUPER_ADMIN
+      description: User role in the system
+      example: USER
+
+    # ========================================
+    # User Models
+    # ========================================
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - role
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Unique user identifier (CUID)
+          example: "cuid123456789"
+        email:
+          type: string
+          format: email
+          description: User email address
+          example: "user@example.com"
+        name:
+          type: string
+          description: User display name
+          example: "John Doe"
+        image:
+          type: string
+          format: uri
+          description: User avatar URL (from OAuth provider)
+          example: "https://lh3.googleusercontent.com/a/example"
+        role:
+          $ref: "#/components/schemas/UserRole"
+        stripeCustomerId:
+          type: string
+          description: Stripe customer ID for payments
+          example: "cus_123456789"
+        referralCode:
+          type: string
+          description: Unique referral code for this user
+          example: "JOHN123"
+        referralCount:
+          type: integer
+          description: Number of successful referrals
+          example: 5
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: "2025-12-10T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last account update timestamp
+          example: "2025-12-12T15:45:00Z"
+
+    # ========================================
+    # Token Models
+    # ========================================
+    UserTokenBalance:
+      type: object
+      required:
+        - balance
+        - lastRegeneration
+        - timeUntilNextRegenMs
+      properties:
+        balance:
+          type: integer
+          description: Current token balance (0-100)
+          example: 45
+        lastRegeneration:
+          type: string
+          format: date-time
+          description: Last regeneration timestamp
+          example: "2025-12-12T15:00:00Z"
+        timeUntilNextRegenMs:
+          type: integer
+          description: Milliseconds until next token regeneration
+          example: 900000
+        tokensAddedThisRequest:
+          type: integer
+          description: Tokens added during this request
+          example: 1
+        stats:
+          type: object
+          properties:
+            totalSpent:
+              type: integer
+              description: Total tokens spent on enhancements
+              example: 150
+            totalEarned:
+              type: integer
+              description: Total tokens earned (regeneration + referrals)
+              example: 500
+            totalRefunded:
+              type: integer
+              description: Total tokens refunded (failed jobs)
+              example: 10
+            transactionCount:
+              type: integer
+              description: Total number of token transactions
+              example: 42
+
+    TokenTransaction:
+      type: object
+      required:
+        - id
+        - userId
+        - amount
+        - type
+        - source
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: Transaction ID (CUID)
+          example: "cuid123456789"
+        userId:
+          type: string
+          description: User ID
+          example: "cuid987654321"
+        amount:
+          type: integer
+          description: Token amount (positive for credits, negative for debits)
+          example: 5
+        type:
+          type: string
+          enum:
+            - ENHANCEMENT
+            - REGENERATION
+            - REFERRAL_BONUS
+            - REFERRAL_REWARD
+            - VOUCHER_REDEMPTION
+            - STRIPE_PURCHASE
+            - REFUND
+          description: Type of transaction
+          example: "ENHANCEMENT"
+        source:
+          type: string
+          description: Source identifier (app, voucher code, etc.)
+          example: "pixel_app"
+        sourceId:
+          type: string
+          description: Related resource ID (job ID, voucher ID, etc.)
+          example: "job_xyz789"
+        balanceAfter:
+          type: integer
+          description: Token balance after transaction
+          example: 40
+        createdAt:
+          type: string
+          format: date-time
+          description: Transaction timestamp
+          example: "2025-12-12T14:30:00Z"
+
+    # ========================================
+    # Image Models
+    # ========================================
+    Image:
+      type: object
+      required:
+        - id
+        - userId
+        - originalUrl
+        - name
+        - mimeType
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Image ID (CUID)
+          example: "cuid123456789"
+        userId:
+          type: string
+          description: Owner user ID
+          example: "cuid987654321"
+        originalUrl:
+          type: string
+          format: uri
+          description: URL to original uploaded image
+          example: "https://storage.example.com/original_abc123.jpg"
+        name:
+          type: string
+          description: Display name of the image
+          example: "My Photo"
+        mimeType:
+          type: string
+          enum:
+            - image/jpeg
+            - image/png
+            - image/webp
+          description: Image MIME type
+          example: "image/jpeg"
+        albumId:
+          type: string
+          description: Album ID if image belongs to an album
+          example: "cuid456789123"
+        createdAt:
+          type: string
+          format: date-time
+          description: Image creation timestamp
+          example: "2025-12-10T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2025-12-12T15:45:00Z"
+
+    EnhancedImage:
+      type: object
+      required:
+        - id
+        - imageId
+        - userId
+        - tier
+        - enhancedUrl
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: Enhanced image ID (CUID)
+          example: "cuid_enh_123"
+        imageId:
+          type: string
+          description: Original image ID
+          example: "cuid123456789"
+        userId:
+          type: string
+          description: User ID
+          example: "cuid987654321"
+        tier:
+          $ref: "#/components/schemas/EnhancementTier"
+        enhancedUrl:
+          type: string
+          format: uri
+          description: URL to enhanced image
+          example: "https://storage.example.com/enhanced_xyz789.jpg"
+        jobId:
+          type: string
+          description: Associated job ID
+          example: "job_abc123"
+        isPublic:
+          type: boolean
+          description: Whether the enhanced image is publicly accessible
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Enhancement creation timestamp
+          example: "2025-12-12T14:30:00Z"
+
+    ImageEnhancementJob:
+      type: object
+      required:
+        - id
+        - userId
+        - imageId
+        - tier
+        - status
+        - tokensCost
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: Job ID (CUID)
+          example: "job_abc123"
+        userId:
+          type: string
+          description: User ID
+          example: "cuid987654321"
+        imageId:
+          type: string
+          description: Image ID being enhanced
+          example: "cuid123456789"
+        tier:
+          $ref: "#/components/schemas/EnhancementTier"
+        status:
+          $ref: "#/components/schemas/JobStatus"
+        tokensCost:
+          type: integer
+          description: Tokens consumed by this job
+          example: 5
+        enhancedImageId:
+          type: string
+          description: ID of resulting enhanced image (when completed)
+          example: "cuid_enh_123"
+        error:
+          type: string
+          description: Error message if job failed
+          example: "Image processing timeout"
+        progress:
+          type: integer
+          description: Job progress percentage (0-100)
+          example: 75
+        createdAt:
+          type: string
+          format: date-time
+          description: Job creation timestamp
+          example: "2025-12-12T14:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2025-12-12T14:35:00Z"
+        completedAt:
+          type: string
+          format: date-time
+          description: Job completion timestamp
+          example: "2025-12-12T14:40:00Z"
+
+    # ========================================
+    # Album Models
+    # ========================================
+    Album:
+      type: object
+      required:
+        - id
+        - userId
+        - name
+        - privacy
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Album ID (CUID)
+          example: "cuid123456789"
+        userId:
+          type: string
+          description: Owner user ID
+          example: "cuid987654321"
+        name:
+          type: string
+          description: Album name
+          example: "Summer Photos 2025"
+        description:
+          type: string
+          description: Album description
+          example: "Vacation photos from Greece"
+        privacy:
+          $ref: "#/components/schemas/AlbumPrivacy"
+        coverImageId:
+          type: string
+          description: ID of the cover image
+          example: "cuid123456789"
+        shareToken:
+          type: string
+          description: Unique token for sharing this album
+          example: "share_token_xyz789"
+        imageCount:
+          type: integer
+          description: Total number of images in album
+          example: 42
+        preview:
+          type: array
+          maxItems: 4
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              url:
+                type: string
+                format: uri
+              name:
+                type: string
+          description: Preview of first 4 images
+          example:
+            - id: "cuid1"
+              url: "https://example.com/thumb1.jpg"
+              name: "Photo 1"
+        createdAt:
+          type: string
+          format: date-time
+          description: Album creation timestamp
+          example: "2025-12-10T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2025-12-12T15:45:00Z"
+
+    # ========================================
+    # Gallery Models
+    # ========================================
+    FeaturedGalleryItem:
+      type: object
+      required:
+        - id
+        - imageId
+        - title
+        - displayOrder
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: Gallery item ID (CUID)
+          example: "cuid123456789"
+        imageId:
+          type: string
+          description: Featured image ID
+          example: "cuid987654321"
+        title:
+          type: string
+          description: Display title for the featured item
+          example: "Stunning Landscape"
+        description:
+          type: string
+          description: Description of the featured item
+          example: "Enhanced mountain landscape photo"
+        displayOrder:
+          type: integer
+          description: Display order in gallery
+          example: 1
+        imageUrl:
+          type: string
+          format: uri
+          description: URL to the featured image
+          example: "https://storage.example.com/featured_xyz.jpg"
+        creatorName:
+          type: string
+          description: Name of the image creator
+          example: "John Doe"
+        createdAt:
+          type: string
+          format: date-time
+          description: Item creation timestamp
+          example: "2025-12-10T10:30:00Z"
+
+    # ========================================
+    # Referral Models
+    # ========================================
+    ReferralLink:
+      type: object
+      required:
+        - code
+        - url
+      properties:
+        code:
+          type: string
+          description: Unique referral code
+          example: "JOHN123"
+        url:
+          type: string
+          format: uri
+          description: Full referral URL
+          example: "https://spike.land?ref=JOHN123"
+
+    ReferralStats:
+      type: object
+      required:
+        - referralCode
+        - successfulReferrals
+        - tokensEarned
+      properties:
+        referralCode:
+          type: string
+          description: User's referral code
+          example: "JOHN123"
+        successfulReferrals:
+          type: integer
+          description: Number of successful referrals
+          example: 5
+        tokensEarned:
+          type: integer
+          description: Total tokens earned from referrals
+          example: 250
+        referrals:
+          type: array
+          items:
+            type: object
+            properties:
+              userId:
+                type: string
+              userName:
+                type: string
+              email:
+                type: string
+              tokensEarned:
+                type: integer
+              referredAt:
+                type: string
+                format: date-time
+          description: Details of referrals
+
+    # ========================================
+    # Voucher Models
+    # ========================================
+    Voucher:
+      type: object
+      required:
+        - id
+        - code
+        - tokens
+        - expiresAt
+        - isActive
+      properties:
+        id:
+          type: string
+          description: Voucher ID (CUID)
+          example: "cuid123456789"
+        code:
+          type: string
+          description: Voucher code
+          example: "WELCOME50"
+        tokens:
+          type: integer
+          description: Number of tokens this voucher grants
+          example: 50
+        isActive:
+          type: boolean
+          description: Whether voucher is active
+          example: true
+        maxRedemptions:
+          type: integer
+          description: Maximum number of redemptions allowed
+          example: 100
+        redeemedCount:
+          type: integer
+          description: Number of times voucher has been redeemed
+          example: 45
+        expiresAt:
+          type: string
+          format: date-time
+          description: Voucher expiration timestamp
+          example: "2025-12-31T23:59:59Z"
+        createdAt:
+          type: string
+          format: date-time
+          description: Voucher creation timestamp
+          example: "2025-12-01T00:00:00Z"
+
+    # ========================================
+    # App Models
+    # ========================================
+    App:
+      type: object
+      required:
+        - id
+        - userId
+        - name
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: App ID (CUID)
+          example: "cuid123456789"
+        userId:
+          type: string
+          description: Owner user ID
+          example: "cuid987654321"
+        name:
+          type: string
+          description: App name
+          example: "Image Enhancement Tool"
+        description:
+          type: string
+          description: App description
+          example: "AI-powered image enhancement for professionals"
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - BUILDING
+            - DEPLOYED
+            - ARCHIVED
+          description: App deployment status
+          example: "DRAFT"
+        domain:
+          type: string
+          format: uri
+          description: Custom domain for deployed app
+          example: "images.example.com"
+        forkedFrom:
+          type: string
+          description: ID of original app if this is a fork
+          example: "cuid_original_123"
+        createdAt:
+          type: string
+          format: date-time
+          description: App creation timestamp
+          example: "2025-12-10T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2025-12-12T15:45:00Z"
+
+    Requirement:
+      type: object
+      required:
+        - id
+        - appId
+        - description
+        - priority
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Requirement ID (CUID)
+          example: "cuid123456789"
+        appId:
+          type: string
+          description: Parent app ID
+          example: "cuid987654321"
+        description:
+          type: string
+          description: Requirement description
+          example: "Add dark mode support"
+        priority:
+          type: string
+          enum:
+            - LOW
+            - MEDIUM
+            - HIGH
+          description: Requirement priority
+          example: "HIGH"
+        status:
+          type: string
+          enum:
+            - PENDING
+            - IN_PROGRESS
+            - COMPLETED
+          description: Requirement status
+          example: "IN_PROGRESS"
+        version:
+          type: integer
+          description: Requirement version number
+          example: 2
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2025-12-10T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2025-12-12T15:45:00Z"
+
+    # ========================================
+    # Admin Models
+    # ========================================
+    HealthCheck:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unhealthy
+          description: System health status
+          example: "healthy"
+        timestamp:
+          type: string
+          format: date-time
+          description: Health check timestamp
+          example: "2025-12-12T15:45:00Z"
+        version:
+          type: string
+          description: API version
+          example: "1.0.0"
+        uptime:
+          type: number
+          description: Server uptime in seconds
+          example: 3600
+
+    AdminDashboard:
+      type: object
+      required:
+        - users
+        - tokens
+        - jobs
+      properties:
+        users:
+          type: object
+          properties:
+            totalUsers:
+              type: integer
+              example: 1500
+            activeUsers:
+              type: integer
+              example: 250
+            newUsersToday:
+              type: integer
+              example: 15
+        tokens:
+          type: object
+          properties:
+            totalIssued:
+              type: integer
+              example: 75000
+            totalSpent:
+              type: integer
+              example: 42000
+            averageBalance:
+              type: number
+              example: 35.5
+        jobs:
+          type: object
+          properties:
+            totalJobs:
+              type: integer
+              example: 10000
+            successfulJobs:
+              type: integer
+              example: 9500
+            failedJobs:
+              type: integer
+              example: 200
+            successRate:
+              type: number
+              format: percentage
+              example: 95.0
+
+  # ========================================
+  # Common Response Objects
+  # ========================================
+  responses:
+    Unauthorized:
+      description: Authentication required or failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: "Unauthorized"
+            code: "UNAUTHORIZED"
+            title: "Authentication Failed"
+            suggestion: "Please log in again"
+
+    Forbidden:
+      description: User lacks permission for this action
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: "Insufficient permissions"
+            code: "FORBIDDEN"
+            title: "Access Denied"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: "Resource not found"
+            code: "NOT_FOUND"
+            title: "Not Found"
+
+    BadRequest:
+      description: Invalid request input
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: "#/components/schemas/Error"
+              - $ref: "#/components/schemas/ValidationError"
+          example:
+            error: "Invalid input"
+            code: "INVALID_INPUT"
+
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until rate limit resets
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Requests remaining in current window
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when limit resets
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: "Rate limit exceeded"
+            code: "RATE_LIMIT_EXCEEDED"
+            title: "Too Many Requests"
+            suggestion: "Please wait before making another request"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            error: "Internal server error"
+            code: "INTERNAL_SERVER_ERROR"
+            title: "Server Error"
+            suggestion: "Please try again later"
+
+  # ========================================
+  # Request Parameters
+  # ========================================
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Page number (1-indexed)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      example: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      description: Items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      example: 20
+
+    SortParam:
+      name: sort
+      in: query
+      description: Sort field and order
+      schema:
+        type: string
+        enum:
+          - createdAt
+          - updatedAt
+          - name
+          - "-createdAt"
+          - "-updatedAt"
+          - "-name"
+      example: "-createdAt"
+
+    IdParam:
+      name: id
+      in: path
+      required: true
+      description: Resource ID (CUID)
+      schema:
+        type: string
+      example: "cuid123456789"
+
+    UserIdParam:
+      name: userId
+      in: path
+      required: true
+      description: User ID (CUID)
+      schema:
+        type: string
+      example: "cuid987654321"
+
+    JobIdParam:
+      name: jobId
+      in: path
+      required: true
+      description: Job ID (CUID)
+      schema:
+        type: string
+      example: "job_abc123"
+
+paths:
+  /api/albums:
+    get:
+      summary: List user's albums
+      description: Retrieve all albums belonging to the authenticated user with preview images
+      operationId: listAlbums
+      tags:
+        - Albums
+      security:
+        - sessionAuth: []
+      responses:
+        "200":
+          description: Albums list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  albums:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        description:
+                          type: string
+                          nullable: true
+                        privacy:
+                          $ref: "#/components/schemas/AlbumPrivacy"
+                        coverImageId:
+                          type: string
+                          nullable: true
+                        imageCount:
+                          type: integer
+                        previewImages:
+                          type: array
+                          maxItems: 4
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              url:
+                                type: string
+                                format: uri
+                              name:
+                                type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+              example:
+                albums:
+                  - id: "clv8k9r9w000108jp5x4y5k8z"
+                    name: "Vacation Photos"
+                    description: "Summer 2024 memories"
+                    privacy: "PRIVATE"
+                    coverImageId: "img_001"
+                    imageCount: 12
+                    previewImages:
+                      - id: "img_001"
+                        url: "https://r2.example.com/original_001.jpg"
+                        name: "Beach sunset"
+                      - id: "img_002"
+                        url: "https://r2.example.com/original_002.jpg"
+                        name: "Ocean view"
+                    createdAt: "2024-12-01T10:00:00Z"
+                    updatedAt: "2024-12-10T15:45:00Z"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      summary: Create new album
+      description: Create a new album for the authenticated user
+      operationId: createAlbum
+      tags:
+        - Albums
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        description: Album creation details
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                description:
+                  type: string
+                  maxLength: 500
+                privacy:
+                  $ref: "#/components/schemas/AlbumPrivacy"
+            example:
+              name: "Summer Vacation"
+              description: "Photos from our summer trip"
+              privacy: "PRIVATE"
+      responses:
+        "200":
+          description: Album created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  album:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      description:
+                        type: string
+                        nullable: true
+                      privacy:
+                        $ref: "#/components/schemas/AlbumPrivacy"
+                      shareToken:
+                        type: string
+                        nullable: true
+                      createdAt:
+                        type: string
+                        format: date-time
+              example:
+                album:
+                  id: "clv8k9r9w000108jp5x4y5k8z"
+                  name: "Summer Vacation"
+                  description: "Photos from our summer trip"
+                  privacy: "PRIVATE"
+                  shareToken: null
+                  createdAt: "2024-12-10T15:45:00Z"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Album name is required"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/albums/{id}:
+    get:
+      summary: Get album details
+      description: Retrieve a specific album with all images. Public/unlisted albums can be accessed without ownership.
+      operationId: getAlbum
+      tags:
+        - Albums
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Album details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  album:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      description:
+                        type: string
+                        nullable: true
+                      privacy:
+                        $ref: "#/components/schemas/AlbumPrivacy"
+                      coverImageId:
+                        type: string
+                        nullable: true
+                      shareToken:
+                        type: string
+                        nullable: true
+                      imageCount:
+                        type: integer
+                      isOwner:
+                        type: boolean
+                      images:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            description:
+                              type: string
+                              nullable: true
+                            originalUrl:
+                              type: string
+                              format: uri
+                            enhancedUrl:
+                              type: string
+                              format: uri
+                              nullable: true
+                            enhancementTier:
+                              $ref: "#/components/schemas/EnhancementTier"
+                              nullable: true
+                            width:
+                              type: integer
+                            height:
+                              type: integer
+                            sortOrder:
+                              type: integer
+                            createdAt:
+                              type: string
+                              format: date-time
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+              example:
+                album:
+                  id: "clv8k9r9w000108jp5x4y5k8z"
+                  name: "Summer Vacation"
+                  description: "Photos from our summer trip"
+                  privacy: "PRIVATE"
+                  coverImageId: "img_001"
+                  shareToken: "abc123def456"
+                  imageCount: 3
+                  isOwner: true
+                  images:
+                    - id: "img_001"
+                      name: "Beach"
+                      description: "Sunset at the beach"
+                      originalUrl: "https://r2.example.com/original_001.jpg"
+                      enhancedUrl: "https://r2.example.com/enhanced_001.jpg"
+                      enhancementTier: "TIER_2K"
+                      width: 1920
+                      height: 1080
+                      sortOrder: 0
+                      createdAt: "2024-12-01T10:30:00Z"
+                  createdAt: "2024-12-01T10:00:00Z"
+                  updatedAt: "2024-12-10T15:45:00Z"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    patch:
+      summary: Update album
+      description: Update album details. Only the album owner can update.
+      operationId: updateAlbum
+      tags:
+        - Albums
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        description: Album update details (all fields optional)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                description:
+                  type: string
+                  maxLength: 500
+                privacy:
+                  $ref: "#/components/schemas/AlbumPrivacy"
+                coverImageId:
+                  type: string
+                  nullable: true
+            example:
+              name: "Updated Album Name"
+              privacy: "UNLISTED"
+              coverImageId: "img_002"
+      responses:
+        "200":
+          description: Album updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  album:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      description:
+                        type: string
+                        nullable: true
+                      privacy:
+                        $ref: "#/components/schemas/AlbumPrivacy"
+                      coverImageId:
+                        type: string
+                        nullable: true
+                      shareToken:
+                        type: string
+                        nullable: true
+                      updatedAt:
+                        type: string
+                        format: date-time
+              example:
+                album:
+                  id: "clv8k9r9w000108jp5x4y5k8z"
+                  name: "Updated Album Name"
+                  description: "Photos from our summer trip"
+                  privacy: "UNLISTED"
+                  coverImageId: "img_002"
+                  shareToken: "abc123def456"
+                  updatedAt: "2024-12-10T15:45:00Z"
+        "400":
+          description: Invalid request body or cover image not in album
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Cover image must be in the album"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: Delete album
+      description: Delete an album and all associated images. Only the album owner can delete.
+      operationId: deleteAlbum
+      tags:
+        - Albums
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Album deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+              example:
+                success: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/albums/{id}/enhance:
+    post:
+      summary: Batch enhance album images
+      description: |
+        Batch enhance all or specific images in an album with a specified enhancement tier.
+        This is a resource-intensive operation that consumes tokens from user balance.
+        Maximum 20 images per batch. Skips already enhanced images by default.
+      operationId: enhanceAlbumImages
+      tags:
+        - Albums
+        - Enhancement
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      requestBody:
+        required: true
+        description: Batch enhancement request
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tier
+              properties:
+                tier:
+                  $ref: "#/components/schemas/EnhancementTier"
+                skipAlreadyEnhanced:
+                  type: boolean
+                  default: true
+                  description: Skip images that already have enhancements at this tier
+            example:
+              tier: "TIER_2K"
+              skipAlreadyEnhanced: true
+      responses:
+        "200":
+          description: Batch enhancement queued successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  totalImages:
+                    type: integer
+                  skipped:
+                    type: integer
+                  queued:
+                    type: integer
+                  totalCost:
+                    type: integer
+                  newBalance:
+                    type: integer
+                  jobs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        imageId:
+                          type: string
+                        jobId:
+                          type: string
+              example:
+                success: true
+                totalImages: 5
+                skipped: 2
+                queued: 3
+                totalCost: 15
+                newBalance: 85
+                jobs:
+                  - imageId: "img_001"
+                    jobId: "album-clv8k9r9w000108jp5x4y5k8z-1702237500000"
+                  - imageId: "img_003"
+                    jobId: "album-clv8k9r9w000108jp5x4y5k8z-1702237500000"
+                  - imageId: "img_005"
+                    jobId: "album-clv8k9r9w000108jp5x4y5k8z-1702237500000"
+        "400":
+          description: Invalid tier or batch exceeds size limit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Maximum 20 images allowed per batch enhancement. This album has 25 images to enhance."
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          description: Insufficient tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  required:
+                    type: integer
+                  toEnhance:
+                    type: integer
+              example:
+                error: "Insufficient tokens"
+                required: 100
+                toEnhance: 10
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          description: Album not found or no images in album
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "No images found in album"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/images/upload:
+    post:
+      summary: Upload a single image
+      tags: [Images]
+      operationId: uploadImage
+      description: |
+        Upload a single image to the platform. Supported formats: JPEG, PNG, WebP, HEIC.
+        Maximum file size: 10MB. Image metadata is extracted and stored for enhancement tracking.
+        Optional albumId can be provided to add image directly to an album upon upload.
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Image file (JPEG, PNG, WebP, HEIC)
+                albumId:
+                  type: string
+                  description: Optional album ID to add image to upon upload
+      responses:
+        "200":
+          description: Image uploaded successfully
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+              description: Unique request identifier for troubleshooting
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, image]
+                properties:
+                  success:
+                    type: boolean
+                  image:
+                    $ref: "#/components/schemas/Image"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/images/batch-upload:
+    post:
+      summary: Upload multiple images in a batch
+      tags: [Batch Operations]
+      operationId: batchUploadImages
+      description: |
+        Upload up to 20 images in a single request. Each file is processed sequentially.
+        Supports partial success - if some files fail, others are still processed.
+        File size limits: 10MB per file, 50MB total batch size.
+        All files are uploaded to R2 first, then database records created in transaction.
+        If database transaction fails, all R2 uploads are automatically cleaned up.
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [files]
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  maxItems: 20
+                  description: Image files to upload (max 20, each max 10MB)
+      responses:
+        "200":
+          description: Batch upload completed (partial success allowed)
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, results, summary]
+                properties:
+                  success:
+                    type: boolean
+                    description: True if at least one file succeeded
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      required: [success, filename]
+                      properties:
+                        success:
+                          type: boolean
+                        filename:
+                          type: string
+                        imageId:
+                          type: string
+                          nullable: true
+                        url:
+                          type: string
+                          format: uri
+                          nullable: true
+                        width:
+                          type: integer
+                          nullable: true
+                        height:
+                          type: integer
+                          nullable: true
+                        size:
+                          type: integer
+                          nullable: true
+                        format:
+                          type: string
+                          nullable: true
+                        error:
+                          type: string
+                          nullable: true
+                        errorType:
+                          type: string
+                          enum: [validation, upload, database, unknown]
+                          nullable: true
+                  summary:
+                    type: object
+                    required: [total, successful, failed]
+                    properties:
+                      total:
+                        type: integer
+                      successful:
+                        type: integer
+                      failed:
+                        type: integer
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/images/enhance:
+    post:
+      summary: Enhance a single image
+      tags: [Enhancement]
+      operationId: enhanceImage
+      description: |
+        Start an AI enhancement job for a single image. The enhancement is processed
+        asynchronously and you can poll the job status using the returned jobId.
+        Consumes tokens based on selected tier. Operation fails if insufficient tokens.
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [imageId, tier]
+              properties:
+                imageId:
+                  type: string
+                  description: ID of the image to enhance
+                tier:
+                  $ref: "#/components/schemas/EnhancementTier"
+      responses:
+        "200":
+          description: Enhancement job started successfully
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, jobId, tokenCost, newBalance]
+                properties:
+                  success:
+                    type: boolean
+                  jobId:
+                    type: string
+                    description: Enhancement job ID for tracking progress
+                  tokenCost:
+                    type: integer
+                    description: Tokens consumed for this enhancement
+                  newBalance:
+                    type: integer
+                    description: User's remaining token balance after consumption
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          description: Insufficient tokens for this operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/images/parallel-enhance:
+    post:
+      summary: Enhance image with multiple tiers in parallel
+      tags: [Enhancement]
+      operationId: parallelEnhanceImage
+      description: |
+        Start enhancement jobs for a single image using multiple tiers simultaneously.
+        Allows processing up to 3 different enhancement tiers (1K, 2K, 4K) for one image
+        in parallel. All tokens are consumed at once. Operation fails if insufficient
+        tokens for all selected tiers.
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [imageId, tiers]
+              properties:
+                imageId:
+                  type: string
+                  description: ID of the image to enhance
+                tiers:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/EnhancementTier"
+                  minItems: 1
+                  maxItems: 3
+                  description: Array of 1-3 unique enhancement tiers
+      responses:
+        "200":
+          description: Parallel enhancement jobs started successfully
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, jobs, totalCost, newBalance]
+                properties:
+                  success:
+                    type: boolean
+                  jobs:
+                    type: array
+                    items:
+                      type: object
+                      required: [jobId, tier, tokenCost, status]
+                      properties:
+                        jobId:
+                          type: string
+                        tier:
+                          $ref: "#/components/schemas/EnhancementTier"
+                        tokenCost:
+                          type: integer
+                        status:
+                          type: string
+                          enum: [PROCESSING]
+                  totalCost:
+                    type: integer
+                    description: Total tokens consumed for all enhancements
+                  newBalance:
+                    type: integer
+        "400":
+          description: Invalid tiers array (empty, too many, duplicates, or invalid values)
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          description: Insufficient tokens for all selected tiers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/images/move-to-album:
+    post:
+      summary: Move images to an album
+      tags: [Albums]
+      operationId: moveImagesToAlbum
+      description: |
+        Move one or more images to a target album. Images are added to the album
+        and can optionally be removed from a source album. Supports moving up to
+        100 images per request. All images and target album must belong to the user.
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [imageIds, targetAlbumId]
+              properties:
+                imageIds:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 100
+                  minItems: 1
+                  description: Array of image IDs to move
+                targetAlbumId:
+                  type: string
+                  description: ID of album to move images to
+                removeFromSourceAlbum:
+                  type: string
+                  nullable: true
+                  description: Optional ID of source album to remove images from
+      responses:
+        "200":
+          description: Images moved successfully (partial success allowed)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, moved, failed]
+                properties:
+                  success:
+                    type: boolean
+                  moved:
+                    type: integer
+                    description: Number of images successfully moved
+                  failed:
+                    type: integer
+                    description: Number of images that failed to move
+                  alreadyInAlbum:
+                    type: integer
+                    description: Number of images already in the album
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        imageId:
+                          type: string
+                        success:
+                          type: boolean
+                        error:
+                          type: string
+                          nullable: true
+        "400":
+          description: Invalid input (too many images, missing IDs, or album validation failed)
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/images/{id}:
+    get:
+      summary: Get image details with enhancement jobs
+      tags: [Images]
+      operationId: getImage
+      description: |
+        Retrieve detailed information about a specific image including all associated
+        enhancement jobs. Returns full image metadata and list of all enhancement jobs
+        with their status and results. User must be the image owner or image must be public.
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Image details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, image]
+                properties:
+                  success:
+                    type: boolean
+                  image:
+                    allOf:
+                      - $ref: "#/components/schemas/Image"
+                      - type: object
+                        properties:
+                          jobs:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/ImageEnhancementJob"
+                            description: List of enhancement jobs for this image
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: Delete an image
+      tags: [Images]
+      operationId: deleteImage
+      description: |
+        Delete an image and all associated enhancement jobs. Also removes corresponding
+        files from R2 storage. User must be the image owner. Operation is transactional
+        - R2 files are deleted first, then database records removed.
+      security:
+        - sessionAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdParam"
+      responses:
+        "200":
+          description: Image deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [success, message]
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"

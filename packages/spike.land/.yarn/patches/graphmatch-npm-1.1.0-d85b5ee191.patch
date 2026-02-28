@@ -1,0 +1,16 @@
+diff --git a/package.json b/package.json
+index d8ade2b22c87847618c31fffb81b0ad3a7ece91d..1ab20796fefd7517056588ececcb18c87ee25239 100644
+--- a/package.json
++++ b/package.json
+@@ -5,7 +5,10 @@
+   "version": "1.1.0",
+   "type": "module",
+   "main": "dist/index.js",
+-  "exports": "./dist/index.js",
++  "exports": {
++    ".": "./dist/index.js",
++    "./dist/index.js": "./dist/index.js"
++  },
+   "types": "./dist/index.d.ts",
+   "scripts": {
+     "benchmark": "tsex benchmark",

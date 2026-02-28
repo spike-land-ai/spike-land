@@ -1,0 +1,30 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="200"
+  height="50"
+  viewBox="0 0 200 50"
+>
+  <style>
+  .text {
+    font-family: "Montserrat", sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+    fill: #fafafa;
+  }
+  </style>
+  <g transform="translate(10, 13)">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#F59E0B"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="#FBBF24" />
+    </svg>
+  </g>
+  <text x="44" y="34" class="text">spike.land</text>
+</svg>

@@ -1,0 +1,127 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="64"
+  height="64"
+  viewBox="0 0 64 64"
+  fill="none"
+>
+  <defs>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+      <feMerge>
+        <feMergeNode in="coloredBlur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <radialGradient id="sparkGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="30%" stop-color="#00E5FF" />
+      <stop offset="70%" stop-color="#FF00FF" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#FF00FF" stop-opacity="0.7" />
+    </radialGradient>
+    <linearGradient id="sparkShine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.7" />
+      <stop offset="40%" stop-color="#00E5FF" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#FF00FF" stop-opacity="0.4" />
+    </linearGradient>
+    <linearGradient id="cellGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0E0E0" />
+      <stop offset="100%" stop-color="#A0A0A0" />
+    </linearGradient>
+  </defs>
+
+  <!-- 3x3 Grid -->
+  <!-- Row 0 -->
+  <rect
+    x="1.28"
+    y="1.28"
+    width="18.77"
+    height="18.77"
+    rx="3.84"
+    fill="url(#cellGradient)"
+    opacity="0.3"
+  />
+  <rect
+    x="22.61"
+    y="1.28"
+    width="18.77"
+    height="18.77"
+    rx="3.84"
+    fill="url(#cellGradient)"
+    opacity="0.3"
+  />
+  <rect
+    x="43.95"
+    y="1.28"
+    width="18.77"
+    height="18.77"
+    rx="3.84"
+    fill="url(#cellGradient)"
+    opacity="0.3"
+  />
+  <!-- Row 1 -->
+  <rect
+    x="1.28"
+    y="22.61"
+    width="18.77"
+    height="18.77"
+    rx="3.84"
+    fill="url(#cellGradient)"
+    opacity="0.3"
+  />
+  <!-- Center cell with glow -->
+  <rect
+    x="22.61"
+    y="22.61"
+    width="18.77"
+    height="18.77"
+    rx="3.84"
+    fill="url(#sparkGradient)"
+    filter="url(#glow)"
+  />
+  <rect
+    x="22.61"
+    y="22.61"
+    width="18.77"
+    height="18.77"
+    rx="3.84"
+    fill="url(#sparkShine)"
+  />
+  <rect
+    x="43.95"
+    y="22.61"
+    width="18.77"
+    height="18.77"
+    rx="3.84"
+    fill="url(#cellGradient)"
+    opacity="0.3"
+  />
+  <!-- Row 2 -->
+  <rect
+    x="1.28"
+    y="43.95"
+    width="18.77"
+    height="18.77"
+    rx="3.84"
+    fill="url(#cellGradient)"
+    opacity="0.3"
+  />
+  <rect
+    x="22.61"
+    y="43.95"
+    width="18.77"
+    height="18.77"
+    rx="3.84"
+    fill="url(#cellGradient)"
+    opacity="0.3"
+  />
+  <rect
+    x="43.95"
+    y="43.95"
+    width="18.77"
+    height="18.77"
+    rx="3.84"
+    fill="url(#cellGradient)"
+    opacity="0.3"
+  />
+</svg>

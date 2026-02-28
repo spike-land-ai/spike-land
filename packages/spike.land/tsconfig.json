@@ -1,0 +1,78 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
+    "verbatimModuleSyntax": true,
+    "useDefineForClassFields": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    // Disabled: conflicts with ESLint dot-notation rule (dot notation preferred for readability)
+    "noPropertyAccessFromIndexSignature": false,
+    "forceConsistentCasingInFileNames": true,
+    // Additional strict options (Resolves #797, #1232):
+    "noImplicitOverride": true,
+    // "exactOptionalPropertyTypes": true, // ~675 errors — needs dedicated sprint
+    "noUncheckedSideEffectImports": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@apps/*": [
+        "./apps/*"
+      ],
+      "@prisma/client": [
+        "./src/generated/prisma"
+      ],
+      "@prisma/client/*": [
+        "./src/generated/prisma/*"
+      ],
+    },
+    "types": [
+      "@testing-library/jest-dom/vitest",
+      "vitest/globals"
+    ]
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "packages",
+    "hono-api",
+    "shell",
+    "scripts",
+    "live",
+    "codespaces"
+  ]
+}

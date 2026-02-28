@@ -1,0 +1,38 @@
+name: PR Checklist
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  update-checklist:
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@checklist')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          trigger_phrase: "@checklist"
+          use_sticky_comment: true
+          prompt: |
+            Scan all comments on this PR since the last checklist update.
+            Create/update a sticky checklist comment with:
+            - [ ] Action items from reviewer feedback
+            - [x] Previously completed items (keep them checked)
+            Group items by reviewer.
+          claude_args: |
+            --allowed-tools "Bash(gh:*),Read,Glob,Grep"
+            --model sonnet

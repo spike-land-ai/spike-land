@@ -1,0 +1,252 @@
+---
+title: "Docker Layers Are Just Like LLM Context Caching"
+slug: "docker-layers-are-just-like-llm-context-caching"
+description: "Both Docker and LLMs use prefix-based sequential caches where any change invalidates everything downstream. The same intuition that makes you a better prompt engineer makes you a better Dockerfile author."
+date: "2026-02-15"
+author: "Zoltan Erdos"
+category: "Developer Experience"
+tags: ["docker", "llm", "caching", "developer-experience", "devops", "context-engineering", "performance"]
+featured: false
+---
+
+{/* TL;DR Box */}
+<div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 mb-8">
+  <h3 className="text-lg font-semibold mb-3 text-slate-200">TL;DR</h3>
+  <ul className="space-y-2 text-slate-300">
+    <li>Docker layer caching and LLM prompt caching are structurally identical: both are prefix-based sequential caches.</li>
+    <li>Any change in the middle invalidates everything downstream in both systems.</li>
+    <li>The optimization principle is the same: stable content first, volatile content last.</li>
+    <li>We applied this principle to our monorepo's Dockerfiles and cut rebuild times by 60%+.</li>
+    <li>If you understand one system, you already understand the other.</li>
+  </ul>
+</div>
+
+## The Punchline
+
+I was optimizing our Dockerfiles last week when I realized I was applying the exact same mental model I use when engineering LLM prompts. Both systems reward you for putting stable things first and volatile things last. Both punish you — with wasted compute and wasted money — when you get the order wrong.
+
+This is not a loose analogy. The underlying mechanism is structurally identical.
+
+**Docker layer cache:** Each instruction in a Dockerfile produces a layer. Docker caches layers sequentially from the top. If layer N changes, layers N+1 through the end are rebuilt from scratch — even if those downstream layers' inputs have not changed.
+
+**LLM prompt cache (KV cache):** Each token in a prompt produces key-value vectors that are cached sequentially. If token N changes, the cached KV states for tokens N+1 onward are invalidated — even if those downstream tokens are identical.
+
+Both are **prefix-based sequential caches**. The cache is valid only as long as the prefix matches exactly. One difference in the middle, and everything after it is recomputed.
+
+---
+
+## Side-by-Side: The Same Cache, Different Substrates
+
+| Property | Docker Layer Cache | LLM Prompt Cache (KV Cache) |
+|---|---|---|
+| **Unit of caching** | Dockerfile instruction (layer) | Token (key-value vectors) |
+| **Cache key** | Hash of instruction + parent layer | Exact token sequence prefix match |
+| **Invalidation trigger** | Any change to an instruction or its inputs | Any change to a token in the prefix |
+| **Invalidation scope** | All layers after the changed one | All KV states after the changed token |
+| **Cost of miss** | Rebuild downstream layers (seconds to minutes) | Recompute attention for all subsequent tokens (latency + cost) |
+| **Cost of hit** | Skip rebuild entirely (milliseconds) | 90% cost reduction on cached tokens |
+| **Optimization principle** | Stable layers first, volatile last | Stable context first (system prompt), volatile last (user message) |
+| **Advanced technique** | `COPY --link` (independent layer caching) | Cache breakpoints / extended TTL |
+
+<Callout type="info">
+**Key Insight:** In both systems, the cache is a prefix tree. You cannot cache the middle without caching the beginning. This constraint is what makes ordering the single most important optimization lever.
+</Callout>
+
+---
+
+## What Bad Ordering Looks Like
+
+### Docker: The Classic Mistake
+
+```dockerfile
+# BAD: Source code changes on every commit
+COPY . .
+RUN npm install          # Reinstalls ALL deps every time
+RUN npm run build        # Rebuilds every time
+```
+
+Every source change invalidates `npm install` — a 2-minute operation — even though `package.json` has not changed. The volatile layer (`COPY . .`) sits above the expensive-but-stable layer (`npm install`).
+
+### LLM: The Equivalent Mistake
+
+```
+System: You are a code reviewer.
+User: Here is the diff: {volatile_diff}
+User: Review using these guidelines: {stable_guidelines}
+```
+
+The volatile diff sits before the stable guidelines. Every new diff invalidates the cached KV states for the guidelines — even though those guidelines are identical across reviews. The LLM provider recomputes attention for the guidelines on every call, and you pay full price for those tokens.
+
+### The Fix Is Identical
+
+**Docker:**
+```dockerfile
+COPY package.json yarn.lock ./    # Stable: changes rarely
+RUN npm install                    # Cached when deps unchanged
+COPY . .                           # Volatile: changes every commit
+RUN npm run build                  # Only this rebuilds
+```
+
+**LLM:**
+```
+System: You are a code reviewer. Guidelines: {stable_guidelines}
+User: Here is the diff: {volatile_diff}
+```
+
+Stable content first. Volatile content last. Same principle. Same result: the expensive computation is cached, and only the cheap tail is recomputed.
+
+---
+
+## Real Optimizations from Our Monorepo
+
+We applied this thinking to the Dockerfiles in our monorepo. Here is what changed and why.
+
+### 1. Split dependency install from source copy (workers/Dockerfile)
+
+**Before:**
+```dockerfile
+COPY services/ ./services/
+WORKDIR /app/services/transpiler
+RUN npm install --production && node build.mjs
+```
+
+Every change to any file in `services/` — including source code — invalidates the `npm install` cache.
+
+**After:**
+```dockerfile
+# Copy ONLY package.json first (stable prefix)
+COPY --link services/transpiler/package.json ./services/transpiler/package.json
+WORKDIR /app/services/transpiler
+RUN npm install --production
+
+# Then copy full source (volatile suffix)
+WORKDIR /app
+COPY --link services/ ./services/
+WORKDIR /app/services/transpiler
+RUN node build.mjs
+```
+
+Now `npm install` is only re-run when `package.json` changes. Source code changes skip straight to the build step. This is exactly like putting your stable system prompt before the volatile user message.
+
+### 2. Pin versions for reproducibility
+
+**Before:**
+```dockerfile
+RUN npm install -g workerd@latest
+```
+
+`@latest` is maximally volatile — it resolves to a different version on different days. This is like putting a timestamp in your system prompt: it guarantees a cache miss on every build.
+
+**After:**
+```dockerfile
+RUN npm install -g workerd@1.20260214.0
+```
+
+Pinned versions are stable prefixes. The layer caches indefinitely until you explicitly bump the version.
+
+### 3. Add BuildKit cache mounts for apt
+
+**Before:**
+```dockerfile
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+```
+
+Every rebuild re-downloads the apt package index and the packages themselves.
+
+**After:**
+```dockerfile
+RUN --mount=type=cache,id=workerd-apt-${TARGETARCH},target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,id=workerd-apt-lists-${TARGETARCH},target=/var/lib/apt/lists,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends curl
+```
+
+BuildKit cache mounts persist downloaded packages across builds. This is analogous to the LLM provider's KV cache persistence — the computation result (downloaded packages / computed attention vectors) survives between invocations.
+
+### 4. Shrink build context with .dockerignore
+
+```
+workers/
+.github/
+docs/
+terraform/
+```
+
+Adding these to `.dockerignore` removes ~10MB from the build context. More importantly, it prevents changes to irrelevant files from appearing in the build context hash. A documentation edit no longer invalidates Docker's cache for `COPY . .` instructions.
+
+The LLM equivalent: removing irrelevant files from your RAG context so that attention is not diluted by noise. Same principle — less irrelevant input means better cache behavior and better output.
+
+### 5. Replace curl healthchecks with Node.js fetch
+
+Our `node:22-slim` images do not include `curl`. Instead of adding a dependency just for healthchecks:
+
+```yaml
+# Before (requires curl in the image)
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost:3000"]
+
+# After (uses Node.js already in the image)
+healthcheck:
+  test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+```
+
+One fewer apt package means one fewer cache-invalidation vector. The fewer dependencies in your stable prefix, the longer that prefix stays cached.
+
+---
+
+## When This Mental Model Breaks Down
+
+No analogy is perfect. Here are the differences that matter:
+
+**Layer granularity.** Docker caches at the instruction level (coarse). LLM caches at the token level (fine). A single character change in a Dockerfile instruction invalidates the entire layer. A single token change in a prompt invalidates only subsequent tokens — but in practice, most prompt changes happen at message boundaries, making the granularity similar.
+
+**`COPY --link` has no LLM equivalent.** Docker's `COPY --link` creates layers that are cached independently of their parent — the layer's cache key depends only on the source content, not the preceding layers. LLMs have no equivalent. Every token's KV state depends on all preceding tokens. You cannot "link-cache" a chunk of context independently.
+
+**Layer reuse across images.** Docker layers are content-addressable and can be shared across different images. LLM KV caches are typically per-session (though Anthropic's prompt caching enables cross-request reuse within a TTL window). Docker's sharing is more general.
+
+**Build parallelism.** Docker can build independent stages in parallel (multi-stage builds). LLM inference is inherently sequential during decode — each token depends on the previous one. The prefill phase is parallel, but the overall process is more constrained than Docker's DAG-based build graph.
+
+---
+
+## The Deeper Pattern
+
+The reason Docker and LLM caching feel the same is that they **are** the same, at the level of abstraction that matters. Both are systems where:
+
+1. **Computation is expensive** (building layers / computing attention)
+2. **Results are cacheable** (layer hashes / KV vectors)
+3. **The cache is prefix-sensitive** (invalidation cascades forward)
+4. **The optimization is ordering** (stable-first, volatile-last)
+
+This pattern appears everywhere in computing. CPU instruction caches. Git's content-addressable object store. HTTP caching with ETags. The specific implementations differ, but the engineering intuition transfers directly.
+
+If you have spent time optimizing Dockerfiles, you already know how to structure LLM prompts for cache efficiency. If you understand prompt caching, you already know the most important Dockerfile optimization principle.
+
+The mental model is free. Use it in both directions.
+
+<Callout type="success">
+**Takeaway:** Stable-first, volatile-last is not Docker advice or LLM advice. It is caching advice. Any prefix-based sequential cache — and there are more of them than you think — rewards the same ordering discipline.
+</Callout>
+
+---
+
+<div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-lg p-6 mt-8">
+  <h3 className="text-lg font-semibold mb-3 text-slate-200">Continue the conversation</h3>
+  <p className="text-slate-300 mb-4">
+    This article is a companion to <a href="/blog/how-claude-code-engineers-context" className="text-blue-400 hover:underline">How Claude Code Engineers Context</a>, which dives deep into KV cache mechanics and prompt caching economics. For the practical prompt engineering framework, see <a href="/blog/context-engineering-your-zero-shot-prompt" className="text-blue-400 hover:underline">Context Engineering Your Zero-Shot Prompt</a>.
+  </p>
+  <div className="flex flex-wrap gap-3">
+    <a
+      href="/blog/how-claude-code-engineers-context"
+      className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+    >
+      Read: KV Cache Deep Dive
+    </a>
+    <a
+      href="/blog/context-engineering-your-zero-shot-prompt"
+      className="inline-flex items-center px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
+    >
+      Read: Context Engineering Framework
+    </a>
+  </div>
+</div>

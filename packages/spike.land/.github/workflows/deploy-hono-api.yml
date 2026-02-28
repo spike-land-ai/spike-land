@@ -1,0 +1,187 @@
+name: Deploy Hono MCP API
+
+permissions:
+  contents: read
+  packages: read # Required to fetch @spike-land-ai/* from GitHub Packages
+  id-token: write # For OIDC auth to AWS
+
+concurrency:
+  group: deploy-hono-api-${{ github.ref }}
+  cancel-in-progress: false
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "hono-api/**"
+      - "src/lib/mcp/**"
+      - "src/lib/prisma.ts"
+      - "src/lib/upstash/**"
+      - "src/lib/storage/**"
+      - "src/lib/rate-limiter.ts"
+      - "prisma/schema.prisma"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  test:
+    name: Test MCP Tools
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+
+      - name: Run MCP tool tests
+        run: yarn vitest run --coverage --coverage.include='src/lib/mcp/**/*.ts' src/lib/mcp/
+
+  build-and-push:
+    name: Build & Push Docker Image
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names spike-land-hono-api --region us-east-1 2>/dev/null || \
+          aws ecr create-repository \
+            --repository-name spike-land-hono-api \
+            --region us-east-1 \
+            --image-scanning-configuration scanOnPush=true \
+            --encryption-configuration encryptionType=AES256
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.ecr-login.outputs.registry }}/spike-land-hono-api
+          tags: |
+            type=sha,prefix=
+            type=ref,event=branch
+
+      - name: Setup Depot
+        uses: depot/setup-action@v1
+        continue-on-error: true
+        id: depot-setup
+
+      - name: Build and push via Depot
+        if: steps.depot-setup.outcome == 'success'
+        uses: depot/build-push-action@v1
+        with:
+          project: tccng0cpjr
+          context: .
+          file: hono-api/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          secrets: |
+            NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+        env:
+          DEPOT_TOKEN: ${{ secrets.DEPOT_TOKEN }}
+
+      - name: Build and push via Docker (fallback)
+        if: steps.depot-setup.outcome != 'success'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: hono-api/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          secrets: |
+            NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service \
+            --cluster staging-spike-land \
+            --service hono-api \
+            --force-new-deployment
+
+      - name: Wait for deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster staging-spike-land \
+            --services hono-api
+
+      - name: Smoke test staging
+        env:
+          STAGING_URL: "https://staging-api.spike.land"
+        run: |
+          sleep 10
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${STAGING_URL}/health")
+          if [ "${STATUS}" != "200" ]; then
+            echo "Health check failed with status ${STATUS}"
+            exit 1
+          fi
+          echo "Health check passed"
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [build-and-push, deploy-staging]
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Update ECS service (us-east-1)
+        run: |
+          aws ecs update-service \
+            --cluster production-spike-land \
+            --service hono-api \
+            --force-new-deployment
+
+      - name: Wait for deployment (us-east-1)
+        run: |
+          aws ecs wait services-stable \
+            --cluster production-spike-land \
+            --services hono-api
+
+      - name: Smoke test production
+        env:
+          PROD_URL: "https://api.spike.land"
+        run: |
+          sleep 10
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${PROD_URL}/health")
+          if [ "${STATUS}" != "200" ]; then
+            echo "Health check failed with status ${STATUS}"
+            exit 1
+          fi
+          echo "Health check passed"

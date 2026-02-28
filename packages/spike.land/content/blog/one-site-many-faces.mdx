@@ -1,0 +1,191 @@
+---
+title: "One Site, Many Faces: How We Built 16 Versions of spike.land"
+slug: "one-site-many-faces"
+description: "The same URL, 16 different experiences. How spike.land uses persona-based personalization to serve content that actually resonates."
+date: "2026-02-22"
+author: "Zoltan Erdos"
+category: "Engineering"
+tags: ["personalization", "a-b-testing", "onboarding", "product"]
+featured: true
+---
+
+{/* TL;DR Box */}
+<div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 mb-8">
+  <h3 className="text-lg font-semibold mb-3 text-slate-200">TL;DR</h3>
+  <ul className="space-y-2 text-slate-300">
+    <li>Most companies A/B test between 2 variants. We ship 16. Simultaneously.</li>
+    <li>4 binary questions produce 16 distinct personas. Each gets their own landing page, poll questions, and app recommendations.</li>
+    <li>A single cookie — `spike-persona` — drives server-side personalization across the entire platform.</li>
+    <li>You are reading a personalized version of this article right now.</li>
+  </ul>
+</div>
+
+## The A/B Tester's Paradise
+
+Here is the dirty secret of A/B testing: most teams test two variants. Maybe three if they are feeling adventurous. A headline tweak here, a button color there. Then they declare victory when one variant beats the other by 3%.
+
+We thought that was boring.
+
+spike.land ships 16 variants of every personalized surface. Not sequentially — simultaneously. Every visitor who completes our onboarding quiz gets content written specifically for them. Not "personalized" in the way that means we swapped your name into a template. Actually different. Different headlines, different pain points, different app recommendations, different poll questions.
+
+The AI Indie developer building a solo AI product sees tools for orchestration and rapid prototyping. The Content Creator with an audience sees pixel studios and music tools. The Enterprise DevOps engineer sees dashboards and QA infrastructure. Same URL. Completely different experience.
+
+This is not a thought experiment. It is running in production right now, and you might be experiencing it as you read this.
+
+---
+
+## The 4-Question Decision Tree
+
+The magic starts with four questions. Not a 47-field form that makes you question your life choices. Four binary questions that branch into a tree of 16 leaves.
+
+**Question 1: Do you write code?**
+This single question splits the entire user base into two worlds. Developers go left. Everyone else goes right.
+
+**Question 2** depends on your first answer. Developers get asked what they build (apps vs. infrastructure). Non-developers get asked about their goals (business vs. personal).
+
+**Question 3** narrows further. Product builders: are you building for yourself or clients? Business folks: solo founder or team leader?
+
+**Question 4** is the final split. Each branch divides one more time, landing you on exactly one of 16 personas.
+
+Four questions. Sixteen outcomes. Each outcome maps to a persona with its own name, hero text, recommended apps, and call-to-action. The tree is deterministic — the same answers always produce the same persona.
+
+Here is what your personalized landing page looks like based on your persona:
+
+<PersonaLandingPreview />
+
+If you have not taken the quiz yet, that component just invited you to do so. If you have, you are seeing your actual personalized content. That is the system working in real time.
+
+---
+
+## How the Cookie Crumbles
+
+The technical implementation is deliberately simple. When a user completes the onboarding quiz, we set a single cookie:
+
+```
+spike-persona=ai-indie
+```
+
+That is it. One cookie. No complex session management, no user profile lookups on every page load, no third-party personalization platform charging per-impression.
+
+The `spike-persona` cookie is read server-side by Next.js middleware and in client components via a simple utility. Server components can personalize at render time. Client components read the cookie on mount and adapt.
+
+The flow looks like this:
+
+1. User visits spike.land
+2. Onboarding quiz presents 4 binary questions
+3. Decision tree walks the answers to a persona leaf
+4. `spike-persona` cookie is set with the persona slug
+5. Every subsequent page load reads the cookie and personalizes
+
+Landing pages at `/for/{persona-slug}` serve as the canonical entry point for each persona. These are not dynamically generated — they are pre-built with persona-specific copy, pain points, recommended tools, and calls to action. The cookie just determines which one you see when you hit the root URL.
+
+Want to try a different persona? Use the switcher below:
+
+<PersonaSwitcher />
+
+Change the persona and reload this page. The poll question, the landing preview, even the framing of sections — it all adapts.
+
+---
+
+## The Vote
+
+Here is where it gets interactive. The poll question you see below is not the same one everyone else sees. Each persona gets a question tailored to their perspective on A/B testing.
+
+An ML Engineer might see: "Is A/B testing just a crude Bayesian bandit with extra steps?" A Non-technical Founder sees: "Should you let data pick your messaging, or trust your vision?" A Social Gamer gets: "Would you A/B test game mechanics to optimize fun?"
+
+Same poll. Sixteen different questions. Your answer gets tagged with your persona, so we can see how different audiences think about the same topic.
+
+<BlogPoll slug="one-site-many-faces" />
+
+---
+
+## Live Analytics
+
+After voting, the results dashboard shows how every persona voted — broken down by segment. This is not a static chart. It refreshes every 30 seconds and shows real cross-persona data.
+
+Watch the patterns emerge. Do developers vote differently from founders? Do creators agree with DevOps engineers? The data tells a story about how different mindsets approach the same question.
+
+<PollAnalyticsDashboard slug="one-site-many-faces" />
+
+---
+
+## Persona Showcase
+
+Here are all 16 personas, each with their own landing page. Click any link to see what spike.land looks like through their eyes.
+
+### Developers
+
+| Persona | Description | Landing Page |
+|---|---|---|
+| **AI Indie** | Solo developer building AI-powered products | [/for/ai-indie](/for/ai-indie) |
+| **Classic Indie** | Solo developer building traditional apps | [/for/classic-indie](/for/classic-indie) |
+| **Agency Dev** | Freelancer or agency developer building for clients | [/for/agency-dev](/for/agency-dev) |
+| **In-house Dev** | Developer employed at a company | [/for/in-house-dev](/for/in-house-dev) |
+| **ML Engineer** | ML/AI engineer deploying models to production | [/for/ml-engineer](/for/ml-engineer) |
+| **AI Hobbyist** | Developer exploring AI for fun and learning | [/for/ai-hobbyist](/for/ai-hobbyist) |
+| **Enterprise DevOps** | DevOps engineer in a large organization | [/for/enterprise-devops](/for/enterprise-devops) |
+| **Startup DevOps** | DevOps engineer in a small team or startup | [/for/startup-devops](/for/startup-devops) |
+
+### Business Leaders
+
+| Persona | Description | Landing Page |
+|---|---|---|
+| **Technical Founder** | Tech-savvy solo founder building a business | [/for/technical-founder](/for/technical-founder) |
+| **Non-technical Founder** | Non-tech solo founder who needs guided, no-code tools | [/for/nontechnical-founder](/for/nontechnical-founder) |
+| **Growth Leader** | Business leader focused on scaling teams and revenue | [/for/growth-leader](/for/growth-leader) |
+| **Ops Leader** | Business leader optimizing team operations | [/for/ops-leader](/for/ops-leader) |
+
+### Creators & Explorers
+
+| Persona | Description | Landing Page |
+|---|---|---|
+| **Content Creator** | Creator with an audience producing content | [/for/content-creator](/for/content-creator) |
+| **Hobbyist Creator** | Person creating art, music, or content for personal enjoyment | [/for/hobbyist-creator](/for/hobbyist-creator) |
+| **Social Gamer** | Person who enjoys multiplayer and social games | [/for/social-gamer](/for/social-gamer) |
+| **Solo Explorer** | Casual user exploring the platform for personal use | [/for/solo-explorer](/for/solo-explorer) |
+
+---
+
+## Beyond the Blog
+
+The persona system does not stop at landing pages and poll questions. It reaches into every corner of the platform.
+
+**App recommendations.** Each persona has a curated set of four recommended apps from the spike.land store. An AI Indie sees the AI Orchestrator and Codespace. A Social Gamer sees Chess Arena and Tabletop Simulator. The store homepage reshuffles based on who you are.
+
+**Learning paths.** The `/learnit/` section adapts its curriculum suggestions based on persona. A developer persona sees coding tutorials and API documentation. A non-technical founder sees no-code guides and business templates.
+
+**Content ranking.** Blog posts, guides, and documentation surface differently depending on persona. An ML Engineer sees infrastructure-heavy content first. A Hobbyist Creator sees creative tool tutorials.
+
+**Future: pricing sensitivity.** The persona model maps cleanly to willingness-to-pay segments. Enterprise DevOps and Agency Devs expect — and budget for — professional tooling. Hobbyist Creators and Solo Explorers are more price-sensitive. The same product, positioned differently, converts differently.
+
+This is the real power of persona-based personalization. It is not just about making the homepage look different. It is about building a platform that genuinely understands who is using it and adapts accordingly.
+
+---
+
+## The Meta Reveal
+
+Here is the part where we break the fourth wall.
+
+You are reading one of 16 versions of this article right now. Not in the sense that the text changed — the prose is the same for everyone. But the poll question you saw above? Personalized. The landing preview? Personalized. The app recommendations on the sidebar? Personalized.
+
+If you used the PersonaSwitcher component earlier, you already saw this in action. The page restructured itself around a different identity. That is not a demo. That is the production system, exposed as an interactive element in a blog post.
+
+Most personalization engines hide behind the curtain. We are pulling it open and handing you the controls. Switch personas. See what a Technical Founder's spike.land looks like versus a Content Creator's. Compare the poll questions. Notice what changes and what stays the same.
+
+The transparency is the point. Personalization works best when users understand it and trust it. Dark patterns erode trust. Showing you exactly how the system categorizes you — and letting you change it — builds it.
+
+---
+
+## The Philosophy
+
+There is a William Gibson quote that gets thrown around in tech circles: "The future is already here — it is just not evenly distributed."
+
+We took that literally.
+
+The future of spike.land is not one product with one message hoping to resonate with everyone. It is 16 products, each speaking directly to someone specific. The AI Indie developer and the Hobbyist Creator both use spike.land, but they use it for completely different reasons. They have different pain points, different budgets, different definitions of success.
+
+Treating them the same would be lazy. Treating them differently — with respect, transparency, and genuine understanding of their context — is what we are building toward.
+
+Four questions. Sixteen personas. One platform that distributes itself evenly.
+
+Welcome to your version of spike.land.

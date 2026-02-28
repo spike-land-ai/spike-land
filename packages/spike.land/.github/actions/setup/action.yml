@@ -1,0 +1,85 @@
+name: "Setup Project"
+description: "Install Node.js, cache node_modules/yarn/Prisma/Playwright, and install dependencies. Checkout must happen BEFORE this action."
+
+inputs:
+  generate-prisma:
+    description: "Generate Prisma client (cached by schema hash)"
+    default: "false"
+  generate-docs:
+    description: "Generate docs data including tools-manifest.json (cached by source hash)"
+    default: "false"
+  install-playwright:
+    description: "Install Playwright Chromium browser (cached by version)"
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v6
+      with:
+        node-version-file: ".nvmrc"
+        # No cache input — we manage caching ourselves to avoid
+        # duplicate Linux-node-*/node-cache-* entries
+
+    - run: corepack enable
+      shell: bash
+
+    # PRIMARY: node_modules cache (saves ~46s per job on hit)
+    - uses: actions/cache@v5
+      id: nm-cache
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-nm-${{ hashFiles('yarn.lock', '.yarnrc.yml') }}
+        restore-keys: ${{ runner.os }}-nm-
+
+    # SECONDARY: yarn archive cache (fallback for cold install)
+    - uses: actions/cache@v5
+      with:
+        path: .yarn/cache
+        key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+        restore-keys: ${{ runner.os }}-yarn-
+
+    - run: yarn
+      shell: bash
+      env:
+        NODE_AUTH_TOKEN: ${{ github.token }}
+
+    # Prisma client cache (~29MB, keyed on schema)
+    - if: inputs.generate-prisma == 'true'
+      uses: actions/cache@v5
+      id: prisma-cache
+      with:
+        path: src/generated/prisma
+        key: ${{ runner.os }}-prisma-${{ hashFiles('prisma/schema.prisma') }}
+
+    - if: inputs.generate-prisma == 'true' && steps.prisma-cache.outputs.cache-hit != 'true'
+      run: yarn db:generate
+      shell: bash
+
+    # Docs data cache (~700K, keyed on generator + MCP tool sources)
+    - if: inputs.generate-docs == 'true'
+      uses: actions/cache@v5
+      id: docs-cache
+      with:
+        path: src/lib/docs/generated
+        key: ${{ runner.os }}-docs-${{ hashFiles('src/lib/docs/generate-docs-data.ts', 'src/lib/mcp/server/tools/**') }}
+
+    - if: inputs.generate-docs == 'true' && steps.docs-cache.outputs.cache-hit != 'true'
+      run: yarn docs:generate
+      shell: bash
+
+    # Playwright browser cache (~400MB, keyed on version)
+    - if: inputs.install-playwright == 'true'
+      uses: actions/cache@v5
+      id: pw-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: ${{ runner.os }}-pw-1.58.1
+
+    - if: inputs.install-playwright == 'true' && steps.pw-cache.outputs.cache-hit != 'true'
+      run: yarn playwright install chromium --with-deps
+      shell: bash
+
+    - if: inputs.install-playwright == 'true' && steps.pw-cache.outputs.cache-hit == 'true'
+      run: yarn playwright install-deps chromium
+      shell: bash

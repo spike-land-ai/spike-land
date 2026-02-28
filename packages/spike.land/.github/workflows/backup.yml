@@ -1,0 +1,413 @@
+name: Aurora Backup Monitor
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # OIDC auth to AWS
+  issues: write
+
+env:
+  AWS_REGION: us-east-1
+  AURORA_CLUSTER_ID: production-spike-land-primary
+  GLOBAL_CLUSTER_ID: production-spike-land-global
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Check Aurora cluster status
+        id: cluster
+        run: |
+          echo "Checking Aurora cluster status..."
+
+          # Retry logic for transient AWS API failures
+          MAX_RETRIES=3
+          RETRY_DELAY=10
+          for attempt in $(seq 1 $MAX_RETRIES); do
+            CLUSTER_JSON=$(aws rds describe-db-clusters \
+              --db-cluster-identifier "$AURORA_CLUSTER_ID" \
+              --output json 2>&1) && break
+
+            echo "WARNING: AWS API call failed (attempt ${attempt}/${MAX_RETRIES})"
+            if [ "$attempt" -eq "$MAX_RETRIES" ]; then
+              echo "WARNING: AWS API unreachable after ${MAX_RETRIES} retries — treating as transient failure"
+              echo "status=api-error" >> "$GITHUB_OUTPUT"
+              echo "cluster_detail=AWS API unreachable after ${MAX_RETRIES} retries (transient)" >> "$GITHUB_OUTPUT"
+              echo "transient_failure=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep $RETRY_DELAY
+          done
+
+          CLUSTER_STATUS=$(echo "$CLUSTER_JSON" | jq -r '.DBClusters[0].Status // "unknown"')
+          CLUSTER_ENGINE=$(echo "$CLUSTER_JSON" | jq -r '.DBClusters[0].Engine // "unknown"')
+          CLUSTER_ENGINE_VERSION=$(echo "$CLUSTER_JSON" | jq -r '.DBClusters[0].EngineVersion // "unknown"')
+          CLUSTER_ENDPOINT=$(echo "$CLUSTER_JSON" | jq -r '.DBClusters[0].Endpoint // "unknown"')
+          CLUSTER_MEMBERS=$(echo "$CLUSTER_JSON" | jq -r '.DBClusters[0].DBClusterMembers | length // 0')
+          BACKUP_WINDOW=$(echo "$CLUSTER_JSON" | jq -r '.DBClusters[0].PreferredBackupWindow // "unknown"')
+          BACKUP_RETENTION=$(echo "$CLUSTER_JSON" | jq -r '.DBClusters[0].BackupRetentionPeriod // "unknown"')
+
+          echo "status=${CLUSTER_STATUS}" >> "$GITHUB_OUTPUT"
+          echo "engine=${CLUSTER_ENGINE} ${CLUSTER_ENGINE_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "endpoint=${CLUSTER_ENDPOINT}" >> "$GITHUB_OUTPUT"
+          echo "members=${CLUSTER_MEMBERS}" >> "$GITHUB_OUTPUT"
+          echo "backup_window=${BACKUP_WINDOW}" >> "$GITHUB_OUTPUT"
+          echo "backup_retention=${BACKUP_RETENTION}" >> "$GITHUB_OUTPUT"
+          CLUSTER_DETAIL="Engine: ${CLUSTER_ENGINE} ${CLUSTER_ENGINE_VERSION} | Endpoint: ${CLUSTER_ENDPOINT} | Members: ${CLUSTER_MEMBERS} | Backup Window: ${BACKUP_WINDOW} | Retention: ${BACKUP_RETENTION} days"
+          echo "cluster_detail=${CLUSTER_DETAIL}" >> "$GITHUB_OUTPUT"
+          echo "Cluster status: ${CLUSTER_STATUS}"
+          echo "Cluster detail: ${CLUSTER_DETAIL}"
+
+          if [ "$CLUSTER_STATUS" != "available" ]; then
+            echo "ERROR: Aurora cluster is not available (status: ${CLUSTER_STATUS})"
+            exit 1
+          fi
+
+      - name: Check automated backups
+        id: backup
+        if: steps.cluster.outputs.transient_failure != 'true'
+        run: |
+          echo "Checking Aurora automated snapshots..."
+
+          # Retry logic for transient AWS API failures
+          MAX_RETRIES=3
+          RETRY_DELAY=10
+          for attempt in $(seq 1 $MAX_RETRIES); do
+            LATEST_SNAPSHOT=$(aws rds describe-db-cluster-snapshots \
+              --db-cluster-identifier "$AURORA_CLUSTER_ID" \
+              --snapshot-type automated \
+              --query 'sort_by(DBClusterSnapshots, &SnapshotCreateTime)[-1]' \
+              --output json 2>&1) && break
+
+            echo "WARNING: AWS API call failed (attempt ${attempt}/${MAX_RETRIES})"
+            if [ "$attempt" -eq "$MAX_RETRIES" ]; then
+              echo "WARNING: AWS API unreachable after ${MAX_RETRIES} retries — treating as transient failure"
+              echo "snapshot_id=api-error" >> "$GITHUB_OUTPUT"
+              echo "snapshot_time=unknown" >> "$GITHUB_OUTPUT"
+              echo "snapshot_status=api-error" >> "$GITHUB_OUTPUT"
+              echo "transient_failure=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep $RETRY_DELAY
+          done
+
+          SNAPSHOT_ID=$(echo "$LATEST_SNAPSHOT" | jq -r '.DBClusterSnapshotIdentifier // "none"')
+          SNAPSHOT_TIME=$(echo "$LATEST_SNAPSHOT" | jq -r '.SnapshotCreateTime // "none"')
+          SNAPSHOT_STATUS=$(echo "$LATEST_SNAPSHOT" | jq -r '.Status // "none"')
+
+          echo "snapshot_id=${SNAPSHOT_ID}" >> "$GITHUB_OUTPUT"
+          echo "snapshot_time=${SNAPSHOT_TIME}" >> "$GITHUB_OUTPUT"
+          echo "snapshot_status=${SNAPSHOT_STATUS}" >> "$GITHUB_OUTPUT"
+
+          echo "Latest snapshot: ${SNAPSHOT_ID}"
+          echo "Created: ${SNAPSHOT_TIME}"
+          echo "Status: ${SNAPSHOT_STATUS}"
+
+          if [ "$SNAPSHOT_ID" = "none" ]; then
+            echo "ERROR: No automated snapshots found"
+            exit 1
+          fi
+
+          if [ "$SNAPSHOT_STATUS" != "available" ]; then
+            echo "ERROR: Latest snapshot is not available (status: ${SNAPSHOT_STATUS})"
+            exit 1
+          fi
+
+      - name: Query recent snapshots for diagnostics
+        id: recent_snapshots
+        if: always()
+        run: |
+          echo "Querying last 5 snapshots for diagnostics..."
+
+          MAX_RETRIES=3
+          RETRY_DELAY=5
+          for attempt in $(seq 1 $MAX_RETRIES); do
+            RECENT=$(aws rds describe-db-cluster-snapshots \
+              --db-cluster-identifier "$AURORA_CLUSTER_ID" \
+              --snapshot-type automated \
+              --max-items 5 \
+              --query 'reverse(sort_by(DBClusterSnapshots, &SnapshotCreateTime))[:5].[SnapshotCreateTime,DBClusterSnapshotIdentifier,Status]' \
+              --output json 2>&1) && break
+
+            echo "WARNING: Snapshot query failed (attempt ${attempt}/${MAX_RETRIES})"
+            if [ "$attempt" -eq "$MAX_RETRIES" ]; then
+              echo "Could not retrieve recent snapshots after ${MAX_RETRIES} attempts"
+              RECENT="[]"
+              break
+            fi
+            sleep $RETRY_DELAY
+          done
+
+          # Format as a readable table for issue body
+          SNAPSHOT_TABLE="| Created | Snapshot ID | Status |"
+          SNAPSHOT_TABLE="${SNAPSHOT_TABLE}\n|---------|-------------|--------|"
+          while IFS= read -r row; do
+            TIME=$(echo "$row" | jq -r '.[0] // "N/A"')
+            ID=$(echo "$row" | jq -r '.[1] // "N/A"')
+            STATUS=$(echo "$row" | jq -r '.[2] // "N/A"')
+            SNAPSHOT_TABLE="${SNAPSHOT_TABLE}\n| ${TIME} | \`${ID}\` | ${STATUS} |"
+          done < <(echo "$RECENT" | jq -c '.[]')
+
+          # Store as multiline output
+          {
+            echo "snapshot_table<<SNAPSHOT_EOF"
+            echo -e "$SNAPSHOT_TABLE"
+            echo "SNAPSHOT_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Recent snapshots:"
+          echo -e "$SNAPSHOT_TABLE"
+
+      - name: Verify backup freshness
+        if: steps.cluster.outputs.transient_failure != 'true' && steps.backup.outputs.transient_failure != 'true'
+        env:
+          SNAPSHOT_TIME: ${{ steps.backup.outputs.snapshot_time }}
+        run: |
+          echo "Verifying backup freshness..."
+          SNAPSHOT_EPOCH=$(date -d "$SNAPSHOT_TIME" +%s)
+          NOW_EPOCH=$(date +%s)
+          AGE_HOURS=$(( (NOW_EPOCH - SNAPSHOT_EPOCH) / 3600 ))
+
+          echo "Backup age: ${AGE_HOURS} hours"
+
+          if [ "$AGE_HOURS" -gt 25 ]; then
+            echo "ERROR: Latest backup is ${AGE_HOURS} hours old (threshold: 25 hours)"
+            exit 1
+          fi
+
+          echo "Backup is fresh (${AGE_HOURS} hours old)"
+
+      - name: Check Global Database replication
+        id: replication
+        if: steps.cluster.outputs.transient_failure != 'true'
+        run: |
+          echo "Checking Global Database replication..."
+          GLOBAL_CLUSTER=$(aws rds describe-global-clusters \
+            --global-cluster-identifier "$GLOBAL_CLUSTER_ID" \
+            --query 'GlobalClusters[0]' \
+            --output json 2>/dev/null || echo '{}')
+
+          GLOBAL_STATUS=$(echo "$GLOBAL_CLUSTER" | jq -r '.Status // "not-found"')
+          echo "global_status=${GLOBAL_STATUS}" >> "$GITHUB_OUTPUT"
+          echo "Global cluster status: ${GLOBAL_STATUS}"
+
+          if [ "$GLOBAL_STATUS" = "not-found" ]; then
+            echo "WARNING: Global cluster not found (may not be configured yet)"
+          elif [ "$GLOBAL_STATUS" != "available" ]; then
+            echo "ERROR: Global cluster is not healthy (status: ${GLOBAL_STATUS})"
+            exit 1
+          fi
+
+          # Check replication lag if global cluster exists
+          if [ "$GLOBAL_STATUS" = "available" ]; then
+            MEMBERS=$(echo "$GLOBAL_CLUSTER" | jq -r '.GlobalClusterMembers | length')
+            echo "Global cluster members: ${MEMBERS}"
+
+            echo "$GLOBAL_CLUSTER" | jq -r '.GlobalClusterMembers[] | "  - \(.DBClusterArn) (writer: \(.IsWriter))"'
+          fi
+
+      - name: Create or update failure issue
+        if: failure() && steps.cluster.outputs.transient_failure != 'true' && steps.backup.outputs.transient_failure != 'true'
+        uses: actions/github-script@v7
+        env:
+          CLUSTER_STATUS: ${{ steps.cluster.outputs.status }}
+          CLUSTER_DETAIL: ${{ steps.cluster.outputs.cluster_detail }}
+          SNAPSHOT_ID: ${{ steps.backup.outputs.snapshot_id }}
+          SNAPSHOT_TIME: ${{ steps.backup.outputs.snapshot_time }}
+          SNAPSHOT_STATUS: ${{ steps.backup.outputs.snapshot_status }}
+          GLOBAL_STATUS: ${{ steps.replication.outputs.global_status }}
+          SNAPSHOT_TABLE: ${{ steps.recent_snapshots.outputs.snapshot_table }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'backup-failure',
+              per_page: 1
+            });
+
+            const workflowUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const timestamp = new Date().toISOString();
+
+            const clusterStatus = process.env.CLUSTER_STATUS || 'unknown';
+            const clusterDetail = process.env.CLUSTER_DETAIL || 'unavailable';
+            const snapshotId = process.env.SNAPSHOT_ID || 'unknown';
+            const snapshotTime = process.env.SNAPSHOT_TIME || 'unknown';
+            const snapshotStatus = process.env.SNAPSHOT_STATUS || 'unknown';
+            const globalStatus = process.env.GLOBAL_STATUS || 'unknown';
+            const snapshotTable = process.env.SNAPSHOT_TABLE || 'No snapshot data available';
+
+            const diagnostics = [
+              `### Cluster Status`,
+              `- **Status**: \`${clusterStatus}\``,
+              `- **Detail**: ${clusterDetail}`,
+              `- **Global Cluster**: \`${globalStatus}\``,
+              ``,
+              `### Latest Snapshot`,
+              `- **ID**: \`${snapshotId}\``,
+              `- **Created**: ${snapshotTime}`,
+              `- **Status**: \`${snapshotStatus}\``,
+              ``,
+              `### Recent Snapshots (Last 5)`,
+              snapshotTable,
+            ].join('\n');
+
+            const manualRecovery = [
+              `### Manual Recovery Steps`,
+              ``,
+              `**If cluster is unavailable:**`,
+              `1. Check [AWS RDS Console](https://console.aws.amazon.com/rds/) for cluster \`${process.env.AURORA_CLUSTER_ID || 'production-spike-land-primary'}\``,
+              `2. Review RDS Events: \`aws rds describe-events --source-identifier ${process.env.AURORA_CLUSTER_ID || 'production-spike-land-primary'} --source-type db-cluster --duration 1440\``,
+              `3. If cluster is in \`maintenance\` state, wait for the maintenance window to complete`,
+              `4. If cluster is in \`failed\` state, initiate point-in-time restore from the latest available snapshot`,
+              ``,
+              `**If no recent snapshots exist:**`,
+              `1. Verify backup retention is enabled: \`aws rds describe-db-clusters --db-cluster-identifier ${process.env.AURORA_CLUSTER_ID || 'production-spike-land-primary'} --query 'DBClusters[0].BackupRetentionPeriod'\``,
+              `2. Check for RDS service health issues: [AWS Health Dashboard](https://health.aws.amazon.com/)`,
+              `3. Trigger a manual snapshot: \`aws rds create-db-cluster-snapshot --db-cluster-identifier ${process.env.AURORA_CLUSTER_ID || 'production-spike-land-primary'} --db-cluster-snapshot-identifier manual-$(date +%Y%m%d-%H%M%S)\``,
+              ``,
+              `**If backup is stale (>25 hours):**`,
+              `1. Check the preferred backup window in cluster settings`,
+              `2. Review if the cluster was in a non-available state during the backup window`,
+              `3. Trigger a manual snapshot (command above) and monitor for completion`,
+              ``,
+              `**If Global Database replication is unhealthy:**`,
+              `1. Check global cluster members: \`aws rds describe-global-clusters --global-cluster-identifier ${process.env.GLOBAL_CLUSTER_ID || 'production-spike-land-global'}\``,
+              `2. Verify secondary region cluster status`,
+              `3. If a secondary is detached, consider re-adding it: [AWS Docs](https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database-managing.html)`,
+            ].join('\n');
+
+            const commentBody = [
+              `## Aurora Backup Monitor Failure`,
+              ``,
+              `**Time**: ${timestamp}`,
+              `**Workflow run**: ${workflowUrl}`,
+              ``,
+              diagnostics,
+              ``,
+              `The Aurora backup health check has failed. See diagnostics above and workflow logs for details.`,
+            ].join('\n');
+
+            const issueBody = [
+              `## Aurora Backup Health Check Failure`,
+              ``,
+              `The Aurora backup monitor detected an issue.`,
+              ``,
+              `**Time**: ${timestamp}`,
+              `**Workflow run**: ${workflowUrl}`,
+              ``,
+              diagnostics,
+              ``,
+              `### Possible Issues`,
+              `1. Aurora cluster not in "available" state`,
+              `2. No recent automated snapshots found`,
+              `3. Latest backup older than 25 hours`,
+              `4. Global Database replication unhealthy`,
+              ``,
+              manualRecovery,
+            ].join('\n');
+
+            if (issues.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'Aurora Backup Monitor: Health Check Failed',
+                body: issueBody,
+                labels: ['backup-failure', 'p0', 'bug']
+              });
+            }
+
+      - name: Close old failure issues on success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labels = ['backup-failure', 'backup-build-failure'];
+
+            for (const label of labels) {
+              const { data: issues } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                labels: label,
+                per_page: 100
+              });
+
+              for (const issue of issues) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: `## Aurora Backup Monitor: All Healthy\n\nAll Aurora backup health checks passed. Closing this issue automatically.`
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed'
+                });
+              }
+            }
+
+      - name: Monitor summary
+        if: always()
+        env:
+          CLUSTER_STATUS: ${{ steps.cluster.outputs.status }}
+          CLUSTER_DETAIL: ${{ steps.cluster.outputs.cluster_detail }}
+          BACKUP_WINDOW: ${{ steps.cluster.outputs.backup_window }}
+          BACKUP_RETENTION: ${{ steps.cluster.outputs.backup_retention }}
+          SNAPSHOT_ID: ${{ steps.backup.outputs.snapshot_id }}
+          SNAPSHOT_TIME: ${{ steps.backup.outputs.snapshot_time }}
+          SNAPSHOT_STATUS: ${{ steps.backup.outputs.snapshot_status }}
+          GLOBAL_STATUS: ${{ steps.replication.outputs.global_status }}
+          SNAPSHOT_TABLE: ${{ steps.recent_snapshots.outputs.snapshot_table }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          STATUS_ICON="✅"
+          if [ "$JOB_STATUS" != "success" ]; then STATUS_ICON="❌"; fi
+
+          # Note transient API failures in the summary
+          if [ "${{ steps.cluster.outputs.transient_failure }}" = "true" ] || [ "${{ steps.backup.outputs.transient_failure }}" = "true" ]; then
+            STATUS_ICON="⚠️"
+            echo "**Note**: AWS API was unreachable — this is likely a transient issue. No failure issue was created." >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "## ${STATUS_ICON} Aurora Backup Monitor" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Check | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Cluster Status | \`${CLUSTER_STATUS}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Cluster Detail | ${CLUSTER_DETAIL} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Backup Window | ${BACKUP_WINDOW} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Backup Retention | ${BACKUP_RETENTION} days |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Latest Snapshot | \`${SNAPSHOT_ID}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Snapshot Time | ${SNAPSHOT_TIME} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Snapshot Status | \`${SNAPSHOT_STATUS}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Global Cluster | \`${GLOBAL_STATUS}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Overall | ${JOB_STATUS} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Recent Snapshots" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo -e "${SNAPSHOT_TABLE}" >> "$GITHUB_STEP_SUMMARY"

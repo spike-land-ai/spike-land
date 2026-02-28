@@ -1,0 +1,38 @@
+{
+  "cSpell.words": [
+    "anthropics",
+    "backgrounding",
+    "Erdos",
+    "NEXTAUTH",
+    "nvmrc",
+    "peerjs",
+    "turbopack",
+    "vitest",
+    "Wordmark",
+    "Zoltan"
+  ],
+  "css.lint.unknownAtRules": "ignore",
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
+  "eslint.nodePath": ".yarn/sdks",
+  "typescript.tsdk": ".yarn/sdks/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.autoClosingBrackets": "always",
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "files.associations": {
+    "live/*.tsx": "typescriptreact"
+  },
+  "vitest.disableWorkspaceWarning": true
+}

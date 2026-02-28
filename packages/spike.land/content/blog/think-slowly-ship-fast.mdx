@@ -1,0 +1,353 @@
+---
+title: "Think Slowly, Ship Fast"
+slug: "think-slowly-ship-fast"
+description: "The Hourglass Model: heavy specs at the top, disposable UI in the middle, bulletproof business logic at the bottom. Five explanations, one for every level of your team."
+date: "2026-02-20"
+author: "Zoltan Erdos"
+category: "Developer Experience"
+tags: ["ai", "testing", "context-engineering", "agents", "vibe-coding", "ci-cd", "automation", "productivity"]
+featured: true
+---
+
+{/* TL;DR Box */}
+<div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 mb-8">
+  <h3 className="text-lg font-semibold mb-3 text-slate-200">TL;DR</h3>
+  <p className="text-slate-300">
+    AI teams ship bugs because they skip the spec. The Hourglass Model fixes this: heavy planning and E2E specs at the top, disposable UI code in the middle, bulletproof business-logic tests at the bottom. Think slowly at the top so agents can ship fast in the middle. Five explanations follow — one for every level of your team.
+  </p>
+</div>
+
+---
+
+## Level 1: Why Your AI Team Ships Bugs
+
+*For the PM who approves the sprint.*
+
+The data is in, and it is not flattering.
+
+CodeRabbit's [2025 code quality study](/learnit/coderabbit-ai-code-quality-defect-study-2025) found that AI-assisted pull requests carry **1.7× more defects** than human-written ones. Not because the AI writes worse syntax — it writes *more* code, faster, with less review. Volume without verification.
+
+METR's [developer speed study](/learnit/metr-developer-speed-study-ai-coding-tools) measured experienced developers completing real-world tasks. With AI tools, they were **19% slower** — not faster. The developers themselves predicted a 24% speedup. They were wrong in both direction and magnitude. The overhead of reviewing, correcting, and re-prompting AI output ate every second it saved.
+
+The pattern repeats. GitClear's code churn analysis shows refactoring activity declining year over year as AI adoption rises. Teams are generating more code but maintaining less of it. The codebase grows. The understanding shrinks.
+
+Here is what these studies share: the problem is not the AI. The AI is fine. The problem is the process around it. Teams hand an AI a vague ticket and hope for the best. That is [vibe coding](/blog/the-vibe-coding-paradox) — and it has a measured failure rate.
+
+The fix is not better AI. It is better specs.
+
+A spec is a decision made before code is written. A spec is "the email update requires confirmation" decided in a planning meeting, not discovered in a code review. A spec is "this endpoint returns 403 for unauthenticated users" documented before a single line is generated.
+
+When you give an AI agent a tight spec, three things happen. First, the agent writes less code — only what the spec demands. Second, the reviewer has a contract to review against — not "does this look right?" but "does this match the spec?" Third, the test writes itself — the spec *is* the test, expressed in a different format.
+
+Every minute spent on a spec saves ten minutes of debugging. Every hour of planning saves a day of rework. This is not a productivity hack. It is project management. You already know this. The question is whether you are willing to apply it to your AI workflow the same way you apply it to your human one.
+
+The rest of this article explains exactly how — at five levels of technical depth.
+
+---
+
+## Level 2: The Hourglass
+
+*For the junior developer writing their first AI-assisted feature.*
+
+You have heard of the [testing pyramid](/blog/the-testing-pyramid-is-upside-down). Many unit tests at the base. Some integration tests in the middle. A few E2E tests at the top. The idea is that lower tests are faster and cheaper, so you write more of them.
+
+The pyramid was designed for humans writing code by hand. AI changes the economics.
+
+When an AI agent generates a React component, the UI code is cheap. Trivially cheap. You can regenerate it in seconds. The component itself is disposable — if it breaks, throw it away and regenerate. What is *not* disposable is the business logic underneath it: the validation rules, the API contracts, the state transitions. Those are the decisions that took your team hours to agree on.
+
+The [Hourglass Model](/learnit/testing-pyramid-vs-hourglass-model-ai-development) flips the investment:
+
+```
+         ┌─────────────────────┐
+         │   E2E Specs (heavy)  │  ← Humans write these
+         │   User flows as       │
+         │   Given/When/Then     │
+         └──────────┬────────────┘
+                    │
+            ┌───────▼───────┐
+            │  UI Code       │  ← AI generates this
+            │  (thin,        │    Disposable.
+            │   disposable)  │    Regenerate, don't fix.
+            └───────┬───────┘
+                    │
+    ┌───────────────▼───────────────┐
+    │  Business Logic Tests (heavy)  │  ← MCP tools + unit tests
+    │  Validation, contracts, state   │    Bulletproof.
+    │  transitions, edge cases        │    Never skip.
+    └────────────────────────────────┘
+```
+
+The top of the hourglass is wide: E2E specs that describe what the user experiences. "Given a logged-in user, when they change their email and confirm, then the profile shows the new email." These are written by humans. They are the requirements.
+
+The middle is narrow: [disposable UI code](/learnit/disposable-ui-code-ai-native-development). React components, Tailwind classes, layout decisions. This is what the AI generates. If a component is wrong, you do not debug it — you regenerate it with a better spec. The middle is thin on purpose.
+
+The bottom is wide again: unit tests for business logic, exposed as MCP tools. These tests are fast, deterministic, and comprehensive. They verify every rule your team agreed on. They run in milliseconds. They never flake.
+
+The hourglass works because it puts human effort where it matters (specs and business logic) and AI effort where it is cheap (UI generation). You think slowly at the top. The AI ships fast in the middle. The tests catch everything at the bottom.
+
+---
+
+## Level 3: Where the Tests Live
+
+*For the senior developer choosing what to test and how.*
+
+The hourglass has a specific test allocation. Get this wrong and you are back to the pyramid's pain.
+
+**Bottom layer (70% of test effort): MCP tool tests.** Every user story becomes an [MCP tool](/learnit/mcp-tool-testing-pattern-create-mock-registry) — a function with a typed input schema, a handler, and a structured response. The tool is the three-way contract: it is the spec (the description), the interface (the schema), and the test surface (the handler).
+
+```typescript
+// The MCP tool IS the spec
+const cancelSubscriptionTool = {
+  name: "cancel_subscription",
+  description: "Cancel the authenticated user's active subscription",
+  inputSchema: {
+    type: "object",
+    properties: {
+      reason: { type: "string", enum: ["too_expensive", "not_useful", "switching", "other"] },
+      feedback: { type: "string" },
+      confirmCancellation: { type: "boolean" },
+    },
+    required: ["reason", "confirmCancellation"],
+  },
+  handler: async ({ reason, feedback, confirmCancellation }, context) => {
+    const user = await context.getAuthenticatedUser();
+    if (!user) return { error: "Not authenticated" };
+
+    const subscription = await context.subscriptionService.getActive(user.id);
+    if (!subscription) return { error: "No active subscription" };
+
+    if (!confirmCancellation) {
+      return {
+        status: "confirmation_required",
+        message: `Cancel ${subscription.plan} plan? This takes effect at period end.`,
+        currentPeriodEnd: subscription.currentPeriodEnd,
+      };
+    }
+
+    await context.subscriptionService.cancel(user.id, reason, feedback);
+    return { status: "cancelled", effectiveDate: subscription.currentPeriodEnd };
+  },
+};
+
+// The unit test verifies the contract
+describe("cancel_subscription", () => {
+  it("requires confirmation before cancelling", async () => {
+    const ctx = createMockRegistry({
+      user: { id: "1" },
+      subscription: { plan: "pro", currentPeriodEnd: "2026-03-01" },
+    });
+
+    const result = await cancelSubscriptionTool.handler(
+      { reason: "too_expensive", confirmCancellation: false },
+      ctx,
+    );
+
+    expect(result.status).toBe("confirmation_required");
+    expect(ctx.subscriptionService.cancel).not.toHaveBeenCalled();
+  });
+
+  it("cancels when confirmed and records reason", async () => {
+    const ctx = createMockRegistry({
+      user: { id: "1" },
+      subscription: { plan: "pro", currentPeriodEnd: "2026-03-01" },
+    });
+
+    const result = await cancelSubscriptionTool.handler(
+      { reason: "switching", feedback: "Moving to competitor", confirmCancellation: true },
+      ctx,
+    );
+
+    expect(result.status).toBe("cancelled");
+    expect(ctx.subscriptionService.cancel).toHaveBeenCalledWith("1", "switching", "Moving to competitor");
+  });
+});
+```
+
+This test runs in 3ms. It covers the confirmation flow, the cancellation logic, the reason tracking. It does not touch a browser. It will never flake because there is no DOM, no network, no animation timing.
+
+**Top layer (20% of test effort): E2E specs.** Written in [Given/When/Then format](/learnit/given-when-then-e2e-test-writing-ai-agents), these verify full user flows through the actual UI. But they only verify *wiring* — that the UI calls the right business logic with the right arguments. The business logic itself is already proven by the MCP tool tests.
+
+```
+Given a user with an active "pro" subscription
+When they navigate to /settings/billing
+And they click "Cancel subscription"
+And they select reason "too_expensive"
+And they confirm the cancellation
+Then they see "Cancellation effective March 1, 2026"
+And the subscription status shows "Cancelling"
+```
+
+You need far fewer of these than you think. If the MCP tool test proves that cancellation with reason "too_expensive" works, the E2E test only needs to verify that the button click reaches the tool with the right arguments.
+
+**Middle layer (10% of test effort): UI component tests.** What deserves a UI test? Only what is *unique to the UI*: accessibility, responsive layout, animation behavior, keyboard navigation. Not business logic. Not data transformation. Not state management. If the test asserts a business rule, it belongs in the MCP tool test. If it asserts a visual behavior, it belongs here.
+
+The ratio — 70/20/10 — is not a rule. It is a signal. If you find yourself writing more UI tests than MCP tool tests, you are probably testing business logic through the DOM. Stop. Extract the logic into a tool. Test it there.
+
+---
+
+## Level 4: Spec-Driven Development with BMAD
+
+*For the architect designing the workflow.*
+
+The hourglass tells you *what* to test. [BMAD](/learnit/bmad-breakthrough-method-agile-ai-driven-development) — Breakthrough Method of Agile AI-Driven Development — tells you *how to plan it*.
+
+BMAD defines six agent personas, each responsible for a specific phase. The key insight is not the personas themselves — it is the [context isolation](/learnit/control-manifests-step-file-architecture-ai-agents) between them. Each persona gets a fresh context window with only the artifacts it needs. No accumulated junk. No 50K-token mega-prompts.
+
+Here is how the personas map to the hourglass:
+
+| BMAD Persona | Hourglass Layer | Artifact |
+|---|---|---|
+| **PM** | Top (E2E specs) | User stories, acceptance criteria, Given/When/Then |
+| **Architect** | Bottom (business logic) | MCP tool schemas, API contracts, data models |
+| **Developer** | Middle (UI) | React components, layouts, styling |
+| **QA** | All layers | Test verification, coverage analysis |
+| **SM (Scrum Master)** | Orchestration | Ticket flow, blocker resolution |
+| **PO (Product Owner)** | Validation | Acceptance, sign-off |
+
+The power is in [epic sharding](/learnit/epic-sharding-token-reduction-multi-agent-workflows). Instead of stuffing an entire feature into one agent context, you break it into vertical slices. Each slice gets its own ticket, its own context, its own agent. The token reduction is dramatic — 74-90% fewer tokens per agent context compared to monolithic prompts.
+
+A control manifest coordinates the slices:
+
+```yaml
+# .bmad/epics/subscription-management.yaml
+epic: "Subscription Management"
+status: in_progress
+
+slices:
+  - id: sub-cancel
+    title: "Cancel subscription flow"
+    status: completed
+    pm_artifacts:
+      - stories/cancel-subscription.md     # Given/When/Then
+    architect_artifacts:
+      - tools/cancel-subscription.ts        # MCP tool schema
+      - schemas/subscription.prisma         # Data model
+    developer_artifacts:
+      - components/CancelDialog.tsx         # UI (disposable)
+    qa_artifacts:
+      - tests/cancel-subscription.test.ts   # MCP tool tests
+    acceptance_criteria:
+      - "User can cancel with reason"
+      - "Cancellation requires confirmation"
+      - "Effective at period end, not immediately"
+
+  - id: sub-upgrade
+    title: "Upgrade subscription flow"
+    status: pending
+    blocked_by: [sub-cancel]
+    pm_artifacts:
+      - stories/upgrade-subscription.md
+    architect_artifacts:
+      - tools/upgrade-subscription.ts
+    # ...
+
+context_rules:
+  pm_sees: [stories/*, acceptance_criteria]
+  architect_sees: [tools/*, schemas/*, stories/*.md]
+  developer_sees: [tools/*.ts, components/*, stories/*.md]
+  qa_sees: [tests/*, tools/*.ts, acceptance_criteria]
+```
+
+Each persona's `*_sees` rule defines exactly what enters its context window. The PM never sees component code. The developer never sees the data model migration. The QA agent sees the tool interface and the acceptance criteria — enough to verify, not enough to get lost.
+
+This is [context engineering applied to project management](/blog/how-claude-code-engineers-context). The same attention-budget physics that makes prompts fail at 30K tokens makes planning fail when an agent carries the entire project in its context. BMAD's answer: do not carry the entire project. Carry exactly what this agent, at this step, needs to produce its artifact.
+
+The manifest is the single source of truth. It tracks what is done, what is blocked, and what each persona needs to see next. When a new agent spins up for the next slice, it reads the manifest, loads its artifacts, and starts with a fresh context that is dense with relevant information and free of accumulated noise.
+
+---
+
+## Level 5: Running the Hourglass in Production
+
+*For the AI team lead wiring the CI pipeline.*
+
+You have the specs (BMAD). You have the test strategy (hourglass). Now you need a pipeline that enforces both — and does it fast enough that developers do not context-switch while waiting.
+
+The [full loop](/learnit/spec-driven-development-ai-agents-workflow) looks like this:
+
+**1. Ticket → 2. BMAD planning → 3. Implementation → 4. Hourglass CI → 5. Review → 6. Merge**
+
+Step 4 is where the hourglass meets reality. The [CI pipeline](/learnit/ci-pipeline-hourglass-testing-strategy) runs three stages:
+
+```yaml
+# .github/workflows/hourglass-ci.yaml
+name: Hourglass CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Stage 1: Business logic (the wide bottom)
+  # Runs first because it's fastest and catches the most bugs
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: yarn
+      - run: yarn vitest run --changed origin/main --coverage
+      - name: Enforce coverage thresholds
+        run: |
+          # MCP tool files: 100% coverage required
+          # Utility files: 90% coverage required
+          # Component files: 70% coverage required (UI is disposable)
+          yarn check-coverage --tools=100 --utils=90 --components=70
+
+  # Stage 2: Build verification (the narrow middle)
+  # Proves the disposable UI compiles — nothing more
+  build:
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: yarn
+      - run: yarn build
+      - run: yarn lint
+
+  # Stage 3: E2E smoke tests (the wide top)
+  # Runs only the flows affected by changed MCP tools
+  e2e-smoke:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: yarn
+      - run: npx playwright install --with-deps chromium
+      - name: Run affected E2E tests
+        run: |
+          # Determine which MCP tools changed
+          CHANGED_TOOLS=$(git diff origin/main --name-only | grep 'tools/' | sed 's|.*/||;s|\.ts$||')
+          if [ -z "$CHANGED_TOOLS" ]; then
+            echo "No MCP tools changed — skipping E2E"
+            exit 0
+          fi
+          # Run only the E2E specs that exercise changed tools
+          yarn playwright test --grep "$CHANGED_TOOLS"
+```
+
+The key insight: `yarn vitest run --changed origin/main` runs only the tests affected by your PR. On a codebase with 500 MCP tool tests, a typical PR touches 3-5 tools. That means 10-20 tests run instead of 500. Seconds instead of minutes.
+
+The [coverage thresholds are tiered](/learnit/gitclear-code-churn-refactoring-decline-ai-2025) to match the hourglass. MCP tools demand 100% — these are your business contracts, and every branch matters. Utilities get 90% — high but not fanatical. Components get 70% — because the UI is disposable and over-testing it is waste. If a component is wrong, you regenerate it. If a business rule is wrong, you have a production incident.
+
+**Cost economics.** A monolithic E2E suite running 200 Playwright tests on every PR costs roughly 15-20 minutes of CI compute. With hourglass CI, the same PR runs 15 unit tests (5 seconds), one build (60 seconds), and 2-3 targeted E2E tests (30 seconds). Total: under 2 minutes. That is not incremental improvement. That is a category change in developer feedback speed.
+
+**Blast radius analysis.** When a PR modifies a business rule — say, changing the cancellation policy from "end of period" to "immediate" — the hourglass CI catches it in three places. The MCP tool test fails because the expected `effectiveDate` changed. The build might fail if the component references the old field. The E2E test fails if the confirmation message is wrong. Three independent signals, all within 2 minutes.
+
+When a PR only modifies UI — say, moving a button from the sidebar to the header — only the E2E test runs, and only if the spec references that layout. The unit tests do not run because no business logic changed. The blast radius is proportional to the risk. UI changes are low risk, low test cost. Logic changes are high risk, high test cost. The hourglass allocates verification effort where it matters.
+
+This is [Addy Osmani's observation](/learnit/addy-osmani-spec-driven-development-waterfall-compressed) come to life: spec-driven development is "waterfall compressed into minutes." You plan like a waterfall — sequentially, deliberately, with specs before code. You execute like agile — in parallel, with AI agents, in minutes instead of weeks. The hourglass is the shape that makes both possible.
+
+---
+
+## Level 6: The Discipline
+
+Every technique in this article reduces to one discipline: **decide before you generate.**
+
+Decide the user flow before the AI writes the component. Decide the business rules before the AI writes the handler. Decide the acceptance criteria before the AI writes the test. The decisions are the hard part. The generation is the easy part.
+
+[You cannot automate chaos.](/blog/you-cannot-automate-chaos) An AI agent with no spec generates chaos faster. An AI agent with a tight spec generates working software faster. The difference is not the agent. It is the spec.
+
+The hourglass is not a testing strategy. It is a thinking strategy. It says: invest human cognition where it compounds (specs, contracts, acceptance criteria) and invest machine cycles where they are cheap (UI, boilerplate, layout). Think slowly at the top. Ship fast in the middle. Verify everything at the bottom.
+
+[The tools exist.](/learnit/addy-osmani-spec-driven-development-waterfall-compressed) BMAD gives you structured planning. MCP tools give you testable contracts. Vitest gives you millisecond feedback. The hourglass gives you a shape to hang it all on.
+
+The only thing it cannot give you is the discipline to write the spec before you write the code. That part is on you.

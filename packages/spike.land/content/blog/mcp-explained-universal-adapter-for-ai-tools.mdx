@@ -1,0 +1,393 @@
+---
+title: "MCP Explained: The Universal Adapter for AI Tools"
+slug: "mcp-explained-universal-adapter-for-ai-tools"
+description: "MCP is more than tool calling — it's a presentation layer for how AI understands tools, data, and workflows. Here's the full spec, what spike-cli implements today, and what's coming."
+date: "2026-02-27"
+author: "Zoltan Erdos"
+category: "Developer Experience"
+tags: ["mcp", "ai", "tools", "resources", "prompts", "protocol", "developer-tools", "spike-cli", "multiplexer"]
+featured: true
+---
+
+{/* TL;DR Box */}
+<div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 mb-8">
+  <h3 className="text-lg font-semibold mb-3 text-slate-200">TL;DR</h3>
+  <ul className="space-y-2 text-slate-300">
+    <li>MCP has three primitives: **Tools** (actions), **Resources** (addressable content), and **Prompts** (reusable templates). Most implementations — including ours — only use Tools so far.</li>
+    <li>It is a **presentation layer**, not just a data transport. MCP defines how AI discovers, understands, and interacts with capabilities — not just how it shuttles JSON.</li>
+    <li>The full cycle: discover capabilities → call with typed params → get narrative, structured responses back.</li>
+    <li>**The context window problem:** an LLM presented with hundreds of tool descriptions wastes context parsing tools it will never use. Smaller, relevant toolsets mean sharper reasoning and lower cost.</li>
+    <li>spike-cli is an MCP multiplexer — one shell connecting spike-land (<ToolCount /> tools), vitest, and filesystem servers, all namespaced. **Lazy toolset loading** means agents see only the tools they request. Today that is 100% Tools. Resources and Prompts are next.</li>
+    <li>Try it: `npx @spike-land-ai/spike-cli shell`</li>
+  </ul>
+</div>
+
+## Connecting AI to Tools Shouldn't Require a Custom Integration Every Time
+
+It does right now. Every new tool means new glue code, new auth handling, new response parsing. MCP is the fix: one protocol, implemented once on each side, and any client talks to any server. Here's what that looks like when spike-cli multiplexes three servers into a single shell:
+
+<SpikeCliDemo />
+
+spike-cli routes across spike-land (<ToolCount /> tools over HTTP), vitest (12 tools over stdio), and a local filesystem server — one namespace, automatic routing, zero per-tool wiring.
+
+---
+
+## What MCP Actually Is
+
+MCP stands for **Model Context Protocol** — an open standard Anthropic released in late 2024 that defines how AI clients interact with external servers. But here is the part most explanations get wrong: **MCP is not just tool calling.** The spec defines three distinct primitives.
+
+### The Three Primitives
+
+**Tools** — Actions the AI can execute. A tool has a name, a description, and a typed input schema. The AI calls it, the server runs it, a result comes back. This is the part everyone talks about. It is also roughly 20% of the spec.
+
+**Resources** — Addressable content the AI can read. A resource has a URI (like `resource://chess/game/g_8f3kq2/pgn`) and returns content — text, JSON, images, files. Resources are how a server exposes *data* without the AI having to call a function. Think of them as GET endpoints that the AI can browse. The client can list available resources, read them, and subscribe to changes.
+
+**Prompts** — Reusable interaction templates the server provides. A prompt has a name, optional arguments, and returns a sequence of messages that the AI should use to structure its conversation. A chess server might expose an `analyze_position` prompt that returns a multi-step analysis template. A code review server might expose `security_audit` with a structured rubric.
+
+### MCP Is a Presentation Layer
+
+Here is the insight most MCP explainers miss: **MCP is a presentation layer, not just a data transport layer.**
+
+An API moves data between systems. MCP does that too — but it also defines *how the AI should understand what it is looking at*. Tool descriptions tell the model what an action does in plain English. Resource URIs give structure to content. Prompts shape entire interaction patterns.
+
+When you add Resources and Prompts to Tools, you are not just giving the AI more endpoints to call. You are giving it a **mental model** of what the server offers and how to navigate it. That is the difference between handing someone a phone book and giving them a guided tour.
+
+### MCP Is Not an API
+
+An API is a contract between two programs. MCP is a contract between a program and an intelligence. The distinction matters because:
+
+- **API responses optimize for machines**: compact JSON, status codes, pagination tokens.
+- **MCP responses optimize for understanding**: narrative text, contextual descriptions, structured content that an LLM can reason about.
+
+**Transport-agnostic.** MCP runs over stdio, HTTP, or WebSockets. A local process and a remote HTTPS endpoint look identical from the protocol's perspective.
+
+**Discovery is built in.** The client asks the server to list its capabilities — tools, resources, prompts. The server responds with everything it exposes, including descriptions and schemas. The AI reads that list and decides what to use. No hardcoded routing needed.
+
+---
+
+## Three Ways to Think About MCP
+
+Pick the mental model that sticks.
+
+### The Restaurant
+
+Menu = browsable content, order = action, tasting notes = interaction template.
+
+<ScrollStoryCard
+  title="The Restaurant"
+  illustration="restaurant"
+  mappings={[
+    { left: "Customer", right: "MCP Client (AI)" },
+    { left: "Menu", right: "Resource (browsable content)" },
+    { left: "Placing order", right: "Tool call (action)" },
+    { left: "Chef's tasting notes", right: "Prompt (interaction template)" },
+    { left: "Dish arrives", right: "Narrative response" }
+  ]}
+/>
+
+### USB-C
+
+One cable spec, three capabilities — data, display, and power.
+
+<ScrollStoryCard
+  title="USB-C"
+  illustration="usb"
+  mappings={[
+    { left: "Laptop", right: "MCP Client" },
+    { left: "USB-C spec", right: "MCP Protocol" },
+    { left: "Peripheral", right: "MCP Server" },
+    { left: "Data transfer", right: "Tools (actions)" },
+    { left: "Display output", right: "Resources (content)" },
+    { left: "Power delivery", right: "Prompts (templates)" }
+  ]}
+/>
+
+### The Embassy
+
+Same diplomatic protocol, regardless of which country you flew in from.
+
+<ScrollStoryCard
+  title="The Embassy"
+  illustration="embassy"
+  mappings={[
+    { left: "Citizen", right: "MCP Client" },
+    { left: "Diplomatic protocol", right: "MCP message format" },
+    { left: "Embassy", right: "MCP Server" },
+    { left: "Consular service", right: "Tool (action)" },
+    { left: "Published guidelines", right: "Resource (content)" },
+    { left: "Visa application form", right: "Prompt (template)" },
+    { left: "Passport", right: "Auth token" }
+  ]}
+/>
+
+---
+
+## The MCP Request Lifecycle
+
+The diagram below shows the **tool call** lifecycle — the most common MCP interaction. Resources and Prompts follow a similar pattern (discover, request, respond) but with different JSON-RPC methods.
+
+<MCPFlowDiagram />
+
+1. **Client** — The AI agent decides it needs something: a tool to call, a resource to read, or a prompt to follow.
+2. **Protocol** — Request formatted as JSON-RPC: method name, typed params, request ID. For tools: `tools/call`. For resources: `resources/read`. For prompts: `prompts/get`.
+3. **Server** — Receives, validates, routes to the appropriate handler.
+4. **Tool** — Executes and produces a result. (For resources: returns content. For prompts: returns message templates.)
+5. **Response** — Result flows back. The best responses are narrative-first — English the LLM can reason about, not just JSON it has to decode.
+
+When spike-cli sits between client and server, it acts as a routing multiplexer — inspecting the namespace prefix (e.g. `vitest__run_tests`) and forwarding to the right upstream server.
+
+---
+
+## Narrative Responses: Tell Stories, Not Dump Data
+
+Here is a pattern most MCP implementations get wrong. A chess tool returns a board state:
+
+**The data dump approach:**
+
+```json
+{
+  "fen": "r1bqkbnr/pppppppp/2n5/4P3/8/8/PPP1PPPP/RNBQKBNR",
+  "turn": "b",
+  "check": false,
+  "castling": { "K": true, "Q": true, "k": true, "q": true },
+  "halfMoves": 2,
+  "fullMoves": 2
+}
+```
+
+The LLM receives this and has to: parse the FEN, reconstruct the board, infer what happened, figure out what matters, and then compose a response. That is a lot of guesswork about what the fields mean in context.
+
+**The narrative approach:**
+
+```
+Board State (Move 2, Black to play)
+
+White opened with 1. e4 and pushed to e5 on move 2, grabbing central space
+aggressively. Black developed the knight to c6, challenging White's center.
+The position is a Scandinavian-adjacent structure where Black needs to decide:
+challenge e5 immediately with d6, or continue development with Nf6.
+
+Key tension: White's e5 pawn is advanced but unsupported. Black can undermine it.
+
+FEN: r1bqkbnr/pppppppp/2n5/4P3/8/8/PPP1PPPP/RNBQKBNR b KQkq - 0 2
+```
+
+Same information. The narrative version tells the LLM *what matters* — the strategic context, the tension, the decision point. The FEN is still there for precision. But the model does not have to reconstruct the story from raw notation.
+
+**Why this works:** LLMs are trained on billions of words of natural language — research papers, blog posts, documentation, books. They are pattern-matching machines optimized for narrative. When a tool response speaks the same language the model was trained on, the model reasons about it more effectively. JSON forces the model to translate; narrative lets it think.
+
+---
+
+## Beyond Text: Agent-Driven UI
+
+Narrative responses are better than JSON. But if MCP is a presentation layer, why stop at text?
+
+Consider: an AI asks a user to pick a color. The text-only approach is a chat message — "What color would you like?" — and a reply: "#FF5733". It works. But showing a **color picker widget** that returns the value is faster, less error-prone, and requires zero knowledge of hex notation.
+
+That is Agent-Driven UI (ADUI): pre-designed micro-frontend widgets that replace or augment text in an AI conversation. A chess board instead of FEN notation. A calendar instead of "pick a date." A map instead of coordinates. The widget speaks a thousand words the LLM does not have to generate.
+
+The development loop closes when you add design tools that create the widgets and browser automation (like Playwright) that validates them visually — enabling fully autonomous UI development and testing. The AI designs, builds, and verifies the interface without a human in the loop.
+
+MCP's presentation-layer architecture makes this possible. Tools execute actions. Resources serve content. Prompts structure interactions. And ADUI renders all of it as something a human can see and touch — not just read.
+
+---
+
+## The Multiplexer Problem
+
+MCP standardizes how tools talk to AI, but wiring up N servers to every client is still a mess of duplicated config and colliding tool names. spike-cli sits between your AI client and every server.
+
+### One Config, All Servers
+
+One `.mcp.json`, any mix of transports:
+
+```json
+{
+  "mcpServers": {
+    "spike-land": {
+      "type": "url",
+      "url": "https://spike.land/api/mcp"
+    },
+    "vitest": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@anthropic-ai/vitest-mcp"]
+    },
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@anthropic-ai/filesystem-mcp", "/home/user/project"]
+    }
+  }
+}
+```
+
+### Namespacing
+
+Multiple servers, colliding tool names. spike-cli prefixes each tool with its server name:
+
+- `spike-land__chess_new_game`
+- `vitest__run_tests`
+- `filesystem__read_file`
+
+Flat, collision-free tool list. Routing handled automatically.
+
+### Lazy Toolset Loading
+
+spike.land ships <ToolCount /> tools. An LLM presented with 400 tool descriptions spends context parsing what it does not need — every irrelevant tool definition is tokens the model could have used for reasoning. The result: worse decisions and higher cost. spike-cli solves this by grouping tools into toolsets that load on demand — only 5 gateway tools visible by default:
+
+```
+spike> toolsets
+  TOOLSET      TOOLS   STATUS
+  chess           6    available
+  codespace       5    available
+  qa-studio       8    available
+
+spike> load chess
+  ✓ Loaded toolset "chess" (6 tools from spike-land)
+```
+
+Load what you need, ignore the rest.
+
+Think of it as the difference between a warehouse and a shelf. A warehouse has everything — but you spend time finding what you need. A shelf has exactly the five items you came for. spike-cli gives your AI agent a shelf. The warehouse is still there, but the agent only pulls from it when it needs a new toolset. The token savings compound: fewer tool descriptions in context means the model spends its context budget on your actual task, not on parsing capabilities it will never invoke.
+
+---
+
+## spike-cli in Action
+
+### Quick Start
+
+```bash
+npx @spike-land-ai/spike-cli shell
+```
+
+Or install globally:
+
+```bash
+npm install -g @spike-land-ai/spike-cli
+spike auth login
+spike shell
+```
+
+### Shell Commands
+
+- `servers` — connected servers + status
+- `tools [server]` — list tools (filter by server)
+- `call <tool> <json>` — call any tool
+- `toolsets` — available toolsets
+- `load <toolset>` — activate a toolset
+- `auth` — manage auth for remote servers
+
+### What spike.land Implements Today
+
+spike.land exposes <ToolCount /> tools over MCP. Zero Resources. Zero Prompts. The platform is tools-only today — every interaction is a function call with a structured response.
+
+That covers the most common MCP use case, but it is not the full spec. Resources would let an AI browse game states, user profiles, and app catalogs as addressable content — without calling a function. Prompts would let the server provide reusable interaction templates: "analyze this chess position," "review this code for security issues," "walk me through setting up a new app."
+
+These are on the roadmap. The protocol supports them. The multiplexer will namespace them the same way it namespaces tools.
+
+### Building a Tool
+
+Adding a tool to an MCP server is ~30 lines:
+
+```typescript
+import { z } from "zod";
+import type { ToolRegistry } from "../tool-registry";
+
+export function registerMyTool(registry: ToolRegistry) {
+  registry.register({
+    name: "my_custom_tool",
+    description: "Does something useful",
+    category: "utilities",
+    tier: "free",
+    inputSchema: {
+      input: z.string().describe("The input to process"),
+      format: z.enum(["json", "text"]).optional()
+        .describe("Output format"),
+    },
+    handler: async ({ input, format }) => {
+      const result = processInput(input, format);
+      return {
+        content: [{
+          type: "text" as const,
+          text: JSON.stringify(result),
+        }],
+      };
+    },
+  });
+}
+```
+
+Register it, spike-cli picks it up — namespaced, discoverable, callable.
+
+---
+
+## Real-World: Chess Arena via MCP
+
+spike.land's Chess Arena is entirely MCP-powered. Six tools:
+
+| Tool | What It Does |
+|---|---|
+| `chess_new_game` | Creates a game with time control |
+| `chess_send_challenge` | Challenges another player |
+| `chess_get_board` | Returns board state as FEN |
+| `chess_make_move` | Validates and executes a move |
+| `chess_get_elo` | Returns player's ELO rating |
+| `chess_resign` | Resigns the current game |
+
+```
+spike> load chess
+  ✓ Loaded toolset "chess" (6 tools from spike-land)
+
+spike> call spike-land__chess_new_game timeControl="5+0"
+  game created (g_8f3kq2), playing as white, waiting for opponent
+
+spike> call spike-land__chess_send_challenge opponent="alice" timeControl="5+0"
+  challenge sent to alice (ch_7x9k2m), pending, expires in 300s
+```
+
+The chess engine and game state are server-side — the AI just speaks MCP through spike-cli.
+
+### What Chess Could Look Like with Full MCP
+
+Today, everything is a tool call. With Resources and Prompts, the chess experience expands:
+
+**Resources** (browsable content, no function call needed):
+- `resource://spike-land/chess/game/g_8f3kq2/pgn` — full game notation
+- `resource://spike-land/chess/game/g_8f3kq2/board` — current board as text/image
+- `resource://spike-land/chess/player/alice/stats` — player profile and history
+
+**Prompts** (reusable interaction templates):
+- `analyze_position` — structured template for evaluating a chess position
+- `post_game_review` — walks through key moments, blunders, and missed opportunities
+
+The AI would browse resources to understand context, use prompts to structure its analysis, and call tools only when it needs to *act* — make a move, resign, send a challenge.
+
+---
+
+## Why This Matters
+
+MCP turns N*M integrations into N+M. That is the part everyone understands.
+
+The part most people miss: MCP is not just plumbing. When a server exposes Tools, Resources, and Prompts together, it is not just connecting the AI to functionality — it is teaching the AI how to think about a domain. The tool descriptions, resource structures, and prompt templates form a **cognitive interface** that shapes how the model approaches problems.
+
+That is why MCP is a presentation layer, not just a transport layer. And that is why the quality of your tool descriptions, the narrative structure of your responses, and the completeness of your server's capability surface all matter more than the raw number of endpoints you expose.
+
+spike-cli adds a multiplexer on top: your AI client connects once, spike-cli handles every server behind it. Today that is <ToolCount /> tools. Tomorrow it includes Resources and Prompts, namespaced and routed the same way.
+
+## 16 Perspectives on MCP
+
+Not sure it clicks yet? 16 professionals explain MCP through their own lens:
+
+<PerspectiveCarousel />
+
+---
+
+## Get Started
+
+```bash
+npx @spike-land-ai/spike-cli shell
+```
+
+- [MCP specification](https://modelcontextprotocol.io) — full spec including Tools, Resources, and Prompts
+- [spike.land MCP endpoint](/api/mcp) — <ToolCount /> tools, Resources and Prompts coming soon
+- [spike-cli source](https://github.com/nicewise/spike-mcp-cli)

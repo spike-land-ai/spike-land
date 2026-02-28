@@ -1,0 +1,320 @@
+---
+title: "Context Engineering Your Zero-Shot Prompt"
+slug: "context-engineering-your-zero-shot-prompt"
+description: "Stop iterating. Start front-loading. A practical framework for giving AI models all the context they need to produce excellent results on the first try."
+date: "2026-02-10"
+author: "Zoltan Erdos"
+category: "Developer Experience"
+tags: ["ai", "context-engineering", "prompt-engineering", "claude", "developer-tools", "productivity", "mcp"]
+featured: true
+---
+
+{/* TL;DR Box */}
+<div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 mb-8">
+  <h3 className="text-lg font-semibold mb-3 text-slate-200">TL;DR</h3>
+  <ul className="space-y-2 text-slate-300">
+    <li>• Prompt engineering is dead. Context engineering replaced it.</li>
+    <li>• A 0-shot prompt isn't about magic words—it's about front-loading context so the AI gets it right the first time.</li>
+    <li>• The framework: Identity + Knowledge + Examples + Constraints + Tools = 0-shot success.</li>
+    <li>• Your CLAUDE.md file is the most valuable artifact you write all week.</li>
+  </ul>
+</div>
+
+Last Tuesday, I typed a single prompt into Claude Code. Eleven minutes later, a fully tested credit-balance display was live on our staging environment—complete with real-time updates, proper error states, and passing CI.
+
+That same afternoon, a colleague sat down with the same model. Same task complexity. Forty-five minutes and twelve prompt iterations later, he was still wrestling with import paths.
+
+The difference wasn't talent. It wasn't the prompt. It wasn't even the model.
+
+**The difference was context.**
+
+He typed a question. I delivered a briefing. He was interrogating a stranger. I was briefing a new team member who already had access to our codebase, our conventions, our test requirements, and our deployment pipeline.
+
+This article is the framework I use to make that happen—every single time.
+
+---
+
+## Prompt Engineering Is Dead
+
+Let's be direct: the term "prompt engineering" has outlived its usefulness. It implied that the magic lives in the words you type—that if you just found the right incantation, the model would do what you wanted. In 2023, that was partially true. You needed specific phrasing to coax good outputs from models that were, frankly, less capable.
+
+In 2026, frontier models understand your intent even when you phrase it poorly. The bottleneck moved. It's no longer about *how you ask*—it's about *what the model knows when you ask*.
+
+**Think of it like a detective story.** Detectives don't solve cases by asking one brilliant question in the interrogation room. They solve cases by assembling evidence, interviewing witnesses, reviewing forensics, and building context—so that by the time they sit down in that room, the question barely matters. The evidence speaks.
+
+Your prompt is the question in the interrogation room. Context engineering is everything that happens before you walk through that door.
+
+| | Prompt Engineering (2023) | Context Engineering (2026) |
+|---|---|---|
+| **Focus** | Crafting the perfect request | Assembling the right information |
+| **Core skill** | Wordsmithing | Systems thinking |
+| **Iteration** | Tweak the prompt, try again | Front-load context, get it right |
+| **Primary artifact** | The prompt itself | CLAUDE.md, tool configs, docs |
+| **Failure mode** | "The AI doesn't understand me" | "I forgot to include X" |
+
+The shift is subtle but everything changes. When a prompt fails, the old instinct was to rewrite the prompt. The new instinct should be: *what context was missing?*
+
+---
+
+## What "0-Shot" Actually Means
+
+In machine learning, "zero-shot" means a model performs a task it was never explicitly trained on. No examples, no fine-tuning—just raw generalization.
+
+In practice, when we say "0-shot prompt," we mean something simpler: **getting the result you want on the first interaction.** No back-and-forth. No "that's close, but actually..." No iteration loop.
+
+Here's the paradox that trips people up:
+
+> 0-shot prompts require the most preparation.
+
+The prompt itself might be short. But the context surrounding it—the system prompt, the CLAUDE.md, the tool configuration, the project documentation—that's where the real work happened. You did the work *before* you typed the prompt.
+
+**Think of it like mise en place.** Professional chefs spend more time prepping ingredients than actually cooking. Everything is measured, chopped, and arranged before the burner turns on. When service starts, execution is fast because preparation was thorough.
+
+If you're iterating on prompts, you're cooking without prep. You're reaching for the salt mid-sear, realizing you forgot to dice the onion, and burning the butter while you scramble.
+
+Mise en place for AI means your context is assembled before you ask the question.
+
+---
+
+## The 5-Layer Context Stack
+
+This is the core framework. Every successful 0-shot prompt—whether you realize it or not—has these five layers working together.
+
+### Layer 1: Identity
+
+**Who is the AI in this interaction?**
+
+This is your system prompt or role definition. It shapes the model's default behavior, tone, and decision-making framework. Without it, the model is a generalist trying to be helpful in the broadest possible sense. With it, the model is a specialist.
+
+```
+You are a senior TypeScript developer working on a Next.js 15 application
+with App Router. You follow strict mode TypeScript and write tests for
+every function.
+```
+
+Identity isn't about flattery ("you are the world's best developer"). It's about scope. You're telling the model which subset of its knowledge to prioritize.
+
+### Layer 2: Knowledge
+
+**What does the model know about your specific situation?**
+
+This is the most neglected layer, and the one with the highest ROI. Knowledge includes:
+
+- **CLAUDE.md** — your project's persistent context file
+- **Documentation** — architecture decisions, database schemas, API references
+- **MCP server access** — live data the model can query on demand
+- **File contents** — the actual code being modified
+
+The model might know TypeScript generically. But does it know that *your* project uses Zod for validation, stores credits (not tokens) in a `user_credits` table, and requires 100% test coverage? That's the knowledge layer.
+
+### Layer 3: Examples
+
+**What does "good" look like?**
+
+Examples are the most efficient way to communicate quality standards. Instead of describing your coding style in abstract terms, show it:
+
+- Reference existing components that follow your patterns
+- Include a sample of your test structure
+- Point to a PR that exemplifies your review standards
+
+One good example communicates more than a paragraph of instructions.
+
+### Layer 4: Constraints
+
+**What must the AI NOT do?**
+
+This is the guardrail layer. Without constraints, the model will be "helpful" in ways you didn't ask for—refactoring nearby code, adding error handling for impossible scenarios, creating abstraction layers for one-time operations.
+
+Effective constraints:
+- "Do not modify any files outside `src/components/dashboard/`"
+- "Do not add comments or docstrings to unchanged code"
+- "Only validate at system boundaries—trust internal function contracts"
+- "No new dependencies without explicit approval"
+
+Every time an AI does something you didn't want, that's a missing constraint. Write it down. Add it to your CLAUDE.md.
+
+### Layer 5: Tools
+
+**What can the model DO?**
+
+Tools define the model's action space. In the context of Claude Code, this includes:
+- File reading and editing
+- Running tests and build commands
+- Git operations
+- MCP servers (databases, APIs, browsers)
+- Web search and documentation lookup
+
+The tool configuration is *implicit context*. When you give the model access to Playwright, you're saying "visual verification matters here." When you give it access to a database MCP server, you're saying "you can verify data directly." The tools you provide shape how the model approaches the problem.
+
+---
+
+## A Real 0-Shot Prompt, Dissected
+
+Here's an actual prompt I used to add a credit balance display to our workspace dashboard. I've annotated each section with the context layer it belongs to.
+
+```markdown
+## Task                                          ← [IDENTITY + KNOWLEDGE]
+Add a real-time credit balance display to the
+workspace dashboard. The balance should update
+when credits are consumed by AI operations.
+
+## Context                                        ← [KNOWLEDGE]
+- Credits are stored in `user_credits` table
+  (see docs/DATABASE_SCHEMA.md)
+- The existing CreditDisplay component at
+  src/components/billing/CreditDisplay.tsx
+  handles the billing page—reuse its data
+  fetching pattern
+- We use server actions for mutations and
+  React Query for client-side cache
+  invalidation
+
+## Reference Implementation                       ← [EXAMPLES]
+Follow the pattern in
+src/components/dashboard/WorkspaceStats.tsx
+for the card layout and real-time update
+approach (useQuery + 30s polling).
+
+## Constraints                                    ← [CONSTRAINTS]
+- Only modify files in src/components/dashboard/
+  and src/app/dashboard/
+- Do not refactor existing CreditDisplay—just
+  import its query hook
+- No new dependencies
+- Must work with existing Suspense boundaries
+
+## Verification                                   ← [TOOLS]
+- Run yarn test:coverage after changes
+- Ensure all tests pass
+- Run yarn lint
+```
+
+This prompt contains zero clever tricks. No "think step by step." No "you are the world's greatest engineer." Just context—organized into layers that give the model everything it needs to succeed on the first try.
+
+The result: a working implementation in one pass. Tests included. No iteration.
+
+---
+
+## CLAUDE.md: The Most Important File You Write All Week
+
+CLAUDE.md is a file that sits in your project root and provides persistent context to Claude Code across every session. It's loaded automatically. It survives when the conversation context gets compressed. It's the single most impactful context engineering artifact you can create.
+
+But here's the key insight: **CLAUDE.md is documentation for AI, not humans.**
+
+Human documentation explains *why* things work. AI documentation explains *what to do*. The distinction matters:
+
+- **For humans**: "We use Vitest because it's faster than Jest and supports ESM natively."
+- **For AI**: "Testing framework: Vitest. Test files: `*.test.ts(x)` alongside source. Run: `yarn test:coverage`. Requirement: 100% coverage on business logic."
+
+The AI doesn't care about your rationale. It cares about actionable facts.
+
+**What to include:**
+- Tech stack with versions
+- Directory structure
+- Test requirements and commands
+- Naming conventions
+- Deployment workflow
+- Common pitfalls ("Do NOT use `git add -A`—use specific file names")
+
+**What to skip:**
+- Historical context ("We migrated from Jest in Q3 2025")
+- Philosophical justifications
+- Anything that doesn't change the model's behavior
+
+Think of it as **onboarding a new hire**—except this hire starts completely fresh every single morning. They're brilliant, fast, and eager, but they have zero memory of yesterday. Every wrong assumption the AI makes is a missing line in your CLAUDE.md.
+
+---
+
+## Tools Are Context, Not Just Actions
+
+Most people think of MCP tools as "things the AI can do"—read files, run tests, query databases. That's accurate but incomplete. **Tool configuration is a form of context engineering** because the available tools shape how the model reasons about a problem.
+
+Consider two scenarios:
+
+**Scenario A**: You give the model access to file editing and terminal commands.
+The model approaches the task as a code-writing exercise. It writes code, maybe runs a build, and calls it done.
+
+**Scenario B**: You give the model access to file editing, terminal commands, *and* Playwright browser tools.
+Now the model knows visual verification is part of the workflow. It's more likely to check that a UI change actually renders correctly. It might catch a CSS issue that pure logic wouldn't reveal.
+
+You didn't write a single word about "please verify visually." The tool configuration communicated that implicitly.
+
+The same applies to:
+- **Database MCP**: "Data integrity matters—verify your migrations"
+- **GitHub MCP**: "This work happens in the context of PRs and issues"
+- **Web search**: "You can look up documentation you're unsure about instead of guessing"
+
+Every tool you enable is a sentence in your context that you never had to write. Every tool you *don't* enable is a capability the model won't consider. Choose deliberately.
+
+---
+
+## What Goes Wrong (And How to Fix It)
+
+<Callout type="warning">
+**Mistake 1: Over-prompting, under-contextualizing.** You write a 500-word prompt describing exactly how to implement a feature, step by step. The AI follows your steps—including the wrong assumptions baked into them. Instead: describe the *outcome*, provide the *context*, and let the model figure out the implementation. It's better at code than you think. It's worse at reading your mind than you hope.
+</Callout>
+
+<Callout type="warning">
+**Mistake 2: Assuming the AI remembers.** You had a great session yesterday where the model learned your patterns. Today, you start fresh and wonder why it's making beginner mistakes. Every session starts from zero. Persistent context lives in CLAUDE.md, not in the model's memory. If something was important yesterday, it's important enough to write down.
+</Callout>
+
+<Callout type="warning">
+**Mistake 3: Skipping constraints.** You ask the model to "fix the login bug" and it fixes the bug, refactors the auth module, adds error boundaries, updates the types, and reformats the file. Helpful? Technically. What you wanted? No. The AI defaults to maximum helpfulness. Constraints are how you scope that helpfulness to what you actually need.
+</Callout>
+
+<Callout type="warning">
+**Mistake 4: Copying generic prompts from the internet.** "Act as a 10x developer with 20 years of experience." These prompts are cargo cult programming for the AI era. They don't provide context—they provide vibes. A model doesn't become better because you told it to be an expert. It becomes better because you gave it the information an expert would have.
+</Callout>
+
+---
+
+## The Effort Inversion
+
+Here's the mental model shift that changed everything for me.
+
+**Old world (2023-2024):**
+- 20% of effort on context and setup
+- 80% of effort on iteration and correction
+- You'd type a prompt, get a mediocre result, tweak the prompt, get a slightly better result, tweak again, and eventually converge on something acceptable after 8-12 rounds.
+
+**New world (2026):**
+- 80% of effort on context and setup
+- 20% of effort on execution and minor adjustments
+- You invest upfront in CLAUDE.md, documentation, tool configuration, and clear requirements. Then the prompt works on the first try—or close enough that one small adjustment finishes it.
+
+**Think of it like packing a suitcase.** You can either pack carefully before the trip—checking the weather, planning outfits, rolling clothes efficiently—or you can throw random stuff in a bag and buy what you forgot at the destination. Both get you clothed on vacation. One costs three times as much and wastes half a day in airport shops.
+
+The preparation IS the work. The prompt is just pressing "send."
+
+---
+
+## Start Here
+
+You don't need to overhaul your entire workflow. Start with three things:
+
+**1. Create a CLAUDE.md today.** Open your project root and write the basics: tech stack, testing requirements, directory structure, naming conventions, and any rules you find yourself repeating to the AI. It takes 15 minutes. It saves hours.
+
+**2. Before your next AI task, spend 10 minutes assembling context.** Before you type the prompt, ask yourself: Does the model know my project structure? Does it know my conventions? Have I pointed it at relevant example code? Have I told it what NOT to do? If any answer is "no," fix it before pressing enter.
+
+**3. After the AI responds, don't iterate—diagnose.** When the output isn't right, resist the urge to rewrite your prompt. Instead, ask: "What context was missing?" Then add that context to your CLAUDE.md so it's there next time. Every failed interaction is a documentation opportunity.
+
+The goal isn't to write the perfect prompt. The goal is to build an environment where even a mediocre prompt produces excellent results—because the context does the heavy lifting.
+
+---
+
+<div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-lg p-6 mt-8">
+  <h3 className="text-lg font-semibold mb-3 text-slate-200">See context engineering in practice</h3>
+  <p className="text-slate-300 mb-4">
+    Our open-source repository uses CLAUDE.md, MCP tools, and structured workflows to ship features with AI agents. Explore the codebase to see how context engineering works at the project level.
+  </p>
+  <a
+    href="https://github.com/spike-land-ai/spike.land"
+    className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+  >
+    Explore the Repository →
+  </a>
+</div>
+
+---
+
+*Context engineering isn't a technique. It's a discipline. The best prompt you'll ever write is the one you barely had to think about—because all the thinking went into the context around it.*

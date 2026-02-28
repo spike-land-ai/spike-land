@@ -1,0 +1,17 @@
+# Gitleaks ignore file
+# Add commit hashes or patterns for known false positives
+# Format: commit-hash:file:line or fingerprint
+#
+# IMPORTANT: Only add entries here after careful review!
+# Each entry should be documented with:
+# 1. Why it's a false positive
+# 2. Who approved it
+# 3. Date added
+#
+# See: https://github.com/gitleaks/gitleaks#gitleaksignore
+
+# Example format:
+# abc123def456:path/to/file.js:42 # Description of false positive
+
+# Documentation and example files are allowed to have placeholder values
+# These are handled by .gitleaks.toml allowlist patterns

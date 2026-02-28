@@ -1,0 +1,2063 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ========================================
+// Auth (6)
+// ========================================
+
+model User {
+  id                      String                   @id @default(cuid())
+  name                    String?
+  email                   String?                  @unique
+  emailVerified           DateTime?
+  image                   String?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  stripeCustomerId        String?                  @unique
+  role                    UserRole                 @default(USER)
+  passwordHash            String?
+  accounts                Account[]
+  albums                  Album[]
+  apiKeys                 ApiKey[]
+  apps                    App[]
+  assetFolders            AssetFolder[]
+  assets                  Asset[]
+  auditLogs               AuditLog[]
+  boxes                   Box[]
+  createdBrandProfiles    BrandProfile[]           @relation("BrandProfileCreator")
+  updatedBrandProfiles    BrandProfile[]           @relation("BrandProfileUpdater")
+  agents                  ClaudeCodeAgent[]
+  contentRewrites         ContentRewrite[]
+  emailLogs               EmailLog[]
+  enhancedImages          EnhancedImage[]
+  pipelines               EnhancementPipeline[]
+  createdGalleryItems     FeaturedGalleryItem[]    @relation("GalleryItemCreator")
+  identity                Identity?
+  enhancementJobs         ImageEnhancementJob[]
+  learnItContent          LearnItContent[]
+  mcpGenerationJobs       McpGenerationJob[]
+  reviewedDrafts          RelayDraft[]
+  scheduledPosts          ScheduledPost[]
+  sessions                Session[]
+  socialAccounts          SocialAccount[]
+  socialPosts             SocialPost[]
+  subscription            Subscription?
+  workspaceInvitations    WorkspaceMember[]        @relation("WorkspaceInvitations")
+  workspaceMembers        WorkspaceMember[]
+  oauthAuthorizationCodes OAuthAuthorizationCode[]
+  oauthAccessTokens       OAuthAccessToken[]
+  vaultSecrets            VaultSecret[]
+  registeredTools         RegisteredTool[]
+  workspaceConfig         WorkspaceConfig?
+  toolInvocations         ToolInvocation[]
+  createdSkills           Skill[]                  @relation("SkillCreator")
+  grantedCapabilityTokens AgentCapabilityToken[]   @relation("GrantedTokens")
+  permissionRequests      PermissionRequest[]
+  agentAuditLogs          AgentAuditLog[]
+  dynamicPages            DynamicPage[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model ApiKey {
+  id                String             @id @default(cuid())
+  userId            String
+  name              String
+  keyHash           String             @unique
+  keyPrefix         String
+  lastUsedAt        DateTime?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mcpGenerationJobs McpGenerationJob[]
+
+  @@index([userId, isActive])
+  @@index([keyHash])
+  @@map("api_keys")
+}
+
+model Identity {
+  id         String      @id @default(cuid())
+  userId     String?     @unique
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  connection Connection?
+  user       User?       @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("identities")
+}
+
+// ========================================
+// Workspace (4)
+// ========================================
+
+model Workspace {
+  id                   String                    @id @default(cuid())
+  name                 String
+  slug                 String                    @unique
+  description          String?
+  avatarUrl            String?
+  settings             Json?
+  isPersonal           Boolean                   @default(false)
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  deletedAt            DateTime?
+  subscriptionTier     WorkspaceSubscriptionTier @default(FREE)
+  maxSocialAccounts    Int                       @default(3)
+  maxScheduledPosts    Int                       @default(30)
+  maxAbTests           Int                       @default(1)
+  monthlyAiCredits     Int                       @default(100)
+  usedAiCredits        Int                       @default(0)
+  maxTeamMembers       Int                       @default(1)
+  billingCycleStart    DateTime?
+  stripeSubscriptionId String?                   @unique
+  assetFolders         AssetFolder[]
+  assetTags            AssetTag[]
+  assets               Asset[]
+  brandProfile         BrandProfile?
+  connections          Connection[]
+  contentRewrites      ContentRewrite[]
+  inboxItems           InboxItem[]
+  notifications        Notification[]
+  scheduledPosts       ScheduledPost[]
+  socialAccounts       SocialAccount[]
+  apps                 WorkspaceApp[]
+  members              WorkspaceMember[]
+
+  @@index([slug])
+  @@index([isPersonal])
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id                 String        @id @default(cuid())
+  workspaceId        String
+  userId             String
+  role               WorkspaceRole @default(MEMBER)
+  invitedAt          DateTime      @default(now())
+  joinedAt           DateTime?
+  invitedById        String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  assignedInboxItems InboxItem[]
+  escalatedItems     InboxItem[]   @relation("EscalatedItems")
+  invitedBy          User?         @relation("WorkspaceInvitations", fields: [invitedById], references: [id])
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace          Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([role])
+  @@map("workspace_members")
+}
+
+model WorkspaceConfig {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  name         String
+  settings     Json     @default("{}")
+  integrations Json     @default("{}")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("workspace_configs")
+}
+
+model WorkspaceApp {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  appId          String    @unique
+  purpose        String?
+  linkedCampaign String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  app            App       @relation(fields: [appId], references: [id], onDelete: Cascade)
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([appId])
+  @@index([purpose])
+  @@map("workspace_apps")
+}
+
+// ========================================
+// Apps/CodeSpace (7)
+// ========================================
+
+model App {
+  id                String             @id @default(cuid())
+  name              String
+  slug              String?            @unique
+  description       String?
+  userId            String
+  forkedFrom        String?
+  status            AppBuildStatus     @default(PROMPTING)
+  domain            String?            @unique
+  codespaceId       String?            @unique
+  codespaceUrl      String?
+  isCurated         Boolean            @default(false)
+  isPublic          Boolean            @default(false)
+  lastAgentActivity DateTime?
+  deletedAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  codeVersions      AppCodeVersion[]
+  images            AppImage[]
+  messages          AppMessage[]
+  statusHistory     AppStatusHistory[]
+  parentApp         App?               @relation("AppForks", fields: [forkedFrom], references: [id])
+  forks             App[]              @relation("AppForks")
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codespaceSession  CodespaceSession?
+  sandboxJobs       SandboxJob[]
+  workspaceLink     WorkspaceApp?
+
+  @@index([userId])
+  @@index([forkedFrom])
+  @@index([status])
+  @@index([codespaceId])
+  @@index([isCurated, isPublic])
+  @@index([lastAgentActivity])
+  @@index([slug])
+  @@index([deletedAt])
+  @@map("apps")
+}
+
+model AppCodeVersion {
+  id          String      @id @default(cuid())
+  appId       String
+  messageId   String?     @unique
+  code        String
+  hash        String
+  description String?
+  createdAt   DateTime    @default(now())
+  app         App         @relation(fields: [appId], references: [id], onDelete: Cascade)
+  message     AppMessage? @relation(fields: [messageId], references: [id])
+
+  @@index([appId, createdAt])
+  @@index([hash])
+  @@map("app_code_versions")
+}
+
+model AppMessage {
+  id          String          @id @default(cuid())
+  appId       String
+  role        AppMessageRole
+  content     String
+  isRead      Boolean         @default(false)
+  metadata    Json?
+  deletedAt   DateTime?
+  createdAt   DateTime        @default(now())
+  codeVersion AppCodeVersion?
+  app         App             @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@index([appId, createdAt])
+  @@index([appId, isRead])
+  @@index([role, isRead])
+  @@index([appId, deletedAt])
+  @@map("app_messages")
+}
+
+model AppImage {
+  id            String   @id @default(cuid())
+  appId         String
+  originalUrl   String
+  r2Key         String
+  width         Int
+  height        Int
+  sizeBytes     Int
+  format        String   @default("webp")
+  tags          String[]
+  aiDescription String?
+  analysisJson  Json?
+  createdAt     DateTime @default(now())
+  app           App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@index([appId])
+  @@index([appId, createdAt])
+  @@map("app_images")
+}
+
+model CodespaceSession {
+  id               String             @id @default(cuid())
+  codeSpace        String             @unique
+  code             String             @db.Text
+  transpiled       String             @db.Text
+  html             String             @db.Text
+  css              String             @db.Text
+  hash             String
+  messages         Json?
+  requiresReRender Boolean            @default(false)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  appId            String?            @unique
+  app              App?               @relation(fields: [appId], references: [id])
+  versions         CodespaceVersion[]
+
+  @@index([codeSpace])
+  @@map("codespace_sessions")
+}
+
+model CodespaceVersion {
+  id         String           @id @default(cuid())
+  sessionId  String
+  number     Int
+  code       String           @db.Text
+  transpiled String           @db.Text
+  html       String           @db.Text
+  css        String           @db.Text
+  hash       String
+  createdAt  DateTime         @default(now())
+  session    CodespaceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, number])
+  @@index([sessionId, number])
+  @@map("codespace_versions")
+}
+
+model AppStatusHistory {
+  id        String         @id @default(cuid())
+  appId     String
+  status    AppBuildStatus
+  message   String?
+  metadata  Json?
+  createdAt DateTime       @default(now())
+  app       App            @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@index([appId, createdAt])
+  @@map("app_status_history")
+}
+
+// ========================================
+// Image Enhancement (6)
+// ========================================
+
+model EnhancedImage {
+  id                   String                @id @default(cuid())
+  userId               String
+  name                 String
+  description          String?
+  originalUrl          String
+  originalR2Key        String
+  originalWidth        Int
+  originalHeight       Int
+  originalSizeBytes    Int
+  originalFormat       String
+  isPublic             Boolean               @default(false)
+  viewCount            Int                   @default(0)
+  tags                 String[]              @default([])
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  shareToken           String?               @unique
+  albumImages          AlbumImage[]
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  featuredGalleryItems FeaturedGalleryItem[]
+  enhancementJobs      ImageEnhancementJob[]
+  blendTargetJobs      ImageEnhancementJob[] @relation("BlendSource")
+
+  @@index([userId, createdAt])
+  @@index([isPublic, createdAt])
+  @@index([shareToken])
+  @@index([tags])
+  @@map("enhanced_images")
+}
+
+model ImageEnhancementJob {
+  id                    String                @id @default(cuid())
+  imageId               String
+  userId                String
+  tier                  EnhancementTier
+  enhancementType       EnhancementType       @default(STANDARD)
+  creditsCost           Int
+  status                JobStatus
+  currentStage          PipelineStage?
+  enhancedUrl           String?
+  enhancedR2Key         String?
+  enhancedWidth         Int?
+  enhancedHeight        Int?
+  enhancedSizeBytes     Int?
+  errorMessage          String?
+  retryCount            Int                   @default(0)
+  maxRetries            Int                   @default(3)
+  geminiPrompt          String?
+  geminiModel           String?
+  geminiTemp            Float?
+  processingStartedAt   DateTime?
+  processingCompletedAt DateTime?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  workflowRunId         String?
+  analysisResult        Json?
+  analysisSource        String?
+  altText               String?
+  qualityScore          Float?
+  wasCropped            Boolean               @default(false)
+  cropDimensions        Json?
+  pipelineId            String?
+  sourceImageId         String?
+  isBlend               Boolean               @default(false)
+  isAnonymous           Boolean               @default(false)
+  featuredGalleryItems  FeaturedGalleryItem[]
+  image                 EnhancedImage         @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  pipeline              EnhancementPipeline?  @relation(fields: [pipelineId], references: [id])
+  sourceImage           EnhancedImage?        @relation("BlendSource", fields: [sourceImageId], references: [id])
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, createdAt])
+  @@index([imageId])
+  @@index([status, updatedAt])
+  @@index([workflowRunId])
+  @@index([pipelineId])
+  @@index([status, currentStage])
+  @@map("image_enhancement_jobs")
+}
+
+model Album {
+  id           String               @id @default(cuid())
+  userId       String
+  name         String
+  description  String?
+  coverImageId String?
+  privacy      AlbumPrivacy         @default(PRIVATE)
+  defaultTier  EnhancementTier      @default(TIER_1K)
+  shareToken   String?              @unique
+  sortOrder    Int                  @default(0)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  pipelineId   String?
+  albumImages  AlbumImage[]
+  pipeline     EnhancementPipeline? @relation(fields: [pipelineId], references: [id])
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name, privacy])
+  @@index([userId, createdAt])
+  @@index([privacy])
+  @@index([shareToken])
+  @@index([pipelineId])
+  @@map("albums")
+}
+
+model AlbumImage {
+  id        String        @id @default(cuid())
+  albumId   String
+  imageId   String
+  sortOrder Int           @default(0)
+  addedAt   DateTime      @default(now())
+  album     Album         @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  image     EnhancedImage @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([albumId, imageId])
+  @@index([albumId, sortOrder])
+  @@index([imageId])
+  @@index([albumId, addedAt])
+  @@map("album_images")
+}
+
+model EnhancementPipeline {
+  id               String                @id @default(cuid())
+  name             String
+  description      String?
+  userId           String?
+  visibility       PipelineVisibility    @default(PRIVATE)
+  shareToken       String?               @unique
+  tier             EnhancementTier       @default(TIER_1K)
+  analysisConfig   Json?
+  autoCropConfig   Json?
+  promptConfig     Json?
+  generationConfig Json?
+  usageCount       Int                   @default(0)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  albums           Album[]
+  user             User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs             ImageEnhancementJob[]
+
+  @@index([userId])
+  @@index([visibility])
+  @@map("enhancement_pipelines")
+}
+
+model FeaturedGalleryItem {
+  id            String               @id @default(cuid())
+  title         String
+  description   String?
+  category      GalleryCategory      @default(PORTRAIT)
+  originalUrl   String
+  enhancedUrl   String
+  width         Int                  @default(16)
+  height        Int                  @default(9)
+  sourceImageId String?
+  sourceJobId   String?
+  sortOrder     Int                  @default(0)
+  isActive      Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  createdBy     String
+  creator       User                 @relation("GalleryItemCreator", fields: [createdBy], references: [id])
+  sourceImage   EnhancedImage?       @relation(fields: [sourceImageId], references: [id])
+  sourceJob     ImageEnhancementJob? @relation(fields: [sourceJobId], references: [id])
+
+  @@index([isActive, sortOrder])
+  @@index([isActive, category, sortOrder])
+  @@map("featured_gallery_items")
+}
+
+// ========================================
+// Social/Orbit Core (10)
+// ========================================
+
+model SocialAccount {
+  id                    String              @id @default(cuid())
+  platform              SocialPlatform
+  accountId             String
+  accountName           String
+  accessTokenEncrypted  String
+  refreshTokenEncrypted String?
+  tokenExpiresAt        DateTime?
+  connectedAt           DateTime            @default(now())
+  status                SocialAccountStatus @default(ACTIVE)
+  metadata              Json?
+  userId                String
+  workspaceId           String
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  inboxItems            InboxItem[]
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace             Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  metrics               SocialMetrics[]
+
+  @@unique([workspaceId, platform, accountId])
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([status])
+  @@map("social_accounts")
+}
+
+model SocialPost {
+  id              String           @id @default(cuid())
+  content         String
+  scheduledAt     DateTime?
+  publishedAt     DateTime?
+  status          SocialPostStatus @default(DRAFT)
+  metadata        Json?
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  impressions     Int?
+  reach           Int?
+  engagementRate  Decimal?         @db.Decimal(5, 4)
+  isEligibleForAd Boolean          @default(false)
+  lastMetricsSync DateTime?
+  createdById     String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  createdBy       User             @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([createdById])
+  @@index([createdById, createdAt])
+  @@index([status])
+  @@index([isEligibleForAd])
+  @@map("social_posts")
+}
+
+model SocialMetrics {
+  id             String        @id @default(cuid())
+  accountId      String
+  date           DateTime      @db.Date
+  followers      Int           @default(0)
+  following      Int           @default(0)
+  postsCount     Int           @default(0)
+  engagementRate Decimal?      @db.Decimal(5, 4)
+  impressions    Int           @default(0)
+  reach          Int           @default(0)
+  likes          Int           @default(0)
+  comments       Int           @default(0)
+  shares         Int           @default(0)
+  rawData        Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  account        SocialAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, date])
+  @@index([accountId])
+  @@index([date])
+  @@map("social_metrics")
+}
+
+model BrandProfile {
+  id              String           @id @default(cuid())
+  workspaceId     String           @unique
+  name            String
+  mission         String?
+  values          Json?
+  toneDescriptors Json?
+  logoUrl         String?
+  logoR2Key       String?
+  colorPalette    Json?
+  version         Int              @default(1)
+  isActive        Boolean          @default(true)
+  createdById     String
+  updatedById     String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  guardrails      BrandGuardrail[]
+  createdBy       User             @relation("BrandProfileCreator", fields: [createdById], references: [id])
+  updatedBy       User?            @relation("BrandProfileUpdater", fields: [updatedById], references: [id])
+  workspace       Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contentRewrites ContentRewrite[]
+
+  @@index([workspaceId])
+  @@index([isActive])
+  @@index([createdById])
+  @@map("brand_profiles")
+}
+
+model BrandGuardrail {
+  id             String            @id @default(cuid())
+  brandProfileId String
+  type           GuardrailType
+  name           String
+  description    String?
+  severity       GuardrailSeverity @default(MEDIUM)
+  ruleConfig     Json?
+  isActive       Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  brandProfile   BrandProfile      @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+
+  @@index([brandProfileId])
+  @@index([brandProfileId, type])
+  @@index([brandProfileId, isActive])
+  @@index([type, severity])
+  @@map("brand_guardrails")
+}
+
+model ContentRewrite {
+  id               String          @id @default(cuid())
+  workspaceId      String
+  brandProfileId   String
+  originalContent  String
+  rewrittenContent String?
+  platform         ContentPlatform @default(GENERAL)
+  status           RewriteStatus   @default(PENDING)
+  characterLimit   Int?
+  changes          Json?
+  toneAnalysis     Json?
+  errorMessage     String?
+  processedAt      DateTime?
+  createdById      String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  brandProfile     BrandProfile    @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+  createdBy        User            @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  workspace        Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([brandProfileId])
+  @@index([createdById])
+  @@index([status])
+  @@index([createdAt])
+  @@map("content_rewrites")
+}
+
+model RelayDraft {
+  id              String           @id @default(cuid())
+  content         String
+  confidenceScore Float
+  status          RelayDraftStatus @default(PENDING)
+  isPreferred     Boolean          @default(false)
+  reason          String?
+  metadata        Json?
+  sentAt          DateTime?
+  errorMessage    String?
+  inboxItemId     String
+  reviewedById    String?
+  reviewedAt      DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  inboxItem       InboxItem        @relation(fields: [inboxItemId], references: [id], onDelete: Cascade)
+  reviewedBy      User?            @relation(fields: [reviewedById], references: [id])
+
+  @@index([inboxItemId])
+  @@index([inboxItemId, status])
+  @@index([status])
+  @@map("relay_drafts")
+}
+
+model ScheduledPost {
+  id               String              @id @default(cuid())
+  content          String
+  scheduledAt      DateTime
+  timezone         String              @default("UTC")
+  recurrenceRule   String?
+  recurrenceEndAt  DateTime?
+  status           ScheduledPostStatus @default(DRAFT)
+  metadata         Json?
+  publishedAt      DateTime?
+  errorMessage     String?
+  retryCount       Int                 @default(0)
+  maxRetries       Int                 @default(3)
+  lastAttemptAt    DateTime?
+  nextOccurrenceAt DateTime?
+  workspaceId      String
+  createdById      String
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  createdBy        User                @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  workspace        Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, scheduledAt])
+  @@index([workspaceId, status])
+  @@index([createdById])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([nextOccurrenceAt])
+  @@map("scheduled_posts")
+}
+
+model Connection {
+  id                    String               @id @default(cuid())
+  workspaceId           String
+  identityId            String?              @unique
+  displayName           String
+  avatarUrl             String?
+  notes                 String?
+  warmthScore           Int                  @default(0)
+  warmthFactors         Json?
+  lastInteraction       DateTime?
+  interactionCount      Int                  @default(0)
+  nextStep              ConnectionNextStep?
+  nextStepDueDate       DateTime?
+  nextStepNotes         String?
+  meetupStatus          MeetupPipelineStatus @default(NONE)
+  meetupStatusUpdatedAt DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  identity              Identity?            @relation(fields: [identityId], references: [id])
+  workspace             Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, warmthScore])
+  @@index([workspaceId, meetupStatus])
+  @@map("connections")
+}
+
+model InboxItem {
+  id                  String            @id @default(cuid())
+  type                InboxItemType
+  status              InboxItemStatus   @default(UNREAD)
+  platform            SocialPlatform
+  platformItemId      String
+  content             String
+  senderName          String
+  senderHandle        String?
+  senderAvatarUrl     String?
+  originalPostId      String?
+  originalPostContent String?
+  metadata            Json?
+  receivedAt          DateTime
+  readAt              DateTime?
+  repliedAt           DateTime?
+  resolvedAt          DateTime?
+  workspaceId         String
+  accountId           String
+  assignedToId        String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  sentiment           InboxSentiment?
+  sentimentScore      Float?
+  priorityScore       Int?
+  priorityFactors     Json?
+  routingAnalyzedAt   DateTime?
+  routingMetadata     Json?
+  escalationStatus    EscalationStatus? @default(NONE)
+  escalationLevel     Int?              @default(0)
+  escalatedAt         DateTime?
+  escalatedToId       String?
+  slaDeadline         DateTime?
+  slaBreach           Boolean           @default(false)
+  account             SocialAccount     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  assignedTo          WorkspaceMember?  @relation(fields: [assignedToId], references: [id])
+  escalatedTo         WorkspaceMember?  @relation("EscalatedItems", fields: [escalatedToId], references: [id])
+  workspace           Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  drafts              RelayDraft[]
+
+  @@unique([workspaceId, platform, platformItemId])
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, platform])
+  @@index([accountId])
+  @@index([assignedToId])
+  @@index([receivedAt])
+  @@map("inbox_items")
+}
+
+// ========================================
+// Agents (6)
+// ========================================
+
+model ClaudeCodeAgent {
+  id                  String                 @id
+  userId              String
+  machineId           String
+  sessionId           String
+  displayName         String
+  projectPath         String?
+  workingDirectory    String?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  lastSeenAt          DateTime?
+  deletedAt           DateTime?
+  totalTokensUsed     Int                    @default(0)
+  totalTasksCompleted Int                    @default(0)
+  totalSessionTime    Int                    @default(0)
+  messages            AgentMessage[]
+  capabilityTokens    AgentCapabilityToken[]
+  permissionRequests  PermissionRequest[]
+  auditLogs           AgentAuditLog[]
+  user                User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, machineId, sessionId])
+  @@index([userId, lastSeenAt])
+  @@index([machineId])
+  @@map("claude_code_agents")
+}
+
+model AgentMessage {
+  id        String           @id @default(cuid())
+  agentId   String
+  role      AgentMessageRole
+  content   String
+  isRead    Boolean          @default(false)
+  metadata  Json?
+  createdAt DateTime         @default(now())
+  agent     ClaudeCodeAgent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId, createdAt])
+  @@index([agentId, isRead])
+  @@map("agent_messages")
+}
+
+model AgentTask {
+  id        String    @id @default(cuid())
+  boxId     String
+  type      String
+  payload   Json?
+  status    JobStatus @default(PENDING)
+  result    Json?
+  error     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  box       Box       @relation(fields: [boxId], references: [id], onDelete: Cascade)
+
+  @@index([boxId, status])
+  @@map("agent_tasks")
+}
+
+model WorkflowRun {
+  id         String            @id @default(cuid())
+  workflowId String
+  status     WorkflowRunStatus
+  startedAt  DateTime          @default(now())
+  endedAt    DateTime?
+
+  @@index([workflowId])
+  @@index([status])
+  @@map("workflow_runs")
+}
+
+model Skill {
+  id              String        @id @default(cuid())
+  name            String        @unique
+  slug            String        @unique
+  displayName     String
+  description     String
+  longDescription String?       @db.Text
+  category        SkillCategory @default(OTHER)
+  status          SkillStatus   @default(DRAFT)
+  version         String        @default("1.0.0")
+  author          String
+  authorUrl       String?
+  repoUrl         String?
+  iconUrl         String?
+  color           String?
+  tags            String[]      @default([])
+  installCount    Int           @default(0)
+  sortOrder       Int           @default(0)
+  isActive        Boolean       @default(true)
+  isFeatured      Boolean       @default(false)
+  createdBy       String?
+  creator         User?         @relation("SkillCreator", fields: [createdBy], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([isActive, sortOrder])
+  @@index([isActive, category, sortOrder])
+  @@index([slug])
+  @@map("skills")
+}
+
+model RegisteredTool {
+  id           String               @id @default(cuid())
+  userId       String
+  name         String
+  description  String
+  category     String               @default("custom")
+  inputSchema  Json
+  handlerSpec  Json
+  status       RegisteredToolStatus @default(DRAFT)
+  installCount Int                  @default(0)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@index([status])
+  @@map("registered_tools")
+}
+
+// ========================================
+// MCP/OAuth (6)
+// ========================================
+
+model OAuthClient {
+  id                      String                   @id @default(cuid())
+  clientId                String                   @unique @default(uuid())
+  clientSecretHash        String?
+  clientName              String
+  redirectUris            String[]
+  grantTypes              String[]                 @default(["authorization_code", "refresh_token"])
+  tokenEndpointAuthMethod String                   @default("none")
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  authorizationCodes      OAuthAuthorizationCode[]
+  accessTokens            OAuthAccessToken[]
+
+  @@index([clientId])
+  @@map("oauth_clients")
+}
+
+model OAuthAccessToken {
+  id             String         @id @default(cuid())
+  tokenHash      String         @unique
+  tokenType      OAuthTokenType
+  clientId       String
+  userId         String
+  scope          String         @default("mcp")
+  resource       String?
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  refreshTokenId String?
+  createdAt      DateTime       @default(now())
+  client         OAuthClient    @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([clientId])
+  @@index([userId])
+  @@index([refreshTokenId])
+  @@map("oauth_access_tokens")
+}
+
+model OAuthAuthorizationCode {
+  id                  String      @id @default(cuid())
+  code                String      @unique
+  clientId            String
+  userId              String
+  redirectUri         String
+  codeChallenge       String
+  codeChallengeMethod String      @default("S256")
+  scope               String      @default("mcp")
+  state               String?
+  resource            String?
+  expiresAt           DateTime
+  usedAt              DateTime?
+  createdAt           DateTime    @default(now())
+  client              OAuthClient @relation(fields: [clientId], references: [clientId], onDelete: Cascade)
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([code])
+  @@index([clientId])
+  @@index([userId])
+  @@map("oauth_authorization_codes")
+}
+
+model AIProvider {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  token     String
+  config    Json?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ai_providers")
+}
+
+model GenerationAttempt {
+  id              String   @id @default(cuid())
+  slug            String
+  success         Boolean
+  iterations      Int
+  totalDurationMs Int
+  notesApplied    String[]
+  errors          Json[]
+  model           String
+  inputTokens     Int
+  outputTokens    Int
+  cachedTokens    Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  @@index([slug])
+  @@index([createdAt])
+  @@map("generation_attempts")
+}
+
+model McpGenerationJob {
+  id                    String          @id @default(cuid())
+  userId                String
+  apiKeyId              String?
+  type                  McpJobType
+  tier                  EnhancementTier
+  creditsCost           Int
+  status                JobStatus
+  prompt                String
+  inputImageUrl         String?
+  inputImageR2Key       String?
+  outputImageUrl        String?
+  outputImageR2Key      String?
+  outputWidth           Int?
+  outputHeight          Int?
+  outputSizeBytes       Int?
+  errorMessage          String?
+  geminiModel           String?
+  processingStartedAt   DateTime?
+  processingCompletedAt DateTime?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  apiKey                ApiKey?         @relation(fields: [apiKeyId], references: [id])
+  user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, createdAt])
+  @@index([apiKeyId])
+  @@index([status, updatedAt])
+  @@map("mcp_generation_jobs")
+}
+
+// ========================================
+// Billing (3)
+// ========================================
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  stripeSubscriptionId String             @unique
+  stripePriceId        String
+  status               SubscriptionStatus
+  tier                 SubscriptionTier   @default(BASIC)
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  downgradeTo          SubscriptionTier?
+  creditsPerMonth      Int
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([stripeSubscriptionId])
+  @@index([status])
+  @@index([tier])
+  @@map("subscriptions")
+}
+
+model SubscriptionPlan {
+  id              String   @id @default(cuid())
+  name            String
+  creditsPerMonth Int
+  priceGBP        Decimal  @db.Decimal(10, 2)
+  stripePriceId   String   @unique
+  priority        Boolean  @default(false)
+  apiAccess       Boolean  @default(false)
+  active          Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([active, sortOrder])
+  @@map("subscription_plans")
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String?
+  type        String
+  title       String
+  message     String
+  priority    String    @default("MEDIUM")
+  read        Boolean   @default(false)
+  readAt      DateTime?
+  entityType  String?
+  entityId    String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, read, createdAt])
+  @@index([workspaceId, userId])
+  @@index([type])
+  @@map("notifications")
+}
+
+// ========================================
+// Audit/Logging (4)
+// ========================================
+
+model AuditLog {
+  id           String      @id @default(cuid())
+  userId       String
+  action       AuditAction
+  targetId     String?
+  targetType   String?
+  resourceId   String?
+  resourceType String?
+  metadata     Json?
+  ipAddress    String?
+  userAgent    String?
+  sessionId    String?
+  createdAt    DateTime    @default(now())
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([targetId])
+  @@index([targetType])
+  @@index([createdAt])
+  @@index([resourceId, resourceType])
+  @@map("audit_logs")
+}
+
+model ErrorLog {
+  id           String           @id @default(cuid())
+  timestamp    DateTime         @default(now())
+  message      String
+  stack        String?
+  sourceFile   String?
+  sourceLine   Int?
+  sourceColumn Int?
+  callerName   String?
+  userId       String?
+  route        String?
+  environment  ErrorEnvironment
+  errorType    String?
+  errorCode    String?
+  metadata     Json?
+
+  @@index([environment, timestamp])
+  @@index([errorType, timestamp])
+  @@index([sourceFile])
+  @@map("error_logs")
+}
+
+model PageView {
+  id          String   @id @default(cuid())
+  sessionId   String
+  path        String
+  title       String?
+  timestamp   DateTime @default(now())
+  timeOnPage  Int?
+  scrollDepth Int?
+
+  @@index([sessionId, timestamp])
+  @@index([path])
+  @@map("page_views")
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  sessionId String
+  name      String
+  category  String?
+  value     Float?
+  metadata  Json?
+  timestamp DateTime @default(now())
+
+  @@index([sessionId, timestamp])
+  @@index([name])
+  @@index([category])
+  @@map("analytics_events")
+}
+
+// ========================================
+// Content (3)
+// ========================================
+
+model DynamicPage {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  title          String
+  description    String?
+  layout         PageLayout    @default(LANDING)
+  status         PageStatus    @default(DRAFT)
+  themeData      Json?
+  seoTitle       String?
+  seoDescription String?
+  ogImageUrl     String?
+  viewCount      Int           @default(0)
+  tags           String[]
+  customCss      String?
+  publishedAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentId       String?
+  parent         DynamicPage?  @relation("PageHierarchy", fields: [parentId], references: [id])
+  children       DynamicPage[] @relation("PageHierarchy")
+  blocks         PageBlock[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([layout])
+  @@index([slug])
+  @@map("dynamic_pages")
+}
+
+model PageBlock {
+  id        String      @id @default(cuid())
+  pageId    String
+  blockType BlockType
+  variant   String?
+  content   Json
+  sortOrder Int
+  isVisible Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  page      DynamicPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, sortOrder])
+  @@map("page_blocks")
+}
+
+model LearnItContent {
+  id            String        @id @default(cuid())
+  path          String[]
+  slug          String        @unique
+  parentSlug    String?
+  title         String
+  description   String
+  content       String
+  wikiLinks     String[]
+  status        LearnItStatus @default(PUBLISHED)
+  generatedAt   DateTime      @default(now())
+  aiModel       String        @default("gemini-3-flash-preview")
+  generatedById String?
+  viewCount     Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+  generatedBy   User?         @relation(fields: [generatedById], references: [id])
+
+  @@index([slug])
+  @@index([path])
+  @@index([viewCount])
+  @@index([status])
+  @@map("learnit_content")
+}
+
+// ========================================
+// Storage (3)
+// ========================================
+
+model Asset {
+  id              String       @id @default(cuid())
+  workspaceId     String
+  folderId        String?
+  filename        String
+  fileType        String
+  sizeBytes       Int
+  width           Int?
+  height          Int?
+  duration        Float?
+  storageProvider String       @default("R2")
+  r2Bucket        String
+  r2Key           String       @unique
+  altText         String?
+  qualityScore    Float?
+  analysisJson    Json?
+  uploadedById    String
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  folder          AssetFolder? @relation(fields: [folderId], references: [id])
+  uploadedBy      User         @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+  workspace       Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([folderId])
+  @@index([uploadedById])
+  @@index([fileType])
+  @@map("assets")
+}
+
+model AssetFolder {
+  id          String        @id @default(cuid())
+  name        String
+  workspaceId String
+  parentId    String?
+  createdById String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  createdBy   User          @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  parent      AssetFolder?  @relation("NestedFolders", fields: [parentId], references: [id], onDelete: Cascade)
+  children    AssetFolder[] @relation("NestedFolders")
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assets      Asset[]
+
+  @@unique([workspaceId, name, parentId])
+  @@index([workspaceId])
+  @@index([parentId])
+  @@map("asset_folders")
+}
+
+model AssetTag {
+  id          String    @id @default(cuid())
+  name        String
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+  @@map("asset_tags")
+}
+
+// ========================================
+// Misc (7)
+// ========================================
+
+model Box {
+  id              String       @id @default(cuid())
+  name            String
+  description     String?
+  userId          String
+  tierId          String?
+  status          BoxStatus    @default(STOPPED)
+  connectionUrl   String?
+  storageVolumeId String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  deletedAt       DateTime?
+  tasks           AgentTask[]
+  messages        BoxMessage[]
+  tier            BoxTier?     @relation(fields: [tierId], references: [id])
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([status])
+  @@map("boxes")
+}
+
+model BoxTier {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  cpu           Int
+  ram           Int
+  storage       Int
+  pricePerHour  Int
+  pricePerMonth Int
+  isActive      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  boxes         Box[]
+
+  @@map("box_tiers")
+}
+
+model BoxMessage {
+  id        String         @id @default(cuid())
+  boxId     String
+  role      BoxMessageRole
+  content   String
+  createdAt DateTime       @default(now())
+  box       Box            @relation(fields: [boxId], references: [id], onDelete: Cascade)
+
+  @@index([boxId, createdAt])
+  @@map("box_messages")
+}
+
+model VaultSecret {
+  id             String            @id @default(cuid())
+  userId         String
+  name           String
+  encryptedValue String            @db.Text
+  iv             String
+  tag            String
+  status         VaultSecretStatus @default(PENDING)
+  allowedUrls    String[]
+  metadata       Json?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("vault_secrets")
+}
+
+model EmailLog {
+  id        String      @id @default(cuid())
+  userId    String
+  to        String
+  subject   String
+  template  String
+  status    EmailStatus @default(SENT)
+  resendId  String?     @unique
+  sentAt    DateTime    @default(now())
+  openedAt  DateTime?
+  clickedAt DateTime?
+  bouncedAt DateTime?
+  metadata  Json?
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([sentAt])
+  @@index([template])
+  @@map("email_logs")
+}
+
+model SyncState {
+  id                 String     @id @default(cuid())
+  source             SyncSource @default(BRIDGEMIND)
+  status             SyncStatus @default(IDLE)
+  lastSuccessfulSync DateTime?
+  lastAttemptedSync  DateTime?
+  consecutiveErrors  Int        @default(0)
+  syncCursor         String?
+  itemsSynced        Int        @default(0)
+  errorMessage       String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+}
+
+model SandboxJob {
+  id          String           @id @default(cuid())
+  appId       String
+  messageId   String           @unique
+  sandboxId   String?
+  requestId   String?
+  status      SandboxJobStatus @default(PENDING)
+  result      Json?
+  error       String?
+  startedAt   DateTime         @default(now())
+  completedAt DateTime?
+  app         App              @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@index([appId, startedAt])
+  @@index([status])
+  @@index([sandboxId])
+  @@map("sandbox_jobs")
+}
+
+// ========================================
+// Capabilities (4)
+// ========================================
+
+model AgentCapabilityToken {
+  id                 String                 @id @default(cuid())
+  tokenHash          String                 @unique
+  agentId            String
+  grantedByUserId    String
+  grantedByAgentId   String?
+  allowedTools       String[]
+  allowedCategories  String[]
+  deniedTools        String[]
+  workspaceIds       String[]
+  maxTokenBudget     Int                    @default(100000)
+  usedTokenBudget    Int                    @default(0)
+  maxApiCalls        Int                    @default(1000)
+  usedApiCalls       Int                    @default(0)
+  parentTokenId      String?
+  delegationDepth    Int                    @default(0)
+  maxDelegationDepth Int                    @default(2)
+  revisionVersion    Int                    @default(1)
+  status             CapabilityTokenStatus  @default(ACTIVE)
+  expiresAt          DateTime?
+  revokedAt          DateTime?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  agent              ClaudeCodeAgent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  grantedByUser      User                   @relation("GrantedTokens", fields: [grantedByUserId], references: [id], onDelete: Cascade)
+  parentToken        AgentCapabilityToken?  @relation("TokenDelegation", fields: [parentTokenId], references: [id])
+  childTokens        AgentCapabilityToken[] @relation("TokenDelegation")
+  permissionRequests PermissionRequest[]    @relation("GrantedByToken")
+  auditLogs          AgentAuditLog[]
+
+  @@index([agentId])
+  @@index([grantedByUserId])
+  @@index([parentTokenId])
+  @@index([status])
+  @@map("agent_capability_tokens")
+}
+
+model AgentAuditLog {
+  id                String                @id @default(cuid())
+  agentId           String
+  userId            String
+  workspaceId       String?
+  action            String
+  actionType        String
+  capabilityTokenId String?
+  input             Json?
+  output            Json?
+  durationMs        Int                   @default(0)
+  isError           Boolean               @default(false)
+  error             String?
+  delegationChain   String[]
+  delegationDepth   Int                   @default(0)
+  tokensConsumed    Int                   @default(0)
+  budgetRemaining   Int                   @default(0)
+  createdAt         DateTime              @default(now())
+  agent             ClaudeCodeAgent       @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  capabilityToken   AgentCapabilityToken? @relation(fields: [capabilityTokenId], references: [id])
+
+  @@index([agentId, createdAt])
+  @@index([userId, createdAt])
+  @@index([capabilityTokenId])
+  @@index([action])
+  @@index([actionType, createdAt])
+  @@map("agent_audit_logs")
+}
+
+model ToolInvocation {
+  id                 String           @id @default(cuid())
+  userId             String
+  sessionId          String?
+  tool               String
+  input              Json
+  output             Json?
+  durationMs         Int
+  tokensConsumed     Int              @default(0)
+  error              String?
+  isError            Boolean          @default(false)
+  parentInvocationId String?
+  createdAt          DateTime         @default(now())
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent             ToolInvocation?  @relation("InvocationTree", fields: [parentInvocationId], references: [id])
+  children           ToolInvocation[] @relation("InvocationTree")
+
+  @@index([userId, createdAt])
+  @@index([tool, createdAt])
+  @@index([sessionId])
+  @@index([parentInvocationId])
+  @@map("tool_invocations")
+}
+
+model PermissionRequest {
+  id               String                  @id @default(cuid())
+  agentId          String
+  userId           String
+  requestType      String
+  requestPayload   Json
+  status           PermissionRequestStatus @default(PENDING)
+  fallbackBehavior FallbackBehavior        @default(QUEUE)
+  grantedTokenId   String?
+  denialReason     String?
+  expiresAt        DateTime?
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  agent            ClaudeCodeAgent         @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  user             User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  grantedToken     AgentCapabilityToken?   @relation("GrantedByToken", fields: [grantedTokenId], references: [id])
+
+  @@index([agentId])
+  @@index([userId, status])
+  @@index([status])
+  @@map("permission_requests")
+}
+
+// ========================================
+// Enums (only those used by kept models)
+// ========================================
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum AppBuildStatus {
+  PROMPTING
+  WAITING
+  DRAFTING
+  BUILDING
+  FINE_TUNING
+  TEST
+  LIVE
+  ARCHIVED
+  FAILED
+}
+
+enum AppMessageRole {
+  USER
+  AGENT
+  SYSTEM
+}
+
+enum EnhancementTier {
+  FREE
+  TIER_1K
+  TIER_2K
+  TIER_4K
+}
+
+enum EnhancementType {
+  STANDARD
+  BLEND
+  PIPELINE
+  AUTO_CROP
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+enum PipelineStage {
+  ANALYZING
+  CROPPING
+  PROMPTING
+  GENERATING
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+  TRIALING
+}
+
+enum SubscriptionTier {
+  FREE
+  BASIC
+  STANDARD
+  PREMIUM
+}
+
+enum WorkspaceSubscriptionTier {
+  FREE
+  PRO
+  BUSINESS
+}
+
+enum AlbumPrivacy {
+  PRIVATE
+  UNLISTED
+  PUBLIC
+}
+
+enum AuditAction {
+  ROLE_CHANGE
+  TOKEN_ADJUSTMENT
+  VOUCHER_CREATE
+  VOUCHER_UPDATE
+  VOUCHER_DELETE
+  USER_DELETE
+  ADMIN_LOGIN
+  USER_LOGIN
+  USER_LOGOUT
+  SESSION_REFRESH
+  WORKSPACE_CREATE
+  WORKSPACE_UPDATE
+  WORKSPACE_DELETE
+  WORKSPACE_MEMBER_ADD
+  WORKSPACE_MEMBER_REMOVE
+  WORKSPACE_SETTINGS_CHANGE
+  CONTENT_CREATE
+  CONTENT_UPDATE
+  CONTENT_DELETE
+  CONTENT_PUBLISH
+  CONTENT_UNPUBLISH
+  CONTENT_SCHEDULE
+  AI_GENERATION_REQUEST
+  AI_GENERATION_COMPLETE
+  AI_APPROVAL
+  AI_REJECTION
+  AI_FEEDBACK
+  INTEGRATION_CONNECT
+  INTEGRATION_DISCONNECT
+  INTEGRATION_SYNC
+  DATA_EXPORT
+  DATA_IMPORT
+  RELAY_DRAFT_CREATE
+  RELAY_DRAFT_APPROVE
+  RELAY_DRAFT_REJECT
+  RELAY_DRAFT_EDIT
+  RELAY_DRAFT_SEND
+}
+
+enum ErrorEnvironment {
+  FRONTEND
+  BACKEND
+}
+
+enum GalleryCategory {
+  PORTRAIT
+  LANDSCAPE
+  PRODUCT
+  ARCHITECTURE
+}
+
+enum EmailStatus {
+  PENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  BOUNCED
+  FAILED
+}
+
+enum BoxStatus {
+  CREATING
+  STARTING
+  RUNNING
+  PAUSED
+  STOPPING
+  STOPPED
+  TERMINATED
+  ERROR
+}
+
+enum AgentMessageRole {
+  USER
+  AGENT
+  SYSTEM
+}
+
+enum SandboxJobStatus {
+  PENDING
+  SPAWNING
+  RUNNING
+  COMPLETED
+  FAILED
+  TIMEOUT
+}
+
+enum BoxMessageRole {
+  USER
+  AGENT
+  SYSTEM
+}
+
+enum PipelineVisibility {
+  PRIVATE
+  PUBLIC
+  LINK
+}
+
+enum McpJobType {
+  GENERATE
+  MODIFY
+}
+
+enum SocialPlatform {
+  TWITTER
+  LINKEDIN
+  FACEBOOK
+  INSTAGRAM
+  TIKTOK
+  YOUTUBE
+  DISCORD
+  SNAPCHAT
+  PINTEREST
+}
+
+enum SocialAccountStatus {
+  ACTIVE
+  EXPIRED
+  ERROR
+  RATE_LIMITED
+  RESTRICTED
+  SUSPENDED
+  DISCONNECTED
+}
+
+enum SocialPostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  FAILED
+}
+
+enum RewriteStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum ContentPlatform {
+  TWITTER
+  LINKEDIN
+  INSTAGRAM
+  FACEBOOK
+  GENERAL
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum GuardrailType {
+  PROHIBITED_TOPIC
+  REQUIRED_DISCLOSURE
+  CONTENT_WARNING
+}
+
+enum GuardrailSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ConnectionNextStep {
+  REPLY
+  REACH_OUT
+  SUGGEST_COFFEE
+  SCHEDULE_MEET
+  FOLLOW_UP
+  NONE
+}
+
+enum MeetupPipelineStatus {
+  NONE
+  INTERESTED
+  CHATTING
+  SUGGESTED
+  SCHEDULED
+  MET
+  FOLLOW_UP
+}
+
+enum ScheduledPostStatus {
+  DRAFT
+  PENDING
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+enum InboxItemType {
+  MENTION
+  COMMENT
+  DIRECT_MESSAGE
+  REPLY
+  REVIEW
+}
+
+enum InboxItemStatus {
+  UNREAD
+  READ
+  PENDING_REPLY
+  REPLIED
+  ARCHIVED
+  IGNORED
+}
+
+enum InboxSentiment {
+  POSITIVE
+  NEGATIVE
+  NEUTRAL
+  MIXED
+}
+
+enum EscalationStatus {
+  NONE
+  PENDING
+  ESCALATED
+  RESOLVED
+}
+
+enum RelayDraftStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SENT
+  FAILED
+}
+
+enum OAuthTokenType {
+  ACCESS
+  REFRESH
+}
+
+enum VaultSecretStatus {
+  PENDING
+  APPROVED
+  REVOKED
+}
+
+enum RegisteredToolStatus {
+  DRAFT
+  PUBLISHED
+  DISABLED
+}
+
+enum WorkflowRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum SkillCategory {
+  QUALITY
+  TESTING
+  WORKFLOW
+  SECURITY
+  PERFORMANCE
+  OTHER
+}
+
+enum SkillStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum CapabilityTokenStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum PermissionRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+  EXPIRED
+}
+
+enum FallbackBehavior {
+  QUEUE
+  SKIP
+  FAIL
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PageLayout {
+  LANDING
+  FEATURE
+  STORE
+  DASHBOARD
+  ARTICLE
+  GALLERY
+  CUSTOM
+}
+
+enum BlockType {
+  HERO
+  FEATURE_GRID
+  FEATURE_LIST
+  CTA
+  TESTIMONIALS
+  PRICING
+  STATS
+  GALLERY
+  FAQ
+  FOOTER
+  COMPARISON_TABLE
+  APP_GRID
+  MARKDOWN
+  CUSTOM_REACT
+}
+
+enum LearnItStatus {
+  GENERATING
+  PUBLISHED
+  HIDDEN
+  FAILED
+}
+
+enum SyncSource {
+  BRIDGEMIND
+  GITHUB
+}
+
+enum SyncStatus {
+  IDLE
+  SYNCING
+  ERROR
+}

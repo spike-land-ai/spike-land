@@ -1,0 +1,108 @@
+name: Database Migration
+
+permissions:
+  contents: read
+  id-token: write # OIDC auth to AWS
+
+# This workflow runs database migrations against Aurora PostgreSQL
+# when schema files change. Runs AFTER code deploys to ECS.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "prisma/migrations/**"
+      - "prisma/schema.prisma"
+  workflow_dispatch:
+    inputs:
+      run_migrations:
+        description: "Run database migrations manually"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  migrate:
+    name: Run Database Migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: "yarn"
+          cache-dependency-path: yarn.lock
+
+      - name: Cache node_modules
+        uses: actions/cache@v5
+        id: yarn-cache
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies (if cache miss)
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client-16
+
+      - name: Set initial admin user (idempotent)
+        run: |
+          echo "Ensuring admin user configuration..."
+          psql "$DATABASE_URL" -c "UPDATE users SET id = 'user_49d6efb916aec77949d6efb916aec779' WHERE email = 'zolika84@gmail.com' AND id != 'user_49d6efb916aec77949d6efb916aec779';" || true
+          psql "$DATABASE_URL" -c "UPDATE users SET role = 'SUPER_ADMIN' WHERE id = 'user_49d6efb916aec77949d6efb916aec779';" || true
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Run Prisma migrations
+        run: yarn prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Generate Prisma Client (verify schema)
+        run: yarn prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Verify database connection
+        run: |
+          echo "Verifying database connection..."
+          yarn prisma db execute --stdin <<< "SELECT 1 as health_check;"
+          echo "✓ Database connection verified"
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Migration summary
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          STATUS_ICON="✅"
+          if [ "$JOB_STATUS" != "success" ]; then STATUS_ICON="❌"; fi
+
+          echo "## ${STATUS_ICON} Database Migration" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Ran \`prisma migrate deploy\` against Aurora PostgreSQL." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Status: **${JOB_STATUS}**" >> "$GITHUB_STEP_SUMMARY"

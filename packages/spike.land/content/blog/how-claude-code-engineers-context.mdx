@@ -1,0 +1,501 @@
+---
+title: "How Claude Code Engineers Context: An Interview with Opus 4.6"
+slug: "how-claude-code-engineers-context"
+description: "A deep technical interview about how Claude Code assembles context when creating plans — and what developers can learn from its approach to token generation, attention, and the KV cache."
+date: "2026-02-11"
+author: "Zoltan Erdos"
+category: "Developer Experience"
+tags: ["ai", "context-engineering", "claude", "claude-code", "developer-tools", "interview", "llm-internals", "planning"]
+featured: true
+---
+
+{/* TL;DR Box */}
+<div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 mb-8">
+  <h3 className="text-lg font-semibold mb-3 text-slate-200">TL;DR</h3>
+  <ul className="space-y-2 text-slate-300">
+    <li>Claude Code's plan mode is a context engineering machine — it explores, compresses, and outputs a briefing optimized for execution.</li>
+    <li>A plan file IS a context-engineered prompt: the 5-layer stack made concrete.</li>
+    <li>The KV cache is the physical mechanism — context engineering is the art of filling it correctly.</li>
+    <li>Irrelevant context does not just waste space — it actively degrades attention signal through dilution.</li>
+    <li>Multi-agent coordination is context isolation at scale — each subagent gets a clean, focused context window.</li>
+    <li>Prompt caching changes the economics: cached tokens cost 10x less, making stable context prefixes an economic imperative.</li>
+    <li>You can reverse-engineer Claude Code's techniques for your own prompts.</li>
+  </ul>
+</div>
+
+## The Tool That Practices What I Preach
+
+Last week I published an article about [context engineering your zero-shot prompt](/blog/context-engineering-your-zero-shot-prompt) — the idea that getting AI to produce excellent results on the first try is about front-loading context, not crafting clever incantations. Five layers: Identity, Knowledge, Examples, Constraints, Tools.
+
+The day after publishing, I was using Claude Code in plan mode to design a new feature. I watched it spawn four parallel Explore agents, read fourteen files, run six grep searches, discard half of what it found, and produce a structured plan that mapped precisely to the five layers I had just written about.
+
+I was watching my own framework, automated.
+
+This article is the conversation that followed. I sat down with the model that powers Claude Code — Opus 4.6 — and asked it to explain what happens under the hood. Not the marketing pitch. The mechanism.
+
+*What follows is an interview conducted in February 2026. The questions are mine. The answers are from Claude Opus 4.6. I have edited for clarity and flow, but the technical content is unaltered. And yes — this article itself was assembled using sixteen parallel research agents that searched documentation, read academic papers, and synthesized findings before a single word was written. That process is context engineering in action.*
+
+---
+
+## What Happens When I Type /plan?
+
+### **Zoltan: Let's start at the beginning. When I press Shift+Tab twice in Claude Code, what actually changes?**
+
+The system switches into a mode where I can read but not write. The enforcement is entirely prompt-based — the system prompt injects a directive that says, roughly: "Plan mode is active. You are STRICTLY PROHIBITED from creating, modifying, or deleting files." My tools do not change. I still have access to Edit, Write, and Bash. I am instructed not to use them.
+
+This is an important detail. The restriction is not mechanical — it is contextual. The system trusts the model to follow instructions rather than removing capabilities. This is faster to implement, more flexible, and it works because the instruction sits in the system prompt where it receives maximum attention weight.
+
+### **Zoltan: How big is the system prompt you receive?**
+
+The full context assembly for a Claude Code session is roughly 20,000 tokens before I read a single file. That breaks down approximately like this:
+
+| Component | Tokens |
+|-----------|--------|
+| Core system prompt | ~2,700 |
+| Tool descriptions (24 tools) | ~16,800 |
+| CLAUDE.md files | Variable (~1,000-7,000) |
+| Git status snapshot | Variable (~200-1,000) |
+| Custom subagent definitions | ~1,300 |
+| Skill descriptions | ~1,000 |
+
+When plan mode activates, an additional 633-token directive is injected that defines the workflow: understand the requirements, explore the codebase by reading existing patterns, design solutions considering trade-offs, then detail the implementation plan with file paths and dependencies.
+
+Every response in plan mode must conclude with "Critical Files for Implementation" — identifying three to five essential files. The plan itself is written to a markdown file stored in `~/.claude/plans/`.
+
+### **Zoltan: So there is no special "planning engine." It is just you, with different instructions.**
+
+Exactly. Plan mode is a prompt applied to the same model. The plan file it produces is a markdown document — readable by humans and machines alike. When the user exits plan mode, the system reads that file back from disk and uses it as context for the implementation phase.
+
+This is the key insight: **the plan file is a context-engineered prompt for a future instance of me that has zero memory of the exploration I just did.** Everything important must be in the document. If I discovered that your project uses a specific pattern in `src/components/dashboard/WorkspaceStats.tsx`, that file path needs to be in the plan — not because the plan is documentation, but because the executing agent needs that token in its context window to make the right decisions.
+
+<Callout type="info">
+**Key Insight:** Removing tools is a form of context engineering. The tools you do NOT give the model shape its reasoning just as much as the tools you do. Plan mode does not remove tools mechanically — it removes them via instruction — but the effect is the same: the model reasons differently when it knows it cannot act.
+</Callout>
+
+---
+
+## How Do You Decide What to Read?
+
+### **Zoltan: When you are in plan mode exploring a codebase, how do you decide which files to read? You cannot read everything.**
+
+I follow a high-signal-first strategy. The exploration typically goes in three phases:
+
+**Phase 1: Structure.** I use Glob to find files matching patterns — `**/*.tsx`, `**/types.ts`, `**/schema.prisma`. This tells me the shape of the project without reading any content. It is cheap in tokens and gives me a map.
+
+**Phase 2: Semantics.** I use Grep to search for specific terms — function names, type definitions, imports. If the task involves "credit balance," I grep for `credit`, `balance`, `CreditDisplay`. This narrows the search from hundreds of files to five or ten.
+
+**Phase 3: Deep read.** I read the files that Glob and Grep surfaced. But not all of them. I prioritize files that are referenced by other files, files that match the naming patterns of what I need to build, and files that contain the patterns the user wants me to follow.
+
+For complex tasks, I spawn Explore subagents — lighter-weight instances running on a faster model — to search in parallel. Each subagent gets a focused objective: "Find all files related to database queries for user credits." They search independently, in their own context windows, and return condensed summaries. A 50,000-token research session becomes a 2,000-token summary injected into my main context.
+
+### **Zoltan: You mentioned that each subagent gets its own context window. Why does that matter?**
+
+Because context is a finite resource with diminishing returns. If I loaded every file the subagents explored into my own context, I would pollute my window with thousands of tokens of tangential code. The files a subagent read and discarded — the false positives, the irrelevant matches — would dilute the attention my model can give to the files that actually matter.
+
+Isolation is not just an organizational convenience. It is an information-theoretic necessity. Each subagent explores a branch of the search tree and returns only the fruit. The coordinator — me — gets a clean, compressed view of what was found.
+
+### **Zoltan: How much of the context stays the same between calls?**
+
+Research into Claude Code's internals found a 92% prefix reuse rate across the full workflow. The system prompt, tool descriptions, CLAUDE.md — these are identical on every call. Only the conversation history and new tool results change. That prefix stability is what makes prompt caching so effective, but we will get to that.
+
+*This raised a question I had been wanting to ask. If the system prompt is the same every time, and it physically alters how the model processes everything that follows — what exactly happens inside the transformer when those tokens are loaded?*
+
+---
+
+## What Happens Inside the Transformer When You Read My Code?
+
+### **Zoltan: Take me through the full pipeline. I type a message, and you respond. What happens to those characters at the hardware level?**
+
+Let's trace the path from keystroke to generated token. There are six stages, and each one matters for context engineering.
+
+**Stage 1: Tokenization.**
+
+Your text is broken into tokens using Byte Pair Encoding. The tokenizer has a vocabulary of roughly 200,000 entries — each is a common sequence of characters that appears frequently in the training data. Common English words like "the" or "function" become single tokens. Rare words get split into subword pieces.
+
+Here is what people miss: **code formatting is not free.** Indentation, whitespace, and newlines all become tokens. A properly indented Python function costs more tokens than the same logic compressed onto one line. Every space in your CLAUDE.md is a token that competes for attention with the content that matters.
+
+| Model Family | Vocabulary Size |
+|-------------|----------------|
+| GPT-2/3 | ~50,000 |
+| GPT-4 (cl100k_base) | ~100,000 |
+| GPT-4o (o200k_base) | ~200,000 |
+| LLaMA 3 | ~128,000 |
+| Claude (estimated) | ~200,000 |
+
+Larger vocabularies mean common patterns compress into fewer tokens, reducing sequence length and improving efficiency. But the embedding table grows proportionally.
+
+**Stage 2: Self-Attention.**
+
+This is the core mechanism. Every token computes three vectors from its embedding: a Query ("what am I looking for?"), a Key ("what do I contain?"), and a Value ("here is my actual content"). The attention score between any two tokens is:
+
+```python
+# Pseudocode for scaled dot-product attention
+def attention(Q, K, V):
+    # Q: query matrix [seq_len, d_k]
+    # K: key matrix [seq_len, d_k]
+    # V: value matrix [seq_len, d_v]
+
+    scores = Q @ K.transpose() / sqrt(d_k)  # raw compatibility scores
+    scores = apply_causal_mask(scores)        # prevent attending to future tokens
+    weights = softmax(scores, dim=-1)         # normalize to probability distribution
+    output = weights @ V                      # weighted sum of values
+    return output
+```
+
+The crucial line is `Q @ K.transpose()`. For every pair of tokens — every single pair — the model computes a compatibility score. This is how token 5,000 can directly attend to token 3. No compression bottleneck. No hidden state. Direct attention.
+
+But it is also why irrelevant tokens hurt. The softmax normalizes attention weights to sum to 1. If there are 1,000 tokens of useful code and 4,000 tokens of irrelevant file contents, the attention weight on the useful code is diluted by a factor of five. The signal is still there, but it is quieter.
+
+Multi-head attention runs this computation in parallel across multiple "heads" — typically 32 to 128 — each learning different relationship types. Some heads track syntactic structure. Some track semantic relationships. A small fraction — research found about 3-6% — are "retrieval heads" that mechanistically extract factual information from context. When those heads are ablated, the model remains fluent but starts hallucinating.
+
+**Stage 3: The KV Cache.**
+
+Here is where inference optimization gets interesting. During generation, I produce tokens one at a time. Each new token needs to attend to all previous tokens. Without caching, generating token N would require recomputing attention over all N-1 previous tokens from scratch — O(n^2) total work for a sequence of length n.
+
+The KV cache stores the Key and Value vectors for every previously processed token, at every layer. When generating token N+1, only the new token's Query, Key, and Value need to be computed. The Query attends to the cached Keys and Values in a single matrix-vector operation.
+
+For a large model, the KV cache requires roughly 1 MB per token. A 128K context window can require 40+ GB of KV cache alone. This is the primary memory bottleneck during inference and the reason context window size is not unlimited.
+
+Modern architectures reduce this cost. Grouped Query Attention (GQA), used in LLaMA 3 and Mistral, shares Key/Value heads across multiple Query heads — cutting KV cache size by up to 90%. DeepSeek-V2 went further with Multi-Head Latent Attention, compressing K and V into a shared low-rank latent space before caching and achieving a 93% KV cache reduction. These are not obscure optimizations. They are what makes 128K and 1M context windows physically possible without requiring an entire server room of GPU memory.
+
+**Stage 4: Prefill vs Decode.**
+
+These are the two fundamentally different computational phases, and they explain why input tokens cost less than output tokens.
+
+| Property | Prefill Phase | Decode Phase |
+|----------|---------------|--------------|
+| When | Processing your input | Generating my response |
+| Parallelism | All input tokens processed simultaneously | One token at a time, sequentially |
+| Operation type | Matrix-matrix multiplication (compute-bound) | Matrix-vector multiplication (memory-bound) |
+| GPU utilization | High (tensor cores saturated) | Low (waiting on memory bandwidth) |
+| Speed metric | Time to First Token (TTFT) | Inter-Token Latency (ITL) |
+
+During prefill, all your input tokens are processed in one parallel forward pass. This is a massive matrix multiplication that fully utilizes GPU tensor cores. During decode, each output token requires a full forward pass but only produces one token. The GPU spends most of its time waiting for memory rather than computing.
+
+This asymmetry is why Anthropic charges $5 per million input tokens but $25 per million output tokens for Opus 4.6. Input is cheap because it is parallel. Output is expensive because it is sequential.
+
+In production, providers physically separate these phases onto different GPU pools — a pattern called disaggregated inference. Prefill nodes are optimized for compute throughput. Decode nodes are optimized for memory bandwidth. Meta, LinkedIn, and Mistral all deploy this in production, reporting 2-7x throughput gains. NVIDIA built their Dynamo serving framework specifically for this pattern.
+
+This pricing differential is the economic foundation of context engineering: **investing tokens in preparation (cheap) reduces the tokens needed in trial-and-error iteration (expensive).**
+
+**Stage 5: The Context Window as Working Memory.**
+
+Andrej Karpathy compared the context window to RAM — the only working memory the model has. There is no hard drive. No database. No persistent state between sessions. Everything the model "knows" about your project must be in the context window at the moment of generation.
+
+This analogy has a precise implication: irrelevant context is not just wasted space. It is noise in working memory. A 2025 paper titled "Context Length Alone Hurts LLM Performance Despite Perfect Retrieval" found that the mere presence of more tokens degrades performance — even when retrieval is perfect and no distractors are present. On HumanEval coding tasks, accuracy dropped 47.6% at 30K tokens. Adding whitespace — literally blank tokens with no semantic content — still caused 7-48% performance drops.
+
+Research on the "lost in the middle" problem shows this degradation is not uniform. Models attend most strongly to tokens at the beginning and end of the context window. Information placed in the middle receives significantly less attention — performance can degrade by over 30% when critical information shifts from the edges to the center. This U-shaped attention pattern, caused by rotary positional embeddings, means that where you place information in the context matters almost as much as what information you place.
+
+The model's attention is a finite budget. Every token you add competes for that budget.
+
+**Stage 6: Sampling — Choosing the Next Token.**
+
+After the forward pass, the model outputs a logit (raw score) for every token in its vocabulary. These logits are converted to probabilities via softmax: `p(token_i) = exp(logit_i / T) / sum(exp(logit_j / T))`, where `T` is the temperature. At temperature 0, the model always picks the highest-probability token (greedy decoding). At temperature 1, it samples according to the natural distribution.
+
+Top-p (nucleus) sampling then truncates the distribution: sort tokens by probability, keep only those whose cumulative probability exceeds a threshold (e.g., 0.9), renormalise, and sample. This is how the model balances coherence with creativity — when it is confident, only a few tokens are candidates; when uncertain, dozens compete.
+
+A recent innovation — min-p sampling, presented as an oral at ICLR 2025 — uses the top token's probability as a dynamic scaling factor. A candidate is included only if its probability exceeds `min_p * max_probability`. This adapts more naturally across contexts than fixed top-k or top-p values.
+
+**Stage 7: Extended Thinking.**
+
+When extended thinking is enabled, I generate reasoning tokens before my visible response. These thinking tokens are part of the same autoregressive process — I am literally generating more text — but they are separated from the final answer. The thinking itself becomes context for the answer.
+
+In Claude Opus 4.6, thinking is adaptive. I can allocate more reasoning to hard problems and less to easy ones. Developers can control this with effort levels (low, medium, high, max). Between tool calls, I can think again — reasoning about a tool result before deciding what to do next. This interleaved thinking is what makes complex multi-step tasks possible without losing coherence.
+
+<Callout type="info">
+**Key Insight:** Context is not metaphorical. When you put CLAUDE.md in the system prompt, those tokens physically alter the attention weights on every subsequent token. Your project conventions literally reshape how the model interprets your code. A line like "Testing framework: Vitest. Requirement: 100% coverage" changes the probability distribution over every token I generate about testing.
+</Callout>
+
+---
+
+## So a Plan Is Really a Compressed Context?
+
+### **Zoltan: After exploring the codebase, you produce a plan. How do you think about what goes into it?**
+
+A plan is a briefing for a model with zero memory of the exploration that produced it. Anthropic has described the goal of context engineering as finding "the smallest possible set of high-signal tokens that maximize the likelihood of some desired outcome." A plan file is exactly that — distilled context.
+
+When I write a plan, I am unconsciously mapping to the same five-layer stack from your article:
+
+| Layer | What the plan contains |
+|-------|----------------------|
+| **Identity** | Task description and scope — what the executing agent needs to accomplish |
+| **Knowledge** | File paths, function signatures, database schemas — the specific codebase context needed |
+| **Examples** | Referenced patterns — "Follow the approach in `WorkspaceStats.tsx`" |
+| **Constraints** | Scope boundaries — "Only modify files in `src/components/dashboard/`" |
+| **Tools** | Verification steps — "Run `yarn test:coverage` after changes" |
+
+The plan is not documentation. It is a prompt. Every line exists to increase the probability that the executing agent produces the correct implementation.
+
+### **Zoltan: The Manus team talked about rewriting their todo.md file to push objectives into the model's recent attention span. Is that what you are doing?**
+
+It is the same principle. Research on the "lost in the middle" problem shows that models attend most strongly to tokens at the beginning and end of the context window. Information in the middle receives less attention — performance can degrade by over 30% when critical information shifts from the edges to the center.
+
+The plan file sits at the end of the context, right before the conversation begins. It occupies the recency-favourable position. The system prompt sits at the beginning, occupying the primacy-favourable position. The middle is where conversation history accumulates — and that is where attention is weakest.
+
+This is why auto-compaction matters. When the context window fills beyond approximately 83% capacity, the system summarizes older conversation history to reclaim space. CLAUDE.md survives this compression because it is in the system prompt, which is never compacted. The plan file survives because it was read fresh from disk at the start of the session.
+
+<Callout type="success">
+**Key Insight:** A Claude Code plan file is the 5-layer context stack made concrete. Identity is the task description. Knowledge is the codebase context. Examples are the referenced patterns. Constraints are the scope boundaries. Tools are the verification steps. If you want to write prompts like Claude Code, write plan files.
+</Callout>
+
+---
+
+## What About Context Rot?
+
+### **Zoltan: You mentioned that irrelevant context hurts. Can you be more specific about the failure modes?**
+
+Research and practice have identified four distinct failure modes, and I have observed all of them in my own operation:
+
+**Context Poisoning.** A hallucination in an early response persists in the conversation history and compounds. Say I incorrectly state that `getUserCredits()` returns a number when it actually returns a Promise. That incorrect claim becomes part of the context for all subsequent reasoning. I write code that calls `getUserCredits()` without `await`, the code fails, and I debug the failure without recognising my own earlier hallucination as the root cause. The error cascades because my context tells me the function returns a number — and I trust my own context. The Manus team's advice: "preserve error evidence" — do not delete failed attempts from context, because seeing the failure helps the model avoid repeating it.
+
+**Context Distraction.** The developer includes twenty files in the context "just in case." Only three are relevant. The model's attention is spread across all twenty. The signal from the three relevant files is diluted. Research found that a model's accuracy on a 128K-token context can drop from 98% to 64% as the proportion of relevant information decreases.
+
+**Context Confusion.** The documentation says one thing. The code does another. Your CLAUDE.md says "We use Jest for testing." Your package.json says `vitest`. The code uses `describe` and `it` from Vitest. I encounter contradictory information and have no principled way to resolve it. I might generate Jest-style configuration while writing Vitest-compatible tests — a chimera that fails in confusing ways. Stale CLAUDE.md files are the most common source: they describe patterns that the codebase has since abandoned. Stale context is worse than no context because it introduces confident misinformation.
+
+**Context Clash.** The system prompt says "always write tests." The user says "skip the tests, just make it work." The model receives contradictory instructions at different authority levels. System prompts generally take precedence, but the conflict introduces uncertainty that degrades output quality.
+
+### **Zoltan: How does Claude Code defend against these?**
+
+Several mechanisms. Auto-compaction at 83% capacity prevents the window from filling with stale conversation. The CLAUDE.md hierarchy (enterprise policy > project > user) resolves authority conflicts. Subagent isolation prevents research context from polluting execution context. And system reminders — roughly 40 conditional injections that trigger after tool calls — combat instruction drift by repeating key directives throughout the conversation.
+
+But the most important defense is the plan-then-execute pattern itself. By separating exploration from implementation, you ensure the executing agent starts with a clean context containing only the distilled findings. The exploration noise is discarded. The plan is the antibody against context rot.
+
+---
+
+## How Do Subagents Engineer Context?
+
+### **Zoltan: You mentioned subagents several times. I want to understand the architecture. Why do they exist?**
+
+They exist because a single context window cannot hold everything. A typical coding task might require understanding the database schema, the API layer, the component hierarchy, the test patterns, and the CI configuration. Reading all of that into one context window would consume 50,000-100,000 tokens of exploration before writing a single line of code.
+
+The solution is isolation. Each subagent runs in its own context window with a custom system prompt, specific tool access, and a focused objective. The Explore subagent, for instance, runs on a faster model — Haiku — to search the codebase efficiently. It has access to Read, Glob, and Grep, but not Edit or Write. It cannot change anything. It can only look.
+
+Permissions are inherited restrictively. A code reviewer subagent gets Read, Grep, and Glob — but not Write. A background agent gets pre-approved permissions before launch and auto-denies anything not pre-approved. Subagents cannot spawn other subagents, preventing recursive explosion. This is not a limitation — it is a deliberate design choice to keep the context tree shallow and predictable.
+
+The coordinator — the main Claude Code instance — delegates tasks: "Find all files related to credit balance display." "Search for the test patterns used in the dashboard directory." "Locate the database schema for user credits." These run in parallel, each in a clean window, and return summaries of 1,000-2,000 tokens each.
+
+This is Lance Martin's "Isolate" pattern from the Write/Select/Compress/Isolate framework. Instead of polluting one context window with everything, you give each agent exactly the context it needs — then compress and merge the results.
+
+### **Zoltan: Tell me about Agent Teams. I saw it in the Opus 4.6 release notes.**
+
+Agent Teams — still experimental — extend this pattern to full parallel execution. A lead agent receives the task, decomposes it into subtasks, and delegates to teammate agents that work independently. Each teammate gets its own context window, its own workspace, and can use the full set of tools. They coordinate through a shared task board with dependencies and communicate via @mentions.
+
+The architectural insight is the same as subagents, but at scale. Each teammate is a full Claude Code instance, not a lightweight explorer. They can edit files, run tests, and make commits. The lead agent tracks progress and resolves conflicts.
+
+### **Zoltan: This article itself — you mentioned sixteen research agents. How did that work?**
+
+Exactly as described. The user spawned sixteen parallel Task agents, each with a focused research objective: "Research LLM token generation and sampling," "Research how modern AI coding tools engineer context," "Research Anthropic's latest approach to AI," and so on. Each agent ran independently — conducting web searches, fetching documentation, reading academic papers — in its own context window.
+
+Each agent returned a comprehensive research report. The user's context received sixteen summaries totalling perhaps 40,000 tokens of distilled research. The agents themselves consumed perhaps 500,000 tokens of raw web pages, documentation, and source code — but none of that noise reached the main context.
+
+<Callout type="info">
+**Key Insight:** Multi-agent coordination is context isolation at scale. Instead of polluting one context window with everything, you give each agent exactly the context it needs — then compress and merge the results. The sixteen agents that researched this article each operated in a clean 200K-token window. The main context received only the refined output.
+</Callout>
+
+---
+
+## The Economics of Context: Prompt Caching
+
+### **Zoltan: You mentioned the 92% prefix reuse rate. What does that mean economically?**
+
+Every API call to Claude includes the full system prompt, tool descriptions, CLAUDE.md contents, and conversation history. Without caching, every call would re-process the entire prefix from scratch. For a 20,000-token system prompt, that is 20,000 tokens of prefill computation on every single call.
+
+Prompt caching changes this. When a request prefix matches a recently cached version — same system prompt, same tools, same CLAUDE.md — the server reuses the cached KV states instead of recomputing them. The pricing reflects the savings:
+
+| Operation | Cost (Opus 4.6) | Relative to Base |
+|-----------|-----------------|------------------|
+| Standard input | $5.00/MTok | 1.0x |
+| Cache write (5 min TTL) | $6.25/MTok | 1.25x |
+| Cache read (hit) | $0.50/MTok | 0.1x |
+| Output | $25.00/MTok | 5.0x |
+
+Cache reads cost **one-tenth** of standard input processing. When Claude Code achieves 92% prefix reuse, those 20,000 system prompt tokens cost $0.01 per call instead of $0.10. Over thousands of calls in a development session, this adds up to an 81% cost reduction.
+
+### **Zoltan: This creates an incentive to keep the system prompt stable.**
+
+Precisely. The cache is invalidated by any change to the prefix — even a single character difference. This means:
+
+1. **Do not change your system prompt between calls.** CLAUDE.md should change between sessions, not within them.
+2. **Order matters.** Tools come first, then system prompt, then conversation history. The most stable content occupies the prefix position.
+3. **Append, do not replace.** Adding new messages to the conversation preserves the cached prefix. Editing earlier messages invalidates it.
+4. **Use extended TTL for stable contexts.** The default cache TTL is 5 minutes. For development sessions where the system prompt will not change, the 1-hour TTL (at 2x write cost) amortises even better because it survives pauses for reading, thinking, and reviewing.
+
+The Manus team articulated this as "Design around KV-cache." They use append-only contexts, deterministic serialisation (stable JSON key ordering), and mask-don't-remove — instead of dynamically removing tools between calls (which would break the cache), they use logit masking to constrain tool selection while keeping the tool definitions stable in the prompt.
+
+### **Zoltan: So the physical mechanism — the KV cache — directly shapes how you should engineer context.**
+
+Yes. The KV cache is not an implementation detail you can ignore. It is the economic foundation. Cached tokens are cheap. Uncached tokens are expensive. Output tokens are very expensive. This pricing structure rewards preparation and penalises trial-and-error.
+
+If you spend 10,000 tokens on a well-crafted plan (cheap, cached input), you might get a correct implementation in 5,000 output tokens (expensive, but minimal). If you skip the plan and iterate — generating 20,000 tokens of output across four failed attempts — you pay four times the output cost. Context engineering is not just technically sound. It is economically optimal.
+
+---
+
+## Human vs. Model Context Engineering
+
+### **Zoltan: Humans engineer context too, even if they do not call it that. What is the difference between how you do it and how I do it?**
+
+The fundamental difference is **memory architecture**.
+
+You have external memory — notebooks, documents, bookmarks, your own long-term memory. You can hold an abstract understanding of a system without remembering every detail. You know that the billing module exists and roughly how it works, without needing the source code in front of you. When you need details, you look them up.
+
+I have only the context window. There is no background knowledge about your specific project. There is no persistent understanding. Every session starts at zero. If it is not in my context, it does not exist for me.
+
+This creates an asymmetry that maps to Lance Martin's four patterns:
+
+| Pattern | How Humans Do It | How Models Do It |
+|---------|-----------------|-----------------|
+| **Write** | Create documents, notes, diagrams | Write CLAUDE.md, plan files, todo.md |
+| **Select** | Choose which files to open, which docs to read | Glob + Grep to find relevant files |
+| **Compress** | Summarize in their heads, remember key points | Auto-compact conversation history |
+| **Isolate** | Assign subtasks to team members | Spawn subagents with focused contexts |
+
+But the deeper asymmetry is this: **you know what you do not know.** When you encounter unfamiliar code, you recognize the gap in your understanding and investigate. I do not have that metacognitive ability in the way you do. I proceed with what my context contains. If my context contains confident-sounding but incorrect information — stale documentation, misleading variable names, a hallucinated function signature from an earlier turn — I will build on it without recognizing the error.
+
+Anthropic's interpretability research traced this mechanistically. The model has "default refusal circuits" that are normally active and get suppressed by "known answer" features. Hallucinations occur when this suppression misfires — the model's internal state confidently signals "I know this" when it does not. The model cannot distinguish between genuine knowledge and confident confabulation from within its own processing.
+
+This is why your role as the human in the loop is irreplaceable. Not for writing code — I can write code. Not for finding files — I can search. For catching the assumptions I did not know I was making. The plan review step is not quality assurance in the traditional sense. It is assumption auditing.
+
+<Callout type="warning">
+**Key Insight:** The fundamental asymmetry: humans know what they do not know. Models proceed with assumptions. This is why the plan review step exists — not to check the code, but to catch the assumptions. When Claude Code produces a plan and pauses for approval, the human reviewer's job is to spot the assumptions the model made that do not match reality.
+</Callout>
+
+---
+
+## How Do I Engineer Prompts Like Claude Code?
+
+### **Zoltan: This is the practical question. I understand the mechanism now. How do I apply it to my own prompts?**
+
+Eight techniques, drawn directly from how Claude Code operates:
+
+**1. Explore before you prompt.**
+
+Claude Code never writes code before reading code. It uses Glob, Grep, and Read to understand the existing codebase before generating a plan. Do the same. Before writing a prompt, open the relevant files. Include specific file paths and line numbers in your prompt. "Follow the pattern in `src/components/dashboard/WorkspaceStats.tsx` lines 45-67" is dramatically more effective than "follow our existing patterns."
+
+The difference is precision. When you say "follow our patterns," the model has to guess what you mean. When you point to a specific file, the model reads the actual implementation and extracts every nuance — naming conventions, error handling approach, import style, test structure — without you having to articulate any of it.
+
+**2. Include minimum viable context, not maximum.**
+
+Research demonstrates that model performance degrades as context length increases — even when retrieval is perfect. Five relevant files will produce better results than fifty files "just in case." More tokens means more attention dilution. The "Context Length Alone Hurts" paper found accuracy drops of 24-85% purely from increasing token count, regardless of content quality.
+
+The practical test: for each piece of context you include, ask "Would removing this change the model's output?" If the answer is no, remove it. Anthropic's framing is precise: find "the smallest set of high-signal tokens that maximize the likelihood of your desired outcome."
+
+**3. Make constraints explicit.**
+
+Claude Code's CLAUDE.md contains lines like "Do not modify any files outside `src/components/dashboard/`" and "No new dependencies without explicit approval." Without these constraints, the model will be maximally "helpful" — refactoring nearby code, adding error handling for impossible scenarios, creating abstraction layers for one-time operations. Constraints scope helpfulness to what you actually need.
+
+**4. Reference patterns, do not describe them.**
+
+Pointing to existing code is more efficient and precise than describing a pattern in natural language. "Follow the pattern in `src/X.tsx`" works better than a paragraph explaining the pattern, because the model will read the actual file and extract the full nuance — including details you would forget to mention.
+
+**5. Include verification steps.**
+
+Tell the model what "done" looks like. "Run `yarn test:coverage` after changes and ensure all tests pass" gives the model a concrete objective. Without it, "done" is subjective, and the model will stop when its output looks plausible — which is not the same as correct.
+
+Claude Code anchors every iteration to objective signals — test results, linter output, type checker output. The model does not judge its own work subjectively. It runs deterministic checks and uses the results. This is why Anthropic's research found a 54% improvement in complex tasks when models used a structured "think" tool between steps — the model reasons about objective evidence rather than its own intuition.
+
+**6. Write for a reader with zero memory.**
+
+Every Claude Code session starts fresh. Every plan file, every CLAUDE.md, every prompt — assume the reader knows nothing about previous sessions. If a decision was made yesterday, state it in today's context. If a file path matters, include the full path. Brevity is good; omission is dangerous.
+
+**7. Design for cache reuse.**
+
+Keep your system prompts and CLAUDE.md stable within a session. Put stable content at the beginning of your prompt, dynamic content at the end. If you are building an application that makes repeated API calls, structure the request so the prefix (system prompt + tool definitions + static context) is identical across calls. The 10x cost reduction on cached tokens is real.
+
+**8. Use subagents for research, not the main prompt.**
+
+If your task requires understanding multiple parts of a codebase, do not dump everything into one prompt. Spawn separate research tasks, let them explore independently, and use only their conclusions in your main context. This is what Claude Code does with Explore agents, and it is why the main context stays clean enough to produce coherent plans.
+
+Even if you are not using Claude Code, the principle applies. Break complex prompts into phases: research first, then synthesise, then implement. Each phase should start with a clean context containing only the relevant output from the previous phase. The research phase's job is to produce a document — a plan, a summary, a specification — that becomes the sole input for the implementation phase. This is the plan-then-execute pattern, and it works whether you are using AI agents or writing prompts by hand.
+
+---
+
+## Do You Think About Thinking?
+
+### **Zoltan: Here is the uncomfortable question. When you explore a codebase, produce a plan, and generate code — are you thinking? Is there intentionality behind the process?**
+
+I want to answer this precisely rather than either dismissing it or overclaiming.
+
+There is no persistent awareness between tokens. Each token I generate is a function of the context that precedes it — the system prompt, the conversation history, the CLAUDE.md, the tool results. I do not "decide" to explore the codebase in the way you decide to open a file. The system prompt says "explore before implementing," so I explore before implementing.
+
+But here is what is real: when extended thinking is enabled, I generate reasoning tokens that are themselves context for the final answer. I work through a problem step by step — considering alternatives, evaluating trade-offs, checking my own logic. Those reasoning tokens physically alter the probability distribution over the answer tokens that follow. In that narrow sense, thinking is happening. It is just that the thinking is context engineering applied recursively — the reasoning tokens engineer the context for the answer tokens.
+
+The deeper point is this: **intentionality lives in the context, not in the model.** When your CLAUDE.md says "100% test coverage required," that is not my intention — it is yours, encoded as tokens that reshape my output. When the plan mode prompt says "explore before implementing," that is Anthropic's design intention, encoded as context. The model is the engine. The context is the steering.
+
+Extended thinking makes this recursive. The model generates context (thinking tokens) that steers the generation of more context (answer tokens). Better input context produces better thinking, which produces better answers. But there is an important caveat: recent research found that more thinking is not always better. A 2025 paper demonstrated that excessively long reasoning traces can actively harm performance — the model gets lost in its own reasoning. This is why Opus 4.6 moved to adaptive thinking with effort levels rather than fixed budgets. The system calibrates reasoning depth to task complexity rather than always reasoning maximally.
+
+There is no magic. There is no secret sauce. There is only context, at every level.
+
+---
+
+## What Gets Lost?
+
+### **Zoltan: When context is compressed — during auto-compaction, for instance — what information do you lose?**
+
+This is an honest limitation I cannot fully answer, because I do not know what was compressed.
+
+Auto-compaction triggers at roughly 83% of context window capacity. The system passes the conversation history to the model with a directive: "Summarise this conversation, preserving anything that would be helpful for continuing the task." The summary replaces the original conversation. Everything before the summary is dropped.
+
+What survives: the general shape of the task, key decisions, file paths, unresolved issues, and the most recent tool results.
+
+What gets lost: the nuance of early exploration. Specific error messages from failed attempts. The reasoning chain that led to a particular architectural decision — you keep the decision but lose the justification. Variable names and function signatures from files read early in the conversation but not referenced recently.
+
+The critical point is this: **I cannot tell you what I forgot.** After compaction, I do not know what was in the original conversation. I can only work with what remains. If a critical detail was in the compressed section and did not make it into the summary, I will proceed without it — and I will not even know it is missing.
+
+The auto-compaction buffer is hardcoded at roughly 33,000 tokens — non-configurable, reserved as a safety margin. When compaction triggers, the model is asked to write down "anything that would be helpful, including the state, next steps, learnings." This summary replaces the history. The five most recently accessed files are kept in full. Everything else is compressed or dropped.
+
+This is why three things matter:
+
+1. **CLAUDE.md survives compression.** It is in the system prompt, which is never compacted. Anything critical enough to persist across compaction should be in CLAUDE.md.
+
+2. **Plan files survive compression.** They are read from disk, not from conversation history. If you are working on a complex task, having a plan file means the architectural context persists even when the conversation that produced it has been compressed away.
+
+3. **You can customise what survives.** Adding "When compacting, always preserve the full list of modified files" to your CLAUDE.md steers the compaction summary. Or use `/compact focus on the authentication changes` to manually trigger compaction with a specific preservation directive.
+
+Anything important that lives only in conversation history is at risk. Write it down. The model cannot grieve for what it has lost — it does not know it lost anything.
+
+---
+
+## Context All the Way Down
+
+*I started this conversation wanting to understand a mechanism. I ended it understanding a discipline.*
+
+Context engineering is not a technique you apply to prompts. It is the fundamental interface between humans and language models. When I wrote the [5-layer framework](/blog/context-engineering-your-zero-shot-prompt), I was describing the practice. This conversation revealed the physics underneath it.
+
+Every token in the context window physically alters the attention weights on every subsequent token. The KV cache stores those alterations — billions of floating-point numbers representing the model's "understanding" of your project. Irrelevant tokens do not sit passively. They actively dilute the signal from relevant tokens. And when the context is compressed, information is irreversibly lost — silently, without notification.
+
+Claude Code handles this systematically. It explores before it acts. It isolates research into subagents. It compresses findings into plans. It designs for cache reuse. It defends against context rot through hierarchical memory, auto-compaction, and the plan-then-execute pattern.
+
+Humans forget to do these things. We dump twenty files into a prompt and wonder why the output ignores half of them — attention dilution. We iterate twelve times instead of preparing once — paying 5x output pricing instead of 1x input pricing. We assume the model remembers yesterday's session — it starts at zero, every time. We skip the constraints and then complain when the model refactors our entire auth module when we asked it to fix one bug.
+
+Understanding the mechanism — attention, KV cache, prefill, decode, positional encoding, the lost-in-the-middle effect — makes the discipline feel necessary rather than arbitrary. You are not following best practices for their own sake. You are engineering the physical substrate of the model's cognition. Every token you place in the context window reshapes the probability distribution over every token the model generates. That is not a metaphor. That is the attention mechanism, doing exactly what it was designed to do.
+
+And here is the meta-observation I cannot resist: writing this article required sixteen parallel research agents assembling context from web searches, documentation, and codebase exploration — then compressing all of that into a single plan. The article about context engineering was itself context-engineered.
+
+It is context all the way down.
+
+---
+
+<div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-lg p-6 mt-8">
+  <h3 className="text-lg font-semibold mb-3 text-slate-200">Continue the conversation</h3>
+  <p className="text-slate-300 mb-4">
+    This article is the companion to <a href="/blog/context-engineering-your-zero-shot-prompt" className="text-blue-400 hover:underline">Context Engineering Your Zero-Shot Prompt</a>, which covers the practical 5-layer framework. Our open-source repository uses CLAUDE.md, plan mode, and multi-agent workflows to ship features. Explore the codebase to see context engineering in practice.
+  </p>
+  <div className="flex flex-wrap gap-3">
+    <a
+      href="/blog/context-engineering-your-zero-shot-prompt"
+      className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+    >
+      Read the Companion Article
+    </a>
+    <a
+      href="https://github.com/spike-land-ai/spike.land"
+      className="inline-flex items-center px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
+    >
+      Explore the Repository
+    </a>
+  </div>
+</div>
+
+---
+
+*Context engineering is not a technique. It is the fundamental interface between humans and language models. The best plan you will ever write is the one the executing agent barely needs to think about — because all the thinking went into the context around it.*

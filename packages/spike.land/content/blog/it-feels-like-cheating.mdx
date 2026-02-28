@@ -1,0 +1,357 @@
+---
+title: "It Feels Like Cheating (Because It Is)"
+slug: "it-feels-like-cheating"
+description: "How I deleted my E2E tests, rebuilt my API in two days, and stopped pretending code is precious. The BAZDMEG Method's radical conclusion: code is disposable."
+date: "2026-02-15"
+author: "Zoltan Erdos"
+category: "Developer Experience"
+tags: ["testing", "mcp", "bazdmeg", "architecture", "agents", "ci-cd", "philosophy"]
+featured: true
+---
+
+## The Confession
+
+I need to tell you something.
+
+Every morning I sit down with my coffee. I open Claude Code. I give it the
+requirements for a feature. Twenty minutes later the feature exists. Tests pass.
+CI is green. I ship it.
+
+Then I close the laptop and take my dog for a walk and the whole time I am
+thinking the same thing. I cheated. That was not real work. I skipped something.
+Somebody is going to find out.
+
+I have been feeling this way for months. The guilt shows up every time something
+works on the first try. Every time I ship before lunch. Every time I look at my
+commit history and see twelve features in a day and think, there is no way this
+is legitimate.
+
+It got worse. I started downplaying it. "Oh, this feature was simple." It was
+not simple. It had auth flows, database migrations, edge case handling, and a
+full test suite. But because I did not suffer building it, I could not accept
+that it was real.
+
+I thought the feeling would go away. It did not. So I started paying attention
+to it.
+
+The feeling has a name. It is called a paradigm shift arriving before the
+culture is ready. When something feels too easy, it is not because you are
+cheating. It is because you eliminated a category of work that used to be hard.
+The guilt is your old identity protesting. Your brain is comparing your output
+against the amount of suffering it expects, and the numbers do not match.
+
+I am going to tell you what I did in two days that made the feeling permanent.
+
+## The Two-Day Delete
+
+Here is what happened.
+
+I looked at my E2E test suite. Playwright tests. Dozens of them. Selectors
+waiting to break. Browser instances spinning up and down. Tests that took four
+minutes to run and flaked on Tuesdays for no reason anyone could explain.
+
+I had a test that clicked a button, waited for a modal, filled in three fields,
+clicked submit, waited for a toast notification, and then checked a database
+value. The test was sixty lines long. Fifty-five of those lines were about the
+browser. Five were about the business logic. The ratio was insane.
+
+Then I looked at my business logic. Validation rules. State transitions.
+Authorization checks. Contract enforcement. The stuff that actually matters. The
+five lines buried inside sixty lines of browser ceremony.
+
+I asked myself: what if I just tested the five lines?
+
+I moved all of it into MCP tools.
+
+Every piece of business logic became an MCP tool with a typed Zod schema, a
+handler function, and a structured response. Input validated. Output typed.
+Contract enforced.
+
+Then I deleted the E2E tests.
+
+All of them.
+
+I replaced them with MCP tool tests that run in milliseconds. Not seconds.
+Milliseconds. No browser. No DOM. No network. No animation timing. No selectors
+that break when someone changes a CSS class.
+
+One hundred percent coverage on business logic. Less than forty-eight hours.
+
+Here is the key insight that made it all click. The same MCP handler that my
+React components call in production is the same handler my tests validate. Not a
+mock. Not a copy. Not an approximation. The exact same function. The exact same
+Zod schema. The exact same contract.
+
+One source of truth. Two consumers. Production and tests share the same
+interface.
+
+I sat there staring at my screen. I had spent weeks writing Playwright tests
+that tested the browser's ability to click buttons. The actual business logic —
+the part that mattered — was tested as a side effect. An afterthought. I had
+been testing the frame instead of the painting.
+
+When I realized that, I said a word in Hungarian that I will not translate here.
+
+## The Hourglass
+
+The testing pyramid was always the wrong shape.
+
+The pyramid says: lots of unit tests at the bottom, some integration tests in
+the middle, a few E2E tests at the top. This made sense when humans wrote every
+line and code was expensive to produce.
+
+AI changed the economics.
+
+The right shape is an hourglass.
+
+```
+         +---------------------+
+         |   E2E Specs (heavy)  |  <-- Humans write these
+         |   User flows as       |
+         |   Given/When/Then     |
+         +----------+-----------+
+                    |
+            +-------v-------+
+            |  UI Code       |  <-- AI generates this
+            |  (thin,        |    Disposable.
+            |   disposable)  |    Regenerate, don't fix.
+            +-------+-------+
+                    |
+    +---------------v---------------+
+    |  Business Logic Tests (heavy)  |  <-- MCP tools + unit tests
+    |  Validation, contracts, state   |    Bulletproof.
+    |  transitions, edge cases        |    Never skip.
+    +-------------------------------+
+```
+
+Heavy on top. Heavy on bottom. Thin and disposable in the middle.
+
+The top is E2E specs. Humans write these. Given the user is logged in, when they
+click checkout, then the order is placed. These describe what should happen. They
+are requirements in executable form.
+
+The bottom is MCP tool tests. Business logic. Validation rules. State
+transitions. Authorization. Contract enforcement. These prove the system works.
+They run in milliseconds. They never flake.
+
+The middle is UI code. AI generates this. It is disposable. If a component
+breaks, you do not debug it. You regenerate it. Delete. Print again.
+
+Seventy percent MCP tool tests. Twenty percent E2E specs. Ten percent UI
+component tests. That is the split.
+
+The middle is disposable because if you know *why* the code exists (top) and you
+can *prove* it works (bottom), the code itself is just a printout. A rendering.
+An artifact. It has no intrinsic value. The value lives in the requirements and
+the tests.
+
+## The Triple-Duty Interface
+
+The MCP tools do not just serve two masters. They serve three.
+
+**Production API.** React components call them. The UI calls `file_guard` to
+check changes. It calls the auth tools to verify sessions. It calls the business
+logic tools to process user actions. These are the production endpoints.
+
+**Test harness.** Vitest validates them. Every tool has typed input and output.
+Every schema is enforced. Every edge case is covered. The tests run against the
+exact same code path that production uses. Not a mock. Not a stub. The real
+thing.
+
+**Agent dev tools.** Claude Code uses them during development. The agent can call
+`file_guard` to pre-check a file change before committing. It can run the exact
+MCP tool it just built to verify the output matches the schema. It can explore
+database state. It can check auth flows. It can validate business rules. All
+through the same interface the production app uses.
+
+This is why Claude Code goes three to five times faster on this codebase.
+
+The agent is not writing code blindly and hoping CI catches mistakes twenty
+minutes later. It has surgical instruments. It can test its own work in real
+time. It can verify a business rule works before it writes the component that
+calls it. It can validate an auth flow before it builds the page that depends on
+it.
+
+It is like giving a surgeon an MRI machine in the operating room instead of
+making them wait for results next Tuesday.
+
+When the tools serve three purposes simultaneously, you do not have three
+codebases to maintain. You have one. And that one codebase is the simplest
+version of the system, because every tool is just a function with a typed schema
+and a handler. No framework overhead. No ceremony.
+
+## The Infinitely Fast CI Server
+
+Someone told me once: "You get an infinitely fast CI server." I did not
+understand what they meant at the time. Now I do.
+
+Think about what happens when CI is slow.
+
+When CI takes thirty minutes, your bug has already compounded. By the time you
+learn about it, you have built three more features on top of broken foundations.
+Now you are doing archaeology. Which of these forty-seven commits broke it? Was
+it this one? No. This one? Maybe. This one? Ah. It was actually two commits
+interacting in a way nobody predicted.
+
+When CI takes ten seconds, the nail touches the tire and you hear it
+immediately. No compounding. No archaeology. No "which commit broke it." You
+know exactly what you just changed. You fix it and move on.
+
+The ten-second rule changes everything.
+
+If your CI pipeline runs in under ten seconds, skip branches entirely. Commit
+directly to main. Trunk-based development. The same pattern Google and Meta use,
+but instead of a thousand engineers making it work, you have a fast test suite
+making it work.
+
+The math is simple. Fifty commits a day at five seconds each is four minutes of
+waiting. Branching overhead at five minutes per change is two hundred fifty
+minutes of ceremony. Four minutes versus four hours. The choice is not a choice.
+
+And here is the part that connects back to the hourglass. MCP tool tests are
+what make ten-second CI possible. You cannot get ten-second CI if your tests
+spin up browsers. You cannot get ten-second CI if your tests make network calls.
+You can get ten-second CI if your tests call a function, validate the output,
+and move on.
+
+The hourglass makes the speed possible. The speed makes trunk-based development
+possible. Trunk-based development makes rapid iteration possible. Rapid
+iteration makes AI development possible. It all connects. Pull one piece out and
+the whole thing slows down. Put them all together and you get something that
+feels like cheating.
+
+## Why It Feels Like Cheating
+
+Every paradigm shift in the history of programming felt like cheating when it
+arrived.
+
+Garbage collection. "You mean I do not manage memory anymore? That is not real
+programming." Millions of developers felt guilty about not calling `free()`.
+Then they shipped faster and the guilt went away.
+
+ORMs. "You mean I do not write SQL anymore? That is dangerous." Developers felt
+guilty about letting a framework write their queries. Then they shipped faster
+and the guilt went away.
+
+CI/CD. "You mean I do not deploy manually anymore? What if something goes
+wrong?" Developers felt guilty about automated deployments. Then they shipped
+faster and the guilt went away.
+
+Now it is code itself. "You mean I do not write the code anymore?"
+
+Yes. That is what I mean.
+
+And yes, the feeling is the same. The exact same cocktail of guilt and
+exhilaration. The exact same voice in your head saying this cannot be right,
+this is too easy, I must be missing something.
+
+You are not missing something. You are gaining something. You are gaining back
+all the time you used to spend on work that was never the point.
+
+The guilt is the signal. When something feels too easy, it is because you
+eliminated a category of work that was never the point. Memory management was
+never the point. SQL was never the point. Deployment was never the point.
+
+Code was never the point.
+
+Requirements are the product. Code is
+just the current rendering of those requirements. A printout. An artifact. If
+you can regenerate it in twenty minutes from clear requirements and proven tests,
+what exactly were you protecting?
+
+The answer is: your identity. The idea that your value comes from the code you
+write. That the act of typing is the act of creating. That the artifact is the
+art.
+
+It is not. The art is knowing what to build. The art is understanding the
+problem so deeply that you can describe it precisely enough for a machine to
+build it correctly on the first try. That is harder than coding. Much harder.
+
+Try it. Sit down and describe a feature so precisely that an AI builds it
+perfectly on the first attempt. No ambiguity. No assumptions. Every edge case
+documented. Every failure mode specified. Every interaction defined.
+
+You will discover that writing requirements at this level of precision is the
+hardest thing you have ever done as a developer. Harder than any algorithm.
+Harder than any architecture decision. Because it requires you to actually
+understand the problem completely, not just well enough to start typing.
+
+## The Name
+
+Bazdmeg is Hungarian. I am not going to translate it.
+
+If you know, you know. If you do not know, ask a Hungarian friend. Watch their
+face. That is the appropriate reaction to realizing that the code you spent
+twenty years learning to write is the least important part of what you build.
+
+I named the methodology after an expletive because the irreverence is the point.
+If your methodology has a polite name, you are still pretending. You are still
+treating code like something sacred. It is not sacred. It is disposable.
+
+Every serious methodology in software has a serious name. Agile. Scrum. Extreme
+Programming. Lean. They all sound like they belong in a consulting slide deck.
+They are designed to make managers comfortable.
+
+The BAZDMEG Method is not designed to make anyone comfortable. It is designed to
+make you confront the thing you do not want to confront: your code does not
+matter. Your tests matter. Your requirements matter. Your understanding of the
+problem matters. The code is a byproduct.
+
+Seven principles. Born from pain. Tested in production.
+
+1. Requirements are the product.
+2. Discipline before automation.
+3. Context is architecture.
+4. Test the lies.
+5. Orchestrate, do not operate.
+6. Trust is earned in PRs.
+7. Own what you ship.
+
+That is the whole method in one breath. Each one earned the hard way. Each one a
+response to a specific failure I experienced, documented, and swore I would
+never repeat.
+
+The details are documented. The checklists exist. The workflow is repeatable.
+But the spirit is in the name. Say it out loud. If it makes you uncomfortable,
+good. That discomfort is the sound of a sacred cow dying.
+
+## The Uncomfortable Question
+
+If I can delete my codebase and rebuild it in twenty minutes, what exactly was I
+protecting all those years?
+
+Not the code. That is disposable. I just proved it.
+
+Not the tests. Those still exist and they are stronger than ever. Milliseconds
+instead of minutes. One hundred percent coverage instead of whatever-we-could-get.
+
+Not the requirements. Those are documented. Clear acceptance criteria. Typed
+schemas. Executable specs.
+
+I was protecting my ego.
+
+The idea that my value comes from the code I write. That the hours spent
+debugging are a badge of honor. That the complexity I can hold in my head makes
+me special. That suffering is proof of seriousness.
+
+It does not. None of it does.
+
+What makes me valuable is understanding problems. Describing solutions
+precisely. Building systems where AI can do the heavy lifting while I do the
+thinking. Knowing what to build, why to build it, and how to prove it works.
+
+The code? The code is a printout. Regenerate it. Delete it. Print it again. It
+does not care. It has no feelings. It has no memory of how hard it was to write.
+It just runs or it does not.
+
+Let go of that, and it stops feeling like cheating.
+
+It starts feeling like clarity.
+
+And clarity, it turns out, is the most productive state I have ever worked in.
+
+---
+
+*Zoltan Erdos is a developer based in Brighton, UK, building
+[spike.land](https://spike.land). He named his methodology after a Hungarian
+expletive because he believes in honesty.*

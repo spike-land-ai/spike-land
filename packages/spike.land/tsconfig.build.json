@@ -1,0 +1,40 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true,
+    "incremental": true,
+    "tsBuildInfoFile": "tsconfig.build.tsbuildinfo"
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "next.config.ts",
+    "instrumentation.ts",
+    "tailwind.config.ts",
+    "prisma.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "packages",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/*.stories.ts",
+    "**/*.stories.tsx",
+    "**/*.example.ts",
+    "**/*.example.tsx",
+    "src/test-utils",
+    "src/components/storybook",
+    "src/app/storybook",
+    "test-db.ts",
+    "vitest*",
+    "next.config.test.ts"
+  ]
+}
