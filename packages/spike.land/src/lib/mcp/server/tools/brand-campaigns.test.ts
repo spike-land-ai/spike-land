@@ -2,12 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /* ── Prisma mock ────────────────────────────────────────────────────────── */
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   userPreference: {
     findUnique: vi.fn(),
     upsert: vi.fn(),
   },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -58,8 +60,7 @@ describe("brand-campaigns tools", () => {
 
   describe("brand_create_campaign", () => {
     it("should create a campaign and return its ID and details", async () => {
-      const handler = registry.handlers.get("brand_create_campaign")!;
-      const result = await handler({
+      const result = await registry.call("brand_create_campaign", {
         name: "Summer Sale",
         description: "Promote summer collection across social channels",
         platform: "twitter",
@@ -79,8 +80,7 @@ describe("brand-campaigns tools", () => {
     });
 
     it("should create a campaign without optional fields", async () => {
-      const handler = registry.handlers.get("brand_create_campaign")!;
-      const result = await handler({
+      const result = await registry.call("brand_create_campaign", {
         name: "Brand Awareness",
         description: "General brand awareness push",
         platform: "all",
@@ -94,8 +94,7 @@ describe("brand-campaigns tools", () => {
     });
 
     it("should reject an invalid ISO date in start_date", async () => {
-      const handler = registry.handlers.get("brand_create_campaign")!;
-      const result = await handler({
+      const result = await registry.call("brand_create_campaign", {
         name: "Bad Date Campaign",
         description: "Campaign with invalid date",
         platform: "linkedin",
@@ -115,8 +114,7 @@ describe("brand-campaigns tools", () => {
         value: makeCampaignRow(),
       });
 
-      const handler = registry.handlers.get("brand_create_campaign")!;
-      await handler({
+      await registry.call("brand_create_campaign", {
         name: "Second Campaign",
         description: "Follow-up campaign",
         platform: "facebook",
@@ -136,8 +134,7 @@ describe("brand-campaigns tools", () => {
         value: makeCampaignRow(),
       });
 
-      const handler = registry.handlers.get("brand_list_campaigns")!;
-      const result = await handler({});
+      const result = await registry.call("brand_list_campaigns", {});
 
       const text = getText(result);
       expect(text).toContain("Campaigns (1)");
@@ -146,8 +143,7 @@ describe("brand-campaigns tools", () => {
     });
 
     it("should return empty message when no campaigns exist", async () => {
-      const handler = registry.handlers.get("brand_list_campaigns")!;
-      const result = await handler({});
+      const result = await registry.call("brand_list_campaigns", {});
 
       expect(getText(result)).toContain("No Campaigns Found");
     });
@@ -179,8 +175,7 @@ describe("brand-campaigns tools", () => {
       ]);
       mockPrisma.userPreference.findUnique.mockResolvedValue({ value: two });
 
-      const handler = registry.handlers.get("brand_list_campaigns")!;
-      const result = await handler({ status: "active" });
+      const result = await registry.call("brand_list_campaigns", { status: "active" });
 
       const text = getText(result);
       expect(text).toContain("Active One");
@@ -214,8 +209,7 @@ describe("brand-campaigns tools", () => {
       ]);
       mockPrisma.userPreference.findUnique.mockResolvedValue({ value: two });
 
-      const handler = registry.handlers.get("brand_list_campaigns")!;
-      const result = await handler({ platform: "tiktok" });
+      const result = await registry.call("brand_list_campaigns", { platform: "tiktok" });
 
       const text = getText(result);
       expect(text).toContain("TikTok Campaign");
@@ -238,8 +232,7 @@ describe("brand-campaigns tools", () => {
       ]);
       mockPrisma.userPreference.findUnique.mockResolvedValue({ value: row });
 
-      const handler = registry.handlers.get("brand_list_campaigns")!;
-      const result = await handler({ platform: "instagram" });
+      const result = await registry.call("brand_list_campaigns", { platform: "instagram" });
 
       expect(getText(result)).toContain("All Platforms");
     });
@@ -253,8 +246,7 @@ describe("brand-campaigns tools", () => {
         value: makeCampaignRow(),
       });
 
-      const handler = registry.handlers.get("brand_get_campaign_stats")!;
-      const result = await handler({ campaign_id: "cmp_test123_abcde" });
+      const result = await registry.call("brand_get_campaign_stats", { campaign_id: "cmp_test123_abcde" });
 
       const text = getText(result);
       expect(text).toContain("Campaign Stats: Spring Launch");
@@ -267,8 +259,7 @@ describe("brand-campaigns tools", () => {
     });
 
     it("should return NOT_FOUND for an unknown campaign ID", async () => {
-      const handler = registry.handlers.get("brand_get_campaign_stats")!;
-      const result = await handler({ campaign_id: "cmp_does_not_exist" });
+      const result = await registry.call("brand_get_campaign_stats", { campaign_id: "cmp_does_not_exist" });
 
       expect(getText(result)).toContain("NOT_FOUND");
       expect(getText(result)).toContain("cmp_does_not_exist");
@@ -279,9 +270,8 @@ describe("brand-campaigns tools", () => {
         value: makeCampaignRow(),
       });
 
-      const handler = registry.handlers.get("brand_get_campaign_stats")!;
-      const r1 = await handler({ campaign_id: "cmp_test123_abcde" });
-      const r2 = await handler({ campaign_id: "cmp_test123_abcde" });
+      const r1 = await registry.call("brand_get_campaign_stats", { campaign_id: "cmp_test123_abcde" });
+      const r2 = await registry.call("brand_get_campaign_stats", { campaign_id: "cmp_test123_abcde" });
 
       expect(getText(r1)).toEqual(getText(r2));
     });
@@ -295,8 +285,7 @@ describe("brand-campaigns tools", () => {
         value: makeCampaignRow(),
       });
 
-      const handler = registry.handlers.get("brand_generate_variants")!;
-      const result = await handler({ campaign_id: "cmp_test123_abcde" });
+      const result = await registry.call("brand_generate_variants", { campaign_id: "cmp_test123_abcde" });
 
       const text = getText(result);
       expect(text).toContain("A/B Copy Variants for \"Spring Launch\"");
@@ -311,8 +300,7 @@ describe("brand-campaigns tools", () => {
         value: makeCampaignRow(),
       });
 
-      const handler = registry.handlers.get("brand_generate_variants")!;
-      const result = await handler({
+      const result = await registry.call("brand_generate_variants", {
         campaign_id: "cmp_test123_abcde",
         variant_count: 5,
         tone: "playful",
@@ -330,8 +318,7 @@ describe("brand-campaigns tools", () => {
         value: makeCampaignRow(),
       });
 
-      const handler = registry.handlers.get("brand_generate_variants")!;
-      const result = await handler({
+      const result = await registry.call("brand_generate_variants", {
         campaign_id: "cmp_test123_abcde",
         tone: "casual",
         variant_count: 2,
@@ -349,8 +336,7 @@ describe("brand-campaigns tools", () => {
         value: makeCampaignRow({ name: "Winter Wonderland" }),
       });
 
-      const handler = registry.handlers.get("brand_generate_variants")!;
-      const result = await handler({
+      const result = await registry.call("brand_generate_variants", {
         campaign_id: "cmp_test123_abcde",
         variant_count: 2,
       });
@@ -359,8 +345,7 @@ describe("brand-campaigns tools", () => {
     });
 
     it("should return NOT_FOUND for an unknown campaign ID", async () => {
-      const handler = registry.handlers.get("brand_generate_variants")!;
-      const result = await handler({ campaign_id: "cmp_ghost" });
+      const result = await registry.call("brand_generate_variants", { campaign_id: "cmp_ghost" });
 
       expect(getText(result)).toContain("NOT_FOUND");
       expect(getText(result)).toContain("cmp_ghost");

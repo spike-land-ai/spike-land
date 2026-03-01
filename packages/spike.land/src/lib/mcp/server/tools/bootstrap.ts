@@ -26,16 +26,15 @@ export function registerBootstrapTools(
                 settings: z.record(z.string(), z.unknown()).optional().default({}),
             })
             .meta({ category: "bootstrap", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     name,
                     settings,
                 } = input;
 
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
-                    const workspace = await prisma.workspaceConfig.upsert({
+                    const workspace = await ctx.prisma.workspaceConfig.upsert({
                         where: { userId },
                         update: { name, settings: settings as object },
                         create: {
@@ -84,7 +83,7 @@ export function registerBootstrapTools(
                 allowed_urls: z.array(z.string().url()).max(20).optional().default([]),
             })
             .meta({ category: "bootstrap", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     integration_name,
                     credentials,
@@ -92,7 +91,6 @@ export function registerBootstrapTools(
                 } = input;
 
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
                     const storedSecrets: Array<{ name: string; id: string; }> = [];
 
@@ -100,7 +98,7 @@ export function registerBootstrapTools(
                         const secretName = `${integration_name}_${key}`;
                         const { encryptedValue, iv, tag } = encryptSecret(userId, value);
 
-                        const secret = await prisma.vaultSecret.upsert({
+                        const secret = await ctx.prisma.vaultSecret.upsert({
                             where: { userId_name: { userId, name: secretName } },
                             update: {
                                 encryptedValue,
@@ -124,7 +122,7 @@ export function registerBootstrapTools(
                     }
 
                     // Update workspace config with integration metadata
-                    const workspace = await prisma.workspaceConfig.findUnique({
+                    const workspace = await ctx.prisma.workspaceConfig.findUnique({
                         where: { userId },
                     });
 
@@ -135,7 +133,7 @@ export function registerBootstrapTools(
                             secretNames: storedSecrets.map(s => s.name),
                             allowedUrls: allowed_urls,
                         };
-                        await prisma.workspaceConfig.update({
+                        await ctx.prisma.workspaceConfig.update({
                             where: { userId },
                             data: { integrations: integrations as object },
                         });
@@ -179,7 +177,7 @@ export function registerBootstrapTools(
                     .optional(),
             })
             .meta({ category: "bootstrap", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     app_name,
                     description,
@@ -281,19 +279,18 @@ export function registerBootstrapTools(
         freeTool(userId)
             .tool("bootstrap_status", "Get the current workspace setup status: workspace config, secrets, tools, and apps.", {})
             .meta({ category: "bootstrap", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, ctx }) => {
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
                     const [workspace, secretCount, toolCount, apps] = await Promise.all([
-                        prisma.workspaceConfig.findUnique({ where: { userId } }),
-                        prisma.vaultSecret.count({
+                        ctx.prisma.workspaceConfig.findUnique({ where: { userId } }),
+                        ctx.prisma.vaultSecret.count({
                             where: { userId, status: { not: "REVOKED" } },
                         }),
-                        prisma.registeredTool.count({
+                        ctx.prisma.registeredTool.count({
                             where: { userId, status: { not: "DISABLED" } },
                         }),
-                        prisma.app.findMany({
+                        ctx.prisma.app.findMany({
                             where: { userId, deletedAt: null },
                             select: {
                                 id: true,

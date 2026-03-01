@@ -35,7 +35,7 @@ export function registerReactionsTools(
                     .describe("Human-readable description of this reaction"),
             })
             .meta({ category: "reactions", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     sourceTool,
                     sourceEvent,
@@ -44,9 +44,7 @@ export function registerReactionsTools(
                     description,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const reaction = await prisma.toolReaction.create({
+                const reaction = await ctx.prisma.toolReaction.create({
                     data: {
                         userId,
                         sourceTool,
@@ -90,20 +88,18 @@ export function registerReactionsTools(
                     .describe("Maximum results"),
             })
             .meta({ category: "reactions", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     sourceTool,
                     enabled,
                     limit,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
                 const where: Record<string, unknown> = { userId };
                 if (sourceTool !== undefined) where.sourceTool = sourceTool;
                 if (enabled !== undefined) where.enabled = enabled;
 
-                const reactions = await prisma.toolReaction.findMany({
+                const reactions = await ctx.prisma.toolReaction.findMany({
                     where,
                     orderBy: { createdAt: "desc" },
                     take: limit,
@@ -149,14 +145,12 @@ export function registerReactionsTools(
                 reactionId: z.string().describe("ID of the reaction to delete"),
             })
             .meta({ category: "reactions", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     reactionId,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const existing = await prisma.toolReaction.findFirst({
+                const existing = await ctx.prisma.toolReaction.findFirst({
                     where: { id: reactionId, userId },
                 });
 
@@ -172,7 +166,7 @@ export function registerReactionsTools(
                     };
                 }
 
-                await prisma.toolReaction.delete({ where: { id: reactionId } });
+                await ctx.prisma.toolReaction.delete({ where: { id: reactionId } });
 
                 return {
                     content: [
@@ -210,7 +204,7 @@ export function registerReactionsTools(
                     .describe("Maximum results"),
             })
             .meta({ category: "reactions", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     reactionId,
                     sourceTool,
@@ -218,14 +212,12 @@ export function registerReactionsTools(
                     limit,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
                 const where: Record<string, unknown> = { userId };
                 if (reactionId !== undefined) where.reactionId = reactionId;
                 if (sourceTool !== undefined) where.sourceTool = sourceTool;
                 if (isError !== undefined) where.isError = isError;
 
-                const logs = await prisma.reactionLog.findMany({
+                const logs = await ctx.prisma.reactionLog.findMany({
                     where,
                     orderBy: { createdAt: "desc" },
                     take: limit,

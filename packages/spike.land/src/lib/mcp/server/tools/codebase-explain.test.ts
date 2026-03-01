@@ -32,7 +32,6 @@ describe("codebase-explain tools", () => {
 
   describe("explain_overview", () => {
     it("should detect Next.js tech stack from package.json", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = [
         "src/app/page.tsx",
         "src/app/layout.tsx",
@@ -55,14 +54,13 @@ describe("codebase-explain tools", () => {
     });
 
     it("should detect tech from files when no package.json", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = [
         "next.config.ts",
         "tsconfig.json",
         "vitest.config.ts",
         "src/app/page.tsx",
       ];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       const text = getText(result);
       expect(text).toContain("Next.js");
       expect(text).toContain("TypeScript");
@@ -70,7 +68,6 @@ describe("codebase-explain tools", () => {
     });
 
     it("should not duplicate tech detected from both sources", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["next.config.ts", "tsconfig.json"];
       const packageJson = JSON.stringify({
         dependencies: { next: "16.0.0" },
@@ -84,14 +81,13 @@ describe("codebase-explain tools", () => {
     });
 
     it("should analyze directory structure", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = [
         "src/lib/utils.ts",
         "src/lib/api.ts",
         "src/components/Button.tsx",
         "tests/unit.test.ts",
       ];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       const text = getText(result);
       expect(text).toContain("src/lib");
       expect(text).toContain("src/components");
@@ -99,14 +95,13 @@ describe("codebase-explain tools", () => {
     });
 
     it("should show file count statistics", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = [
         "src/a.ts",
         "src/b.ts",
         "src/c.tsx",
         "README.md",
       ];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       const text = getText(result);
       expect(text).toContain("**Total files:** 4");
       expect(text).toContain(".ts");
@@ -114,7 +109,6 @@ describe("codebase-explain tools", () => {
     });
 
     it("should show file extension breakdown", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = [
         "src/a.ts",
         "src/b.ts",
@@ -122,7 +116,7 @@ describe("codebase-explain tools", () => {
         "src/d.css",
         "src/e.json",
       ];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       const text = getText(result);
       expect(text).toContain("Files by Extension");
       expect(text).toContain(".ts");
@@ -130,9 +124,8 @@ describe("codebase-explain tools", () => {
     });
 
     it("should handle invalid package.json gracefully", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["src/index.ts"];
-      const result = await handler({
+      const result = await registry.call("explain_overview", {
         files,
         package_json: "not valid json {{{",
       });
@@ -142,23 +135,20 @@ describe("codebase-explain tools", () => {
     });
 
     it("should detect Docker from files", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["dockerfile", "docker-compose.yml", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       const text = getText(result);
       expect(text).toContain("Docker");
     });
 
     it("should detect GitHub Actions from files", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = [".github/workflows/ci.yml", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       const text = getText(result);
       expect(text).toContain("GitHub Actions");
     });
 
     it("should detect multiple frameworks", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const packageJson = JSON.stringify({
         dependencies: {
           express: "4.18.0",
@@ -181,8 +171,7 @@ describe("codebase-explain tools", () => {
     });
 
     it("should show 'No tech stack detected' when nothing found", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
-      const result = await handler({ files: ["readme.txt"] });
+      const result = await registry.call("explain_overview", { files: ["readme.txt"] });
       const text = getText(result);
       expect(text).toContain("No tech stack detected");
     });
@@ -192,8 +181,7 @@ describe("codebase-explain tools", () => {
 
   describe("explain_module", () => {
     it("should identify module purpose from directory name", async () => {
-      const handler = registry.handlers.get("explain_module")!;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/components",
         files: ["src/components/Button.tsx", "src/components/Card.tsx"],
       });
@@ -203,8 +191,7 @@ describe("codebase-explain tools", () => {
     });
 
     it("should identify test and entry files", async () => {
-      const handler = registry.handlers.get("explain_module")!;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/lib",
         files: [
           "src/lib/index.ts",
@@ -218,7 +205,6 @@ describe("codebase-explain tools", () => {
     });
 
     it("should analyze exports from entry content", async () => {
-      const handler = registry.handlers.get("explain_module")!;
       const entryContent = `
 export function formatDate(date: Date): string {
   return date.toISOString();
@@ -228,7 +214,7 @@ export const MAX_ITEMS = 100;
 
 export default class ApiClient {}
 `;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/utils",
         files: ["src/utils/index.ts"],
         entry_content: entryContent,
@@ -241,13 +227,12 @@ export default class ApiClient {}
     });
 
     it("should analyze dependencies from entry content", async () => {
-      const handler = registry.handlers.get("explain_module")!;
       const entryContent = `
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { helper } from "./helper";
 `;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/services",
         files: ["src/services/index.ts"],
         entry_content: entryContent,
@@ -261,13 +246,12 @@ import { helper } from "./helper";
     });
 
     it("should detect patterns in module", async () => {
-      const handler = registry.handlers.get("explain_module")!;
       const entryContent = `
 import { z } from "zod";
 export const schema = z.object({ name: z.string() });
 export function validate() {}
 `;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/validators",
         files: [
           "src/validators/index.ts",
@@ -285,8 +269,7 @@ export function validate() {}
     });
 
     it("should handle module without entry content", async () => {
-      const handler = registry.handlers.get("explain_module")!;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/hooks",
         files: ["src/hooks/useAuth.ts", "src/hooks/useTheme.ts"],
       });
@@ -299,7 +282,6 @@ export function validate() {}
     });
 
     it("should infer purpose for known directories", async () => {
-      const handler = registry.handlers.get("explain_module")!;
       const knownDirs: Record<string, string> = {
         api: "API routes and handlers",
         middleware: "Request/response middleware",
@@ -307,7 +289,7 @@ export function validate() {}
         mcp: "Model Context Protocol implementation",
       };
       for (const [dir, expected] of Object.entries(knownDirs)) {
-        const result = await handler({
+        const result = await registry.call("explain_module", {
           module_path: `src/${dir}`,
           files: [`src/${dir}/index.ts`],
         });
@@ -316,8 +298,7 @@ export function validate() {}
     });
 
     it("should handle unknown directory names", async () => {
-      const handler = registry.handlers.get("explain_module")!;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/foobar",
         files: ["src/foobar/main.ts"],
       });
@@ -326,12 +307,11 @@ export function validate() {}
     });
 
     it("should detect React Context pattern", async () => {
-      const handler = registry.handlers.get("explain_module")!;
       const entryContent = `
 import { createContext, useContext } from "react";
 export const ThemeContext = createContext({});
 `;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/providers",
         files: ["src/providers/index.tsx"],
         entry_content: entryContent,
@@ -345,13 +325,12 @@ export const ThemeContext = createContext({});
 
   describe("explain_flow", () => {
     it("should extract ES6 imports", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { apiRequest } from "./helpers";
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/components/MyComponent.tsx",
       });
@@ -362,12 +341,11 @@ import { apiRequest } from "./helpers";
     });
 
     it("should extract dynamic imports", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 const prisma = (await import("@/lib/prisma")).default;
 const mod = await import("./heavy-module");
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/services/loader.ts",
       });
@@ -377,12 +355,11 @@ const mod = await import("./heavy-module");
     });
 
     it("should extract require statements", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 const fs = require("node:fs");
 const path = require("node:path");
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "scripts/build.js",
       });
@@ -392,7 +369,6 @@ const path = require("node:path");
     });
 
     it("should extract exports", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export function MyComponent() {
   return <div>Hello</div>;
@@ -404,7 +380,7 @@ export interface MyInterface { id: number; }
 export class MyClass {}
 export default MyComponent;
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/components/MyComponent.tsx",
       });
@@ -418,12 +394,11 @@ export default MyComponent;
     });
 
     it("should extract re-exports", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export { getText, isError } from "./assertions";
 export { createMockRegistry } from "./mock-registry";
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/test-utils/index.ts",
       });
@@ -434,7 +409,6 @@ export { createMockRegistry } from "./mock-registry";
     });
 
     it("should extract function definitions", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -451,7 +425,7 @@ function helperFn() {
 
 export default MyComponent;
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/components/MyComponent.tsx",
       });
@@ -461,7 +435,6 @@ export default MyComponent;
     });
 
     it("should build dependency chain", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -470,7 +443,7 @@ import { validate } from "./validate";
 export function createUser() {}
 export function deleteUser() {}
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/services/user.ts",
       });
@@ -487,12 +460,11 @@ export function deleteUser() {}
     });
 
     it("should handle file with no imports", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export const PI = 3.14159;
 export const E = 2.71828;
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/constants.ts",
       });
@@ -502,12 +474,11 @@ export const E = 2.71828;
     });
 
     it("should handle file with no exports", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 import { init } from "./setup";
 init();
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/bootstrap.ts",
       });
@@ -516,12 +487,11 @@ init();
     });
 
     it("should handle file with no functions", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export const CONFIG = { port: 3000 };
 export type AppConfig = typeof CONFIG;
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/config.ts",
       });
@@ -530,12 +500,11 @@ export type AppConfig = typeof CONFIG;
     });
 
     it("should deduplicate imports from different patterns", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 import { something } from "react";
 const lazy = await import("react");
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/app.tsx",
       });
@@ -549,13 +518,12 @@ const lazy = await import("react");
     });
 
     it("should extract async function definitions", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export async function fetchData() {
   return await fetch("/api");
 }
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/api.ts",
       });
@@ -564,8 +532,7 @@ export async function fetchData() {
     });
 
     it("should show file path in output", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: "const x = 1;",
         file_path: "src/deep/nested/file.ts",
       });
@@ -575,12 +542,11 @@ export async function fetchData() {
     });
 
     it("should handle export { x as y } renaming", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 const internal = () => {};
 export { internal as publicApi };
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/mod.ts",
       });
@@ -589,14 +555,13 @@ export { internal as publicApi };
     });
 
     it("should extract arrow function definitions", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export const fetchUser = async (id: string): Promise<User> => {
   return db.find(id);
 };
 const processItem = (item: Item) => item.value;
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/helpers.ts",
       });
@@ -605,7 +570,6 @@ const processItem = (item: Item) => item.value;
     });
 
     it("should handle file with only internal imports (no external)", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 import { helper } from "./helper";
 import { utils } from "../utils";
@@ -613,7 +577,7 @@ import { config } from "@/lib/config";
 
 export function main() {}
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/main.ts",
       });
@@ -625,14 +589,13 @@ export function main() {}
     });
 
     it("should not duplicate exports across patterns", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export function myFunc() {}
 export function myFunc() {} // duplicate
 export const myConst = 1;
 export const myConst = 2; // duplicate
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/dedup.ts",
       });
@@ -645,11 +608,10 @@ export const myConst = 2; // duplicate
     });
 
     it("should not duplicate functions across patterns", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export function doWork() {}
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/work.ts",
       });
@@ -666,109 +628,94 @@ export function doWork() {}
 
   describe("explain_overview - additional file detection", () => {
     it("should detect Jest config from files", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["jest.config.ts", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("Jest");
     });
 
     it("should detect Jest config .js variant", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["jest.config.js", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("Jest");
     });
 
     it("should detect Vite config from files", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["vite.config.ts", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("Vite");
     });
 
     it("should detect Vite config .js variant", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["vite.config.js", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("Vite");
     });
 
     it("should detect webpack config from files", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["webpack.config.js", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("webpack");
     });
 
     it("should detect webpack config .ts variant", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["webpack.config.ts", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("webpack");
     });
 
     it("should detect Tailwind CSS config from files", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["tailwind.config.ts", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("Tailwind CSS");
     });
 
     it("should detect Tailwind CSS config .js variant", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["tailwind.config.js", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("Tailwind CSS");
     });
 
     it("should detect Docker from docker-compose.yaml", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["docker-compose.yaml", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("Docker");
     });
 
     it("should detect Turborepo from turbo.json", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["turbo.json", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("Turborepo");
     });
 
     it("should detect Prisma from prisma/schema.prisma", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["prisma/schema.prisma", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("Prisma");
     });
 
     it("should detect Storybook from .storybook directory", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = [".storybook/main.ts", "src/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       expect(getText(result)).toContain("Storybook");
     });
 
     it("should handle files with no extension", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["Makefile", "Dockerfile"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       const text = getText(result);
       expect(text).toContain("**Total files:** 2");
     });
 
     it("should handle files without directories", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["README.md", "LICENSE"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       const text = getText(result);
       expect(text).toContain("**Total files:** 2");
     });
 
     it("should handle second-level child dir with 0 files below it", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       const files = ["src/lib/index.ts"];
-      const result = await handler({ files });
+      const result = await registry.call("explain_overview", { files });
       const text = getText(result);
       // src/lib is a second-level dir; the file is at that level, not below it
       expect(text).toContain("src/");
@@ -779,12 +726,11 @@ export function doWork() {}
 
   describe("explain_module - additional patterns", () => {
     it("should handle module with no exports in entry content", async () => {
-      const handler = registry.handlers.get("explain_module")!;
       const entryContent = `
 import { something } from "lib";
 const internal = something();
 `;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/bootstrap",
         files: ["src/bootstrap/index.ts"],
         entry_content: entryContent,
@@ -794,11 +740,10 @@ const internal = something();
     });
 
     it("should handle module with no dependencies in entry content", async () => {
-      const handler = registry.handlers.get("explain_module")!;
       const entryContent = `
 export const VALUE = 42;
 `;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/constants",
         files: ["src/constants/index.ts"],
         entry_content: entryContent,
@@ -808,12 +753,11 @@ export const VALUE = 42;
     });
 
     it("should handle module with only external dependencies", async () => {
-      const handler = registry.handlers.get("explain_module")!;
       const entryContent = `
 import { z } from "zod";
 export const schema = z.string();
 `;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/schemas",
         files: ["src/schemas/index.ts"],
         entry_content: entryContent,
@@ -824,8 +768,7 @@ export const schema = z.string();
     });
 
     it("should detect .spec. files as tests", async () => {
-      const handler = registry.handlers.get("explain_module")!;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/lib",
         files: ["src/lib/utils.spec.ts"],
       });
@@ -834,8 +777,7 @@ export const schema = z.string();
     });
 
     it("should detect main.ts as entry file", async () => {
-      const handler = registry.handlers.get("explain_module")!;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/app",
         files: ["src/app/main.ts"],
       });
@@ -844,8 +786,7 @@ export const schema = z.string();
     });
 
     it("should detect no patterns when module has no tests/index/types/entry", async () => {
-      const handler = registry.handlers.get("explain_module")!;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/misc",
         files: ["src/misc/helper.ts"],
       });
@@ -854,8 +795,7 @@ export const schema = z.string();
     });
 
     it("should use modulePath as moduleName when no slash present", async () => {
-      const handler = registry.handlers.get("explain_module")!;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "standalone",
         files: ["standalone/file.ts"],
       });
@@ -864,9 +804,8 @@ export const schema = z.string();
     });
 
     it("should handle export default pattern detection", async () => {
-      const handler = registry.handlers.get("explain_module")!;
       const entryContent = `export default function App() {}`;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/app",
         files: ["src/app/index.ts"],
         entry_content: entryContent,
@@ -880,12 +819,11 @@ export const schema = z.string();
 
   describe("explain_flow - dedup and fallback branches", () => {
     it("should deduplicate ES6 static imports of same module", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 import { a } from "shared";
 import { b } from "shared";
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/dup.ts",
       });
@@ -898,12 +836,11 @@ import { b } from "shared";
     });
 
     it("should deduplicate require of same module already imported via ES6", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 import { something } from "lodash";
 const _ = require("lodash");
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/mixed.ts",
       });
@@ -916,14 +853,13 @@ const _ = require("lodash");
     });
 
     it("should deduplicate export function appearing twice", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       // This triggers the seen.has() branch in extractExports for fnPattern
       const content = `
 export function doStuff() {}
 // overload signature
 export function doStuff(arg: string) {}
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/overload.ts",
       });
@@ -936,12 +872,11 @@ export function doStuff(arg: string) {}
     });
 
     it("should deduplicate export const appearing in both varPattern and namedPattern", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export const VALUE = 1;
 export { VALUE };
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/reexport.ts",
       });
@@ -954,12 +889,11 @@ export { VALUE };
     });
 
     it("should deduplicate export class with same name", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export class MyService {}
 export { MyService };
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/svc.ts",
       });
@@ -972,12 +906,11 @@ export { MyService };
     });
 
     it("should deduplicate export interface/type with same name", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export interface Config {}
 export { Config };
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/types.ts",
       });
@@ -990,12 +923,11 @@ export { Config };
     });
 
     it("should deduplicate default export when already seen via export default class", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export default class App {}
 export default App;
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/app.ts",
       });
@@ -1008,13 +940,12 @@ export default App;
     });
 
     it("should deduplicate named export { } items already seen", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export function foo() {}
 export const bar = 1;
 export { foo, bar };
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/barrel.ts",
       });
@@ -1027,12 +958,11 @@ export { foo, bar };
     });
 
     it("should deduplicate arrow function that also appears as function declaration", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 function helper() {}
 const helper = () => {};
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/fns.ts",
       });
@@ -1045,7 +975,6 @@ const helper = () => {};
     });
 
     it("should handle tech stack entry without version (undefined)", async () => {
-      const handler = registry.handlers.get("explain_overview")!;
       // Package with deps missing version
       const packageJson = JSON.stringify({
         dependencies: { react: "18.0.0" },
@@ -1059,8 +988,7 @@ const helper = () => {};
     });
 
     it("should handle file path without slash in modulePath fallback", async () => {
-      const handler = registry.handlers.get("explain_module")!;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "root",
         files: ["root"],
       });
@@ -1069,8 +997,7 @@ const helper = () => {};
     });
 
     it("should handle file basename fallback when no slash in path", async () => {
-      const handler = registry.handlers.get("explain_module")!;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/lib",
         files: ["noSlashFile"],
       });
@@ -1079,8 +1006,7 @@ const helper = () => {};
     });
 
     it("should handle file path in detectPatterns when no slash in basename", async () => {
-      const handler = registry.handlers.get("explain_module")!;
-      const result = await handler({
+      const result = await registry.call("explain_module", {
         module_path: "src/mod",
         files: ["indexfile"],
       });
@@ -1094,7 +1020,6 @@ const helper = () => {};
 
   describe("explain_flow - extractExports uncovered branches", () => {
     it("should deduplicate class export already seen from named export", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       // export { MyClass } appears first (namedPattern won't help since classPattern runs first),
       // so we need a class name that also appears via another pattern before classPattern.
       // export const MyWidget = ... then export default class MyWidget — const pattern sees it first
@@ -1102,7 +1027,7 @@ const helper = () => {};
 export const MyWidget = 1;
 export default class MyWidget {}
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/widget.ts",
       });
@@ -1115,13 +1040,12 @@ export default class MyWidget {}
     });
 
     it("should deduplicate type/interface export already seen from another pattern", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       // export const Config = ... then export interface Config — const pattern sees it first
       const content = `
 export const Config = {};
 export interface Config {}
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/cfg.ts",
       });
@@ -1134,12 +1058,11 @@ export interface Config {}
     });
 
     it("should not include 'default' export when content has no export default", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       const content = `
 export function helper() {}
 export const VALUE = 42;
 `;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/nodefault.ts",
       });
@@ -1153,11 +1076,10 @@ export const VALUE = 42;
     });
 
     it("should deduplicate 'default' when already captured by earlier pattern", async () => {
-      const handler = registry.handlers.get("explain_flow")!;
       // "export default class default" — classPattern captures "default" as (\w+),
       // adding it to seen before the export default check at line 636 runs
       const content = `export default class default {}`;
-      const result = await handler({
+      const result = await registry.call("explain_flow", {
         file_content: content,
         file_path: "src/dedup-default.ts",
       });

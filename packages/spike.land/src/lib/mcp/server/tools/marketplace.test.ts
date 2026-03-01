@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock prisma
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   registeredTool: {
     findMany: vi.fn(),
     findFirst: vi.fn(),
@@ -19,7 +20,8 @@ const mockPrisma = {
     groupBy: vi.fn(),
   },
   $transaction: vi.fn(),
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: mockPrisma,
@@ -65,8 +67,7 @@ describe("marketplace tools", () => {
       ]);
       mockPrisma.toolInstallation.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("marketplace_search")!;
-      const result = await handler({ query: "weather", limit: 10 });
+      const result = await registry.call("marketplace_search", { query: "weather", limit: 10 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("weather_api");
@@ -90,8 +91,7 @@ describe("marketplace tools", () => {
         { toolId: "tool-1" },
       ]);
 
-      const handler = registry.handlers.get("marketplace_search")!;
-      const result = await handler({ query: "weather", limit: 10 });
+      const result = await registry.call("marketplace_search", { query: "weather", limit: 10 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("[installed]");
@@ -100,8 +100,7 @@ describe("marketplace tools", () => {
     it("should return no results message", async () => {
       mockPrisma.registeredTool.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("marketplace_search")!;
-      const result = await handler({ query: "nonexistent", limit: 10 });
+      const result = await registry.call("marketplace_search", { query: "nonexistent", limit: 10 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("No marketplace tools found");
@@ -120,8 +119,7 @@ describe("marketplace tools", () => {
       ]);
       mockPrisma.toolInstallation.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("marketplace_search")!;
-      const result = await handler({ query: "anon", limit: 10 });
+      const result = await registry.call("marketplace_search", { query: "anon", limit: 10 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("Author: Unknown");
@@ -132,8 +130,7 @@ describe("marketplace tools", () => {
         new Error("DB error"),
       );
 
-      const handler = registry.handlers.get("marketplace_search")!;
-      const result = await handler({ query: "test", limit: 10 });
+      const result = await registry.call("marketplace_search", { query: "test", limit: 10 });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -150,8 +147,7 @@ describe("marketplace tools", () => {
     it("should handle non-Error throws", async () => {
       mockPrisma.registeredTool.findMany.mockRejectedValue("string error");
 
-      const handler = registry.handlers.get("marketplace_search")!;
-      const result = await handler({ query: "test", limit: 10 });
+      const result = await registry.call("marketplace_search", { query: "test", limit: 10 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("Unknown error");
@@ -173,8 +169,7 @@ describe("marketplace tools", () => {
       mockPrisma.toolInstallation.findUnique.mockResolvedValue(null);
       mockPrisma.$transaction.mockResolvedValue([{}, {}, {}]);
 
-      const handler = registry.handlers.get("marketplace_install")!;
-      const result = await handler({ tool_id: "tool-1" });
+      const result = await registry.call("marketplace_install", { tool_id: "tool-1" });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("Tool Installed");
@@ -185,8 +180,7 @@ describe("marketplace tools", () => {
     it("should return error when tool is not found or not published", async () => {
       mockPrisma.registeredTool.findFirst.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("marketplace_install")!;
-      const result = await handler({ tool_id: "nonexistent" });
+      const result = await registry.call("marketplace_install", { tool_id: "nonexistent" });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -212,8 +206,7 @@ describe("marketplace tools", () => {
         toolId: "tool-1",
       });
 
-      const handler = registry.handlers.get("marketplace_install")!;
-      const result = await handler({ tool_id: "tool-1" });
+      const result = await registry.call("marketplace_install", { tool_id: "tool-1" });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("already installed");
@@ -225,8 +218,7 @@ describe("marketplace tools", () => {
         new Error("DB error"),
       );
 
-      const handler = registry.handlers.get("marketplace_install")!;
-      const result = await handler({ tool_id: "tool-1" });
+      const result = await registry.call("marketplace_install", { tool_id: "tool-1" });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -243,8 +235,7 @@ describe("marketplace tools", () => {
     it("should handle non-Error throws", async () => {
       mockPrisma.registeredTool.findFirst.mockRejectedValue("string error");
 
-      const handler = registry.handlers.get("marketplace_install")!;
-      const result = await handler({ tool_id: "tool-1" });
+      const result = await registry.call("marketplace_install", { tool_id: "tool-1" });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("Unknown error");
@@ -266,8 +257,7 @@ describe("marketplace tools", () => {
       });
       mockPrisma.$transaction.mockResolvedValue([{}, {}]);
 
-      const handler = registry.handlers.get("marketplace_uninstall")!;
-      const result = await handler({ tool_id: "tool-1" });
+      const result = await registry.call("marketplace_uninstall", { tool_id: "tool-1" });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("Tool Uninstalled");
@@ -278,8 +268,7 @@ describe("marketplace tools", () => {
     it("should return error when tool is not installed", async () => {
       mockPrisma.toolInstallation.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("marketplace_uninstall")!;
-      const result = await handler({ tool_id: "nonexistent" });
+      const result = await registry.call("marketplace_uninstall", { tool_id: "nonexistent" });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -298,8 +287,7 @@ describe("marketplace tools", () => {
         new Error("DB error"),
       );
 
-      const handler = registry.handlers.get("marketplace_uninstall")!;
-      const result = await handler({ tool_id: "tool-1" });
+      const result = await registry.call("marketplace_uninstall", { tool_id: "tool-1" });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -316,8 +304,7 @@ describe("marketplace tools", () => {
     it("should handle non-Error throws", async () => {
       mockPrisma.toolInstallation.findUnique.mockRejectedValue("string error");
 
-      const handler = registry.handlers.get("marketplace_uninstall")!;
-      const result = await handler({ tool_id: "tool-1" });
+      const result = await registry.call("marketplace_uninstall", { tool_id: "tool-1" });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("Unknown error");
@@ -343,8 +330,7 @@ describe("marketplace tools", () => {
         { toolId: "tool-2", _sum: { tokens: 5 } },
       ]);
 
-      const handler = registry.handlers.get("marketplace_my_earnings")!;
-      const result = await handler({});
+      const result = await registry.call("marketplace_my_earnings", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("Marketplace Earnings Dashboard");
@@ -359,8 +345,7 @@ describe("marketplace tools", () => {
     it("should show message when no published tools", async () => {
       mockPrisma.registeredTool.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("marketplace_my_earnings")!;
-      const result = await handler({});
+      const result = await registry.call("marketplace_my_earnings", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("no published tools");
@@ -376,8 +361,7 @@ describe("marketplace tools", () => {
       });
       mockPrisma.toolEarning.groupBy.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("marketplace_my_earnings")!;
-      const result = await handler({});
+      const result = await registry.call("marketplace_my_earnings", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("Total Earnings:** 0 tokens");
@@ -395,8 +379,7 @@ describe("marketplace tools", () => {
         { toolId: "tool-1", _sum: { tokens: null } },
       ]);
 
-      const handler = registry.handlers.get("marketplace_my_earnings")!;
-      const result = await handler({});
+      const result = await registry.call("marketplace_my_earnings", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("null_earnings_tool");
@@ -408,8 +391,7 @@ describe("marketplace tools", () => {
         new Error("DB error"),
       );
 
-      const handler = registry.handlers.get("marketplace_my_earnings")!;
-      const result = await handler({});
+      const result = await registry.call("marketplace_my_earnings", {});
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -426,8 +408,7 @@ describe("marketplace tools", () => {
     it("should handle non-Error throws", async () => {
       mockPrisma.registeredTool.findMany.mockRejectedValue("string error");
 
-      const handler = registry.handlers.get("marketplace_my_earnings")!;
-      const result = await handler({});
+      const result = await registry.call("marketplace_my_earnings", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!.text;
       expect(text).toContain("Unknown error");

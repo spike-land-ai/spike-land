@@ -61,7 +61,7 @@ export function registerMcpObservabilityTools(
                 ),
             })
             .meta({ category: "mcp-observability", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     period_hours = 24,
                     tool_name,
@@ -69,11 +69,10 @@ export function registerMcpObservabilityTools(
                 } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
                 const since = new Date(Date.now() - period_hours * 60 * 60 * 1000);
 
                 const rows = tool_name
-                    ? await prisma.$queryRaw<ToolMetricRow[]>`SELECT
+                    ? await ctx.prisma.$queryRaw<ToolMetricRow[]>`SELECT
               tool,
               COUNT(*)::bigint AS call_count,
               SUM(CASE WHEN "isError" THEN 1 ELSE 0 END)::bigint AS error_count,
@@ -87,7 +86,7 @@ export function registerMcpObservabilityTools(
             GROUP BY tool
             ORDER BY call_count DESC
             LIMIT ${limit}`
-                    : await prisma.$queryRaw<ToolMetricRow[]>`SELECT
+                    : await ctx.prisma.$queryRaw<ToolMetricRow[]>`SELECT
               tool,
               COUNT(*)::bigint AS call_count,
               SUM(CASE WHEN "isError" THEN 1 ELSE 0 END)::bigint AS error_count,
@@ -149,13 +148,12 @@ export function registerMcpObservabilityTools(
                 ),
             })
             .meta({ category: "mcp-observability", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     include_tool_breakdown = false,
                 } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
 
                 const now = new Date();
                 const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -172,7 +170,7 @@ export function registerMcpObservabilityTools(
                     (async () => {
                         try {
                             const start = Date.now();
-                            await prisma.$queryRaw`SELECT 1`;
+                            await ctx.prisma.$queryRaw`SELECT 1`;
                             return {
                                 status: "HEALTHY" as const,
                                 latencyMs: Date.now() - start,
@@ -194,7 +192,7 @@ export function registerMcpObservabilityTools(
                             return { status: "DOWN" as const, latencyMs: -1 };
                         }
                     })(),
-                    prisma.toolInvocation.aggregate({
+                    ctx.prisma.toolInvocation.aggregate({
                         where: { createdAt: { gte: last24h } },
                         _count: true,
                         _sum: { tokensConsumed: true, durationMs: true },
@@ -204,10 +202,10 @@ export function registerMcpObservabilityTools(
                         _sum: { tokensConsumed: null, durationMs: null },
                         _avg: { durationMs: null },
                     })),
-                    prisma.toolInvocation.count({
+                    ctx.prisma.toolInvocation.count({
                         where: { createdAt: { gte: last24h }, isError: true },
                     }).catch(() => 0),
-                    prisma.toolInvocation.groupBy({
+                    ctx.prisma.toolInvocation.groupBy({
                         by: ["tool"],
                         where: { createdAt: { gte: last1h } },
                         _count: true,
@@ -258,7 +256,7 @@ export function registerMcpObservabilityTools(
                 ),
             })
             .meta({ category: "mcp-observability", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     period_hours = 24,
                     user_id,
@@ -266,12 +264,11 @@ export function registerMcpObservabilityTools(
                 } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
                 const since = new Date(Date.now() - period_hours * 60 * 60 * 1000);
 
                 if (user_id) {
                     // Detailed cost attribution for a single user
-                    const rows = await prisma.$queryRaw<UserCostRow[]>`SELECT
+                    const rows = await ctx.prisma.$queryRaw<UserCostRow[]>`SELECT
               "userId",
               tool,
               DATE("createdAt") AS day,
@@ -310,7 +307,7 @@ export function registerMcpObservabilityTools(
                 }
 
                 // Summary across all users
-                const rows = await prisma.$queryRaw<UserSummaryRow[]>`SELECT
+                const rows = await ctx.prisma.$queryRaw<UserSummaryRow[]>`SELECT
             "userId",
             COUNT(*)::bigint AS call_count,
             COALESCE(SUM("tokensConsumed"), 0)::bigint AS total_tokens,

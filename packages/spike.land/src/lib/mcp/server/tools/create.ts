@@ -25,15 +25,13 @@ export function registerCreateTools(
                 ),
             })
             .meta({ category: "create", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     query,
                     limit = 10,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const apps = await prisma.createdApp.findMany({
+                const apps = await ctx.prisma.createdApp.findMany({
                     where: {
                         status: "PUBLISHED",
                         OR: [
@@ -76,14 +74,12 @@ export function registerCreateTools(
                 slug: z.string().min(1).describe("Unique slug of the created app."),
             })
             .meta({ category: "create", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     slug,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const app = await prisma.createdApp.findUnique({
+                const app = await ctx.prisma.createdApp.findUnique({
                     where: { slug },
                     include: {
                         generatedBy: {
@@ -127,7 +123,7 @@ export function registerCreateTools(
                 ),
             })
             .meta({ category: "create", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     text,
                 } = input;
@@ -155,7 +151,7 @@ export function registerCreateTools(
                 codespace_id: z.string().min(1).describe("Codespace ID to check health for."),
             })
             .meta({ category: "create", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     codespace_id,
                 } = input;
@@ -183,18 +179,16 @@ export function registerCreateTools(
                 ),
             })
             .meta({ category: "create", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     limit = 10,
                 } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const { filterHealthyCodespaces } = await import(
                     "@/lib/create/codespace-health"
                 );
 
                 // Fetch more than needed to account for unhealthy ones being filtered out
-                const apps = await prisma.createdApp.findMany({
+                const apps = await ctx.prisma.createdApp.findMany({
                     where: { status: "PUBLISHED" },
                     select: {
                         slug: true,
@@ -235,17 +229,15 @@ export function registerCreateTools(
                 ),
             })
             .meta({ category: "create", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     limit = 10,
                 } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const { filterHealthyCodespaces } = await import(
                     "@/lib/create/codespace-health"
                 );
 
-                const apps = await prisma.createdApp.findMany({
+                const apps = await ctx.prisma.createdApp.findMany({
                     where: { status: "PUBLISHED" },
                     select: {
                         slug: true,
@@ -286,14 +278,12 @@ export function registerCreateTools(
                 slug: z.string().min(1).describe("Unique slug of the created app."),
             })
             .meta({ category: "create", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     slug,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const app = await prisma.createdApp.findUnique({
+                const app = await ctx.prisma.createdApp.findUnique({
                     where: { slug },
                     select: {
                         slug: true,

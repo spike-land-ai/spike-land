@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   workspace: { findFirst: vi.fn(), update: vi.fn() },
   emailLog: { create: vi.fn(), findFirst: vi.fn(), findMany: vi.fn() },
   notification: { findMany: vi.fn(), updateMany: vi.fn(), create: vi.fn() },
   newsletterSubscriber: { upsert: vi.fn() },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -41,8 +43,7 @@ describe("email tools", () => {
   describe("email_send", () => {
     it("should create an email log with SENT status", async () => {
       mockPrisma.emailLog.create.mockResolvedValue({ id: "email-1" });
-      const handler = registry.handlers.get("email_send")!;
-      const result = await handler({
+      const result = await registry.call("email_send", {
         workspace_slug: "my-ws",
         to: "recipient@example.com",
         subject: "Hello",
@@ -76,8 +77,7 @@ describe("email tools", () => {
         clickedAt: null,
         bouncedAt: null,
       });
-      const handler = registry.handlers.get("email_get_status")!;
-      const result = await handler({
+      const result = await registry.call("email_get_status", {
         workspace_slug: "my-ws",
         email_id: "email-1",
       });
@@ -98,8 +98,7 @@ describe("email tools", () => {
         clickedAt: new Date("2025-06-01T12:05:00Z"),
         bouncedAt: new Date("2025-06-01T12:10:00Z"),
       });
-      const handler = registry.handlers.get("email_get_status")!;
-      const result = await handler({
+      const result = await registry.call("email_get_status", {
         workspace_slug: "my-ws",
         email_id: "email-2",
       });
@@ -119,8 +118,7 @@ describe("email tools", () => {
         clickedAt: null,
         bouncedAt: null,
       });
-      const handler = registry.handlers.get("email_get_status")!;
-      const result = await handler({
+      const result = await registry.call("email_get_status", {
         workspace_slug: "my-ws",
         email_id: "email-3",
       });
@@ -132,8 +130,7 @@ describe("email tools", () => {
 
     it("should return NOT_FOUND for missing email", async () => {
       mockPrisma.emailLog.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("email_get_status")!;
-      const result = await handler({
+      const result = await registry.call("email_get_status", {
         workspace_slug: "my-ws",
         email_id: "missing",
       });
@@ -152,8 +149,7 @@ describe("email tools", () => {
           sentAt: new Date("2025-06-01"),
         },
       ]);
-      const handler = registry.handlers.get("email_list")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("email_list", { workspace_slug: "my-ws" });
       const text = getText(result);
       expect(text).toContain("Email Logs");
       expect(text).toContain("Welcome");
@@ -169,8 +165,7 @@ describe("email tools", () => {
           sentAt: new Date("2025-06-01"),
         },
       ]);
-      const handler = registry.handlers.get("email_list")!;
-      const result = await handler({ workspace_slug: "my-ws", limit: 5 });
+      const result = await registry.call("email_list", { workspace_slug: "my-ws", limit: 5 });
       const text = getText(result);
       expect(text).toContain("Email Logs");
       expect(mockPrisma.emailLog.findMany).toHaveBeenCalledWith(
@@ -180,8 +175,7 @@ describe("email tools", () => {
 
     it("should return message when no emails found", async () => {
       mockPrisma.emailLog.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("email_list")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("email_list", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("No email records found");
     });
   });
@@ -230,8 +224,7 @@ describe("notifications tools", () => {
           createdAt: new Date("2025-06-02"),
         },
       ]);
-      const handler = registry.handlers.get("notification_list")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("notification_list", { workspace_slug: "my-ws" });
       const text = getText(result);
       expect(text).toContain("Notifications (2)");
       expect(text).toContain("Welcome");
@@ -241,15 +234,13 @@ describe("notifications tools", () => {
 
     it("should return message when no notifications found", async () => {
       mockPrisma.notification.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("notification_list")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("notification_list", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("No notifications found");
     });
 
     it("should filter unread only", async () => {
       mockPrisma.notification.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("notification_list")!;
-      await handler({ workspace_slug: "my-ws", unread_only: true });
+      await registry.call("notification_list", { workspace_slug: "my-ws", unread_only: true });
       expect(mockPrisma.notification.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ read: false }),
@@ -261,8 +252,7 @@ describe("notifications tools", () => {
   describe("notification_mark_read", () => {
     it("should mark notifications as read", async () => {
       mockPrisma.notification.updateMany.mockResolvedValue({ count: 3 });
-      const handler = registry.handlers.get("notification_mark_read")!;
-      const result = await handler({
+      const result = await registry.call("notification_mark_read", {
         workspace_slug: "my-ws",
         notification_ids: ["n1", "n2", "n3"],
       });
@@ -279,8 +269,7 @@ describe("notifications tools", () => {
   describe("notification_configure_channels", () => {
     it("should update notification channel settings", async () => {
       mockPrisma.workspace.update.mockResolvedValue({});
-      const handler = registry.handlers.get("notification_configure_channels")!;
-      const result = await handler({
+      const result = await registry.call("notification_configure_channels", {
         workspace_slug: "my-ws",
         email_enabled: true,
         slack_enabled: false,
@@ -305,8 +294,7 @@ describe("notifications tools", () => {
 
     it("should handle partial channel updates", async () => {
       mockPrisma.workspace.update.mockResolvedValue({});
-      const handler = registry.handlers.get("notification_configure_channels")!;
-      const result = await handler({
+      const result = await registry.call("notification_configure_channels", {
         workspace_slug: "my-ws",
         email_enabled: false,
       });
@@ -317,8 +305,7 @@ describe("notifications tools", () => {
 
     it("should show (unchanged) for all channels when none are specified", async () => {
       mockPrisma.workspace.update.mockResolvedValue({});
-      const handler = registry.handlers.get("notification_configure_channels")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("notification_configure_channels", { workspace_slug: "my-ws" });
       const text = getText(result);
       expect(text).toContain("Email:** (unchanged)");
       expect(text).toContain("Slack:** (unchanged)");
@@ -329,8 +316,7 @@ describe("notifications tools", () => {
   describe("notification_send", () => {
     it("should create a notification", async () => {
       mockPrisma.notification.create.mockResolvedValue({ id: "notif-1" });
-      const handler = registry.handlers.get("notification_send")!;
-      const result = await handler({
+      const result = await registry.call("notification_send", {
         workspace_slug: "my-ws",
         title: "Deployment Complete",
         message: "v2.0 has been deployed",
@@ -354,8 +340,7 @@ describe("notifications tools", () => {
 
     it("should target a specific user when user_id provided", async () => {
       mockPrisma.notification.create.mockResolvedValue({ id: "notif-2" });
-      const handler = registry.handlers.get("notification_send")!;
-      const result = await handler({
+      const result = await registry.call("notification_send", {
         workspace_slug: "my-ws",
         title: "Task Assigned",
         message: "You have a new task",
@@ -393,8 +378,7 @@ describe("newsletter tools", () => {
         subscribedAt: new Date("2024-06-15T12:00:00Z"),
         source: "mcp",
       });
-      const handler = registry.handlers.get("newsletter_subscribe")!;
-      const result = await handler({ email: "test@example.com" });
+      const result = await registry.call("newsletter_subscribe", { email: "test@example.com" });
       expect(getText(result)).toContain("Newsletter Subscription Confirmed!");
       expect(getText(result)).toContain("test@example.com");
       expect(getText(result)).toContain("2024-06-15");
@@ -412,8 +396,7 @@ describe("newsletter tools", () => {
         subscribedAt: new Date("2024-01-01T00:00:00Z"),
         source: "mcp",
       });
-      const handler = registry.handlers.get("newsletter_subscribe")!;
-      const result = await handler({ email: "returning@example.com" });
+      const result = await registry.call("newsletter_subscribe", { email: "returning@example.com" });
       expect(getText(result)).toContain("Newsletter Subscription Confirmed!");
       expect(getText(result)).toContain("returning@example.com");
       expect(mockPrisma.newsletterSubscriber.upsert).toHaveBeenCalledWith(
@@ -427,8 +410,7 @@ describe("newsletter tools", () => {
       mockPrisma.newsletterSubscriber.upsert.mockRejectedValue(
         new Error("Database connection failed"),
       );
-      const handler = registry.handlers.get("newsletter_subscribe")!;
-      const result = await handler({ email: "fail@example.com" });
+      const result = await registry.call("newsletter_subscribe", { email: "fail@example.com" });
       expect(getText(result)).toContain("Error");
     });
   });

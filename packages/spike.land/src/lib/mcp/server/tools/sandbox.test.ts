@@ -28,8 +28,7 @@ describe("sandbox tools", () => {
 
   describe("sandbox_create", () => {
     it("should create a sandbox with default language", async () => {
-      const handler = registry.handlers.get("sandbox_create")!;
-      const result = await handler({ language: "typescript" });
+      const result = await registry.call("sandbox_create", { language: "typescript" });
 
       expect(isError(result)).toBe(false);
       const text = getText(result);
@@ -39,8 +38,7 @@ describe("sandbox tools", () => {
     });
 
     it("should create a sandbox with custom name", async () => {
-      const handler = registry.handlers.get("sandbox_create")!;
-      const result = await handler({ name: "my-sandbox", language: "python" });
+      const result = await registry.call("sandbox_create", { name: "my-sandbox", language: "python" });
 
       expect(isError(result)).toBe(false);
       const text = getText(result);
@@ -49,8 +47,7 @@ describe("sandbox tools", () => {
     });
 
     it("should create a sandbox with auto-generated name when none provided", async () => {
-      const handler = registry.handlers.get("sandbox_create")!;
-      const result = await handler({ language: "javascript" });
+      const result = await registry.call("sandbox_create", { language: "javascript" });
 
       const text = getText(result);
       expect(text).toContain("sandbox-");
@@ -60,12 +57,9 @@ describe("sandbox tools", () => {
 
   describe("sandbox_exec", () => {
     it("should execute code in a sandbox", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
-
-      const execHandler = registry.handlers.get("sandbox_exec")!;
-      const result = await execHandler({
+      const result = await registry.call("sandbox_exec", {
         sandbox_id: sandboxId,
         code: "console.log('hello');",
       });
@@ -78,12 +72,9 @@ describe("sandbox tools", () => {
     });
 
     it("should use language override", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
-
-      const execHandler = registry.handlers.get("sandbox_exec")!;
-      const result = await execHandler({
+      const result = await registry.call("sandbox_exec", {
         sandbox_id: sandboxId,
         code: "print('hello')",
         language: "python",
@@ -94,8 +85,7 @@ describe("sandbox tools", () => {
     });
 
     it("should return error for non-existent sandbox", async () => {
-      const handler = registry.handlers.get("sandbox_exec")!;
-      const result = await handler({
+      const result = await registry.call("sandbox_exec", {
         sandbox_id: "nonexistent",
         code: "test",
       });
@@ -105,15 +95,10 @@ describe("sandbox tools", () => {
     });
 
     it("should return error for destroyed sandbox", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
-
-      const destroyHandler = registry.handlers.get("sandbox_destroy")!;
-      await destroyHandler({ sandbox_id: sandboxId });
-
-      const execHandler = registry.handlers.get("sandbox_exec")!;
-      const result = await execHandler({
+      await registry.call("sandbox_destroy", { sandbox_id: sandboxId });
+      const result = await registry.call("sandbox_exec", {
         sandbox_id: sandboxId,
         code: "test",
       });
@@ -125,12 +110,9 @@ describe("sandbox tools", () => {
 
   describe("sandbox_write_file", () => {
     it("should write a file to the sandbox", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
-
-      const writeHandler = registry.handlers.get("sandbox_write_file")!;
-      const result = await writeHandler({
+      const result = await registry.call("sandbox_write_file", {
         sandbox_id: sandboxId,
         file_path: "index.ts",
         content: "export const x = 1;",
@@ -144,8 +126,7 @@ describe("sandbox tools", () => {
     });
 
     it("should return error for non-existent sandbox", async () => {
-      const handler = registry.handlers.get("sandbox_write_file")!;
-      const result = await handler({
+      const result = await registry.call("sandbox_write_file", {
         sandbox_id: "nonexistent",
         file_path: "test.ts",
         content: "test",
@@ -156,16 +137,13 @@ describe("sandbox tools", () => {
     });
 
     it("should return error for destroyed sandbox", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
 
-      await registry.handlers.get("sandbox_destroy")!({
+      await registry.call("sandbox_destroy", {
         sandbox_id: sandboxId,
       });
-
-      const writeHandler = registry.handlers.get("sandbox_write_file")!;
-      const result = await writeHandler({
+      const result = await registry.call("sandbox_write_file", {
         sandbox_id: sandboxId,
         file_path: "test.ts",
         content: "test",
@@ -178,19 +156,14 @@ describe("sandbox tools", () => {
 
   describe("sandbox_read_file", () => {
     it("should read a file from the sandbox", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
-
-      const writeHandler = registry.handlers.get("sandbox_write_file")!;
-      await writeHandler({
+      await registry.call("sandbox_write_file", {
         sandbox_id: sandboxId,
         file_path: "hello.ts",
         content: "const msg = 'hello';",
       });
-
-      const readHandler = registry.handlers.get("sandbox_read_file")!;
-      const result = await readHandler({
+      const result = await registry.call("sandbox_read_file", {
         sandbox_id: sandboxId,
         file_path: "hello.ts",
       });
@@ -202,12 +175,9 @@ describe("sandbox tools", () => {
     });
 
     it("should return error for non-existent file", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
-
-      const readHandler = registry.handlers.get("sandbox_read_file")!;
-      const result = await readHandler({
+      const result = await registry.call("sandbox_read_file", {
         sandbox_id: sandboxId,
         file_path: "missing.ts",
       });
@@ -217,8 +187,7 @@ describe("sandbox tools", () => {
     });
 
     it("should return error for non-existent sandbox", async () => {
-      const handler = registry.handlers.get("sandbox_read_file")!;
-      const result = await handler({
+      const result = await registry.call("sandbox_read_file", {
         sandbox_id: "nonexistent",
         file_path: "test.ts",
       });
@@ -230,29 +199,23 @@ describe("sandbox tools", () => {
 
   describe("sandbox_destroy", () => {
     it("should destroy a sandbox and return stats", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("sandbox_create", {
         name: "doomed",
         language: "typescript",
       });
       const sandboxId = extractId(getText(createResult));
 
       // Write a file and run a command
-      const writeHandler = registry.handlers.get("sandbox_write_file")!;
-      await writeHandler({
+      await registry.call("sandbox_write_file", {
         sandbox_id: sandboxId,
         file_path: "index.ts",
         content: "export default 42;",
       });
-
-      const execHandler = registry.handlers.get("sandbox_exec")!;
-      await execHandler({
+      await registry.call("sandbox_exec", {
         sandbox_id: sandboxId,
         code: "console.log(42)",
       });
-
-      const destroyHandler = registry.handlers.get("sandbox_destroy")!;
-      const result = await destroyHandler({ sandbox_id: sandboxId });
+      const result = await registry.call("sandbox_destroy", { sandbox_id: sandboxId });
 
       expect(isError(result)).toBe(false);
       const text = getText(result);
@@ -263,22 +226,18 @@ describe("sandbox tools", () => {
     });
 
     it("should return error for non-existent sandbox", async () => {
-      const handler = registry.handlers.get("sandbox_destroy")!;
-      const result = await handler({ sandbox_id: "nonexistent" });
+      const result = await registry.call("sandbox_destroy", { sandbox_id: "nonexistent" });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("not found");
     });
 
     it("should return error when destroying already destroyed sandbox", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
+      await registry.call("sandbox_destroy", { sandbox_id: sandboxId });
 
-      const destroyHandler = registry.handlers.get("sandbox_destroy")!;
-      await destroyHandler({ sandbox_id: sandboxId });
-
-      const result = await destroyHandler({ sandbox_id: sandboxId });
+      const result = await registry.call("sandbox_destroy", { sandbox_id: sandboxId });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("destroyed");
     });
@@ -286,14 +245,11 @@ describe("sandbox tools", () => {
 
   describe("sandbox_write_file limits (SEC-SANDBOX-02)", () => {
     it("should reject files exceeding 1MB", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
-
-      const writeHandler = registry.handlers.get("sandbox_write_file")!;
       // 1MB + 1 byte
       const largeContent = "x".repeat(1_048_577);
-      const result = await writeHandler({
+      const result = await registry.call("sandbox_write_file", {
         sandbox_id: sandboxId,
         file_path: "big.ts",
         content: largeContent,
@@ -304,14 +260,11 @@ describe("sandbox tools", () => {
     });
 
     it("should reject when file count exceeds 100", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
-
-      const writeHandler = registry.handlers.get("sandbox_write_file")!;
       // Write 100 files
       for (let i = 0; i < 100; i++) {
-        await writeHandler({
+        await registry.call("sandbox_write_file", {
           sandbox_id: sandboxId,
           file_path: `file-${i}.ts`,
           content: "x",
@@ -319,7 +272,7 @@ describe("sandbox tools", () => {
       }
 
       // 101st file should fail
-      const result = await writeHandler({
+      const result = await registry.call("sandbox_write_file", {
         sandbox_id: sandboxId,
         file_path: "file-100.ts",
         content: "x",
@@ -330,13 +283,10 @@ describe("sandbox tools", () => {
     });
 
     it("should allow overwriting existing file even at file count limit", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
-
-      const writeHandler = registry.handlers.get("sandbox_write_file")!;
       for (let i = 0; i < 100; i++) {
-        await writeHandler({
+        await registry.call("sandbox_write_file", {
           sandbox_id: sandboxId,
           file_path: `file-${i}.ts`,
           content: "x",
@@ -344,7 +294,7 @@ describe("sandbox tools", () => {
       }
 
       // Overwriting existing file should succeed
-      const result = await writeHandler({
+      const result = await registry.call("sandbox_write_file", {
         sandbox_id: sandboxId,
         file_path: "file-0.ts",
         content: "updated",
@@ -355,18 +305,15 @@ describe("sandbox tools", () => {
     });
 
     it("should reject when total sandbox size exceeds 50MB", async () => {
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({ language: "typescript" });
+      const createResult = await registry.call("sandbox_create", { language: "typescript" });
       const sandboxId = extractId(getText(createResult));
-
-      const writeHandler = registry.handlers.get("sandbox_write_file")!;
       // Write files just under 1MB each (max per-file) to approach 50MB (52,428,800 bytes)
       const nearMaxFile = "x".repeat(1_048_000);
       // 52 files * 1,048,000 bytes = 54,496,000 > 52,428,800
       // But we need to stay under 100 file limit, so write 50 files first
       // 50 * 1,048,000 = 52,400,000 (just under 50MB)
       for (let i = 0; i < 50; i++) {
-        await writeHandler({
+        await registry.call("sandbox_write_file", {
           sandbox_id: sandboxId,
           file_path: `file-${i}.ts`,
           content: nearMaxFile,
@@ -374,7 +321,7 @@ describe("sandbox tools", () => {
       }
 
       // This file would push total to 52,400,000 + 1,048,000 = 53,448,000 > 52,428,800
-      const result = await writeHandler({
+      const result = await registry.call("sandbox_write_file", {
         sandbox_id: sandboxId,
         file_path: "overflow.ts",
         content: nearMaxFile,
@@ -388,8 +335,7 @@ describe("sandbox tools", () => {
   describe("full lifecycle", () => {
     it("should support create -> write -> read -> exec -> destroy", async () => {
       // Create
-      const createHandler = registry.handlers.get("sandbox_create")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("sandbox_create", {
         name: "lifecycle-test",
         language: "typescript",
       });
@@ -398,8 +344,7 @@ describe("sandbox tools", () => {
       expect(sandboxId).toBeTruthy();
 
       // Write
-      const writeHandler = registry.handlers.get("sandbox_write_file")!;
-      const writeResult = await writeHandler({
+      const writeResult = await registry.call("sandbox_write_file", {
         sandbox_id: sandboxId,
         file_path: "app.ts",
         content: "export function add(a: number, b: number) { return a + b; }",
@@ -408,8 +353,7 @@ describe("sandbox tools", () => {
       expect(getText(writeResult)).toContain("app.ts");
 
       // Read
-      const readHandler = registry.handlers.get("sandbox_read_file")!;
-      const readResult = await readHandler({
+      const readResult = await registry.call("sandbox_read_file", {
         sandbox_id: sandboxId,
         file_path: "app.ts",
       });
@@ -417,8 +361,7 @@ describe("sandbox tools", () => {
       expect(getText(readResult)).toContain("export function add");
 
       // Exec
-      const execHandler = registry.handlers.get("sandbox_exec")!;
-      const execResult = await execHandler({
+      const execResult = await registry.call("sandbox_exec", {
         sandbox_id: sandboxId,
         code: "import { add } from './app'; console.log(add(1, 2));",
       });
@@ -426,15 +369,14 @@ describe("sandbox tools", () => {
       expect(getText(execResult)).toContain("Exit code:** 0");
 
       // Destroy
-      const destroyHandler = registry.handlers.get("sandbox_destroy")!;
-      const destroyResult = await destroyHandler({ sandbox_id: sandboxId });
+      const destroyResult = await registry.call("sandbox_destroy", { sandbox_id: sandboxId });
       expect(isError(destroyResult)).toBe(false);
       expect(getText(destroyResult)).toContain("lifecycle-test");
       expect(getText(destroyResult)).toContain("Files created:** 1");
       expect(getText(destroyResult)).toContain("Commands run:** 1");
 
       // Verify destroyed sandbox cannot be used
-      const postDestroyResult = await readHandler({
+      const postDestroyResult = await registry.call("sandbox_read_file", {
         sandbox_id: sandboxId,
         file_path: "app.ts",
       });
@@ -447,11 +389,10 @@ describe("sandbox tools", () => {
     it("should return the number of sandboxes", async () => {
       expect(_getSandboxCount()).toBe(0);
 
-      const handler = registry.handlers.get("sandbox_create")!;
-      await handler({ language: "typescript" });
+      await registry.call("sandbox_create", { language: "typescript" });
       expect(_getSandboxCount()).toBe(1);
 
-      await handler({ language: "python" });
+      await registry.call("sandbox_create", { language: "python" });
       expect(_getSandboxCount()).toBe(2);
     });
   });

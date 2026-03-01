@@ -54,8 +54,7 @@ describe("agent inbox tools", () => {
     it("should return no unread messages when empty", async () => {
       mockPrisma.appMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("agent_inbox_poll")!;
-      const result = await handler({});
+      const result = await registry.call("agent_inbox_poll", {});
 
       expect(getText(result)).toContain("No unread messages");
       expect(getText(result)).toContain("serverTime");
@@ -86,8 +85,7 @@ describe("agent inbox tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("agent_inbox_poll")!;
-      const result = await handler({});
+      const result = await registry.call("agent_inbox_poll", {});
 
       expect(getText(result)).toContain("Unread Messages (3 across 2 app(s))");
       expect(getText(result)).toContain("My App");
@@ -100,8 +98,7 @@ describe("agent inbox tools", () => {
     it("should filter by app_id when provided", async () => {
       mockPrisma.appMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("agent_inbox_poll")!;
-      await handler({ app_id: "app-1" });
+      await registry.call("agent_inbox_poll", { app_id: "app-1" });
 
       expect(mockPrisma.appMessage.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -123,8 +120,7 @@ describe("agent inbox tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("agent_inbox_poll")!;
-      const result = await handler({});
+      const result = await registry.call("agent_inbox_poll", {});
 
       const text = getText(result);
       expect(text).toContain("Unread Messages");
@@ -144,8 +140,7 @@ describe("agent inbox tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("agent_inbox_poll")!;
-      const result = await handler({});
+      const result = await registry.call("agent_inbox_poll", {});
 
       expect(getText(result)).toContain("...");
     });
@@ -153,8 +148,7 @@ describe("agent inbox tools", () => {
     it("should filter by since timestamp when provided", async () => {
       mockPrisma.appMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("agent_inbox_poll")!;
-      await handler({ since: "2026-02-18T09:00:00Z" });
+      await registry.call("agent_inbox_poll", { since: "2026-02-18T09:00:00Z" });
 
       expect(mockPrisma.appMessage.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -170,8 +164,7 @@ describe("agent inbox tools", () => {
     it("should return error when app not found", async () => {
       mockPrisma.app.findFirst.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("agent_inbox_read")!;
-      const result = await handler({ app_id: "nonexistent" });
+      const result = await registry.call("agent_inbox_read", { app_id: "nonexistent" });
 
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("App not found");
@@ -204,8 +197,7 @@ describe("agent inbox tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("agent_inbox_read")!;
-      const result = await handler({ app_id: "app-1" });
+      const result = await registry.call("agent_inbox_read", { app_id: "app-1" });
 
       expect(getText(result)).toContain("Test App");
       expect(getText(result)).toContain("User question");
@@ -234,8 +226,7 @@ describe("agent inbox tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("agent_inbox_read")!;
-      const result = await handler({ app_id: "app-1" });
+      const result = await registry.call("agent_inbox_read", { app_id: "app-1" });
 
       expect(getText(result)).toContain("[Read]");
     });
@@ -258,8 +249,7 @@ describe("agent inbox tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("agent_inbox_read")!;
-      const result = await handler({ app_id: "app-1" });
+      const result = await registry.call("agent_inbox_read", { app_id: "app-1" });
 
       expect(getText(result)).toContain("my-codespace");
     });
@@ -272,8 +262,7 @@ describe("agent inbox tools", () => {
       });
       mockPrisma.appMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("agent_inbox_read")!;
-      await handler({ app_id: "app-1", since: "2026-02-18T08:00:00Z" });
+      await registry.call("agent_inbox_read", { app_id: "app-1", since: "2026-02-18T08:00:00Z" });
 
       expect(mockPrisma.appMessage.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -308,8 +297,7 @@ describe("agent inbox tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("agent_inbox_read")!;
-      const result = await handler({ app_id: "app-1" });
+      const result = await registry.call("agent_inbox_read", { app_id: "app-1" });
 
       expect(getText(result)).toContain("Attachments:");
       expect(getText(result)).toContain("https://example.com/file.png");
@@ -324,8 +312,7 @@ describe("agent inbox tools", () => {
       });
       mockPrisma.appMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("agent_inbox_read")!;
-      await handler({ app_id: "app-1", unread_only: true });
+      await registry.call("agent_inbox_read", { app_id: "app-1", unread_only: true });
 
       expect(mockPrisma.appMessage.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -345,8 +332,7 @@ describe("agent inbox tools", () => {
       });
       mockPrisma.appMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("agent_inbox_read")!;
-      const result = await handler({ app_id: "app-1" });
+      const result = await registry.call("agent_inbox_read", { app_id: "app-1" });
 
       expect(getText(result)).toContain("No messages found");
     });
@@ -354,8 +340,7 @@ describe("agent inbox tools", () => {
     it("should verify app ownership", async () => {
       mockPrisma.app.findFirst.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("agent_inbox_read")!;
-      await handler({ app_id: "app-1" });
+      await registry.call("agent_inbox_read", { app_id: "app-1" });
 
       expect(mockPrisma.app.findFirst).toHaveBeenCalledWith({
         where: { id: "app-1", userId: "user-123" },
@@ -368,8 +353,7 @@ describe("agent inbox tools", () => {
     it("should return error when app not found", async () => {
       mockPrisma.app.findFirst.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("agent_inbox_respond")!;
-      const result = await handler({ app_id: "nonexistent", content: "Hello" });
+      const result = await registry.call("agent_inbox_respond", { app_id: "nonexistent", content: "Hello" });
 
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("App not found");
@@ -390,8 +374,7 @@ describe("agent inbox tools", () => {
       });
       mockPrisma.appMessage.updateMany.mockResolvedValue({ count: 1 });
 
-      const handler = registry.handlers.get("agent_inbox_respond")!;
-      const result = await handler({
+      const result = await registry.call("agent_inbox_respond", {
         app_id: "app-1",
         content: "Here is my response",
         processed_message_ids: ["msg-1"],
@@ -437,8 +420,7 @@ describe("agent inbox tools", () => {
         createdAt: new Date(),
       });
 
-      const handler = registry.handlers.get("agent_inbox_respond")!;
-      const result = await handler({
+      const result = await registry.call("agent_inbox_respond", {
         app_id: "app-1",
         content: "Updated your code",
         code_updated: true,
@@ -462,8 +444,7 @@ describe("agent inbox tools", () => {
         createdAt: new Date(),
       });
 
-      const handler = registry.handlers.get("agent_inbox_respond")!;
-      await handler({ app_id: "app-1", content: "Reply" });
+      await registry.call("agent_inbox_respond", { app_id: "app-1", content: "Reply" });
 
       expect(mockPrisma.appMessage.updateMany).not.toHaveBeenCalled();
     });
@@ -473,8 +454,7 @@ describe("agent inbox tools", () => {
     it("should return no pending messages when empty", async () => {
       mockPrisma.bazdmegChatMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("agent_inbox_site_chat_poll")!;
-      const result = await handler({});
+      const result = await registry.call("agent_inbox_site_chat_poll", {});
 
       expect(getText(result)).toContain("No pending site chat messages");
       expect(getText(result)).toContain("serverTime");
@@ -492,8 +472,7 @@ describe("agent inbox tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("agent_inbox_site_chat_poll")!;
-      const result = await handler({});
+      const result = await registry.call("agent_inbox_site_chat_poll", {});
 
       expect(getText(result)).toContain("Pending Site Chat Messages (1)");
       expect(getText(result)).toContain("How do I deploy?");
@@ -503,8 +482,7 @@ describe("agent inbox tools", () => {
     it("should filter by since timestamp", async () => {
       mockPrisma.bazdmegChatMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("agent_inbox_site_chat_poll")!;
-      await handler({ since: "2026-02-18T09:00:00Z" });
+      await registry.call("agent_inbox_site_chat_poll", { since: "2026-02-18T09:00:00Z" });
 
       expect(mockPrisma.bazdmegChatMessage.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -520,8 +498,7 @@ describe("agent inbox tools", () => {
     it("should return error when message not found", async () => {
       mockPrisma.bazdmegChatMessage.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("agent_inbox_site_chat_respond")!;
-      const result = await handler({
+      const result = await registry.call("agent_inbox_site_chat_respond", {
         message_id: "nonexistent",
         answer: "Hello",
       });
@@ -537,8 +514,7 @@ describe("agent inbox tools", () => {
         answer: "Already answered",
       });
 
-      const handler = registry.handlers.get("agent_inbox_site_chat_respond")!;
-      const result = await handler({
+      const result = await registry.call("agent_inbox_site_chat_respond", {
         message_id: "chat-1",
         answer: "New answer",
       });
@@ -557,8 +533,7 @@ describe("agent inbox tools", () => {
         id: "chat-1",
       });
 
-      const handler = registry.handlers.get("agent_inbox_site_chat_respond")!;
-      const result = await handler({
+      const result = await registry.call("agent_inbox_site_chat_respond", {
         message_id: "chat-1",
         answer: "You can deploy by running yarn deploy.",
       });
@@ -585,8 +560,7 @@ describe("agent inbox tools", () => {
         id: "chat-2",
       });
 
-      const handler = registry.handlers.get("agent_inbox_site_chat_respond")!;
-      await handler({
+      await registry.call("agent_inbox_site_chat_respond", {
         message_id: "chat-2",
         answer: "Answer",
         model: "claude-opus",

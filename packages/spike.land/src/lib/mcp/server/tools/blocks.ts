@@ -55,7 +55,7 @@ export function registerBlocksTools(
                 ),
             })
             .meta({ category: "blocks", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     pageId,
                     blockType,
@@ -76,11 +76,9 @@ export function registerBlocksTools(
                     );
                 }
 
-                const prisma = (await import("@/lib/prisma")).default;
-
                 let resolvedSortOrder = sortOrder;
                 if (resolvedSortOrder === undefined) {
-                    const maxBlock = await prisma.pageBlock.findFirst({
+                    const maxBlock = await ctx.prisma.pageBlock.findFirst({
                         where: { pageId },
                         orderBy: { sortOrder: "desc" },
                         select: { sortOrder: true },
@@ -88,7 +86,7 @@ export function registerBlocksTools(
                     resolvedSortOrder = maxBlock ? maxBlock.sortOrder + 1 : 0;
                 }
 
-                const block = await prisma.pageBlock.create({
+                const block = await ctx.prisma.pageBlock.create({
                     data: {
                         pageId,
                         blockType,
@@ -125,7 +123,7 @@ export function registerBlocksTools(
                 isVisible: z.boolean().optional().describe("Updated visibility."),
             })
             .meta({ category: "blocks", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     blockId,
                     content,
@@ -133,9 +131,7 @@ export function registerBlocksTools(
                     isVisible,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const existing = await prisma.pageBlock.findUnique({
+                const existing = await ctx.prisma.pageBlock.findUnique({
                     where: { id: blockId },
                 });
 
@@ -168,7 +164,7 @@ export function registerBlocksTools(
                     updateData.isVisible = isVisible;
                 }
 
-                const updated = await prisma.pageBlock.update({
+                const updated = await ctx.prisma.pageBlock.update({
                     where: { id: blockId },
                     data: updateData,
                 });
@@ -194,14 +190,12 @@ export function registerBlocksTools(
                 blockId: z.string().min(1).describe("ID of the PageBlock to delete."),
             })
             .meta({ category: "blocks", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     blockId,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                await prisma.pageBlock.delete({
+                await ctx.prisma.pageBlock.delete({
                     where: { id: blockId },
                 });
 
@@ -222,17 +216,15 @@ export function registerBlocksTools(
                 ),
             })
             .meta({ category: "blocks", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     pageId,
                     blockIds,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                await prisma.$transaction(
+                await ctx.prisma.$transaction(
                     blockIds.map((id: string, index: number) =>
-                        prisma.pageBlock.update({
+                        ctx.prisma.pageBlock.update({
                             where: { id },
                             data: { sortOrder: index },
                         })
@@ -254,7 +246,7 @@ export function registerBlocksTools(
         freeTool(_userId)
             .tool("blocks_list_types", "List all available block types with descriptions.", {})
             .meta({ category: "blocks", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, _ctx }) => {
                 
 
                 const { getBlockTypeDescriptions } = await import(
@@ -279,14 +271,12 @@ export function registerBlocksTools(
                 blockId: z.string().min(1).describe("ID of the PageBlock to retrieve."),
             })
             .meta({ category: "blocks", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     blockId,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const block = await prisma.pageBlock.findUnique({
+                const block = await ctx.prisma.pageBlock.findUnique({
                     where: { id: blockId },
                 });
 

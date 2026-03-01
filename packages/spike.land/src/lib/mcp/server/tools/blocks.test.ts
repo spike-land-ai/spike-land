@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock prisma
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   pageBlock: {
     findUnique: vi.fn(),
     findFirst: vi.fn(),
@@ -10,7 +11,8 @@ const mockPrisma = {
     delete: vi.fn(),
   },
   $transaction: vi.fn(),
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({
   default: mockPrisma,
@@ -67,8 +69,7 @@ describe("blocks tools", () => {
         createdAt: now,
       });
 
-      const handler = registry.handlers.get("blocks_add")!;
-      const result = await handler({
+      const result = await registry.call("blocks_add", {
         pageId: "page-1",
         blockType: "HERO",
         content: { headline: "Hello World" },
@@ -98,8 +99,7 @@ describe("blocks tools", () => {
         createdAt: now,
       });
 
-      const handler = registry.handlers.get("blocks_add")!;
-      const result = await handler({
+      const result = await registry.call("blocks_add", {
         pageId: "page-1",
         blockType: "CTA",
         content: { headline: "CTA" },
@@ -131,8 +131,7 @@ describe("blocks tools", () => {
         createdAt: now,
       });
 
-      const handler = registry.handlers.get("blocks_add")!;
-      await handler({
+      await registry.call("blocks_add", {
         pageId: "page-1",
         blockType: "HERO",
         content: { headline: "First" },
@@ -161,8 +160,7 @@ describe("blocks tools", () => {
         createdAt: now,
       });
 
-      const handler = registry.handlers.get("blocks_add")!;
-      const result = await handler({
+      const result = await registry.call("blocks_add", {
         pageId: "page-1",
         blockType: "HERO",
         content: { headline: "Hidden" },
@@ -179,8 +177,7 @@ describe("blocks tools", () => {
         error: "Missing required field: headline",
       });
 
-      const handler = registry.handlers.get("blocks_add")!;
-      const result = await handler({
+      const result = await registry.call("blocks_add", {
         pageId: "page-1",
         blockType: "HERO",
         content: {},
@@ -215,8 +212,7 @@ describe("blocks tools", () => {
         updatedAt: now,
       });
 
-      const handler = registry.handlers.get("blocks_update")!;
-      const result = await handler({
+      const result = await registry.call("blocks_update", {
         blockId: "block-1",
         content: { headline: "Updated" },
         variant: "dark",
@@ -231,8 +227,7 @@ describe("blocks tools", () => {
     it("should return NOT_FOUND when block does not exist", async () => {
       mockPrisma.pageBlock.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("blocks_update")!;
-      const result = await handler({ blockId: "nonexistent" });
+      const result = await registry.call("blocks_update", { blockId: "nonexistent" });
 
       const text = getText(result);
       expect(text).toContain("NOT_FOUND");
@@ -249,8 +244,7 @@ describe("blocks tools", () => {
         error: "Invalid headline type",
       });
 
-      const handler = registry.handlers.get("blocks_update")!;
-      const result = await handler({
+      const result = await registry.call("blocks_update", {
         blockId: "block-1",
         content: { headline: 123 },
       });
@@ -276,8 +270,7 @@ describe("blocks tools", () => {
         updatedAt: now,
       });
 
-      const handler = registry.handlers.get("blocks_update")!;
-      const result = await handler({
+      const result = await registry.call("blocks_update", {
         blockId: "block-1",
         isVisible: false,
       });
@@ -295,8 +288,7 @@ describe("blocks tools", () => {
     it("should delete a block successfully", async () => {
       mockPrisma.pageBlock.delete.mockResolvedValue({});
 
-      const handler = registry.handlers.get("blocks_delete")!;
-      const result = await handler({ blockId: "block-1" });
+      const result = await registry.call("blocks_delete", { blockId: "block-1" });
 
       const text = getText(result);
       expect(text).toContain("Block Deleted");
@@ -313,8 +305,7 @@ describe("blocks tools", () => {
     it("should reorder blocks using a transaction", async () => {
       mockPrisma.$transaction.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("blocks_reorder")!;
-      const result = await handler({
+      const result = await registry.call("blocks_reorder", {
         pageId: "page-1",
         blockIds: ["block-c", "block-a", "block-b"],
       });
@@ -339,8 +330,7 @@ describe("blocks tools", () => {
         FAQ: "Frequently asked questions",
       });
 
-      const handler = registry.handlers.get("blocks_list_types")!;
-      const result = await handler({});
+      const result = await registry.call("blocks_list_types", {});
 
       const text = getText(result);
       expect(text).toContain("Available Block Types");
@@ -367,8 +357,7 @@ describe("blocks tools", () => {
         content: { headline: "Hello", subheadline: "World" },
       });
 
-      const handler = registry.handlers.get("blocks_get")!;
-      const result = await handler({ blockId: "block-1" });
+      const result = await registry.call("blocks_get", { blockId: "block-1" });
 
       const text = getText(result);
       expect(text).toContain("Block Details");
@@ -394,8 +383,7 @@ describe("blocks tools", () => {
         content: { text: "Click me" },
       });
 
-      const handler = registry.handlers.get("blocks_get")!;
-      const result = await handler({ blockId: "block-2" });
+      const result = await registry.call("blocks_get", { blockId: "block-2" });
 
       const text = getText(result);
       expect(text).toContain("Block Details");
@@ -406,8 +394,7 @@ describe("blocks tools", () => {
     it("should return NOT_FOUND when block does not exist", async () => {
       mockPrisma.pageBlock.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("blocks_get")!;
-      const result = await handler({ blockId: "nonexistent" });
+      const result = await registry.call("blocks_get", { blockId: "nonexistent" });
 
       const text = getText(result);
       expect(text).toContain("NOT_FOUND");

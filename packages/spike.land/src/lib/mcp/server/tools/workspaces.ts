@@ -25,9 +25,8 @@ export function registerWorkspacesTools(
         freeTool(userId)
             .tool("workspaces_list", "List all workspaces you are a member of.", {})
             .meta({ category: "workspaces", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
-                const prisma = (await import("@/lib/prisma")).default;
-                const memberships = await prisma.workspaceMember.findMany({
+            .handler(async ({ input: _input, ctx }) => {
+                const memberships = await ctx.prisma.workspaceMember.findMany({
                     where: { userId, joinedAt: { not: null } },
                     include: {
                         workspace: {
@@ -62,17 +61,15 @@ export function registerWorkspacesTools(
                 ),
             })
             .meta({ category: "workspaces", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { name, slug } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const baseSlug = slug || generateSlug(name);
 
                 // Ensure slug uniqueness
                 let finalSlug = baseSlug;
                 let suffix = 0;
                 while (true) {
-                    const existing = await prisma.workspace.findUnique({
+                    const existing = await ctx.prisma.workspace.findUnique({
                         where: { slug: finalSlug },
                         select: { id: true },
                     });
@@ -81,7 +78,7 @@ export function registerWorkspacesTools(
                     finalSlug = `${baseSlug}-${suffix}`;
                 }
 
-                const result = await prisma.$transaction(async tx => {
+                const result = await ctx.prisma.$transaction(async tx => {
                     const workspace = await tx.workspace.create({
                         data: { name, slug: finalSlug },
                     });
@@ -112,7 +109,7 @@ export function registerWorkspacesTools(
                 slug: z.string().min(1).optional().describe("Workspace slug."),
             })
             .meta({ category: "workspaces", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { workspace_id, slug } = input;
 
                 if (!workspace_id && !slug) {
@@ -120,14 +117,13 @@ export function registerWorkspacesTools(
                         "**Error: VALIDATION_ERROR**\nProvide either workspace_id or slug.\n**Retryable:** false",
                     );
                 }
-                const prisma = (await import("@/lib/prisma")).default;
                 const where: Record<string, unknown> = {};
                 if (workspace_id) where.id = workspace_id;
                 if (slug) where.slug = slug;
                 // Ensure user is a member
                 where.members = { some: { userId } };
 
-                const workspace = await prisma.workspace.findFirst({
+                const workspace = await ctx.prisma.workspace.findFirst({
                     where,
                     select: {
                         id: true,
@@ -167,10 +163,8 @@ export function registerWorkspacesTools(
                 slug: z.string().min(1).max(40).optional().describe("New slug."),
             })
             .meta({ category: "workspaces", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { workspace_id, name, slug } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const data: Record<string, unknown> = {};
                 if (name) data.name = name;
                 if (slug) data.slug = slug;
@@ -179,7 +173,7 @@ export function registerWorkspacesTools(
                         "**Error: VALIDATION_ERROR**\nNo fields to update.\n**Retryable:** false",
                     );
                 }
-                const workspace = await prisma.workspace.update({
+                const workspace = await ctx.prisma.workspace.update({
                     where: { id: workspace_id },
                     data,
                 });
@@ -195,24 +189,22 @@ export function registerWorkspacesTools(
                 workspace_id: z.string().min(1).describe("Workspace ID to toggle favorite."),
             })
             .meta({ category: "workspaces", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { workspace_id } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
-                const existing = await prisma.workspaceFavorite.findUnique({
+                const existing = await ctx.prisma.workspaceFavorite.findUnique({
                     where: {
                         userId_workspaceId: { userId, workspaceId: workspace_id },
                     },
                 });
                 if (existing) {
-                    await prisma.workspaceFavorite.delete({
+                    await ctx.prisma.workspaceFavorite.delete({
                         where: { id: existing.id },
                     });
                     return textResult(
                         `**Favorite Removed!** Workspace ${workspace_id} unfavorited.`,
                     );
                 } else {
-                    await prisma.workspaceFavorite.create({
+                    await ctx.prisma.workspaceFavorite.create({
                         data: { userId, workspaceId: workspace_id },
                     });
                     return textResult(

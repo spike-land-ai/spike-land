@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock prisma
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   workspaceConfig: {
     upsert: vi.fn(),
     findUnique: vi.fn(),
@@ -17,7 +18,8 @@ const mockPrisma = {
   app: {
     findMany: vi.fn(),
   },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: mockPrisma,
@@ -77,8 +79,7 @@ describe("bootstrap tools", () => {
         settings: {},
       });
 
-      const handler = registry.handlers.get("bootstrap_workspace")!;
-      const result = await handler({ name: "My Workspace", settings: {} });
+      const result = await registry.call("bootstrap_workspace", { name: "My Workspace", settings: {} });
 
       expect(mockPrisma.workspaceConfig.upsert).toHaveBeenCalledWith({
         where: { userId },
@@ -105,8 +106,7 @@ describe("bootstrap tools", () => {
         settings: { theme: "dark" },
       });
 
-      const handler = registry.handlers.get("bootstrap_workspace")!;
-      const result = await handler({
+      const result = await registry.call("bootstrap_workspace", {
         name: "Dev Space",
         settings: { theme: "dark" },
       });
@@ -127,8 +127,7 @@ describe("bootstrap tools", () => {
         settings: { region: "eu" },
       });
 
-      const handler = registry.handlers.get("bootstrap_workspace")!;
-      const result = await handler({
+      const result = await registry.call("bootstrap_workspace", {
         name: "Updated Workspace",
         settings: { region: "eu" },
       });
@@ -161,8 +160,7 @@ describe("bootstrap tools", () => {
         new Error("DB connection failed"),
       );
 
-      const handler = registry.handlers.get("bootstrap_workspace")!;
-      const result = await handler({ name: "Test", settings: {} });
+      const result = await registry.call("bootstrap_workspace", { name: "Test", settings: {} });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -182,8 +180,7 @@ describe("bootstrap tools", () => {
     it("should handle non-Error thrown values", async () => {
       mockPrisma.workspaceConfig.upsert.mockRejectedValue("string error");
 
-      const handler = registry.handlers.get("bootstrap_workspace")!;
-      const result = await handler({ name: "Test", settings: {} });
+      const result = await registry.call("bootstrap_workspace", { name: "Test", settings: {} });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -223,10 +220,7 @@ describe("bootstrap tools", () => {
       });
       mockPrisma.workspaceConfig.update.mockResolvedValue({});
 
-      const handler = registry.handlers.get(
-        "bootstrap_connect_integration",
-      )!;
-      const result = await handler({
+            const result = await registry.call("bootstrap_connect_integration", {
         integration_name: "github",
         credentials: { api_key: "gh-key-123", api_secret: "gh-secret-456" },
         allowed_urls: ["https://api.github.com"],
@@ -286,10 +280,7 @@ describe("bootstrap tools", () => {
       });
       mockPrisma.workspaceConfig.update.mockResolvedValue({});
 
-      const handler = registry.handlers.get(
-        "bootstrap_connect_integration",
-      )!;
-      const result = await handler({
+            const result = await registry.call("bootstrap_connect_integration", {
         integration_name: "slack",
         credentials: { token: "xoxb-123" },
         allowed_urls: [],
@@ -329,10 +320,7 @@ describe("bootstrap tools", () => {
       });
       mockPrisma.workspaceConfig.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get(
-        "bootstrap_connect_integration",
-      )!;
-      const result = await handler({
+            const result = await registry.call("bootstrap_connect_integration", {
         integration_name: "api",
         credentials: { key: "val" },
         allowed_urls: [],
@@ -368,10 +356,7 @@ describe("bootstrap tools", () => {
       });
       mockPrisma.workspaceConfig.update.mockResolvedValue({});
 
-      const handler = registry.handlers.get(
-        "bootstrap_connect_integration",
-      )!;
-      await handler({
+            await registry.call("bootstrap_connect_integration", {
         integration_name: "svc",
         credentials: { token: "t" },
         allowed_urls: [],
@@ -399,10 +384,7 @@ describe("bootstrap tools", () => {
         new Error("Vault DB error"),
       );
 
-      const handler = registry.handlers.get(
-        "bootstrap_connect_integration",
-      )!;
-      const result = await handler({
+            const result = await registry.call("bootstrap_connect_integration", {
         integration_name: "test",
         credentials: { key: "val" },
         allowed_urls: [],
@@ -428,10 +410,7 @@ describe("bootstrap tools", () => {
         throw "unexpected";
       });
 
-      const handler = registry.handlers.get(
-        "bootstrap_connect_integration",
-      )!;
-      const result = await handler({
+            const result = await registry.call("bootstrap_connect_integration", {
         integration_name: "test",
         credentials: { key: "val" },
         allowed_urls: [],
@@ -479,8 +458,7 @@ describe("bootstrap tools", () => {
         text: () => Promise.resolve(""),
       });
 
-      const handler = registry.handlers.get("bootstrap_create_app")!;
-      const result = await handler({
+      const result = await registry.call("bootstrap_create_app", {
         app_name: "My App",
         description: "A test application for the platform",
         code: "export default function App() { return <div>Hello</div>; }",
@@ -521,8 +499,7 @@ describe("bootstrap tools", () => {
         text: () => Promise.resolve(""),
       });
 
-      const handler = registry.handlers.get("bootstrap_create_app")!;
-      const result = await handler({
+      const result = await registry.call("bootstrap_create_app", {
         app_name: "No Code App",
         codespace_id: "custom-space",
       });
@@ -549,8 +526,7 @@ describe("bootstrap tools", () => {
         text: () => Promise.resolve(""),
       });
 
-      const handler = registry.handlers.get("bootstrap_create_app")!;
-      await handler({ app_name: "Cool Widget!!!" });
+      await registry.call("bootstrap_create_app", { app_name: "Cool Widget!!!" });
 
       const [, appOptions] = mockFetch.mock.calls[0] as [
         string,
@@ -565,8 +541,7 @@ describe("bootstrap tools", () => {
         new Error("DB connection failed"),
       );
 
-      const handler = registry.handlers.get("bootstrap_create_app")!;
-      const result = await handler({
+      const result = await registry.call("bootstrap_create_app", {
         app_name: "Broken App",
         code: "some code",
       });
@@ -590,8 +565,7 @@ describe("bootstrap tools", () => {
         text: () => Promise.resolve("App name already taken"),
       });
 
-      const handler = registry.handlers.get("bootstrap_create_app")!;
-      const result = await handler({
+      const result = await registry.call("bootstrap_create_app", {
         app_name: "Dup App",
       });
 
@@ -616,8 +590,7 @@ describe("bootstrap tools", () => {
         text: () => Promise.reject(new Error("read error")),
       });
 
-      const handler = registry.handlers.get("bootstrap_create_app")!;
-      const result = await handler({
+      const result = await registry.call("bootstrap_create_app", {
         app_name: "Some App",
       });
 
@@ -630,8 +603,7 @@ describe("bootstrap tools", () => {
     it("should handle network/fetch errors", async () => {
       mockFetch.mockRejectedValue(new Error("Network timeout"));
 
-      const handler = registry.handlers.get("bootstrap_create_app")!;
-      const result = await handler({
+      const result = await registry.call("bootstrap_create_app", {
         app_name: "Net Fail",
       });
 
@@ -653,8 +625,7 @@ describe("bootstrap tools", () => {
     it("should handle non-Error thrown values in catch", async () => {
       mockFetch.mockRejectedValue(42);
 
-      const handler = registry.handlers.get("bootstrap_create_app")!;
-      const result = await handler({
+      const result = await registry.call("bootstrap_create_app", {
         app_name: "Weird Fail",
       });
 
@@ -675,8 +646,7 @@ describe("bootstrap tools", () => {
         text: () => Promise.resolve(""),
       });
 
-      const handler = registry.handlers.get("bootstrap_create_app")!;
-      await handler({ app_name: "Fallback App" });
+      await registry.call("bootstrap_create_app", { app_name: "Fallback App" });
 
       const [, appOptions] = mockFetch.mock.calls[0] as [string, RequestInit];
       expect(
@@ -709,8 +679,7 @@ describe("bootstrap tools", () => {
         text: () => Promise.resolve(""),
       });
 
-      const handler = registry.handlers.get("bootstrap_create_app")!;
-      const result = await handler({
+      const result = await registry.call("bootstrap_create_app", {
         app_name: "Null Msgs",
         code: "export default function() { return <div/>; }",
       });
@@ -733,8 +702,7 @@ describe("bootstrap tools", () => {
         text: () => Promise.resolve(""),
       });
 
-      const handler = registry.handlers.get("bootstrap_create_app")!;
-      await handler({
+      await registry.call("bootstrap_create_app", {
         app_name: "Auth App",
       });
 
@@ -782,8 +750,7 @@ describe("bootstrap tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("bootstrap_status")!;
-      const result = await handler({});
+      const result = await registry.call("bootstrap_status", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -804,8 +771,7 @@ describe("bootstrap tools", () => {
       mockPrisma.registeredTool.count.mockResolvedValue(0);
       mockPrisma.app.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("bootstrap_status")!;
-      const result = await handler({});
+      const result = await registry.call("bootstrap_status", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -827,8 +793,7 @@ describe("bootstrap tools", () => {
       mockPrisma.registeredTool.count.mockResolvedValue(0);
       mockPrisma.app.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("bootstrap_status")!;
-      const result = await handler({});
+      const result = await registry.call("bootstrap_status", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -847,8 +812,7 @@ describe("bootstrap tools", () => {
       mockPrisma.registeredTool.count.mockResolvedValue(0);
       mockPrisma.app.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("bootstrap_status")!;
-      const result = await handler({});
+      const result = await registry.call("bootstrap_status", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -867,8 +831,7 @@ describe("bootstrap tools", () => {
       mockPrisma.registeredTool.count.mockResolvedValue(0);
       mockPrisma.app.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("bootstrap_status")!;
-      const result = await handler({});
+      const result = await registry.call("bootstrap_status", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -887,8 +850,7 @@ describe("bootstrap tools", () => {
       mockPrisma.registeredTool.count.mockResolvedValue(0);
       mockPrisma.app.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("bootstrap_status")!;
-      const result = await handler({});
+      const result = await registry.call("bootstrap_status", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -900,8 +862,7 @@ describe("bootstrap tools", () => {
         new Error("Connection refused"),
       );
 
-      const handler = registry.handlers.get("bootstrap_status")!;
-      const result = await handler({});
+      const result = await registry.call("bootstrap_status", {});
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -921,8 +882,7 @@ describe("bootstrap tools", () => {
     it("should handle non-Error thrown values", async () => {
       mockPrisma.workspaceConfig.findUnique.mockRejectedValue(null);
 
-      const handler = registry.handlers.get("bootstrap_status")!;
-      const result = await handler({});
+      const result = await registry.call("bootstrap_status", {});
 
       expect(result).toEqual(
         expect.objectContaining({

@@ -78,8 +78,7 @@ describe("settings tools", () => {
           createdAt: new Date("2024-02-01"),
         },
       ]);
-      const handler = registry.handlers.get("settings_list_api_keys")!;
-      const result = await handler({});
+      const result = await registry.call("settings_list_api_keys", {});
       expect(getText(result)).toContain("API Keys (2)");
       expect(getText(result)).toContain("Production Key");
       expect(getText(result)).toContain("Active");
@@ -91,8 +90,7 @@ describe("settings tools", () => {
 
     it("should return empty message when no API keys", async () => {
       mockPrisma.apiKey.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("settings_list_api_keys")!;
-      const result = await handler({});
+      const result = await registry.call("settings_list_api_keys", {});
       expect(getText(result)).toContain("No API keys found");
     });
 
@@ -107,8 +105,7 @@ describe("settings tools", () => {
           createdAt: new Date("2024-01-01"),
         },
       ]);
-      const handler = registry.handlers.get("settings_list_api_keys")!;
-      const result = await handler({});
+      const result = await registry.call("settings_list_api_keys", {});
       expect(getText(result)).toContain("2024-06-15");
     });
   });
@@ -122,8 +119,7 @@ describe("settings tools", () => {
         keyPrefix: "sk_live_ful",
         createdAt: new Date("2024-06-01"),
       });
-      const handler = registry.handlers.get("settings_create_api_key")!;
-      const result = await handler({ name: "My New Key" });
+      const result = await registry.call("settings_create_api_key", { name: "My New Key" });
       expect(getText(result)).toContain("API Key Created");
       expect(getText(result)).toContain("key-new");
       expect(getText(result)).toContain("My New Key");
@@ -142,8 +138,7 @@ describe("settings tools", () => {
         keyPrefix: "sk_live_tri",
         createdAt: new Date(),
       });
-      const handler = registry.handlers.get("settings_create_api_key")!;
-      await handler({ name: "  Trimmed Key  " });
+      await registry.call("settings_create_api_key", { name: "  Trimmed Key  " });
       expect(mockCreateApiKey).toHaveBeenCalledWith(userId, "Trimmed Key");
     });
   });
@@ -151,8 +146,7 @@ describe("settings tools", () => {
   describe("settings_revoke_api_key", () => {
     it("should revoke API key successfully", async () => {
       mockRevokeApiKey.mockResolvedValue({ success: true });
-      const handler = registry.handlers.get("settings_revoke_api_key")!;
-      const result = await handler({ key_id: "key-1" });
+      const result = await registry.call("settings_revoke_api_key", { key_id: "key-1" });
       expect(getText(result)).toContain("API Key Revoked");
       expect(getText(result)).toContain("key-1");
       expect(mockRevokeApiKey).toHaveBeenCalledWith(userId, "key-1");
@@ -163,8 +157,7 @@ describe("settings tools", () => {
         success: false,
         error: "API key not found",
       });
-      const handler = registry.handlers.get("settings_revoke_api_key")!;
-      const result = await handler({ key_id: "nonexistent" });
+      const result = await registry.call("settings_revoke_api_key", { key_id: "nonexistent" });
       expect(getText(result)).toContain("NOT_FOUND");
       expect(getText(result)).toContain("API key not found");
     });
@@ -174,16 +167,14 @@ describe("settings tools", () => {
         success: false,
         error: "API key is already revoked",
       });
-      const handler = registry.handlers.get("settings_revoke_api_key")!;
-      const result = await handler({ key_id: "key-revoked" });
+      const result = await registry.call("settings_revoke_api_key", { key_id: "key-revoked" });
       expect(getText(result)).toContain("NOT_FOUND");
       expect(getText(result)).toContain("already revoked");
     });
 
     it("should use default error message when error is undefined", async () => {
       mockRevokeApiKey.mockResolvedValue({ success: false });
-      const handler = registry.handlers.get("settings_revoke_api_key")!;
-      const result = await handler({ key_id: "key-unknown" });
+      const result = await registry.call("settings_revoke_api_key", { key_id: "key-unknown" });
       expect(getText(result)).toContain("NOT_FOUND");
       expect(getText(result)).toContain("API key not found");
     });
@@ -210,8 +201,7 @@ describe("settings tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("settings_mcp_history")!;
-      const result = await handler({ limit: 12, offset: 0 });
+      const result = await registry.call("settings_mcp_history", { limit: 12, offset: 0 });
       const text = getText(result);
       expect(text).toContain("MCP History");
       expect(text).toContain("1 of 1");
@@ -233,8 +223,7 @@ describe("settings tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("settings_mcp_history")!;
-      const result = await handler({ limit: 12, offset: 0 });
+      const result = await registry.call("settings_mcp_history", { limit: 12, offset: 0 });
       expect(getText(result)).toContain("No jobs found");
     });
 
@@ -258,8 +247,7 @@ describe("settings tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("settings_mcp_history")!;
-      const result = await handler({ limit: 12, offset: 0 });
+      const result = await registry.call("settings_mcp_history", { limit: 12, offset: 0 });
       const text = getText(result);
       expect(text).toContain("More results available");
       expect(text).toContain("offset=12");
@@ -285,9 +273,8 @@ describe("settings tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("settings_mcp_history")!;
       // Call with no offset to trigger (offset ?? 0) + (limit ?? 12)
-      const result = await handler({});
+      const result = await registry.call("settings_mcp_history", {});
       const text = getText(result);
       expect(text).toContain("More results available");
       expect(text).toContain("offset=12"); // 0 + 12
@@ -313,9 +300,8 @@ describe("settings tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("settings_mcp_history")!;
       // Call without explicit limit/offset to exercise the ?? fallbacks
-      const result = await handler({});
+      const result = await registry.call("settings_mcp_history", {});
       const text = getText(result);
       expect(text).toContain("MCP History");
       expect(text).toContain("job-default");
@@ -332,8 +318,7 @@ describe("settings tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("settings_mcp_history")!;
-      await handler({ type: "GENERATE", limit: 12, offset: 0 });
+      await registry.call("settings_mcp_history", { type: "GENERATE", limit: 12, offset: 0 });
 
       const [url] = mockFetch.mock.calls[0] as [string];
       expect(url).toContain("type=GENERATE");
@@ -360,8 +345,7 @@ describe("settings tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("settings_mcp_history")!;
-      const result = await handler({ limit: 12, offset: 0 });
+      const result = await registry.call("settings_mcp_history", { limit: 12, offset: 0 });
       const text = getText(result);
       expect(text).toContain("...");
       expect(text).not.toContain("A".repeat(200));
@@ -389,8 +373,7 @@ describe("settings tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("settings_mcp_job_detail")!;
-      const result = await handler({ job_id: "job-detail-1" });
+      const result = await registry.call("settings_mcp_job_detail", { job_id: "job-detail-1" });
       const text = getText(result);
       expect(text).toContain("MCP Job Detail");
       expect(text).toContain("job-detail-1");
@@ -420,8 +403,7 @@ describe("settings tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("settings_mcp_job_detail")!;
-      const result = await handler({ job_id: "job-minimal" });
+      const result = await registry.call("settings_mcp_job_detail", { job_id: "job-minimal" });
       const text = getText(result);
       expect(text).toContain("MCP Job Detail");
       expect(text).toContain("job-minimal");
@@ -467,8 +449,7 @@ describe("environment tools", () => {
           healthEndpoint: "https://spike.land/api/health",
         },
       ]);
-      const handler = registry.handlers.get("env_list")!;
-      const result = await handler({});
+      const result = await registry.call("env_list", {});
       const text = getText(result);
       expect(text).toContain("dev");
       expect(text).toContain("prod");
@@ -493,8 +474,7 @@ describe("environment tools", () => {
         commitSha: "abc1234",
         lastDeployedAt: new Date("2026-01-01"),
       });
-      const handler = registry.handlers.get("env_status")!;
-      const result = await handler({ name: "prod" });
+      const result = await registry.call("env_status", { name: "prod" });
       const text = getText(result);
       expect(text).toContain("prod");
       expect(text).toContain("healthy");
@@ -504,8 +484,7 @@ describe("environment tools", () => {
 
     it("should return not found for unknown environment", async () => {
       mockGetEnvConfig.mockReturnValue(undefined);
-      const handler = registry.handlers.get("env_status")!;
-      const result = await handler({ name: "dev" });
+      const result = await registry.call("env_status", { name: "dev" });
       expect(getText(result)).toContain("not found");
     });
 
@@ -524,8 +503,7 @@ describe("environment tools", () => {
         commitSha: null,
         lastDeployedAt: null,
       });
-      const handler = registry.handlers.get("env_status")!;
-      const result = await handler({ name: "dev" });
+      const result = await registry.call("env_status", { name: "dev" });
       const text = getText(result);
       expect(text).toContain("down");
       expect(text).toContain("unknown");
@@ -567,8 +545,7 @@ describe("environment tools", () => {
           lastDeployedAt: new Date("2026-01-01"),
         });
       });
-      const handler = registry.handlers.get("env_compare")!;
-      const result = await handler({ env_a: "dev", env_b: "prod" });
+      const result = await registry.call("env_compare", { env_a: "dev", env_b: "prod" });
       const text = getText(result);
       expect(text).toContain("dev vs prod");
       expect(text).toContain("Version match: YES");
@@ -609,8 +586,7 @@ describe("environment tools", () => {
           lastDeployedAt: null,
         });
       });
-      const handler = registry.handlers.get("env_compare")!;
-      const result = await handler({ env_a: "dev", env_b: "prod" });
+      const result = await registry.call("env_compare", { env_a: "dev", env_b: "prod" });
       const text = getText(result);
       expect(text).toContain("Version match: NO");
       expect(text).toContain("Commit match: NO");
@@ -618,8 +594,7 @@ describe("environment tools", () => {
 
     it("should return not found for unknown env_a", async () => {
       mockGetEnvConfig.mockReturnValue(undefined);
-      const handler = registry.handlers.get("env_compare")!;
-      const result = await handler({ env_a: "dev", env_b: "prod" });
+      const result = await registry.call("env_compare", { env_a: "dev", env_b: "prod" });
       expect(getText(result)).toContain("not found");
     });
 
@@ -634,8 +609,7 @@ describe("environment tools", () => {
         }
         return undefined;
       });
-      const handler = registry.handlers.get("env_compare")!;
-      const result = await handler({ env_a: "dev", env_b: "prod" });
+      const result = await registry.call("env_compare", { env_a: "dev", env_b: "prod" });
       expect(getText(result)).toContain("not found");
     });
   });
@@ -644,24 +618,21 @@ describe("environment tools", () => {
     it("should deny access when user has USER role", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
       mockGetAllConfigs.mockReturnValue([]);
-      const handler = registry.handlers.get("env_list")!;
-      const result = await handler({});
+      const result = await registry.call("env_list", {});
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
 
     it("should deny access when user is not found", async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
       mockGetAllConfigs.mockReturnValue([]);
-      const handler = registry.handlers.get("env_list")!;
-      const result = await handler({});
+      const result = await registry.call("env_list", {});
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
 
     it("should allow SUPER_ADMIN role", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "SUPER_ADMIN" });
       mockGetAllConfigs.mockReturnValue([]);
-      const handler = registry.handlers.get("env_list")!;
-      const result = await handler({});
+      const result = await registry.call("env_list", {});
       expect(getText(result)).toContain("Environments (0)");
     });
 
@@ -669,8 +640,7 @@ describe("environment tools", () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
       const toolNames = ["env_list", "env_status", "env_compare"];
       for (const toolName of toolNames) {
-        const handler = registry.handlers.get(toolName)!;
-        const result = await handler({});
+                const result = await handler({});
         expect(getText(result)).toContain("PERMISSION_DENIED");
       }
     });
@@ -711,8 +681,7 @@ describe("environment tools", () => {
           lastDeployedAt: null,
         });
       });
-      const handler = registry.handlers.get("env_compare")!;
-      const result = await handler({ env_a: "dev", env_b: "prod" });
+      const result = await registry.call("env_compare", { env_a: "dev", env_b: "prod" });
       const text = getText(result);
       expect(text).toContain("Version match: NO");
       expect(text).toContain("Commit match: NO");

@@ -27,7 +27,7 @@ export function registerGatewayMetaTools(
                 ),
             })
             .meta({ category: "gateway-meta", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { query, limit, semantic } = input;
 
                 if (semantic) {
@@ -88,8 +88,7 @@ export function registerGatewayMetaTools(
                     }
                 > = [];
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
-                    marketplaceTools = await prisma.registeredTool.findMany({
+                    marketplaceTools = await ctx.prisma.registeredTool.findMany({
                         where: {
                             status: "PUBLISHED",
                             OR: [
@@ -166,7 +165,7 @@ export function registerGatewayMetaTools(
         freeTool(userId)
             .tool("list_categories", "List all available tool categories with descriptions and tool counts.", {})
             .meta({ category: "gateway-meta", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, _ctx }) => {
                 if (typeof registry.listCategories !== "function") {
                     return {
                         content: [{
@@ -217,7 +216,7 @@ export function registerGatewayMetaTools(
                 category: z.string().min(1).describe("Category name to activate"),
             })
             .meta({ category: "gateway-meta", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const { category } = input;
 
                 const enabled = registry.enableCategory(category);
@@ -269,7 +268,7 @@ export function registerGatewayMetaTools(
         freeTool(userId)
             .tool("get_balance", "Get the current token balance for AI image generation.", {})
             .meta({ category: "gateway-meta", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, _ctx }) => {
                 try {
                     // Import dynamically to avoid circular deps at module level
                     const { WorkspaceCreditManager } = await import(
@@ -298,7 +297,7 @@ export function registerGatewayMetaTools(
         freeTool(userId)
             .tool("get_status", "Get platform status including available features, tool counts, and active categories.", {})
             .meta({ category: "gateway-meta", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, _ctx }) => {
                 if (typeof registry.listCategories !== "function") {
                     return {
                         content: [{

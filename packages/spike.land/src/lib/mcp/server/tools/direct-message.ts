@@ -27,12 +27,10 @@ export function registerDirectMessageTools(
                 ),
             })
             .meta({ category: "direct-message", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { subject, message, toEmail, priority } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const targetUser = await prisma.user.findFirst({
+                const targetUser = await ctx.prisma.user.findFirst({
                     where: {
                         email: {
                             equals: toEmail || "zoltan@spike.land",
@@ -49,7 +47,7 @@ export function registerDirectMessageTools(
                     );
                 }
 
-                const dm = await prisma.directMessage.create({
+                const dm = await ctx.prisma.directMessage.create({
                     data: {
                         fromUserId: userId.startsWith("session:") ? null : userId,
                         fromSessionId: userId.startsWith("session:") ? userId : null,
@@ -81,12 +79,10 @@ export function registerDirectMessageTools(
                 ),
             })
             .meta({ category: "direct-message", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { unreadOnly, limit } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const messages = await prisma.directMessage.findMany({
+                const messages = await ctx.prisma.directMessage.findMany({
                     where: {
                         toUserId: userId,
                         ...(unreadOnly ? { read: false } : {}),
@@ -126,12 +122,10 @@ export function registerDirectMessageTools(
                 ),
             })
             .meta({ category: "direct-message", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { messageId } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                await prisma.directMessage.update({
+                await ctx.prisma.directMessage.update({
                     where: { id: messageId, toUserId: userId },
                     data: { read: true, readAt: new Date() },
                 });

@@ -52,8 +52,7 @@ describe("esbuild tools", () => {
         code: "import { jsx } from \"@emotion/react/jsx-runtime\";\n",
         warnings: [],
       });
-      const handler = registry.handlers.get("esbuild_transpile")!;
-      const result = await handler({ code: "const x = <div/>;" });
+      const result = await registry.call("esbuild_transpile", { code: "const x = <div/>;" });
       expect(getText(result)).toContain("Transpiled");
       expect(getText(result)).toContain("tsx → esm");
       expect(getText(result)).toContain("target=es2024");
@@ -70,8 +69,7 @@ describe("esbuild tools", () => {
 
     it("should transpile with custom loader and target", async () => {
       mockTransform.mockResolvedValue({ code: "var x = 1;\n", warnings: [] });
-      const handler = registry.handlers.get("esbuild_transpile")!;
-      const result = await handler({
+      const result = await registry.call("esbuild_transpile", {
         code: "const x: number = 1;",
         loader: "ts",
         target: "es2020",
@@ -96,16 +94,14 @@ describe("esbuild tools", () => {
         code: "var x = 1;\n",
         warnings: [{ text: "Unreachable code" }],
       });
-      const handler = registry.handlers.get("esbuild_transpile")!;
-      const result = await handler({ code: "const x = 1;" });
+      const result = await registry.call("esbuild_transpile", { code: "const x = 1;" });
       expect(getText(result)).toContain("Warnings (1)");
       expect(getText(result)).toContain("Unreachable code");
     });
 
     it("should handle transform errors via safeToolCall", async () => {
       mockTransform.mockRejectedValue(new Error("Unexpected token"));
-      const handler = registry.handlers.get("esbuild_transpile")!;
-      const result = await handler({ code: "invalid{{{" });
+      const result = await registry.call("esbuild_transpile", { code: "invalid{{{" });
       expect(getText(result)).toContain("Error");
     });
   });
@@ -116,8 +112,7 @@ describe("esbuild tools", () => {
         js: "var app=function(){};",
         css: "body{margin:0}",
       });
-      const handler = registry.handlers.get("esbuild_bundle")!;
-      const result = await handler({ codespace_id: "my-space" });
+      const result = await registry.call("esbuild_bundle", { codespace_id: "my-space" });
       expect(getText(result)).toContain("Bundled");
       expect(getText(result)).toContain("my-space");
       expect(mockBundleCodespace).toHaveBeenCalledWith(
@@ -127,8 +122,7 @@ describe("esbuild tools", () => {
 
     it("should report zero CSS when bundle has none", async () => {
       mockBundleCodespace.mockResolvedValue({ js: "var x=1;", css: "" });
-      const handler = registry.handlers.get("esbuild_bundle")!;
-      const result = await handler({ codespace_id: "no-css" });
+      const result = await registry.call("esbuild_bundle", { codespace_id: "no-css" });
       const json = getJson(result) as { has_css: boolean; };
       expect(json.has_css).toBe(false);
     });
@@ -137,8 +131,7 @@ describe("esbuild tools", () => {
       mockBundleCodespace.mockRejectedValue(
         new Error("Bundle failed for bad-space: fetch error"),
       );
-      const handler = registry.handlers.get("esbuild_bundle")!;
-      const result = await handler({ codespace_id: "bad-space" });
+      const result = await registry.call("esbuild_bundle", { codespace_id: "bad-space" });
       expect(getText(result)).toContain("Error");
     });
   });
@@ -146,8 +139,7 @@ describe("esbuild tools", () => {
   describe("esbuild_validate", () => {
     it("should return valid for correct code", async () => {
       mockTransform.mockResolvedValue({ code: "", warnings: [] });
-      const handler = registry.handlers.get("esbuild_validate")!;
-      const result = await handler({ code: "const x = 1;" });
+      const result = await registry.call("esbuild_validate", { code: "const x = 1;" });
       expect(getText(result)).toContain("Valid");
     });
 
@@ -155,8 +147,7 @@ describe("esbuild tools", () => {
       mockTransform.mockRejectedValue(
         new Error("<stdin>:1:5: error: Unexpected token\n1 error(s)"),
       );
-      const handler = registry.handlers.get("esbuild_validate")!;
-      const result = await handler({ code: "const =" });
+      const result = await registry.call("esbuild_validate", { code: "const =" });
       expect(getText(result)).toContain("Invalid");
       const json = getJson(result) as Array<{ line?: number; message: string; }>;
       expect(json.length).toBeGreaterThan(0);
@@ -165,8 +156,7 @@ describe("esbuild tools", () => {
 
     it("should handle non-Error thrown in validate catch", async () => {
       mockTransform.mockRejectedValue("string syntax error");
-      const handler = registry.handlers.get("esbuild_validate")!;
-      const result = await handler({ code: "bad code" });
+      const result = await registry.call("esbuild_validate", { code: "bad code" });
       expect(getText(result)).toContain("Invalid");
       const json = getJson(result) as Array<{ message: string; }>;
       expect(json.length).toBeGreaterThan(0);
@@ -174,8 +164,7 @@ describe("esbuild tools", () => {
 
     it("should use custom loader", async () => {
       mockTransform.mockResolvedValue({ code: "", warnings: [] });
-      const handler = registry.handlers.get("esbuild_validate")!;
-      await handler({ code: "const x = 1;", loader: "ts" });
+      await registry.call("esbuild_validate", { code: "const x = 1;", loader: "ts" });
       expect(mockTransform).toHaveBeenCalledWith(
         "const x = 1;",
         expect.objectContaining({ loader: "ts" }),
@@ -185,8 +174,7 @@ describe("esbuild tools", () => {
 
   describe("esbuild_parse_errors", () => {
     it("should parse multi-error text", async () => {
-      const handler = registry.handlers.get("esbuild_parse_errors")!;
-      const result = await handler({
+      const result = await registry.call("esbuild_parse_errors", {
         error_text:
           "<stdin>:3:10: error: Expected semicolon\n<stdin>:7:2: error: Unexpected end of file\n2 error(s)",
       });
@@ -201,8 +189,7 @@ describe("esbuild tools", () => {
     });
 
     it("should handle plain error message", async () => {
-      const handler = registry.handlers.get("esbuild_parse_errors")!;
-      const result = await handler({ error_text: "Something went wrong" });
+      const result = await registry.call("esbuild_parse_errors", { error_text: "Something went wrong" });
       const json = getJson(result) as Array<{ message: string; }>;
       expect(json.length).toBe(1);
       expect(json[0]!.message).toBe("Something went wrong");
@@ -211,8 +198,7 @@ describe("esbuild tools", () => {
 
   describe("esbuild_info", () => {
     it("should return version and status", async () => {
-      const handler = registry.handlers.get("esbuild_info")!;
-      const result = await handler({});
+      const result = await registry.call("esbuild_info", {});
       expect(getText(result)).toContain("esbuild-wasm");
       expect(getText(result)).toContain("0.24.2");
       expect(getText(result)).toContain("ready");
@@ -230,8 +216,7 @@ describe("esbuild tools", () => {
       mockEnsureEsbuildReady.mockRejectedValueOnce(
         new Error("WASM load failed"),
       );
-      const handler = registry.handlers.get("esbuild_info")!;
-      const result = await handler({});
+      const result = await registry.call("esbuild_info", {});
       expect(getText(result)).toContain("init_failed");
     });
   });

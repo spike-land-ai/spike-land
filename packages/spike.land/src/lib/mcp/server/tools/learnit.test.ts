@@ -1,13 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock prisma
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   learnItContent: {
     findUnique: vi.fn(),
     findMany: vi.fn(),
     update: vi.fn(),
   },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({
   default: mockPrisma,
@@ -66,8 +68,7 @@ describe("learnit tools", () => {
       });
       mockPrisma.learnItContent.update.mockResolvedValue({});
 
-      const handler = registry.handlers.get("learnit_get_topic")!;
-      const result = await handler({ slug: "javascript/closures" });
+      const result = await registry.call("learnit_get_topic", { slug: "javascript/closures" });
 
       const text = getText(result);
       expect(text).toContain("JavaScript Closures");
@@ -95,8 +96,7 @@ describe("learnit tools", () => {
       });
       mockPrisma.learnItContent.update.mockResolvedValue({});
 
-      const handler = registry.handlers.get("learnit_get_topic")!;
-      const result = await handler({ slug: "python/basics" });
+      const result = await registry.call("learnit_get_topic", { slug: "python/basics" });
 
       const text = getText(result);
       expect(text).toContain("Python is a high-level programming language.");
@@ -106,8 +106,7 @@ describe("learnit tools", () => {
     it("should return NOT_FOUND for missing topic", async () => {
       mockPrisma.learnItContent.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("learnit_get_topic")!;
-      const result = await handler({ slug: "nonexistent" });
+      const result = await registry.call("learnit_get_topic", { slug: "nonexistent" });
 
       expect(getText(result)).toContain("NOT_FOUND");
     });
@@ -127,8 +126,7 @@ describe("learnit tools", () => {
       });
       mockPrisma.learnItContent.update.mockResolvedValue({});
 
-      const handler = registry.handlers.get("learnit_get_topic")!;
-      await handler({ slug: "rust/ownership" });
+      await registry.call("learnit_get_topic", { slug: "rust/ownership" });
 
       // View count update should have been called
       expect(mockPrisma.learnItContent.update).toHaveBeenCalledWith({
@@ -155,8 +153,7 @@ describe("learnit tools", () => {
         new Error("DB write failed"),
       );
 
-      const handler = registry.handlers.get("learnit_get_topic")!;
-      const result = await handler({ slug: "go/goroutines" });
+      const result = await registry.call("learnit_get_topic", { slug: "go/goroutines" });
 
       // Should still return the topic successfully despite the update failure
       const text = getText(result);
@@ -183,8 +180,7 @@ describe("learnit tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("learnit_search_topics")!;
-      const result = await handler({ query: "javascript" });
+      const result = await registry.call("learnit_search_topics", { query: "javascript" });
 
       const text = getText(result);
       expect(text).toContain("Found 2 topic(s)");
@@ -196,8 +192,7 @@ describe("learnit tools", () => {
     it("should return message when no topics found", async () => {
       mockPrisma.learnItContent.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("learnit_search_topics")!;
-      const result = await handler({ query: "zzzzz" });
+      const result = await registry.call("learnit_search_topics", { query: "zzzzz" });
 
       expect(getText(result)).toContain("No topics found matching \"zzzzz\"");
     });
@@ -205,8 +200,7 @@ describe("learnit tools", () => {
     it("should use default limit of 10", async () => {
       mockPrisma.learnItContent.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("learnit_search_topics")!;
-      await handler({ query: "test" });
+      await registry.call("learnit_search_topics", { query: "test" });
 
       expect(mockPrisma.learnItContent.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ take: 10 }),
@@ -246,8 +240,7 @@ describe("learnit tools", () => {
         description: "...",
       });
 
-      const handler = registry.handlers.get("learnit_get_relations")!;
-      const result = await handler({ slug: "javascript/closures" });
+      const result = await registry.call("learnit_get_relations", { slug: "javascript/closures" });
 
       const text = getText(result);
       expect(text).toContain("Related (1):");
@@ -268,8 +261,7 @@ describe("learnit tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("learnit_get_relations")!;
-      const result = await handler({
+      const result = await registry.call("learnit_get_relations", {
         slug: "javascript/closures",
         type: "related",
       });
@@ -289,8 +281,7 @@ describe("learnit tools", () => {
         description: "...",
       });
 
-      const handler = registry.handlers.get("learnit_get_relations")!;
-      const result = await handler({
+      const result = await registry.call("learnit_get_relations", {
         slug: "javascript/closures",
         type: "parent",
       });
@@ -317,8 +308,7 @@ describe("learnit tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("learnit_get_relations")!;
-      const result = await handler({
+      const result = await registry.call("learnit_get_relations", {
         slug: "javascript/closures",
         type: "children",
       });
@@ -334,8 +324,7 @@ describe("learnit tools", () => {
     it("should show (none) for empty related list", async () => {
       mockGetRelatedTopics.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("learnit_get_relations")!;
-      const result = await handler({
+      const result = await registry.call("learnit_get_relations", {
         slug: "javascript/closures",
         type: "related",
       });
@@ -348,8 +337,7 @@ describe("learnit tools", () => {
     it("should show (none) for empty prerequisites list", async () => {
       mockGetPrerequisites.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("learnit_get_relations")!;
-      const result = await handler({
+      const result = await registry.call("learnit_get_relations", {
         slug: "javascript/closures",
         type: "prerequisites",
       });
@@ -362,8 +350,7 @@ describe("learnit tools", () => {
     it("should show (none) when parent is null", async () => {
       mockGetParentTopic.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("learnit_get_relations")!;
-      const result = await handler({
+      const result = await registry.call("learnit_get_relations", {
         slug: "javascript/closures",
         type: "parent",
       });
@@ -375,8 +362,7 @@ describe("learnit tools", () => {
     it("should return NOT_FOUND for missing topic", async () => {
       mockPrisma.learnItContent.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("learnit_get_relations")!;
-      const result = await handler({ slug: "nope" });
+      const result = await registry.call("learnit_get_relations", { slug: "nope" });
 
       expect(getText(result)).toContain("NOT_FOUND");
     });
@@ -399,8 +385,7 @@ describe("learnit tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("learnit_list_popular")!;
-      const result = await handler({});
+      const result = await registry.call("learnit_list_popular", {});
 
       const text = getText(result);
       expect(text).toContain("Top 2 Topic(s) by Views");
@@ -412,8 +397,7 @@ describe("learnit tools", () => {
     it("should return message when no topics", async () => {
       mockPrisma.learnItContent.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("learnit_list_popular")!;
-      const result = await handler({});
+      const result = await registry.call("learnit_list_popular", {});
 
       expect(getText(result)).toContain("No published topics found");
     });
@@ -431,8 +415,7 @@ describe("learnit tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("learnit_list_recent")!;
-      const result = await handler({});
+      const result = await registry.call("learnit_list_recent", {});
 
       const text = getText(result);
       expect(text).toContain("Most Recent Topic(s)");
@@ -443,8 +426,7 @@ describe("learnit tools", () => {
     it("should return message when no topics", async () => {
       mockPrisma.learnItContent.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("learnit_list_recent")!;
-      const result = await handler({});
+      const result = await registry.call("learnit_list_recent", {});
 
       expect(getText(result)).toContain("No published topics found");
     });
@@ -486,8 +468,7 @@ describe("learnit tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("learnit_get_topic_graph")!;
-      const result = await handler({ slug: "javascript/closures" });
+      const result = await registry.call("learnit_get_topic_graph", { slug: "javascript/closures" });
 
       const text = getText(result);
       expect(text).toContain("Topic Graph:");
@@ -526,8 +507,7 @@ describe("learnit tools", () => {
       ]);
       mockGetPrerequisites.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("learnit_get_topic_graph")!;
-      const result = await handler({
+      const result = await registry.call("learnit_get_topic_graph", {
         slug: "javascript/closures",
         depth: 2,
       });
@@ -542,8 +522,7 @@ describe("learnit tools", () => {
     it("should return NOT_FOUND for missing center topic", async () => {
       mockPrisma.learnItContent.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("learnit_get_topic_graph")!;
-      const result = await handler({ slug: "nope" });
+      const result = await registry.call("learnit_get_topic_graph", { slug: "nope" });
 
       expect(getText(result)).toContain("NOT_FOUND");
     });
@@ -554,8 +533,7 @@ describe("learnit tools", () => {
       mockGetRelatedTopics.mockResolvedValue([]);
       mockGetPrerequisites.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("learnit_get_topic_graph")!;
-      const result = await handler({ slug: "javascript/closures" });
+      const result = await registry.call("learnit_get_topic_graph", { slug: "javascript/closures" });
 
       const text = getText(result);
       expect(text).toContain("Parent:** (none)");
@@ -615,8 +593,7 @@ describe("learnit tools", () => {
       mockGetChildTopics.mockResolvedValueOnce([]);
       mockGetRelatedTopics.mockResolvedValueOnce([]);
 
-      const handler = registry.handlers.get("learnit_get_topic_graph")!;
-      const result = await handler({ slug: "javascript/closures", depth: 2 });
+      const result = await registry.call("learnit_get_topic_graph", { slug: "javascript/closures", depth: 2 });
 
       const text = getText(result);
       expect(text).toContain("Depth-2 Expansions (3)");
@@ -631,8 +608,7 @@ describe("learnit tools", () => {
       mockGetRelatedTopics.mockResolvedValue([]);
       mockGetPrerequisites.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("learnit_get_topic_graph")!;
-      const result = await handler({ slug: "javascript/closures", depth: 2 });
+      const result = await registry.call("learnit_get_topic_graph", { slug: "javascript/closures", depth: 2 });
 
       const text = getText(result);
       expect(text).not.toContain("Depth-2 Expansions");
@@ -667,8 +643,7 @@ describe("learnit tools", () => {
       mockGetChildTopics.mockResolvedValueOnce([]);
       mockGetRelatedTopics.mockResolvedValueOnce([]);
 
-      const handler = registry.handlers.get("learnit_get_topic_graph")!;
-      const result = await handler({ slug: "javascript/closures", depth: 2 });
+      const result = await registry.call("learnit_get_topic_graph", { slug: "javascript/closures", depth: 2 });
 
       const text = getText(result);
       expect(text).toContain("Depth-2 Expansions (3)");
@@ -693,8 +668,7 @@ describe("learnit tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("learnit_get_relations")!;
-      const result = await handler({
+      const result = await registry.call("learnit_get_relations", {
         slug: "javascript/closures",
         type: "prerequisites",
       });

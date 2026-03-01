@@ -16,6 +16,8 @@ import type { ToolRegistry } from "../tool-registry";
 import { textResult } from "./tool-helpers";
 import { freeTool } from "../tool-builder/procedures.js";
 
+type PrismaClient = Awaited<typeof import("@/lib/prisma")>["default"];
+
 /* ── Constants ───────────────────────────────────────────────────────────── */
 
 const PREF_KEY_PREFIX = "brand_campaigns";
@@ -57,8 +59,7 @@ function prefKey(userId: string): string {
     return `${PREF_KEY_PREFIX}:${userId}`;
 }
 
-async function loadCampaigns(userId: string): Promise<Campaign[]> {
-    const prisma = (await import("@/lib/prisma")).default;
+async function loadCampaigns(prisma: PrismaClient, userId: string): Promise<Campaign[]> {
     const pref = await prisma.userPreference.findUnique({
         where: { userId_key: { userId, key: prefKey(userId) } },
     });
@@ -72,10 +73,10 @@ async function loadCampaigns(userId: string): Promise<Campaign[]> {
 }
 
 async function saveCampaigns(
+    prisma: PrismaClient,
     userId: string,
     campaigns: Campaign[],
 ): Promise<void> {
-    const prisma = (await import("@/lib/prisma")).default;
     await prisma.userPreference.upsert({
         where: { userId_key: { userId, key: prefKey(userId) } },
         create: { userId, key: prefKey(userId), value: JSON.stringify(campaigns) },
@@ -275,7 +276,7 @@ export function registerBrandCampaignTools(
                 ),
             })
             .meta({ category: "brand-campaigns", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { name, description, platform, start_date, budget } = input;
 
                 if (start_date !== undefined) {
@@ -287,7 +288,7 @@ export function registerBrandCampaignTools(
                     }
                 }
 
-                const campaigns = await loadCampaigns(userId);
+                const campaigns = await loadCampaigns(ctx.prisma, userId);
                 const now = new Date().toISOString();
                 const campaign: Campaign = {
                     id: generateId(),
@@ -301,7 +302,7 @@ export function registerBrandCampaignTools(
                     updated_at: now,
                 };
                 campaigns.push(campaign);
-                await saveCampaigns(userId, campaigns);
+                await saveCampaigns(ctx.prisma, userId, campaigns);
 
                 return textResult(
                     `**Campaign Created**\n\n`
@@ -330,10 +331,10 @@ export function registerBrandCampaignTools(
                 ),
             })
             .meta({ category: "brand-campaigns", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { status, platform } = input;
 
-                let campaigns = await loadCampaigns(userId);
+                let campaigns = await loadCampaigns(ctx.prisma, userId);
 
                 if (status && status !== "all") {
                     campaigns = campaigns.filter(c => c.status === status);
@@ -373,10 +374,10 @@ export function registerBrandCampaignTools(
                 campaign_id: z.string().min(1).describe("Campaign ID."),
             })
             .meta({ category: "brand-campaigns", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { campaign_id } = input;
 
-                const campaigns = await loadCampaigns(userId);
+                const campaigns = await loadCampaigns(ctx.prisma, userId);
                 const campaign = campaigns.find(c => c.id === campaign_id);
 
                 if (!campaign) {
@@ -418,10 +419,10 @@ export function registerBrandCampaignTools(
                 ),
             })
             .meta({ category: "brand-campaigns", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { campaign_id, variant_count, tone } = input;
 
-                const campaigns = await loadCampaigns(userId);
+                const campaigns = await loadCampaigns(ctx.prisma, userId);
                 const campaign = campaigns.find(c => c.id === campaign_id);
 
                 if (!campaign) {

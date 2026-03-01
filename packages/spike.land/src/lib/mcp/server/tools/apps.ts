@@ -47,7 +47,7 @@ export function registerAppsTools(
                     ),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     prompt,
                     codespace_id,
@@ -111,13 +111,11 @@ export function registerAppsTools(
                     .describe("Max apps to return. Default: 20."),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     status,
                     limit,
                 } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
 
                 const where: Record<string, unknown> = {
                     userId,
@@ -129,7 +127,7 @@ export function registerAppsTools(
                     where.status = { notIn: ["ARCHIVED"] };
                 }
 
-                const apps = await prisma.app.findMany({
+                const apps = await ctx.prisma.app.findMany({
                     where,
                     select: {
                         id: true,
@@ -178,7 +176,7 @@ export function registerAppsTools(
                     ),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     app_id,
                 } = input;
@@ -253,7 +251,7 @@ export function registerAppsTools(
                     .describe("Image IDs to attach as references."),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     app_id,
                     message,
@@ -307,14 +305,12 @@ export function registerAppsTools(
                     .describe("Max messages. Default: 20."),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     app_id,
                     cursor,
                     limit,
                 } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const { findAppByIdentifierSimple } = await import("@/lib/app-lookup");
 
                 const app = await findAppByIdentifierSimple(app_id, userId);
@@ -332,7 +328,7 @@ export function registerAppsTools(
                     where.createdAt = { lt: new Date(cursor) };
                 }
 
-                const messages = await prisma.appMessage.findMany({
+                const messages = await ctx.prisma.appMessage.findMany({
                     where,
                     select: {
                         id: true,
@@ -388,7 +384,7 @@ export function registerAppsTools(
                     .describe("ARCHIVED stops the live app. PROMPTING resets to draft state."),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     app_id,
                     status,
@@ -421,7 +417,7 @@ export function registerAppsTools(
                     ),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     app_id,
                 } = input;
@@ -451,7 +447,7 @@ export function registerAppsTools(
                     ),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     app_id,
                 } = input;
@@ -482,7 +478,7 @@ export function registerAppsTools(
                     .describe("Must be true. This action CANNOT be undone."),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     app_id,
                     confirm,
@@ -524,13 +520,11 @@ export function registerAppsTools(
                     .describe("Max versions. Default: 10."),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     app_id,
                     limit,
                 } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const { findAppByIdentifierSimple } = await import("@/lib/app-lookup");
 
                 const app = await findAppByIdentifierSimple(app_id, userId);
@@ -540,7 +534,7 @@ export function registerAppsTools(
                     );
                 }
 
-                const versions = await prisma.appCodeVersion.findMany({
+                const versions = await ctx.prisma.appCodeVersion.findMany({
                     where: { appId: app.id },
                     select: {
                         id: true,
@@ -583,7 +577,7 @@ export function registerAppsTools(
                     .describe("Target status for all apps."),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     app_ids,
                     status,
@@ -633,7 +627,7 @@ export function registerAppsTools(
         freeTool(userId)
             .tool("apps_clear_messages", "Clear all messages in an app's chat history. This action cannot be undone.", AppsClearMessagesSchema.shape)
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const { app_id } = input;
 
                 await apiRequest(`/api/apps/${encodeURIComponent(app_id)}/messages`, {
@@ -657,7 +651,7 @@ export function registerAppsTools(
         freeTool(userId)
             .tool("apps_upload_images", "Get instructions for uploading images to an app. Returns the upload endpoint and requirements.", AppsUploadImagesSchema.shape)
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const { app_id, image_count } = input;
 
                 return textResult(
@@ -679,7 +673,7 @@ export function registerAppsTools(
         freeTool(userId)
             .tool("apps_generate_codespace_id", "Generate a random codespace ID in the format 'adjective.noun.verb.suffix'. Useful for creating unique app identifiers.", AppsGenerateCodespaceIdSchema.shape)
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, _ctx }) => {
                 const { generateCodespaceId } = await import("@/lib/apps/codespace-id");
                 const id = generateCodespaceId();
                 return textResult(

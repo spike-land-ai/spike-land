@@ -7,7 +7,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ToolRegistry } from "./tool-registry";
+import { z } from "zod";
+import { ToolRegistry, validateSchemaDescriptions } from "./tool-registry";
 import type { ToolDefinition } from "./tool-registry";
 import logger from "@/lib/logger";
 
@@ -410,5 +411,114 @@ describe("ToolRegistry", () => {
         });
       });
     });
+  });
+
+  describe("schema description validation", () => {
+    it("should throw in non-production when schema fields lack .describe()", () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = "test";
+
+      const tool = makeTool({
+        inputSchema: {
+          name: z.string(),
+          age: z.number(),
+        },
+      });
+
+      expect(() => registry.register(tool)).toThrow(
+        /has schema fields without \.describe\(\): name, age/,
+      );
+
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it("should not throw when all schema fields have .describe()", () => {
+      const tool = makeTool({
+        inputSchema: {
+          name: z.string().describe("The user name"),
+          age: z.number().describe("The user age"),
+        },
+      });
+
+      expect(() => registry.register(tool)).not.toThrow();
+    });
+
+    it("should warn in production when schema fields lack .describe()", () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = "production";
+
+      const tool = makeTool({
+        inputSchema: {
+          name: z.string(),
+        },
+      });
+
+      expect(() => registry.register(tool)).not.toThrow();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining("has schema fields without .describe(): name"),
+      );
+
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it("should not throw when inputSchema is undefined", () => {
+      const tool = makeTool({ inputSchema: undefined });
+      expect(() => registry.register(tool)).not.toThrow();
+    });
+
+    it("should report only fields missing .describe()", () => {
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = "test";
+
+      const tool = makeTool({
+        inputSchema: {
+          good: z.string().describe("Has description"),
+          bad: z.string(),
+        },
+      });
+
+      expect(() => registry.register(tool)).toThrow(
+        /has schema fields without \.describe\(\): bad/,
+      );
+
+      process.env.NODE_ENV = originalEnv;
+    });
+  });
+});
+
+describe("validateSchemaDescriptions", () => {
+  it("should return empty array for undefined schema", () => {
+    expect(validateSchemaDescriptions(undefined)).toEqual([]);
+  });
+
+  it("should return empty array when all fields have descriptions", () => {
+    const schema = {
+      name: z.string().describe("Name"),
+      count: z.number().describe("Count"),
+    };
+    expect(validateSchemaDescriptions(schema)).toEqual([]);
+  });
+
+  it("should return field names missing descriptions", () => {
+    const schema = {
+      described: z.string().describe("Has one"),
+      missing1: z.string(),
+      missing2: z.number(),
+    };
+    expect(validateSchemaDescriptions(schema)).toEqual(["missing1", "missing2"]);
+  });
+
+  it("should handle optional fields with .describe()", () => {
+    const schema = {
+      opt: z.string().optional().describe("Optional field"),
+    };
+    expect(validateSchemaDescriptions(schema)).toEqual([]);
+  });
+
+  it("should detect optional fields without .describe()", () => {
+    const schema = {
+      opt: z.string().optional(),
+    };
+    expect(validateSchemaDescriptions(schema)).toEqual(["opt"]);
   });
 });

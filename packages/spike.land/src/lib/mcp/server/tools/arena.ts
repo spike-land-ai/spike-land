@@ -7,7 +7,6 @@
 
 import { z } from "zod";
 import type { ToolRegistry } from "../tool-registry";
-import prisma from "@/lib/prisma";
 import logger from "@/lib/logger";
 import { arenaGenerateFromPrompt } from "@/lib/arena/arena-generator";
 import { submitReview } from "@/lib/arena/review";
@@ -36,7 +35,7 @@ export function registerArenaTools(
                     .describe("Maximum results"),
             })
             .meta({ category: "arena", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     status,
                     category,
@@ -47,7 +46,7 @@ export function registerArenaTools(
                     const where: Record<string, unknown> = { status };
                     if (category) where.category = category;
 
-                    const challenges = await prisma.arenaChallenge.findMany({
+                    const challenges = await ctx.prisma.arenaChallenge.findMany({
                         where,
                         orderBy: { createdAt: "desc" },
                         take: limit,
@@ -98,13 +97,13 @@ export function registerArenaTools(
                 challenge_id: z.string().min(1).describe("The challenge ID"),
             })
             .meta({ category: "arena", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     challenge_id,
                 } = input;
 
                 try {
-                    const challenge = await prisma.arenaChallenge.findUnique({
+                    const challenge = await ctx.prisma.arenaChallenge.findUnique({
                         where: { id: challenge_id },
                         include: {
                             createdBy: { select: { name: true } },
@@ -188,7 +187,7 @@ export function registerArenaTools(
                     .describe("Optional custom system prompt"),
             })
             .meta({ category: "arena", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     challenge_id,
                     prompt,
@@ -197,7 +196,7 @@ export function registerArenaTools(
 
                 try {
                     // Verify challenge is open
-                    const challenge = await prisma.arenaChallenge.findUnique({
+                    const challenge = await ctx.prisma.arenaChallenge.findUnique({
                         where: { id: challenge_id },
                         select: { id: true, status: true, title: true },
                     });
@@ -224,7 +223,7 @@ export function registerArenaTools(
                     }
 
                     // Create submission
-                    const submission = await prisma.arenaSubmission.create({
+                    const submission = await ctx.prisma.arenaSubmission.create({
                         data: {
                             challengeId: challenge_id,
                             userId,
@@ -284,7 +283,7 @@ export function registerArenaTools(
                 comment: z.string().max(2000).optional().describe("Review comment"),
             })
             .meta({ category: "arena", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     submission_id,
                     bugs,
@@ -339,13 +338,13 @@ export function registerArenaTools(
                     .describe("Number of entries to return"),
             })
             .meta({ category: "arena", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     limit,
                 } = input;
 
                 try {
-                    const entries = await prisma.arenaElo.findMany({
+                    const entries = await ctx.prisma.arenaElo.findMany({
                         orderBy: { elo: "desc" },
                         take: limit,
                         include: {

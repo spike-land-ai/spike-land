@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ToolRegistry } from "../tool-registry";
+import type { ToolModuleExport } from "../tool-discovery";
 import { resolveWorkspace, textResult } from "./tool-helpers";
 import { type ReminderType } from "@prisma/client";
 import { workspaceTool } from "../tool-builder/procedures.js";
@@ -15,16 +16,14 @@ export function registerRemindersTools(
                 status: z.enum(["ACTIVE", "COMPLETED", "ALL"]).optional().default("ACTIVE"),
             })
             .meta({ category: "reminders", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const workspace = await resolveWorkspace(userId, args.workspace_slug);
                 const where: Record<string, unknown> = { workspaceId: workspace.id };
                 if (args.status === "ACTIVE") where.status = { not: "COMPLETED" };
                 else if (args.status === "COMPLETED") where.status = "COMPLETED";
 
-                const reminders = await prisma.connectionReminder.findMany({
+                const reminders = await ctx.prisma.connectionReminder.findMany({
                     where,
                     include: { connection: { select: { displayName: true } } },
                     orderBy: { dueDate: "asc" },
@@ -57,12 +56,10 @@ export function registerRemindersTools(
                 ),
             })
             .meta({ category: "reminders", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const workspace = await resolveWorkspace(userId, args.workspace_slug);
-                const reminder = await prisma.connectionReminder.create({
+                const reminder = await ctx.prisma.connectionReminder.create({
                     data: {
                         workspaceId: workspace.id,
                         title: args.title,
@@ -85,12 +82,10 @@ export function registerRemindersTools(
                 reminderId: z.string().min(1),
             })
             .meta({ category: "reminders", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const workspace = await resolveWorkspace(userId, args.workspace_slug);
-                const reminder = await prisma.connectionReminder.update({
+                const reminder = await ctx.prisma.connectionReminder.update({
                     where: { id: args.reminderId, workspaceId: workspace.id },
                     data: { status: "COMPLETED" },
                 });
@@ -100,3 +95,8 @@ export function registerRemindersTools(
             })
     );
 }
+
+/** Auto-discovery metadata for tool-manifest. */
+export const toolModules: ToolModuleExport[] = [
+  { register: registerRemindersTools, categories: ["reminders"] },
+];

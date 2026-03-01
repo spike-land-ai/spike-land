@@ -94,8 +94,7 @@ describe("avl-social tools", () => {
         makeProfile({ userId: "u2", leafNodeId: "leaf-2", user: { name: "Bob", email: null } }),
       ]);
 
-      const handler = registry.handlers.get("profile_get_leaderboard")!;
-      const result = await handler({ limit: 10, sort_by: "depth" });
+      const result = await registry.call("profile_get_leaderboard", { limit: 10, sort_by: "depth" });
       const text = getText(result);
 
       expect(text).toContain("beUniq Leaderboard");
@@ -109,8 +108,7 @@ describe("avl-social tools", () => {
     it("returns message when no profiles exist", async () => {
       mockPrisma.default.avlUserProfile.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("profile_get_leaderboard")!;
-      const result = await handler({ limit: 10, sort_by: "depth" });
+      const result = await registry.call("profile_get_leaderboard", { limit: 10, sort_by: "depth" });
       const text = getText(result);
 
       expect(text).toContain("No completed profiles yet");
@@ -134,8 +132,7 @@ describe("avl-social tools", () => {
         }),
       ]);
 
-      const handler = registry.handlers.get("profile_get_leaderboard")!;
-      const result = await handler({ limit: 10, sort_by: "questions_answered" });
+      const result = await registry.call("profile_get_leaderboard", { limit: 10, sort_by: "questions_answered" });
       const text = getText(result);
 
       // "Many" has 3 answers and should rank above "Few" (1 answer)
@@ -159,8 +156,7 @@ describe("avl-social tools", () => {
         }),
       ]);
 
-      const handler = registry.handlers.get("profile_get_leaderboard")!;
-      const result = await handler({ limit: 10, sort_by: "speed" });
+      const result = await registry.call("profile_get_leaderboard", { limit: 10, sort_by: "speed" });
       const text = getText(result);
 
       expect(text.indexOf("Fast")).toBeLessThan(text.indexOf("Slow"));
@@ -171,8 +167,7 @@ describe("avl-social tools", () => {
         makeProfile({ user: { name: null, email: "charlie@spike.land" } }),
       ]);
 
-      const handler = registry.handlers.get("profile_get_leaderboard")!;
-      const result = await handler({ limit: 10, sort_by: "depth" });
+      const result = await registry.call("profile_get_leaderboard", { limit: 10, sort_by: "depth" });
       const text = getText(result);
 
       expect(text).toContain("charlie");
@@ -187,8 +182,7 @@ describe("avl-social tools", () => {
     it("returns plain text share by default", async () => {
       mockPrisma.default.avlUserProfile.findUnique.mockResolvedValue(makeProfile());
 
-      const handler = registry.handlers.get("profile_share_result")!;
-      const result = await handler({ format: "text" });
+      const result = await registry.call("profile_share_result", { format: "text" });
       const text = getText(result);
 
       expect(text).toContain("Share Your Result");
@@ -199,8 +193,7 @@ describe("avl-social tools", () => {
     it("returns a visual card", async () => {
       mockPrisma.default.avlUserProfile.findUnique.mockResolvedValue(makeProfile());
 
-      const handler = registry.handlers.get("profile_share_result")!;
-      const result = await handler({ format: "card" });
+      const result = await registry.call("profile_share_result", { format: "card" });
       const text = getText(result);
 
       expect(text).toContain("beUniq Profile Card");
@@ -211,8 +204,7 @@ describe("avl-social tools", () => {
     it("returns a shareable link containing the user ID", async () => {
       mockPrisma.default.avlUserProfile.findUnique.mockResolvedValue(makeProfile());
 
-      const handler = registry.handlers.get("profile_share_result")!;
-      const result = await handler({ format: "link" });
+      const result = await registry.call("profile_share_result", { format: "link" });
       const text = getText(result);
 
       expect(text).toContain("Share Your Profile");
@@ -223,8 +215,7 @@ describe("avl-social tools", () => {
     it("returns error when no completed profile exists", async () => {
       mockPrisma.default.avlUserProfile.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("profile_share_result")!;
-      const result = await handler({ format: "text" });
+      const result = await registry.call("profile_share_result", { format: "text" });
       const text = getText(result);
 
       expect(text).toContain("No Completed Profile");
@@ -242,8 +233,7 @@ describe("avl-social tools", () => {
         .mockResolvedValueOnce(makeProfile())
         .mockResolvedValueOnce(makeOtherProfile());
 
-      const handler = registry.handlers.get("profile_compare")!;
-      const result = await handler({ other_user_id: OTHER_USER_ID });
+      const result = await registry.call("profile_compare", { other_user_id: OTHER_USER_ID });
       const text = getText(result);
 
       expect(text).toContain("Profile Comparison");
@@ -265,8 +255,7 @@ describe("avl-social tools", () => {
         .mockResolvedValueOnce(makeProfile())
         .mockResolvedValueOnce(sameTagProfile);
 
-      const handler = registry.handlers.get("profile_compare")!;
-      const result = await handler({ other_user_id: OTHER_USER_ID });
+      const result = await registry.call("profile_compare", { other_user_id: OTHER_USER_ID });
       const text = getText(result);
 
       expect(text).toContain("100%");
@@ -277,8 +266,7 @@ describe("avl-social tools", () => {
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(makeOtherProfile());
 
-      const handler = registry.handlers.get("profile_compare")!;
-      const result = await handler({ other_user_id: OTHER_USER_ID });
+      const result = await registry.call("profile_compare", { other_user_id: OTHER_USER_ID });
       const text = getText(result);
 
       expect(text).toContain("No Profile");
@@ -290,8 +278,7 @@ describe("avl-social tools", () => {
         .mockResolvedValueOnce(makeProfile())
         .mockResolvedValueOnce(null);
 
-      const handler = registry.handlers.get("profile_compare")!;
-      const result = await handler({ other_user_id: OTHER_USER_ID });
+      const result = await registry.call("profile_compare", { other_user_id: OTHER_USER_ID });
       const text = getText(result);
 
       expect(text).toContain("Other Player Not Found");
@@ -307,8 +294,7 @@ describe("avl-social tools", () => {
         .mockResolvedValueOnce(makeProfile())
         .mockResolvedValueOnce(identicalProfile);
 
-      const handler = registry.handlers.get("profile_compare")!;
-      const result = await handler({ other_user_id: OTHER_USER_ID });
+      const result = await registry.call("profile_compare", { other_user_id: OTHER_USER_ID });
       const text = getText(result);
 
       expect(text).toContain("Paths are identical");
@@ -324,8 +310,7 @@ describe("avl-social tools", () => {
       mockPrisma.default.avlUserProfile.findUnique.mockResolvedValue(makeProfile());
       mockPrisma.default.avlUserProfile.count.mockResolvedValue(42);
 
-      const handler = registry.handlers.get("profile_get_insights")!;
-      const result = await handler({});
+      const result = await registry.call("profile_get_insights", {});
       const text = getText(result);
 
       expect(text).toContain("Personality Insights");
@@ -340,8 +325,7 @@ describe("avl-social tools", () => {
       mockPrisma.default.avlUserProfile.findUnique.mockResolvedValue(makeProfile());
       mockPrisma.default.avlUserProfile.count.mockResolvedValue(0);
 
-      const handler = registry.handlers.get("profile_get_insights")!;
-      const result = await handler({});
+      const result = await registry.call("profile_get_insights", {});
       const text = getText(result);
 
       expect(text).toContain("uniquely you");
@@ -350,8 +334,7 @@ describe("avl-social tools", () => {
     it("returns error when no profile exists", async () => {
       mockPrisma.default.avlUserProfile.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("profile_get_insights")!;
-      const result = await handler({});
+      const result = await registry.call("profile_get_insights", {});
       const text = getText(result);
 
       expect(text).toContain("No Profile");
@@ -370,8 +353,7 @@ describe("avl-social tools", () => {
       mockPrisma.default.avlUserProfile.findUnique.mockResolvedValue(highConfidenceProfile);
       mockPrisma.default.avlUserProfile.count.mockResolvedValue(10);
 
-      const handler = registry.handlers.get("profile_get_insights")!;
-      const result = await handler({});
+      const result = await registry.call("profile_get_insights", {});
       const text = getText(result);
 
       expect(text).toContain("Rare Combinations");

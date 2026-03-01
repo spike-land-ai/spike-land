@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   skill: {
     findMany: vi.fn(),
     findFirst: vi.fn(),
@@ -12,7 +13,8 @@ const mockPrisma = {
     create: vi.fn(),
   },
   $transaction: vi.fn(),
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -47,8 +49,7 @@ describe("skill-store tools", () => {
           installCount: 42,
         },
       ]);
-      const handler = registry.handlers.get("skill_store_list")!;
-      const result = await handler({});
+      const result = await registry.call("skill_store_list", {});
       expect(getText(result)).toContain("Code Review");
       expect(getText(result)).toContain("QUALITY");
       expect(getText(result)).toContain("42");
@@ -74,8 +75,7 @@ describe("skill-store tools", () => {
           installCount: 10,
         },
       ]);
-      const handler = registry.handlers.get("skill_store_list")!;
-      const result = await handler({ category: "TESTING" });
+      const result = await registry.call("skill_store_list", { category: "TESTING" });
       expect(getText(result)).toContain("Test Runner");
       expect(mockPrisma.skill.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -97,8 +97,7 @@ describe("skill-store tools", () => {
           installCount: 5,
         },
       ]);
-      const handler = registry.handlers.get("skill_store_list")!;
-      const result = await handler({ search: "lint" });
+      const result = await registry.call("skill_store_list", { search: "lint" });
       expect(getText(result)).toContain("Linter Pro");
       expect(mockPrisma.skill.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -115,8 +114,7 @@ describe("skill-store tools", () => {
 
     it("should filter by both category and search", async () => {
       mockPrisma.skill.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("skill_store_list")!;
-      const result = await handler({ category: "SECURITY", search: "scan" });
+      const result = await registry.call("skill_store_list", { category: "SECURITY", search: "scan" });
       expect(getText(result)).toContain("No published skills found");
       expect(mockPrisma.skill.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -134,15 +132,13 @@ describe("skill-store tools", () => {
 
     it("should return empty message when no skills found", async () => {
       mockPrisma.skill.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("skill_store_list")!;
-      const result = await handler({});
+      const result = await registry.call("skill_store_list", {});
       expect(getText(result)).toContain("No published skills found");
     });
 
     it("should respect limit and offset", async () => {
       mockPrisma.skill.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("skill_store_list")!;
-      await handler({ limit: 5, offset: 10 });
+      await registry.call("skill_store_list", { limit: 5, offset: 10 });
       expect(mockPrisma.skill.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           take: 5,
@@ -173,8 +169,7 @@ describe("skill-store tools", () => {
         isFeatured: true,
         createdAt: new Date("2024-01-01"),
       });
-      const handler = registry.handlers.get("skill_store_get")!;
-      const result = await handler({ identifier: "code-review" });
+      const result = await registry.call("skill_store_get", { identifier: "code-review" });
       expect(getText(result)).toContain("Code Review");
       expect(getText(result)).toContain("Extended description here");
       expect(getText(result)).toContain("ai, review");
@@ -204,8 +199,7 @@ describe("skill-store tools", () => {
         isFeatured: false,
         createdAt: new Date("2024-01-01"),
       });
-      const handler = registry.handlers.get("skill_store_get")!;
-      const result = await handler({ identifier: "s2" });
+      const result = await registry.call("skill_store_get", { identifier: "s2" });
       expect(getText(result)).toContain("Basic Skill");
       expect(getText(result)).not.toContain("Details:");
       expect(getText(result)).not.toContain("Tags:");
@@ -216,8 +210,7 @@ describe("skill-store tools", () => {
 
     it("should return NOT_FOUND for missing skill", async () => {
       mockPrisma.skill.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("skill_store_get")!;
-      const result = await handler({ identifier: "nonexistent" });
+      const result = await registry.call("skill_store_get", { identifier: "nonexistent" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
   });
@@ -231,8 +224,7 @@ describe("skill-store tools", () => {
       });
       mockPrisma.skillInstallation.findFirst.mockResolvedValue(null);
       mockPrisma.$transaction.mockResolvedValue([{}, {}]);
-      const handler = registry.handlers.get("skill_store_install")!;
-      const result = await handler({ skill_id: "s1" });
+      const result = await registry.call("skill_store_install", { skill_id: "s1" });
       expect(getText(result)).toContain("Skill Installed");
       expect(getText(result)).toContain("Code Review");
       expect(mockPrisma.$transaction).toHaveBeenCalled();
@@ -240,8 +232,7 @@ describe("skill-store tools", () => {
 
     it("should return NOT_FOUND for unpublished skill", async () => {
       mockPrisma.skill.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("skill_store_install")!;
-      const result = await handler({ skill_id: "nope" });
+      const result = await registry.call("skill_store_install", { skill_id: "nope" });
       expect(getText(result)).toContain("NOT_FOUND");
       expect(mockPrisma.skillInstallation.findFirst).not.toHaveBeenCalled();
     });
@@ -257,8 +248,7 @@ describe("skill-store tools", () => {
         skillId: "s1",
         userId,
       });
-      const handler = registry.handlers.get("skill_store_install")!;
-      const result = await handler({ skill_id: "s1" });
+      const result = await registry.call("skill_store_install", { skill_id: "s1" });
       expect(getText(result)).toContain("Already Installed");
       expect(mockPrisma.$transaction).not.toHaveBeenCalled();
     });
@@ -294,8 +284,7 @@ describe("skill-store tools", () => {
           isFeatured: true,
         },
       ]);
-      const handler = registry.handlers.get("skill_store_admin_list")!;
-      const result = await handler({});
+      const result = await registry.call("skill_store_admin_list", {});
       expect(getText(result)).toContain("Draft");
       expect(getText(result)).toContain("Published");
       expect(getText(result)).toContain("DRAFT");
@@ -305,8 +294,7 @@ describe("skill-store tools", () => {
 
     it("should filter by status", async () => {
       mockPrisma.skill.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("skill_store_admin_list")!;
-      const result = await handler({ status: "ARCHIVED" });
+      const result = await registry.call("skill_store_admin_list", { status: "ARCHIVED" });
       expect(getText(result)).toContain("No skills found");
       expect(mockPrisma.skill.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -317,15 +305,13 @@ describe("skill-store tools", () => {
 
     it("should return empty message", async () => {
       mockPrisma.skill.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("skill_store_admin_list")!;
-      const result = await handler({});
+      const result = await registry.call("skill_store_admin_list", {});
       expect(getText(result)).toContain("No skills found");
     });
 
     it("should respect limit and offset", async () => {
       mockPrisma.skill.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("skill_store_admin_list")!;
-      await handler({ limit: 50, offset: 25 });
+      await registry.call("skill_store_admin_list", { limit: 50, offset: 25 });
       expect(mockPrisma.skill.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           take: 50,
@@ -342,8 +328,7 @@ describe("skill-store tools", () => {
         name: "new-skill",
         displayName: "New Skill",
       });
-      const handler = registry.handlers.get("skill_store_admin_create")!;
-      const result = await handler({
+      const result = await registry.call("skill_store_admin_create", {
         name: "new-skill",
         slug: "new-skill",
         displayName: "New Skill",
@@ -374,8 +359,7 @@ describe("skill-store tools", () => {
         name: "full-skill",
         displayName: "Full Skill",
       });
-      const handler = registry.handlers.get("skill_store_admin_create")!;
-      const result = await handler({
+      const result = await registry.call("skill_store_admin_create", {
         name: "full-skill",
         slug: "full-skill",
         displayName: "Full Skill",
@@ -421,8 +405,7 @@ describe("skill-store tools", () => {
         displayName: "Updated Skill",
         status: "PUBLISHED",
       });
-      const handler = registry.handlers.get("skill_store_admin_update")!;
-      const result = await handler({
+      const result = await registry.call("skill_store_admin_update", {
         skill_id: "s1",
         displayName: "Updated Skill",
         status: "PUBLISHED",
@@ -440,8 +423,7 @@ describe("skill-store tools", () => {
         displayName: "Full Update",
         status: "DRAFT",
       });
-      const handler = registry.handlers.get("skill_store_admin_update")!;
-      await handler({
+      await registry.call("skill_store_admin_update", {
         skill_id: "s1",
         name: "new-name",
         slug: "new-slug",
@@ -490,8 +472,7 @@ describe("skill-store tools", () => {
         displayName: "Same",
         status: "PUBLISHED",
       });
-      const handler = registry.handlers.get("skill_store_admin_update")!;
-      const result = await handler({ skill_id: "s1" });
+      const result = await registry.call("skill_store_admin_update", { skill_id: "s1" });
       expect(getText(result)).toContain("Skill Updated");
       expect(mockPrisma.skill.update).toHaveBeenCalledWith({
         where: { id: "s1" },
@@ -506,8 +487,7 @@ describe("skill-store tools", () => {
         displayName: "Archived Skill",
         id: "s1",
       });
-      const handler = registry.handlers.get("skill_store_admin_delete")!;
-      const result = await handler({ skill_id: "s1" });
+      const result = await registry.call("skill_store_admin_delete", { skill_id: "s1" });
       expect(getText(result)).toContain("Skill Archived");
       expect(getText(result)).toContain("Archived Skill");
       expect(mockPrisma.skill.update).toHaveBeenCalledWith({

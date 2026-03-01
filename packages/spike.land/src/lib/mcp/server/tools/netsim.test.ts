@@ -56,8 +56,7 @@ describe("netsim MCP tools", () => {
         ]),
       });
 
-      const handler = registry.handlers.get("netsim_create_topology")!;
-      const result = await handler({ name: "my-network", node_count: 3 });
+      const result = await registry.call("netsim_create_topology", { name: "my-network", node_count: 3 });
 
       const text = getText(result);
       expect(text).toContain("Network Topology Created");
@@ -82,8 +81,7 @@ describe("netsim MCP tools", () => {
         lossRate: 0,
       });
 
-      const handler = registry.handlers.get("netsim_set_link_state")!;
-      const result = await handler({
+      const result = await registry.call("netsim_set_link_state", {
         topology_id: "netsim-abc-1",
         from: "node-1",
         to: "node-2",
@@ -107,8 +105,7 @@ describe("netsim MCP tools", () => {
         lossRate: 0.3,
       });
 
-      const handler = registry.handlers.get("netsim_set_link_state")!;
-      const result = await handler({
+      const result = await registry.call("netsim_set_link_state", {
         topology_id: "netsim-abc-1",
         from: "node-1",
         to: "node-2",
@@ -123,8 +120,7 @@ describe("netsim MCP tools", () => {
 
   describe("netsim_partition_node", () => {
     it("should partition node and confirm", async () => {
-      const handler = registry.handlers.get("netsim_partition_node")!;
-      const result = await handler({
+      const result = await registry.call("netsim_partition_node", {
         topology_id: "netsim-abc-1",
         node_id: "node-2",
       });
@@ -142,8 +138,7 @@ describe("netsim MCP tools", () => {
 
   describe("netsim_heal_node", () => {
     it("should heal node and confirm", async () => {
-      const handler = registry.handlers.get("netsim_heal_node")!;
-      const result = await handler({
+      const result = await registry.call("netsim_heal_node", {
         topology_id: "netsim-abc-1",
         node_id: "node-2",
       });
@@ -172,8 +167,7 @@ describe("netsim MCP tools", () => {
         delayed: false,
       });
 
-      const handler = registry.handlers.get("netsim_send_message")!;
-      const result = await handler({
+      const result = await registry.call("netsim_send_message", {
         topology_id: "netsim-abc-1",
         from: "node-1",
         to: "node-2",
@@ -198,8 +192,7 @@ describe("netsim MCP tools", () => {
         delayed: false,
       });
 
-      const handler = registry.handlers.get("netsim_send_message")!;
-      const result = await handler({
+      const result = await registry.call("netsim_send_message", {
         topology_id: "netsim-abc-1",
         from: "node-1",
         to: "node-3",
@@ -222,8 +215,7 @@ describe("netsim MCP tools", () => {
         delayed: false,
       });
 
-      const handler = registry.handlers.get("netsim_send_message")!;
-      const result = await handler({
+      const result = await registry.call("netsim_send_message", {
         topology_id: "netsim-abc-1",
         from: "node-1",
         to: "node-2",
@@ -244,8 +236,7 @@ describe("netsim MCP tools", () => {
         pending: [],
       });
 
-      const handler = registry.handlers.get("netsim_tick")!;
-      const result = await handler({ topology_id: "netsim-abc-1" });
+      const result = await registry.call("netsim_tick", { topology_id: "netsim-abc-1" });
 
       const text = getText(result);
       expect(text).toContain("Simulation Advanced");
@@ -261,8 +252,7 @@ describe("netsim MCP tools", () => {
         pending: [],
       });
 
-      const handler = registry.handlers.get("netsim_tick")!;
-      const result = await handler({ topology_id: "netsim-abc-1", rounds: 5 });
+      const result = await registry.call("netsim_tick", { topology_id: "netsim-abc-1", rounds: 5 });
 
       const text = getText(result);
       expect(text).toContain("No messages delivered");
@@ -275,8 +265,7 @@ describe("netsim MCP tools", () => {
         throw new Error("Access denied");
       });
 
-      const handler = registry.handlers.get("netsim_send_message")!;
-      const result = await handler({
+      const result = await registry.call("netsim_send_message", {
         topology_id: "someone-elses",
         from: "node-1",
         to: "node-2",

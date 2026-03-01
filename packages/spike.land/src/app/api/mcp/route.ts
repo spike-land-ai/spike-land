@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
   const enabledCategories = await loadEnabledCategories(authResult.userId);
 
   // Create MCP server for this user with restored category state
-  const mcpServer = createMcpServer(authResult.userId, { enabledCategories });
+  const mcpServer = await createMcpServer(authResult.userId, { enabledCategories });
 
   // Ensure Accept header satisfies MCP spec (requires both application/json and text/event-stream)
   const headers = new Headers(request.headers);

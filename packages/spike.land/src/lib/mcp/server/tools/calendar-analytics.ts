@@ -243,10 +243,9 @@ export function registerCalendarAnalyticsTools(
                 ),
             })
             .meta({ category: "calendar-analytics", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { period, platform } = input;
                 return safeToolCall("calendar_get_analytics", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
 
                     const days = periodToDays(period);
                     const dateFilter: Record<string, Date> = {};
@@ -264,10 +263,10 @@ export function registerCalendarAnalyticsTools(
                         where.scheduledAt = dateFilter;
                     }
 
-                    const totalPosts = await prisma.socialPost.count({ where });
+                    const totalPosts = await ctx.prisma.socialPost.count({ where });
 
                     // Fetch the best-performing post (highest engagement proxy: most recent PUBLISHED)
-                    const bestPost = await prisma.socialPost.findFirst({
+                    const bestPost = await ctx.prisma.socialPost.findFirst({
                         where,
                         orderBy: { scheduledAt: "desc" },
                         select: { id: true, content: true, scheduledAt: true },
@@ -307,7 +306,7 @@ export function registerCalendarAnalyticsTools(
                 ),
             })
             .meta({ category: "calendar-analytics", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const { topic, platform, count } = input;
                 return safeToolCall("calendar_suggest_content", async () => {
                     if (!topic.trim()) {
@@ -341,10 +340,9 @@ export function registerCalendarAnalyticsTools(
                 ),
             })
             .meta({ category: "calendar-analytics", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { posts } = input;
                 return safeToolCall("calendar_bulk_schedule", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
 
                     const now = new Date();
 
@@ -371,7 +369,7 @@ export function registerCalendarAnalyticsTools(
                     const created: { id: string; platform: string; scheduled_at: string; }[] = [];
 
                     for (const item of posts) {
-                        const post = await prisma.socialPost.create({
+                        const post = await ctx.prisma.socialPost.create({
                             data: {
                                 createdById: userId,
                                 content: item.content,
@@ -406,12 +404,11 @@ export function registerCalendarAnalyticsTools(
                 post_id: z.string().min(1).describe("Social post ID to retrieve metrics for."),
             })
             .meta({ category: "calendar-analytics", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { post_id } = input;
                 return safeToolCall("calendar_get_performance", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
 
-                    const post = await prisma.socialPost.findFirst({
+                    const post = await ctx.prisma.socialPost.findFirst({
                         where: { id: post_id, createdById: userId },
                         select: {
                             id: true,

@@ -72,7 +72,7 @@ export function registerVaultTools(
                     .default([]),
             })
             .meta({ category: "vault", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     name,
                     value,
@@ -80,12 +80,11 @@ export function registerVaultTools(
                 } = input;
 
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
                     // Check quota
                     const [count, limit] = await Promise.all([
-                        getSecretCount(prisma, userId),
-                        getSecretLimit(prisma, userId),
+                        getSecretCount(ctx.prisma, userId),
+                        getSecretLimit(ctx.prisma, userId),
                     ]);
 
                     if (count >= limit) {
@@ -105,7 +104,7 @@ export function registerVaultTools(
                     const { encryptedValue, iv, tag } = encryptSecret(userId, value);
 
                     // Store in database
-                    const secret = await prisma.vaultSecret.upsert({
+                    const secret = await ctx.prisma.vaultSecret.upsert({
                         where: { userId_name: { userId, name } },
                         update: {
                             encryptedValue,
@@ -154,11 +153,10 @@ export function registerVaultTools(
         freeTool(userId)
             .tool("vault_list_secrets", "List all secrets in the vault. Returns names and status only — NEVER returns secret values.", {})
             .meta({ category: "vault", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, ctx }) => {
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
-                    const secrets = await prisma.vaultSecret.findMany({
+                    const secrets = await ctx.prisma.vaultSecret.findMany({
                         where: { userId },
                         select: {
                             id: true,
@@ -171,8 +169,8 @@ export function registerVaultTools(
                     });
 
                     const [count, limit] = await Promise.all([
-                        getSecretCount(prisma, userId),
-                        getSecretLimit(prisma, userId),
+                        getSecretCount(ctx.prisma, userId),
+                        getSecretLimit(ctx.prisma, userId),
                     ]);
 
                     if (secrets.length === 0) {
@@ -213,15 +211,14 @@ export function registerVaultTools(
                 secret_id: z.string().min(1),
             })
             .meta({ category: "vault", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     secret_id,
                 } = input;
 
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
-                    const secret = await prisma.vaultSecret.findFirst({
+                    const secret = await ctx.prisma.vaultSecret.findFirst({
                         where: { id: secret_id, userId },
                     });
 
@@ -248,7 +245,7 @@ export function registerVaultTools(
                         };
                     }
 
-                    await prisma.vaultSecret.update({
+                    await ctx.prisma.vaultSecret.update({
                         where: { id: secret_id },
                         data: { status: "REVOKED" },
                     });

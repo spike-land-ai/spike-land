@@ -39,12 +39,10 @@ export function registerAudioTools(
                 ),
             })
             .meta({ category: "audio", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { project_id, filename, content_type } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const project = await prisma.audioMixerProject.findFirst({
+                const project = await ctx.prisma.audioMixerProject.findFirst({
                     where: { id: project_id, userId },
                 });
                 if (!project) {
@@ -66,11 +64,11 @@ export function registerAudioTools(
                     );
                 }
 
-                const trackCount = await prisma.audioTrack.count({
+                const trackCount = await ctx.prisma.audioTrack.count({
                     where: { projectId: project_id },
                 });
 
-                const track = await prisma.audioTrack.create({
+                const track = await ctx.prisma.audioTrack.create({
                     data: {
                         projectId: project_id,
                         name: filename,
@@ -100,12 +98,10 @@ export function registerAudioTools(
                 track_id: z.string().min(1).describe("Audio track ID."),
             })
             .meta({ category: "audio", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { track_id } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const track = await prisma.audioTrack.findUnique({
+                const track = await ctx.prisma.audioTrack.findUnique({
                     where: { id: track_id },
                     include: {
                         project: {
@@ -150,10 +146,9 @@ export function registerAudioTools(
         freeTool(userId)
             .tool("audio_list_projects", "List all audio mixer projects for the current user.", {})
             .meta({ category: "audio", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
-                const prisma = (await import("@/lib/prisma")).default;
+            .handler(async ({ input: _input, ctx }) => {
 
-                const projects = await prisma.audioMixerProject.findMany({
+                const projects = await ctx.prisma.audioMixerProject.findMany({
                     where: { userId },
                     include: { _count: { select: { tracks: true } } },
                     orderBy: { updatedAt: "desc" },
@@ -186,12 +181,10 @@ export function registerAudioTools(
                 ),
             })
             .meta({ category: "audio", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { name, description } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const project = await prisma.audioMixerProject.create({
+                const project = await ctx.prisma.audioMixerProject.create({
                     data: { name, description: description ?? "", userId },
                 });
 
@@ -212,12 +205,10 @@ export function registerAudioTools(
                 project_id: z.string().min(1).describe("Audio mixer project ID."),
             })
             .meta({ category: "audio", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { project_id } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const project = await prisma.audioMixerProject.findFirst({
+                const project = await ctx.prisma.audioMixerProject.findFirst({
                     where: { id: project_id, userId },
                 });
                 if (!project) {
@@ -227,10 +218,10 @@ export function registerAudioTools(
                 }
 
                 // Delete tracks first, then the project
-                await prisma.audioTrack.deleteMany({
+                await ctx.prisma.audioTrack.deleteMany({
                     where: { projectId: project_id },
                 });
-                await prisma.audioMixerProject.delete({ where: { id: project_id } });
+                await ctx.prisma.audioMixerProject.delete({ where: { id: project_id } });
 
                 return textResult(
                     `**Project Deleted**\n\n`
@@ -248,12 +239,10 @@ export function registerAudioTools(
                 project_id: z.string().min(1).describe("Audio mixer project ID."),
             })
             .meta({ category: "audio", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { project_id } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const project = await prisma.audioMixerProject.findFirst({
+                const project = await ctx.prisma.audioMixerProject.findFirst({
                     where: { id: project_id, userId },
                 });
                 if (!project) {
@@ -262,7 +251,7 @@ export function registerAudioTools(
                     );
                 }
 
-                const tracks = await prisma.audioTrack.findMany({
+                const tracks = await ctx.prisma.audioTrack.findMany({
                     where: { projectId: project_id },
                     orderBy: { sortOrder: "asc" },
                 });
@@ -291,12 +280,10 @@ export function registerAudioTools(
                 track_id: z.string().min(1).describe("Audio track ID to delete."),
             })
             .meta({ category: "audio", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { track_id } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const track = await prisma.audioTrack.findUnique({
+                const track = await ctx.prisma.audioTrack.findUnique({
                     where: { id: track_id },
                     include: { project: { select: { userId: true, name: true } } },
                 });
@@ -313,7 +300,7 @@ export function registerAudioTools(
                     );
                 }
 
-                await prisma.audioTrack.delete({ where: { id: track_id } });
+                await ctx.prisma.audioTrack.delete({ where: { id: track_id } });
 
                 return textResult(
                     `**Track Deleted**\n\n`
@@ -336,12 +323,10 @@ export function registerAudioTools(
                 solo: z.boolean().optional().describe("Whether the track is soloed."),
             })
             .meta({ category: "audio", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { track_id, name, volume, muted, solo } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const existing = await prisma.audioTrack.findUnique({
+                const existing = await ctx.prisma.audioTrack.findUnique({
                     where: { id: track_id },
                     include: { project: { select: { userId: true } } },
                 });
@@ -370,7 +355,7 @@ export function registerAudioTools(
                     );
                 }
 
-                const updated = await prisma.audioTrack.update({
+                const updated = await ctx.prisma.audioTrack.update({
                     where: { id: track_id },
                     data: updateData,
                 });

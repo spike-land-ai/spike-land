@@ -27,12 +27,11 @@ export function registerEmailTools(
                 template: z.string().min(1).describe("Email template name."),
             })
             .meta({ category: "email", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("email_send", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     await resolveWorkspace(userId, args.workspace_slug);
-                    const email = await prisma.emailLog.create({
+                    const email = await ctx.prisma.emailLog.create({
                         data: {
                             userId,
                             to: args.to,
@@ -59,12 +58,11 @@ export function registerEmailTools(
                 email_id: z.string().min(1).describe("Email log ID."),
             })
             .meta({ category: "email", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("email_get_status", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     await resolveWorkspace(userId, args.workspace_slug);
-                    const email = await prisma.emailLog.findFirst({
+                    const email = await ctx.prisma.emailLog.findFirst({
                         where: { id: args.email_id },
                     });
                     if (!email) {
@@ -95,12 +93,11 @@ export function registerEmailTools(
                 ),
             })
             .meta({ category: "email", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("email_list", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     await resolveWorkspace(userId, args.workspace_slug);
-                    const emails = await prisma.emailLog.findMany({
+                    const emails = await ctx.prisma.emailLog.findMany({
                         where: { userId },
                         orderBy: { sentAt: "desc" },
                         take: args.limit ?? 20,
@@ -135,17 +132,16 @@ export function registerNotificationsTools(
                 ),
             })
             .meta({ category: "notifications", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("notification_list", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const ws = await resolveWorkspace(userId, args.workspace_slug);
                     const where: Record<string, unknown> = {
                         workspaceId: ws.id,
                         OR: [{ userId }, { userId: null }],
                     };
                     if (args.unread_only) where.read = false;
-                    const notifications = await prisma.notification.findMany({
+                    const notifications = await ctx.prisma.notification.findMany({
                         where,
                         orderBy: { createdAt: "desc" },
                         take: args.limit,
@@ -182,12 +178,11 @@ export function registerNotificationsTools(
                 ),
             })
             .meta({ category: "notifications", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("notification_mark_read", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     await resolveWorkspace(userId, args.workspace_slug);
-                    const result = await prisma.notification.updateMany({
+                    const result = await ctx.prisma.notification.updateMany({
                         where: { id: { in: args.notification_ids } },
                         data: { read: true, readAt: new Date() },
                     });
@@ -210,10 +205,9 @@ export function registerNotificationsTools(
                 ),
             })
             .meta({ category: "notifications", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("notification_configure_channels", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const ws = await resolveWorkspace(userId, args.workspace_slug);
 
                     // Store notification channel preferences in workspace metadata
@@ -228,7 +222,7 @@ export function registerNotificationsTools(
                         config.inAppNotifications = args.in_app_enabled;
                     }
 
-                    await prisma.workspace.update({
+                    await ctx.prisma.workspace.update({
                         where: { id: ws.id },
                         data: { settings: config },
                     });
@@ -257,12 +251,11 @@ export function registerNotificationsTools(
                 ),
             })
             .meta({ category: "notifications", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("notification_send", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const ws = await resolveWorkspace(userId, args.workspace_slug);
-                    const notification = await prisma.notification.create({
+                    const notification = await ctx.prisma.notification.create({
                         data: {
                             workspaceId: ws.id,
                             userId: args.user_id ?? null,
@@ -295,12 +288,10 @@ export function registerNewsletterTools(
                 email: z.string().email().describe("Email address to subscribe."),
             })
             .meta({ category: "newsletter", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { email } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const subscriber = await prisma.newsletterSubscriber.upsert({
+                const subscriber = await ctx.prisma.newsletterSubscriber.upsert({
                     where: { email },
                     create: { email, source: "mcp" },
                     update: { unsubscribed: false, unsubscribedAt: null },

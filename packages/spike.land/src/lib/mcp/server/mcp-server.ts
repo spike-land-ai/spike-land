@@ -35,10 +35,10 @@ export interface CreateMcpServerOptions {
  * capability evaluation, audit logging, and budget deduction.
  * Without it, behavior is identical to before (full access).
  */
-export function createMcpServer(
+export async function createMcpServer(
   userId: string,
   options?: CreateMcpServerOptions,
-): McpServer {
+): Promise<McpServer> {
   const mcpServer = new McpServer(
     {
       name: "spike-land",
@@ -60,7 +60,7 @@ export function createMcpServer(
     )
     : new ToolRegistry(mcpServer, userId);
 
-  registerAllTools(registry, userId);
+  await registerAllTools(registry, userId);
 
   // Restore previously enabled categories (e.g. from Redis persistence)
   if (options?.enabledCategories && options.enabledCategories.length > 0) {

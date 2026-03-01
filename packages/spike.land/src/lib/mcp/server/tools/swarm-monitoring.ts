@@ -31,15 +31,14 @@ export function registerSwarmMonitoringTools(
                     .describe("Time period to aggregate metrics over."),
             })
             .meta({ category: "swarm-monitoring", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { period = "24h" } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
                 const since = new Date(Date.now() - periodToMs(period));
 
                 const [agents, logs] = await Promise.all([
-                    prisma.claudeCodeAgent.findMany({
+                    ctx.prisma.claudeCodeAgent.findMany({
                         where: { deletedAt: null },
                         select: {
                             id: true,
@@ -49,7 +48,7 @@ export function registerSwarmMonitoringTools(
                             createdAt: true,
                         },
                     }),
-                    prisma.agentAuditLog.findMany({
+                    ctx.prisma.agentAuditLog.findMany({
                         where: { createdAt: { gte: since } },
                         select: {
                             durationMs: true,
@@ -106,13 +105,12 @@ export function registerSwarmMonitoringTools(
                 ),
             })
             .meta({ category: "swarm-monitoring", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { agent_id } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
 
-                const agents = await prisma.claudeCodeAgent.findMany({
+                const agents = await ctx.prisma.claudeCodeAgent.findMany({
                     where: agent_id
                         ? { id: agent_id, deletedAt: null }
                         : { deletedAt: null },
@@ -170,19 +168,18 @@ export function registerSwarmMonitoringTools(
                 ),
             })
             .meta({ category: "swarm-monitoring", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { agent_id, from_step, to_step } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
 
-                const agent = await prisma.claudeCodeAgent.findUnique({
+                const agent = await ctx.prisma.claudeCodeAgent.findUnique({
                     where: { id: agent_id },
                     select: { id: true, displayName: true, deletedAt: true },
                 });
                 if (!agent) return textResult(`Agent ${agent_id} not found.`);
 
-                const allLogs = await prisma.agentAuditLog.findMany({
+                const allLogs = await ctx.prisma.agentAuditLog.findMany({
                     where: { agentId: agent_id },
                     select: {
                         action: true,
@@ -236,14 +233,13 @@ export function registerSwarmMonitoringTools(
         freeTool(userId)
             .tool("swarm_health", "Get health status of all active agents: alive/stuck/errored state, last activity time, current task, and memory/token usage.", {})
             .meta({ category: "swarm-monitoring", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, ctx }) => {
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
                 const now = new Date();
                 const fiveMinAgo = new Date(now.getTime() - 5 * 60 * 1000);
                 const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
 
-                const agents = await prisma.claudeCodeAgent.findMany({
+                const agents = await ctx.prisma.claudeCodeAgent.findMany({
                     where: { deletedAt: null },
                     select: {
                         id: true,

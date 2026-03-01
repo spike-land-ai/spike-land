@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   claudeCodeAgent: { findMany: vi.fn(), findUnique: vi.fn() },
   agentMessage: { findMany: vi.fn(), create: vi.fn() },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -36,8 +38,7 @@ describe("agent-management tools", () => {
           _count: { messages: 25 },
         },
       ]);
-      const handler = registry.handlers.get("agents_list")!;
-      const result = await handler({});
+      const result = await registry.call("agents_list", {});
       expect(getText(result)).toContain("My Agent");
       expect(getText(result)).toContain("25 messages");
       expect(getText(result)).toContain("10 tasks");
@@ -47,8 +48,7 @@ describe("agent-management tools", () => {
 
     it("should return empty message when no agents", async () => {
       mockPrisma.claudeCodeAgent.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("agents_list")!;
-      const result = await handler({});
+      const result = await registry.call("agents_list", {});
       expect(getText(result)).toContain("No agents found");
     });
 
@@ -63,16 +63,14 @@ describe("agent-management tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("agents_list")!;
-      const result = await handler({});
+      const result = await registry.call("agents_list", {});
       expect(getText(result)).toContain("New Agent");
       expect(getText(result)).toContain("never");
     });
 
     it("should respect custom limit", async () => {
       mockPrisma.claudeCodeAgent.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("agents_list")!;
-      await handler({ limit: 5 });
+      await registry.call("agents_list", { limit: 5 });
       expect(mockPrisma.claudeCodeAgent.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           take: 5,
@@ -82,8 +80,7 @@ describe("agent-management tools", () => {
 
     it("should use default limit of 20", async () => {
       mockPrisma.claudeCodeAgent.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("agents_list")!;
-      await handler({});
+      await registry.call("agents_list", {});
       expect(mockPrisma.claudeCodeAgent.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           take: 20,
@@ -109,8 +106,7 @@ describe("agent-management tools", () => {
         createdAt: new Date("2024-01-01"),
         _count: { messages: 25 },
       });
-      const handler = registry.handlers.get("agents_get")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("agents_get", { agent_id: "agent-1" });
       expect(getText(result)).toContain("My Agent");
       expect(getText(result)).toContain("machine-abc");
       expect(getText(result)).toContain("sess-xyz");
@@ -123,8 +119,7 @@ describe("agent-management tools", () => {
 
     it("should return NOT_FOUND when agent does not exist", async () => {
       mockPrisma.claudeCodeAgent.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("agents_get")!;
-      const result = await handler({ agent_id: "nonexistent" });
+      const result = await registry.call("agents_get", { agent_id: "nonexistent" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
 
@@ -144,8 +139,7 @@ describe("agent-management tools", () => {
         createdAt: new Date(),
         _count: { messages: 0 },
       });
-      const handler = registry.handlers.get("agents_get")!;
-      const result = await handler({ agent_id: "agent-other" });
+      const result = await registry.call("agents_get", { agent_id: "agent-other" });
       // Security: must NOT leak ownership info - return generic NOT_FOUND
       expect(getText(result)).toContain("NOT_FOUND");
       expect(getText(result)).toContain("Agent not found");
@@ -169,8 +163,7 @@ describe("agent-management tools", () => {
         createdAt: new Date("2024-01-01"),
         _count: { messages: 0 },
       });
-      const handler = registry.handlers.get("agents_get")!;
-      const result = await handler({ agent_id: "agent-minimal" });
+      const result = await registry.call("agents_get", { agent_id: "agent-minimal" });
       expect(getText(result)).toContain("(none)");
       expect(getText(result)).toContain("never");
     });
@@ -196,8 +189,7 @@ describe("agent-management tools", () => {
           createdAt: new Date("2024-06-02"),
         },
       ]);
-      const handler = registry.handlers.get("agents_get_queue")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("agents_get_queue", { agent_id: "agent-1" });
       expect(getText(result)).toContain("Unread Messages for My Agent (2)");
       expect(getText(result)).toContain("Hello agent");
       expect(getText(result)).toContain("Task completed");
@@ -211,16 +203,14 @@ describe("agent-management tools", () => {
         displayName: "My Agent",
       });
       mockPrisma.agentMessage.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("agents_get_queue")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("agents_get_queue", { agent_id: "agent-1" });
       expect(getText(result)).toContain("No unread messages");
       expect(getText(result)).toContain("My Agent");
     });
 
     it("should return NOT_FOUND when agent does not exist", async () => {
       mockPrisma.claudeCodeAgent.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("agents_get_queue")!;
-      const result = await handler({ agent_id: "nonexistent" });
+      const result = await registry.call("agents_get_queue", { agent_id: "nonexistent" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
 
@@ -229,8 +219,7 @@ describe("agent-management tools", () => {
         userId: "other-user",
         displayName: "Other Agent",
       });
-      const handler = registry.handlers.get("agents_get_queue")!;
-      const result = await handler({ agent_id: "agent-other" });
+      const result = await registry.call("agents_get_queue", { agent_id: "agent-other" });
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
 
@@ -248,8 +237,7 @@ describe("agent-management tools", () => {
           createdAt: new Date(),
         },
       ]);
-      const handler = registry.handlers.get("agents_get_queue")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("agents_get_queue", { agent_id: "agent-1" });
       expect(getText(result)).toContain("...");
       expect(getText(result)).not.toContain("A".repeat(200));
     });
@@ -262,8 +250,7 @@ describe("agent-management tools", () => {
         displayName: "My Agent",
       });
       mockPrisma.agentMessage.create.mockResolvedValue({ id: "msg-new" });
-      const handler = registry.handlers.get("agents_send_message")!;
-      const result = await handler({
+      const result = await registry.call("agents_send_message", {
         agent_id: "agent-1",
         content: "Do something",
       });
@@ -283,8 +270,7 @@ describe("agent-management tools", () => {
 
     it("should return NOT_FOUND when agent does not exist", async () => {
       mockPrisma.claudeCodeAgent.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("agents_send_message")!;
-      const result = await handler({
+      const result = await registry.call("agents_send_message", {
         agent_id: "nonexistent",
         content: "Hello",
       });
@@ -297,8 +283,7 @@ describe("agent-management tools", () => {
         userId: "other-user",
         displayName: "Other Agent",
       });
-      const handler = registry.handlers.get("agents_send_message")!;
-      const result = await handler({
+      const result = await registry.call("agents_send_message", {
         agent_id: "agent-other",
         content: "Hello",
       });
@@ -313,8 +298,7 @@ describe("agent-management tools", () => {
       });
       const longContent = "B".repeat(150);
       mockPrisma.agentMessage.create.mockResolvedValue({ id: "msg-long" });
-      const handler = registry.handlers.get("agents_send_message")!;
-      const result = await handler({
+      const result = await registry.call("agents_send_message", {
         agent_id: "agent-1",
         content: longContent,
       });

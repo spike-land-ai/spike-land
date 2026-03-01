@@ -12,10 +12,9 @@ export function registerBoxesTools(
         workspaceTool(userId)
             .tool("boxes_list", "List all boxes for the current user", {})
             .meta({ category: "boxes", tier: "workspace" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, ctx }) => {
                 return safeToolCall("boxes_list", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
-                    const boxes = await prisma.box.findMany({
+                    const boxes = await ctx.prisma.box.findMany({
                         where: { userId, deletedAt: null },
                         include: { tier: true },
                         orderBy: { createdAt: "desc" },
@@ -32,11 +31,10 @@ export function registerBoxesTools(
                 tierId: z.string(),
             })
             .meta({ category: "boxes", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("boxes_create", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
-                    const tier = await prisma.boxTier.findUnique({
+                    const tier = await ctx.prisma.boxTier.findUnique({
                         where: { id: args.tierId },
                     });
                     if (!tier) throw new Error("Invalid tier");
@@ -60,7 +58,7 @@ export function registerBoxesTools(
 
                     let box;
                     try {
-                        box = await prisma.box.create({
+                        box = await ctx.prisma.box.create({
                             data: {
                                 name: args.name,
                                 userId,
@@ -95,14 +93,13 @@ export function registerBoxesTools(
                 ]),
             })
             .meta({ category: "boxes", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { id, action } = input;
                 return safeToolCall("boxes_action", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
-                    const box = await prisma.box.findUnique({ where: { id, userId } });
+                    const box = await ctx.prisma.box.findUnique({ where: { id, userId } });
                     if (!box) throw new Error("Box not found");
 
-                    await prisma.boxAction.create({
+                    await ctx.prisma.boxAction.create({
                         data: { boxId: id, action, status: "PENDING" },
                     });
 
@@ -111,7 +108,7 @@ export function registerBoxesTools(
                     if (action === BoxActionType.STOP) newStatus = BoxStatus.STOPPING;
                     if (action === BoxActionType.RESTART) newStatus = BoxStatus.STARTING;
 
-                    const updatedBox = await prisma.box.update({
+                    const updatedBox = await ctx.prisma.box.update({
                         where: { id, userId },
                         data: { status: newStatus },
                     });
@@ -127,11 +124,10 @@ export function registerBoxesTools(
                 id: z.string(),
             })
             .meta({ category: "boxes", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { id } = input;
                 return safeToolCall("boxes_get", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
-                    const box = await prisma.box.findUnique({
+                    const box = await ctx.prisma.box.findUnique({
                         where: { id, userId },
                         include: { tier: true },
                     });

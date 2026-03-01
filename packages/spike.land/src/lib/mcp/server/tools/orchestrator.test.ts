@@ -24,8 +24,7 @@ describe("orchestrator tools", () => {
 
   describe("orchestrator_create_plan", () => {
     it("should create a plan with subtasks", async () => {
-      const handler = registry.handlers.get("orchestrator_create_plan")!;
-      const result = await handler({
+      const result = await registry.call("orchestrator_create_plan", {
         description: "Build feature X",
         subtasks: [
           { description: "Write tests" },
@@ -43,8 +42,7 @@ describe("orchestrator tools", () => {
     });
 
     it("should create a plan with context", async () => {
-      const handler = registry.handlers.get("orchestrator_create_plan")!;
-      const result = await handler({
+      const result = await registry.call("orchestrator_create_plan", {
         description: "Refactor module",
         subtasks: [{ description: "Analyze code" }],
         context: "Next.js app",
@@ -55,8 +53,7 @@ describe("orchestrator tools", () => {
     });
 
     it("should reject invalid dependency references", async () => {
-      const handler = registry.handlers.get("orchestrator_create_plan")!;
-      const result = await handler({
+      const result = await registry.call("orchestrator_create_plan", {
         description: "Bad plan",
         subtasks: [
           { description: "Task A", dependencies: ["subtask-99"] },
@@ -70,8 +67,7 @@ describe("orchestrator tools", () => {
 
   describe("orchestrator_dispatch", () => {
     it("should dispatch subtasks with no dependencies", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Test dispatch",
         subtasks: [
           { description: "Task A" },
@@ -79,9 +75,7 @@ describe("orchestrator tools", () => {
         ],
       });
       const planId = extractPlanId(getText(createResult));
-
-      const dispatchHandler = registry.handlers.get("orchestrator_dispatch")!;
-      const result = await dispatchHandler({ plan_id: planId });
+      const result = await registry.call("orchestrator_dispatch", { plan_id: planId });
 
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("Dispatched 1 subtask(s)");
@@ -89,8 +83,7 @@ describe("orchestrator tools", () => {
     });
 
     it("should not dispatch subtasks with unmet dependencies", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Test deps",
         subtasks: [
           { description: "Task A" },
@@ -100,17 +93,15 @@ describe("orchestrator tools", () => {
       const planId = extractPlanId(getText(createResult));
 
       // Dispatch once to move subtask-1 to dispatched
-      const dispatchHandler = registry.handlers.get("orchestrator_dispatch")!;
-      await dispatchHandler({ plan_id: planId });
+      await registry.call("orchestrator_dispatch", { plan_id: planId });
 
       // Dispatch again — subtask-2 still blocked, subtask-1 already dispatched
-      const result = await dispatchHandler({ plan_id: planId });
+      const result = await registry.call("orchestrator_dispatch", { plan_id: planId });
       expect(getText(result)).toContain("No subtasks ready for dispatch");
     });
 
     it("should return error for non-existent plan", async () => {
-      const handler = registry.handlers.get("orchestrator_dispatch")!;
-      const result = await handler({ plan_id: "nonexistent" });
+      const result = await registry.call("orchestrator_dispatch", { plan_id: "nonexistent" });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("not found");
@@ -119,8 +110,7 @@ describe("orchestrator tools", () => {
 
   describe("orchestrator_status", () => {
     it("should show plan and subtask statuses", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Status test",
         subtasks: [
           { description: "Task A" },
@@ -128,9 +118,7 @@ describe("orchestrator tools", () => {
         ],
       });
       const planId = extractPlanId(getText(createResult));
-
-      const statusHandler = registry.handlers.get("orchestrator_status")!;
-      const result = await statusHandler({ plan_id: planId });
+      const result = await registry.call("orchestrator_status", { plan_id: planId });
 
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("Plan Status: pending");
@@ -140,8 +128,7 @@ describe("orchestrator tools", () => {
     });
 
     it("should return error for non-existent plan", async () => {
-      const handler = registry.handlers.get("orchestrator_status")!;
-      const result = await handler({ plan_id: "missing" });
+      const result = await registry.call("orchestrator_status", { plan_id: "missing" });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("not found");
@@ -150,17 +137,13 @@ describe("orchestrator tools", () => {
 
   describe("orchestrator_submit_result", () => {
     it("should update subtask with result", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Submit test",
         subtasks: [{ description: "Task A" }],
       });
       const planId = extractPlanId(getText(createResult));
 
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      const result = await submitHandler({
+      const result = await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
@@ -174,17 +157,13 @@ describe("orchestrator tools", () => {
     });
 
     it("should auto-complete plan when all subtasks complete", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Auto-complete test",
         subtasks: [{ description: "Only task" }],
       });
       const planId = extractPlanId(getText(createResult));
 
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      const result = await submitHandler({
+      const result = await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
@@ -195,8 +174,7 @@ describe("orchestrator tools", () => {
     });
 
     it("should auto-fail plan when any subtask fails", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Fail test",
         subtasks: [
           { description: "Task A" },
@@ -205,10 +183,7 @@ describe("orchestrator tools", () => {
       });
       const planId = extractPlanId(getText(createResult));
 
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      const result = await submitHandler({
+      const result = await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "failed",
@@ -221,17 +196,13 @@ describe("orchestrator tools", () => {
     });
 
     it("should return error for non-existent subtask", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Missing subtask",
         subtasks: [{ description: "Task A" }],
       });
       const planId = extractPlanId(getText(createResult));
 
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      const result = await submitHandler({
+      const result = await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-99",
         status: "completed",
@@ -243,8 +214,7 @@ describe("orchestrator tools", () => {
     });
 
     it("should return error for non-existent plan", async () => {
-      const handler = registry.handlers.get("orchestrator_submit_result")!;
-      const result = await handler({
+      const result = await registry.call("orchestrator_submit_result", {
         plan_id: "missing",
         subtask_id: "subtask-1",
         status: "completed",
@@ -258,8 +228,7 @@ describe("orchestrator tools", () => {
 
   describe("orchestrator_merge", () => {
     it("should merge completed subtask results in dependency order", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Merge test",
         subtasks: [
           { description: "Task A" },
@@ -268,24 +237,19 @@ describe("orchestrator tools", () => {
       });
       const planId = extractPlanId(getText(createResult));
 
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      await submitHandler({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
         result: "Result A",
       });
-      await submitHandler({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-2",
         status: "completed",
         result: "Result B",
       });
-
-      const mergeHandler = registry.handlers.get("orchestrator_merge")!;
-      const result = await mergeHandler({ plan_id: planId });
+      const result = await registry.call("orchestrator_merge", { plan_id: planId });
 
       expect(isError(result)).toBe(false);
       const text = getText(result);
@@ -297,23 +261,19 @@ describe("orchestrator tools", () => {
     });
 
     it("should reject merge on incomplete plan", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Incomplete merge",
         subtasks: [{ description: "Task A" }],
       });
       const planId = extractPlanId(getText(createResult));
-
-      const mergeHandler = registry.handlers.get("orchestrator_merge")!;
-      const result = await mergeHandler({ plan_id: planId });
+      const result = await registry.call("orchestrator_merge", { plan_id: planId });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("not completed");
     });
 
     it("should return error for non-existent plan", async () => {
-      const handler = registry.handlers.get("orchestrator_merge")!;
-      const result = await handler({ plan_id: "missing" });
+      const result = await registry.call("orchestrator_merge", { plan_id: "missing" });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("not found");
@@ -323,8 +283,7 @@ describe("orchestrator tools", () => {
   describe("authorization checks", () => {
     it("should reject dispatch for plan owned by different user", async () => {
       // Create a plan with original userId
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Auth test",
         subtasks: [{ description: "Task A" }],
       });
@@ -334,17 +293,13 @@ describe("orchestrator tools", () => {
       const otherRegistry = createMockRegistry();
       registerOrchestratorTools(otherRegistry, "other-user");
 
-      const dispatchHandler = otherRegistry.handlers.get(
-        "orchestrator_dispatch",
-      )!;
-      const result = await dispatchHandler({ plan_id: planId });
+      const result = await otherRegistry.call("orchestrator_dispatch", { plan_id: planId });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("Unauthorized");
     });
 
     it("should reject status for plan owned by different user", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Auth test",
         subtasks: [{ description: "Task A" }],
       });
@@ -353,15 +308,13 @@ describe("orchestrator tools", () => {
       const otherRegistry = createMockRegistry();
       registerOrchestratorTools(otherRegistry, "other-user");
 
-      const statusHandler = otherRegistry.handlers.get("orchestrator_status")!;
-      const result = await statusHandler({ plan_id: planId });
+      const result = await otherRegistry.call("orchestrator_status", { plan_id: planId });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("Unauthorized");
     });
 
     it("should reject submit for plan owned by different user", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Auth test",
         subtasks: [{ description: "Task A" }],
       });
@@ -370,10 +323,7 @@ describe("orchestrator tools", () => {
       const otherRegistry = createMockRegistry();
       registerOrchestratorTools(otherRegistry, "other-user");
 
-      const submitHandler = otherRegistry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      const result = await submitHandler({
+      const result = await otherRegistry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
@@ -384,8 +334,7 @@ describe("orchestrator tools", () => {
     });
 
     it("should reject merge for plan owned by different user", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Auth test",
         subtasks: [{ description: "Task A" }],
       });
@@ -394,8 +343,7 @@ describe("orchestrator tools", () => {
       const otherRegistry = createMockRegistry();
       registerOrchestratorTools(otherRegistry, "other-user");
 
-      const mergeHandler = otherRegistry.handlers.get("orchestrator_merge")!;
-      const result = await mergeHandler({ plan_id: planId });
+      const result = await otherRegistry.call("orchestrator_merge", { plan_id: planId });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("Unauthorized");
     });
@@ -403,13 +351,8 @@ describe("orchestrator tools", () => {
 
   describe("orchestrator_status - edge cases", () => {
     it("should display result and error in status", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      const statusHandler = registry.handlers.get("orchestrator_status")!;
 
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Status detail test",
         subtasks: [
           { description: "Task A" },
@@ -419,13 +362,13 @@ describe("orchestrator tools", () => {
       const planId = extractPlanId(getText(createResult));
 
       // Complete one, fail another
-      await submitHandler({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
         result: "Success result text",
       });
-      await submitHandler({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-2",
         status: "failed",
@@ -433,59 +376,49 @@ describe("orchestrator tools", () => {
         error: "Something broke",
       });
 
-      const result = await statusHandler({ plan_id: planId });
+      const result = await registry.call("orchestrator_status", { plan_id: planId });
       const text = getText(result);
       expect(text).toContain("Result: Success result text");
       expect(text).toContain("Error: Something broke");
     });
 
     it("should truncate long results in status display", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      const statusHandler = registry.handlers.get("orchestrator_status")!;
 
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Long result test",
         subtasks: [{ description: "Task A" }],
       });
       const planId = extractPlanId(getText(createResult));
 
       const longResult = "x".repeat(150);
-      await submitHandler({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
         result: longResult,
       });
 
-      const result = await statusHandler({ plan_id: planId });
+      const result = await registry.call("orchestrator_status", { plan_id: planId });
       const text = getText(result);
       expect(text).toContain("...");
     });
 
     it("should display completedAt when plan is completed", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      const statusHandler = registry.handlers.get("orchestrator_status")!;
 
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Completed plan",
         subtasks: [{ description: "Only task" }],
       });
       const planId = extractPlanId(getText(createResult));
 
-      await submitHandler({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
         result: "Done",
       });
 
-      const result = await statusHandler({ plan_id: planId });
+      const result = await registry.call("orchestrator_status", { plan_id: planId });
       const text = getText(result);
       expect(text).toContain("Completed:");
     });
@@ -493,19 +426,15 @@ describe("orchestrator tools", () => {
 
   describe("orchestrator_submit_result - edge cases", () => {
     it("should truncate long result in submit response", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
 
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Long submit test",
         subtasks: [{ description: "Task A" }],
       });
       const planId = extractPlanId(getText(createResult));
 
       const longResult = "y".repeat(250);
-      const result = await submitHandler({
+      const result = await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
@@ -516,13 +445,8 @@ describe("orchestrator tools", () => {
     });
 
     it("should set plan to in_progress when submitting to a pending plan", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      const statusHandler = registry.handlers.get("orchestrator_status")!;
 
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Pending to in_progress",
         subtasks: [
           { description: "Task A" },
@@ -532,53 +456,43 @@ describe("orchestrator tools", () => {
       const planId = extractPlanId(getText(createResult));
 
       // Submit one subtask as completed (plan should go from pending to in_progress)
-      await submitHandler({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
         result: "Done",
       });
 
-      const result = await statusHandler({ plan_id: planId });
+      const result = await registry.call("orchestrator_status", { plan_id: planId });
       expect(getText(result)).toContain("in_progress");
     });
   });
 
   describe("orchestrator_merge - edge cases", () => {
     it("should handle subtask with no result in merge", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      const mergeHandler = registry.handlers.get("orchestrator_merge")!;
 
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Empty result merge",
         subtasks: [{ description: "Task A" }],
       });
       const planId = extractPlanId(getText(createResult));
 
-      await submitHandler({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
         result: "",
       });
 
-      const result = await mergeHandler({ plan_id: planId });
+      const result = await registry.call("orchestrator_merge", { plan_id: planId });
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("Merged Output");
     });
 
     it("should merge subtasks in topological order with diamond dependency", async () => {
-      const createHandler = registry.handlers.get("orchestrator_create_plan")!;
-      const submitHandler = registry.handlers.get(
-        "orchestrator_submit_result",
-      )!;
-      const mergeHandler = registry.handlers.get("orchestrator_merge")!;
 
       // Diamond: A -> B, A -> C, B+C -> D
-      const createResult = await createHandler({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Diamond merge",
         subtasks: [
           { description: "Root" },
@@ -590,7 +504,7 @@ describe("orchestrator tools", () => {
       const planId = extractPlanId(getText(createResult));
 
       for (let i = 1; i <= 4; i++) {
-        await submitHandler({
+        await registry.call("orchestrator_submit_result", {
           plan_id: planId,
           subtask_id: `subtask-${i}`,
           status: "completed",
@@ -598,7 +512,7 @@ describe("orchestrator tools", () => {
         });
       }
 
-      const result = await mergeHandler({ plan_id: planId });
+      const result = await registry.call("orchestrator_merge", { plan_id: planId });
       expect(isError(result)).toBe(false);
       const text = getText(result);
       // Root must appear before Left, Right, and Join
@@ -611,14 +525,9 @@ describe("orchestrator tools", () => {
 
   describe("full lifecycle", () => {
     it("should handle a 3-subtask dependency chain end-to-end", async () => {
-      const create = registry.handlers.get("orchestrator_create_plan")!;
-      const dispatch = registry.handlers.get("orchestrator_dispatch")!;
-      const submit = registry.handlers.get("orchestrator_submit_result")!;
-      const status = registry.handlers.get("orchestrator_status")!;
-      const merge = registry.handlers.get("orchestrator_merge")!;
 
       // 1. Create plan: A -> B -> C
-      const createResult = await create({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Full lifecycle test",
         subtasks: [
           { description: "Step A" },
@@ -630,12 +539,12 @@ describe("orchestrator tools", () => {
       expect(getText(createResult)).toContain("Subtasks:** 3");
 
       // 2. Dispatch — only A should be ready
-      const dispatch1 = await dispatch({ plan_id: planId });
+      const dispatch1 = await registry.call("orchestrator_dispatch", { plan_id: planId });
       expect(getText(dispatch1)).toContain("Dispatched 1 subtask(s)");
       expect(getText(dispatch1)).toContain("subtask-1");
 
       // 3. Submit result for A
-      const submitA = await submit({
+      const submitA = await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
@@ -645,12 +554,12 @@ describe("orchestrator tools", () => {
       expect(getText(submitA)).toContain("in_progress");
 
       // 4. Dispatch — B should now be ready
-      const dispatch2 = await dispatch({ plan_id: planId });
+      const dispatch2 = await registry.call("orchestrator_dispatch", { plan_id: planId });
       expect(getText(dispatch2)).toContain("Dispatched 1 subtask(s)");
       expect(getText(dispatch2)).toContain("subtask-2");
 
       // 5. Submit result for B
-      const submitB = await submit({
+      const submitB = await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-2",
         status: "completed",
@@ -659,12 +568,12 @@ describe("orchestrator tools", () => {
       expect(getText(submitB)).toContain("completed");
 
       // 6. Dispatch — C should now be ready
-      const dispatch3 = await dispatch({ plan_id: planId });
+      const dispatch3 = await registry.call("orchestrator_dispatch", { plan_id: planId });
       expect(getText(dispatch3)).toContain("Dispatched 1 subtask(s)");
       expect(getText(dispatch3)).toContain("subtask-3");
 
       // 7. Submit result for C — plan should auto-complete
-      const submitC = await submit({
+      const submitC = await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-3",
         status: "completed",
@@ -673,11 +582,11 @@ describe("orchestrator tools", () => {
       expect(getText(submitC)).toContain("Plan Status:** completed");
 
       // 8. Check status
-      const statusResult = await status({ plan_id: planId });
+      const statusResult = await registry.call("orchestrator_status", { plan_id: planId });
       expect(getText(statusResult)).toContain("Plan Status: completed");
 
       // 9. Merge — all results in order A, B, C
-      const mergeResult = await merge({ plan_id: planId });
+      const mergeResult = await registry.call("orchestrator_merge", { plan_id: planId });
       const mergedText = getText(mergeResult);
       expect(mergedText).toContain("A is done");
       expect(mergedText).toContain("B is done");
@@ -691,13 +600,9 @@ describe("orchestrator tools", () => {
     });
 
     it("should handle parallel subtasks with shared dependency", async () => {
-      const create = registry.handlers.get("orchestrator_create_plan")!;
-      const dispatch = registry.handlers.get("orchestrator_dispatch")!;
-      const submit = registry.handlers.get("orchestrator_submit_result")!;
-      const merge = registry.handlers.get("orchestrator_merge")!;
 
       // A -> B (depends on A), A -> C (depends on A), D (depends on B and C)
-      const createResult = await create({
+      const createResult = await registry.call("orchestrator_create_plan", {
         description: "Parallel test",
         subtasks: [
           { description: "Base task" },
@@ -712,11 +617,11 @@ describe("orchestrator tools", () => {
       const planId = extractPlanId(getText(createResult));
 
       // Dispatch — only subtask-1 (base)
-      const d1 = await dispatch({ plan_id: planId });
+      const d1 = await registry.call("orchestrator_dispatch", { plan_id: planId });
       expect(getText(d1)).toContain("Dispatched 1 subtask(s)");
 
       // Complete subtask-1
-      await submit({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-1",
         status: "completed",
@@ -724,17 +629,17 @@ describe("orchestrator tools", () => {
       });
 
       // Dispatch — subtask-2 and subtask-3 should both be ready
-      const d2 = await dispatch({ plan_id: planId });
+      const d2 = await registry.call("orchestrator_dispatch", { plan_id: planId });
       expect(getText(d2)).toContain("Dispatched 2 subtask(s)");
 
       // Complete both branches
-      await submit({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-2",
         status: "completed",
         result: "Branch 1 done",
       });
-      await submit({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-3",
         status: "completed",
@@ -742,12 +647,12 @@ describe("orchestrator tools", () => {
       });
 
       // Dispatch — subtask-4 should be ready
-      const d3 = await dispatch({ plan_id: planId });
+      const d3 = await registry.call("orchestrator_dispatch", { plan_id: planId });
       expect(getText(d3)).toContain("Dispatched 1 subtask(s)");
       expect(getText(d3)).toContain("subtask-4");
 
       // Complete final
-      await submit({
+      await registry.call("orchestrator_submit_result", {
         plan_id: planId,
         subtask_id: "subtask-4",
         status: "completed",
@@ -755,7 +660,7 @@ describe("orchestrator tools", () => {
       });
 
       // Merge
-      const mergeResult = await merge({ plan_id: planId });
+      const mergeResult = await registry.call("orchestrator_merge", { plan_id: planId });
       expect(getText(mergeResult)).toContain("Base done");
       expect(getText(mergeResult)).toContain("All merged");
     });

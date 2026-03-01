@@ -25,14 +25,12 @@ export function registerLearnItTools(
                 ),
             })
             .meta({ category: "learnit", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     slug,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const topic = await prisma.learnItContent.findUnique({
+                const topic = await ctx.prisma.learnItContent.findUnique({
                     where: { slug },
                     select: {
                         id: true,
@@ -55,7 +53,7 @@ export function registerLearnItTools(
                 }
 
                 // Fire-and-forget view count increment
-                prisma.learnItContent
+                ctx.prisma.learnItContent
                     .update({ where: { slug }, data: { viewCount: { increment: 1 } } })
                     .catch(err => logger.error("[learnit] Failed to increment view count:", err));
 
@@ -92,15 +90,13 @@ export function registerLearnItTools(
                 ),
             })
             .meta({ category: "learnit", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     query,
                     limit = 10,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const topics = await prisma.learnItContent.findMany({
+                const topics = await ctx.prisma.learnItContent.findMany({
                     where: {
                         status: "PUBLISHED",
                         OR: [
@@ -144,13 +140,11 @@ export function registerLearnItTools(
                     .describe("Filter by relation type. Omit to get all types."),
             })
             .meta({ category: "learnit", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     slug,
                     type,
                 } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const {
                     getRelatedTopics,
                     getPrerequisites,
@@ -158,7 +152,7 @@ export function registerLearnItTools(
                     getParentTopic,
                 } = await import("@/lib/learnit/relation-service");
 
-                const topic = await prisma.learnItContent.findUnique({
+                const topic = await ctx.prisma.learnItContent.findUnique({
                     where: { slug },
                     select: { id: true, title: true },
                 });
@@ -218,14 +212,12 @@ export function registerLearnItTools(
                 ),
             })
             .meta({ category: "learnit", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     limit = 10,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const topics = await prisma.learnItContent.findMany({
+                const topics = await ctx.prisma.learnItContent.findMany({
                     where: { status: "PUBLISHED" },
                     select: {
                         slug: true,
@@ -259,14 +251,12 @@ export function registerLearnItTools(
                 ),
             })
             .meta({ category: "learnit", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     limit = 10,
                 } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const topics = await prisma.learnItContent.findMany({
+                const topics = await ctx.prisma.learnItContent.findMany({
                     where: { status: "PUBLISHED" },
                     select: {
                         slug: true,
@@ -304,13 +294,11 @@ export function registerLearnItTools(
                 ),
             })
             .meta({ category: "learnit", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     slug,
                     depth = 1,
                 } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const {
                     getRelatedTopics,
                     getPrerequisites,
@@ -318,7 +306,7 @@ export function registerLearnItTools(
                     getParentTopic,
                 } = await import("@/lib/learnit/relation-service");
 
-                const topic = await prisma.learnItContent.findUnique({
+                const topic = await ctx.prisma.learnItContent.findUnique({
                     where: { slug },
                     select: { id: true, title: true, slug: true },
                 });

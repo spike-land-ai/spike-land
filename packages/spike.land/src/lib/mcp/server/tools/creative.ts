@@ -24,13 +24,12 @@ export function registerCreativeTools(
                 ),
             })
             .meta({ category: "creative", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("creative_generate_variants", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     await resolveWorkspace(userId, args.workspace_slug);
 
-                    const creativeSet = await prisma.creativeSet.create({
+                    const creativeSet = await ctx.prisma.creativeSet.create({
                         data: {
                             name: args.name,
                             generatedById: userId,
@@ -42,7 +41,7 @@ export function registerCreativeTools(
 
                     const variantIds: string[] = [];
                     for (let i = 0; i < args.variant_count; i++) {
-                        const variant = await prisma.creativeVariant.create({
+                        const variant = await ctx.prisma.creativeVariant.create({
                             data: {
                                 setId: creativeSet.id,
                                 variantType: "TEXT_ONLY",
@@ -76,13 +75,12 @@ export function registerCreativeTools(
                 ),
             })
             .meta({ category: "creative", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("creative_detect_fatigue", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     await resolveWorkspace(userId, args.workspace_slug);
 
-                    const alerts = await prisma.creativeFatigueAlert.findMany({
+                    const alerts = await ctx.prisma.creativeFatigueAlert.findMany({
                         where: { isResolved: false },
                         orderBy: { detectedAt: "desc" },
                         take: args.limit,
@@ -113,13 +111,12 @@ export function registerCreativeTools(
                 creative_set_id: z.string().min(1).describe("Creative set ID."),
             })
             .meta({ category: "creative", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("creative_get_performance", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     await resolveWorkspace(userId, args.workspace_slug);
 
-                    const creativeSet = await prisma.creativeSet.findFirst({
+                    const creativeSet = await ctx.prisma.creativeSet.findFirst({
                         where: { id: args.creative_set_id },
                         include: {
                             variants: {
@@ -160,13 +157,12 @@ export function registerCreativeTools(
                 ),
             })
             .meta({ category: "creative", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("creative_list_sets", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     await resolveWorkspace(userId, args.workspace_slug);
 
-                    const sets = await prisma.creativeSet.findMany({
+                    const sets = await ctx.prisma.creativeSet.findMany({
                         where: { generatedById: userId },
                         include: { _count: { select: { variants: true } } },
                         orderBy: { createdAt: "desc" },

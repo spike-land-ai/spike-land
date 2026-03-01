@@ -61,8 +61,7 @@ describe("boxes tools", () => {
       const boxes = [{ id: "box-1", name: "Test Box", userId }];
       mockPrisma.box.findMany.mockResolvedValue(boxes);
 
-      const handler = registry.handlers.get("boxes_list")!;
-      const result = await handler({});
+      const result = await registry.call("boxes_list", {});
 
       expect(mockPrisma.box.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: { userId, deletedAt: null } }),
@@ -83,8 +82,7 @@ describe("boxes tools", () => {
       mockPrisma.box.create.mockResolvedValue(box);
       mockTriggerBoxProvisioning.mockResolvedValue(undefined);
 
-      const handler = registry.handlers.get("boxes_create")!;
-      const result = await handler({ name: "New Box", tierId: "tier-1" });
+      const result = await registry.call("boxes_create", { name: "New Box", tierId: "tier-1" });
 
       expect(getText(result)).toContain("box-new");
       expect(mockCreditManager.consumeCredits).toHaveBeenCalled();
@@ -100,8 +98,7 @@ describe("boxes tools", () => {
       mockPrisma.box.create.mockRejectedValue(new Error("DB error"));
       mockCreditManager.refundCredits.mockResolvedValue(true);
 
-      const handler = registry.handlers.get("boxes_create")!;
-      const result = await handler({ name: "Fail Box", tierId: "tier-1" });
+      const result = await registry.call("boxes_create", { name: "Fail Box", tierId: "tier-1" });
 
       expect(mockCreditManager.refundCredits).toHaveBeenCalledWith(userId, 10);
       expect(isError(result)).toBe(true);
@@ -109,8 +106,7 @@ describe("boxes tools", () => {
 
     it("should error when tier is invalid", async () => {
       mockPrisma.boxTier.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("boxes_create")!;
-      const result = await handler({ name: "Bad", tierId: "bad-tier" });
+      const result = await registry.call("boxes_create", { name: "Bad", tierId: "bad-tier" });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("Invalid tier");
     });
@@ -122,8 +118,7 @@ describe("boxes tools", () => {
       });
       mockCreditManager.hasEnoughCredits.mockResolvedValue(false);
 
-      const handler = registry.handlers.get("boxes_create")!;
-      const result = await handler({ name: "No Credits", tierId: "tier-1" });
+      const result = await registry.call("boxes_create", { name: "No Credits", tierId: "tier-1" });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("Insufficient credits");
@@ -137,8 +132,7 @@ describe("boxes tools", () => {
       mockPrisma.boxAction.create.mockResolvedValue({});
       mockPrisma.box.update.mockResolvedValue({ ...box, status: "STOPPING" });
 
-      const handler = registry.handlers.get("boxes_action")!;
-      await handler({ id: "box-1", action: "STOP" });
+      await registry.call("boxes_action", { id: "box-1", action: "STOP" });
 
       expect(mockPrisma.box.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -153,8 +147,7 @@ describe("boxes tools", () => {
       mockPrisma.boxAction.create.mockResolvedValue({});
       mockPrisma.box.update.mockResolvedValue({ ...box, status: "STARTING" });
 
-      const handler = registry.handlers.get("boxes_action")!;
-      const result = await handler({ id: "box-1", action: "START" });
+      const result = await registry.call("boxes_action", { id: "box-1", action: "START" });
 
       expect(isError(result)).toBe(false);
       expect(mockPrisma.box.update).toHaveBeenCalledWith(
@@ -170,8 +163,7 @@ describe("boxes tools", () => {
       mockPrisma.boxAction.create.mockResolvedValue({});
       mockPrisma.box.update.mockResolvedValue({ ...box, status: "STARTING" });
 
-      const handler = registry.handlers.get("boxes_action")!;
-      const result = await handler({ id: "box-1", action: "RESTART" });
+      const result = await registry.call("boxes_action", { id: "box-1", action: "RESTART" });
 
       expect(isError(result)).toBe(false);
       expect(mockPrisma.box.update).toHaveBeenCalledWith(
@@ -184,8 +176,7 @@ describe("boxes tools", () => {
     it("should error when box not found", async () => {
       mockPrisma.box.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("boxes_action")!;
-      const result = await handler({ id: "nonexistent", action: "STOP" });
+      const result = await registry.call("boxes_action", { id: "nonexistent", action: "STOP" });
 
       expect(isError(result)).toBe(true);
     });
@@ -201,8 +192,7 @@ describe("boxes tools", () => {
       };
       mockPrisma.box.findUnique.mockResolvedValue(box);
 
-      const handler = registry.handlers.get("boxes_get")!;
-      const result = await handler({ id: "box-1" });
+      const result = await registry.call("boxes_get", { id: "box-1" });
 
       expect(getText(result)).toContain("box-1");
     });
@@ -210,8 +200,7 @@ describe("boxes tools", () => {
     it("should error when box not found", async () => {
       mockPrisma.box.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("boxes_get")!;
-      const result = await handler({ id: "nonexistent" });
+      const result = await registry.call("boxes_get", { id: "nonexistent" });
 
       expect(isError(result)).toBe(true);
     });

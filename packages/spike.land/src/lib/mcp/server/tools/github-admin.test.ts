@@ -49,8 +49,7 @@ describe("github admin tools", () => {
           url: "https://github.com/spike-land-ai/spike.land/issues/1",
         },
       ]);
-      const handler = registry.handlers.get("github_admin_roadmap")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_roadmap", {});
       expect(getText(result)).toContain("Add MCP dashboard");
       expect(getText(result)).toContain("In Progress");
       expect(getText(result)).toContain("feature, p1");
@@ -69,31 +68,27 @@ describe("github admin tools", () => {
           url: null,
         },
       ]);
-      const handler = registry.handlers.get("github_admin_roadmap")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_roadmap", {});
       expect(getText(result)).toContain("Draft idea");
       expect(getText(result)).toContain("DRAFT_ISSUE");
     });
 
     it("should return empty message when no items found", async () => {
       mockGetRoadmap.mockResolvedValue([]);
-      const handler = registry.handlers.get("github_admin_roadmap")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_roadmap", {});
       expect(getText(result)).toContain("No roadmap items found");
     });
 
     it("should return empty message when API returns null", async () => {
       mockGetRoadmap.mockResolvedValue(null);
-      const handler = registry.handlers.get("github_admin_roadmap")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_roadmap", {});
       expect(getText(result)).toContain("No roadmap items found");
     });
 
     it("should show not-configured when GH_PAT_TOKEN is missing", async () => {
       vi.stubEnv("GH_PAT_TOKEN", "");
       delete process.env.GH_PAT_TOKEN;
-      const handler = registry.handlers.get("github_admin_roadmap")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_roadmap", {});
       expect(getText(result)).toContain("GitHub not configured");
     });
   });
@@ -113,8 +108,7 @@ describe("github admin tools", () => {
           },
         ],
       });
-      const handler = registry.handlers.get("github_admin_issues_summary")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_issues_summary", {});
       expect(getText(result)).toContain("Open: 12");
       expect(getText(result)).toContain("Closed: 48");
       expect(getText(result)).toContain("bug: 3");
@@ -129,24 +123,21 @@ describe("github admin tools", () => {
         byLabel: {},
         recentlyUpdated: [],
       });
-      const handler = registry.handlers.get("github_admin_issues_summary")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_issues_summary", {});
       expect(getText(result)).toContain("Open: 0");
       expect(getText(result)).not.toContain("By Label");
     });
 
     it("should return error when summary is null", async () => {
       mockGetIssuesSummary.mockResolvedValue(null);
-      const handler = registry.handlers.get("github_admin_issues_summary")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_issues_summary", {});
       expect(getText(result)).toContain("Could not fetch issues summary");
     });
 
     it("should show not-configured when GH_PAT_TOKEN is missing", async () => {
       vi.stubEnv("GH_PAT_TOKEN", "");
       delete process.env.GH_PAT_TOKEN;
-      const handler = registry.handlers.get("github_admin_issues_summary")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_issues_summary", {});
       expect(getText(result)).toContain("GitHub not configured");
     });
   });
@@ -166,8 +157,7 @@ describe("github admin tools", () => {
           },
         ],
       });
-      const handler = registry.handlers.get("github_admin_pr_status")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_pr_status", {});
       expect(getText(result)).toContain("Open: 3");
       expect(getText(result)).toContain("Merged: 25");
       expect(getText(result)).toContain("#99 feat: add dashboard");
@@ -181,8 +171,7 @@ describe("github admin tools", () => {
         merged: 10,
         pending: [],
       });
-      const handler = registry.handlers.get("github_admin_pr_status")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_pr_status", {});
       expect(getText(result)).toContain("Open: 0");
       expect(getText(result)).toContain("Merged: 10");
       expect(getText(result)).not.toContain("Pending PRs");
@@ -190,16 +179,14 @@ describe("github admin tools", () => {
 
     it("should return error when status is null", async () => {
       mockGetPRStatus.mockResolvedValue(null);
-      const handler = registry.handlers.get("github_admin_pr_status")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_pr_status", {});
       expect(getText(result)).toContain("Could not fetch PR status");
     });
 
     it("should show not-configured when GH_PAT_TOKEN is missing", async () => {
       vi.stubEnv("GH_PAT_TOKEN", "");
       delete process.env.GH_PAT_TOKEN;
-      const handler = registry.handlers.get("github_admin_pr_status")!;
-      const result = await handler({});
+      const result = await registry.call("github_admin_pr_status", {});
       expect(getText(result)).toContain("GitHub not configured");
     });
   });

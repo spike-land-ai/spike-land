@@ -39,8 +39,7 @@ describe("chat tools", () => {
         content: [{ type: "text", text: "Hello from Claude!" }],
         usage: { input_tokens: 10, output_tokens: 20 },
       });
-      const handler = registry.handlers.get("chat_send_message")!;
-      const result = await handler({ message: "Hi there", model: "sonnet" });
+      const result = await registry.call("chat_send_message", { message: "Hi there", model: "sonnet" });
       expect(getText(result)).toContain("AI Response");
       expect(getText(result)).toContain("Hello from Claude!");
       expect(getText(result)).toContain("sonnet");
@@ -52,8 +51,7 @@ describe("chat tools", () => {
         content: [{ type: "text", text: "Default model response" }],
         usage: { input_tokens: 5, output_tokens: 15 },
       });
-      const handler = registry.handlers.get("chat_send_message")!;
-      const result = await handler({ message: "Test message" });
+      const result = await registry.call("chat_send_message", { message: "Test message" });
       expect(getText(result)).toContain("AI Response");
       expect(getText(result)).toContain("Default model response");
       expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({
@@ -66,8 +64,7 @@ describe("chat tools", () => {
         content: [{ type: "text", text: "Opus response" }],
         usage: { input_tokens: 8, output_tokens: 25 },
       });
-      const handler = registry.handlers.get("chat_send_message")!;
-      const result = await handler({ message: "Use opus", model: "opus" });
+      const result = await registry.call("chat_send_message", { message: "Use opus", model: "opus" });
       expect(getText(result)).toContain("opus");
       expect(getText(result)).toContain("Opus response");
       expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({
@@ -80,8 +77,7 @@ describe("chat tools", () => {
         content: [{ type: "text", text: "Haiku response" }],
         usage: { input_tokens: 3, output_tokens: 10 },
       });
-      const handler = registry.handlers.get("chat_send_message")!;
-      const result = await handler({ message: "Use haiku", model: "haiku" });
+      const result = await registry.call("chat_send_message", { message: "Use haiku", model: "haiku" });
       expect(getText(result)).toContain("haiku");
       expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({
         model: "claude-4-5-haiku",
@@ -93,8 +89,7 @@ describe("chat tools", () => {
         content: [{ type: "text", text: "System-aware response" }],
         usage: { input_tokens: 12, output_tokens: 30 },
       });
-      const handler = registry.handlers.get("chat_send_message")!;
-      await handler({
+      await registry.call("chat_send_message", {
         message: "Hello",
         model: "sonnet",
         system_prompt: "You are a pirate",
@@ -109,8 +104,7 @@ describe("chat tools", () => {
         content: [{ type: "text", text: "No system" }],
         usage: { input_tokens: 4, output_tokens: 8 },
       });
-      const handler = registry.handlers.get("chat_send_message")!;
-      await handler({ message: "Hello", model: "sonnet" });
+      await registry.call("chat_send_message", { message: "Hello", model: "sonnet" });
       const callArgs = mockCreate.mock.calls[0]![0] as Record<string, unknown>;
       expect(callArgs).not.toHaveProperty("system");
     });
@@ -123,8 +117,7 @@ describe("chat tools", () => {
         ],
         usage: { input_tokens: 6, output_tokens: 12 },
       });
-      const handler = registry.handlers.get("chat_send_message")!;
-      const result = await handler({ message: "Multi-block", model: "sonnet" });
+      const result = await registry.call("chat_send_message", { message: "Multi-block", model: "sonnet" });
       expect(getText(result)).toContain("Part one.\nPart two.");
     });
 
@@ -136,8 +129,7 @@ describe("chat tools", () => {
         ],
         usage: { input_tokens: 6, output_tokens: 12 },
       });
-      const handler = registry.handlers.get("chat_send_message")!;
-      const result = await handler({
+      const result = await registry.call("chat_send_message", {
         message: "Mixed blocks",
         model: "sonnet",
       });
@@ -150,8 +142,7 @@ describe("chat tools", () => {
         content: [{ type: "text", text: "Fallback response" }],
         usage: { input_tokens: 5, output_tokens: 10 },
       });
-      const handler = registry.handlers.get("chat_send_message")!;
-      const result = await handler({
+      const result = await registry.call("chat_send_message", {
         message: "Test fallback",
         model: "nonexistent",
       });
@@ -163,8 +154,7 @@ describe("chat tools", () => {
 
     it("should handle API errors gracefully via safeToolCall", async () => {
       mockCreate.mockRejectedValue(new Error("rate limit exceeded"));
-      const handler = registry.handlers.get("chat_send_message")!;
-      const result = await handler({ message: "Fail", model: "sonnet" });
+      const result = await registry.call("chat_send_message", { message: "Fail", model: "sonnet" });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("rate limit");
     });

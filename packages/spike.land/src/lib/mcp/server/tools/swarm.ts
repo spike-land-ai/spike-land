@@ -26,15 +26,14 @@ export function registerSwarmTools(
                 ),
             })
             .meta({ category: "swarm", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { status = "all", limit = 20 } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
                 const now = new Date();
                 const fiveMinAgo = new Date(now.getTime() - 5 * 60 * 1000);
 
-                const agents = await prisma.claudeCodeAgent.findMany({
+                const agents = await ctx.prisma.claudeCodeAgent.findMany({
                     where: { deletedAt: null },
                     select: {
                         id: true,
@@ -80,12 +79,11 @@ export function registerSwarmTools(
                 agent_id: z.string().min(1).describe("Agent ID."),
             })
             .meta({ category: "swarm", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { agent_id } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
-                const agent = await prisma.claudeCodeAgent.findUnique({
+                const agent = await ctx.prisma.claudeCodeAgent.findUnique({
                     where: { id: agent_id },
                     include: { _count: { select: { messages: true } } },
                 });
@@ -112,12 +110,11 @@ export function registerSwarmTools(
                 project_path: z.string().optional().describe("Project path."),
             })
             .meta({ category: "swarm", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { display_name, machine_id, session_id, project_path } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
-                const agent = await prisma.claudeCodeAgent.create({
+                const agent = await ctx.prisma.claudeCodeAgent.create({
                     data: {
                         id: session_id,
                         userId,
@@ -140,12 +137,11 @@ export function registerSwarmTools(
                 agent_id: z.string().min(1).describe("Agent ID to stop."),
             })
             .meta({ category: "swarm", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { agent_id } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
-                await prisma.claudeCodeAgent.update({
+                await ctx.prisma.claudeCodeAgent.update({
                     where: { id: agent_id },
                     data: { deletedAt: new Date() },
                 });
@@ -161,17 +157,16 @@ export function registerSwarmTools(
                 working_directory: z.string().optional().describe("New working directory."),
             })
             .meta({ category: "swarm", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { agent_id, project_path, working_directory } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
                 const data: Record<string, string> = {};
                 if (project_path !== undefined) data.projectPath = project_path;
                 if (working_directory !== undefined) {
                     data.workingDirectory = working_directory;
                 }
-                await prisma.claudeCodeAgent.update({ where: { id: agent_id }, data });
+                await ctx.prisma.claudeCodeAgent.update({ where: { id: agent_id }, data });
                 return textResult(`Agent ${agent_id} redirected.`);
             })
     );
@@ -182,12 +177,11 @@ export function registerSwarmTools(
                 content: z.string().min(1).max(10000).describe("Message content."),
             })
             .meta({ category: "swarm", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { content } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
-                const agents = await prisma.claudeCodeAgent.findMany({
+                const agents = await ctx.prisma.claudeCodeAgent.findMany({
                     where: { deletedAt: null },
                     select: { id: true },
                 });
@@ -197,7 +191,7 @@ export function registerSwarmTools(
                     content,
                     isRead: false,
                 }));
-                const result = await prisma.agentMessage.createMany({ data: messages });
+                const result = await ctx.prisma.agentMessage.createMany({ data: messages });
                 return textResult(`Broadcast sent to ${result.count} agents.`);
             })
     );
@@ -211,12 +205,11 @@ export function registerSwarmTools(
                 ),
             })
             .meta({ category: "swarm", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { agent_id, limit = 20 } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
-                const logs = await prisma.agentAuditLog.findMany({
+                const logs = await ctx.prisma.agentAuditLog.findMany({
                     where: { agentId: agent_id },
                     select: {
                         action: true,
@@ -242,10 +235,9 @@ export function registerSwarmTools(
         workspaceTool(userId)
             .tool("swarm_topology", "Get the swarm topology showing agent relationships and trust scores.", {})
             .meta({ category: "swarm", tier: "workspace" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, ctx }) => {
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
-                const agents = await prisma.claudeCodeAgent.findMany({
+                const agents = await ctx.prisma.claudeCodeAgent.findMany({
                     where: { deletedAt: null },
                     select: {
                         id: true,
@@ -284,12 +276,11 @@ export function registerSwarmTools(
                     .describe("Optional metadata (JSON object) attached to the message."),
             })
             .meta({ category: "swarm", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { target_agent_id, content, metadata } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
-                const target = await prisma.claudeCodeAgent.findUnique({
+                const target = await ctx.prisma.claudeCodeAgent.findUnique({
                     where: { id: target_agent_id },
                     select: { id: true, displayName: true, deletedAt: true },
                 });
@@ -300,7 +291,7 @@ export function registerSwarmTools(
                         false,
                     );
                 }
-                const msg = await prisma.agentMessage.create({
+                const msg = await ctx.prisma.agentMessage.create({
                     data: {
                         agentId: target_agent_id,
                         role: "AGENT",
@@ -331,17 +322,16 @@ export function registerSwarmTools(
                 ),
             })
             .meta({ category: "swarm", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { agent_id, unread_only = true, limit = 20, mark_as_read = true } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
                 const where: { agentId: string; isRead?: boolean; } = {
                     agentId: agent_id,
                 };
                 if (unread_only) where.isRead = false;
 
-                const messages = await prisma.agentMessage.findMany({
+                const messages = await ctx.prisma.agentMessage.findMany({
                     where,
                     select: {
                         id: true,
@@ -360,7 +350,7 @@ export function registerSwarmTools(
                 if (mark_as_read && messages.length > 0) {
                     const ids = messages.filter(m => !m.isRead).map(m => m.id);
                     if (ids.length > 0) {
-                        await prisma.agentMessage.updateMany({
+                        await ctx.prisma.agentMessage.updateMany({
                             where: { id: { in: ids } },
                             data: { isRead: true },
                         });
@@ -395,12 +385,11 @@ export function registerSwarmTools(
                     .describe("Optional context data for the delegated task."),
             })
             .meta({ category: "swarm", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { target_agent_id, task_description, priority = "medium", context } = input;
 
                 await requireAdminRole(userId);
-                const prisma = (await import("@/lib/prisma")).default;
-                const target = await prisma.claudeCodeAgent.findUnique({
+                const target = await ctx.prisma.claudeCodeAgent.findUnique({
                     where: { id: target_agent_id },
                     select: { id: true, displayName: true, deletedAt: true },
                 });
@@ -421,7 +410,7 @@ export function registerSwarmTools(
                     ...(context ? { context } : {}),
                 };
 
-                const msg = await prisma.agentMessage.create({
+                const msg = await ctx.prisma.agentMessage.create({
                     data: {
                         agentId: target_agent_id,
                         role: "SYSTEM",

@@ -82,8 +82,7 @@ describe("ai-gateway tools", () => {
         { name: "anthropic", isDefault: true },
       ]);
 
-      const handler = registry.handlers.get("ai_list_providers")!;
-      const result = await handler({});
+      const result = await registry.call("ai_list_providers", {});
       const text = getText(result);
       const data = JSON.parse(text);
 
@@ -102,8 +101,7 @@ describe("ai-gateway tools", () => {
       mockGetDefault.mockResolvedValue(null);
       mockPrisma.aIProvider.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("ai_list_providers")!;
-      const result = await handler({});
+      const result = await registry.call("ai_list_providers", {});
       const data = JSON.parse(getText(result));
 
       expect(data.providers[0].source).toBe("env");
@@ -115,8 +113,7 @@ describe("ai-gateway tools", () => {
 
   describe("ai_list_models", () => {
     it("should list all models by default", async () => {
-      const handler = registry.handlers.get("ai_list_models")!;
-      const result = await handler({});
+      const result = await registry.call("ai_list_models", {});
       const data = JSON.parse(getText(result));
 
       expect(data.count).toBe(6);
@@ -129,8 +126,7 @@ describe("ai-gateway tools", () => {
     });
 
     it("should filter by provider", async () => {
-      const handler = registry.handlers.get("ai_list_models")!;
-      const result = await handler({ provider: "anthropic" });
+      const result = await registry.call("ai_list_models", { provider: "anthropic" });
       const data = JSON.parse(getText(result));
 
       expect(data.count).toBe(3);
@@ -140,8 +136,7 @@ describe("ai-gateway tools", () => {
     });
 
     it("should filter by capability", async () => {
-      const handler = registry.handlers.get("ai_list_models")!;
-      const result = await handler({ capability: "image-gen" });
+      const result = await registry.call("ai_list_models", { capability: "image-gen" });
       const data = JSON.parse(getText(result));
 
       expect(data.count).toBe(3);
@@ -151,8 +146,7 @@ describe("ai-gateway tools", () => {
     });
 
     it("should filter by both provider and capability", async () => {
-      const handler = registry.handlers.get("ai_list_models")!;
-      const result = await handler({
+      const result = await registry.call("ai_list_models", {
         provider: "google",
         capability: "chat",
       });
@@ -173,8 +167,7 @@ describe("ai-gateway tools", () => {
         usage: { input_tokens: 10, output_tokens: 20 },
       });
 
-      const handler = registry.handlers.get("ai_chat")!;
-      const result = await handler({ message: "Hi" });
+      const result = await registry.call("ai_chat", { message: "Hi" });
       const data = JSON.parse(getText(result));
 
       expect(data.provider).toBe("anthropic");
@@ -191,8 +184,7 @@ describe("ai-gateway tools", () => {
         },
       });
 
-      const handler = registry.handlers.get("ai_chat")!;
-      const result = await handler({
+      const result = await registry.call("ai_chat", {
         message: "Hi",
         model: "gemini-flash",
       });
@@ -212,8 +204,7 @@ describe("ai-gateway tools", () => {
         },
       });
 
-      const handler = registry.handlers.get("ai_chat")!;
-      const result = await handler({
+      const result = await registry.call("ai_chat", {
         message: "Test",
         provider: "google",
       });
@@ -228,8 +219,7 @@ describe("ai-gateway tools", () => {
         usage: { input_tokens: 8, output_tokens: 12 },
       });
 
-      const handler = registry.handlers.get("ai_chat")!;
-      await handler({
+      await registry.call("ai_chat", {
         message: "Hi",
         system_prompt: "You are a pirate",
       });
@@ -245,8 +235,7 @@ describe("ai-gateway tools", () => {
         usageMetadata: { promptTokenCount: 4, candidatesTokenCount: 6 },
       });
 
-      const handler = registry.handlers.get("ai_chat")!;
-      await handler({
+      await registry.call("ai_chat", {
         message: "Hi",
         provider: "google",
         system_prompt: "Be concise",
@@ -264,8 +253,7 @@ describe("ai-gateway tools", () => {
     it("should handle Anthropic API errors", async () => {
       mockClaudeCreate.mockRejectedValue(new Error("rate limit exceeded"));
 
-      const handler = registry.handlers.get("ai_chat")!;
-      const result = await handler({ message: "Fail" });
+      const result = await registry.call("ai_chat", { message: "Fail" });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("rate limit");
@@ -277,8 +265,7 @@ describe("ai-gateway tools", () => {
         usage: { input_tokens: 5, output_tokens: 10 },
       });
 
-      const handler = registry.handlers.get("ai_chat")!;
-      const result = await handler({ message: "Hi", model: "opus" });
+      const result = await registry.call("ai_chat", { message: "Hi", model: "opus" });
       const data = JSON.parse(getText(result));
 
       expect(data.model).toBe("claude-opus-4-6");
@@ -293,8 +280,7 @@ describe("ai-gateway tools", () => {
         usage: { input_tokens: 5, output_tokens: 10 },
       });
 
-      const handler = registry.handlers.get("ai_chat")!;
-      await handler({ message: "Hi", temperature: 0.5 });
+      await registry.call("ai_chat", { message: "Hi", temperature: 0.5 });
 
       expect(mockClaudeCreate).toHaveBeenCalledWith(
         expect.objectContaining({ temperature: 0.5 }),
@@ -307,8 +293,7 @@ describe("ai-gateway tools", () => {
         usageMetadata: { promptTokenCount: 3, candidatesTokenCount: 5 },
       });
 
-      const handler = registry.handlers.get("ai_chat")!;
-      await handler({ message: "Hi", provider: "google", temperature: 1.0 });
+      await registry.call("ai_chat", { message: "Hi", provider: "google", temperature: 1.0 });
 
       expect(mockGeminiGenerate).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -323,8 +308,7 @@ describe("ai-gateway tools", () => {
         usageMetadata: { promptTokenCount: 3, candidatesTokenCount: 5 },
       });
 
-      const handler = registry.handlers.get("ai_chat")!;
-      const result = await handler({ message: "Hi", provider: "google" });
+      const result = await registry.call("ai_chat", { message: "Hi", provider: "google" });
       const data = JSON.parse(getText(result));
       expect(data.response).toBe("");
     });
@@ -335,8 +319,7 @@ describe("ai-gateway tools", () => {
         usageMetadata: undefined,
       });
 
-      const handler = registry.handlers.get("ai_chat")!;
-      const result = await handler({
+      const result = await registry.call("ai_chat", {
         message: "Hi",
         provider: "google",
       });
@@ -353,8 +336,7 @@ describe("ai-gateway tools", () => {
     it("should upsert a provider", async () => {
       mockPrisma.aIProvider.upsert.mockResolvedValue({});
 
-      const handler = registry.handlers.get("ai_manage_provider")!;
-      const result = await handler({
+      const result = await registry.call("ai_manage_provider", {
         action: "upsert",
         provider_id: "anthropic",
         token: "new-token",
@@ -369,8 +351,7 @@ describe("ai-gateway tools", () => {
     it("should upsert a provider with config", async () => {
       mockPrisma.aIProvider.upsert.mockResolvedValue({});
 
-      const handler = registry.handlers.get("ai_manage_provider")!;
-      const result = await handler({
+      const result = await registry.call("ai_manage_provider", {
         action: "upsert",
         provider_id: "anthropic",
         token: "new-token",
@@ -393,8 +374,7 @@ describe("ai-gateway tools", () => {
     it("should delete a provider", async () => {
       mockPrisma.aIProvider.delete.mockResolvedValue({});
 
-      const handler = registry.handlers.get("ai_manage_provider")!;
-      const result = await handler({
+      const result = await registry.call("ai_manage_provider", {
         action: "delete",
         provider_id: "google",
       });
@@ -409,8 +389,7 @@ describe("ai-gateway tools", () => {
       mockPrisma.aIProvider.updateMany.mockResolvedValue({});
       mockPrisma.aIProvider.update.mockResolvedValue({});
 
-      const handler = registry.handlers.get("ai_manage_provider")!;
-      const result = await handler({
+      const result = await registry.call("ai_manage_provider", {
         action: "set_default",
         provider_id: "google",
       });
@@ -429,8 +408,7 @@ describe("ai-gateway tools", () => {
     it("should require admin role", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
 
-      const handler = registry.handlers.get("ai_manage_provider")!;
-      const result = await handler({
+      const result = await registry.call("ai_manage_provider", {
         action: "upsert",
         provider_id: "anthropic",
         token: "t",
@@ -441,16 +419,14 @@ describe("ai-gateway tools", () => {
     });
 
     it("should require provider_id for upsert", async () => {
-      const handler = registry.handlers.get("ai_manage_provider")!;
-      const result = await handler({ action: "upsert" });
+      const result = await registry.call("ai_manage_provider", { action: "upsert" });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("provider_id is required");
     });
 
     it("should require provider_id for delete", async () => {
-      const handler = registry.handlers.get("ai_manage_provider")!;
-      const result = await handler({ action: "delete" });
+      const result = await registry.call("ai_manage_provider", { action: "delete" });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("provider_id is required");
@@ -459,8 +435,7 @@ describe("ai-gateway tools", () => {
     it("should upsert a provider without token", async () => {
       mockPrisma.aIProvider.upsert.mockResolvedValue({});
 
-      const handler = registry.handlers.get("ai_manage_provider")!;
-      const result = await handler({
+      const result = await registry.call("ai_manage_provider", {
         action: "upsert",
         provider_id: "anthropic",
         config: { baseUrl: "https://custom.api.com" },
@@ -477,8 +452,7 @@ describe("ai-gateway tools", () => {
     });
 
     it("should require provider_id for set_default", async () => {
-      const handler = registry.handlers.get("ai_manage_provider")!;
-      const result = await handler({ action: "set_default" });
+      const result = await registry.call("ai_manage_provider", { action: "set_default" });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("provider_id is required");
@@ -513,8 +487,7 @@ describe("ai-gateway tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("ai_get_usage")!;
-      const result = await handler({ days: 7 });
+      const result = await registry.call("ai_get_usage", { days: 7 });
       const data = JSON.parse(getText(result));
 
       expect(data.totalInvocations).toBe(3);
@@ -535,8 +508,7 @@ describe("ai-gateway tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("ai_get_usage")!;
-      const result = await handler({ days: 7 });
+      const result = await registry.call("ai_get_usage", { days: 7 });
       const data = JSON.parse(getText(result));
 
       expect(data.totalInvocations).toBe(1);
@@ -546,8 +518,7 @@ describe("ai-gateway tools", () => {
     it("should filter by provider when specified", async () => {
       mockPrisma.toolInvocation.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("ai_get_usage")!;
-      await handler({ days: 7, provider: "anthropic" });
+      await registry.call("ai_get_usage", { days: 7, provider: "anthropic" });
 
       expect(mockPrisma.toolInvocation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -564,8 +535,7 @@ describe("ai-gateway tools", () => {
     it("should handle empty invocations", async () => {
       mockPrisma.toolInvocation.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("ai_get_usage")!;
-      const result = await handler({});
+      const result = await registry.call("ai_get_usage", {});
       const data = JSON.parse(getText(result));
 
       expect(data.totalInvocations).toBe(0);

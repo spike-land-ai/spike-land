@@ -23,9 +23,8 @@ describe("filesystem tools", () => {
 
   describe("internal helpers", () => {
     it("should return filesystem count", async () => {
-      const handler = registry.handlers.get("fs_write")!;
-      await handler({ codespace_id: "cs-1", file_path: "/a.ts", content: "a" });
-      await handler({ codespace_id: "cs-2", file_path: "/b.ts", content: "b" });
+      await registry.call("fs_write", { codespace_id: "cs-1", file_path: "/a.ts", content: "a" });
+      await registry.call("fs_write", { codespace_id: "cs-2", file_path: "/b.ts", content: "b" });
       expect(_getFilesystemCount()).toBe(2);
     });
   });
@@ -48,8 +47,7 @@ describe("filesystem tools", () => {
 
   describe("codespace_id validation", () => {
     it("should return error on invalid codespace ID with special chars", async () => {
-      const handler = registry.handlers.get("fs_write")!;
-      const result = await handler({
+      const result = await registry.call("fs_write", {
         codespace_id: "bad id!@#",
         file_path: "/src/App.tsx",
         content: "hello",
@@ -59,8 +57,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return error on codespace ID with spaces", async () => {
-      const handler = registry.handlers.get("fs_read")!;
-      const result = await handler({
+      const result = await registry.call("fs_read", {
         codespace_id: "bad space",
         file_path: "/src/App.tsx",
       });
@@ -69,8 +66,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return error on codespace ID with path traversal", async () => {
-      const handler = registry.handlers.get("fs_rm")!;
-      const result = await handler({
+      const result = await registry.call("fs_rm", {
         codespace_id: "../../etc/passwd",
         file_path: "/src/App.tsx",
       });
@@ -83,8 +79,7 @@ describe("filesystem tools", () => {
 
   describe("fs_write", () => {
     it("should create a new file", async () => {
-      const handler = registry.handlers.get("fs_write")!;
-      const result = await handler({
+      const result = await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content: "export default () => <div>Hello</div>",
@@ -95,8 +90,7 @@ describe("filesystem tools", () => {
     });
 
     it("should update an existing file", async () => {
-      const handler = registry.handlers.get("fs_write")!;
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content: "original",
@@ -111,9 +105,8 @@ describe("filesystem tools", () => {
     });
 
     it("should reject files exceeding 1MB", async () => {
-      const handler = registry.handlers.get("fs_write")!;
       const largeContent = "x".repeat(1_048_577);
-      const result = await handler({
+      const result = await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/big.ts",
         content: largeContent,
@@ -123,10 +116,9 @@ describe("filesystem tools", () => {
     });
 
     it("should reject when file count limit (100) is reached", async () => {
-      const handler = registry.handlers.get("fs_write")!;
       // Create 100 files
       for (let i = 0; i < 100; i++) {
-        await handler({
+        await registry.call("fs_write", {
           codespace_id: "test-app",
           file_path: `/src/file${i}.ts`,
           content: "content",
@@ -143,9 +135,8 @@ describe("filesystem tools", () => {
     });
 
     it("should allow updating existing file when at file count limit", async () => {
-      const handler = registry.handlers.get("fs_write")!;
       for (let i = 0; i < 100; i++) {
-        await handler({
+        await registry.call("fs_write", {
           codespace_id: "test-app",
           file_path: `/src/file${i}.ts`,
           content: "content",
@@ -162,11 +153,10 @@ describe("filesystem tools", () => {
     });
 
     it("should reject when total size limit (50MB) is exceeded", async () => {
-      const handler = registry.handlers.get("fs_write")!;
       // Write a file close to 50MB
       const bigContent = "x".repeat(1_048_000); // ~1MB each
       for (let i = 0; i < 50; i++) {
-        await handler({
+        await registry.call("fs_write", {
           codespace_id: "test-app",
           file_path: `/src/file${i}.ts`,
           content: bigContent,
@@ -187,15 +177,12 @@ describe("filesystem tools", () => {
 
   describe("fs_read", () => {
     it("should read file with line numbers", async () => {
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content: "line1\nline2\nline3",
       });
-
-      const readHandler = registry.handlers.get("fs_read")!;
-      const result = await readHandler({
+      const result = await registry.call("fs_read", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
       });
@@ -207,8 +194,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return error for file not found", async () => {
-      const handler = registry.handlers.get("fs_read")!;
-      const result = await handler({
+      const result = await registry.call("fs_read", {
         codespace_id: "test-app",
         file_path: "/src/missing.ts",
       });
@@ -217,8 +203,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return error for empty codespace", async () => {
-      const handler = registry.handlers.get("fs_read")!;
-      const result = await handler({
+      const result = await registry.call("fs_read", {
         codespace_id: "empty-app",
         file_path: "/src/App.tsx",
       });
@@ -227,15 +212,12 @@ describe("filesystem tools", () => {
     });
 
     it("should support offset and limit", async () => {
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content: "line1\nline2\nline3\nline4\nline5",
       });
-
-      const readHandler = registry.handlers.get("fs_read")!;
-      const result = await readHandler({
+      const result = await registry.call("fs_read", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         offset: 2,
@@ -253,15 +235,12 @@ describe("filesystem tools", () => {
 
   describe("fs_edit", () => {
     it("should replace text and return diff", async () => {
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content: "const greeting = 'hello';",
       });
-
-      const editHandler = registry.handlers.get("fs_edit")!;
-      const result = await editHandler({
+      const result = await registry.call("fs_edit", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         old_text: "'hello'",
@@ -275,15 +254,12 @@ describe("filesystem tools", () => {
     });
 
     it("should return error when old_text not found", async () => {
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content: "const x = 1;",
       });
-
-      const editHandler = registry.handlers.get("fs_edit")!;
-      const result = await editHandler({
+      const result = await registry.call("fs_edit", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         old_text: "not here",
@@ -294,15 +270,12 @@ describe("filesystem tools", () => {
     });
 
     it("should return error when old_text appears multiple times", async () => {
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content: "hello world hello",
       });
-
-      const editHandler = registry.handlers.get("fs_edit")!;
-      const result = await editHandler({
+      const result = await registry.call("fs_edit", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         old_text: "hello",
@@ -313,8 +286,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return error for file not found", async () => {
-      const editHandler = registry.handlers.get("fs_edit")!;
-      const result = await editHandler({
+      const result = await registry.call("fs_edit", {
         codespace_id: "test-app",
         file_path: "/src/missing.ts",
         old_text: "old",
@@ -329,8 +301,7 @@ describe("filesystem tools", () => {
 
   describe("fs_glob", () => {
     beforeEach(async () => {
-      const handler = registry.handlers.get("fs_write")!;
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content: "app",
@@ -358,8 +329,7 @@ describe("filesystem tools", () => {
     });
 
     it("should match deeply nested files with **/*.ts", async () => {
-      const handler = registry.handlers.get("fs_glob")!;
-      const result = await handler({
+      const result = await registry.call("fs_glob", {
         codespace_id: "test-app",
         pattern: "**/*.ts",
       });
@@ -370,8 +340,7 @@ describe("filesystem tools", () => {
     });
 
     it("should match with **/ prefix", async () => {
-      const handler = registry.handlers.get("fs_glob")!;
-      const result = await handler({
+      const result = await registry.call("fs_glob", {
         codespace_id: "test-app",
         pattern: "**/math.ts",
       });
@@ -379,8 +348,7 @@ describe("filesystem tools", () => {
     });
 
     it("should match with ? wildcard", async () => {
-      const handler = registry.handlers.get("fs_glob")!;
-      const result = await handler({
+      const result = await registry.call("fs_glob", {
         codespace_id: "test-app",
         pattern: "/src/utils/mat?.ts",
       });
@@ -388,8 +356,7 @@ describe("filesystem tools", () => {
     });
 
     it("should match only root level with /*.md", async () => {
-      const handler = registry.handlers.get("fs_glob")!;
-      const result = await handler({
+      const result = await registry.call("fs_glob", {
         codespace_id: "test-app",
         pattern: "/*.md",
       });
@@ -399,8 +366,7 @@ describe("filesystem tools", () => {
     });
 
     it("should match with ** at end of pattern (not followed by /)", async () => {
-      const handler = registry.handlers.get("fs_glob")!;
-      const result = await handler({
+      const result = await registry.call("fs_glob", {
         codespace_id: "test-app",
         pattern: "/src/**",
       });
@@ -410,8 +376,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return no matches message", async () => {
-      const handler = registry.handlers.get("fs_glob")!;
-      const result = await handler({
+      const result = await registry.call("fs_glob", {
         codespace_id: "test-app",
         pattern: "**/*.json",
       });
@@ -419,8 +384,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return empty codespace message", async () => {
-      const handler = registry.handlers.get("fs_glob")!;
-      const result = await handler({
+      const result = await registry.call("fs_glob", {
         codespace_id: "empty-app",
         pattern: "**/*",
       });
@@ -432,8 +396,7 @@ describe("filesystem tools", () => {
 
   describe("fs_grep", () => {
     beforeEach(async () => {
-      const handler = registry.handlers.get("fs_write")!;
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content:
@@ -448,8 +411,7 @@ describe("filesystem tools", () => {
     });
 
     it("should find basic string matches", async () => {
-      const handler = registry.handlers.get("fs_grep")!;
-      const result = await handler({
+      const result = await registry.call("fs_grep", {
         codespace_id: "test-app",
         pattern: "export default",
       });
@@ -459,8 +421,7 @@ describe("filesystem tools", () => {
     });
 
     it("should support regex search", async () => {
-      const handler = registry.handlers.get("fs_grep")!;
-      const result = await handler({
+      const result = await registry.call("fs_grep", {
         codespace_id: "test-app",
         pattern: "function \\w+\\(",
         is_regex: true,
@@ -471,8 +432,7 @@ describe("filesystem tools", () => {
     });
 
     it("should show context lines", async () => {
-      const handler = registry.handlers.get("fs_grep")!;
-      const result = await handler({
+      const result = await registry.call("fs_grep", {
         codespace_id: "test-app",
         pattern: "return a + b",
         context: 1,
@@ -487,8 +447,7 @@ describe("filesystem tools", () => {
     });
 
     it("should filter by glob pattern", async () => {
-      const handler = registry.handlers.get("fs_grep")!;
-      const result = await handler({
+      const result = await registry.call("fs_grep", {
         codespace_id: "test-app",
         pattern: "export",
         glob: "**/*.ts",
@@ -499,8 +458,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return no matches message", async () => {
-      const handler = registry.handlers.get("fs_grep")!;
-      const result = await handler({
+      const result = await registry.call("fs_grep", {
         codespace_id: "test-app",
         pattern: "nonexistent_string_xyz",
       });
@@ -508,8 +466,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return empty codespace message", async () => {
-      const handler = registry.handlers.get("fs_grep")!;
-      const result = await handler({
+      const result = await registry.call("fs_grep", {
         codespace_id: "empty-app",
         pattern: "anything",
       });
@@ -517,8 +474,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return error for invalid regex", async () => {
-      const handler = registry.handlers.get("fs_grep")!;
-      const result = await handler({
+      const result = await registry.call("fs_grep", {
         codespace_id: "test-app",
         pattern: "[invalid",
         is_regex: true,
@@ -532,8 +488,7 @@ describe("filesystem tools", () => {
 
   describe("fs_ls", () => {
     beforeEach(async () => {
-      const handler = registry.handlers.get("fs_write")!;
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content: "app",
@@ -551,30 +506,26 @@ describe("filesystem tools", () => {
     });
 
     it("should list root directory entries", async () => {
-      const handler = registry.handlers.get("fs_ls")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("fs_ls", { codespace_id: "test-app" });
       const text = getText(result);
       expect(text).toContain("src/");
       expect(text).toContain("package.json");
     });
 
     it("should list subdirectory entries", async () => {
-      const handler = registry.handlers.get("fs_ls")!;
-      const result = await handler({ codespace_id: "test-app", path: "/src" });
+      const result = await registry.call("fs_ls", { codespace_id: "test-app", path: "/src" });
       const text = getText(result);
       expect(text).toContain("App.tsx");
       expect(text).toContain("utils/");
     });
 
     it("should return empty codespace message", async () => {
-      const handler = registry.handlers.get("fs_ls")!;
-      const result = await handler({ codespace_id: "empty-app" });
+      const result = await registry.call("fs_ls", { codespace_id: "empty-app" });
       expect(getText(result)).toContain("No files in codespace");
     });
 
     it("should return no entries for nonexistent directory", async () => {
-      const handler = registry.handlers.get("fs_ls")!;
-      const result = await handler({
+      const result = await registry.call("fs_ls", {
         codespace_id: "test-app",
         path: "/nonexistent",
       });
@@ -586,15 +537,12 @@ describe("filesystem tools", () => {
 
   describe("fs_rm", () => {
     it("should remove a file", async () => {
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/temp.ts",
         content: "temp",
       });
-
-      const rmHandler = registry.handlers.get("fs_rm")!;
-      const result = await rmHandler({
+      const result = await registry.call("fs_rm", {
         codespace_id: "test-app",
         file_path: "/src/temp.ts",
       });
@@ -604,8 +552,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return error for file not found", async () => {
-      const handler = registry.handlers.get("fs_rm")!;
-      const result = await handler({
+      const result = await registry.call("fs_rm", {
         codespace_id: "test-app",
         file_path: "/src/missing.ts",
       });
@@ -614,15 +561,12 @@ describe("filesystem tools", () => {
     });
 
     it("should protect entry point /src/App.tsx", async () => {
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content: "app",
       });
-
-      const rmHandler = registry.handlers.get("fs_rm")!;
-      const result = await rmHandler({
+      const result = await registry.call("fs_rm", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
       });
@@ -636,8 +580,7 @@ describe("filesystem tools", () => {
 
   describe("fs_intent", () => {
     beforeEach(async () => {
-      const handler = registry.handlers.get("fs_write")!;
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content:
@@ -661,8 +604,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return relevant files based on keywords", async () => {
-      const handler = registry.handlers.get("fs_intent")!;
-      const result = await handler({
+      const result = await registry.call("fs_intent", {
         codespace_id: "test-app",
         mission: "fix the button component",
       });
@@ -672,8 +614,7 @@ describe("filesystem tools", () => {
     });
 
     it("should boost entry point score", async () => {
-      const handler = registry.handlers.get("fs_intent")!;
-      const result = await handler({
+      const result = await registry.call("fs_intent", {
         codespace_id: "test-app",
         mission: "review the app",
       });
@@ -683,8 +624,7 @@ describe("filesystem tools", () => {
     });
 
     it("should exclude test files when include_tests is false", async () => {
-      const handler = registry.handlers.get("fs_intent")!;
-      const result = await handler({
+      const result = await registry.call("fs_intent", {
         codespace_id: "test-app",
         mission: "fix the button component",
         include_tests: false,
@@ -695,8 +635,7 @@ describe("filesystem tools", () => {
     });
 
     it("should include and boost test files when include_tests is true", async () => {
-      const handler = registry.handlers.get("fs_intent")!;
-      const result = await handler({
+      const result = await registry.call("fs_intent", {
         codespace_id: "test-app",
         mission: "fix the button component",
         include_tests: true,
@@ -707,8 +646,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return empty codespace message", async () => {
-      const handler = registry.handlers.get("fs_intent")!;
-      const result = await handler({
+      const result = await registry.call("fs_intent", {
         codespace_id: "empty-app",
         mission: "build something",
       });
@@ -717,8 +655,7 @@ describe("filesystem tools", () => {
     });
 
     it("should return no matching files message", async () => {
-      const handler = registry.handlers.get("fs_intent")!;
-      const result = await handler({
+      const result = await registry.call("fs_intent", {
         codespace_id: "test-app",
         mission: "zz qq xx",
       });
@@ -733,15 +670,13 @@ describe("filesystem tools", () => {
 
   describe("fs_intent no matching files", () => {
     it("should return no matching files when nothing scores", async () => {
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "nomatch-app",
         file_path: "/data/config.json",
         content: "{\"key\": \"value\"}",
       });
 
-      const handler = registry.handlers.get("fs_intent")!;
-      const result = await handler({
+      const result = await registry.call("fs_intent", {
         codespace_id: "nomatch-app",
         mission: "zz qq xx",
       });
@@ -756,15 +691,12 @@ describe("filesystem tools", () => {
   describe("round-trip", () => {
     it("should read back what was written (with line numbers)", async () => {
       const content = "line 1\nline 2\nline 3";
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/hello.ts",
         content,
       });
-
-      const readHandler = registry.handlers.get("fs_read")!;
-      const result = await readHandler({
+      const result = await registry.call("fs_read", {
         codespace_id: "test-app",
         file_path: "/src/hello.ts",
       });
@@ -791,8 +723,7 @@ describe("filesystem tools", () => {
     it("should evict filesystem after TTL expires", async () => {
       vi.useFakeTimers();
 
-      const handler = registry.handlers.get("fs_write")!;
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "ttl-app",
         file_path: "/src/App.tsx",
         content: "hello",
@@ -803,8 +734,7 @@ describe("filesystem tools", () => {
       vi.advanceTimersByTime(_getDefaultTtlMs() + 1);
 
       // Filesystem should be evicted
-      const readHandler = registry.handlers.get("fs_read")!;
-      const result = await readHandler({
+      const result = await registry.call("fs_read", {
         codespace_id: "ttl-app",
         file_path: "/src/App.tsx",
       });
@@ -814,9 +744,7 @@ describe("filesystem tools", () => {
 
     it("should reset TTL on access", async () => {
       vi.useFakeTimers();
-
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "refresh-app",
         file_path: "/src/App.tsx",
         content: "hello",
@@ -826,8 +754,7 @@ describe("filesystem tools", () => {
       vi.advanceTimersByTime(_getDefaultTtlMs() / 2);
 
       // Access the filesystem (this should reset the TTL)
-      const readHandler = registry.handlers.get("fs_read")!;
-      const readResult = await readHandler({
+      const readResult = await registry.call("fs_read", {
         codespace_id: "refresh-app",
         file_path: "/src/App.tsx",
       });
@@ -836,7 +763,7 @@ describe("filesystem tools", () => {
       // Advance another half TTL -- should NOT be evicted yet
       vi.advanceTimersByTime(_getDefaultTtlMs() / 2);
 
-      const readResult2 = await readHandler({
+      const readResult2 = await registry.call("fs_read", {
         codespace_id: "refresh-app",
         file_path: "/src/App.tsx",
       });
@@ -847,8 +774,7 @@ describe("filesystem tools", () => {
     it("should clean up timers on _resetFilesystems", async () => {
       vi.useFakeTimers();
 
-      const handler = registry.handlers.get("fs_write")!;
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "cleanup-app",
         file_path: "/src/App.tsx",
         content: "cleanup",
@@ -879,15 +805,12 @@ describe("filesystem tools", () => {
 
   describe("path normalization", () => {
     it("should normalize paths without leading slash", async () => {
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "src/App.tsx",
         content: "normalized",
       });
-
-      const readHandler = registry.handlers.get("fs_read")!;
-      const result = await readHandler({
+      const result = await registry.call("fs_read", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
       });
@@ -896,15 +819,12 @@ describe("filesystem tools", () => {
     });
 
     it("should read file written without leading slash using slash path", async () => {
-      const writeHandler = registry.handlers.get("fs_write")!;
-      await writeHandler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "src/utils.ts",
         content: "util content",
       });
-
-      const readHandler = registry.handlers.get("fs_read")!;
-      const result = await readHandler({
+      const result = await registry.call("fs_read", {
         codespace_id: "test-app",
         file_path: "src/utils.ts",
       });

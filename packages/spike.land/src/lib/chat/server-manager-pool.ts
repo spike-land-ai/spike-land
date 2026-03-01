@@ -82,7 +82,7 @@ export async function getServerManager(
 
   // In-process path: Docker, production, or explicit opt-in
   if (shouldUseInProcessTools()) {
-    const provider = new InProcessToolProvider(userId);
+    const provider = await InProcessToolProvider.create(userId);
     const entry: PoolEntry = { provider, lastUsed: Date.now() };
     pool.set(userId, entry);
     startCleanupTimer();
@@ -102,7 +102,7 @@ export async function getServerManager(
         error: err instanceof Error ? err.message : String(err),
       });
       // Replace with in-process provider
-      entry.provider = new InProcessToolProvider(userId);
+      entry.provider = await InProcessToolProvider.create(userId);
     }
   })();
 

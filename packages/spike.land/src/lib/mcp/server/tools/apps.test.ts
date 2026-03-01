@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock prisma
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   app: {
     findMany: vi.fn(),
   },
@@ -11,7 +12,8 @@ const mockPrisma = {
   appCodeVersion: {
     findMany: vi.fn(),
   },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({
   default: mockPrisma,
@@ -72,8 +74,7 @@ describe("apps tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("apps_create")!;
-      const result = await handler({
+      const result = await registry.call("apps_create", {
         prompt: "Build a todo app",
       });
 
@@ -99,8 +100,7 @@ describe("apps tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("apps_create")!;
-      await handler({
+      await registry.call("apps_create", {
         prompt: "Build a dashboard",
         codespace_id: "custom-slug",
         image_ids: ["img-1"],
@@ -121,8 +121,7 @@ describe("apps tools", () => {
         text: () => Promise.resolve(JSON.stringify({ error: "Name taken" })),
       });
 
-      const handler = registry.handlers.get("apps_create")!;
-      const result = await handler({ prompt: "test" });
+      const result = await registry.call("apps_create", { prompt: "test" });
 
       expect(result).toEqual(
         expect.objectContaining({ isError: true }),
@@ -149,8 +148,7 @@ describe("apps tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("apps_list")!;
-      const result = await handler({ limit: 20 });
+      const result = await registry.call("apps_list", { limit: 20 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -163,8 +161,7 @@ describe("apps tools", () => {
     it("should show empty message when no apps", async () => {
       mockPrisma.app.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("apps_list")!;
-      const result = await handler({ limit: 20 });
+      const result = await registry.call("apps_list", { limit: 20 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -175,8 +172,7 @@ describe("apps tools", () => {
     it("should filter by status when provided", async () => {
       mockPrisma.app.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("apps_list")!;
-      await handler({ status: "LIVE", limit: 10 });
+      await registry.call("apps_list", { status: "LIVE", limit: 10 });
 
       expect(mockPrisma.app.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -192,8 +188,7 @@ describe("apps tools", () => {
     it("should handle database errors", async () => {
       mockPrisma.app.findMany.mockRejectedValue(new Error("DB error"));
 
-      const handler = registry.handlers.get("apps_list")!;
-      const result = await handler({ limit: 20 });
+      const result = await registry.call("apps_list", { limit: 20 });
 
       expect(result).toEqual(
         expect.objectContaining({ isError: true }),
@@ -215,8 +210,7 @@ describe("apps tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("apps_list")!;
-      const result = await handler({ limit: 20 });
+      const result = await registry.call("apps_list", { limit: 20 });
 
       const text = getText(result);
       expect(text).toContain("ID: `slug-only`");
@@ -237,8 +231,7 @@ describe("apps tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("apps_list")!;
-      const result = await handler({ limit: 20 });
+      const result = await registry.call("apps_list", { limit: 20 });
 
       const text = getText(result);
       expect(text).toContain("ID: `app-fallback-id`");
@@ -265,8 +258,7 @@ describe("apps tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("apps_get")!;
-      const result = await handler({ app_id: "my-app" });
+      const result = await registry.call("apps_get", { app_id: "my-app" });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -282,8 +274,7 @@ describe("apps tools", () => {
         text: () => Promise.resolve(JSON.stringify({ error: "App not found" })),
       });
 
-      const handler = registry.handlers.get("apps_get")!;
-      const result = await handler({ app_id: "nonexistent" });
+      const result = await registry.call("apps_get", { app_id: "nonexistent" });
 
       expect(result).toEqual(
         expect.objectContaining({ isError: true }),
@@ -309,8 +300,7 @@ describe("apps tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("apps_get")!;
-      const result = await handler({ app_id: "app-no-slug" });
+      const result = await registry.call("apps_get", { app_id: "app-no-slug" });
 
       const text = getText(result);
       expect(text).toContain("Slug:** \u2014");
@@ -351,8 +341,7 @@ describe("apps tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("apps_get")!;
-      const result = await handler({ app_id: "full-app" });
+      const result = await registry.call("apps_get", { app_id: "full-app" });
 
       const text = getText(result);
       expect(text).toContain("Description:** A fully-featured app");
@@ -382,8 +371,7 @@ describe("apps tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("apps_chat")!;
-      const result = await handler({
+      const result = await registry.call("apps_chat", {
         app_id: "my-app",
         message: "Add dark mode",
       });
@@ -406,8 +394,7 @@ describe("apps tools", () => {
           }),
       });
 
-      const handler = registry.handlers.get("apps_chat")!;
-      await handler({
+      await registry.call("apps_chat", {
         app_id: "my-app",
         message: "Use this design",
         image_ids: ["img-1"],
@@ -442,8 +429,7 @@ describe("apps tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("apps_get_messages")!;
-      const result = await handler({ app_id: "my-app", limit: 20 });
+      const result = await registry.call("apps_get_messages", { app_id: "my-app", limit: 20 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -456,8 +442,7 @@ describe("apps tools", () => {
     it("should return error when app not found", async () => {
       mockFindAppByIdentifierSimple.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("apps_get_messages")!;
-      const result = await handler({ app_id: "nonexistent", limit: 20 });
+      const result = await registry.call("apps_get_messages", { app_id: "nonexistent", limit: 20 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -471,8 +456,7 @@ describe("apps tools", () => {
       });
       mockPrisma.appMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("apps_get_messages")!;
-      const result = await handler({ app_id: "my-app", limit: 20 });
+      const result = await registry.call("apps_get_messages", { app_id: "my-app", limit: 20 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -494,8 +478,7 @@ describe("apps tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("apps_get_messages")!;
-      await handler({
+      await registry.call("apps_get_messages", {
         app_id: "my-app",
         cursor: "2025-01-01T00:00:00Z",
         limit: 20,
@@ -533,8 +516,7 @@ describe("apps tools", () => {
       ];
       mockPrisma.appMessage.findMany.mockResolvedValue(messages);
 
-      const handler = registry.handlers.get("apps_get_messages")!;
-      const result = await handler({ app_id: "my-app", limit: 2 });
+      const result = await registry.call("apps_get_messages", { app_id: "my-app", limit: 2 });
 
       expect(getText(result)).toContain("More messages available");
     });
@@ -555,8 +537,7 @@ describe("apps tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("apps_get_messages")!;
-      const result = await handler({ app_id: "my-app", limit: 20 });
+      const result = await registry.call("apps_get_messages", { app_id: "my-app", limit: 20 });
 
       const text = getText(result);
       expect(text).toContain("...");
@@ -571,8 +552,7 @@ describe("apps tools", () => {
         json: () => Promise.resolve({ success: true }),
       });
 
-      const handler = registry.handlers.get("apps_set_status")!;
-      const result = await handler({
+      const result = await registry.call("apps_set_status", {
         app_id: "my-app",
         status: "ARCHIVED",
       });
@@ -590,8 +570,7 @@ describe("apps tools", () => {
         json: () => Promise.resolve({ success: true }),
       });
 
-      const handler = registry.handlers.get("apps_set_status")!;
-      const result = await handler({
+      const result = await registry.call("apps_set_status", {
         app_id: "my-app",
         status: "PROMPTING",
       });
@@ -610,8 +589,7 @@ describe("apps tools", () => {
         json: () => Promise.resolve({ success: true }),
       });
 
-      const handler = registry.handlers.get("apps_bin")!;
-      const result = await handler({ app_id: "my-app" });
+      const result = await registry.call("apps_bin", { app_id: "my-app" });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -627,8 +605,7 @@ describe("apps tools", () => {
         json: () => Promise.resolve({ success: true }),
       });
 
-      const handler = registry.handlers.get("apps_restore")!;
-      const result = await handler({ app_id: "my-app" });
+      const result = await registry.call("apps_restore", { app_id: "my-app" });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -638,8 +615,7 @@ describe("apps tools", () => {
 
   describe("apps_delete_permanent", () => {
     it("should require confirm=true", async () => {
-      const handler = registry.handlers.get("apps_delete_permanent")!;
-      const result = await handler({ app_id: "my-app", confirm: false });
+      const result = await registry.call("apps_delete_permanent", { app_id: "my-app", confirm: false });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -652,8 +628,7 @@ describe("apps tools", () => {
         json: () => Promise.resolve({ success: true }),
       });
 
-      const handler = registry.handlers.get("apps_delete_permanent")!;
-      const result = await handler({ app_id: "my-app", confirm: true });
+      const result = await registry.call("apps_delete_permanent", { app_id: "my-app", confirm: true });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -676,8 +651,7 @@ describe("apps tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("apps_list_versions")!;
-      const result = await handler({ app_id: "my-app", limit: 10 });
+      const result = await registry.call("apps_list_versions", { app_id: "my-app", limit: 10 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -689,8 +663,7 @@ describe("apps tools", () => {
     it("should return error when app not found", async () => {
       mockFindAppByIdentifierSimple.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("apps_list_versions")!;
-      const result = await handler({ app_id: "nope", limit: 10 });
+      const result = await registry.call("apps_list_versions", { app_id: "nope", limit: 10 });
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -711,8 +684,7 @@ describe("apps tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("apps_list_versions")!;
-      const result = await handler({ app_id: "my-app", limit: 10 });
+      const result = await registry.call("apps_list_versions", { app_id: "my-app", limit: 10 });
 
       const text = getText(result);
       expect(text).toContain("xyz789ab");
@@ -726,8 +698,7 @@ describe("apps tools", () => {
       });
       mockPrisma.appCodeVersion.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("apps_list_versions")!;
-      const result = await handler({ app_id: "my-app", limit: 10 });
+      const result = await registry.call("apps_list_versions", { app_id: "my-app", limit: 10 });
 
       const text = getText(result);
       expect(text).toContain("No code versions yet");
@@ -746,8 +717,7 @@ describe("apps tools", () => {
           json: () => Promise.resolve({ success: true }),
         });
 
-      const handler = registry.handlers.get("apps_batch_status")!;
-      const result = await handler({
+      const result = await registry.call("apps_batch_status", {
         app_ids: ["app-1", "app-2"],
         status: "ARCHIVED",
       });
@@ -770,8 +740,7 @@ describe("apps tools", () => {
           text: () => Promise.resolve(JSON.stringify({ error: "App not found" })),
         });
 
-      const handler = registry.handlers.get("apps_batch_status")!;
-      const result = await handler({
+      const result = await registry.call("apps_batch_status", {
         app_ids: ["app-1", "app-2"],
         status: "ARCHIVED",
       });
@@ -791,8 +760,7 @@ describe("apps tools", () => {
         })
         .mockRejectedValueOnce("string error");
 
-      const handler = registry.handlers.get("apps_batch_status")!;
-      const result = await handler({
+      const result = await registry.call("apps_batch_status", {
         app_ids: ["app-1", "app-2"],
         status: "ARCHIVED",
       });
@@ -810,8 +778,7 @@ describe("apps tools", () => {
         json: () => Promise.resolve({ success: true }),
       });
 
-      const handler = registry.handlers.get("apps_clear_messages")!;
-      const result = await handler({ app_id: "my-app" });
+      const result = await registry.call("apps_clear_messages", { app_id: "my-app" });
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining("/api/apps/my-app/messages"),
@@ -829,8 +796,7 @@ describe("apps tools", () => {
         text: () => Promise.resolve(JSON.stringify({ error: "App not found" })),
       });
 
-      const handler = registry.handlers.get("apps_clear_messages")!;
-      const result = await handler({ app_id: "nonexistent" });
+      const result = await registry.call("apps_clear_messages", { app_id: "nonexistent" });
 
       expect(result).toEqual(expect.objectContaining({ isError: true }));
     });
@@ -838,8 +804,7 @@ describe("apps tools", () => {
 
   describe("apps_upload_images", () => {
     it("should return upload instructions with correct app_id and count", async () => {
-      const handler = registry.handlers.get("apps_upload_images")!;
-      const result = await handler({ app_id: "my-app", image_count: 3 });
+      const result = await registry.call("apps_upload_images", { app_id: "my-app", image_count: 3 });
 
       const text = getText(result);
       expect(text).toContain("Image Upload Instructions");
@@ -850,8 +815,7 @@ describe("apps tools", () => {
     });
 
     it("should include upload requirements", async () => {
-      const handler = registry.handlers.get("apps_upload_images")!;
-      const result = await handler({ app_id: "test-app", image_count: 1 });
+      const result = await registry.call("apps_upload_images", { app_id: "test-app", image_count: 1 });
 
       const text = getText(result);
       expect(text).toContain("Max per request: 5");
@@ -862,8 +826,7 @@ describe("apps tools", () => {
 
   describe("apps_generate_codespace_id", () => {
     it("should return a generated codespace ID in expected format", async () => {
-      const handler = registry.handlers.get("apps_generate_codespace_id")!;
-      const result = await handler({});
+      const result = await registry.call("apps_generate_codespace_id", {});
 
       const text = getText(result);
       expect(text).toContain("Generated Codespace ID");

@@ -33,7 +33,7 @@ export function registerAiGatewayTools(
         freeTool(userId)
             .tool("ai_list_providers", "List configured AI providers with availability status, default provider, and capabilities.", {})
             .meta({ category: "ai-gateway", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, ctx }) => {
                 
                 return safeToolCall("ai_list_providers", async () => {
                     const { isClaudeConfigured } = await import(
@@ -46,13 +46,11 @@ export function registerAiGatewayTools(
                         "@/lib/ai/ai-config-resolver"
                     );
 
-                    const prisma = (await import("@/lib/prisma")).default;
-
                     const [claudeReady, geminiReady, defaultProvider, dbProviders] = await Promise.all([
                         isClaudeConfigured(),
                         isGeminiConfigured(),
                         getDefaultAIProvider(),
-                        prisma.aIProvider.findMany({
+                        ctx.prisma.aIProvider.findMany({
                             select: { name: true, isDefault: true },
                         }),
                     ]);
@@ -104,7 +102,7 @@ export function registerAiGatewayTools(
                     .describe("Filter by capability, or 'all'."),
             })
             .meta({ category: "ai-gateway", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     provider = "all",
                     capability = "all",
@@ -169,7 +167,7 @@ export function registerAiGatewayTools(
                     .describe("Sampling temperature."),
             })
             .meta({ category: "ai-gateway", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const {
                     message,
                     provider,
@@ -288,7 +286,7 @@ export function registerAiGatewayTools(
                     .describe("Additional config JSON for upsert."),
             })
             .meta({ category: "ai-gateway", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     action,
                     provider_id,
@@ -297,8 +295,6 @@ export function registerAiGatewayTools(
                 } = input;
                 return safeToolCall("ai_manage_provider", async () => {
                     await requireAdminRole(userId);
-
-                    const prisma = (await import("@/lib/prisma")).default;
 
                     if (action === "upsert") {
                         if (!provider_id) {
@@ -322,7 +318,7 @@ export function registerAiGatewayTools(
                             updateData.config = config as Prisma.InputJsonValue;
                         }
 
-                        await prisma.aIProvider.upsert({
+                        await ctx.prisma.aIProvider.upsert({
                             where: { name: provider_id },
                             create: {
                                 name: provider_id,
@@ -357,7 +353,7 @@ export function registerAiGatewayTools(
                                 false,
                             );
                         }
-                        await prisma.aIProvider.delete({
+                        await ctx.prisma.aIProvider.delete({
                             where: { name: provider_id },
                         });
 
@@ -384,11 +380,11 @@ export function registerAiGatewayTools(
                         );
                     }
                     // Unset all defaults, then set the target
-                    await prisma.aIProvider.updateMany({
+                    await ctx.prisma.aIProvider.updateMany({
                         where: { isDefault: true },
                         data: { isDefault: false },
                     });
-                    await prisma.aIProvider.update({
+                    await ctx.prisma.aIProvider.update({
                         where: { name: provider_id },
                         data: { isDefault: true },
                     });
@@ -418,18 +414,17 @@ export function registerAiGatewayTools(
                     .describe("Filter by provider name."),
             })
             .meta({ category: "ai-gateway", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     days = 7,
                     provider,
                 } = input;
                 return safeToolCall("ai_get_usage", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
 
                     const since = new Date();
                     since.setDate(since.getDate() - days);
 
-                    const invocations = await prisma.toolInvocation.findMany({
+                    const invocations = await ctx.prisma.toolInvocation.findMany({
                         where: {
                             tool: { in: ["ai_chat", "chat_send_message"] },
                             createdAt: { gte: since },

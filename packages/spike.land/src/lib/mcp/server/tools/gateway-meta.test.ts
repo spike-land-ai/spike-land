@@ -14,11 +14,13 @@ vi.mock("../category-persistence", () => ({
 }));
 
 // Mock prisma for search_tools marketplace query
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   registeredTool: {
     findMany: vi.fn().mockResolvedValue([]),
   },
-};
+},
+}));
 vi.mock("@/lib/prisma", () => ({
   prisma: mockPrisma,
   default: mockPrisma,
@@ -121,16 +123,14 @@ describe("gateway-meta tools", () => {
         },
       ];
       registry._enabledTools = ["generate_image"];
-      const handler = registry.handlers.get("search_tools")!;
-      const result = await handler({ query: "image", limit: 10 });
+      const result = await registry.call("search_tools", { query: "image", limit: 10 });
       expect(getText(result)).toContain("generate_image");
       expect(getText(result)).toContain("now activated");
     });
 
     it("should return no results message", async () => {
       registry._searchResults = [];
-      const handler = registry.handlers.get("search_tools")!;
-      const result = await handler({ query: "nonexistent", limit: 10 });
+      const result = await registry.call("search_tools", { query: "nonexistent", limit: 10 });
       expect(getText(result)).toContain("No tools found");
     });
 
@@ -146,8 +146,7 @@ describe("gateway-meta tools", () => {
       ];
       // enableTools returns empty array (no newly enabled tools)
       registry._enabledTools = [];
-      const handler = registry.handlers.get("search_tools")!;
-      const result = await handler({ query: "image", limit: 10 });
+      const result = await registry.call("search_tools", { query: "image", limit: 10 });
       expect(getText(result)).toContain("generate_image");
       expect(getText(result)).not.toContain("now activated");
       expect(getText(result)).not.toContain("(inactive)");
@@ -168,8 +167,7 @@ describe("gateway-meta tools", () => {
         },
       ];
       registry._enabledTools = [];
-      const handler = registry.handlers.get("search_tools")!;
-      const result = await handler({ query: "old", limit: 10 });
+      const result = await registry.call("search_tools", { query: "old", limit: 10 });
       expect(getText(result)).toContain("(inactive)");
     });
 
@@ -185,8 +183,7 @@ describe("gateway-meta tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("search_tools")!;
-      const result = await handler({ query: "community", limit: 10 });
+      const result = await registry.call("search_tools", { query: "community", limit: 10 });
       expect(getText(result)).toContain("Marketplace");
       expect(getText(result)).toContain("community_tool");
       expect(getText(result)).toContain("Alice");
@@ -214,8 +211,7 @@ describe("gateway-meta tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("search_tools")!;
-      const result = await handler({ query: "tool", limit: 10 });
+      const result = await registry.call("search_tools", { query: "tool", limit: 10 });
       expect(getText(result)).toContain("platform tool(s)");
       expect(getText(result)).toContain("platform_tool");
       expect(getText(result)).toContain("Marketplace");
@@ -237,8 +233,7 @@ describe("gateway-meta tools", () => {
         new Error("DB down"),
       );
 
-      const handler = registry.handlers.get("search_tools")!;
-      const result = await handler({ query: "tool", limit: 10 });
+      const result = await registry.call("search_tools", { query: "tool", limit: 10 });
       // Should still show platform results even if DB fails
       expect(getText(result)).toContain("platform_tool");
       expect(getText(result)).not.toContain("Marketplace");
@@ -263,8 +258,7 @@ describe("gateway-meta tools", () => {
         },
       ];
       registry._enabledTools = ["generate_image"];
-      const handler = registry.handlers.get("search_tools")!;
-      const result = await handler({
+      const result = await registry.call("search_tools", {
         query: "make pictures of a sunset",
         limit: 10,
         semantic: true,
@@ -277,8 +271,7 @@ describe("gateway-meta tools", () => {
 
     it("should return no results message for semantic mode", async () => {
       registry._semanticResults = [];
-      const handler = registry.handlers.get("search_tools")!;
-      const result = await handler({
+      const result = await registry.call("search_tools", {
         query: "xyznonexistent",
         limit: 10,
         semantic: true,
@@ -299,8 +292,7 @@ describe("gateway-meta tools", () => {
         },
       ];
       registry._enabledTools = ["generate_image"];
-      const handler = registry.handlers.get("search_tools")!;
-      const result = await handler({
+      const result = await registry.call("search_tools", {
         query: "make pictures",
         limit: 10,
         semantic: true,
@@ -320,8 +312,7 @@ describe("gateway-meta tools", () => {
         },
       ];
       registry._enabledTools = ["generate_image"];
-      const handler = registry.handlers.get("search_tools")!;
-      const result = await handler({
+      const result = await registry.call("search_tools", {
         query: "image",
         limit: 10,
         semantic: false,
@@ -343,8 +334,7 @@ describe("gateway-meta tools", () => {
           tools: [],
         },
       ];
-      const handler = registry.handlers.get("list_categories")!;
-      const result = await handler({});
+      const result = await registry.call("list_categories", {});
       expect(getText(result)).toContain("image");
       expect(getText(result)).toContain("3 tools");
     });
@@ -368,8 +358,7 @@ describe("gateway-meta tools", () => {
           tools: [],
         },
       ];
-      const handler = registry.handlers.get("list_categories")!;
-      const result = await handler({});
+      const result = await registry.call("list_categories", {});
       expect(getText(result)).toContain("Workspace Required");
       expect(getText(result)).toContain("billing");
     });
@@ -393,8 +382,7 @@ describe("gateway-meta tools", () => {
           tools: [],
         },
       ];
-      const handler = registry.handlers.get("list_categories")!;
-      const result = await handler({});
+      const result = await registry.call("list_categories", {});
       expect(getText(result)).toContain("image");
       // gateway-meta is skipped in the free categories listing
       expect(getText(result)).not.toContain("- **gateway-meta**");
@@ -411,8 +399,7 @@ describe("gateway-meta tools", () => {
           tools: [],
         },
       ];
-      const handler = registry.handlers.get("list_categories")!;
-      const result = await handler({});
+      const result = await registry.call("list_categories", {});
       expect(getText(result)).toContain("(2/5 active)");
     });
 
@@ -427,16 +414,14 @@ describe("gateway-meta tools", () => {
           tools: [],
         },
       ];
-      const handler = registry.handlers.get("list_categories")!;
-      const result = await handler({});
+      const result = await registry.call("list_categories", {});
       expect(getText(result)).toContain("(3/4 active)");
     });
 
     it("should handle empty categories list", async () => {
       registry._categories = [];
       registry._toolCount = 0;
-      const handler = registry.handlers.get("list_categories")!;
-      const result = await handler({});
+      const result = await registry.call("list_categories", {});
       expect(getText(result)).toContain("0 total tools");
       expect(getText(result)).toContain("search_tools");
     });
@@ -445,16 +430,14 @@ describe("gateway-meta tools", () => {
   describe("enable_category", () => {
     it("should enable category tools", async () => {
       registry._enabledTools = ["generate_image", "modify_image"];
-      const handler = registry.handlers.get("enable_category")!;
-      const result = await handler({ category: "image" });
+      const result = await registry.call("enable_category", { category: "image" });
       expect(getText(result)).toContain("Activated 2 tool(s)");
     });
 
     it("should report already active", async () => {
       registry._enabledTools = [];
       registry._hasCategory = true;
-      const handler = registry.handlers.get("enable_category")!;
-      const result = await handler({ category: "image" });
+      const result = await registry.call("enable_category", { category: "image" });
       expect(getText(result)).toContain("already active");
     });
 
@@ -469,8 +452,7 @@ describe("gateway-meta tools", () => {
         enabledCount: 0,
         tools: [],
       }];
-      const handler = registry.handlers.get("enable_category")!;
-      const result = await handler({ category: "nonexistent" });
+      const result = await registry.call("enable_category", { category: "nonexistent" });
       expect(getText(result)).toContain("not found");
     });
   });
@@ -478,23 +460,20 @@ describe("gateway-meta tools", () => {
   describe("get_balance", () => {
     it("should return balance", async () => {
       mockGetBalance.mockResolvedValue(100);
-      const handler = registry.handlers.get("get_balance")!;
-      const result = await handler({});
+      const result = await registry.call("get_balance", {});
       expect(getText(result)).toContain("Token Balance:** 100");
     });
 
     it("should handle error", async () => {
       mockGetBalance.mockRejectedValue(new Error("DB down"));
-      const handler = registry.handlers.get("get_balance")!;
-      const result = await handler({});
+      const result = await registry.call("get_balance", {});
       expect(getText(result)).toContain("Error getting balance");
       expect(getText(result)).toContain("DB down");
     });
 
     it("should handle non-Error thrown value in get_balance", async () => {
       mockGetBalance.mockRejectedValue("string failure");
-      const handler = registry.handlers.get("get_balance")!;
-      const result = await handler({});
+      const result = await registry.call("get_balance", {});
       expect(getText(result)).toContain("Error getting balance");
       expect(getText(result)).toContain("Unknown error");
     });
@@ -509,8 +488,7 @@ describe("gateway-meta tools", () => {
       );
       // Override listCategories to be undefined to trigger the guard
       (brokenRegistry as unknown as Record<string, unknown>).listCategories = undefined;
-      const handler = brokenRegistry.handlers.get("list_categories")!;
-      const result = await handler({});
+      const result = await brokenRegistry.call("list_categories", {});
       expect(getText(result)).toContain("Internal error");
       expect(getText(result)).toContain("registry missing listCategories");
     });
@@ -527,8 +505,7 @@ describe("gateway-meta tools", () => {
       brokenRegistry._hasCategory = false;
       // Override listCategories to be undefined to trigger the guard
       (brokenRegistry as unknown as Record<string, unknown>).listCategories = undefined;
-      const handler = brokenRegistry.handlers.get("enable_category")!;
-      const result = await handler({ category: "nonexistent" });
+      const result = await brokenRegistry.call("enable_category", { category: "nonexistent" });
       expect(getText(result)).toContain("Internal error");
       expect(getText(result)).toContain("registry missing listCategories");
     });
@@ -542,8 +519,7 @@ describe("gateway-meta tools", () => {
         userId,
       );
       (brokenRegistry as unknown as Record<string, unknown>).listCategories = undefined;
-      const handler = brokenRegistry.handlers.get("get_status")!;
-      const result = await handler({});
+      const result = await brokenRegistry.call("get_status", {});
       expect(getText(result)).toContain("Internal error");
       expect(getText(result)).toContain("registry missing listCategories");
     });
@@ -569,8 +545,7 @@ describe("gateway-meta tools", () => {
           tools: [],
         },
       ];
-      const handler = registry.handlers.get("get_status")!;
-      const result = await handler({});
+      const result = await registry.call("get_status", {});
       expect(getText(result)).toContain("Platform Status");
       expect(getText(result)).toContain("Total Tools:** 10");
     });
@@ -594,8 +569,7 @@ describe("gateway-meta tools", () => {
           tools: [],
         },
       ];
-      const handler = registry.handlers.get("get_status")!;
-      const result = await handler({});
+      const result = await registry.call("get_status", {});
       expect(getText(result)).toContain("Platform Status");
       expect(getText(result)).not.toContain("**Active:**");
       expect(getText(result)).toContain("**Available:**");
@@ -612,8 +586,7 @@ describe("gateway-meta tools", () => {
           tools: [],
         },
       ];
-      const handler = registry.handlers.get("get_status")!;
-      const result = await handler({});
+      const result = await registry.call("get_status", {});
       expect(getText(result)).toContain("Platform Status");
       expect(getText(result)).toContain("**Active:**");
       expect(getText(result)).not.toContain("**Available:**");
@@ -630,8 +603,7 @@ describe("gateway-meta tools", () => {
           tools: [],
         },
       ];
-      const handler = registry.handlers.get("get_status")!;
-      const result = await handler({});
+      const result = await registry.call("get_status", {});
       // gateway-meta with enabledCount=0 is excluded from inactive list
       expect(getText(result)).not.toContain("**Available:**");
     });

@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---- Prisma mock ----
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   registeredTool: {
     count: vi.fn(),
     upsert: vi.fn(),
@@ -11,7 +12,8 @@ const mockPrisma = {
   },
   subscription: { findUnique: vi.fn() },
   vaultSecret: { findMany: vi.fn() },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 

@@ -99,12 +99,10 @@ export function registerAudioEffectsTools(
                     .describe("Optional effect-specific parameters (e.g. { wet: 0.5, decay: 1.2 })."),
             })
             .meta({ category: "audio-effects", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { track_id, effect_type, params } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const track = await prisma.audioTrack.findUnique({
+                const track = await ctx.prisma.audioTrack.findUnique({
                     where: { id: track_id },
                     include: {
                         project: { select: { id: true, name: true, userId: true } },
@@ -160,12 +158,10 @@ export function registerAudioEffectsTools(
                     .describe("Export quality level: low, medium, high, or lossless."),
             })
             .meta({ category: "audio-effects", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { project_id, format, quality } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const project = await prisma.audioMixerProject.findFirst({
+                const project = await ctx.prisma.audioMixerProject.findFirst({
                     where: { id: project_id, userId },
                     include: { _count: { select: { tracks: true } } },
                 });
@@ -218,12 +214,10 @@ export function registerAudioEffectsTools(
                     .describe("Number of waveform data points to return (default: 100)."),
             })
             .meta({ category: "audio-effects", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { track_id, resolution } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const track = await prisma.audioTrack.findUnique({
+                const track = await ctx.prisma.audioTrack.findUnique({
                     where: { id: track_id },
                     include: {
                         project: { select: { userId: true } },
@@ -284,12 +278,10 @@ export function registerAudioEffectsTools(
                     .describe("Optional name for the duplicated track."),
             })
             .meta({ category: "audio-effects", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { track_id, new_name } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const track = await prisma.audioTrack.findUnique({
+                const track = await ctx.prisma.audioTrack.findUnique({
                     where: { id: track_id },
                     include: {
                         project: { select: { id: true, name: true, userId: true } },
@@ -308,13 +300,13 @@ export function registerAudioEffectsTools(
                     );
                 }
 
-                const trackCount = await prisma.audioTrack.count({
+                const trackCount = await ctx.prisma.audioTrack.count({
                     where: { projectId: track.projectId },
                 });
 
                 const duplicateName = new_name ?? `${track.name} (copy)`;
 
-                const duplicate = await prisma.audioTrack.create({
+                const duplicate = await ctx.prisma.audioTrack.create({
                     data: {
                         projectId: track.projectId,
                         name: duplicateName,
@@ -356,12 +348,10 @@ export function registerAudioEffectsTools(
                     .describe("Track IDs in the desired new order."),
             })
             .meta({ category: "audio-effects", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { project_id, track_ids } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const project = await prisma.audioMixerProject.findFirst({
+                const project = await ctx.prisma.audioMixerProject.findFirst({
                     where: { id: project_id, userId },
                 });
 
@@ -372,7 +362,7 @@ export function registerAudioEffectsTools(
                 }
 
                 // Verify all referenced tracks belong to this project
-                const tracks = await prisma.audioTrack.findMany({
+                const tracks = await ctx.prisma.audioTrack.findMany({
                     where: { projectId: project_id },
                     select: { id: true, name: true },
                 });
@@ -390,7 +380,7 @@ export function registerAudioEffectsTools(
                 // Apply new sort orders
                 await Promise.all(
                     track_ids.map((id, index) =>
-                        prisma.audioTrack.update({
+                        ctx.prisma.audioTrack.update({
                             where: { id },
                             data: { sortOrder: index },
                         })

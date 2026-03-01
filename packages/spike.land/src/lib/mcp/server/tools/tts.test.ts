@@ -37,8 +37,7 @@ describe("tts tools", () => {
       mockGetCachedTTSUrl.mockResolvedValue(
         "https://r2.spike.land/tts/cached-audio.mp3",
       );
-      const handler = registry.handlers.get("tts_synthesize")!;
-      const result = await handler({ text: "Hello world" });
+      const result = await registry.call("tts_synthesize", { text: "Hello world" });
       expect(getText(result)).toContain("TTS Result (cached)");
       expect(getText(result)).toContain(
         "https://r2.spike.land/tts/cached-audio.mp3",
@@ -55,8 +54,7 @@ describe("tts tools", () => {
       mockCacheTTSAudio.mockResolvedValue(
         "https://r2.spike.land/tts/new-audio.mp3",
       );
-      const handler = registry.handlers.get("tts_synthesize")!;
-      const result = await handler({ text: "Hello world" });
+      const result = await registry.call("tts_synthesize", { text: "Hello world" });
       expect(getText(result)).toContain("TTS Result");
       expect(getText(result)).not.toContain("cached");
       expect(getText(result)).toContain(
@@ -74,8 +72,7 @@ describe("tts tools", () => {
       mockCacheTTSAudio.mockResolvedValue(
         "https://r2.spike.land/tts/voice.mp3",
       );
-      const handler = registry.handlers.get("tts_synthesize")!;
-      await handler({ text: "Custom voice", voice_id: "voice-abc-123" });
+      await registry.call("tts_synthesize", { text: "Custom voice", voice_id: "voice-abc-123" });
       expect(mockSynthesizeSpeech).toHaveBeenCalledWith("Custom voice", {
         voiceId: "voice-abc-123",
       });
@@ -86,8 +83,7 @@ describe("tts tools", () => {
       const audioBuffer = Buffer.from("audio-content-here");
       mockSynthesizeSpeech.mockResolvedValue(audioBuffer);
       mockCacheTTSAudio.mockResolvedValue(null);
-      const handler = registry.handlers.get("tts_synthesize")!;
-      const result = await handler({ text: "Test caching failure" });
+      const result = await registry.call("tts_synthesize", { text: "Test caching failure" });
       expect(getText(result)).toContain("TTS Result");
       expect(getText(result)).toContain("20 characters");
       expect(getText(result)).toContain(`${audioBuffer.length} bytes`);
@@ -98,8 +94,7 @@ describe("tts tools", () => {
     it("should handle synthesis API errors gracefully via safeToolCall", async () => {
       mockGetCachedTTSUrl.mockResolvedValue(null);
       mockSynthesizeSpeech.mockRejectedValue(new Error("ElevenLabs API error"));
-      const handler = registry.handlers.get("tts_synthesize")!;
-      const result = await handler({ text: "Fail" });
+      const result = await registry.call("tts_synthesize", { text: "Fail" });
       expect(getText(result)).toContain("Error");
     });
 
@@ -109,8 +104,7 @@ describe("tts tools", () => {
       mockCacheTTSAudio.mockResolvedValue(
         "https://r2.spike.land/tts/default.mp3",
       );
-      const handler = registry.handlers.get("tts_synthesize")!;
-      await handler({ text: "No voice id" });
+      await registry.call("tts_synthesize", { text: "No voice id" });
       expect(mockSynthesizeSpeech).toHaveBeenCalledWith("No voice id", {});
     });
   });

@@ -65,8 +65,7 @@ describe("swarm tools", () => {
           _count: { messages: 10 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_list_agents")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_list_agents", {});
       expect(getText(result)).toContain("Worker-1");
       expect(getText(result)).toContain("ACTIVE");
       expect(getText(result)).toContain("Tasks: 5");
@@ -74,8 +73,7 @@ describe("swarm tools", () => {
 
     it("should return message when no agents found", async () => {
       mockPrisma.claudeCodeAgent.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("swarm_list_agents")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_list_agents", {});
       expect(getText(result)).toContain("No agents found");
     });
 
@@ -104,8 +102,7 @@ describe("swarm tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_list_agents")!;
-      const result = await handler({ status: "active" });
+      const result = await registry.call("swarm_list_agents", { status: "active" });
       expect(getText(result)).toContain("Active");
       expect(getText(result)).not.toContain("Idle");
     });
@@ -145,8 +142,7 @@ describe("swarm tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_list_agents")!;
-      const result = await handler({ status: "idle" });
+      const result = await registry.call("swarm_list_agents", { status: "idle" });
       expect(getText(result)).toContain("IdleAgent");
       expect(getText(result)).not.toContain("Active");
       expect(getText(result)).not.toContain("StoppedAgent");
@@ -176,8 +172,7 @@ describe("swarm tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_list_agents")!;
-      const result = await handler({ status: "stopped" });
+      const result = await registry.call("swarm_list_agents", { status: "stopped" });
       expect(getText(result)).toContain("StoppedAgent");
       expect(getText(result)).not.toContain("Active");
     });
@@ -196,8 +191,7 @@ describe("swarm tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_list_agents")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_list_agents", {});
       expect(getText(result)).toContain("IDLE");
     });
 
@@ -214,8 +208,7 @@ describe("swarm tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_list_agents")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_list_agents", {});
       expect(getText(result)).toContain("STOPPED");
     });
   });
@@ -238,8 +231,7 @@ describe("swarm tools", () => {
         deletedAt: null,
         _count: { messages: 5 },
       });
-      const handler = registry.handlers.get("swarm_get_agent")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("swarm_get_agent", { agent_id: "agent-1" });
       expect(getText(result)).toContain("Worker-1");
       expect(getText(result)).toContain("Tokens: 500");
       expect(getText(result)).toContain("Tasks: 3");
@@ -262,8 +254,7 @@ describe("swarm tools", () => {
         deletedAt: null,
         _count: { messages: 0 },
       });
-      const handler = registry.handlers.get("swarm_get_agent")!;
-      const result = await handler({ agent_id: "agent-2" });
+      const result = await registry.call("swarm_get_agent", { agent_id: "agent-2" });
       const text = getText(result);
       expect(text).toContain("Project: (none)");
       expect(text).toContain("Working Dir: (none)");
@@ -286,15 +277,13 @@ describe("swarm tools", () => {
         deletedAt: null,
         _count: { messages: 0 },
       });
-      const handler = registry.handlers.get("swarm_get_agent")!;
-      const result = await handler({ agent_id: "agent-3" });
+      const result = await registry.call("swarm_get_agent", { agent_id: "agent-3" });
       expect(getText(result)).toContain("Last Seen: never");
     });
 
     it("should return not found for missing agent", async () => {
       mockPrisma.claudeCodeAgent.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("swarm_get_agent")!;
-      const result = await handler({ agent_id: "missing" });
+      const result = await registry.call("swarm_get_agent", { agent_id: "missing" });
       expect(getText(result)).toContain("Agent not found");
     });
 
@@ -305,8 +294,7 @@ describe("swarm tools", () => {
         deletedAt: new Date(),
         _count: { messages: 0 },
       });
-      const handler = registry.handlers.get("swarm_get_agent")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("swarm_get_agent", { agent_id: "agent-1" });
       expect(getText(result)).toContain("Agent not found");
     });
   });
@@ -317,8 +305,7 @@ describe("swarm tools", () => {
         id: "new-session",
         displayName: "NewBot",
       });
-      const handler = registry.handlers.get("swarm_spawn_agent")!;
-      const result = await handler({
+      const result = await registry.call("swarm_spawn_agent", {
         display_name: "NewBot",
         machine_id: "m1",
         session_id: "new-session",
@@ -337,8 +324,7 @@ describe("swarm tools", () => {
   describe("swarm_stop_agent", () => {
     it("should soft-delete an agent", async () => {
       mockPrisma.claudeCodeAgent.update.mockResolvedValue({});
-      const handler = registry.handlers.get("swarm_stop_agent")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("swarm_stop_agent", { agent_id: "agent-1" });
       expect(getText(result)).toContain("stopped");
       expect(mockPrisma.claudeCodeAgent.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -351,8 +337,7 @@ describe("swarm tools", () => {
   describe("swarm_redirect_agent", () => {
     it("should redirect an agent", async () => {
       mockPrisma.claudeCodeAgent.update.mockResolvedValue({});
-      const handler = registry.handlers.get("swarm_redirect_agent")!;
-      const result = await handler({
+      const result = await registry.call("swarm_redirect_agent", {
         agent_id: "agent-1",
         project_path: "/new-proj",
         working_directory: "/new-dir",
@@ -362,8 +347,7 @@ describe("swarm tools", () => {
 
     it("should redirect with only project_path (no working_directory)", async () => {
       mockPrisma.claudeCodeAgent.update.mockResolvedValue({});
-      const handler = registry.handlers.get("swarm_redirect_agent")!;
-      const result = await handler({
+      const result = await registry.call("swarm_redirect_agent", {
         agent_id: "agent-1",
         project_path: "/new-proj",
       });
@@ -377,8 +361,7 @@ describe("swarm tools", () => {
 
     it("should redirect with only working_directory (no project_path)", async () => {
       mockPrisma.claudeCodeAgent.update.mockResolvedValue({});
-      const handler = registry.handlers.get("swarm_redirect_agent")!;
-      const result = await handler({
+      const result = await registry.call("swarm_redirect_agent", {
         agent_id: "agent-1",
         working_directory: "/new-dir",
       });
@@ -392,8 +375,7 @@ describe("swarm tools", () => {
 
     it("should redirect with neither path field", async () => {
       mockPrisma.claudeCodeAgent.update.mockResolvedValue({});
-      const handler = registry.handlers.get("swarm_redirect_agent")!;
-      const result = await handler({
+      const result = await registry.call("swarm_redirect_agent", {
         agent_id: "agent-1",
       });
       expect(getText(result)).toContain("redirected");
@@ -412,8 +394,7 @@ describe("swarm tools", () => {
         { id: "a2" },
       ]);
       mockPrisma.agentMessage.createMany.mockResolvedValue({ count: 2 });
-      const handler = registry.handlers.get("swarm_broadcast")!;
-      const result = await handler({ content: "Hello swarm" });
+      const result = await registry.call("swarm_broadcast", { content: "Hello swarm" });
       expect(getText(result)).toContain("Broadcast sent to 2 agents");
     });
   });
@@ -429,16 +410,14 @@ describe("swarm tools", () => {
           isError: false,
         },
       ]);
-      const handler = registry.handlers.get("swarm_agent_timeline")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("swarm_agent_timeline", { agent_id: "agent-1" });
       expect(getText(result)).toContain("tool_call");
       expect(getText(result)).toContain("CODE_EDIT");
     });
 
     it("should return message when no timeline entries", async () => {
       mockPrisma.agentAuditLog.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("swarm_agent_timeline")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("swarm_agent_timeline", { agent_id: "agent-1" });
       expect(getText(result)).toContain("No timeline entries found");
     });
 
@@ -452,8 +431,7 @@ describe("swarm tools", () => {
           isError: true,
         },
       ]);
-      const handler = registry.handlers.get("swarm_agent_timeline")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("swarm_agent_timeline", { agent_id: "agent-1" });
       expect(getText(result)).toContain("[ERROR]");
     });
   });
@@ -472,8 +450,7 @@ describe("swarm tools", () => {
           },
         },
       ]);
-      const handler = registry.handlers.get("swarm_topology")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_topology", {});
       expect(getText(result)).toContain("Alpha");
       expect(getText(result)).toContain("TRUSTED");
       expect(getText(result)).toContain("100 ok / 2 fail");
@@ -481,8 +458,7 @@ describe("swarm tools", () => {
 
     it("should return message when no agents in swarm", async () => {
       mockPrisma.claudeCodeAgent.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("swarm_topology")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_topology", {});
       expect(getText(result)).toContain("No agents in the swarm");
     });
 
@@ -495,8 +471,7 @@ describe("swarm tools", () => {
           trustScore: null,
         },
       ]);
-      const handler = registry.handlers.get("swarm_topology")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_topology", {});
       expect(getText(result)).toContain("SANDBOX");
     });
   });
@@ -504,23 +479,20 @@ describe("swarm tools", () => {
   describe("requireAdminRole", () => {
     it("should deny access when user has USER role", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
-      const handler = registry.handlers.get("swarm_list_agents")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_list_agents", {});
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
 
     it("should deny access when user is not found", async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("swarm_list_agents")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_list_agents", {});
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
 
     it("should allow SUPER_ADMIN role", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "SUPER_ADMIN" });
       mockPrisma.claudeCodeAgent.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("swarm_list_agents")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_list_agents", {});
       expect(getText(result)).toContain("No agents found");
     });
 
@@ -538,9 +510,8 @@ describe("swarm tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_list_agents")!;
       // Cast to bypass Zod enum — we want to hit the `return true` default in the filter
-      const result = await handler({ status: "unknown_status" as "all" });
+      const result = await registry.call("swarm_list_agents", { status: "unknown_status" as "all" });
       const text = getText(result);
       expect(text).toContain("Agent1");
     });
@@ -561,8 +532,7 @@ describe("swarm tools", () => {
         "swarm_delegate_task",
       ];
       for (const toolName of toolNames) {
-        const handler = registry.handlers.get(toolName)!;
-        const result = await handler({});
+                const result = await registry.call(toolName, {});
         expect(getText(result)).toContain("PERMISSION_DENIED");
       }
     });
@@ -581,8 +551,7 @@ describe("swarm tools", () => {
         role: "AGENT",
         content: "Hello",
       });
-      const handler = registry.handlers.get("swarm_send_message")!;
-      const result = await handler({
+      const result = await registry.call("swarm_send_message", {
         target_agent_id: "target-1",
         content: "Hello",
       });
@@ -613,8 +582,7 @@ describe("swarm tools", () => {
         role: "AGENT",
         content: "WithMeta",
       });
-      const handler = registry.handlers.get("swarm_send_message")!;
-      const result = await handler({
+      const result = await registry.call("swarm_send_message", {
         target_agent_id: "target-1",
         content: "WithMeta",
         metadata: { key: "value" },
@@ -629,8 +597,7 @@ describe("swarm tools", () => {
 
     it("should fail when target agent not found", async () => {
       mockPrisma.claudeCodeAgent.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("swarm_send_message")!;
-      const result = await handler({
+      const result = await registry.call("swarm_send_message", {
         target_agent_id: "missing",
         content: "Hello",
       });
@@ -643,8 +610,7 @@ describe("swarm tools", () => {
         displayName: "Deleted",
         deletedAt: new Date(),
       });
-      const handler = registry.handlers.get("swarm_send_message")!;
-      const result = await handler({
+      const result = await registry.call("swarm_send_message", {
         target_agent_id: "target-1",
         content: "Hello",
       });
@@ -674,8 +640,7 @@ describe("swarm tools", () => {
         },
       ]);
       mockPrisma.agentMessage.updateMany.mockResolvedValue({ count: 2 });
-      const handler = registry.handlers.get("swarm_read_messages")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("swarm_read_messages", { agent_id: "agent-1" });
       const text = getText(result);
       expect(text).toContain("Messages (2)");
       expect(text).toContain("Hello there");
@@ -690,8 +655,7 @@ describe("swarm tools", () => {
 
     it("should return no messages when inbox is empty", async () => {
       mockPrisma.agentMessage.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("swarm_read_messages")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("swarm_read_messages", { agent_id: "agent-1" });
       expect(getText(result)).toContain("No messages found");
     });
 
@@ -707,8 +671,7 @@ describe("swarm tools", () => {
           createdAt: now,
         },
       ]);
-      const handler = registry.handlers.get("swarm_read_messages")!;
-      await handler({ agent_id: "agent-1", mark_as_read: false });
+      await registry.call("swarm_read_messages", { agent_id: "agent-1", mark_as_read: false });
       expect(mockPrisma.agentMessage.updateMany).not.toHaveBeenCalled();
     });
 
@@ -725,8 +688,7 @@ describe("swarm tools", () => {
         },
       ]);
       mockPrisma.agentMessage.updateMany.mockResolvedValue({ count: 1 });
-      const handler = registry.handlers.get("swarm_read_messages")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("swarm_read_messages", { agent_id: "agent-1" });
       expect(getText(result)).toContain("UNREAD");
     });
 
@@ -742,8 +704,7 @@ describe("swarm tools", () => {
           createdAt: now,
         },
       ]);
-      const handler = registry.handlers.get("swarm_read_messages")!;
-      const result = await handler({ agent_id: "agent-1", unread_only: false });
+      const result = await registry.call("swarm_read_messages", { agent_id: "agent-1", unread_only: false });
       expect(getText(result)).toContain("READ");
     });
 
@@ -759,8 +720,7 @@ describe("swarm tools", () => {
           createdAt: now,
         },
       ]);
-      const handler = registry.handlers.get("swarm_read_messages")!;
-      await handler({ agent_id: "agent-1", unread_only: false });
+      await registry.call("swarm_read_messages", { agent_id: "agent-1", unread_only: false });
       expect(mockPrisma.agentMessage.updateMany).not.toHaveBeenCalled();
     });
 
@@ -778,8 +738,7 @@ describe("swarm tools", () => {
         },
       ]);
       mockPrisma.agentMessage.updateMany.mockResolvedValue({ count: 1 });
-      const handler = registry.handlers.get("swarm_read_messages")!;
-      const result = await handler({ agent_id: "agent-1" });
+      const result = await registry.call("swarm_read_messages", { agent_id: "agent-1" });
       expect(getText(result)).toContain("...");
     });
   });
@@ -797,8 +756,7 @@ describe("swarm tools", () => {
         role: "SYSTEM",
         content: "[TASK:MEDIUM] Fix the bug",
       });
-      const handler = registry.handlers.get("swarm_delegate_task")!;
-      const result = await handler({
+      const result = await registry.call("swarm_delegate_task", {
         target_agent_id: "worker-1",
         task_description: "Fix the bug",
       });
@@ -820,8 +778,7 @@ describe("swarm tools", () => {
         role: "SYSTEM",
         content: "[TASK:CRITICAL] Deploy hotfix",
       });
-      const handler = registry.handlers.get("swarm_delegate_task")!;
-      const result = await handler({
+      const result = await registry.call("swarm_delegate_task", {
         target_agent_id: "worker-1",
         task_description: "Deploy hotfix",
         priority: "critical",
@@ -854,8 +811,7 @@ describe("swarm tools", () => {
         role: "SYSTEM",
         content: "[TASK:HIGH] Review PR",
       });
-      const handler = registry.handlers.get("swarm_delegate_task")!;
-      await handler({
+      await registry.call("swarm_delegate_task", {
         target_agent_id: "worker-1",
         task_description: "Review PR",
         priority: "high",
@@ -874,8 +830,7 @@ describe("swarm tools", () => {
 
     it("should fail when target agent not found", async () => {
       mockPrisma.claudeCodeAgent.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("swarm_delegate_task")!;
-      const result = await handler({
+      const result = await registry.call("swarm_delegate_task", {
         target_agent_id: "missing",
         task_description: "Do something",
       });
@@ -888,8 +843,7 @@ describe("swarm tools", () => {
         displayName: "StoppedWorker",
         deletedAt: new Date(),
       });
-      const handler = registry.handlers.get("swarm_delegate_task")!;
-      const result = await handler({
+      const result = await registry.call("swarm_delegate_task", {
         target_agent_id: "worker-1",
         task_description: "Do something",
       });

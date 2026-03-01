@@ -143,7 +143,7 @@ export function registerToolFactoryTools(
                 handler_spec: HandlerSpecSchema,
             })
             .meta({ category: "tools", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     name,
                     description,
@@ -152,12 +152,11 @@ export function registerToolFactoryTools(
                 } = input;
 
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
                     // Check quota
                     const [count, limit] = await Promise.all([
-                        getToolCount(prisma, userId),
-                        getToolLimit(prisma, userId),
+                        getToolCount(ctx.prisma, userId),
+                        getToolLimit(ctx.prisma, userId),
                     ]);
 
                     if (count >= limit) {
@@ -202,7 +201,7 @@ export function registerToolFactoryTools(
                         }
                     }
 
-                    const tool = await prisma.registeredTool.upsert({
+                    const tool = await ctx.prisma.registeredTool.upsert({
                         where: { userId_name: { userId, name } },
                         update: {
                             description,
@@ -249,17 +248,16 @@ export function registerToolFactoryTools(
                 test_input: z.record(z.string(), z.unknown()).default({}),
             })
             .meta({ category: "tools", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     tool_id,
                     test_input,
                 } = input;
 
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const { decryptSecret } = await import("../crypto/vault");
 
-                    const tool = await prisma.registeredTool.findFirst({
+                    const tool = await ctx.prisma.registeredTool.findFirst({
                         where: { id: tool_id, userId, status: { not: "DISABLED" } },
                     });
 
@@ -293,7 +291,7 @@ export function registerToolFactoryTools(
 
                     const secrets: Record<string, string> = {};
                     if (secretRefs.size > 0) {
-                        const vaultSecrets = await prisma.vaultSecret.findMany({
+                        const vaultSecrets = await ctx.prisma.vaultSecret.findMany({
                             where: {
                                 userId,
                                 name: { in: Array.from(secretRefs) },
@@ -425,15 +423,14 @@ export function registerToolFactoryTools(
                 tool_id: z.string().min(1),
             })
             .meta({ category: "tools", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     tool_id,
                 } = input;
 
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
-                    const tool = await prisma.registeredTool.findFirst({
+                    const tool = await ctx.prisma.registeredTool.findFirst({
                         where: { id: tool_id, userId },
                     });
 
@@ -462,7 +459,7 @@ export function registerToolFactoryTools(
                         };
                     }
 
-                    await prisma.registeredTool.update({
+                    await ctx.prisma.registeredTool.update({
                         where: { id: tool_id },
                         data: { status: "PUBLISHED" },
                     });
@@ -492,11 +489,10 @@ export function registerToolFactoryTools(
         freeTool(userId)
             .tool("list_registered_tools", "List all tools registered by the current user.", {})
             .meta({ category: "tools", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, ctx }) => {
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
-                    const tools = await prisma.registeredTool.findMany({
+                    const tools = await ctx.prisma.registeredTool.findMany({
                         where: { userId },
                         select: {
                             id: true,
@@ -510,8 +506,8 @@ export function registerToolFactoryTools(
                     });
 
                     const [count, limit] = await Promise.all([
-                        getToolCount(prisma, userId),
-                        getToolLimit(prisma, userId),
+                        getToolCount(ctx.prisma, userId),
+                        getToolLimit(ctx.prisma, userId),
                     ]);
 
                     if (tools.length === 0) {
@@ -549,15 +545,14 @@ export function registerToolFactoryTools(
                 tool_id: z.string().min(1),
             })
             .meta({ category: "tools", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     tool_id,
                 } = input;
 
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
-                    const tool = await prisma.registeredTool.findFirst({
+                    const tool = await ctx.prisma.registeredTool.findFirst({
                         where: { id: tool_id, userId },
                     });
 
@@ -584,7 +579,7 @@ export function registerToolFactoryTools(
                         };
                     }
 
-                    await prisma.registeredTool.update({
+                    await ctx.prisma.registeredTool.update({
                         where: { id: tool_id },
                         data: { status: "DISABLED" },
                     });

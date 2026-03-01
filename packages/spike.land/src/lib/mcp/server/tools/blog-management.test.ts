@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   blogPost: {
     create: vi.fn(),
     findUnique: vi.fn(),
@@ -11,7 +12,8 @@ const mockPrisma = {
     aggregate: vi.fn(),
     groupBy: vi.fn(),
   },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -48,8 +50,7 @@ describe("blog-management tools", () => {
         createdAt: now,
       });
 
-      const handler = registry.handlers.get("blog_create_draft")!;
-      const result = await handler({
+      const result = await registry.call("blog_create_draft", {
         title: "My First Post",
         content: "Hello world!",
         tags: ["intro", "news"],
@@ -87,8 +88,7 @@ describe("blog-management tools", () => {
         createdAt: new Date(),
       });
 
-      const handler = registry.handlers.get("blog_create_draft")!;
-      const result = await handler({ title: "Minimal", content: "Content here." });
+      const result = await registry.call("blog_create_draft", { title: "Minimal", content: "Content here." });
 
       expect(getText(result)).toContain("Draft Created!");
       expect(getText(result)).toContain("post-min");
@@ -119,8 +119,7 @@ describe("blog-management tools", () => {
         updatedAt: new Date("2025-06-02T11:00:00Z"),
       });
 
-      const handler = registry.handlers.get("blog_update_post")!;
-      const result = await handler({
+      const result = await registry.call("blog_update_post", {
         post_id: "post-abc",
         title: "Updated Title",
         tags: ["updated"],
@@ -150,8 +149,7 @@ describe("blog-management tools", () => {
         updatedAt: new Date(),
       });
 
-      const handler = registry.handlers.get("blog_update_post")!;
-      const result = await handler({ post_id: "p1", status: "draft" });
+      const result = await registry.call("blog_update_post", { post_id: "p1", status: "draft" });
 
       const text = getText(result);
       expect(text).toContain("Post Updated");
@@ -165,8 +163,7 @@ describe("blog-management tools", () => {
     it("should return NOT_FOUND when post does not exist", async () => {
       mockPrisma.blogPost.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("blog_update_post")!;
-      const result = await handler({ post_id: "nope", title: "New title" });
+      const result = await registry.call("blog_update_post", { post_id: "nope", title: "New title" });
 
       expect(getText(result)).toContain("NOT_FOUND");
       expect(mockPrisma.blogPost.update).not.toHaveBeenCalled();
@@ -179,8 +176,7 @@ describe("blog-management tools", () => {
         status: "draft",
       });
 
-      const handler = registry.handlers.get("blog_update_post")!;
-      const result = await handler({ post_id: "post-other", title: "Hijack" });
+      const result = await registry.call("blog_update_post", { post_id: "post-other", title: "Hijack" });
 
       expect(getText(result)).toContain("PERMISSION_DENIED");
       expect(mockPrisma.blogPost.update).not.toHaveBeenCalled();
@@ -193,8 +189,7 @@ describe("blog-management tools", () => {
         status: "draft",
       });
 
-      const handler = registry.handlers.get("blog_update_post")!;
-      const result = await handler({ post_id: "post-abc" });
+      const result = await registry.call("blog_update_post", { post_id: "post-abc" });
 
       expect(getText(result)).toContain("No changes specified");
       expect(mockPrisma.blogPost.update).not.toHaveBeenCalled();
@@ -219,8 +214,7 @@ describe("blog-management tools", () => {
         publishedAt: new Date("2025-06-03T12:00:00Z"),
       });
 
-      const handler = registry.handlers.get("blog_publish_post")!;
-      const result = await handler({ post_id: "post-abc" });
+      const result = await registry.call("blog_publish_post", { post_id: "post-abc" });
 
       expect(getText(result)).toContain("Post Published!");
       expect(getText(result)).toContain("post-abc");
@@ -245,8 +239,7 @@ describe("blog-management tools", () => {
         slug: "post-1",
       });
 
-      const handler = registry.handlers.get("blog_publish_post")!;
-      const result = await handler({ post_id: "p1" });
+      const result = await registry.call("blog_publish_post", { post_id: "p1" });
 
       const text = getText(result);
       expect(text).toContain("Post Published!");
@@ -263,8 +256,7 @@ describe("blog-management tools", () => {
         status: "published",
       });
 
-      const handler = registry.handlers.get("blog_publish_post")!;
-      const result = await handler({ post_id: "post-abc" });
+      const result = await registry.call("blog_publish_post", { post_id: "post-abc" });
 
       expect(getText(result)).toContain("INVALID_STATE");
       expect(getText(result)).toContain("published");
@@ -274,8 +266,7 @@ describe("blog-management tools", () => {
     it("should return NOT_FOUND for missing post", async () => {
       mockPrisma.blogPost.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("blog_publish_post")!;
-      const result = await handler({ post_id: "ghost" });
+      const result = await registry.call("blog_publish_post", { post_id: "ghost" });
 
       expect(getText(result)).toContain("NOT_FOUND");
       expect(mockPrisma.blogPost.update).not.toHaveBeenCalled();
@@ -288,8 +279,7 @@ describe("blog-management tools", () => {
         status: "draft",
       });
 
-      const handler = registry.handlers.get("blog_publish_post")!;
-      const result = await handler({ post_id: "post-abc" });
+      const result = await registry.call("blog_publish_post", { post_id: "post-abc" });
 
       expect(getText(result)).toContain("PERMISSION_DENIED");
       expect(mockPrisma.blogPost.update).not.toHaveBeenCalled();
@@ -317,8 +307,7 @@ describe("blog-management tools", () => {
         { sessionId: "s3", _count: { sessionId: 1 } },
       ]);
 
-      const handler = registry.handlers.get("blog_get_analytics")!;
-      const result = await handler({ post_id: "post-abc", period: "30d" });
+      const result = await registry.call("blog_get_analytics", { post_id: "post-abc", period: "30d" });
 
       expect(getText(result)).toContain("Analytics:");
       expect(getText(result)).toContain("My First Post");
@@ -343,8 +332,7 @@ describe("blog-management tools", () => {
       });
       mockPrisma.pageView.groupBy.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("blog_get_analytics")!;
-      const result = await handler({ post_id: "post-abc", period: "all" });
+      const result = await registry.call("blog_get_analytics", { post_id: "post-abc", period: "all" });
 
       expect(getText(result)).toContain("all");
       expect(getText(result)).toContain("1200");
@@ -354,8 +342,7 @@ describe("blog-management tools", () => {
     it("should return NOT_FOUND for missing post", async () => {
       mockPrisma.blogPost.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("blog_get_analytics")!;
-      const result = await handler({ post_id: "ghost" });
+      const result = await registry.call("blog_get_analytics", { post_id: "ghost" });
 
       expect(getText(result)).toContain("NOT_FOUND");
       expect(mockPrisma.pageView.count).not.toHaveBeenCalled();
@@ -369,8 +356,7 @@ describe("blog-management tools", () => {
         slug: "stolen",
       });
 
-      const handler = registry.handlers.get("blog_get_analytics")!;
-      const result = await handler({ post_id: "post-abc" });
+      const result = await registry.call("blog_get_analytics", { post_id: "post-abc" });
 
       expect(getText(result)).toContain("PERMISSION_DENIED");
       expect(mockPrisma.pageView.count).not.toHaveBeenCalled();
@@ -396,8 +382,7 @@ describe("blog-management tools", () => {
         scheduledAt: futureDate,
       });
 
-      const handler = registry.handlers.get("blog_schedule_post")!;
-      const result = await handler({
+      const result = await registry.call("blog_schedule_post", {
         post_id: "post-abc",
         publish_at: futureDateISO,
       });
@@ -416,8 +401,7 @@ describe("blog-management tools", () => {
     it("should return VALIDATION_ERROR for a past date", async () => {
       const pastDate = new Date(Date.now() - 1000).toISOString();
 
-      const handler = registry.handlers.get("blog_schedule_post")!;
-      const result = await handler({
+      const result = await registry.call("blog_schedule_post", {
         post_id: "post-abc",
         publish_at: pastDate,
       });
@@ -429,8 +413,7 @@ describe("blog-management tools", () => {
     });
 
     it("should return VALIDATION_ERROR for an invalid datetime string", async () => {
-      const handler = registry.handlers.get("blog_schedule_post")!;
-      const result = await handler({
+      const result = await registry.call("blog_schedule_post", {
         post_id: "post-abc",
         publish_at: "not-a-date",
       });
@@ -444,8 +427,7 @@ describe("blog-management tools", () => {
       const futureDate = new Date(Date.now() + 3600 * 1000).toISOString();
       mockPrisma.blogPost.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("blog_schedule_post")!;
-      const result = await handler({
+      const result = await registry.call("blog_schedule_post", {
         post_id: "ghost",
         publish_at: futureDate,
       });
@@ -462,8 +444,7 @@ describe("blog-management tools", () => {
         status: "draft",
       });
 
-      const handler = registry.handlers.get("blog_schedule_post")!;
-      const result = await handler({
+      const result = await registry.call("blog_schedule_post", {
         post_id: "post-abc",
         publish_at: futureDate,
       });
@@ -480,8 +461,7 @@ describe("blog-management tools", () => {
         status: "scheduled",
       });
 
-      const handler = registry.handlers.get("blog_schedule_post")!;
-      const result = await handler({
+      const result = await registry.call("blog_schedule_post", {
         post_id: "post-abc",
         publish_at: futureDate,
       });
@@ -507,8 +487,7 @@ describe("blog-management tools", () => {
         status: "draft",
       });
 
-      const handler = registry.handlers.get("blog_revert_to_draft")!;
-      const result = await handler({ post_id: "post-abc" });
+      const result = await registry.call("blog_revert_to_draft", { post_id: "post-abc" });
 
       const text = getText(result);
       expect(text).toContain("Post Reverted to Draft");
@@ -533,8 +512,7 @@ describe("blog-management tools", () => {
         status: "draft",
       });
 
-      const handler = registry.handlers.get("blog_revert_to_draft")!;
-      const result = await handler({ post_id: "p1" });
+      const result = await registry.call("blog_revert_to_draft", { post_id: "p1" });
 
       const text = getText(result);
       expect(text).toContain("Post Reverted to Draft");
@@ -552,8 +530,7 @@ describe("blog-management tools", () => {
         status: "draft",
       });
 
-      const handler = registry.handlers.get("blog_revert_to_draft")!;
-      const result = await handler({ post_id: "post-abc" });
+      const result = await registry.call("blog_revert_to_draft", { post_id: "post-abc" });
 
       expect(getText(result)).toContain("INVALID_STATE");
       expect(getText(result)).toContain("already a draft");
@@ -563,8 +540,7 @@ describe("blog-management tools", () => {
     it("should return NOT_FOUND for missing post", async () => {
       mockPrisma.blogPost.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("blog_revert_to_draft")!;
-      const result = await handler({ post_id: "ghost" });
+      const result = await registry.call("blog_revert_to_draft", { post_id: "ghost" });
 
       expect(getText(result)).toContain("NOT_FOUND");
       expect(mockPrisma.blogPost.update).not.toHaveBeenCalled();
@@ -577,8 +553,7 @@ describe("blog-management tools", () => {
         status: "scheduled",
       });
 
-      const handler = registry.handlers.get("blog_revert_to_draft")!;
-      const result = await handler({ post_id: "post-abc" });
+      const result = await registry.call("blog_revert_to_draft", { post_id: "post-abc" });
 
       expect(getText(result)).toContain("PERMISSION_DENIED");
       expect(mockPrisma.blogPost.update).not.toHaveBeenCalled();

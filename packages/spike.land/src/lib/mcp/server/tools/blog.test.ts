@@ -67,8 +67,7 @@ describe("blog tools", () => {
   describe("blog_list_posts", () => {
     it("should list all posts by default", async () => {
       mockGetAllPosts.mockReturnValue([samplePost, samplePostFeatured]);
-      const handler = registry.handlers.get("blog_list_posts")!;
-      const result = await handler({});
+      const result = await registry.call("blog_list_posts", {});
       expect(getText(result)).toContain("Hello World");
       expect(getText(result)).toContain("Featured Post");
       expect(getText(result)).toContain("Blog Posts (2 of 2)");
@@ -82,8 +81,7 @@ describe("blog tools", () => {
 
     it("should filter by category", async () => {
       mockGetPostsByCategory.mockReturnValue([samplePost]);
-      const handler = registry.handlers.get("blog_list_posts")!;
-      const result = await handler({ category: "engineering" });
+      const result = await registry.call("blog_list_posts", { category: "engineering" });
       expect(getText(result)).toContain("Hello World");
       expect(mockGetPostsByCategory).toHaveBeenCalledWith("engineering");
       expect(mockGetAllPosts).not.toHaveBeenCalled();
@@ -91,8 +89,7 @@ describe("blog tools", () => {
 
     it("should filter by tag", async () => {
       mockGetPostsByTag.mockReturnValue([samplePostFeatured]);
-      const handler = registry.handlers.get("blog_list_posts")!;
-      const result = await handler({ tag: "news" });
+      const result = await registry.call("blog_list_posts", { tag: "news" });
       expect(getText(result)).toContain("Featured Post");
       expect(mockGetPostsByTag).toHaveBeenCalledWith("news");
       expect(mockGetAllPosts).not.toHaveBeenCalled();
@@ -100,8 +97,7 @@ describe("blog tools", () => {
 
     it("should filter featured posts", async () => {
       mockGetFeaturedPosts.mockReturnValue([samplePostFeatured]);
-      const handler = registry.handlers.get("blog_list_posts")!;
-      const result = await handler({ featured: true });
+      const result = await registry.call("blog_list_posts", { featured: true });
       expect(getText(result)).toContain("Featured Post");
       expect(getText(result)).toContain("Featured");
       expect(mockGetFeaturedPosts).toHaveBeenCalled();
@@ -110,8 +106,7 @@ describe("blog tools", () => {
 
     it("should return empty message when no posts found", async () => {
       mockGetAllPosts.mockReturnValue([]);
-      const handler = registry.handlers.get("blog_list_posts")!;
-      const result = await handler({});
+      const result = await registry.call("blog_list_posts", {});
       expect(getText(result)).toContain("No blog posts found");
     });
 
@@ -122,37 +117,32 @@ describe("blog tools", () => {
         frontmatter: { ...samplePost.frontmatter, title: "Third Post" },
       }];
       mockGetAllPosts.mockReturnValue(manyPosts);
-      const handler = registry.handlers.get("blog_list_posts")!;
-      const result = await handler({ limit: 1, offset: 1 });
+      const result = await registry.call("blog_list_posts", { limit: 1, offset: 1 });
       expect(getText(result)).toContain("Blog Posts (1 of 3)");
       expect(getText(result)).toContain("Featured Post");
     });
 
     it("should return empty if offset is beyond array length", async () => {
       mockGetAllPosts.mockReturnValue([samplePost]);
-      const handler = registry.handlers.get("blog_list_posts")!;
-      const result = await handler({ offset: 10 });
+      const result = await registry.call("blog_list_posts", { offset: 10 });
       expect(getText(result)).toContain("No blog posts found");
     });
 
     it("should show Featured marker for featured posts", async () => {
       mockGetAllPosts.mockReturnValue([samplePostFeatured]);
-      const handler = registry.handlers.get("blog_list_posts")!;
-      const result = await handler({});
+      const result = await registry.call("blog_list_posts", {});
       expect(getText(result)).toContain("| Featured");
     });
 
     it("should not show Featured marker for non-featured posts", async () => {
       mockGetAllPosts.mockReturnValue([samplePost]);
-      const handler = registry.handlers.get("blog_list_posts")!;
-      const result = await handler({});
+      const result = await registry.call("blog_list_posts", {});
       expect(getText(result)).not.toContain("| Featured");
     });
 
     it("should prioritize category over tag and featured", async () => {
       mockGetPostsByCategory.mockReturnValue([samplePost]);
-      const handler = registry.handlers.get("blog_list_posts")!;
-      await handler({ category: "engineering", tag: "intro", featured: true });
+      await registry.call("blog_list_posts", { category: "engineering", tag: "intro", featured: true });
       expect(mockGetPostsByCategory).toHaveBeenCalledWith("engineering");
       expect(mockGetPostsByTag).not.toHaveBeenCalled();
       expect(mockGetFeaturedPosts).not.toHaveBeenCalled();
@@ -160,8 +150,7 @@ describe("blog tools", () => {
 
     it("should prioritize tag over featured when no category", async () => {
       mockGetPostsByTag.mockReturnValue([samplePost]);
-      const handler = registry.handlers.get("blog_list_posts")!;
-      await handler({ tag: "intro", featured: true });
+      await registry.call("blog_list_posts", { tag: "intro", featured: true });
       expect(mockGetPostsByTag).toHaveBeenCalledWith("intro");
       expect(mockGetFeaturedPosts).not.toHaveBeenCalled();
     });
@@ -170,8 +159,7 @@ describe("blog tools", () => {
   describe("blog_get_post", () => {
     it("should return full post details", async () => {
       mockGetPostBySlug.mockReturnValue(sampleFullPost);
-      const handler = registry.handlers.get("blog_get_post")!;
-      const result = await handler({ slug: "hello-world" });
+      const result = await registry.call("blog_get_post", { slug: "hello-world" });
       expect(getText(result)).toContain("Hello World");
       expect(getText(result)).toContain("hello-world");
       expect(getText(result)).toContain("Zoltan");
@@ -189,8 +177,7 @@ describe("blog tools", () => {
 
     it("should return NOT_FOUND for missing post", async () => {
       mockGetPostBySlug.mockReturnValue(null);
-      const handler = registry.handlers.get("blog_get_post")!;
-      const result = await handler({ slug: "nonexistent" });
+      const result = await registry.call("blog_get_post", { slug: "nonexistent" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
 
@@ -199,15 +186,13 @@ describe("blog tools", () => {
         ...samplePostFeatured,
         content: "Featured content",
       });
-      const handler = registry.handlers.get("blog_get_post")!;
-      const result = await handler({ slug: "featured-post" });
+      const result = await registry.call("blog_get_post", { slug: "featured-post" });
       expect(getText(result)).toContain("**Featured:** Yes");
     });
 
     it("should show Featured: No for non-featured posts", async () => {
       mockGetPostBySlug.mockReturnValue(sampleFullPost);
-      const handler = registry.handlers.get("blog_get_post")!;
-      const result = await handler({ slug: "hello-world" });
+      const result = await registry.call("blog_get_post", { slug: "hello-world" });
       expect(getText(result)).toContain("**Featured:** No");
     });
   });

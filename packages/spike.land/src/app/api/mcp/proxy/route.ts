@@ -12,9 +12,9 @@ interface ProxyRequestBody {
   params: Record<string, unknown>;
 }
 
-function buildRegistry(userId: string): ProxyToolRegistry {
+async function buildRegistry(userId: string): Promise<ProxyToolRegistry> {
   const registry = new ProxyToolRegistry();
-  registerAllTools(registry as unknown as ToolRegistry, userId);
+  await registerAllTools(registry as unknown as ToolRegistry, userId);
   return registry;
 }
 
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     : "anonymous";
 
   try {
-    const registry = buildRegistry(userId);
+    const registry = await buildRegistry(userId);
     const result = await registry.callTool(tool, params);
 
     return NextResponse.json({ result });

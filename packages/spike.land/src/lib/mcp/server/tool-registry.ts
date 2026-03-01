@@ -16,8 +16,28 @@ import type {
 import type { z } from "zod";
 import type { BuiltTool } from "@spike-land-ai/shared/tool-builder";
 import logger from "@/lib/logger";
-import { suggestParameters, ToolEmbeddingIndex } from "@/lib/mcp/embeddings";
 import { recordSkillUsage } from "./tool-loader";
+import { CATEGORY_DESCRIPTIONS } from "./tool-categories";
+import { ToolSearch } from "./tool-search";
+
+/**
+ * Validate that all fields in a Zod input schema have `.describe()` calls.
+ * Returns an array of field names missing descriptions.
+ */
+export function validateSchemaDescriptions(
+  inputSchema: z.ZodRawShape | undefined,
+): string[] {
+  if (!inputSchema) return [];
+  const missing: string[] = [];
+  for (const [fieldName, zodType] of Object.entries(inputSchema)) {
+    // Zod stores .describe() result on the instance's `description` property
+    const desc = (zodType as { description?: string }).description;
+    if (!desc) {
+      missing.push(fieldName);
+    }
+  }
+  return missing;
+}
 
 export type ToolComplexity = "primitive" | "composed" | "workflow";
 
@@ -71,11 +91,11 @@ interface TrackedTool {
   wrappedHandler: (input: never) => Promise<CallToolResult>;
 }
 
-export const CATEGORY_DESCRIPTIONS: Record<string, string> = {
-  // Gateway meta (always-on)
-  "gateway-meta": "Discovery tools for searching and activating other tools",
+// Re-export for backward compatibility (moved to tool-categories.ts)
+export { CATEGORY_DESCRIPTIONS } from "./tool-categories";
 
-  // Core platform
+const _REMOVED = {
+  "gateway-meta": "Discovery tools for searching and activating other tools",
   storage: "File and object storage management for user uploads and assets",
   gallery: "Featured image gallery and before/after album showcase with tiers and privacy control",
   boxes: "EC2 box provisioning and lifecycle management with start, stop, and restart actions",
@@ -334,6 +354,18 @@ export class ToolRegistry {
   }
 
   register(def: ToolDefinition): void {
+    // Validate that all schema fields have .describe() for LLM tool selection
+    const missingDescriptions = validateSchemaDescriptions(def.inputSchema);
+    if (missingDescriptions.length > 0) {
+      const msg =
+        `Tool "${def.name}" has schema fields without .describe(): ${missingDescriptions.join(", ")}. ` +
+        `Add .describe() to every Zod field for accurate LLM tool selection.`;
+      if (process.env.NODE_ENV !== "production") {
+        throw new Error(msg);
+      }
+      logger.warn(msg);
+    }
+
     const originalHandler = def.handler;
     const { userId } = this;
 

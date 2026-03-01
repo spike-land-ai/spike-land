@@ -33,10 +33,8 @@ export function registerAgentInboxTools(
                     .describe("Filter to a specific app. Omit to poll all apps."),
             })
             .meta({ category: "agent-inbox", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { since, app_id } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const { setMcpAgentActive } = await import("@/lib/upstash/client");
 
                 // Build where clause for unread user messages on apps owned by this user
@@ -54,7 +52,7 @@ export function registerAgentInboxTools(
                     whereClause.createdAt = { gt: new Date(since) };
                 }
 
-                const messages = await prisma.appMessage.findMany({
+                const messages = await ctx.prisma.appMessage.findMany({
                     where: whereClause,
                     orderBy: { createdAt: "desc" },
                     select: {
@@ -156,13 +154,11 @@ export function registerAgentInboxTools(
                     .describe("ISO timestamp. Only return messages created after this time."),
             })
             .meta({ category: "agent-inbox", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { app_id, limit, unread_only, since } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
                 // Verify app ownership
-                const app = await prisma.app.findFirst({
+                const app = await ctx.prisma.app.findFirst({
                     where: { id: app_id, userId },
                     select: { id: true, name: true, codespaceId: true },
                 });
@@ -182,7 +178,7 @@ export function registerAgentInboxTools(
                     whereClause.createdAt = { gt: new Date(since) };
                 }
 
-                const messages = await prisma.appMessage.findMany({
+                const messages = await ctx.prisma.appMessage.findMany({
                     where: whereClause,
                     orderBy: { createdAt: "asc" },
                     take: limit || 20,
@@ -262,16 +258,14 @@ export function registerAgentInboxTools(
                     .describe("Message IDs to mark as read after responding."),
             })
             .meta({ category: "agent-inbox", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { app_id, content, code_updated, processed_message_ids } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const { broadcastMessage, broadcastCodeUpdated } = await import(
                     "@/app/api/apps/[id]/messages/stream/route"
                 );
 
                 // Verify app ownership
-                const app = await prisma.app.findFirst({
+                const app = await ctx.prisma.app.findFirst({
                     where: { id: app_id, userId },
                     select: { id: true, name: true, codespaceId: true },
                 });
@@ -283,7 +277,7 @@ export function registerAgentInboxTools(
                 }
 
                 // Create agent message
-                const agentMessage = await prisma.appMessage.create({
+                const agentMessage = await ctx.prisma.appMessage.create({
                     data: {
                         appId: app_id,
                         role: "AGENT",
@@ -293,7 +287,7 @@ export function registerAgentInboxTools(
 
                 // Mark processed messages as read
                 if (processed_message_ids && processed_message_ids.length > 0) {
-                    await prisma.appMessage.updateMany({
+                    await ctx.prisma.appMessage.updateMany({
                         where: {
                             id: { in: processed_message_ids },
                             appId: app_id,
@@ -338,10 +332,8 @@ export function registerAgentInboxTools(
                     .describe("ISO timestamp. Only return messages created after this time."),
             })
             .meta({ category: "agent-inbox", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { since } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const { setMcpAgentActive } = await import("@/lib/upstash/client");
 
                 // Refresh MCP agent active flag for site-chat
@@ -355,7 +347,7 @@ export function registerAgentInboxTools(
                     whereClause.createdAt = { gt: new Date(since) };
                 }
 
-                const messages = await prisma.bazdmegChatMessage.findMany({
+                const messages = await ctx.prisma.bazdmegChatMessage.findMany({
                     where: whereClause,
                     orderBy: { createdAt: "asc" },
                     select: {
@@ -406,12 +398,10 @@ export function registerAgentInboxTools(
                     .describe("Model name to record. Defaults to 'mcp-agent'."),
             })
             .meta({ category: "agent-inbox", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { message_id, answer, model } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const message = await prisma.bazdmegChatMessage.findUnique({
+                const message = await ctx.prisma.bazdmegChatMessage.findUnique({
                     where: { id: message_id },
                     select: { id: true, question: true, answer: true },
                 });
@@ -428,7 +418,7 @@ export function registerAgentInboxTools(
                     );
                 }
 
-                await prisma.bazdmegChatMessage.update({
+                await ctx.prisma.bazdmegChatMessage.update({
                     where: { id: message_id },
                     data: {
                         answer,

@@ -21,11 +21,9 @@ export function registerAgentManagementTools(
                 ),
             })
             .meta({ category: "agents", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { limit = 20 } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
-                const agents = await prisma.claudeCodeAgent.findMany({
+                const agents = await ctx.prisma.claudeCodeAgent.findMany({
                     where: { userId, deletedAt: null },
                     select: {
                         id: true,
@@ -55,11 +53,9 @@ export function registerAgentManagementTools(
                 agent_id: z.string().min(1).describe("Agent ID."),
             })
             .meta({ category: "agents", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { agent_id } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
-                const agent = await prisma.claudeCodeAgent.findUnique({
+                const agent = await ctx.prisma.claudeCodeAgent.findUnique({
                     where: { id: agent_id },
                     include: {
                         _count: { select: { messages: true } },
@@ -99,12 +95,10 @@ export function registerAgentManagementTools(
                 agent_id: z.string().min(1).describe("Agent ID to check queue for."),
             })
             .meta({ category: "agents", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { agent_id } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 // Verify ownership
-                const agent = await prisma.claudeCodeAgent.findUnique({
+                const agent = await ctx.prisma.claudeCodeAgent.findUnique({
                     where: { id: agent_id },
                     select: { userId: true, displayName: true },
                 });
@@ -119,7 +113,7 @@ export function registerAgentManagementTools(
                     );
                 }
 
-                const messages = await prisma.agentMessage.findMany({
+                const messages = await ctx.prisma.agentMessage.findMany({
                     where: { agentId: agent_id, isRead: false },
                     select: { id: true, role: true, content: true, createdAt: true },
                     orderBy: { createdAt: "asc" },
@@ -147,12 +141,10 @@ export function registerAgentManagementTools(
                 ),
             })
             .meta({ category: "agents", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { agent_id, content } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 // Verify ownership
-                const agent = await prisma.claudeCodeAgent.findUnique({
+                const agent = await ctx.prisma.claudeCodeAgent.findUnique({
                     where: { id: agent_id },
                     select: { userId: true, displayName: true },
                 });
@@ -167,7 +159,7 @@ export function registerAgentManagementTools(
                     );
                 }
 
-                const message = await prisma.agentMessage.create({
+                const message = await ctx.prisma.agentMessage.create({
                     data: {
                         agentId: agent_id,
                         role: "USER",

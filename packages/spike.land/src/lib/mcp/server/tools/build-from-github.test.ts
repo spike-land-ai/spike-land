@@ -45,8 +45,7 @@ describe("build_from_github tool", () => {
   });
 
   it("should fail on invalid url", async () => {
-    const handler = registry.handlers.get("build_from_github")!;
-    const result = await handler({
+    const result = await registry.call("build_from_github", {
       repoUrl: "invalid-url",
       minify: true,
       npmMode: "external",
@@ -65,8 +64,7 @@ describe("build_from_github tool", () => {
       warnings: [],
     } as any);
 
-    const handler = registry.handlers.get("build_from_github")!;
-    const result = await handler({
+    const result = await registry.call("build_from_github", {
       repoUrl: "https://github.com/foo/bar",
       minify: true,
       npmMode: "bundle",

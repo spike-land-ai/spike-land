@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   agentCapabilityToken: { findFirst: vi.fn() },
   agentTrustScore: { findFirst: vi.fn() },
   permissionRequest: { create: vi.fn(), findMany: vi.fn() },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -41,10 +43,7 @@ describe("capabilities tools", () => {
       mockPrisma.permissionRequest.create.mockResolvedValue({
         id: "req-1",
       });
-      const handler = registry.handlers.get(
-        "capabilities_request_permissions",
-      )!;
-      const result = await handler({
+            const result = await registry.call("capabilities_request_permissions", {
         tools: ["admin_delete_user"],
         reason: "Need to clean up test data",
       });
@@ -55,10 +54,7 @@ describe("capabilities tools", () => {
 
     it("should handle no active capability token", async () => {
       mockPrisma.agentCapabilityToken.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get(
-        "capabilities_request_permissions",
-      )!;
-      const result = await handler({ reason: "test" });
+            const result = await registry.call("capabilities_request_permissions", { reason: "test" });
       expect(getText(result)).toContain("No Capability Token");
     });
 
@@ -70,10 +66,7 @@ describe("capabilities tools", () => {
       mockPrisma.permissionRequest.create.mockResolvedValue({
         id: "req-2",
       });
-      const handler = registry.handlers.get(
-        "capabilities_request_permissions",
-      )!;
-      const result = await handler({
+            const result = await registry.call("capabilities_request_permissions", {
         categories: ["image", "audio"],
         reason: "Need media tools",
       });
@@ -105,8 +98,7 @@ describe("capabilities tools", () => {
         totalSuccessful: 50,
         totalFailed: 2,
       });
-      const handler = registry.handlers.get("capabilities_check_permissions")!;
-      const result = await handler({});
+      const result = await registry.call("capabilities_check_permissions", {});
       const text = getText(result);
       expect(text).toContain("Current Capabilities");
       expect(text).toContain("Test Agent");
@@ -116,8 +108,7 @@ describe("capabilities tools", () => {
 
     it("should handle no capability token", async () => {
       mockPrisma.agentCapabilityToken.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("capabilities_check_permissions")!;
-      const result = await handler({});
+      const result = await registry.call("capabilities_check_permissions", {});
       expect(getText(result)).toContain("No Capability Token");
     });
 
@@ -137,8 +128,7 @@ describe("capabilities tools", () => {
         agent: { displayName: "Restricted Agent" },
       });
       mockPrisma.agentTrustScore.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("capabilities_check_permissions")!;
-      const result = await handler({});
+      const result = await registry.call("capabilities_check_permissions", {});
       const text = getText(result);
       expect(text).toContain("admin_delete_user, admin_reset_db");
       expect(text).not.toContain("Denied Tools:** (none)");
@@ -160,8 +150,7 @@ describe("capabilities tools", () => {
         agent: { displayName: "Cat Agent" },
       });
       mockPrisma.agentTrustScore.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("capabilities_check_permissions")!;
-      const result = await handler({});
+      const result = await registry.call("capabilities_check_permissions", {});
       const text = getText(result);
       expect(text).toContain("Allowed Tools:** (by category)");
     });
@@ -182,8 +171,7 @@ describe("capabilities tools", () => {
         agent: { displayName: "New Agent" },
       });
       mockPrisma.agentTrustScore.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("capabilities_check_permissions")!;
-      const result = await handler({});
+      const result = await registry.call("capabilities_check_permissions", {});
       const text = getText(result);
       expect(text).toContain("SANDBOX");
       expect(text).toContain("New Agent");
@@ -203,10 +191,7 @@ describe("capabilities tools", () => {
         createdAt: new Date("2026-01-01"),
         agent: { displayName: "Agent A" },
       }]);
-      const handler = registry.handlers.get(
-        "capabilities_list_queued_actions",
-      )!;
-      const result = await handler({ status: "PENDING" });
+            const result = await registry.call("capabilities_request_permissions", { status: "PENDING" });
       const text = getText(result);
       expect(text).toContain("Permission Requests");
       expect(text).toContain("req-1");
@@ -215,10 +200,7 @@ describe("capabilities tools", () => {
 
     it("should handle empty list", async () => {
       mockPrisma.permissionRequest.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get(
-        "capabilities_list_queued_actions",
-      )!;
-      const result = await handler({ status: "PENDING" });
+            const result = await registry.call("capabilities_request_permissions", { status: "PENDING" });
       expect(getText(result)).toContain("No PENDING Requests");
     });
 
@@ -233,10 +215,7 @@ describe("capabilities tools", () => {
         createdAt: new Date("2026-01-02"),
         agent: { displayName: "Agent B" },
       }]);
-      const handler = registry.handlers.get(
-        "capabilities_list_queued_actions",
-      )!;
-      const result = await handler({ status: "DENIED" });
+            const result = await registry.call("capabilities_request_permissions", { status: "DENIED" });
       const text = getText(result);
       expect(text).toContain("Too risky");
       expect(text).toContain("DENIED");

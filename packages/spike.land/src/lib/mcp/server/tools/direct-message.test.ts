@@ -42,8 +42,7 @@ describe("direct message tools", () => {
         priority: "MEDIUM",
       });
 
-      const handler = registry.handlers.get("dm_send")!;
-      const result = await handler({
+      const result = await registry.call("dm_send", {
         subject: "Hello",
         message: "Test message",
       });
@@ -85,8 +84,7 @@ describe("direct message tools", () => {
         priority: "URGENT",
       });
 
-      const handler = registry.handlers.get("dm_send")!;
-      const result = await handler({
+      const result = await registry.call("dm_send", {
         subject: "Urgent",
         message: "Please respond",
         toEmail: "alice@example.com",
@@ -133,8 +131,7 @@ describe("direct message tools", () => {
         priority: "MEDIUM",
       });
 
-      const handler = sessionRegistry.handlers.get("dm_send")!;
-      await handler({ subject: "From session", message: "Anonymous message" });
+      await sessionRegistry.call("dm_send", { subject: "From session", message: "Anonymous message" });
 
       expect(mockPrisma.directMessage.create).toHaveBeenCalledWith({
         data: {
@@ -161,8 +158,7 @@ describe("direct message tools", () => {
         priority: "MEDIUM",
       });
 
-      const handler = registry.handlers.get("dm_send")!;
-      const result = await handler({
+      const result = await registry.call("dm_send", {
         subject: "Test",
         message: "Hello",
         toEmail: "noname@example.com",
@@ -185,8 +181,7 @@ describe("direct message tools", () => {
         priority: "MEDIUM",
       });
 
-      const handler = registry.handlers.get("dm_send")!;
-      const result = await handler({
+      const result = await registry.call("dm_send", {
         subject: "Case test",
         message: "Testing case",
         toEmail: "Alice@EXAMPLE.COM",
@@ -208,8 +203,7 @@ describe("direct message tools", () => {
     it("should return error when recipient not found", async () => {
       mockPrisma.user.findFirst.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("dm_send")!;
-      const result = await handler({
+      const result = await registry.call("dm_send", {
         subject: "Hello",
         message: "Test",
         toEmail: "nobody@example.com",
@@ -224,8 +218,7 @@ describe("direct message tools", () => {
     it("should return error when default owner not found", async () => {
       mockPrisma.user.findFirst.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("dm_send")!;
-      const result = await handler({ subject: "Hello", message: "Test" });
+      const result = await registry.call("dm_send", { subject: "Hello", message: "Test" });
 
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("Recipient not found");
@@ -254,8 +247,7 @@ describe("direct message tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("dm_list")!;
-      const result = await handler({});
+      const result = await registry.call("dm_list", {});
 
       expect(mockPrisma.directMessage.findMany).toHaveBeenCalledWith({
         where: { toUserId: "user-123" },
@@ -274,8 +266,7 @@ describe("direct message tools", () => {
     it("should return empty message when no messages found", async () => {
       mockPrisma.directMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("dm_list")!;
-      const result = await handler({});
+      const result = await registry.call("dm_list", {});
 
       expect(getText(result)).toContain("No messages found");
     });
@@ -283,8 +274,7 @@ describe("direct message tools", () => {
     it("should filter unread only when specified", async () => {
       mockPrisma.directMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("dm_list")!;
-      const result = await handler({ unreadOnly: true });
+      const result = await registry.call("dm_list", { unreadOnly: true });
 
       expect(mockPrisma.directMessage.findMany).toHaveBeenCalledWith({
         where: { toUserId: "user-123", read: false },
@@ -297,8 +287,7 @@ describe("direct message tools", () => {
     it("should respect custom limit", async () => {
       mockPrisma.directMessage.findMany.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("dm_list")!;
-      await handler({ limit: 5 });
+      await registry.call("dm_list", { limit: 5 });
 
       expect(mockPrisma.directMessage.findMany).toHaveBeenCalledWith({
         where: { toUserId: "user-123" },
@@ -320,8 +309,7 @@ describe("direct message tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("dm_list")!;
-      const result = await handler({});
+      const result = await registry.call("dm_list", {});
 
       expect(getText(result)).toContain("...");
       expect(getText(result)).not.toContain(longMessage);
@@ -336,8 +324,7 @@ describe("direct message tools", () => {
         readAt: new Date(),
       });
 
-      const handler = registry.handlers.get("dm_mark_read")!;
-      const result = await handler({ messageId: "dm-001" });
+      const result = await registry.call("dm_mark_read", { messageId: "dm-001" });
 
       expect(mockPrisma.directMessage.update).toHaveBeenCalledWith({
         where: { id: "dm-001", toUserId: "user-123" },
@@ -352,8 +339,7 @@ describe("direct message tools", () => {
         new Error("Record not found"),
       );
 
-      const handler = registry.handlers.get("dm_mark_read")!;
-      const result = await handler({ messageId: "nonexistent" });
+      const result = await registry.call("dm_mark_read", { messageId: "nonexistent" });
 
       // safeToolCall catches the error and returns a classified error result
       expect(getText(result)).toContain("Error");

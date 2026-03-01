@@ -6,6 +6,7 @@
 
 import { z } from "zod";
 import type { ToolRegistry } from "../tool-registry";
+import type { ToolModuleExport } from "../tool-discovery";
 import { textResult } from "./tool-helpers";
 import { freeTool } from "../tool-builder/procedures.js";
 
@@ -33,13 +34,11 @@ export function registerBillingTools(
                 ),
             })
             .meta({ category: "billing", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
                 // Verify workspace membership
-                const membership = await prisma.workspaceMember.findFirst({
+                const membership = await ctx.prisma.workspaceMember.findFirst({
                     where: { userId, workspaceId: args.workspace_id },
                     select: { role: true },
                 });
@@ -80,11 +79,10 @@ export function registerBillingTools(
         freeTool(userId)
             .tool("billing_status", "Get current billing status: subscription tier, Stripe subscription info, and AI credit balance across all workspaces.", z.object({}).shape)
             .meta({ category: "billing", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
-                const prisma = (await import("@/lib/prisma")).default;
+            .handler(async ({ input: _input, ctx }) => {
 
                 // Find user's personal workspace with subscription info
-                const personalWorkspace = await prisma.workspace.findFirst({
+                const personalWorkspace = await ctx.prisma.workspace.findFirst({
                     where: {
                         isPersonal: true,
                         members: { some: { userId } },
@@ -151,7 +149,7 @@ export function registerBillingTools(
                 }
 
                 // Fetch team/org workspaces the user belongs to
-                const teamWorkspaces = await prisma.workspace.findMany({
+                const teamWorkspaces = await ctx.prisma.workspace.findMany({
                     where: {
                         isPersonal: false,
                         members: { some: { userId } },
@@ -186,3 +184,8 @@ export function registerBillingTools(
             })
     );
 }
+
+/** Auto-discovery metadata for tool-manifest. */
+export const toolModules: ToolModuleExport[] = [
+  { register: registerBillingTools, categories: ["billing"] },
+];

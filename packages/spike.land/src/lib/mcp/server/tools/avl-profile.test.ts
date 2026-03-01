@@ -52,8 +52,7 @@ describe("avl-profile tools", () => {
         question: "Do you prefer backend work?",
         questionTags: ["backend", "preference"],
       });
-      const handler = registry.handlers.get("profile_start")!;
-      const result = await handler({ tree_name: "default" });
+      const result = await registry.call("profile_start", { tree_name: "default" });
       const text = getText(result);
       expect(text).toContain("Profiling Started");
       expect(text).toContain("sess-1");
@@ -68,8 +67,7 @@ describe("avl-profile tools", () => {
         question: "Something?",
         questionTags: [],
       });
-      const handler = registry.handlers.get("profile_start")!;
-      const result = await handler({ tree_name: "default" });
+      const result = await registry.call("profile_start", { tree_name: "default" });
       const text = getText(result);
       expect(text).toContain("none");
     });
@@ -83,8 +81,7 @@ describe("avl-profile tools", () => {
           answerPath: [],
         },
       });
-      const handler = registry.handlers.get("profile_start")!;
-      const result = await handler({ tree_name: "default" });
+      const result = await registry.call("profile_start", { tree_name: "default" });
       const text = getText(result);
       expect(text).toContain("Already Profiled");
       expect(text).toContain("none");
@@ -98,8 +95,7 @@ describe("avl-profile tools", () => {
           leafNodeId: "leaf-0",
         },
       });
-      const handler = registry.handlers.get("profile_start")!;
-      const result = await handler({ tree_name: "default" });
+      const result = await registry.call("profile_start", { tree_name: "default" });
       const text = getText(result);
       expect(text).toContain("Profile Created");
       expect(text).toContain("none");
@@ -121,8 +117,7 @@ describe("avl-profile tools", () => {
           ],
         },
       });
-      const handler = registry.handlers.get("profile_start")!;
-      const result = await handler({ tree_name: "default" });
+      const result = await registry.call("profile_start", { tree_name: "default" });
       const text = getText(result);
       expect(text).toContain("Already Profiled");
       expect(text).toContain("developer, backend");
@@ -138,8 +133,7 @@ describe("avl-profile tools", () => {
           leafNodeId: "leaf-root",
         },
       });
-      const handler = registry.handlers.get("profile_start")!;
-      const result = await handler({ tree_name: "default" });
+      const result = await registry.call("profile_start", { tree_name: "default" });
       const text = getText(result);
       expect(text).toContain("Profile Created");
       expect(text).toContain("newcomer");
@@ -156,8 +150,7 @@ describe("avl-profile tools", () => {
         questionTags: ["typescript", "preference"],
         round: 1,
       });
-      const handler = registry.handlers.get("profile_continue")!;
-      const result = await handler({ tree_name: "default" });
+      const result = await registry.call("profile_continue", { tree_name: "default" });
       const text = getText(result);
       expect(text).toContain("New Questions Available");
       expect(text).toContain("Round 1");
@@ -180,8 +173,7 @@ describe("avl-profile tools", () => {
           }],
         },
       });
-      const handler = registry.handlers.get("profile_continue")!;
-      const result = await handler({ tree_name: "default" });
+      const result = await registry.call("profile_continue", { tree_name: "default" });
       const text = getText(result);
       expect(text).toContain("Already Profiled");
       expect(text).toContain("Round 0");
@@ -195,8 +187,7 @@ describe("avl-profile tools", () => {
           leafNodeId: "leaf-root",
         },
       });
-      const handler = registry.handlers.get("profile_continue")!;
-      const result = await handler({ tree_name: "default" });
+      const result = await registry.call("profile_continue", { tree_name: "default" });
       const text = getText(result);
       expect(text).toContain("Profile Created");
     });
@@ -210,8 +201,7 @@ describe("avl-profile tools", () => {
         question: "Do you enjoy testing?",
         questionTags: ["testing"],
       });
-      const handler = registry.handlers.get("profile_answer")!;
-      const result = await handler({ session_id: "sess-1", answer: true });
+      const result = await registry.call("profile_answer", { session_id: "sess-1", answer: true });
       const text = getText(result);
       expect(text).toContain("Next Question");
       expect(text).toContain("sess-1");
@@ -225,8 +215,7 @@ describe("avl-profile tools", () => {
         sessionId: "sess-collision",
         nodeId: "node-42",
       });
-      const handler = registry.handlers.get("profile_answer")!;
-      const result = await handler({ session_id: "sess-1", answer: false });
+      const result = await registry.call("profile_answer", { session_id: "sess-1", answer: false });
       const text = getText(result);
       expect(text).toContain("Collision Detected");
       expect(text).toContain("sess-collision");
@@ -256,8 +245,7 @@ describe("avl-profile tools", () => {
           ],
         },
       });
-      const handler = registry.handlers.get("profile_answer")!;
-      const result = await handler({ session_id: "sess-1", answer: true });
+      const result = await registry.call("profile_answer", { session_id: "sess-1", answer: true });
       const text = getText(result);
       expect(text).toContain("Profile Assigned");
       expect(text).toContain("developer, tester");
@@ -285,8 +273,7 @@ describe("avl-profile tools", () => {
         profileVector: { developer: 1.0 },
         completedAt: new Date(),
       });
-      const handler = registry.handlers.get("profile_get")!;
-      const result = await handler({});
+      const result = await registry.call("profile_get", {});
       const text = getText(result);
       expect(text).toContain("User Profile");
       expect(text).toContain("developer");
@@ -298,8 +285,7 @@ describe("avl-profile tools", () => {
 
     it("should handle no profile", async () => {
       mockTraversal.getUserProfile.mockResolvedValue(null);
-      const handler = registry.handlers.get("profile_get")!;
-      const result = await handler({});
+      const result = await registry.call("profile_get", {});
       const text = getText(result);
       expect(text).toContain("No Profile Found");
     });
@@ -317,8 +303,7 @@ describe("avl-profile tools", () => {
         userCount: 5,
         maxDepth: 4,
       });
-      const handler = registry.handlers.get("profile_tree_stats")!;
-      const result = await handler({ tree_name: "default" });
+      const result = await registry.call("profile_tree_stats", { tree_name: "default" });
       const text = getText(result);
       expect(text).toContain("AVL Profile Tree: default");
       expect(text).toContain("15");
@@ -336,8 +321,7 @@ describe("avl-profile tools", () => {
         question: "Do you prefer functional programming?",
         tags: ["functional", "paradigm"],
       });
-      const handler = registry.handlers.get("profile_generate_question")!;
-      const result = await handler({
+      const result = await registry.call("profile_generate_question", {
         used_questions: ["Do you code?"],
         context_hint: "programming style",
       });
@@ -351,8 +335,7 @@ describe("avl-profile tools", () => {
   describe("profile_reset", () => {
     it("should reset profile", async () => {
       mockTraversal.resetUserProfile.mockResolvedValue(undefined);
-      const handler = registry.handlers.get("profile_reset")!;
-      const result = await handler({});
+      const result = await registry.call("profile_reset", {});
       const text = getText(result);
       expect(text).toContain("Profile Reset");
     });

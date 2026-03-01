@@ -42,8 +42,7 @@ describe("billing tools", () => {
   describe("billing_create_checkout", () => {
     it("should create checkout intent for tokens", async () => {
       mockPrisma.workspaceMember.findFirst.mockResolvedValue({ role: "OWNER" });
-      const handler = registry.handlers.get("billing_create_checkout")!;
-      const result = await handler({ type: "tokens", workspace_id: "ws-1" });
+      const result = await registry.call("billing_create_checkout", { type: "tokens", workspace_id: "ws-1" });
       expect(getText(result)).toContain("Checkout Session Intent");
       expect(getText(result)).toContain("tokens");
       expect(getText(result)).toContain("ws-1");
@@ -52,8 +51,7 @@ describe("billing tools", () => {
 
     it("should create checkout intent for subscription", async () => {
       mockPrisma.workspaceMember.findFirst.mockResolvedValue({ role: "ADMIN" });
-      const handler = registry.handlers.get("billing_create_checkout")!;
-      const result = await handler({
+      const result = await registry.call("billing_create_checkout", {
         type: "subscription",
         workspace_id: "ws-2",
       });
@@ -67,8 +65,7 @@ describe("billing tools", () => {
       mockPrisma.workspaceMember.findFirst.mockResolvedValue({
         role: "MEMBER",
       });
-      const handler = registry.handlers.get("billing_create_checkout")!;
-      const result = await handler({
+      const result = await registry.call("billing_create_checkout", {
         type: "workspace_tier",
         workspace_id: "ws-3",
       });
@@ -80,8 +77,7 @@ describe("billing tools", () => {
 
     it("should return error when not a workspace member", async () => {
       mockPrisma.workspaceMember.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("billing_create_checkout")!;
-      const result = await handler({ type: "tokens", workspace_id: "ws-nope" });
+      const result = await registry.call("billing_create_checkout", { type: "tokens", workspace_id: "ws-nope" });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain(
         "Workspace not found or you are not a member",
@@ -90,8 +86,7 @@ describe("billing tools", () => {
 
     it("should verify workspace membership with correct params", async () => {
       mockPrisma.workspaceMember.findFirst.mockResolvedValue({ role: "OWNER" });
-      const handler = registry.handlers.get("billing_create_checkout")!;
-      await handler({ type: "tokens", workspace_id: "ws-check" });
+      await registry.call("billing_create_checkout", { type: "tokens", workspace_id: "ws-check" });
       expect(mockPrisma.workspaceMember.findFirst).toHaveBeenCalledWith({
         where: { userId, workspaceId: "ws-check" },
         select: { role: true },
@@ -100,16 +95,14 @@ describe("billing tools", () => {
 
     it("should include checkout instructions in result", async () => {
       mockPrisma.workspaceMember.findFirst.mockResolvedValue({ role: "OWNER" });
-      const handler = registry.handlers.get("billing_create_checkout")!;
-      const result = await handler({ type: "tokens", workspace_id: "ws-1" });
+      const result = await registry.call("billing_create_checkout", { type: "tokens", workspace_id: "ws-1" });
       expect(getText(result)).toContain("billing page");
       expect(getText(result)).toContain("POST /api/stripe/checkout");
     });
 
     it("should include price_id when provided", async () => {
       mockPrisma.workspaceMember.findFirst.mockResolvedValue({ role: "OWNER" });
-      const handler = registry.handlers.get("billing_create_checkout")!;
-      const result = await handler({
+      const result = await registry.call("billing_create_checkout", {
         type: "subscription",
         workspace_id: "ws-1",
         price_id: "price_abc123",
@@ -120,8 +113,7 @@ describe("billing tools", () => {
 
     it("should include success and cancel URLs when provided", async () => {
       mockPrisma.workspaceMember.findFirst.mockResolvedValue({ role: "OWNER" });
-      const handler = registry.handlers.get("billing_create_checkout")!;
-      const result = await handler({
+      const result = await registry.call("billing_create_checkout", {
         type: "subscription",
         workspace_id: "ws-1",
         price_id: "price_xyz",
@@ -135,8 +127,7 @@ describe("billing tools", () => {
 
     it("should omit optional fields when not provided", async () => {
       mockPrisma.workspaceMember.findFirst.mockResolvedValue({ role: "OWNER" });
-      const handler = registry.handlers.get("billing_create_checkout")!;
-      const result = await handler({ type: "tokens", workspace_id: "ws-1" });
+      const result = await registry.call("billing_create_checkout", { type: "tokens", workspace_id: "ws-1" });
       const text = getText(result);
       expect(text).not.toContain("**Price ID:**");
       expect(text).not.toContain("**Success URL:**");
@@ -162,8 +153,7 @@ describe("billing tools", () => {
         tier: "PRO",
         workspaceId: "ws-abc",
       });
-      const handler = registry.handlers.get("billing_status")!;
-      const result = await handler({});
+      const result = await registry.call("billing_status", {});
       const text = getText(result);
       expect(text).toContain("Billing Status");
       // Personal Subscription section
@@ -194,8 +184,7 @@ describe("billing tools", () => {
       });
       mockPrisma.workspace.findMany.mockResolvedValue([]);
       mockGetBalance.mockResolvedValue(null);
-      const handler = registry.handlers.get("billing_status")!;
-      const result = await handler({});
+      const result = await registry.call("billing_status", {});
       expect(getText(result)).toContain("**Active Stripe Subscription:** No");
       expect(getText(result)).toContain("FREE");
       expect(getText(result)).toContain("**Remaining:** 50");
@@ -212,16 +201,14 @@ describe("billing tools", () => {
       });
       mockPrisma.workspace.findMany.mockResolvedValue([]);
       mockGetBalance.mockResolvedValue(null);
-      const handler = registry.handlers.get("billing_status")!;
-      const result = await handler({});
+      const result = await registry.call("billing_status", {});
       expect(getText(result)).toContain("**Remaining:** 0");
       expect(getText(result)).toContain("**Used:** 300");
     });
 
     it("should return error when no personal workspace found", async () => {
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("billing_status")!;
-      const result = await handler({});
+      const result = await registry.call("billing_status", {});
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("No personal workspace found");
     });
@@ -237,8 +224,7 @@ describe("billing tools", () => {
       });
       mockPrisma.workspace.findMany.mockResolvedValue([]);
       mockGetBalance.mockResolvedValue(null);
-      const handler = registry.handlers.get("billing_status")!;
-      await handler({});
+      await registry.call("billing_status", {});
       expect(mockPrisma.workspace.findFirst).toHaveBeenCalledWith({
         where: {
           isPersonal: true,
@@ -273,8 +259,7 @@ describe("billing tools", () => {
         tier: "FREE",
         workspaceId: "ws-123",
       });
-      const handler = registry.handlers.get("billing_status")!;
-      await handler({});
+      await registry.call("billing_status", {});
       expect(mockGetBalance).toHaveBeenCalledWith(userId);
     });
 
@@ -295,8 +280,7 @@ describe("billing tools", () => {
         tier: "STARTER",
         workspaceId: "ws-zero",
       });
-      const handler = registry.handlers.get("billing_status")!;
-      const result = await handler({});
+      const result = await registry.call("billing_status", {});
       const text = getText(result);
       expect(text).toContain("**Remaining:** 0");
       expect(text).toContain("**Used:** 500");
@@ -313,8 +297,7 @@ describe("billing tools", () => {
       });
       mockPrisma.workspace.findMany.mockResolvedValue([]);
       mockGetBalance.mockRejectedValue(new Error("Service unavailable"));
-      const handler = registry.handlers.get("billing_status")!;
-      const result = await handler({});
+      const result = await registry.call("billing_status", {});
       const text = getText(result);
       expect(text).toContain("Billing Status");
       expect(text).toContain("**Remaining:** 50");
@@ -350,8 +333,7 @@ describe("billing tools", () => {
       ]);
       mockGetBalance.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("billing_status")!;
-      const result = await handler({});
+      const result = await registry.call("billing_status", {});
       const text = getText(result);
 
       // Personal section
@@ -381,8 +363,7 @@ describe("billing tools", () => {
       mockPrisma.workspace.findMany.mockResolvedValue([]);
       mockGetBalance.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("billing_status")!;
-      await handler({});
+      await registry.call("billing_status", {});
 
       expect(mockPrisma.workspace.findMany).toHaveBeenCalledWith({
         where: {
@@ -413,8 +394,7 @@ describe("billing tools", () => {
       mockPrisma.workspace.findMany.mockResolvedValue([]);
       mockGetBalance.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("billing_status")!;
-      const result = await handler({});
+      const result = await registry.call("billing_status", {});
       const text = getText(result);
       expect(text).not.toContain("Team Workspaces");
     });

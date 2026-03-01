@@ -24,12 +24,11 @@ export function registerCalendarTools(
                 scheduled_at: z.string().min(1).describe("ISO 8601 date for scheduling."),
             })
             .meta({ category: "calendar", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("calendar_schedule_post", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     await resolveWorkspace(userId, args.workspace_slug);
-                    const post = await prisma.socialPost.create({
+                    const post = await ctx.prisma.socialPost.create({
                         data: {
                             createdById: userId,
                             content: args.content,
@@ -37,7 +36,7 @@ export function registerCalendarTools(
                             scheduledAt: new Date(args.scheduled_at),
                         },
                     });
-                    await prisma.scheduledPostAccount.createMany({
+                    await ctx.prisma.scheduledPostAccount.createMany({
                         data: args.account_ids.map(accountId => ({
                             postId: post.id,
                             accountId,
@@ -66,10 +65,9 @@ export function registerCalendarTools(
                 ),
             })
             .meta({ category: "calendar", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("calendar_list_scheduled", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
                     const where: Record<string, unknown> = {
                         workspaceId: workspace.id,
@@ -81,7 +79,7 @@ export function registerCalendarTools(
                         if (args.to_date) scheduledAt.lte = new Date(args.to_date);
                         where.scheduledAt = scheduledAt;
                     }
-                    const posts = await prisma.scheduledPost.findMany({
+                    const posts = await ctx.prisma.scheduledPost.findMany({
                         where,
                         orderBy: { scheduledAt: "asc" },
                         take: args.limit,
@@ -116,12 +114,11 @@ export function registerCalendarTools(
                 post_id: z.string().min(1).describe("Scheduled post ID to cancel."),
             })
             .meta({ category: "calendar", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("calendar_cancel_post", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     await resolveWorkspace(userId, args.workspace_slug);
-                    const post = await prisma.scheduledPost.findFirst({
+                    const post = await ctx.prisma.scheduledPost.findFirst({
                         where: { id: args.post_id, status: "SCHEDULED" },
                     });
                     if (!post) {
@@ -129,7 +126,7 @@ export function registerCalendarTools(
                             "**Error: NOT_FOUND**\nScheduled post not found or already cancelled.\n**Retryable:** false",
                         );
                     }
-                    await prisma.scheduledPost.update({
+                    await ctx.prisma.scheduledPost.update({
                         where: { id: args.post_id },
                         data: { status: "CANCELLED" },
                     });
@@ -149,12 +146,11 @@ export function registerCalendarTools(
                 account_id: z.string().min(1).describe("Social account ID."),
             })
             .meta({ category: "calendar", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("calendar_get_best_times", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     await resolveWorkspace(userId, args.workspace_slug);
-                    const recommendations = await prisma.postingTimeRecommendation.findMany(
+                    const recommendations = await ctx.prisma.postingTimeRecommendation.findMany(
                         {
                             where: { accountId: args.account_id },
                             orderBy: { score: "desc" },
@@ -190,15 +186,14 @@ export function registerCalendarTools(
                 ),
             })
             .meta({ category: "calendar", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("calendar_detect_gaps", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
                     const now = new Date();
                     const endDate = new Date(now);
                     endDate.setDate(endDate.getDate() + args.days_ahead);
-                    const posts = await prisma.scheduledPost.findMany({
+                    const posts = await ctx.prisma.scheduledPost.findMany({
                         where: {
                             workspaceId: workspace.id,
                             status: "SCHEDULED",

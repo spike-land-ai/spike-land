@@ -54,21 +54,18 @@ describe("codespace tools", () => {
 
   describe("validateCodeSpaceId", () => {
     it("should throw on invalid codespace ID", async () => {
-      const handler = registry.handlers.get("codespace_update")!;
-      await expect(handler({ codespace_id: "bad id!@#", code: "hello" }))
+      await expect(registry.call("codespace_update", { codespace_id: "bad id!@#", code: "hello" }))
         .rejects.toThrow("Invalid codespace ID format");
     });
 
     it("should throw on codespace ID with spaces", async () => {
-      const handler = registry.handlers.get("codespace_run")!;
-      await expect(handler({ codespace_id: "bad space" })).rejects.toThrow(
+      await expect(registry.call("codespace_run", { codespace_id: "bad space" })).rejects.toThrow(
         "Invalid codespace ID format",
       );
     });
 
     it("should throw on codespace ID with special chars", async () => {
-      const handler = registry.handlers.get("codespace_get")!;
-      await expect(handler({ codespace_id: "../../etc/passwd" })).rejects
+      await expect(registry.call("codespace_get", { codespace_id: "../../etc/passwd" })).rejects
         .toThrow("Invalid codespace ID format");
     });
   });
@@ -95,8 +92,7 @@ describe("codespace tools", () => {
         messages: [],
       });
 
-      const handler = registry.handlers.get("codespace_update")!;
-      const result = await handler({
+      const result = await registry.call("codespace_update", {
         codespace_id: "test-app",
         code: "export default () => <div>Hello</div>",
       });
@@ -110,8 +106,7 @@ describe("codespace tools", () => {
     it("should return error on SessionService failure", async () => {
       mockGetOrCreateSession.mockRejectedValue(new Error("DB error"));
 
-      const handler = registry.handlers.get("codespace_update")!;
-      const result = await handler({
+      const result = await registry.call("codespace_update", {
         codespace_id: "test-app",
         code: "bad code",
       });
@@ -131,8 +126,7 @@ describe("codespace tools", () => {
       });
       mockTranspileCode.mockRejectedValue(new Error("Syntax error"));
 
-      const handler = registry.handlers.get("codespace_update")!;
-      const result = await handler({
+      const result = await registry.call("codespace_update", {
         codespace_id: "test-app",
         code: "bad syntax",
       });
@@ -143,8 +137,7 @@ describe("codespace tools", () => {
     it("should handle non-Error thrown values", async () => {
       mockGetOrCreateSession.mockRejectedValue("raw string error");
 
-      const handler = registry.handlers.get("codespace_update")!;
-      const result = await handler({ codespace_id: "test-app", code: "code" });
+      const result = await registry.call("codespace_update", { codespace_id: "test-app", code: "code" });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("Unknown error");
     });
@@ -172,16 +165,14 @@ describe("codespace tools", () => {
         messages: [],
       });
 
-      const handler = registry.handlers.get("codespace_run")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_run", { codespace_id: "test-app" });
       expect(getText(result)).toContain("Transpiled");
     });
 
     it("should return error when codespace not found", async () => {
       mockGetSession.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("codespace_run")!;
-      const result = await handler({ codespace_id: "missing" });
+      const result = await registry.call("codespace_run", { codespace_id: "missing" });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("not found");
     });
@@ -198,16 +189,14 @@ describe("codespace tools", () => {
       });
       mockTranspileCode.mockRejectedValue(new Error("Failed"));
 
-      const handler = registry.handlers.get("codespace_run")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_run", { codespace_id: "test-app" });
       expect(getText(result)).toContain("Error");
     });
 
     it("should handle non-Error thrown values", async () => {
       mockGetSession.mockRejectedValue("raw string error");
 
-      const handler = registry.handlers.get("codespace_run")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_run", { codespace_id: "test-app" });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("Unknown error");
     });
@@ -221,8 +210,7 @@ describe("codespace tools", () => {
         status: 200,
         arrayBuffer: () => Promise.resolve(imageBuffer),
       });
-      const handler = registry.handlers.get("codespace_screenshot")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_screenshot", { codespace_id: "test-app" });
       const content = (result as {
         content: Array<
           { type: string; text?: string; data?: string; mimeType?: string; }
@@ -238,16 +226,14 @@ describe("codespace tools", () => {
         ok: false,
         status: 500,
       });
-      const handler = registry.handlers.get("codespace_screenshot")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_screenshot", { codespace_id: "test-app" });
       expect(getText(result)).toContain("Error");
     });
 
     it("should return error on fetch exception", async () => {
       mockFetch.mockRejectedValue(new Error("Network timeout"));
 
-      const handler = registry.handlers.get("codespace_screenshot")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_screenshot", { codespace_id: "test-app" });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("Network timeout");
     });
@@ -255,8 +241,7 @@ describe("codespace tools", () => {
     it("should handle non-Error thrown in screenshot catch", async () => {
       mockFetch.mockRejectedValue("raw string error");
 
-      const handler = registry.handlers.get("codespace_screenshot")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_screenshot", { codespace_id: "test-app" });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("Unknown error");
     });
@@ -273,8 +258,7 @@ describe("codespace tools", () => {
         css: "",
         messages: [],
       });
-      const handler = registry.handlers.get("codespace_get")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_get", { codespace_id: "test-app" });
       expect(getText(result)).toContain("CodeSpace Details");
       expect(getText(result)).toContain("Source Code");
     });
@@ -282,8 +266,7 @@ describe("codespace tools", () => {
     it("should return error when codespace not found", async () => {
       mockGetSession.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("codespace_get")!;
-      const result = await handler({ codespace_id: "missing" });
+      const result = await registry.call("codespace_get", { codespace_id: "missing" });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("not found");
     });
@@ -291,16 +274,14 @@ describe("codespace tools", () => {
     it("should return error on service failure", async () => {
       mockGetSession.mockRejectedValue(new Error("DB down"));
 
-      const handler = registry.handlers.get("codespace_get")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_get", { codespace_id: "test-app" });
       expect(getText(result)).toContain("Error");
     });
 
     it("should handle non-Error thrown in codespace_get catch", async () => {
       mockGetSession.mockRejectedValue("raw string error");
 
-      const handler = registry.handlers.get("codespace_get")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_get", { codespace_id: "test-app" });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("Unknown error");
     });
@@ -313,8 +294,7 @@ describe("codespace tools", () => {
         status: 200,
         json: () => Promise.resolve({ id: "app-1", name: "My App" }),
       });
-      const handler = registry.handlers.get("codespace_link_app")!;
-      const result = await handler({
+      const result = await registry.call("codespace_link_app", {
         codespace_id: "test-app",
         app_id: "app-1",
       });
@@ -327,8 +307,7 @@ describe("codespace tools", () => {
         status: 200,
         json: () => Promise.resolve({ id: "app-2", name: "New App" }),
       });
-      const handler = registry.handlers.get("codespace_link_app")!;
-      const result = await handler({
+      const result = await registry.call("codespace_link_app", {
         codespace_id: "test-app",
         app_name: "New App",
         app_description: "Description of app",
@@ -337,8 +316,7 @@ describe("codespace tools", () => {
     });
 
     it("should error without app_id or app_name", async () => {
-      const handler = registry.handlers.get("codespace_link_app")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_link_app", { codespace_id: "test-app" });
       expect(getText(result)).toContain("app_id or app_name required");
     });
 
@@ -348,8 +326,7 @@ describe("codespace tools", () => {
         status: 404,
         json: () => Promise.resolve({ error: "App not found" }),
       });
-      const handler = registry.handlers.get("codespace_link_app")!;
-      const result = await handler({
+      const result = await registry.call("codespace_link_app", {
         codespace_id: "test-app",
         app_id: "bad-id",
       });
@@ -362,8 +339,7 @@ describe("codespace tools", () => {
         status: 400,
         json: () => Promise.resolve({ error: "Validation failed" }),
       });
-      const handler = registry.handlers.get("codespace_link_app")!;
-      const result = await handler({
+      const result = await registry.call("codespace_link_app", {
         codespace_id: "test-app",
         app_name: "Bad App",
       });
@@ -386,8 +362,7 @@ describe("codespace tools", () => {
             },
           ]),
       });
-      const handler = registry.handlers.get("codespace_list_my_apps")!;
-      const result = await handler({});
+      const result = await registry.call("codespace_list_my_apps", {});
       expect(getText(result)).toContain("My Apps");
       expect(getText(result)).toContain("App 1");
     });
@@ -398,15 +373,13 @@ describe("codespace tools", () => {
         status: 200,
         json: () => Promise.resolve([]),
       });
-      const handler = registry.handlers.get("codespace_list_my_apps")!;
-      const result = await handler({});
+      const result = await registry.call("codespace_list_my_apps", {});
       expect(getText(result)).toContain("No apps found");
     });
 
     it("should return error on fetch failure", async () => {
       mockFetch.mockRejectedValue(new Error("Service unavailable"));
-      const handler = registry.handlers.get("codespace_list_my_apps")!;
-      const result = await handler({});
+      const result = await registry.call("codespace_list_my_apps", {});
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("Service unavailable");
     });
@@ -420,16 +393,14 @@ describe("codespace tools", () => {
             { id: "app-1", name: "App No CS", status: "ACTIVE" },
           ]),
       });
-      const handler = registry.handlers.get("codespace_list_my_apps")!;
-      const result = await handler({});
+      const result = await registry.call("codespace_list_my_apps", {});
       expect(getText(result)).toContain("App No CS");
       expect(getText(result)).not.toContain("Codespace:");
     });
 
     it("should handle non-Error thrown from spikeLandRequest", async () => {
       mockFetch.mockRejectedValue("string error");
-      const handler = registry.handlers.get("codespace_list_my_apps")!;
-      const result = await handler({});
+      const result = await registry.call("codespace_list_my_apps", {});
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("Unknown error");
     });
@@ -440,8 +411,7 @@ describe("codespace tools", () => {
         status: 500,
         json: () => Promise.resolve({}),
       });
-      const handler = registry.handlers.get("codespace_list_my_apps")!;
-      const result = await handler({});
+      const result = await registry.call("codespace_list_my_apps", {});
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("API error: 500");
     });
@@ -452,8 +422,7 @@ describe("codespace tools", () => {
         status: 200,
         json: () => Promise.resolve(null),
       });
-      const handler = registry.handlers.get("codespace_list_my_apps")!;
-      const result = await handler({});
+      const result = await registry.call("codespace_list_my_apps", {});
       expect(getText(result)).toContain("My Apps (0)");
       expect(getText(result)).toContain("No apps found");
     });
@@ -472,8 +441,7 @@ describe("codespace tools", () => {
         "import { test } from 'vitest';\ntest('util', () => {});",
       );
 
-      const handler = registry.handlers.get("codespace_run_tests")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_run_tests", { codespace_id: "test-app" });
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("Test files (2)");
       expect(getText(result)).toContain("App.test.tsx");
@@ -484,8 +452,7 @@ describe("codespace tools", () => {
       const fs = getFilesystem("test-app");
       fs.set("/src/App.tsx", "export default () => <div/>");
 
-      const handler = registry.handlers.get("codespace_run_tests")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_run_tests", { codespace_id: "test-app" });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("No test files found");
     });
@@ -496,8 +463,7 @@ describe("codespace tools", () => {
       fs.set("/src/App.test.tsx", "test('renders', () => {});");
       fs.set("/src/utils.spec.ts", "test('util', () => {});");
 
-      const handler = registry.handlers.get("codespace_run_tests")!;
-      const result = await handler({
+      const result = await registry.call("codespace_run_tests", {
         codespace_id: "test-app",
         test_path: "/src/App.test.tsx",
       });
@@ -511,8 +477,7 @@ describe("codespace tools", () => {
       const fs = getFilesystem("test-app");
       fs.set("/src/App.test.tsx", "test('renders', () => {});");
 
-      const handler = registry.handlers.get("codespace_run_tests")!;
-      const result = await handler({
+      const result = await registry.call("codespace_run_tests", {
         codespace_id: "test-app",
         test_path: "src/App.test.tsx",
       });
@@ -521,15 +486,13 @@ describe("codespace tools", () => {
     });
 
     it("should return error when codespace has no files", async () => {
-      const handler = registry.handlers.get("codespace_run_tests")!;
-      const result = await handler({ codespace_id: "empty-cs" });
+      const result = await registry.call("codespace_run_tests", { codespace_id: "empty-cs" });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("No files in codespace");
     });
 
     it("should throw on invalid codespace ID", async () => {
-      const handler = registry.handlers.get("codespace_run_tests")!;
-      await expect(handler({ codespace_id: "bad id!@#" })).rejects.toThrow(
+      await expect(registry.call("codespace_run_tests", { codespace_id: "bad id!@#" })).rejects.toThrow(
         "Invalid codespace ID format",
       );
     });
@@ -538,8 +501,7 @@ describe("codespace tools", () => {
       const fs = getFilesystem("test-app");
       fs.set("src/App.test.tsx", "test('renders', () => {});");
 
-      const handler = registry.handlers.get("codespace_run_tests")!;
-      const result = await handler({
+      const result = await registry.call("codespace_run_tests", {
         codespace_id: "test-app",
         test_path: "/src/App.test.tsx",
       });
@@ -551,8 +513,7 @@ describe("codespace tools", () => {
       const fs = getFilesystem("test-app");
       fs.set("/src/empty.test.ts", "");
 
-      const handler = registry.handlers.get("codespace_run_tests")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_run_tests", { codespace_id: "test-app" });
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("empty.test.ts");
       expect(getText(result)).toContain("1 lines");
@@ -562,8 +523,7 @@ describe("codespace tools", () => {
       const fs = getFilesystem("test-app");
       fs.set("/src/App.test.tsx", "line1\nline2\nline3");
 
-      const handler = registry.handlers.get("codespace_run_tests")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_run_tests", { codespace_id: "test-app" });
       expect(getText(result)).toContain("3 lines");
     });
 
@@ -571,8 +531,7 @@ describe("codespace tools", () => {
       const fs = getFilesystem("test-app");
       fs.set("/src/App.tsx", "export default () => <div/>");
 
-      const handler = registry.handlers.get("codespace_run_tests")!;
-      const result = await handler({
+      const result = await registry.call("codespace_run_tests", {
         codespace_id: "test-app",
         test_path: "/src/missing.test.tsx",
       });
@@ -588,8 +547,7 @@ describe("codespace tools", () => {
       fs.set("/src/App.tsx", "export default () => <div/>");
       fs.set("/src/App.test.tsx", "test('renders', () => {});");
 
-      const handler = registry.handlers.get("codespace_generate_variant")!;
-      const result = await handler({
+      const result = await registry.call("codespace_generate_variant", {
         codespace_id: "test-app",
         spec: "Add a button",
       });
@@ -604,8 +562,7 @@ describe("codespace tools", () => {
       const fs = getFilesystem("test-app");
       fs.set("/src/App.tsx", "export default () => <div/>");
 
-      const handler = registry.handlers.get("codespace_generate_variant")!;
-      const result = await handler({ codespace_id: "test-app", count: 5 });
+      const result = await registry.call("codespace_generate_variant", { codespace_id: "test-app", count: 5 });
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("test-app-v1");
       expect(getText(result)).toContain("test-app-v5");
@@ -615,8 +572,7 @@ describe("codespace tools", () => {
       const fs = getFilesystem("test-app");
       fs.set("/src/App.tsx", "export default () => <div/>");
 
-      const handler = registry.handlers.get("codespace_generate_variant")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_generate_variant", { codespace_id: "test-app" });
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("test-app-v1");
       expect(getText(result)).toContain("test-app-v3");
@@ -624,22 +580,19 @@ describe("codespace tools", () => {
     });
 
     it("should report no test files when codespace is empty", async () => {
-      const handler = registry.handlers.get("codespace_generate_variant")!;
-      const result = await handler({ codespace_id: "empty-cs" });
+      const result = await registry.call("codespace_generate_variant", { codespace_id: "empty-cs" });
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("**Test files:** none");
       expect(getText(result)).toContain("**Entry point:** missing");
     });
 
     it("should report spec as none when omitted", async () => {
-      const handler = registry.handlers.get("codespace_generate_variant")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_generate_variant", { codespace_id: "test-app" });
       expect(getText(result)).toContain("**Spec:** (none)");
     });
 
     it("should throw on invalid codespace ID", async () => {
-      const handler = registry.handlers.get("codespace_generate_variant")!;
-      await expect(handler({ codespace_id: "bad id!@#" })).rejects.toThrow(
+      await expect(registry.call("codespace_generate_variant", { codespace_id: "bad id!@#" })).rejects.toThrow(
         "Invalid codespace ID format",
       );
     });
@@ -651,8 +604,7 @@ describe("codespace tools", () => {
       fs.set("/src/App.tsx", "export default () => <div/>");
       fs.set("/src/App.test.tsx", "test('renders', () => {});");
 
-      const handler = registry.handlers.get("codespace_regenerate")!;
-      const result = await handler({
+      const result = await registry.call("codespace_regenerate", {
         codespace_id: "test-app",
         from_tests: true,
       });
@@ -667,16 +619,14 @@ describe("codespace tools", () => {
       fs.set("/src/App.tsx", "export default () => <div/>");
       fs.set("/src/App.test.tsx", "test('renders', () => {});");
 
-      const handler = registry.handlers.get("codespace_regenerate")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_regenerate", { codespace_id: "test-app" });
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("Regeneration request accepted");
       expect(getText(result)).toContain("auto (tests found)");
     });
 
     it("should accept version restore request", async () => {
-      const handler = registry.handlers.get("codespace_regenerate")!;
-      const result = await handler({
+      const result = await registry.call("codespace_regenerate", {
         codespace_id: "test-app",
         from_version: 42,
       });
@@ -689,8 +639,7 @@ describe("codespace tools", () => {
       const fs = getFilesystem("test-app");
       fs.set("/src/App.tsx", "export default () => <div/>");
 
-      const handler = registry.handlers.get("codespace_regenerate")!;
-      const result = await handler({
+      const result = await registry.call("codespace_regenerate", {
         codespace_id: "test-app",
         from_tests: true,
       });
@@ -702,15 +651,13 @@ describe("codespace tools", () => {
       const fs = getFilesystem("test-app");
       fs.set("/src/App.tsx", "export default () => <div/>");
 
-      const handler = registry.handlers.get("codespace_regenerate")!;
-      const result = await handler({ codespace_id: "test-app" });
+      const result = await registry.call("codespace_regenerate", { codespace_id: "test-app" });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("No test files found");
     });
 
     it("should throw on invalid codespace ID", async () => {
-      const handler = registry.handlers.get("codespace_regenerate")!;
-      await expect(handler({ codespace_id: "bad id!@#" })).rejects.toThrow(
+      await expect(registry.call("codespace_regenerate", { codespace_id: "bad id!@#" })).rejects.toThrow(
         "Invalid codespace ID format",
       );
     });

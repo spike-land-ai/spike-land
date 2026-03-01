@@ -77,8 +77,7 @@ describe("audio-effects tools", () => {
     it("should apply a reverb effect and return effect details", async () => {
       mockPrisma.audioTrack.findUnique.mockResolvedValue(TRACK);
 
-      const handler = registry.handlers.get("audio_apply_effect")!;
-      const result = await handler({ track_id: "track-1", effect_type: "reverb" });
+      const result = await registry.call("audio_apply_effect", { track_id: "track-1", effect_type: "reverb" });
 
       const text = getText(result);
       expect(text).toContain("Effect Applied");
@@ -93,8 +92,7 @@ describe("audio-effects tools", () => {
     it("should merge caller-supplied params with defaults", async () => {
       mockPrisma.audioTrack.findUnique.mockResolvedValue(TRACK);
 
-      const handler = registry.handlers.get("audio_apply_effect")!;
-      const result = await handler({
+      const result = await registry.call("audio_apply_effect", {
         track_id: "track-1",
         effect_type: "delay",
         params: { wet: 0.8, feedback: 0.5 },
@@ -109,8 +107,7 @@ describe("audio-effects tools", () => {
     it("should return NOT_FOUND when track does not exist", async () => {
       mockPrisma.audioTrack.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("audio_apply_effect")!;
-      const result = await handler({ track_id: "no-such-track", effect_type: "eq" });
+      const result = await registry.call("audio_apply_effect", { track_id: "no-such-track", effect_type: "eq" });
 
       expect(getText(result)).toContain("NOT_FOUND");
     });
@@ -121,15 +118,13 @@ describe("audio-effects tools", () => {
         project: { ...TRACK.project, userId: OTHER_USER_ID },
       });
 
-      const handler = registry.handlers.get("audio_apply_effect")!;
-      const result = await handler({ track_id: "track-1", effect_type: "normalize" });
+      const result = await registry.call("audio_apply_effect", { track_id: "track-1", effect_type: "normalize" });
 
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
 
     it("should work for all supported effect types", async () => {
       mockPrisma.audioTrack.findUnique.mockResolvedValue(TRACK);
-      const handler = registry.handlers.get("audio_apply_effect")!;
 
       for (
         const effectType of [
@@ -144,7 +139,7 @@ describe("audio-effects tools", () => {
       ) {
         vi.clearAllMocks();
         mockPrisma.audioTrack.findUnique.mockResolvedValue(TRACK);
-        const result = await handler({ track_id: "track-1", effect_type: effectType });
+        const result = await registry.call("audio_apply_effect", { track_id: "track-1", effect_type: effectType });
         expect(getText(result)).toContain("Effect Applied");
         expect(getText(result)).toContain(effectType);
       }
@@ -160,8 +155,7 @@ describe("audio-effects tools", () => {
         _count: { tracks: 4 },
       });
 
-      const handler = registry.handlers.get("audio_export_mix")!;
-      const result = await handler({ project_id: "proj-1", format: "mp3" });
+      const result = await registry.call("audio_export_mix", { project_id: "proj-1", format: "mp3" });
 
       const text = getText(result);
       expect(text).toContain("Export Job Created");
@@ -179,8 +173,7 @@ describe("audio-effects tools", () => {
         _count: { tracks: 2 },
       });
 
-      const handler = registry.handlers.get("audio_export_mix")!;
-      const result = await handler({ project_id: "proj-1", format: "wav" });
+      const result = await registry.call("audio_export_mix", { project_id: "proj-1", format: "wav" });
 
       expect(getText(result)).toContain("lossless");
     });
@@ -191,8 +184,7 @@ describe("audio-effects tools", () => {
         _count: { tracks: 2 },
       });
 
-      const handler = registry.handlers.get("audio_export_mix")!;
-      const result = await handler({ project_id: "proj-1", format: "mp3", quality: "low" });
+      const result = await registry.call("audio_export_mix", { project_id: "proj-1", format: "mp3", quality: "low" });
 
       expect(getText(result)).toContain("low");
     });
@@ -200,8 +192,7 @@ describe("audio-effects tools", () => {
     it("should return NOT_FOUND when project does not exist", async () => {
       mockPrisma.audioMixerProject.findFirst.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("audio_export_mix")!;
-      const result = await handler({ project_id: "no-proj", format: "flac" });
+      const result = await registry.call("audio_export_mix", { project_id: "no-proj", format: "flac" });
 
       expect(getText(result)).toContain("NOT_FOUND");
     });
@@ -212,8 +203,7 @@ describe("audio-effects tools", () => {
         _count: { tracks: 1 },
       });
 
-      const handler = registry.handlers.get("audio_export_mix")!;
-      const result = await handler({ project_id: "proj-1", format: "ogg" });
+      const result = await registry.call("audio_export_mix", { project_id: "proj-1", format: "ogg" });
 
       const text = getText(result);
       expect(text).toMatch(/\.ogg/);
@@ -229,8 +219,7 @@ describe("audio-effects tools", () => {
         project: { userId: USER_ID },
       });
 
-      const handler = registry.handlers.get("audio_get_waveform")!;
-      const result = await handler({ track_id: "track-1" });
+      const result = await registry.call("audio_get_waveform", { track_id: "track-1" });
 
       const text = getText(result);
       expect(text).toContain("Waveform Data");
@@ -254,8 +243,7 @@ describe("audio-effects tools", () => {
         project: { userId: USER_ID },
       });
 
-      const handler = registry.handlers.get("audio_get_waveform")!;
-      const result = await handler({ track_id: "track-1", resolution: 50 });
+      const result = await registry.call("audio_get_waveform", { track_id: "track-1", resolution: 50 });
 
       const text = getText(result);
       expect(text).toContain("50 points");
@@ -269,8 +257,7 @@ describe("audio-effects tools", () => {
     it("should return NOT_FOUND when track does not exist", async () => {
       mockPrisma.audioTrack.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("audio_get_waveform")!;
-      const result = await handler({ track_id: "ghost" });
+      const result = await registry.call("audio_get_waveform", { track_id: "ghost" });
 
       expect(getText(result)).toContain("NOT_FOUND");
     });
@@ -281,8 +268,7 @@ describe("audio-effects tools", () => {
         project: { userId: OTHER_USER_ID },
       });
 
-      const handler = registry.handlers.get("audio_get_waveform")!;
-      const result = await handler({ track_id: "track-1" });
+      const result = await registry.call("audio_get_waveform", { track_id: "track-1" });
 
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
@@ -302,8 +288,7 @@ describe("audio-effects tools", () => {
         sortOrder: 1,
       });
 
-      const handler = registry.handlers.get("audio_duplicate_track")!;
-      const result = await handler({ track_id: "track-1" });
+      const result = await registry.call("audio_duplicate_track", { track_id: "track-1" });
 
       const text = getText(result);
       expect(text).toContain("Track Duplicated");
@@ -334,8 +319,7 @@ describe("audio-effects tools", () => {
         sortOrder: 3,
       });
 
-      const handler = registry.handlers.get("audio_duplicate_track")!;
-      const result = await handler({ track_id: "track-1", new_name: "lead-vocals" });
+      const result = await registry.call("audio_duplicate_track", { track_id: "track-1", new_name: "lead-vocals" });
 
       expect(getText(result)).toContain("lead-vocals");
       expect(mockPrisma.audioTrack.create).toHaveBeenCalledWith(
@@ -348,8 +332,7 @@ describe("audio-effects tools", () => {
     it("should return NOT_FOUND when source track does not exist", async () => {
       mockPrisma.audioTrack.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("audio_duplicate_track")!;
-      const result = await handler({ track_id: "ghost" });
+      const result = await registry.call("audio_duplicate_track", { track_id: "ghost" });
 
       expect(getText(result)).toContain("NOT_FOUND");
       expect(mockPrisma.audioTrack.create).not.toHaveBeenCalled();
@@ -361,8 +344,7 @@ describe("audio-effects tools", () => {
         project: { ...TRACK.project, userId: OTHER_USER_ID },
       });
 
-      const handler = registry.handlers.get("audio_duplicate_track")!;
-      const result = await handler({ track_id: "track-1" });
+      const result = await registry.call("audio_duplicate_track", { track_id: "track-1" });
 
       expect(getText(result)).toContain("PERMISSION_DENIED");
       expect(mockPrisma.audioTrack.create).not.toHaveBeenCalled();
@@ -381,8 +363,7 @@ describe("audio-effects tools", () => {
       ]);
       mockPrisma.audioTrack.update.mockResolvedValue({});
 
-      const handler = registry.handlers.get("audio_reorder_tracks")!;
-      const result = await handler({
+      const result = await registry.call("audio_reorder_tracks", {
         project_id: "proj-1",
         track_ids: ["t3", "t1", "t2"],
       });
@@ -414,8 +395,7 @@ describe("audio-effects tools", () => {
     it("should return NOT_FOUND when project does not exist", async () => {
       mockPrisma.audioMixerProject.findFirst.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("audio_reorder_tracks")!;
-      const result = await handler({ project_id: "no-proj", track_ids: ["t1"] });
+      const result = await registry.call("audio_reorder_tracks", { project_id: "no-proj", track_ids: ["t1"] });
 
       expect(getText(result)).toContain("NOT_FOUND");
       expect(mockPrisma.audioTrack.update).not.toHaveBeenCalled();
@@ -428,8 +408,7 @@ describe("audio-effects tools", () => {
         { id: "t2", name: "drums.mp3" },
       ]);
 
-      const handler = registry.handlers.get("audio_reorder_tracks")!;
-      const result = await handler({
+      const result = await registry.call("audio_reorder_tracks", {
         project_id: "proj-1",
         track_ids: ["t1", "t2", "t-unknown"],
       });
@@ -447,8 +426,7 @@ describe("audio-effects tools", () => {
       ]);
       mockPrisma.audioTrack.update.mockResolvedValue({});
 
-      const handler = registry.handlers.get("audio_reorder_tracks")!;
-      const result = await handler({ project_id: "proj-1", track_ids: ["t1"] });
+      const result = await registry.call("audio_reorder_tracks", { project_id: "proj-1", track_ids: ["t1"] });
 
       expect(getText(result)).toContain("Tracks Reordered");
       expect(mockPrisma.audioTrack.update).toHaveBeenCalledTimes(1);

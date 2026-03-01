@@ -321,8 +321,7 @@ import bar from "../bar";`;
         }),
       });
 
-      const handler = registry.handlers.get("context_index_repo")!;
-      const result = await handler({
+      const result = await registry.call("context_index_repo", {
         repo_url: "https://github.com/test/repo",
         branch: "main",
       });
@@ -349,8 +348,7 @@ import bar from "../bar";`;
         }),
       });
 
-      const handler = registry.handlers.get("context_index_repo")!;
-      const result = await handler({
+      const result = await registry.call("context_index_repo", {
         repo_url: "https://github.com/test/nextapp",
         branch: "main",
       });
@@ -362,8 +360,7 @@ import bar from "../bar";`;
     });
 
     it("should return error for invalid GitHub URL", async () => {
-      const handler = registry.handlers.get("context_index_repo")!;
-      const result = await handler({
+      const result = await registry.call("context_index_repo", {
         repo_url: "https://gitlab.com/test/repo",
         branch: "main",
       });
@@ -379,8 +376,7 @@ import bar from "../bar";`;
         statusText: "Not Found",
       });
 
-      const handler = registry.handlers.get("context_index_repo")!;
-      const result = await handler({
+      const result = await registry.call("context_index_repo", {
         repo_url: "https://github.com/test/nonexistent",
         branch: "main",
       });
@@ -396,8 +392,7 @@ import bar from "../bar";`;
         statusText: "Internal Server Error",
       });
 
-      const handler = registry.handlers.get("context_index_repo")!;
-      const result = await handler({
+      const result = await registry.call("context_index_repo", {
         repo_url: "https://github.com/test/repo",
         branch: "main",
       });
@@ -417,8 +412,7 @@ import bar from "../bar";`;
         }),
       });
 
-      const handler = registry.handlers.get("context_index_repo")!;
-      const result = await handler({
+      const result = await registry.call("context_index_repo", {
         repo_url: "https://github.com/test/huge-repo",
         branch: "main",
       });
@@ -439,8 +433,7 @@ import bar from "../bar";`;
         }),
       });
 
-      const handler = registry.handlers.get("context_index_repo")!;
-      const result = await handler({
+      const result = await registry.call("context_index_repo", {
         repo_url: "https://github.com/test/nosize",
         branch: "main",
       });
@@ -463,8 +456,7 @@ import bar from "../bar";`;
         }),
       });
 
-      const handler = registry.handlers.get("context_index_repo")!;
-      const result = await handler({
+      const result = await registry.call("context_index_repo", {
         repo_url: "https://github.com/test/notech",
         branch: "main",
       });
@@ -491,8 +483,7 @@ import bar from "../bar";`;
         }),
       });
 
-      const handler = registry.handlers.get("context_index_repo")!;
-      const result = await handler({
+      const result = await registry.call("context_index_repo", {
         repo_url: "https://github.com/test/equal-dirs",
         branch: "main",
       });
@@ -516,8 +507,7 @@ import bar from "../bar";`;
         }),
       });
 
-      const handler = registry.handlers.get("context_index_repo")!;
-      await handler({
+      await registry.call("context_index_repo", {
         repo_url: "https://github.com/test/repo",
         branch: "dev",
       });
@@ -550,8 +540,7 @@ import bar from "../bar";`;
     });
 
     it("should return relevant files for a task", async () => {
-      const handler = registry.handlers.get("context_pack")!;
-      const result = await handler({
+      const result = await registry.call("context_pack", {
         repo_url: "https://github.com/test/repo",
         task_description: "Fix the auth login flow",
         max_files: 20,
@@ -564,8 +553,7 @@ import bar from "../bar";`;
     });
 
     it("should return error for non-indexed repo", async () => {
-      const handler = registry.handlers.get("context_pack")!;
-      const result = await handler({
+      const result = await registry.call("context_pack", {
         repo_url: "https://github.com/unknown/repo",
         task_description: "Fix something",
         max_files: 20,
@@ -576,8 +564,7 @@ import bar from "../bar";`;
     });
 
     it("should return error for empty keywords", async () => {
-      const handler = registry.handlers.get("context_pack")!;
-      const result = await handler({
+      const result = await registry.call("context_pack", {
         repo_url: "https://github.com/test/repo",
         task_description: "it is",
         max_files: 20,
@@ -597,8 +584,7 @@ import bar from "../bar";`;
         indexedAt: new Date(),
       });
 
-      const handler = registry.handlers.get("context_pack")!;
-      const result = await handler({
+      const result = await registry.call("context_pack", {
         repo_url: "https://github.com/test/empty",
         task_description: "authentication module refactoring",
         max_files: 20,
@@ -609,8 +595,7 @@ import bar from "../bar";`;
     });
 
     it("should respect max_files limit", async () => {
-      const handler = registry.handlers.get("context_pack")!;
-      const result = await handler({
+      const result = await registry.call("context_pack", {
         repo_url: "https://github.com/test/repo",
         task_description: "auth login register helper",
         max_files: 2,
@@ -634,8 +619,7 @@ import bar from "../bar";`;
         indexedAt: new Date(),
       });
 
-      const handler = registry.handlers.get("context_pack")!;
-      const result = await handler({
+      const result = await registry.call("context_pack", {
         repo_url: "https://github.com/test/sizes",
         task_description: "big small files source",
         max_files: 20,
@@ -647,8 +631,7 @@ import bar from "../bar";`;
     });
 
     it("should rank source files higher than test files", async () => {
-      const handler = registry.handlers.get("context_pack")!;
-      const result = await handler({
+      const result = await registry.call("context_pack", {
         repo_url: "https://github.com/test/repo",
         task_description: "login authentication",
         max_files: 20,
@@ -686,8 +669,7 @@ import bar from "../bar";`;
         text: async () => `import { helper } from "../utils/helper";\nimport { z } from "zod";`,
       });
 
-      const handler = registry.handlers.get("context_get_deps")!;
-      const result = await handler({
+      const result = await registry.call("context_get_deps", {
         repo_url: "https://github.com/test/repo",
         file_path: "src/auth/login.ts",
       });
@@ -705,8 +687,7 @@ import bar from "../bar";`;
         text: async () => `const x = 1;`,
       });
 
-      const handler = registry.handlers.get("context_get_deps")!;
-      const result = await handler({
+      const result = await registry.call("context_get_deps", {
         repo_url: "https://github.com/test/repo",
         file_path: "src/auth/login.ts",
       });
@@ -718,8 +699,7 @@ import bar from "../bar";`;
     });
 
     it("should return error for non-indexed repo", async () => {
-      const handler = registry.handlers.get("context_get_deps")!;
-      const result = await handler({
+      const result = await registry.call("context_get_deps", {
         repo_url: "https://github.com/unknown/repo",
         file_path: "src/index.ts",
       });
@@ -729,8 +709,7 @@ import bar from "../bar";`;
     });
 
     it("should return error for file not in index", async () => {
-      const handler = registry.handlers.get("context_get_deps")!;
-      const result = await handler({
+      const result = await registry.call("context_get_deps", {
         repo_url: "https://github.com/test/repo",
         file_path: "src/nonexistent.ts",
       });
@@ -745,8 +724,7 @@ import bar from "../bar";`;
         status: 404,
       });
 
-      const handler = registry.handlers.get("context_get_deps")!;
-      const result = await handler({
+      const result = await registry.call("context_get_deps", {
         repo_url: "https://github.com/test/repo",
         file_path: "src/auth/login.ts",
       });
@@ -762,8 +740,7 @@ import bar from "../bar";`;
         text: async () => `export const VERSION = "1.0.0";`,
       });
 
-      const handler = registry.handlers.get("context_get_deps")!;
-      const result = await handler({
+      const result = await registry.call("context_get_deps", {
         repo_url: "https://github.com/test/repo",
         file_path: "src/utils/helper.ts",
       });
@@ -793,8 +770,7 @@ import bar from "../bar";`;
         text: async () => `const x = 1;`,
       });
 
-      const handler = registry.handlers.get("context_get_deps")!;
-      const result = await handler({
+      const result = await registry.call("context_get_deps", {
         repo_url: "https://github.com/test/many",
         file_path: "src/many/target.ts",
       });
@@ -818,8 +794,7 @@ import bar from "../bar";`;
         indexedAt: new Date(),
       });
 
-      const handler = registry.handlers.get("context_get_deps")!;
-      const result = await handler({
+      const result = await registry.call("context_get_deps", {
         repo_url: fakeUrl,
         file_path: "src/index.ts",
       });
@@ -846,8 +821,7 @@ import bar from "../bar";`;
         text: async () => `export const x = 1;`,
       });
 
-      const handler = registry.handlers.get("context_get_deps")!;
-      const result = await handler({
+      const result = await registry.call("context_get_deps", {
         repo_url: "https://github.com/test/nocode",
         file_path: "docs/readme.ts",
       });

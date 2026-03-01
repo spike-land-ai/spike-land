@@ -19,12 +19,11 @@ export function registerScoutTools(
                 workspace_slug: z.string().min(1).describe("Workspace slug."),
             })
             .meta({ category: "scout", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("scout_list_competitors", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
-                    const competitors = await prisma.scoutCompetitor.findMany({
+                    const competitors = await ctx.prisma.scoutCompetitor.findMany({
                         where: { workspaceId: workspace.id },
                         select: {
                             id: true,
@@ -58,12 +57,11 @@ export function registerScoutTools(
                 handle: z.string().min(1).describe("Competitor handle on the platform."),
             })
             .meta({ category: "scout", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("scout_add_competitor", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
-                    const competitor = await prisma.scoutCompetitor.create({
+                    const competitor = await ctx.prisma.scoutCompetitor.create({
                         data: {
                             workspaceId: workspace.id,
                             name: args.name,
@@ -100,14 +98,13 @@ export function registerScoutTools(
                 ),
             })
             .meta({ category: "scout", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("scout_get_benchmark", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
                     const where: Record<string, unknown> = { workspaceId: workspace.id };
                     if (args.competitor_id) where.competitorId = args.competitor_id;
-                    const benchmarks = await prisma.scoutBenchmark.findMany({
+                    const benchmarks = await ctx.prisma.scoutBenchmark.findMany({
                         where,
                         orderBy: { generatedAt: "desc" },
                         take: 20,
@@ -142,12 +139,11 @@ export function registerScoutTools(
                 ),
             })
             .meta({ category: "scout", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("scout_list_topics", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
-                    const topics = await prisma.scoutTopic.findMany({
+                    const topics = await ctx.prisma.scoutTopic.findMany({
                         where: { workspaceId: workspace.id },
                         orderBy: { createdAt: "desc" },
                         take: args.limit,
@@ -174,16 +170,15 @@ export function registerScoutTools(
                 ),
             })
             .meta({ category: "scout", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("scout_get_insights", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
                     // Get topics for this workspace, optionally filtered
                     const topicWhere: Record<string, unknown> = {
                         workspaceId: workspace.id,
                     };
-                    const topics = await prisma.scoutTopic.findMany({
+                    const topics = await ctx.prisma.scoutTopic.findMany({
                         where: topicWhere,
                         select: { id: true },
                     });
@@ -195,7 +190,7 @@ export function registerScoutTools(
                         );
                     }
 
-                    const results = await prisma.scoutResult.findMany({
+                    const results = await ctx.prisma.scoutResult.findMany({
                         where: { topicId: { in: topicIds } },
                         orderBy: { foundAt: "desc" },
                         take: 10,

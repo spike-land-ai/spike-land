@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   workspace: { findFirst: vi.fn() },
   scoutCompetitor: { findMany: vi.fn(), create: vi.fn() },
   scoutBenchmark: { findMany: vi.fn() },
   scoutTopic: { findMany: vi.fn() },
   scoutResult: { findMany: vi.fn() },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -47,8 +49,7 @@ describe("scout tools", () => {
           updatedAt: new Date("2025-06-01"),
         },
       ]);
-      const handler = registry.handlers.get("scout_list_competitors")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_list_competitors", { workspace_slug: "acme" });
       const text = getText(result);
       expect(text).toContain("Competitors");
       expect(text).toContain("Rival Co");
@@ -58,8 +59,7 @@ describe("scout tools", () => {
 
     it("should show empty message when no competitors", async () => {
       mockPrisma.scoutCompetitor.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("scout_list_competitors")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_list_competitors", { workspace_slug: "acme" });
       expect(getText(result)).toContain("No competitors tracked yet");
     });
 
@@ -74,8 +74,7 @@ describe("scout tools", () => {
           updatedAt: new Date("2025-06-01"),
         },
       ]);
-      const handler = registry.handlers.get("scout_list_competitors")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_list_competitors", { workspace_slug: "acme" });
       const text = getText(result);
       expect(text).toContain("**handleonly**");
       expect(text).toContain("@handleonly");
@@ -90,8 +89,7 @@ describe("scout tools", () => {
         platform: "TWITTER",
         handle: "newrival",
       });
-      const handler = registry.handlers.get("scout_add_competitor")!;
-      const result = await handler({
+      const result = await registry.call("scout_add_competitor", {
         workspace_slug: "acme",
         name: "New Rival",
         platform: "TWITTER",
@@ -125,8 +123,7 @@ describe("scout tools", () => {
           generatedAt: new Date("2025-06-01"),
         },
       ]);
-      const handler = registry.handlers.get("scout_get_benchmark")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_get_benchmark", { workspace_slug: "acme" });
       const text = getText(result);
       expect(text).toContain("Benchmarks");
       expect(text).toContain("Engagement Rate");
@@ -137,8 +134,7 @@ describe("scout tools", () => {
 
     it("should filter by competitor_id when provided", async () => {
       mockPrisma.scoutBenchmark.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("scout_get_benchmark")!;
-      await handler({ workspace_slug: "acme", competitor_id: "c-1" });
+      await registry.call("scout_get_benchmark", { workspace_slug: "acme", competitor_id: "c-1" });
       expect(mockPrisma.scoutBenchmark.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ competitorId: "c-1" }),
@@ -148,8 +144,7 @@ describe("scout tools", () => {
 
     it("should show empty message when no benchmarks", async () => {
       mockPrisma.scoutBenchmark.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("scout_get_benchmark")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_get_benchmark", { workspace_slug: "acme" });
       expect(getText(result)).toContain("No benchmark data available");
     });
 
@@ -157,8 +152,7 @@ describe("scout tools", () => {
       mockPrisma.scoutBenchmark.findMany.mockResolvedValue([
         { generatedAt: new Date("2025-06-01") },
       ]);
-      const handler = registry.handlers.get("scout_get_benchmark")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_get_benchmark", { workspace_slug: "acme" });
       const text = getText(result);
       expect(text).toContain("unknown");
       expect(text).toContain("N/A");
@@ -171,8 +165,7 @@ describe("scout tools", () => {
         { name: "AI Tools", isActive: true, _count: { results: 12 } },
         { name: "Sustainability", isActive: false, _count: { results: 8 } },
       ]);
-      const handler = registry.handlers.get("scout_list_topics")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_list_topics", { workspace_slug: "acme" });
       const text = getText(result);
       expect(text).toContain("Topics");
       expect(text).toContain("AI Tools");
@@ -182,8 +175,7 @@ describe("scout tools", () => {
 
     it("should respect limit parameter", async () => {
       mockPrisma.scoutTopic.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("scout_list_topics")!;
-      await handler({ workspace_slug: "acme", limit: 5 });
+      await registry.call("scout_list_topics", { workspace_slug: "acme", limit: 5 });
       expect(mockPrisma.scoutTopic.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ take: 5 }),
       );
@@ -191,8 +183,7 @@ describe("scout tools", () => {
 
     it("should show empty message when no topics", async () => {
       mockPrisma.scoutTopic.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("scout_list_topics")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_list_topics", { workspace_slug: "acme" });
       expect(getText(result)).toContain("No topics found");
     });
   });
@@ -213,8 +204,7 @@ describe("scout tools", () => {
           topic: { name: "Video Strategy" },
         },
       ]);
-      const handler = registry.handlers.get("scout_get_insights")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_get_insights", { workspace_slug: "acme" });
       const text = getText(result);
       expect(text).toContain("Scout Results");
       expect(text).toContain("Video Strategy");
@@ -224,16 +214,14 @@ describe("scout tools", () => {
 
     it("should return empty when no topics exist", async () => {
       mockPrisma.scoutTopic.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("scout_get_insights")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_get_insights", { workspace_slug: "acme" });
       expect(getText(result)).toContain("No topics found");
     });
 
     it("should show empty message when no results", async () => {
       mockPrisma.scoutTopic.findMany.mockResolvedValue([{ id: "topic-1" }]);
       mockPrisma.scoutResult.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("scout_get_insights")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_get_insights", { workspace_slug: "acme" });
       expect(getText(result)).toContain("No insights available");
     });
 
@@ -251,8 +239,7 @@ describe("scout tools", () => {
           topic: { name: "Long Topic" },
         },
       ]);
-      const handler = registry.handlers.get("scout_get_insights")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_get_insights", { workspace_slug: "acme" });
       const text = getText(result);
       expect(text).toContain("...");
       // Should contain only 200 chars of content + ellipsis
@@ -273,8 +260,7 @@ describe("scout tools", () => {
           topic: { name: "Short Topic" },
         },
       ]);
-      const handler = registry.handlers.get("scout_get_insights")!;
-      const result = await handler({ workspace_slug: "acme" });
+      const result = await registry.call("scout_get_insights", { workspace_slug: "acme" });
       const text = getText(result);
       expect(text).toContain("Short insight content");
       // Ensure no truncation ellipsis

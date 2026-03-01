@@ -100,8 +100,7 @@ describe("mcp-analytics MCP tools", () => {
           { tool: "netsim_tick", _count: { tool: 1 } },
         ]);
 
-      const handler = registry.handlers.get("mcp_tool_usage_stats")!;
-      const result = await handler({});
+      const result = await registry.call("mcp_tool_usage_stats", {});
       const text = getText(result);
 
       expect(text).toContain("MCP Tool Usage Stats");
@@ -119,8 +118,7 @@ describe("mcp-analytics MCP tools", () => {
       });
       mockPrisma.toolInvocation.groupBy.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("mcp_tool_usage_stats")!;
-      const result = await handler({ period: "24h" });
+      const result = await registry.call("mcp_tool_usage_stats", { period: "24h" });
       const text = getText(result);
 
       expect(text).toContain("No tool invocations found");
@@ -145,8 +143,7 @@ describe("mcp-analytics MCP tools", () => {
         ])
         .mockResolvedValueOnce([]);
 
-      const handler = registry.handlers.get("mcp_tool_usage_stats")!;
-      const result = await handler({ period: "30d" });
+      const result = await registry.call("mcp_tool_usage_stats", { period: "30d" });
       expect(getText(result)).toContain("last 30 days");
     });
 
@@ -159,8 +156,7 @@ describe("mcp-analytics MCP tools", () => {
       });
       mockPrisma.toolInvocation.groupBy.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("mcp_tool_usage_stats")!;
-      const result = await handler({ category: "chess" });
+      const result = await registry.call("mcp_tool_usage_stats", { category: "chess" });
       expect(getText(result)).toContain("category \"chess\"");
     });
 
@@ -184,8 +180,7 @@ describe("mcp-analytics MCP tools", () => {
           { tool: "tool_a", _count: { tool: 1 } },
         ]);
 
-      const handler = registry.handlers.get("mcp_tool_usage_stats")!;
-      const result = await handler({});
+      const result = await registry.call("mcp_tool_usage_stats", {});
       // 1 error out of 4 = 25%
       expect(getText(result)).toContain("25.0%");
     });
@@ -193,15 +188,13 @@ describe("mcp-analytics MCP tools", () => {
 
   describe("mcp_generate_docs", () => {
     it("should return error when neither tool_name nor category is provided", async () => {
-      const handler = registry.handlers.get("mcp_generate_docs")!;
-      const result = await handler({});
+      const result = await registry.call("mcp_generate_docs", {});
       expect(getText(result)).toContain("Provide either");
       expect(isError(result)).toBe(false);
     });
 
     it("should generate docs for a known tool", async () => {
-      const handler = registry.handlers.get("mcp_generate_docs")!;
-      const result = await handler({ tool_name: "chess_move" });
+      const result = await registry.call("mcp_generate_docs", { tool_name: "chess_move" });
       const text = getText(result);
 
       expect(text).toContain("# chess_move");
@@ -213,14 +206,12 @@ describe("mcp-analytics MCP tools", () => {
     });
 
     it("should return not-found message for unknown tool", async () => {
-      const handler = registry.handlers.get("mcp_generate_docs")!;
-      const result = await handler({ tool_name: "nonexistent_tool" });
+      const result = await registry.call("mcp_generate_docs", { tool_name: "nonexistent_tool" });
       expect(getText(result)).toContain("not found");
     });
 
     it("should generate category docs for known category", async () => {
-      const handler = registry.handlers.get("mcp_generate_docs")!;
-      const result = await handler({ category: "chess" });
+      const result = await registry.call("mcp_generate_docs", { category: "chess" });
       const text = getText(result);
 
       expect(text).toContain("chess — Tool Category Documentation");
@@ -230,8 +221,7 @@ describe("mcp-analytics MCP tools", () => {
     });
 
     it("should return not-found message for unknown category", async () => {
-      const handler = registry.handlers.get("mcp_generate_docs")!;
-      const result = await handler({ category: "unknown_category" });
+      const result = await registry.call("mcp_generate_docs", { category: "unknown_category" });
       expect(getText(result)).toContain("No tools found for category");
     });
   });
@@ -241,8 +231,7 @@ describe("mcp-analytics MCP tools", () => {
       mockPrisma.toolInvocation.findFirst.mockResolvedValue(null);
       mockPrisma.toolInvocation.count.mockResolvedValue(150);
 
-      const handler = registry.handlers.get("mcp_health_check")!;
-      const result = await handler({});
+      const result = await registry.call("mcp_health_check", {});
       const text = getText(result);
 
       expect(text).toContain("MCP Service Health Check");
@@ -260,8 +249,7 @@ describe("mcp-analytics MCP tools", () => {
       });
       mockPrisma.toolInvocation.count.mockResolvedValue(42);
 
-      const handler = registry.handlers.get("mcp_health_check")!;
-      const result = await handler({});
+      const result = await registry.call("mcp_health_check", {});
       const text = getText(result);
 
       expect(text).toContain("Last Error:");
@@ -273,8 +261,7 @@ describe("mcp-analytics MCP tools", () => {
       mockPrisma.toolInvocation.findFirst.mockResolvedValue(null);
       mockPrisma.toolInvocation.count.mockResolvedValue(0);
 
-      const handler = registry.handlers.get("mcp_health_check")!;
-      const result = await handler({});
+      const result = await registry.call("mcp_health_check", {});
       const text = getText(result);
 
       expect(text).toContain("None recorded");
@@ -284,8 +271,7 @@ describe("mcp-analytics MCP tools", () => {
       mockPrisma.toolInvocation.findFirst.mockResolvedValue(null);
       mockPrisma.toolInvocation.count.mockResolvedValue(0);
 
-      const handler = registry.handlers.get("mcp_health_check")!;
-      const result = await handler({});
+      const result = await registry.call("mcp_health_check", {});
       expect(getText(result)).toContain("DB Response Time:");
       expect(getText(result)).toContain("ms");
     });

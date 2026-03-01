@@ -66,8 +66,7 @@ describe("mcp-observability tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("admin_tool_metrics")!;
-      const result = await handler({});
+      const result = await registry.call("admin_tool_metrics", {});
       const text = getText(result);
       expect(text).toContain("MCP Tool Metrics");
       expect(text).toContain("gallery_generate");
@@ -89,16 +88,14 @@ describe("mcp-observability tools", () => {
     it("should return empty message when no invocations", async () => {
       mockPrisma.$queryRaw.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("admin_tool_metrics")!;
-      const result = await handler({});
+      const result = await registry.call("admin_tool_metrics", {});
       expect(getText(result)).toContain("No tool invocations found");
     });
 
     it("should pass custom period and limit", async () => {
       mockPrisma.$queryRaw.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("admin_tool_metrics")!;
-      const result = await handler({ period_hours: 48, limit: 10 });
+      const result = await registry.call("admin_tool_metrics", { period_hours: 48, limit: 10 });
       // With $queryRaw tagged template, we just verify no errors and the mock was called
       expect(mockPrisma.$queryRaw).toHaveBeenCalled();
       expect(getText(result)).toContain("No tool invocations found");
@@ -107,8 +104,7 @@ describe("mcp-observability tools", () => {
     it("should filter by tool name", async () => {
       mockPrisma.$queryRaw.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("admin_tool_metrics")!;
-      const result = await handler({ tool_name: "gallery_generate" });
+      const result = await registry.call("admin_tool_metrics", { tool_name: "gallery_generate" });
       // With $queryRaw tagged template, parameters are safely interpolated
       expect(mockPrisma.$queryRaw).toHaveBeenCalled();
       expect(getText(result)).toContain("No tool invocations found");
@@ -116,8 +112,7 @@ describe("mcp-observability tools", () => {
 
     it("should deny non-admin users", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
-      const handler = registry.handlers.get("admin_tool_metrics")!;
-      const result = await handler({});
+      const result = await registry.call("admin_tool_metrics", {});
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
   });
@@ -137,8 +132,7 @@ describe("mcp-observability tools", () => {
         { tool: "chat_send", _count: 20 },
       ]);
 
-      const handler = registry.handlers.get("admin_system_health")!;
-      const result = await handler({});
+      const result = await registry.call("admin_system_health", {});
       const text = getText(result);
       expect(text).toContain("MCP System Health");
       expect(text).toContain("Database: HEALTHY");
@@ -161,8 +155,7 @@ describe("mcp-observability tools", () => {
         { tool: "dash_overview", _count: 15 },
       ]);
 
-      const handler = registry.handlers.get("admin_system_health")!;
-      const result = await handler({ include_tool_breakdown: true });
+      const result = await registry.call("admin_system_health", { include_tool_breakdown: true });
       const text = getText(result);
       expect(text).toContain("Active Tools (last 1h)");
       expect(text).toContain("dash_overview: 15 calls");
@@ -179,8 +172,7 @@ describe("mcp-observability tools", () => {
       mockPrisma.toolInvocation.count.mockResolvedValue(0);
       mockPrisma.toolInvocation.groupBy.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("admin_system_health")!;
-      const result = await handler({});
+      const result = await registry.call("admin_system_health", {});
       const text = getText(result);
       expect(text).toContain("Database: DOWN");
       expect(text).toContain("Redis: HEALTHY");
@@ -197,8 +189,7 @@ describe("mcp-observability tools", () => {
       mockPrisma.toolInvocation.count.mockResolvedValue(0);
       mockPrisma.toolInvocation.groupBy.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("admin_system_health")!;
-      const result = await handler({});
+      const result = await registry.call("admin_system_health", {});
       const text = getText(result);
       expect(text).toContain("Database: HEALTHY");
       expect(text).toContain("Redis: DOWN");
@@ -215,8 +206,7 @@ describe("mcp-observability tools", () => {
       mockPrisma.toolInvocation.count.mockResolvedValue(0);
       mockPrisma.toolInvocation.groupBy.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("admin_system_health")!;
-      const result = await handler({});
+      const result = await registry.call("admin_system_health", {});
       const text = getText(result);
       expect(text).toContain("Total Invocations: 0");
       expect(text).toContain("Total Tokens: 0");
@@ -237,8 +227,7 @@ describe("mcp-observability tools", () => {
         new Error("groupBy failed"),
       );
 
-      const handler = registry.handlers.get("admin_system_health")!;
-      const result = await handler({});
+      const result = await registry.call("admin_system_health", {});
       const text = getText(result);
       // Should still produce output with fallback values
       expect(text).toContain("MCP System Health");
@@ -251,8 +240,7 @@ describe("mcp-observability tools", () => {
 
     it("should deny non-admin users", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
-      const handler = registry.handlers.get("admin_system_health")!;
-      const result = await handler({});
+      const result = await registry.call("admin_system_health", {});
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
   });
@@ -276,8 +264,7 @@ describe("mcp-observability tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("admin_user_analytics")!;
-      const result = await handler({});
+      const result = await registry.call("admin_user_analytics", {});
       const text = getText(result);
       expect(text).toContain("User Analytics");
       expect(text).toContain("user-1");
@@ -314,8 +301,7 @@ describe("mcp-observability tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("admin_user_analytics")!;
-      const result = await handler({ user_id: "user-1" });
+      const result = await registry.call("admin_user_analytics", { user_id: "user-1" });
       const text = getText(result);
       expect(text).toContain("User Cost Attribution: user-1");
       expect(text).toContain("gallery_generate");
@@ -329,30 +315,26 @@ describe("mcp-observability tools", () => {
     it("should return empty message for no data", async () => {
       mockPrisma.$queryRaw.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("admin_user_analytics")!;
-      const result = await handler({});
+      const result = await registry.call("admin_user_analytics", {});
       expect(getText(result)).toContain("No invocations");
     });
 
     it("should return empty message for specific user with no data", async () => {
       mockPrisma.$queryRaw.mockResolvedValue([]);
 
-      const handler = registry.handlers.get("admin_user_analytics")!;
-      const result = await handler({ user_id: "nonexistent" });
+      const result = await registry.call("admin_user_analytics", { user_id: "nonexistent" });
       expect(getText(result)).toContain("No invocations for user nonexistent");
     });
 
     it("should deny non-admin users", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
-      const handler = registry.handlers.get("admin_user_analytics")!;
-      const result = await handler({});
+      const result = await registry.call("admin_user_analytics", {});
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
 
     it("should deny null users", async () => {
       mockPrisma.user.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("admin_user_analytics")!;
-      const result = await handler({});
+      const result = await registry.call("admin_user_analytics", {});
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
   });
@@ -376,8 +358,7 @@ describe("mcp-observability tools", () => {
         "admin_user_analytics",
       ];
       for (const toolName of toolNames) {
-        const handler = registry.handlers.get(toolName)!;
-        const result = await handler({});
+                const result = await handler({});
         expect(getText(result)).not.toContain("PERMISSION_DENIED");
       }
     });

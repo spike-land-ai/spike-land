@@ -26,12 +26,11 @@ export function registerBrandBrainTools(
                 ),
             })
             .meta({ category: "brand-brain", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("brand_score_content", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
-                    const profile = await prisma.brandProfile.findUnique({
+                    const profile = await ctx.prisma.brandProfile.findUnique({
                         where: { workspaceId: workspace.id },
                         include: {
                             vocabulary: true,
@@ -105,12 +104,11 @@ export function registerBrandBrainTools(
                 ),
             })
             .meta({ category: "brand-brain", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("brand_rewrite_content", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
-                    const profile = await prisma.brandProfile.findUnique({
+                    const profile = await ctx.prisma.brandProfile.findUnique({
                         where: { workspaceId: workspace.id },
                         select: { id: true },
                     });
@@ -119,7 +117,7 @@ export function registerBrandBrainTools(
                             "**Error: NOT_FOUND**\nNo brand profile found for this workspace.\n**Retryable:** false",
                         );
                     }
-                    const rewrite = await prisma.contentRewrite.create({
+                    const rewrite = await ctx.prisma.contentRewrite.create({
                         data: {
                             workspaceId: workspace.id,
                             createdById: userId,
@@ -152,12 +150,11 @@ export function registerBrandBrainTools(
                 workspace_slug: z.string().min(1).describe("Workspace slug."),
             })
             .meta({ category: "brand-brain", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("brand_get_profile", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
-                    const profile = await prisma.brandProfile.findUnique({
+                    const profile = await ctx.prisma.brandProfile.findUnique({
                         where: { workspaceId: workspace.id },
                         include: {
                             guardrails: true,
@@ -198,12 +195,11 @@ export function registerBrandBrainTools(
                 platform: z.string().optional().describe("Target platform for context."),
             })
             .meta({ category: "brand-brain", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("brand_check_policy", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
-                    const rules = await prisma.policyRule.findMany({
+                    const rules = await ctx.prisma.policyRule.findMany({
                         where: { workspaceId: workspace.id, isActive: true },
                     });
                     if (rules.length === 0) {
@@ -246,7 +242,7 @@ export function registerBrandBrainTools(
                             ? "FAILED"
                             : "PASSED_WITH_WARNINGS";
 
-                    const check = await prisma.policyCheck.create({
+                    const check = await ctx.prisma.policyCheck.create({
                         data: {
                             workspaceId: workspace.id,
                             contentText: args.content,
@@ -281,7 +277,7 @@ export function registerBrandBrainTools(
                         for (const v of violations) {
                             const matchedRule = rules.find(r => r.name === v.rule);
                             if (matchedRule) {
-                                await prisma.policyViolation.create({
+                                await ctx.prisma.policyViolation.create({
                                     data: {
                                         checkId: check.id,
                                         workspaceId: workspace.id,
@@ -326,14 +322,13 @@ export function registerBrandBrainTools(
                 ),
             })
             .meta({ category: "brand-brain", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("brand_list_violations", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
                     const where: Record<string, unknown> = { workspaceId: workspace.id };
                     if (args.severity) where.severity = args.severity;
-                    const violations = await prisma.policyViolation.findMany({
+                    const violations = await ctx.prisma.policyViolation.findMany({
                         where,
                         orderBy: { createdAt: "desc" },
                         take: args.limit ?? 20,
@@ -363,12 +358,11 @@ export function registerBrandBrainTools(
                 workspace_slug: z.string().min(1).describe("Workspace slug."),
             })
             .meta({ category: "brand-brain", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("brand_get_guardrails", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const workspace = await resolveWorkspace(userId, args.workspace_slug);
-                    const profile = await prisma.brandProfile.findUnique({
+                    const profile = await ctx.prisma.brandProfile.findUnique({
                         where: { workspaceId: workspace.id },
                         select: { id: true },
                     });
@@ -377,7 +371,7 @@ export function registerBrandBrainTools(
                             "**Error: NOT_FOUND**\nNo brand profile found for this workspace.\n**Retryable:** false",
                         );
                     }
-                    const guardrails = await prisma.brandGuardrail.findMany({
+                    const guardrails = await ctx.prisma.brandGuardrail.findMany({
                         where: { brandProfileId: profile.id, isActive: true },
                     });
                     if (guardrails.length === 0) {
@@ -403,21 +397,20 @@ export function registerBrandBrainTools(
                 ),
             })
             .meta({ category: "brand-brain", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("analyze_brand_voice", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const slug = args.workspace_slug;
                     const workspace = slug
                         ? await resolveWorkspace(userId, slug)
                         : await (async () => {
-                            const ws = await prisma.workspace.findFirst({
+                            const ws = await ctx.prisma.workspace.findFirst({
                                 where: { members: { some: { userId } } },
                             });
                             if (!ws) throw new Error("No workspace found for user.");
                             return ws;
                         })();
-                    const profile = await prisma.brandProfile.findUnique({
+                    const profile = await ctx.prisma.brandProfile.findUnique({
                         where: { workspaceId: workspace.id },
                         include: {
                             guardrails: { where: { isActive: true } },

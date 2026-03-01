@@ -47,8 +47,7 @@ describe("causality MCP tools", () => {
         processOrder: ["proc-1", "proc-2", "proc-3"],
       });
 
-      const handler = registry.handlers.get("causality_create_system")!;
-      const result = await handler({
+      const result = await registry.call("causality_create_system", {
         name: "my-system",
         process_count: 3,
         clock_type: "lamport",
@@ -75,8 +74,7 @@ describe("causality MCP tools", () => {
         processOrder: ["proc-1", "proc-2"],
       });
 
-      const handler = registry.handlers.get("causality_create_system")!;
-      const result = await handler({
+      const result = await registry.call("causality_create_system", {
         name: "vec-system",
         process_count: 2,
         clock_type: "vector",
@@ -97,8 +95,7 @@ describe("causality MCP tools", () => {
         timestamp: 1,
       });
 
-      const handler = registry.handlers.get("causality_local_event")!;
-      const result = await handler({
+      const result = await registry.call("causality_local_event", {
         system_id: "causal-abc-1",
         process_id: "proc-1",
         label: "compute",
@@ -122,8 +119,7 @@ describe("causality MCP tools", () => {
         timestamp: 1,
       });
 
-      const handler = registry.handlers.get("causality_local_event")!;
-      const result = await handler({
+      const result = await registry.call("causality_local_event", {
         system_id: "causal-abc-2",
         process_id: "proc-1",
         label: "write",
@@ -152,8 +148,7 @@ describe("causality MCP tools", () => {
         },
       });
 
-      const handler = registry.handlers.get("causality_send_event")!;
-      const result = await handler({
+      const result = await registry.call("causality_send_event", {
         system_id: "causal-abc-1",
         from_process: "proc-1",
         to_process: "proc-2",
@@ -185,8 +180,7 @@ describe("causality MCP tools", () => {
         explanation: "evt-1 has a lower Lamport timestamp than evt-2.",
       });
 
-      const handler = registry.handlers.get("causality_compare_events")!;
-      const result = await handler({
+      const result = await registry.call("causality_compare_events", {
         system_id: "causal-abc-1",
         event_a: "evt-1",
         event_b: "evt-2",
@@ -206,8 +200,7 @@ describe("causality MCP tools", () => {
         explanation: "Neither event causally precedes the other.",
       });
 
-      const handler = registry.handlers.get("causality_compare_events")!;
-      const result = await handler({
+      const result = await registry.call("causality_compare_events", {
         system_id: "causal-abc-1",
         event_a: "evt-1",
         event_b: "evt-3",
@@ -226,8 +219,7 @@ describe("causality MCP tools", () => {
         explanation: "Both refer to the same event.",
       });
 
-      const handler = registry.handlers.get("causality_compare_events")!;
-      const result = await handler({
+      const result = await registry.call("causality_compare_events", {
         system_id: "causal-abc-1",
         event_a: "evt-1",
         event_b: "evt-1",
@@ -257,8 +249,7 @@ describe("causality MCP tools", () => {
         ],
       });
 
-      const handler = registry.handlers.get("causality_inspect")!;
-      const result = await handler({ system_id: "causal-abc-1" });
+      const result = await registry.call("causality_inspect", { system_id: "causal-abc-1" });
 
       const text = getText(result);
       expect(text).toContain("my-system");
@@ -277,8 +268,7 @@ describe("causality MCP tools", () => {
         events: [],
       });
 
-      const handler = registry.handlers.get("causality_inspect")!;
-      await handler({ system_id: "causal-abc-1", process_id: "proc-1" });
+      await registry.call("causality_inspect", { system_id: "causal-abc-1", process_id: "proc-1" });
 
       expect(mockEngine.inspect).toHaveBeenCalledWith(
         "causal-abc-1",
@@ -300,7 +290,7 @@ describe("causality MCP tools", () => {
       });
 
       const text = getText(
-        await registry.handlers.get("causality_inspect")!({ system_id: "s1" }),
+        await registry.call("causality_inspect", { system_id: "s1" }),
       );
       expect(text).toContain("Vector{");
       expect(text).not.toContain("Events:");
@@ -324,8 +314,7 @@ describe("causality MCP tools", () => {
         },
       ]);
 
-      const handler = registry.handlers.get("causality_timeline")!;
-      const result = await handler({ system_id: "causal-abc-1" });
+      const result = await registry.call("causality_timeline", { system_id: "causal-abc-1" });
 
       const text = getText(result);
       expect(text).toContain("Timeline");
@@ -337,8 +326,7 @@ describe("causality MCP tools", () => {
     it("should handle empty timeline", async () => {
       mockEngine.getTimeline.mockReturnValue([]);
 
-      const handler = registry.handlers.get("causality_timeline")!;
-      const result = await handler({ system_id: "causal-abc-1" });
+      const result = await registry.call("causality_timeline", { system_id: "causal-abc-1" });
 
       expect(getText(result)).toContain("No events recorded");
     });
@@ -350,8 +338,7 @@ describe("causality MCP tools", () => {
         throw new Error("Access denied");
       });
 
-      const handler = registry.handlers.get("causality_inspect")!;
-      const result = await handler({ system_id: "someone-elses" });
+      const result = await registry.call("causality_inspect", { system_id: "someone-elses" });
 
       expect(isError(result)).toBe(true);
     });

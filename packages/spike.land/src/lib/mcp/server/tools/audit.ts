@@ -27,10 +27,9 @@ export function registerAuditTools(
                 ),
             })
             .meta({ category: "audit", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("audit_query_logs", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const ws = await resolveWorkspace(userId, args.workspace_slug);
                     const since = new Date();
                     since.setDate(since.getDate() - args.days);
@@ -40,7 +39,7 @@ export function registerAuditTools(
                     };
                     if (args.action) where.action = args.action;
                     if (args.target_type) where.targetType = args.target_type;
-                    const logs = await prisma.workspaceAuditLog.findMany({
+                    const logs = await ctx.prisma.workspaceAuditLog.findMany({
                         where,
                         orderBy: { createdAt: "desc" },
                         take: args.limit,
@@ -72,14 +71,13 @@ export function registerAuditTools(
                 ),
             })
             .meta({ category: "audit", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("audit_export", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const ws = await resolveWorkspace(userId, args.workspace_slug);
                     const fromDate = new Date(args.from_date);
                     const toDate = new Date(args.to_date);
-                    const logs = await prisma.workspaceAuditLog.findMany({
+                    const logs = await ctx.prisma.workspaceAuditLog.findMany({
                         where: {
                             workspaceId: ws.id,
                             createdAt: { gte: fromDate, lte: toDate },
@@ -109,14 +107,13 @@ export function registerAuditTools(
                 ),
             })
             .meta({ category: "audit", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("audit_get_ai_decisions", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const ws = await resolveWorkspace(userId, args.workspace_slug);
                     const since = new Date();
                     since.setDate(since.getDate() - args.days);
-                    const decisions = await prisma.aIDecisionLog.findMany({
+                    const decisions = await ctx.prisma.aIDecisionLog.findMany({
                         where: {
                             workspaceId: ws.id,
                             createdAt: { gte: since },
@@ -150,14 +147,13 @@ export function registerAuditTools(
                 ),
             })
             .meta({ category: "audit", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
                 return safeToolCall("audit_get_agent_trail", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const ws = await resolveWorkspace(userId, args.workspace_slug);
                     const where: Record<string, unknown> = { workspaceId: ws.id };
                     if (args.agent_id) where.agentId = args.agent_id;
-                    const trail = await prisma.agentAuditLog.findMany({
+                    const trail = await ctx.prisma.agentAuditLog.findMany({
                         where,
                         orderBy: { createdAt: "desc" },
                         take: args.limit,

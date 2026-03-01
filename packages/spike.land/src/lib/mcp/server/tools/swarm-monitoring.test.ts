@@ -52,8 +52,7 @@ describe("swarm-monitoring tools", () => {
         { durationMs: 400, isError: false, createdAt: now },
         { durationMs: 100, isError: true, createdAt: now },
       ]);
-      const handler = registry.handlers.get("swarm_get_metrics")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_get_metrics", {});
       const text = getText(result);
       expect(text).toContain("Swarm Metrics (24h)");
       expect(text).toContain("Tasks completed: 10");
@@ -72,8 +71,7 @@ describe("swarm-monitoring tools", () => {
         },
       ]);
       mockPrisma.agentAuditLog.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("swarm_get_metrics")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_get_metrics", {});
       expect(getText(result)).toContain("Success rate: 100%");
     });
 
@@ -82,23 +80,20 @@ describe("swarm-monitoring tools", () => {
       mockPrisma.agentAuditLog.findMany.mockResolvedValue([
         { durationMs: 300, isError: true, createdAt: new Date() },
       ]);
-      const handler = registry.handlers.get("swarm_get_metrics")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_get_metrics", {});
       expect(getText(result)).toContain("Avg task duration: 0ms");
     });
 
     it("should accept 7d period", async () => {
       mockPrisma.claudeCodeAgent.findMany.mockResolvedValue([]);
       mockPrisma.agentAuditLog.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("swarm_get_metrics")!;
-      const result = await handler({ period: "7d" });
+      const result = await registry.call("swarm_get_metrics", { period: "7d" });
       expect(getText(result)).toContain("Swarm Metrics (7d)");
     });
 
     it("should deny access to non-admin users", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
-      const handler = registry.handlers.get("swarm_get_metrics")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_get_metrics", {});
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
   });
@@ -119,8 +114,7 @@ describe("swarm-monitoring tools", () => {
           totalTasksCompleted: 10,
         },
       ]);
-      const handler = registry.handlers.get("swarm_get_cost")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_get_cost", {});
       const text = getText(result);
       expect(text).toContain("Total tokens");
       expect(text).toContain("Worker-1");
@@ -137,8 +131,7 @@ describe("swarm-monitoring tools", () => {
           totalTasksCompleted: 2,
         },
       ]);
-      const handler = registry.handlers.get("swarm_get_cost")!;
-      const result = await handler({ agent_id: "a1" });
+      const result = await registry.call("swarm_get_cost", { agent_id: "a1" });
       const text = getText(result);
       expect(text).toContain("agent: a1");
       expect(text).toContain("Worker-1");
@@ -153,23 +146,20 @@ describe("swarm-monitoring tools", () => {
           totalTasksCompleted: 0,
         },
       ]);
-      const handler = registry.handlers.get("swarm_get_cost")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_get_cost", {});
       expect(getText(result)).toContain("no tasks");
     });
 
     it("should return not found when no agents match agent_id filter", async () => {
       mockPrisma.claudeCodeAgent.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("swarm_get_cost")!;
-      const result = await handler({ agent_id: "missing-id" });
+      const result = await registry.call("swarm_get_cost", { agent_id: "missing-id" });
       expect(getText(result)).toContain("missing-id");
       expect(getText(result)).toContain("not found");
     });
 
     it("should deny access to non-admin users", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
-      const handler = registry.handlers.get("swarm_get_cost")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_get_cost", {});
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
   });
@@ -201,8 +191,7 @@ describe("swarm-monitoring tools", () => {
           input: null,
         },
       ]);
-      const handler = registry.handlers.get("swarm_replay")!;
-      const result = await handler({ agent_id: "a1" });
+      const result = await registry.call("swarm_replay", { agent_id: "a1" });
       const text = getText(result);
       expect(text).toContain("Replay: ReplayBot");
       expect(text).toContain("Step 0");
@@ -243,8 +232,7 @@ describe("swarm-monitoring tools", () => {
           input: null,
         },
       ]);
-      const handler = registry.handlers.get("swarm_replay")!;
-      const result = await handler({ agent_id: "a1", from_step: 1, to_step: 1 });
+      const result = await registry.call("swarm_replay", { agent_id: "a1", from_step: 1, to_step: 1 });
       const text = getText(result);
       expect(text).toContain("step_1");
       expect(text).not.toContain("step_0");
@@ -267,15 +255,13 @@ describe("swarm-monitoring tools", () => {
           input: null,
         },
       ]);
-      const handler = registry.handlers.get("swarm_replay")!;
-      const result = await handler({ agent_id: "a1" });
+      const result = await registry.call("swarm_replay", { agent_id: "a1" });
       expect(getText(result)).toContain("[ERROR]");
     });
 
     it("should return not found for a missing agent", async () => {
       mockPrisma.claudeCodeAgent.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("swarm_replay")!;
-      const result = await handler({ agent_id: "missing" });
+      const result = await registry.call("swarm_replay", { agent_id: "missing" });
       expect(getText(result)).toContain("not found");
     });
 
@@ -286,8 +272,7 @@ describe("swarm-monitoring tools", () => {
         deletedAt: null,
       });
       mockPrisma.agentAuditLog.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("swarm_replay")!;
-      const result = await handler({ agent_id: "a1" });
+      const result = await registry.call("swarm_replay", { agent_id: "a1" });
       expect(getText(result)).toContain("No execution history");
     });
 
@@ -307,8 +292,7 @@ describe("swarm-monitoring tools", () => {
           input: null,
         },
       ]);
-      const handler = registry.handlers.get("swarm_replay")!;
-      const result = await handler({ agent_id: "a1", from_step: 5, to_step: 10 });
+      const result = await registry.call("swarm_replay", { agent_id: "a1", from_step: 5, to_step: 10 });
       expect(getText(result)).toContain("No steps in range");
     });
 
@@ -328,15 +312,13 @@ describe("swarm-monitoring tools", () => {
           input: { key: "x".repeat(200) },
         },
       ]);
-      const handler = registry.handlers.get("swarm_replay")!;
-      const result = await handler({ agent_id: "a1" });
+      const result = await registry.call("swarm_replay", { agent_id: "a1" });
       expect(getText(result)).toContain("...");
     });
 
     it("should deny access to non-admin users", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
-      const handler = registry.handlers.get("swarm_replay")!;
-      const result = await handler({ agent_id: "a1" });
+      const result = await registry.call("swarm_replay", { agent_id: "a1" });
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
   });
@@ -354,8 +336,7 @@ describe("swarm-monitoring tools", () => {
           _count: { messages: 2 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_health")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_health", {});
       const text = getText(result);
       expect(text).toContain("HealthyBot");
       expect(text).toContain("ALIVE");
@@ -375,8 +356,7 @@ describe("swarm-monitoring tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_health")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_health", {});
       expect(getText(result)).toContain("STUCK");
     });
 
@@ -393,8 +373,7 @@ describe("swarm-monitoring tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_health")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_health", {});
       expect(getText(result)).toContain("ERRORED");
     });
 
@@ -410,16 +389,14 @@ describe("swarm-monitoring tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_health")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_health", {});
       expect(getText(result)).toContain("ERRORED");
       expect(getText(result)).toContain("never");
     });
 
     it("should return message when no agents are present", async () => {
       mockPrisma.claudeCodeAgent.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("swarm_health")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_health", {});
       expect(getText(result)).toContain("No active agents");
     });
 
@@ -436,8 +413,7 @@ describe("swarm-monitoring tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_health")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_health", {});
       expect(getText(result)).toContain("Summary:");
       expect(getText(result)).toContain("alive");
       expect(getText(result)).toContain("stuck");
@@ -456,15 +432,13 @@ describe("swarm-monitoring tools", () => {
           _count: { messages: 0 },
         },
       ]);
-      const handler = registry.handlers.get("swarm_health")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_health", {});
       expect(getText(result)).toContain("No active task");
     });
 
     it("should deny access to non-admin users", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
-      const handler = registry.handlers.get("swarm_health")!;
-      const result = await handler({});
+      const result = await registry.call("swarm_health", {});
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
   });

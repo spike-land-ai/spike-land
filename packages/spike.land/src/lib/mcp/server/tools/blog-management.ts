@@ -32,12 +32,10 @@ export function registerBlogManagementTools(
                 ),
             })
             .meta({ category: "blog-management", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { title, content, tags, category } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const post = await prisma.blogPost.create({
+                const post = await ctx.prisma.blogPost.create({
                     data: {
                         title,
                         content,
@@ -81,12 +79,10 @@ export function registerBlogManagementTools(
                 ),
             })
             .meta({ category: "blog-management", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { post_id, title, content, tags, category, status } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const existing = await prisma.blogPost.findUnique({
+                const existing = await ctx.prisma.blogPost.findUnique({
                     where: { id: post_id },
                 });
 
@@ -121,7 +117,7 @@ export function registerBlogManagementTools(
                     );
                 }
 
-                const updated = await prisma.blogPost.update({
+                const updated = await ctx.prisma.blogPost.update({
                     where: { id: post_id },
                     data: updateData,
                 });
@@ -146,12 +142,10 @@ export function registerBlogManagementTools(
                 post_id: z.string().min(1).describe("Blog post ID to publish."),
             })
             .meta({ category: "blog-management", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { post_id } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const existing = await prisma.blogPost.findUnique({
+                const existing = await ctx.prisma.blogPost.findUnique({
                     where: { id: post_id },
                 });
 
@@ -174,7 +168,7 @@ export function registerBlogManagementTools(
                 }
 
                 const publishedAt = new Date();
-                const published = await prisma.blogPost.update({
+                const published = await ctx.prisma.blogPost.update({
                     where: { id: post_id },
                     data: { status: "published", publishedAt },
                 });
@@ -203,12 +197,10 @@ export function registerBlogManagementTools(
                 ),
             })
             .meta({ category: "blog-management", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { post_id, period = "30d" } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const post = await prisma.blogPost.findUnique({
+                const post = await ctx.prisma.blogPost.findUnique({
                     where: { id: post_id },
                 });
 
@@ -244,13 +236,13 @@ export function registerBlogManagementTools(
                 };
 
                 const [totalViews, avgTimeRows, referralRows] = await Promise.all([
-                    prisma.pageView.count({ where: whereClause }),
-                    prisma.pageView.aggregate({
+                    ctx.prisma.pageView.count({ where: whereClause }),
+                    ctx.prisma.pageView.aggregate({
                         where: { ...whereClause, timeOnPage: { not: null } },
                         _avg: { timeOnPage: true },
                         _count: { timeOnPage: true },
                     }),
-                    prisma.pageView.groupBy({
+                    ctx.prisma.pageView.groupBy({
                         by: ["sessionId"],
                         where: whereClause,
                         _count: { sessionId: true },
@@ -290,10 +282,8 @@ export function registerBlogManagementTools(
                 ),
             })
             .meta({ category: "blog-management", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { post_id, publish_at } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
 
                 const publishDate = new Date(publish_at);
                 if (isNaN(publishDate.getTime())) {
@@ -308,7 +298,7 @@ export function registerBlogManagementTools(
                     );
                 }
 
-                const existing = await prisma.blogPost.findUnique({
+                const existing = await ctx.prisma.blogPost.findUnique({
                     where: { id: post_id },
                 });
 
@@ -330,7 +320,7 @@ export function registerBlogManagementTools(
                     );
                 }
 
-                const scheduled = await prisma.blogPost.update({
+                const scheduled = await ctx.prisma.blogPost.update({
                     where: { id: post_id },
                     data: { status: "scheduled", scheduledAt: publishDate },
                 });
@@ -353,12 +343,10 @@ export function registerBlogManagementTools(
                 post_id: z.string().min(1).describe("Blog post ID to revert to draft."),
             })
             .meta({ category: "blog-management", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { post_id } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const existing = await prisma.blogPost.findUnique({
+                const existing = await ctx.prisma.blogPost.findUnique({
                     where: { id: post_id },
                 });
 
@@ -380,7 +368,7 @@ export function registerBlogManagementTools(
                     );
                 }
 
-                const reverted = await prisma.blogPost.update({
+                const reverted = await ctx.prisma.blogPost.update({
                     where: { id: post_id },
                     data: { status: "draft", scheduledAt: null, publishedAt: null },
                 });

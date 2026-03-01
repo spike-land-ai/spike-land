@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   audioMixerProject: {
     findFirst: vi.fn(),
     findMany: vi.fn(),
@@ -16,7 +17,8 @@ const mockPrisma = {
     deleteMany: vi.fn(),
     update: vi.fn(),
   },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -48,8 +50,7 @@ describe("audio tools", () => {
       });
       mockPrisma.audioTrack.count.mockResolvedValue(2);
       mockPrisma.audioTrack.create.mockResolvedValue({ id: "t1" });
-      const handler = registry.handlers.get("audio_upload")!;
-      const result = await handler({
+      const result = await registry.call("audio_upload", {
         project_id: "p1",
         filename: "track.wav",
         content_type: "audio/wav",
@@ -73,8 +74,7 @@ describe("audio tools", () => {
 
     it("should return NOT_FOUND when project does not exist", async () => {
       mockPrisma.audioMixerProject.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("audio_upload")!;
-      const result = await handler({
+      const result = await registry.call("audio_upload", {
         project_id: "nope",
         filename: "track.mp3",
         content_type: "audio/mp3",
@@ -89,8 +89,7 @@ describe("audio tools", () => {
         name: "My Project",
         userId,
       });
-      const handler = registry.handlers.get("audio_upload")!;
-      const result = await handler({
+      const result = await registry.call("audio_upload", {
         project_id: "p1",
         filename: "track.exe",
         content_type: "audio/exe",
@@ -109,8 +108,7 @@ describe("audio tools", () => {
       });
       mockPrisma.audioTrack.count.mockResolvedValue(0);
       mockPrisma.audioTrack.create.mockResolvedValue({ id: "t2" });
-      const handler = registry.handlers.get("audio_upload")!;
-      const result = await handler({
+      const result = await registry.call("audio_upload", {
         project_id: "p1",
         filename: "noextension",
         content_type: "audio/mp3",
@@ -127,8 +125,7 @@ describe("audio tools", () => {
       });
       mockPrisma.audioTrack.count.mockResolvedValue(0);
       mockPrisma.audioTrack.create.mockResolvedValue({ id: "t3" });
-      const handler = registry.handlers.get("audio_upload")!;
-      const result = await handler({
+      const result = await registry.call("audio_upload", {
         project_id: "p1",
         filename: "song.ogg",
         content_type: "audio/wav",
@@ -145,8 +142,7 @@ describe("audio tools", () => {
       });
       mockPrisma.audioTrack.count.mockResolvedValue(0);
       mockPrisma.audioTrack.create.mockResolvedValue({ id: "t5" });
-      const handler = registry.handlers.get("audio_upload")!;
-      const result = await handler({
+      const result = await registry.call("audio_upload", {
         project_id: "p1",
         filename: "noextension",
         content_type: "audio",
@@ -163,8 +159,7 @@ describe("audio tools", () => {
       mockPrisma.audioMixerProject.findFirst.mockRejectedValue(
         new Error("Database connection failed"),
       );
-      const handler = registry.handlers.get("audio_upload")!;
-      const result = await handler({
+      const result = await registry.call("audio_upload", {
         project_id: "p1",
         filename: "track.wav",
         content_type: "audio/wav",
@@ -181,8 +176,7 @@ describe("audio tools", () => {
       });
       mockPrisma.audioTrack.count.mockResolvedValue(5);
       mockPrisma.audioTrack.create.mockResolvedValue({ id: "t4" });
-      const handler = registry.handlers.get("audio_upload")!;
-      await handler({
+      await registry.call("audio_upload", {
         project_id: "p1",
         filename: "track.flac",
         content_type: "audio/flac",
@@ -213,8 +207,7 @@ describe("audio tools", () => {
         createdAt: new Date("2024-06-15T12:00:00Z"),
         project: { id: "p1", name: "My Project", userId },
       });
-      const handler = registry.handlers.get("audio_get_track")!;
-      const result = await handler({ track_id: "t1" });
+      const result = await registry.call("audio_get_track", { track_id: "t1" });
       expect(getText(result)).toContain("Audio Track");
       expect(getText(result)).toContain("t1");
       expect(getText(result)).toContain("track.wav");
@@ -230,8 +223,7 @@ describe("audio tools", () => {
 
     it("should return NOT_FOUND when track does not exist", async () => {
       mockPrisma.audioTrack.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("audio_get_track")!;
-      const result = await handler({ track_id: "nope" });
+      const result = await registry.call("audio_get_track", { track_id: "nope" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
 
@@ -250,8 +242,7 @@ describe("audio tools", () => {
         createdAt: new Date(),
         project: { id: "p2", name: "Other Project", userId: "other-user-456" },
       });
-      const handler = registry.handlers.get("audio_get_track")!;
-      const result = await handler({ track_id: "t1" });
+      const result = await registry.call("audio_get_track", { track_id: "t1" });
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
   });
@@ -274,8 +265,7 @@ describe("audio tools", () => {
           updatedAt: new Date("2024-06-14T12:00:00Z"),
         },
       ]);
-      const handler = registry.handlers.get("audio_list_projects")!;
-      const result = await handler({});
+      const result = await registry.call("audio_list_projects", {});
       expect(getText(result)).toContain("Your Audio Projects (2)");
       expect(getText(result)).toContain("Project A");
       expect(getText(result)).toContain("3 track(s)");
@@ -284,8 +274,7 @@ describe("audio tools", () => {
 
     it("should return empty message when no projects exist", async () => {
       mockPrisma.audioMixerProject.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("audio_list_projects")!;
-      const result = await handler({});
+      const result = await registry.call("audio_list_projects", {});
       expect(getText(result)).toContain("No projects found");
       expect(getText(result)).toContain("audio_create_project");
     });
@@ -300,8 +289,7 @@ describe("audio tools", () => {
         name: "My New Mix",
         createdAt: new Date("2024-06-15T12:00:00Z"),
       });
-      const handler = registry.handlers.get("audio_create_project")!;
-      const result = await handler({ name: "My New Mix" });
+      const result = await registry.call("audio_create_project", { name: "My New Mix" });
       expect(getText(result)).toContain("Project Created!");
       expect(getText(result)).toContain("p-new");
       expect(getText(result)).toContain("My New Mix");
@@ -318,8 +306,7 @@ describe("audio tools", () => {
         name: "Podcast",
         createdAt: new Date(),
       });
-      const handler = registry.handlers.get("audio_create_project")!;
-      const result = await handler({
+      const result = await registry.call("audio_create_project", {
         name: "Podcast",
         description: "Weekly podcast",
       });
@@ -343,8 +330,7 @@ describe("audio tools", () => {
       });
       mockPrisma.audioTrack.deleteMany.mockResolvedValue({ count: 3 });
       mockPrisma.audioMixerProject.delete.mockResolvedValue({ id: "p1" });
-      const handler = registry.handlers.get("audio_delete_project")!;
-      const result = await handler({ project_id: "p1" });
+      const result = await registry.call("audio_delete_project", { project_id: "p1" });
       expect(getText(result)).toContain("Project Deleted");
       expect(getText(result)).toContain("Old Project");
       expect(mockPrisma.audioTrack.deleteMany).toHaveBeenCalledWith({
@@ -357,8 +343,7 @@ describe("audio tools", () => {
 
     it("should return NOT_FOUND for non-existent project", async () => {
       mockPrisma.audioMixerProject.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("audio_delete_project")!;
-      const result = await handler({ project_id: "nope" });
+      const result = await registry.call("audio_delete_project", { project_id: "nope" });
       expect(getText(result)).toContain("NOT_FOUND");
       expect(mockPrisma.audioMixerProject.delete).not.toHaveBeenCalled();
     });
@@ -393,8 +378,7 @@ describe("audio tools", () => {
           solo: false,
         },
       ]);
-      const handler = registry.handlers.get("audio_list_tracks")!;
-      const result = await handler({ project_id: "p1" });
+      const result = await registry.call("audio_list_tracks", { project_id: "p1" });
       expect(getText(result)).toContain("Tracks in");
       expect(getText(result)).toContain("vocals.wav");
       expect(getText(result)).toContain("WAV");
@@ -409,16 +393,14 @@ describe("audio tools", () => {
         userId,
       });
       mockPrisma.audioTrack.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("audio_list_tracks")!;
-      const result = await handler({ project_id: "p1" });
+      const result = await registry.call("audio_list_tracks", { project_id: "p1" });
       expect(getText(result)).toContain("No tracks");
       expect(getText(result)).toContain("audio_upload");
     });
 
     it("should return NOT_FOUND for non-existent project", async () => {
       mockPrisma.audioMixerProject.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("audio_list_tracks")!;
-      const result = await handler({ project_id: "nope" });
+      const result = await registry.call("audio_list_tracks", { project_id: "nope" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
   });
@@ -433,8 +415,7 @@ describe("audio tools", () => {
         project: { userId, name: "My Project" },
       });
       mockPrisma.audioTrack.delete.mockResolvedValue({ id: "t1" });
-      const handler = registry.handlers.get("audio_delete_track")!;
-      const result = await handler({ track_id: "t1" });
+      const result = await registry.call("audio_delete_track", { track_id: "t1" });
       expect(getText(result)).toContain("Track Deleted");
       expect(getText(result)).toContain("old.wav");
       expect(mockPrisma.audioTrack.delete).toHaveBeenCalledWith({
@@ -444,8 +425,7 @@ describe("audio tools", () => {
 
     it("should return NOT_FOUND for non-existent track", async () => {
       mockPrisma.audioTrack.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("audio_delete_track")!;
-      const result = await handler({ track_id: "nope" });
+      const result = await registry.call("audio_delete_track", { track_id: "nope" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
 
@@ -455,8 +435,7 @@ describe("audio tools", () => {
         name: "track.wav",
         project: { userId: "other-user", name: "Other" },
       });
-      const handler = registry.handlers.get("audio_delete_track")!;
-      const result = await handler({ track_id: "t1" });
+      const result = await registry.call("audio_delete_track", { track_id: "t1" });
       expect(getText(result)).toContain("PERMISSION_DENIED");
       expect(mockPrisma.audioTrack.delete).not.toHaveBeenCalled();
     });
@@ -477,8 +456,7 @@ describe("audio tools", () => {
         muted: false,
         solo: false,
       });
-      const handler = registry.handlers.get("audio_update_track")!;
-      const result = await handler({ track_id: "t1", volume: 0.5 });
+      const result = await registry.call("audio_update_track", { track_id: "t1", volume: 0.5 });
       expect(getText(result)).toContain("Track Updated");
       expect(getText(result)).toContain("0.5");
       expect(mockPrisma.audioTrack.update).toHaveBeenCalledWith({
@@ -499,8 +477,7 @@ describe("audio tools", () => {
         muted: true,
         solo: false,
       });
-      const handler = registry.handlers.get("audio_update_track")!;
-      const result = await handler({
+      const result = await registry.call("audio_update_track", {
         track_id: "t1",
         name: "renamed.wav",
         muted: true,
@@ -525,8 +502,7 @@ describe("audio tools", () => {
         muted: false,
         solo: true,
       });
-      const handler = registry.handlers.get("audio_update_track")!;
-      const result = await handler({ track_id: "t1", solo: true });
+      const result = await registry.call("audio_update_track", { track_id: "t1", solo: true });
       expect(getText(result)).toContain("Track Updated");
       expect(mockPrisma.audioTrack.update).toHaveBeenCalledWith({
         where: { id: "t1" },
@@ -539,16 +515,14 @@ describe("audio tools", () => {
         id: "t1",
         project: { userId },
       });
-      const handler = registry.handlers.get("audio_update_track")!;
-      const result = await handler({ track_id: "t1" });
+      const result = await registry.call("audio_update_track", { track_id: "t1" });
       expect(getText(result)).toContain("No changes specified");
       expect(mockPrisma.audioTrack.update).not.toHaveBeenCalled();
     });
 
     it("should return NOT_FOUND for non-existent track", async () => {
       mockPrisma.audioTrack.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("audio_update_track")!;
-      const result = await handler({ track_id: "nope", volume: 0.5 });
+      const result = await registry.call("audio_update_track", { track_id: "nope", volume: 0.5 });
       expect(getText(result)).toContain("NOT_FOUND");
     });
 
@@ -557,8 +531,7 @@ describe("audio tools", () => {
         id: "t1",
         project: { userId: "other-user" },
       });
-      const handler = registry.handlers.get("audio_update_track")!;
-      const result = await handler({ track_id: "t1", volume: 0.5 });
+      const result = await registry.call("audio_update_track", { track_id: "t1", volume: 0.5 });
       expect(getText(result)).toContain("PERMISSION_DENIED");
     });
   });

@@ -27,9 +27,8 @@ export function registerSettingsTools(
         freeTool(userId)
             .tool("settings_list_api_keys", "List your API keys (keys are masked for security).", {})
             .meta({ category: "settings", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
-                const prisma = (await import("@/lib/prisma")).default;
-                const keys = await prisma.apiKey.findMany({
+            .handler(async ({ input: _input, ctx }) => {
+                const keys = await ctx.prisma.apiKey.findMany({
                     where: { userId },
                     select: {
                         id: true,
@@ -58,7 +57,7 @@ export function registerSettingsTools(
                 name: z.string().min(1).max(50).describe("Name for the API key."),
             })
             .meta({ category: "settings", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const { name } = input;
 
                 const { createApiKey } = await import("@/lib/mcp/api-key-manager");
@@ -80,7 +79,7 @@ export function registerSettingsTools(
                 key_id: z.string().min(1).describe("API key ID to revoke."),
             })
             .meta({ category: "settings", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const { key_id } = input;
 
                 const { revokeApiKey } = await import("@/lib/mcp/api-key-manager");
@@ -110,7 +109,7 @@ export function registerSettingsTools(
         freeTool(userId)
             .tool("settings_mcp_history", "List MCP job history with pagination and optional type filter.", McpHistorySchema.shape)
             .meta({ category: "settings", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const { type, limit, offset } = input;
 
                 const params = new URLSearchParams({
@@ -160,7 +159,7 @@ export function registerSettingsTools(
         freeTool(userId)
             .tool("settings_mcp_job_detail", "Get full detail for a single MCP job including images and processing time.", McpJobDetailSchema.shape)
             .meta({ category: "settings", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const { job_id } = input;
 
                 const job = await apiRequest<
@@ -208,7 +207,7 @@ export function registerEnvironmentTools(
         workspaceTool(userId)
             .tool("env_list", "List all registered environments with their URLs and health endpoints.", {})
             .meta({ category: "env", tier: "workspace" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, _ctx }) => {
                 await requireAdminRole(userId);
                 const { getAllEnvironmentConfigs } = await import(
                     "@/lib/dashboard/environments"
@@ -229,7 +228,7 @@ export function registerEnvironmentTools(
                 name: z.enum(["dev", "preview", "prod"]).describe("Environment name."),
             })
             .meta({ category: "env", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const { name } = input;
 
                 await requireAdminRole(userId);
@@ -258,7 +257,7 @@ export function registerEnvironmentTools(
                 env_b: z.enum(["dev", "preview", "prod"]).describe("Second environment."),
             })
             .meta({ category: "env", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const { env_a, env_b } = input;
 
                 await requireAdminRole(userId);

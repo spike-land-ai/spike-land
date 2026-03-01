@@ -1,15 +1,23 @@
 /**
  * Tool Registration Manifest
  *
- * Single source of truth for all MCP tool modules.
- * Each entry maps a register function to an optional condition.
- * Adding a new tool = 1 import + 1 array entry.
+ * Hybrid manifest: auto-discovered in-tree tools + explicit entries.
  *
- * Store apps (chess-arena, cleansweep, etc.) are imported from
- * packages/store-apps/ via the fromStandalone() adapter.
+ * In-tree tool files can opt into auto-discovery by exporting:
+ *   export const toolModules: ToolModuleExport[] = [
+ *     { register: registerMyTools, categories: ["my-category"] },
+ *   ];
+ *
+ * Tools that export `toolModules` are auto-discovered at startup and
+ * don't need explicit entries here. Store apps, conditional tools,
+ * and tools not yet migrated remain in EXPLICIT_MODULES.
+ *
+ * Migration path: gradually add `toolModules` exports to tool files,
+ * then remove the corresponding import + EXPLICIT_MODULES entry.
  */
 
 import type { ToolRegistry } from "./tool-registry";
+import { discoverToolModules } from "./tool-discovery";
 
 // --- Store apps adapter ---
 import { fromStandalone } from "@store-apps/shared/adapter";
@@ -376,14 +384,32 @@ export const TOOL_MODULES: ToolModuleEntry[] = [
 ];
 
 /**
- * Register all tool modules from the manifest.
- * Evaluates conditions and skips modules that don't match.
+ * Register all tool modules: auto-discovered + explicit.
+ *
+ * Auto-discovered modules (from tool files exporting `toolModules`)
+ * are loaded first. Explicit entries are then registered, with
+ * deduplication by function reference to avoid double-registration
+ * during the migration period.
  */
-export function registerAllTools(
+export async function registerAllTools(
   registry: ToolRegistry,
   userId: string,
-): void {
+): Promise<void> {
+  // Collect register functions that have already been registered
+  const registered = new Set<Function>();
+
+  // Phase 1: Auto-discovered modules
+  const discovered = await discoverToolModules();
+  for (const entry of discovered) {
+    if (!entry.condition || entry.condition()) {
+      entry.register(registry, userId);
+      registered.add(entry.register);
+    }
+  }
+
+  // Phase 2: Explicit modules (skip any already auto-discovered)
   for (const entry of TOOL_MODULES) {
+    if (registered.has(entry.register)) continue;
     if (!entry.condition || entry.condition()) {
       entry.register(registry, userId);
     }

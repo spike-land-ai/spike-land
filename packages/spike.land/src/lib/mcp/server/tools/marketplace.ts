@@ -60,15 +60,14 @@ export function registerMarketplaceTools(
                 limit: z.number().min(1).max(50).optional().default(10),
             })
             .meta({ category: "marketplace", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     query,
                     limit,
                 } = input;
 
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
-                    const tools = await findPublishedTools(prisma, query, limit);
+                    const tools = await findPublishedTools(ctx.prisma, query, limit);
 
                     if (tools.length === 0) {
                         return {
@@ -82,7 +81,7 @@ export function registerMarketplaceTools(
                     }
 
                     // Check which ones the user has installed
-                    const installed = await prisma.toolInstallation.findMany({
+                    const installed = await ctx.prisma.toolInstallation.findMany({
                         where: {
                             userId,
                             toolId: { in: tools.map(t => t.id) },
@@ -123,15 +122,14 @@ export function registerMarketplaceTools(
                 tool_id: z.string().min(1),
             })
             .meta({ category: "marketplace", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     tool_id,
                 } = input;
 
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
-                    const tool = await prisma.registeredTool.findFirst({
+                    const tool = await ctx.prisma.registeredTool.findFirst({
                         where: { id: tool_id, status: "PUBLISHED" },
                         select: { id: true, name: true, userId: true },
                     });
@@ -149,7 +147,7 @@ export function registerMarketplaceTools(
                     }
 
                     // Check if already installed
-                    const existing = await prisma.toolInstallation.findUnique({
+                    const existing = await ctx.prisma.toolInstallation.findUnique({
                         where: { userId_toolId: { userId, toolId: tool_id } },
                     });
 
@@ -165,15 +163,15 @@ export function registerMarketplaceTools(
                     }
 
                     // Create installation + increment install count + record earning in a transaction
-                    await prisma.$transaction([
-                        prisma.toolInstallation.create({
+                    await ctx.prisma.$transaction([
+                        ctx.prisma.toolInstallation.create({
                             data: { userId, toolId: tool_id },
                         }),
-                        prisma.registeredTool.update({
+                        ctx.prisma.registeredTool.update({
                             where: { id: tool_id },
                             data: { installCount: { increment: 1 } },
                         }),
-                        prisma.toolEarning.create({
+                        ctx.prisma.toolEarning.create({
                             data: {
                                 toolId: tool_id,
                                 userId: tool.userId,
@@ -210,15 +208,14 @@ export function registerMarketplaceTools(
                 tool_id: z.string().min(1),
             })
             .meta({ category: "marketplace", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const {
                     tool_id,
                 } = input;
 
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
-                    const installation = await prisma.toolInstallation.findUnique({
+                    const installation = await ctx.prisma.toolInstallation.findUnique({
                         where: { userId_toolId: { userId, toolId: tool_id } },
                         include: { tool: { select: { name: true } } },
                     });
@@ -235,11 +232,11 @@ export function registerMarketplaceTools(
                         };
                     }
 
-                    await prisma.$transaction([
-                        prisma.toolInstallation.delete({
+                    await ctx.prisma.$transaction([
+                        ctx.prisma.toolInstallation.delete({
                             where: { id: installation.id },
                         }),
-                        prisma.registeredTool.update({
+                        ctx.prisma.registeredTool.update({
                             where: { id: tool_id },
                             data: { installCount: { decrement: 1 } },
                         }),
@@ -270,12 +267,11 @@ export function registerMarketplaceTools(
             .tool("marketplace_my_earnings", "View your token earnings from published marketplace tools. "
                 + "Shows per-tool breakdown and total earnings.", {})
             .meta({ category: "marketplace", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
+            .handler(async ({ input: _input, ctx }) => {
                 try {
-                    const prisma = (await import("@/lib/prisma")).default;
 
                     // Get all published tools by this user
-                    const tools = await prisma.registeredTool.findMany({
+                    const tools = await ctx.prisma.registeredTool.findMany({
                         where: { userId, status: "PUBLISHED" },
                         select: {
                             id: true,
@@ -299,7 +295,7 @@ export function registerMarketplaceTools(
                     }
 
                     // Get total earnings
-                    const earningsAgg = await prisma.toolEarning.aggregate({
+                    const earningsAgg = await ctx.prisma.toolEarning.aggregate({
                         where: { userId },
                         _sum: { tokens: true },
                     });
@@ -307,7 +303,7 @@ export function registerMarketplaceTools(
 
                     // Get per-tool earnings
                     const toolIds = tools.map(t => t.id);
-                    const perToolEarnings = await prisma.toolEarning.groupBy({
+                    const perToolEarnings = await ctx.prisma.toolEarning.groupBy({
                         by: ["toolId"],
                         where: { toolId: { in: toolIds } },
                         _sum: { tokens: true },

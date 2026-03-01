@@ -41,10 +41,8 @@ export function registerSkillStoreTools(
                 ),
             })
             .meta({ category: "skill-store", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { category, search, limit = 20, offset = 0 } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const where: {
                     status: SkillStatus;
                     isActive: boolean;
@@ -69,7 +67,7 @@ export function registerSkillStoreTools(
                     ];
                 }
 
-                const skills = await prisma.skill.findMany({
+                const skills = await ctx.prisma.skill.findMany({
                     where,
                     select: {
                         id: true,
@@ -105,11 +103,9 @@ export function registerSkillStoreTools(
                 identifier: z.string().min(1).describe("Skill slug or ID."),
             })
             .meta({ category: "skill-store", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { identifier } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
-                const skill = await prisma.skill.findFirst({
+                const skill = await ctx.prisma.skill.findFirst({
                     where: {
                         OR: [{ slug: identifier }, { id: identifier }],
                         status: "PUBLISHED",
@@ -174,12 +170,10 @@ export function registerSkillStoreTools(
                 skill_id: z.string().min(1).describe("Skill ID to install."),
             })
             .meta({ category: "skill-store", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { skill_id } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const skill = await prisma.skill.findFirst({
+                const skill = await ctx.prisma.skill.findFirst({
                     where: { id: skill_id, status: "PUBLISHED", isActive: true },
                     select: { id: true, name: true, displayName: true },
                 });
@@ -189,7 +183,7 @@ export function registerSkillStoreTools(
                     );
                 }
 
-                const existing = await prisma.skillInstallation.findFirst({
+                const existing = await ctx.prisma.skillInstallation.findFirst({
                     where: { skillId: skill_id, userId },
                 });
                 if (existing) {
@@ -198,11 +192,11 @@ export function registerSkillStoreTools(
                     );
                 }
 
-                await prisma.$transaction([
-                    prisma.skillInstallation.create({
+                await ctx.prisma.$transaction([
+                    ctx.prisma.skillInstallation.create({
                         data: { skillId: skill_id, userId },
                     }),
-                    prisma.skill.update({
+                    ctx.prisma.skill.update({
                         where: { id: skill_id },
                         data: { installCount: { increment: 1 } },
                     }),
@@ -226,16 +220,14 @@ export function registerSkillStoreTools(
                 ),
             })
             .meta({ category: "skill-store", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { status, limit = 20, offset = 0 } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const where: { status?: SkillStatus; } = {};
                 if (status) {
                     where.status = status as SkillStatus;
                 }
 
-                const skills = await prisma.skill.findMany({
+                const skills = await ctx.prisma.skill.findMany({
                     where,
                     select: {
                         id: true,
@@ -313,11 +305,8 @@ export function registerSkillStoreTools(
                 ),
             })
             .meta({ category: "skill-store", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
-                
-
-                const prisma = (await import("@/lib/prisma")).default;
-                const skill = await prisma.skill.create({
+            .handler(async ({ input, ctx }) => {
+                const skill = await ctx.prisma.skill.create({
                     data: {
                         name: input.name,
                         slug: input.slug,
@@ -380,10 +369,8 @@ export function registerSkillStoreTools(
                 isFeatured: z.boolean().optional().describe("New featured status."),
             })
             .meta({ category: "skill-store", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { skill_id, ...fields } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
                 const data: Record<string, unknown> = {};
                 if (fields.name !== undefined) data.name = fields.name;
                 if (fields.slug !== undefined) data.slug = fields.slug;
@@ -415,7 +402,7 @@ export function registerSkillStoreTools(
                     data.isFeatured = fields.isFeatured;
                 }
 
-                const skill = await prisma.skill.update({
+                const skill = await ctx.prisma.skill.update({
                     where: { id: skill_id },
                     data,
                 });
@@ -431,11 +418,9 @@ export function registerSkillStoreTools(
                 skill_id: z.string().min(1).describe("Skill ID to archive."),
             })
             .meta({ category: "skill-store", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { skill_id } = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
-                const skill = await prisma.skill.update({
+                const skill = await ctx.prisma.skill.update({
                     where: { id: skill_id },
                     data: { status: "ARCHIVED", isActive: false },
                 });

@@ -11,9 +11,8 @@ export function registerPermissionsTools(
         workspaceTool(userId)
             .tool("permissions_list_pending", "List pending permission requests for the user.", {})
             .meta({ category: "permissions", tier: "workspace" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
-                const prisma = (await import("@/lib/prisma")).default;
-                const requests = await prisma.permissionRequest.findMany({
+            .handler(async ({ input: _input, ctx }) => {
+                const requests = await ctx.prisma.permissionRequest.findMany({
                     where: { userId, status: "PENDING" },
                     include: {
                         agent: { select: { displayName: true } },
@@ -41,11 +40,9 @@ export function registerPermissionsTools(
                 action: z.enum(["APPROVE", "DENY"]).describe("Approve or deny the request."),
             })
             .meta({ category: "permissions", tier: "workspace" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
-
-                const prisma = (await import("@/lib/prisma")).default;
-                const request = await prisma.permissionRequest.findUnique({
+                const request = await ctx.prisma.permissionRequest.findUnique({
                     where: { id: args.requestId, userId },
                 });
 
@@ -54,7 +51,7 @@ export function registerPermissionsTools(
                     throw new Error(`Request is already ${request.status}.`);
                 }
 
-                const updated = await prisma.permissionRequest.update({
+                const updated = await ctx.prisma.permissionRequest.update({
                     where: { id: args.requestId },
                     data: {
                         status: args.action === "APPROVE" ? "APPROVED" : "DENIED",

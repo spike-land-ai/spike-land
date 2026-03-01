@@ -38,8 +38,7 @@ describe("codespace-template tools", () => {
 
   describe("codespace_list_templates", () => {
     it("should list all templates when no category filter provided", async () => {
-      const handler = registry.handlers.get("codespace_list_templates")!;
-      const result = await handler({});
+      const result = await registry.call("codespace_list_templates", {});
       expect(isError(result)).toBe(false);
       const text = getText(result);
       expect(text).toContain("Available Templates");
@@ -51,8 +50,7 @@ describe("codespace-template tools", () => {
     });
 
     it("should filter templates by category 'react'", async () => {
-      const handler = registry.handlers.get("codespace_list_templates")!;
-      const result = await handler({ category: "react" });
+      const result = await registry.call("codespace_list_templates", { category: "react" });
       expect(isError(result)).toBe(false);
       const text = getText(result);
       expect(text).toContain("react");
@@ -60,8 +58,7 @@ describe("codespace-template tools", () => {
     });
 
     it("should filter templates by category 'blank'", async () => {
-      const handler = registry.handlers.get("codespace_list_templates")!;
-      const result = await handler({ category: "blank" });
+      const result = await registry.call("codespace_list_templates", { category: "blank" });
       expect(isError(result)).toBe(false);
       const text = getText(result);
       expect(text).toContain("Blank");
@@ -69,24 +66,21 @@ describe("codespace-template tools", () => {
     });
 
     it("should filter templates by category 'game'", async () => {
-      const handler = registry.handlers.get("codespace_list_templates")!;
-      const result = await handler({ category: "game" });
+      const result = await registry.call("codespace_list_templates", { category: "game" });
       expect(isError(result)).toBe(false);
       const text = getText(result);
       expect(text).toContain("game");
     });
 
     it("should filter templates by category 'dashboard'", async () => {
-      const handler = registry.handlers.get("codespace_list_templates")!;
-      const result = await handler({ category: "dashboard" });
+      const result = await registry.call("codespace_list_templates", { category: "dashboard" });
       expect(isError(result)).toBe(false);
       const text = getText(result);
       expect(text).toContain("dashboard");
     });
 
     it("should include dependency information in template listing", async () => {
-      const handler = registry.handlers.get("codespace_list_templates")!;
-      const result = await handler({ category: "next" });
+      const result = await registry.call("codespace_list_templates", { category: "next" });
       expect(isError(result)).toBe(false);
       const text = getText(result);
       // next-api-route template has next and @types/node deps
@@ -94,8 +88,7 @@ describe("codespace-template tools", () => {
     });
 
     it("should show 'none' for templates with no dependencies", async () => {
-      const handler = registry.handlers.get("codespace_list_templates")!;
-      const result = await handler({ category: "blank" });
+      const result = await registry.call("codespace_list_templates", { category: "blank" });
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("none");
     });
@@ -124,8 +117,7 @@ describe("codespace-template tools", () => {
         messages: [],
       });
 
-      const handler = registry.handlers.get("codespace_create_from_template")!;
-      const result = await handler({
+      const result = await registry.call("codespace_create_from_template", {
         template_id: "blank",
         name: "my-app",
       });
@@ -140,8 +132,7 @@ describe("codespace-template tools", () => {
     });
 
     it("should return error for unknown template_id", async () => {
-      const handler = registry.handlers.get("codespace_create_from_template")!;
-      const result = await handler({
+      const result = await registry.call("codespace_create_from_template", {
         template_id: "nonexistent-template",
         name: "my-app",
       });
@@ -171,8 +162,7 @@ describe("codespace-template tools", () => {
         messages: [],
       });
 
-      const handler = registry.handlers.get("codespace_create_from_template")!;
-      const result = await handler({
+      const result = await registry.call("codespace_create_from_template", {
         template_id: "react-counter",
         name: "my-counter",
         description: "Custom project description",
@@ -185,8 +175,7 @@ describe("codespace-template tools", () => {
     it("should return error when session service throws", async () => {
       mockGetOrCreateSession.mockRejectedValue(new Error("DB unavailable"));
 
-      const handler = registry.handlers.get("codespace_create_from_template")!;
-      const result = await handler({
+      const result = await registry.call("codespace_create_from_template", {
         template_id: "blank",
         name: "my-app",
       });
@@ -216,9 +205,8 @@ describe("codespace-template tools", () => {
         messages: [],
       });
 
-      const handler = registry.handlers.get("codespace_create_from_template")!;
       // dashboard-stats has 2 files
-      const result = await handler({
+      const result = await registry.call("codespace_create_from_template", {
         template_id: "dashboard-stats",
         name: "stats-app",
       });
@@ -250,8 +238,7 @@ describe("codespace-template tools", () => {
         messages: [],
       });
 
-      const handler = registry.handlers.get("codespace_create_from_template")!;
-      const result = await handler({
+      const result = await registry.call("codespace_create_from_template", {
         template_id: "dashboard-stats",
         name: "dash-app",
       });
@@ -276,8 +263,7 @@ describe("codespace-template tools", () => {
         hash: "h",
       });
 
-      const handler = registry.handlers.get("codespace_get_dependencies")!;
-      const result = await handler({ codespace_id: "my-app" });
+      const result = await registry.call("codespace_get_dependencies", { codespace_id: "my-app" });
 
       expect(isError(result)).toBe(false);
       const text = getText(result);
@@ -297,8 +283,7 @@ describe("codespace-template tools", () => {
         hash: "h",
       });
 
-      const handler = registry.handlers.get("codespace_get_dependencies")!;
-      const result = await handler({ codespace_id: "my-app" });
+      const result = await registry.call("codespace_get_dependencies", { codespace_id: "my-app" });
 
       expect(isError(result)).toBe(false);
       const text = getText(result);
@@ -312,8 +297,7 @@ describe("codespace-template tools", () => {
     it("should return error when codespace not found", async () => {
       mockGetSession.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("codespace_get_dependencies")!;
-      const result = await handler({ codespace_id: "missing-cs" });
+      const result = await registry.call("codespace_get_dependencies", { codespace_id: "missing-cs" });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("not found");
@@ -323,8 +307,7 @@ describe("codespace-template tools", () => {
     it("should return error when session service throws", async () => {
       mockGetSession.mockRejectedValue(new Error("DB error"));
 
-      const handler = registry.handlers.get("codespace_get_dependencies")!;
-      const result = await handler({ codespace_id: "my-app" });
+      const result = await registry.call("codespace_get_dependencies", { codespace_id: "my-app" });
 
       expect(isError(result)).toBe(true);
     });
@@ -340,8 +323,7 @@ describe("codespace-template tools", () => {
         hash: "h",
       });
 
-      const handler = registry.handlers.get("codespace_get_dependencies")!;
-      const result = await handler({ codespace_id: "pure-app" });
+      const result = await registry.call("codespace_get_dependencies", { codespace_id: "pure-app" });
 
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("No external npm dependencies detected");
@@ -359,8 +341,7 @@ describe("codespace-template tools", () => {
         hash: "h",
       });
 
-      const handler = registry.handlers.get("codespace_get_dependencies")!;
-      const result = await handler({ codespace_id: "my-app" });
+      const result = await registry.call("codespace_get_dependencies", { codespace_id: "my-app" });
 
       expect(isError(result)).toBe(false);
       expect(getText(result)).toContain("@shadcn/ui");
@@ -391,8 +372,7 @@ describe("codespace-template tools", () => {
         messages: [],
       });
 
-      const handler = registry.handlers.get("codespace_add_dependency")!;
-      const result = await handler({
+      const result = await registry.call("codespace_add_dependency", {
         codespace_id: "my-app",
         package_name: "lodash",
         version: "^4.17.21",
@@ -427,8 +407,7 @@ describe("codespace-template tools", () => {
         messages: [],
       });
 
-      const handler = registry.handlers.get("codespace_add_dependency")!;
-      const result = await handler({
+      const result = await registry.call("codespace_add_dependency", {
         codespace_id: "my-app",
         package_name: "@types/lodash",
         dev: true,
@@ -460,8 +439,7 @@ describe("codespace-template tools", () => {
         messages: [],
       });
 
-      const handler = registry.handlers.get("codespace_add_dependency")!;
-      const result = await handler({
+      const result = await registry.call("codespace_add_dependency", {
         codespace_id: "my-app",
         package_name: "date-fns",
       });
@@ -483,8 +461,7 @@ describe("codespace-template tools", () => {
         hash: "h",
       });
 
-      const handler = registry.handlers.get("codespace_add_dependency")!;
-      const result = await handler({
+      const result = await registry.call("codespace_add_dependency", {
         codespace_id: "my-app",
         package_name: "lodash",
         version: "^4",
@@ -498,8 +475,7 @@ describe("codespace-template tools", () => {
     it("should return error when codespace not found", async () => {
       mockGetSession.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("codespace_add_dependency")!;
-      const result = await handler({
+      const result = await registry.call("codespace_add_dependency", {
         codespace_id: "missing-cs",
         package_name: "lodash",
       });
@@ -511,8 +487,7 @@ describe("codespace-template tools", () => {
     it("should return error when session service throws", async () => {
       mockGetSession.mockRejectedValue(new Error("DB failure"));
 
-      const handler = registry.handlers.get("codespace_add_dependency")!;
-      const result = await handler({
+      const result = await registry.call("codespace_add_dependency", {
         codespace_id: "my-app",
         package_name: "lodash",
       });

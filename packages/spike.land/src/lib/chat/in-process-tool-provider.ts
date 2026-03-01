@@ -37,22 +37,28 @@ export class InProcessToolProvider {
   private registry: ToolRegistry;
   private toolCache: NamespacedTool[] | null = null;
 
-  constructor(userId: string) {
+  private constructor(registry: ToolRegistry) {
+    this.registry = registry;
+  }
+
+  static async create(userId: string): Promise<InProcessToolProvider> {
     // Create a minimal McpServer — only used for ToolRegistry's registerTool bookkeeping.
     // No actual MCP transport is set up.
     const mcpServer = new McpServer({ name: "in-process", version: "1.0.0" });
-    this.registry = new ToolRegistry(mcpServer, userId);
+    const registry = new ToolRegistry(mcpServer, userId);
 
-    // Register all 120+ tools
-    registerAllTools(this.registry, userId);
+    // Register all 120+ tools (async for auto-discovery)
+    await registerAllTools(registry, userId);
 
     // Enable all tools — skip progressive disclosure for agent loops
-    const enabled = this.registry.enableAll();
+    const enabled = registry.enableAll();
     logger.info("InProcessToolProvider initialized", {
-      totalTools: this.registry.getToolCount(),
+      totalTools: registry.getToolCount(),
       enabledTools: enabled,
       userId,
     });
+
+    return new InProcessToolProvider(registry);
   }
 
   /** Returns all tools as NamespacedTool[] (cached after first call). */

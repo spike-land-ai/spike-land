@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   socialPost: {
     count: vi.fn(),
     findFirst: vi.fn(),
     create: vi.fn(),
   },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -42,8 +44,7 @@ describe("calendar analytics tools", () => {
         content: "Our latest product drop is live!",
         scheduledAt: new Date("2026-02-20T10:00:00Z"),
       });
-      const handler = registry.handlers.get("calendar_get_analytics")!;
-      const result = await handler({ period: "7d" });
+      const result = await registry.call("calendar_get_analytics", { period: "7d" });
       const text = getText(result);
       expect(text).toContain("Analytics");
       expect(text).toContain("7d");
@@ -57,8 +58,7 @@ describe("calendar analytics tools", () => {
     it("should return analytics with platform filter", async () => {
       mockPrisma.socialPost.count.mockResolvedValue(5);
       mockPrisma.socialPost.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("calendar_get_analytics")!;
-      const result = await handler({ period: "30d", platform: "instagram" });
+      const result = await registry.call("calendar_get_analytics", { period: "30d", platform: "instagram" });
       const text = getText(result);
       expect(text).toContain("Instagram");
       expect(text).toContain("30d");
@@ -69,8 +69,7 @@ describe("calendar analytics tools", () => {
     it("should handle zero posts gracefully", async () => {
       mockPrisma.socialPost.count.mockResolvedValue(0);
       mockPrisma.socialPost.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("calendar_get_analytics")!;
-      const result = await handler({ period: "all" });
+      const result = await registry.call("calendar_get_analytics", { period: "all" });
       const text = getText(result);
       expect(text).toContain("0");
       expect(text).toContain("no data");
@@ -83,8 +82,7 @@ describe("calendar analytics tools", () => {
         content: "High performer",
         scheduledAt: new Date("2026-02-25T08:00:00Z"),
       });
-      const handler = registry.handlers.get("calendar_get_analytics")!;
-      const result = await handler({ period: "90d" });
+      const result = await registry.call("calendar_get_analytics", { period: "90d" });
       expect(getText(result)).toContain("positive");
     });
 
@@ -92,8 +90,7 @@ describe("calendar analytics tools", () => {
       mockPrisma.socialPost.count.mockRejectedValue(
         new Error("DB connection timeout"),
       );
-      const handler = registry.handlers.get("calendar_get_analytics")!;
-      const result = await handler({ period: "7d" });
+      const result = await registry.call("calendar_get_analytics", { period: "7d" });
       const text = getText(result);
       expect(text).toContain("Error");
       expect(text).toContain("DB connection timeout");
@@ -104,8 +101,7 @@ describe("calendar analytics tools", () => {
 
   describe("calendar_suggest_content", () => {
     it("should return content suggestions for instagram", async () => {
-      const handler = registry.handlers.get("calendar_suggest_content")!;
-      const result = await handler({
+      const result = await registry.call("calendar_suggest_content", {
         topic: "eco-friendly packaging",
         platform: "instagram",
         count: 2,
@@ -120,8 +116,7 @@ describe("calendar analytics tools", () => {
     });
 
     it("should default to 3 suggestions when count is omitted", async () => {
-      const handler = registry.handlers.get("calendar_suggest_content")!;
-      const result = await handler({
+      const result = await registry.call("calendar_suggest_content", {
         topic: "product launch",
         platform: "twitter",
       });
@@ -133,8 +128,7 @@ describe("calendar analytics tools", () => {
     });
 
     it("should return suggestions for linkedin platform", async () => {
-      const handler = registry.handlers.get("calendar_suggest_content")!;
-      const result = await handler({
+      const result = await registry.call("calendar_suggest_content", {
         topic: "team culture",
         platform: "linkedin",
         count: 1,
@@ -147,8 +141,7 @@ describe("calendar analytics tools", () => {
     });
 
     it("should handle the 'all' platform case", async () => {
-      const handler = registry.handlers.get("calendar_suggest_content")!;
-      const result = await handler({
+      const result = await registry.call("calendar_suggest_content", {
         topic: "summer sale",
         platform: "all",
         count: 3,
@@ -167,11 +160,10 @@ describe("calendar analytics tools", () => {
         .mockResolvedValueOnce({ id: "bulk-1" })
         .mockResolvedValueOnce({ id: "bulk-2" });
 
-      const handler = registry.handlers.get("calendar_bulk_schedule")!;
       const futureDate1 = new Date(Date.now() + 86_400_000).toISOString();
       const futureDate2 = new Date(Date.now() + 172_800_000).toISOString();
 
-      const result = await handler({
+      const result = await registry.call("calendar_bulk_schedule", {
         posts: [
           { content: "Post one", platform: "instagram", scheduled_at: futureDate1 },
           { content: "Post two", platform: "twitter", scheduled_at: futureDate2 },
@@ -188,10 +180,9 @@ describe("calendar analytics tools", () => {
     });
 
     it("should reject posts with past scheduled_at dates", async () => {
-      const handler = registry.handlers.get("calendar_bulk_schedule")!;
       const pastDate = new Date(Date.now() - 86_400_000).toISOString();
 
-      const result = await handler({
+      const result = await registry.call("calendar_bulk_schedule", {
         posts: [
           { content: "Stale post", platform: "facebook", scheduled_at: pastDate },
         ],
@@ -204,11 +195,10 @@ describe("calendar analytics tools", () => {
     });
 
     it("should identify multiple invalid posts in one response", async () => {
-      const handler = registry.handlers.get("calendar_bulk_schedule")!;
       const pastDate = new Date(Date.now() - 86_400_000).toISOString();
       const futureDate = new Date(Date.now() + 86_400_000).toISOString();
 
-      const result = await handler({
+      const result = await registry.call("calendar_bulk_schedule", {
         posts: [
           { content: "Past post 1", platform: "instagram", scheduled_at: pastDate },
           { content: "Future post", platform: "twitter", scheduled_at: futureDate },
@@ -227,10 +217,9 @@ describe("calendar analytics tools", () => {
       mockPrisma.socialPost.create.mockRejectedValue(
         new Error("Unique constraint failed"),
       );
-      const handler = registry.handlers.get("calendar_bulk_schedule")!;
       const futureDate = new Date(Date.now() + 86_400_000).toISOString();
 
-      const result = await handler({
+      const result = await registry.call("calendar_bulk_schedule", {
         posts: [
           { content: "Post", platform: "tiktok", scheduled_at: futureDate },
         ],
@@ -262,8 +251,7 @@ describe("calendar analytics tools", () => {
         },
       });
 
-      const handler = registry.handlers.get("calendar_get_performance")!;
-      const result = await handler({ post_id: "perf-1" });
+      const result = await registry.call("calendar_get_performance", { post_id: "perf-1" });
       const text = getText(result);
       expect(text).toContain("Post Performance");
       expect(text).toContain("perf-1");
@@ -278,8 +266,7 @@ describe("calendar analytics tools", () => {
 
     it("should return NOT_FOUND for a missing or unauthorised post", async () => {
       mockPrisma.socialPost.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("calendar_get_performance")!;
-      const result = await handler({ post_id: "ghost-post" });
+      const result = await registry.call("calendar_get_performance", { post_id: "ghost-post" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
 
@@ -291,8 +278,7 @@ describe("calendar analytics tools", () => {
         scheduledAt: new Date("2026-03-01T10:00:00Z"),
         createdAt: new Date("2026-02-25T10:00:00Z"),
       });
-      const handler = registry.handlers.get("calendar_get_performance")!;
-      const result = await handler({ post_id: "draft-1" });
+      const result = await registry.call("calendar_get_performance", { post_id: "draft-1" });
       const text = getText(result);
       expect(text).toContain("VALIDATION_ERROR");
       expect(text).toContain("SCHEDULED");
@@ -307,8 +293,7 @@ describe("calendar analytics tools", () => {
         createdAt: new Date("2026-02-08T10:00:00Z"),
         metrics: undefined,
       });
-      const handler = registry.handlers.get("calendar_get_performance")!;
-      const result = await handler({ post_id: "no-metrics" });
+      const result = await registry.call("calendar_get_performance", { post_id: "no-metrics" });
       const text = getText(result);
       expect(text).toContain("0");
       expect(text).toContain("0.00%");
@@ -319,8 +304,7 @@ describe("calendar analytics tools", () => {
       mockPrisma.socialPost.findFirst.mockRejectedValue(
         new Error("Read replica unavailable"),
       );
-      const handler = registry.handlers.get("calendar_get_performance")!;
-      const result = await handler({ post_id: "perf-err" });
+      const result = await registry.call("calendar_get_performance", { post_id: "perf-err" });
       const text = getText(result);
       expect(text).toContain("Error");
       expect(text).toContain("Read replica unavailable");

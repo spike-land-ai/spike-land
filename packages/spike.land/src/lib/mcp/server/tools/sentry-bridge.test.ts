@@ -43,8 +43,7 @@ describe("error log bridge tools", () => {
           errorType: "TypeError",
         },
       ]);
-      const handler = registry.handlers.get("error_issues")!;
-      const result = await handler({});
+      const result = await registry.call("error_issues", {});
       expect(getText(result)).toContain("TypeError in handler");
       expect(getText(result)).toContain("BACKEND");
       expect(getText(result)).toContain("Count: 42");
@@ -52,15 +51,13 @@ describe("error log bridge tools", () => {
 
     it("should return empty message when no issues found", async () => {
       mockListIssues.mockResolvedValue([]);
-      const handler = registry.handlers.get("error_issues")!;
-      const result = await handler({});
+      const result = await registry.call("error_issues", {});
       expect(getText(result)).toContain("No error issues found");
     });
 
     it("should pass query and limit to bridge", async () => {
       mockListIssues.mockResolvedValue([]);
-      const handler = registry.handlers.get("error_issues")!;
-      await handler({ query: "TypeError", limit: 10 });
+      await registry.call("error_issues", { query: "TypeError", limit: 10 });
       expect(mockListIssues).toHaveBeenCalledWith({
         query: "TypeError",
         limit: 10,
@@ -86,8 +83,7 @@ describe("error log bridge tools", () => {
         metadata: null,
         timestamp: "2026-02-14T00:00:00.000Z",
       });
-      const handler = registry.handlers.get("error_detail")!;
-      const result = await handler({ error_id: "clx123" });
+      const result = await registry.call("error_detail", { error_id: "clx123" });
       expect(getText(result)).toContain("TypeError in handler");
       expect(getText(result)).toContain("app/api/route.ts");
       expect(getText(result)).toContain("BACKEND");
@@ -96,8 +92,7 @@ describe("error log bridge tools", () => {
 
     it("should return not-found when error is null", async () => {
       mockGetDetail.mockResolvedValue(null);
-      const handler = registry.handlers.get("error_detail")!;
-      const result = await handler({ error_id: "nonexistent" });
+      const result = await registry.call("error_detail", { error_id: "nonexistent" });
       expect(getText(result)).toContain("Error not found");
     });
   });
@@ -110,8 +105,7 @@ describe("error log bridge tools", () => {
         last30d: 200,
         byEnvironment: { FRONTEND: 120, BACKEND: 80 },
       });
-      const handler = registry.handlers.get("error_stats")!;
-      const result = await handler({});
+      const result = await registry.call("error_stats", {});
       expect(getText(result)).toContain("Last 24h: 10");
       expect(getText(result)).toContain("Last 7d: 50");
       expect(getText(result)).toContain("Last 30d: 200");
@@ -121,8 +115,7 @@ describe("error log bridge tools", () => {
 
     it("should return error when stats are null", async () => {
       mockGetStats.mockResolvedValue(null);
-      const handler = registry.handlers.get("error_stats")!;
-      const result = await handler({});
+      const result = await registry.call("error_stats", {});
       expect(getText(result)).toContain("Could not fetch error stats");
     });
   });

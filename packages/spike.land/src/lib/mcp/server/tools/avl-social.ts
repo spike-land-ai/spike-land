@@ -133,13 +133,11 @@ export function registerAvlSocialTools(
                     ),
             })
             .meta({ category: "avl-social", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
                 // Fetch profiles with user info; cap at 200 to avoid full table scan.
-                const rawProfiles = await prisma.avlUserProfile.findMany({
+                const rawProfiles = await ctx.prisma.avlUserProfile.findMany({
                     include: { user: { select: { name: true, email: true } } },
                     take: 200,
                 });
@@ -214,12 +212,10 @@ export function registerAvlSocialTools(
                     ),
             })
             .meta({ category: "avl-social", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const rawProfile = await prisma.avlUserProfile.findUnique({
+                const rawProfile = await ctx.prisma.avlUserProfile.findUnique({
                     where: { userId },
                     include: { user: { select: { name: true, email: true } } },
                 });
@@ -276,17 +272,15 @@ export function registerAvlSocialTools(
                     .describe("User ID of the other player to compare against."),
             })
             .meta({ category: "avl-social", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const args = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
                 const [rawMine, rawOther] = await Promise.all([
-                    prisma.avlUserProfile.findUnique({
+                    ctx.prisma.avlUserProfile.findUnique({
                         where: { userId },
                         include: { user: { select: { name: true, email: true } } },
                     }),
-                    prisma.avlUserProfile.findUnique({
+                    ctx.prisma.avlUserProfile.findUnique({
                         where: { userId: args.other_user_id },
                         include: { user: { select: { name: true, email: true } } },
                     }),
@@ -368,10 +362,9 @@ export function registerAvlSocialTools(
         freeTool(userId)
             .tool("profile_get_insights", "Get personality insights derived from your beUniq answer pattern: dominant traits, tag confidence scores, rare combinations, and a fun uniqueness fact.", {})
             .meta({ category: "avl-social", tier: "free" })
-            .handler(async ({ input: _input, ctx: _ctx }) => {
-                const prisma = (await import("@/lib/prisma")).default;
+            .handler(async ({ input: _input, ctx }) => {
 
-                const rawProfile = await prisma.avlUserProfile.findUnique({
+                const rawProfile = await ctx.prisma.avlUserProfile.findUnique({
                     where: { userId },
                 });
 
@@ -392,7 +385,7 @@ export function registerAvlSocialTools(
                 const rare = sorted.slice(-2).filter(t => (confidence[t] ?? 0) < 40);
 
                 const depth = leafDepth(rawProfile.leafNodeId);
-                const totalUsers = await prisma.avlUserProfile.count();
+                const totalUsers = await ctx.prisma.avlUserProfile.count();
                 const rarity = totalUsers > 0 ? `1 in ${totalUsers}` : "uniquely you";
 
                 const confidenceLines = sorted

@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   workspace: { findFirst: vi.fn() },
   workspaceAuditLog: { findMany: vi.fn() },
   aIDecisionLog: { findMany: vi.fn() },
   agentAuditLog: { findMany: vi.fn() },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -51,8 +53,7 @@ describe("audit tools", () => {
           details: null,
         },
       ]);
-      const handler = registry.handlers.get("audit_query_logs")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("audit_query_logs", { workspace_slug: "my-ws" });
       const text = getText(result);
       expect(text).toContain("Audit Logs (2)");
       expect(text).toContain("CREATE");
@@ -62,8 +63,7 @@ describe("audit tools", () => {
 
     it("should return message when no logs found", async () => {
       mockPrisma.workspaceAuditLog.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("audit_query_logs")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("audit_query_logs", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("No audit logs found");
     });
 
@@ -77,8 +77,7 @@ describe("audit tools", () => {
           details: null,
         },
       ]);
-      const handler = registry.handlers.get("audit_query_logs")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("audit_query_logs", { workspace_slug: "my-ws" });
       const text = getText(result);
       expect(text).toContain("unknown");
       expect(text).toContain("system");
@@ -86,8 +85,7 @@ describe("audit tools", () => {
 
     it("should apply action and target_type filters", async () => {
       mockPrisma.workspaceAuditLog.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("audit_query_logs")!;
-      await handler({
+      await registry.call("audit_query_logs", {
         workspace_slug: "my-ws",
         action: "DELETE",
         target_type: "User",
@@ -110,8 +108,7 @@ describe("audit tools", () => {
         { action: "UPDATE" },
         { action: "DELETE" },
       ]);
-      const handler = registry.handlers.get("audit_export")!;
-      const result = await handler({
+      const result = await registry.call("audit_export", {
         workspace_slug: "my-ws",
         from_date: "2025-01-01",
         to_date: "2025-06-30",
@@ -134,8 +131,7 @@ describe("audit tools", () => {
           createdAt: new Date("2025-06-01"),
         },
       ]);
-      const handler = registry.handlers.get("audit_get_ai_decisions")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("audit_get_ai_decisions", { workspace_slug: "my-ws" });
       const text = getText(result);
       expect(text).toContain("AI Decisions (1)");
       expect(text).toContain("CONTENT_MODERATION");
@@ -151,8 +147,7 @@ describe("audit tools", () => {
           createdAt: new Date("2025-06-01"),
         },
       ]);
-      const handler = registry.handlers.get("audit_get_ai_decisions")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("audit_get_ai_decisions", { workspace_slug: "my-ws" });
       const text = getText(result);
       expect(text).toContain("input: n/a");
       expect(text).toContain("output: n/a");
@@ -160,8 +155,7 @@ describe("audit tools", () => {
 
     it("should return message when no decisions found", async () => {
       mockPrisma.aIDecisionLog.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("audit_get_ai_decisions")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("audit_get_ai_decisions", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("No AI decisions found");
     });
   });
@@ -175,8 +169,7 @@ describe("audit tools", () => {
           createdAt: new Date("2025-06-01"),
         },
       ]);
-      const handler = registry.handlers.get("audit_get_agent_trail")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("audit_get_agent_trail", { workspace_slug: "my-ws" });
       const text = getText(result);
       expect(text).toContain("Agent Trail (1)");
       expect(text).toContain("TOOL_CALL");
@@ -185,15 +178,13 @@ describe("audit tools", () => {
 
     it("should return message when no trail found", async () => {
       mockPrisma.agentAuditLog.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("audit_get_agent_trail")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("audit_get_agent_trail", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("No agent activity found");
     });
 
     it("should filter by agent_id when provided", async () => {
       mockPrisma.agentAuditLog.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("audit_get_agent_trail")!;
-      await handler({ workspace_slug: "my-ws", agent_id: "agent-42" });
+      await registry.call("audit_get_agent_trail", { workspace_slug: "my-ws", agent_id: "agent-42" });
       expect(mockPrisma.agentAuditLog.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ agentId: "agent-42" }),

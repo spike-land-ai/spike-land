@@ -54,16 +54,14 @@ describe("jules tools", () => {
           title: "Fix bug",
         }],
       }));
-      const handler = registry.handlers.get("jules_list_sessions")!;
-      const result = await handler({ page_size: 20 });
+      const result = await registry.call("jules_list_sessions", { page_size: 20 });
       expect(getText(result)).toContain("Fix bug");
       expect(getText(result)).toContain("COMPLETED");
     });
 
     it("should show empty message", async () => {
       mockFetch.mockResolvedValue(mockJsonResponse({ sessions: [] }));
-      const handler = registry.handlers.get("jules_list_sessions")!;
-      const result = await handler({ page_size: 20 });
+      const result = await registry.call("jules_list_sessions", { page_size: 20 });
       expect(getText(result)).toContain("No sessions found");
     });
 
@@ -74,8 +72,7 @@ describe("jules tools", () => {
           { name: "sessions/def", state: "IN_PROGRESS", title: "Running task" },
         ],
       }));
-      const handler = registry.handlers.get("jules_list_sessions")!;
-      const result = await handler({ status: "COMPLETED", page_size: 20 });
+      const result = await registry.call("jules_list_sessions", { status: "COMPLETED", page_size: 20 });
       expect(getText(result)).toContain("Done task");
       expect(getText(result)).not.toContain("Running task");
       expect(getText(result)).toContain("Sessions (1)");
@@ -83,8 +80,7 @@ describe("jules tools", () => {
 
     it("should handle sessions undefined in response", async () => {
       mockFetch.mockResolvedValue(mockJsonResponse({}));
-      const handler = registry.handlers.get("jules_list_sessions")!;
-      const result = await handler({ page_size: 20 });
+      const result = await registry.call("jules_list_sessions", { page_size: 20 });
       expect(getText(result)).toContain("No sessions found");
     });
 
@@ -97,8 +93,7 @@ describe("jules tools", () => {
           url: "https://jules.google.com/sessions/abc",
         }],
       }));
-      const handler = registry.handlers.get("jules_list_sessions")!;
-      const result = await handler({ page_size: 20 });
+      const result = await registry.call("jules_list_sessions", { page_size: 20 });
       expect(getText(result)).toContain(
         "URL: https://jules.google.com/sessions/abc",
       );
@@ -108,47 +103,41 @@ describe("jules tools", () => {
       mockFetch.mockResolvedValue(mockJsonResponse({
         sessions: [{ name: "sessions/xyz", state: "QUEUED" }],
       }));
-      const handler = registry.handlers.get("jules_list_sessions")!;
-      const result = await handler({ page_size: 20 });
+      const result = await registry.call("jules_list_sessions", { page_size: 20 });
       expect(getText(result)).toContain("sessions/xyz");
     });
 
     it("should return error when API key is missing at request time", async () => {
       delete process.env.JULES_API_KEY;
-      const handler = registry.handlers.get("jules_list_sessions")!;
-      const result = await handler({ page_size: 20 });
+      const result = await registry.call("jules_list_sessions", { page_size: 20 });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("Jules API not configured");
     });
 
     it("should handle fetch throwing an error", async () => {
       mockFetch.mockRejectedValue(new Error("Network failure"));
-      const handler = registry.handlers.get("jules_list_sessions")!;
-      const result = await handler({ page_size: 20 });
+      const result = await registry.call("jules_list_sessions", { page_size: 20 });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("Network failure");
     });
 
     it("should handle non-Error thrown from fetch", async () => {
       mockFetch.mockRejectedValue("some string error");
-      const handler = registry.handlers.get("jules_list_sessions")!;
-      const result = await handler({ page_size: 20 });
+      const result = await registry.call("jules_list_sessions", { page_size: 20 });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("Unknown error");
     });
 
     it("should handle API error response without error.message field", async () => {
       mockFetch.mockResolvedValue(mockJsonResponse({}, false));
-      const handler = registry.handlers.get("jules_list_sessions")!;
-      const result = await handler({ page_size: 20 });
+      const result = await registry.call("jules_list_sessions", { page_size: 20 });
       expect(getText(result)).toContain("Error");
       expect(getText(result)).toContain("API error");
     });
 
     it("should skip pageSize param and query string when page_size is 0", async () => {
       mockFetch.mockResolvedValue(mockJsonResponse({ sessions: [] }));
-      const handler = registry.handlers.get("jules_list_sessions")!;
-      const result = await handler({ page_size: 0 });
+      const result = await registry.call("jules_list_sessions", { page_size: 0 });
       expect(getText(result)).toContain("No sessions found");
       // page_size=0 is falsy, so pageSize param should not be set
       // and the URL should not include a query string
@@ -164,8 +153,7 @@ describe("jules tools", () => {
       mockFetch.mockResolvedValue(
         mockJsonResponse({ name: "sessions/new-123", state: "QUEUED" }),
       );
-      const handler = registry.handlers.get("jules_create_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_create_session", {
         title: "New task",
         task: "Fix the login bug",
         starting_branch: "main",
@@ -178,8 +166,7 @@ describe("jules tools", () => {
       mockFetch.mockResolvedValue(
         mockJsonResponse({ error: { message: "Rate limited" } }, false),
       );
-      const handler = registry.handlers.get("jules_create_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_create_session", {
         title: "Task",
         task: "Do something",
         starting_branch: "main",
@@ -191,8 +178,7 @@ describe("jules tools", () => {
       mockFetch.mockResolvedValue(
         mockJsonResponse({ name: "sessions/custom-123", state: "QUEUED" }),
       );
-      const handler = registry.handlers.get("jules_create_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_create_session", {
         title: "Custom repo",
         task: "Fix it",
         source_repo: "myorg/myrepo",
@@ -215,8 +201,7 @@ describe("jules tools", () => {
           url: "https://jules.google.com/sessions/new-456",
         }),
       );
-      const handler = registry.handlers.get("jules_create_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_create_session", {
         title: "Task",
         task: "Do something",
         starting_branch: "main",
@@ -231,8 +216,7 @@ describe("jules tools", () => {
       mockFetch.mockResolvedValue(
         mockJsonResponse({ name: "sessions/new-789", state: "QUEUED" }),
       );
-      const handler = registry.handlers.get("jules_create_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_create_session", {
         title: "Task",
         task: "Do something",
         starting_branch: "main",
@@ -257,8 +241,7 @@ describe("jules tools", () => {
             activities: [{ type: "code_change", content: "Modified auth.ts" }],
           }),
         );
-      const handler = registry.handlers.get("jules_get_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_get_session", {
         session_id: "abc",
         include_activities: true,
       });
@@ -277,8 +260,7 @@ describe("jules tools", () => {
           }),
         )
         .mockResolvedValueOnce(mockJsonResponse({ activities: [] }));
-      const handler = registry.handlers.get("jules_get_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_get_session", {
         session_id: "abc",
         include_activities: true,
       });
@@ -292,8 +274,7 @@ describe("jules tools", () => {
           mockJsonResponse({ name: "sessions/abc", state: "QUEUED" }),
         )
         .mockResolvedValueOnce(mockJsonResponse({ activities: [] }));
-      const handler = registry.handlers.get("jules_get_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_get_session", {
         session_id: "abc",
         include_activities: true,
       });
@@ -311,8 +292,7 @@ describe("jules tools", () => {
           }),
         )
         .mockResolvedValueOnce(mockJsonResponse({ activities: [] }));
-      const handler = registry.handlers.get("jules_get_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_get_session", {
         session_id: "abc",
         include_activities: true,
       });
@@ -327,8 +307,7 @@ describe("jules tools", () => {
           title: "Task",
         }),
       );
-      const handler = registry.handlers.get("jules_get_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_get_session", {
         session_id: "abc",
         include_activities: false,
       });
@@ -346,8 +325,7 @@ describe("jules tools", () => {
           }),
         )
         .mockResolvedValueOnce(mockJsonResponse({ activities: [] }));
-      const handler = registry.handlers.get("jules_get_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_get_session", {
         session_id: "abc",
         include_activities: true,
       });
@@ -366,8 +344,7 @@ describe("jules tools", () => {
         .mockResolvedValueOnce(
           mockJsonResponse({ activities: [{}, { type: "note" }] }),
         );
-      const handler = registry.handlers.get("jules_get_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_get_session", {
         session_id: "abc",
         include_activities: true,
       });
@@ -385,8 +362,7 @@ describe("jules tools", () => {
           }),
         )
         .mockResolvedValueOnce(mockJsonResponse({ activities: [] }));
-      const handler = registry.handlers.get("jules_get_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_get_session", {
         session_id: "sessions/abc",
         include_activities: true,
       });
@@ -398,9 +374,8 @@ describe("jules tools", () => {
     });
 
     it("should throw on invalid session ID", async () => {
-      const handler = registry.handlers.get("jules_get_session")!;
       await expect(
-        handler({ session_id: "invalid!@#", include_activities: true }),
+        registry.call("jules_get_session", { session_id: "invalid!@#", include_activities: true }),
       ).rejects.toThrow("Invalid session ID format");
     });
 
@@ -408,8 +383,7 @@ describe("jules tools", () => {
       mockFetch.mockResolvedValueOnce(
         mockJsonResponse({ error: { message: "Not found" } }, false),
       );
-      const handler = registry.handlers.get("jules_get_session")!;
-      const result = await handler({
+      const result = await registry.call("jules_get_session", {
         session_id: "abc",
         include_activities: true,
       });
@@ -421,22 +395,19 @@ describe("jules tools", () => {
   describe("jules_approve_plan", () => {
     it("should approve plan", async () => {
       mockFetch.mockResolvedValue(mockJsonResponse({ state: "IN_PROGRESS" }));
-      const handler = registry.handlers.get("jules_approve_plan")!;
-      const result = await handler({ session_id: "abc" });
+      const result = await registry.call("jules_approve_plan", { session_id: "abc" });
       expect(getText(result)).toContain("Plan Approved");
     });
 
     it("should show default status when state is missing", async () => {
       mockFetch.mockResolvedValue(mockJsonResponse({}));
-      const handler = registry.handlers.get("jules_approve_plan")!;
-      const result = await handler({ session_id: "abc" });
+      const result = await registry.call("jules_approve_plan", { session_id: "abc" });
       expect(getText(result)).toContain("IN_PROGRESS");
     });
 
     it("should handle sessions/ prefix in session_id", async () => {
       mockFetch.mockResolvedValue(mockJsonResponse({ state: "IN_PROGRESS" }));
-      const handler = registry.handlers.get("jules_approve_plan")!;
-      const result = await handler({ session_id: "sessions/abc" });
+      const result = await registry.call("jules_approve_plan", { session_id: "sessions/abc" });
       expect(getText(result)).toContain("Plan Approved");
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining("/sessions/abc:approvePlan"),
@@ -445,8 +416,7 @@ describe("jules tools", () => {
     });
 
     it("should throw on invalid session ID", async () => {
-      const handler = registry.handlers.get("jules_approve_plan")!;
-      await expect(handler({ session_id: "bad id!" })).rejects.toThrow(
+      await expect(registry.call("jules_approve_plan", { session_id: "bad id!" })).rejects.toThrow(
         "Invalid session ID format",
       );
     });
@@ -455,8 +425,7 @@ describe("jules tools", () => {
       mockFetch.mockResolvedValue(
         mockJsonResponse({ error: { message: "Forbidden" } }, false),
       );
-      const handler = registry.handlers.get("jules_approve_plan")!;
-      const result = await handler({ session_id: "abc" });
+      const result = await registry.call("jules_approve_plan", { session_id: "abc" });
       expect(getText(result)).toContain("Error");
     });
   });
@@ -464,8 +433,7 @@ describe("jules tools", () => {
   describe("jules_send_message", () => {
     it("should send message", async () => {
       mockFetch.mockResolvedValue(mockJsonResponse({ state: "IN_PROGRESS" }));
-      const handler = registry.handlers.get("jules_send_message")!;
-      const result = await handler({
+      const result = await registry.call("jules_send_message", {
         session_id: "abc",
         message: "Please also fix tests",
       });
@@ -474,8 +442,7 @@ describe("jules tools", () => {
 
     it("should handle sessions/ prefix in session_id", async () => {
       mockFetch.mockResolvedValue(mockJsonResponse({ state: "IN_PROGRESS" }));
-      const handler = registry.handlers.get("jules_send_message")!;
-      const result = await handler({
+      const result = await registry.call("jules_send_message", {
         session_id: "sessions/abc",
         message: "Hello",
       });
@@ -487,8 +454,7 @@ describe("jules tools", () => {
     });
 
     it("should throw on invalid session ID", async () => {
-      const handler = registry.handlers.get("jules_send_message")!;
-      await expect(handler({ session_id: "bad!id", message: "Hello" })).rejects
+      await expect(registry.call("jules_send_message", { session_id: "bad!id", message: "Hello" })).rejects
         .toThrow("Invalid session ID format");
     });
 
@@ -496,8 +462,7 @@ describe("jules tools", () => {
       mockFetch.mockResolvedValue(
         mockJsonResponse({ error: { message: "Session not active" } }, false),
       );
-      const handler = registry.handlers.get("jules_send_message")!;
-      const result = await handler({ session_id: "abc", message: "Hello" });
+      const result = await registry.call("jules_send_message", { session_id: "abc", message: "Hello" });
       expect(getText(result)).toContain("Error");
     });
   });

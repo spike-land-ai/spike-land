@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   workspaceMember: { findMany: vi.fn(), create: vi.fn() },
   workspace: {
     findUnique: vi.fn(),
@@ -10,7 +11,8 @@ const mockPrisma = {
   },
   workspaceFavorite: { findUnique: vi.fn(), create: vi.fn(), delete: vi.fn() },
   $transaction: vi.fn(),
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -45,8 +47,7 @@ describe("workspaces tools", () => {
           },
         },
       ]);
-      const handler = registry.handlers.get("workspaces_list")!;
-      const result = await handler({});
+      const result = await registry.call("workspaces_list", {});
       expect(getText(result)).toContain("My Workspace");
       expect(getText(result)).toContain("FREE");
       expect(getText(result)).toContain("OWNER");
@@ -57,8 +58,7 @@ describe("workspaces tools", () => {
 
     it("should return empty message when no workspaces", async () => {
       mockPrisma.workspaceMember.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("workspaces_list")!;
-      const result = await handler({});
+      const result = await registry.call("workspaces_list", {});
       expect(getText(result)).toContain("No workspaces found");
     });
 
@@ -85,8 +85,7 @@ describe("workspaces tools", () => {
           },
         },
       ]);
-      const handler = registry.handlers.get("workspaces_list")!;
-      const result = await handler({});
+      const result = await registry.call("workspaces_list", {});
       expect(getText(result)).toContain("Workspaces (2)");
       expect(getText(result)).toContain("Workspace A");
       expect(getText(result)).toContain("Workspace B");
@@ -112,8 +111,7 @@ describe("workspaces tools", () => {
           return fn(tx);
         },
       );
-      const handler = registry.handlers.get("workspaces_create")!;
-      const result = await handler({ name: "New Workspace", slug: "new-ws" });
+      const result = await registry.call("workspaces_create", { name: "New Workspace", slug: "new-ws" });
       expect(getText(result)).toContain("Workspace Created");
       expect(getText(result)).toContain("New Workspace");
       expect(getText(result)).toContain("new-ws");
@@ -136,8 +134,7 @@ describe("workspaces tools", () => {
           return fn(tx);
         },
       );
-      const handler = registry.handlers.get("workspaces_create")!;
-      const result = await handler({ name: "My Cool Project" });
+      const result = await registry.call("workspaces_create", { name: "My Cool Project" });
       expect(getText(result)).toContain("Workspace Created");
       expect(getText(result)).toContain("My Cool Project");
     });
@@ -161,8 +158,7 @@ describe("workspaces tools", () => {
           return fn(tx);
         },
       );
-      const handler = registry.handlers.get("workspaces_create")!;
-      const result = await handler({ name: "Test", slug: "test" });
+      const result = await registry.call("workspaces_create", { name: "Test", slug: "test" });
       expect(getText(result)).toContain("Workspace Created");
       expect(getText(result)).toContain("test-1");
     });
@@ -180,8 +176,7 @@ describe("workspaces tools", () => {
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-06-01"),
       });
-      const handler = registry.handlers.get("workspaces_get")!;
-      const result = await handler({ workspace_id: "ws1" });
+      const result = await registry.call("workspaces_get", { workspace_id: "ws1" });
       expect(getText(result)).toContain("My Workspace");
       expect(getText(result)).toContain("my-ws");
       expect(getText(result)).toContain("A great workspace");
@@ -200,22 +195,19 @@ describe("workspaces tools", () => {
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-06-01"),
       });
-      const handler = registry.handlers.get("workspaces_get")!;
-      const result = await handler({ slug: "slug-ws" });
+      const result = await registry.call("workspaces_get", { slug: "slug-ws" });
       expect(getText(result)).toContain("Slug Workspace");
       expect(getText(result)).toContain("(none)");
     });
 
     it("should return NOT_FOUND when workspace does not exist", async () => {
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
-      const handler = registry.handlers.get("workspaces_get")!;
-      const result = await handler({ workspace_id: "nonexistent" });
+      const result = await registry.call("workspaces_get", { workspace_id: "nonexistent" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
 
     it("should return VALIDATION_ERROR when neither ID nor slug provided", async () => {
-      const handler = registry.handlers.get("workspaces_get")!;
-      const result = await handler({});
+      const result = await registry.call("workspaces_get", {});
       expect(getText(result)).toContain("VALIDATION_ERROR");
       expect(getText(result)).toContain("workspace_id or slug");
     });
@@ -227,8 +219,7 @@ describe("workspaces tools", () => {
         name: "Updated Name",
         slug: "old-slug",
       });
-      const handler = registry.handlers.get("workspaces_update")!;
-      const result = await handler({
+      const result = await registry.call("workspaces_update", {
         workspace_id: "ws1",
         name: "Updated Name",
       });
@@ -241,8 +232,7 @@ describe("workspaces tools", () => {
         name: "Same Name",
         slug: "new-slug",
       });
-      const handler = registry.handlers.get("workspaces_update")!;
-      const result = await handler({ workspace_id: "ws1", slug: "new-slug" });
+      const result = await registry.call("workspaces_update", { workspace_id: "ws1", slug: "new-slug" });
       expect(getText(result)).toContain("Workspace Updated");
       expect(getText(result)).toContain("new-slug");
     });
@@ -252,8 +242,7 @@ describe("workspaces tools", () => {
         name: "New Name",
         slug: "new-slug",
       });
-      const handler = registry.handlers.get("workspaces_update")!;
-      const result = await handler({
+      const result = await registry.call("workspaces_update", {
         workspace_id: "ws1",
         name: "New Name",
         slug: "new-slug",
@@ -266,8 +255,7 @@ describe("workspaces tools", () => {
     });
 
     it("should return VALIDATION_ERROR when no fields to update", async () => {
-      const handler = registry.handlers.get("workspaces_update")!;
-      const result = await handler({ workspace_id: "ws1" });
+      const result = await registry.call("workspaces_update", { workspace_id: "ws1" });
       expect(getText(result)).toContain("VALIDATION_ERROR");
       expect(getText(result)).toContain("No fields to update");
     });
@@ -277,8 +265,7 @@ describe("workspaces tools", () => {
     it("should add favorite when not already favorited", async () => {
       mockPrisma.workspaceFavorite.findUnique.mockResolvedValue(null);
       mockPrisma.workspaceFavorite.create.mockResolvedValue({});
-      const handler = registry.handlers.get("workspaces_favorite")!;
-      const result = await handler({ workspace_id: "ws1" });
+      const result = await registry.call("workspaces_favorite", { workspace_id: "ws1" });
       expect(getText(result)).toContain("Favorite Added");
       expect(getText(result)).toContain("ws1");
       expect(mockPrisma.workspaceFavorite.create).toHaveBeenCalledWith({
@@ -289,8 +276,7 @@ describe("workspaces tools", () => {
     it("should remove favorite when already favorited", async () => {
       mockPrisma.workspaceFavorite.findUnique.mockResolvedValue({ id: "fav1" });
       mockPrisma.workspaceFavorite.delete.mockResolvedValue({});
-      const handler = registry.handlers.get("workspaces_favorite")!;
-      const result = await handler({ workspace_id: "ws1" });
+      const result = await registry.call("workspaces_favorite", { workspace_id: "ws1" });
       expect(getText(result)).toContain("Favorite Removed");
       expect(getText(result)).toContain("ws1");
       expect(mockPrisma.workspaceFavorite.delete).toHaveBeenCalledWith({

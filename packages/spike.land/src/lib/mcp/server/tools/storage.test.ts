@@ -36,8 +36,7 @@ describe("storage tools", () => {
         "https://r2.example.com/presigned",
       );
 
-      const handler = registry.handlers.get("storage_get_upload_url")!;
-      const result = await handler({
+      const result = await registry.call("storage_get_upload_url", {
         filename: "photo.jpg",
         content_type: "image/jpeg",
         purpose: "image",
@@ -53,8 +52,7 @@ describe("storage tools", () => {
         "https://r2.example.com/presigned",
       );
 
-      const handler = registry.handlers.get("storage_get_upload_url")!;
-      const result = await handler({
+      const result = await registry.call("storage_get_upload_url", {
         filename: "noextension",
         content_type: "application/octet-stream",
         purpose: "asset",
@@ -72,8 +70,7 @@ describe("storage tools", () => {
         "https://r2.example.com/presigned",
       );
 
-      const handler = registry.handlers.get("storage_get_upload_url")!;
-      const result = await handler({
+      const result = await registry.call("storage_get_upload_url", {
         filename: "file.",
         content_type: "application/octet-stream",
         purpose: "asset",
@@ -87,8 +84,7 @@ describe("storage tools", () => {
 
   describe("storage_register_upload", () => {
     it("should reject R2 keys that don't belong to the user", async () => {
-      const handler = registry.handlers.get("storage_register_upload")!;
-      const result = await handler({
+      const result = await registry.call("storage_register_upload", {
         r2_key: "uploads/other-user/image/file.jpg",
         purpose: "image",
       });
@@ -100,8 +96,7 @@ describe("storage tools", () => {
     it("should accept R2 keys belonging to the user", async () => {
       vi.stubEnv("CLOUDFLARE_R2_PUBLIC_URL", "https://cdn.example.com");
 
-      const handler = registry.handlers.get("storage_register_upload")!;
-      const result = await handler({
+      const result = await registry.call("storage_register_upload", {
         r2_key: `uploads/${userId}/image/file.jpg`,
         purpose: "image",
       });

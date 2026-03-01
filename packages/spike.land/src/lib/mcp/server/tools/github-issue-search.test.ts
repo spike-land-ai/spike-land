@@ -50,8 +50,7 @@ describe("github issue search tools", () => {
         }),
       });
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      const result = await handler({ query: "auth" });
+      const result = await registry.call("github_issue_search", { query: "auth" });
       const text = getText(result);
 
       expect(text).toContain("Found 2 issue(s)");
@@ -75,8 +74,7 @@ describe("github issue search tools", () => {
         }),
       });
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      const result = await handler({ query: "nonexistent-xyz" });
+      const result = await registry.call("github_issue_search", { query: "nonexistent-xyz" });
       const text = getText(result);
 
       expect(text).toContain("No issues found");
@@ -89,8 +87,7 @@ describe("github issue search tools", () => {
         json: async () => ({ total_count: 0, items: [] }),
       });
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      await handler({ query: "bug", state: "open" });
+      await registry.call("github_issue_search", { query: "bug", state: "open" });
 
       expect(mockFetch).toHaveBeenCalledTimes(1);
       const calledUrl = mockFetch.mock.calls[0]![0] as string;
@@ -103,8 +100,7 @@ describe("github issue search tools", () => {
         json: async () => ({ total_count: 0, items: [] }),
       });
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      await handler({ query: "bug", state: "all" });
+      await registry.call("github_issue_search", { query: "bug", state: "all" });
 
       const calledUrl = mockFetch.mock.calls[0]![0] as string;
       expect(calledUrl).not.toContain("state:");
@@ -116,8 +112,7 @@ describe("github issue search tools", () => {
         json: async () => ({ total_count: 0, items: [] }),
       });
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      await handler({ query: "test", limit: 5 });
+      await registry.call("github_issue_search", { query: "test", limit: 5 });
 
       const calledUrl = mockFetch.mock.calls[0]![0] as string;
       expect(calledUrl).toContain("per_page=5");
@@ -129,8 +124,7 @@ describe("github issue search tools", () => {
         json: async () => ({ total_count: 0, items: [] }),
       });
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      await handler({ query: "test" });
+      await registry.call("github_issue_search", { query: "test" });
 
       const calledUrl = mockFetch.mock.calls[0]![0] as string;
       expect(calledUrl).toContain("per_page=10");
@@ -142,8 +136,7 @@ describe("github issue search tools", () => {
         json: async () => ({ total_count: 0, items: [] }),
       });
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      await handler({ query: "test" });
+      await registry.call("github_issue_search", { query: "test" });
 
       const calledHeaders = mockFetch.mock.calls[0]![1] as {
         headers: Record<string, string>;
@@ -172,8 +165,7 @@ describe("github issue search tools", () => {
         }),
       });
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      const result = await handler({ query: "simple" });
+      const result = await registry.call("github_issue_search", { query: "simple" });
       const text = getText(result);
 
       expect(text).toContain("#99");
@@ -185,8 +177,7 @@ describe("github issue search tools", () => {
       vi.stubEnv("GH_PAT_TOKEN", "");
       delete process.env.GH_PAT_TOKEN;
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      const result = await handler({ query: "test" });
+      const result = await registry.call("github_issue_search", { query: "test" });
       const text = getText(result);
 
       expect(text).toContain("GitHub not configured");
@@ -200,8 +191,7 @@ describe("github issue search tools", () => {
         text: async () => "API rate limit exceeded",
       });
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      const result = await handler({ query: "test" });
+      const result = await registry.call("github_issue_search", { query: "test" });
 
       expect(isError(result)).toBe(true);
     });
@@ -215,8 +205,7 @@ describe("github issue search tools", () => {
         },
       });
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      const result = await handler({ query: "test" });
+      const result = await registry.call("github_issue_search", { query: "test" });
 
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("Unknown error");
@@ -225,8 +214,7 @@ describe("github issue search tools", () => {
     it("should handle fetch exceptions", async () => {
       mockFetch.mockRejectedValue(new Error("Network failure"));
 
-      const handler = registry.handlers.get("github_issue_search")!;
-      const result = await handler({ query: "test" });
+      const result = await registry.call("github_issue_search", { query: "test" });
 
       expect(isError(result)).toBe(true);
     });

@@ -52,10 +52,9 @@ export function registerMcpAnalyticsTools(
                 ),
             })
             .meta({ category: "mcp-analytics", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { period, category } = input;
                 return safeToolCall("mcp_tool_usage_stats", async () => {
-                    const prisma = (await import("@/lib/prisma")).default;
                     const hours = periodHours(period ?? "7d");
                     const since = new Date(Date.now() - hours * 60 * 60 * 1000);
 
@@ -69,13 +68,13 @@ export function registerMcpAnalyticsTools(
 
                     // Use SQL aggregation instead of loading rows into memory
                     const [totalAgg, errorAgg, durationAgg, perToolStats] = await Promise.all([
-                        prisma.toolInvocation.count({ where }),
-                        prisma.toolInvocation.count({ where: { ...where, isError: true } }),
-                        prisma.toolInvocation.aggregate({
+                        ctx.prisma.toolInvocation.count({ where }),
+                        ctx.prisma.toolInvocation.count({ where: { ...where, isError: true } }),
+                        ctx.prisma.toolInvocation.aggregate({
                             where,
                             _avg: { durationMs: true },
                         }),
-                        prisma.toolInvocation.groupBy({
+                        ctx.prisma.toolInvocation.groupBy({
                             by: ["tool"],
                             where,
                             _count: { tool: true },
@@ -101,7 +100,7 @@ export function registerMcpAnalyticsTools(
                     // Per-tool error counts for the top tools
                     const topToolNames = perToolStats.map(s => s.tool);
                     const perToolErrors = topToolNames.length > 0
-                        ? await prisma.toolInvocation.groupBy({
+                        ? await ctx.prisma.toolInvocation.groupBy({
                             by: ["tool"],
                             where: { ...where, isError: true, tool: { in: topToolNames } },
                             _count: { tool: true },
@@ -143,7 +142,7 @@ export function registerMcpAnalyticsTools(
                 ),
             })
             .meta({ category: "mcp-analytics", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, _ctx }) => {
                 const { tool_name, category } = input;
                 return safeToolCall("mcp_generate_docs", async () => {
                     if (!tool_name && !category) {
@@ -228,18 +227,17 @@ export function registerMcpAnalyticsTools(
         freeTool(userId)
             .tool("mcp_health_check", "Check the health of the MCP service: service status, available tool count, enabled tool count, and last recorded error for the current user.", {})
             .meta({ category: "mcp-analytics", tier: "free" })
-            .handler(async ({ input: _args, ctx: _ctx }) => {
+            .handler(async ({ input: _args, ctx }) => {
                 return safeToolCall("mcp_health_check", async () => {
                     const startMs = Date.now();
-                    const prisma = (await import("@/lib/prisma")).default;
 
                     const [lastError, totalInvocations] = await Promise.all([
-                        prisma.toolInvocation.findFirst({
+                        ctx.prisma.toolInvocation.findFirst({
                             where: { userId, isError: true },
                             orderBy: { createdAt: "desc" },
                             select: { tool: true, error: true, createdAt: true },
                         }),
-                        prisma.toolInvocation.count({ where: { userId } }),
+                        ctx.prisma.toolInvocation.count({ where: { userId } }),
                     ]);
 
                     const responseMs = Date.now() - startMs;

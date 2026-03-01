@@ -47,8 +47,7 @@ describe("crdt MCP tools", () => {
         replicaOrder: ["replica-1", "replica-2", "replica-3"],
       });
 
-      const handler = registry.handlers.get("crdt_create_set")!;
-      const result = await handler({
+      const result = await registry.call("crdt_create_set", {
         name: "my-counter",
         replica_count: 3,
         type: "g_counter",
@@ -85,8 +84,7 @@ describe("crdt MCP tools", () => {
         },
       });
 
-      const handler = registry.handlers.get("crdt_update")!;
-      const result = await handler({
+      const result = await registry.call("crdt_update", {
         set_id: "crdt-abc-1",
         replica_id: "replica-1",
         operation: "increment",
@@ -114,8 +112,7 @@ describe("crdt MCP tools", () => {
         );
       });
 
-      const handler = registry.handlers.get("crdt_update")!;
-      const result = await handler({
+      const result = await registry.call("crdt_update", {
         set_id: "crdt-abc-1",
         replica_id: "replica-1",
         operation: "decrement",
@@ -143,8 +140,7 @@ describe("crdt MCP tools", () => {
         },
       });
 
-      const handler = registry.handlers.get("crdt_sync_pair")!;
-      const result = await handler({
+      const result = await registry.call("crdt_sync_pair", {
         set_id: "crdt-abc-1",
         from_replica: "replica-1",
         to_replica: "replica-2",
@@ -187,8 +183,7 @@ describe("crdt MCP tools", () => {
         converged: true,
       });
 
-      const handler = registry.handlers.get("crdt_sync_all")!;
-      const result = await handler({ set_id: "crdt-abc-1" });
+      const result = await registry.call("crdt_sync_all", { set_id: "crdt-abc-1" });
 
       const text = getText(result);
       expect(text).toContain("All Replicas Synchronized");
@@ -219,8 +214,7 @@ describe("crdt MCP tools", () => {
         operationCount: 5,
       });
 
-      const handler = registry.handlers.get("crdt_inspect")!;
-      const result = await handler({ set_id: "crdt-abc-1" });
+      const result = await registry.call("crdt_inspect", { set_id: "crdt-abc-1" });
 
       const text = getText(result);
       expect(text).toContain("my-counter");
@@ -245,8 +239,7 @@ describe("crdt MCP tools", () => {
         operationCount: 3,
       });
 
-      const handler = registry.handlers.get("crdt_inspect")!;
-      await handler({ set_id: "crdt-abc-1", replica_id: "replica-1" });
+      await registry.call("crdt_inspect", { set_id: "crdt-abc-1", replica_id: "replica-1" });
 
       expect(mockEngine.inspect).toHaveBeenCalledWith(
         "crdt-abc-1",
@@ -263,8 +256,7 @@ describe("crdt MCP tools", () => {
         diffs: [],
       });
 
-      const handler = registry.handlers.get("crdt_check_convergence")!;
-      const result = await handler({ set_id: "crdt-abc-1" });
+      const result = await registry.call("crdt_check_convergence", { set_id: "crdt-abc-1" });
 
       const text = getText(result);
       expect(text).toContain("CONVERGED");
@@ -284,8 +276,7 @@ describe("crdt MCP tools", () => {
         ],
       });
 
-      const handler = registry.handlers.get("crdt_check_convergence")!;
-      const result = await handler({ set_id: "crdt-abc-1" });
+      const result = await registry.call("crdt_check_convergence", { set_id: "crdt-abc-1" });
 
       const text = getText(result);
       expect(text).toContain("NOT CONVERGED");
@@ -305,8 +296,7 @@ describe("crdt MCP tools", () => {
           + "**Current State:** All replicas have converged.",
       );
 
-      const handler = registry.handlers.get("crdt_compare_with_consensus")!;
-      const result = await handler({
+      const result = await registry.call("crdt_compare_with_consensus", {
         set_id: "crdt-abc-1",
         scenario_description: "distributed page view counter",
       });
@@ -329,8 +319,7 @@ describe("crdt MCP tools", () => {
         throw new Error("Access denied");
       });
 
-      const handler = registry.handlers.get("crdt_inspect")!;
-      const result = await handler({ set_id: "someone-elses" });
+      const result = await registry.call("crdt_inspect", { set_id: "someone-elses" });
 
       expect(isError(result)).toBe(true);
     });
@@ -355,7 +344,7 @@ describe("crdt MCP tools", () => {
           timestamp: 0,
         },
       });
-      const result = await registry.handlers.get("crdt_update")!({
+      const result = await registry.call("crdt_update", {
         set_id: "s1",
         replica_id: "r1",
         operation: "increment",
@@ -384,7 +373,7 @@ describe("crdt MCP tools", () => {
           timestamp: 0,
         },
       });
-      const result = await registry.handlers.get("crdt_update")!({
+      const result = await registry.call("crdt_update", {
         set_id: "s1",
         replica_id: "r1",
         operation: "set",
@@ -408,7 +397,7 @@ describe("crdt MCP tools", () => {
         operationCount: 0,
       });
       const text = getText(
-        await registry.handlers.get("crdt_inspect")!({ set_id: "s2" }),
+        await registry.call("crdt_inspect", { set_id: "s2" }),
       );
       expect(text).toContain("value: \"null\"");
     });
@@ -431,7 +420,7 @@ describe("crdt MCP tools", () => {
           timestamp: 0,
         },
       });
-      const result = await registry.handlers.get("crdt_update")!({
+      const result = await registry.call("crdt_update", {
         set_id: "s1",
         replica_id: "r1",
         operation: "add",
@@ -455,7 +444,7 @@ describe("crdt MCP tools", () => {
         operationCount: 0,
       });
       const text = getText(
-        await registry.handlers.get("crdt_inspect")!({ set_id: "su" }),
+        await registry.call("crdt_inspect", { set_id: "su" }),
       );
       expect(text).toContain("foo");
       expect(text).toContain("bar");
@@ -475,7 +464,7 @@ describe("crdt MCP tools", () => {
           timestamp: 0,
         },
       });
-      const result = await registry.handlers.get("crdt_update")!({
+      const result = await registry.call("crdt_update", {
         set_id: "s1",
         replica_id: "r1",
         operation: "increment",
@@ -500,7 +489,7 @@ describe("crdt MCP tools", () => {
         converged: false,
       });
       const text = getText(
-        await registry.handlers.get("crdt_sync_all")!({ set_id: "s1" }),
+        await registry.call("crdt_sync_all", { set_id: "s1" }),
       );
       expect(text).toContain("No");
     });

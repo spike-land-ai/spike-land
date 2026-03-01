@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   workspace: { findFirst: vi.fn() },
   brandProfile: { findUnique: vi.fn() },
   brandGuardrail: { findMany: vi.fn() },
@@ -8,7 +9,8 @@ const mockPrisma = {
   policyRule: { findMany: vi.fn() },
   policyCheck: { create: vi.fn() },
   policyViolation: { findMany: vi.fn(), create: vi.fn() },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 
@@ -44,8 +46,7 @@ describe("brand-brain tools", () => {
         ],
         guardrails: [],
       });
-      const handler = registry.handlers.get("brand_score_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_score_content", {
         workspace_slug: "my-ws",
         content: "Our innovative product is great",
       });
@@ -62,8 +63,7 @@ describe("brand-brain tools", () => {
         ],
         guardrails: [],
       });
-      const handler = registry.handlers.get("brand_score_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_score_content", {
         workspace_slug: "my-ws",
         content: "Get this cheap spam offer",
       });
@@ -86,8 +86,7 @@ describe("brand-brain tools", () => {
           },
         ],
       });
-      const handler = registry.handlers.get("brand_score_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_score_content", {
         workspace_slug: "my-ws",
         content: "Better than competitor-x",
       });
@@ -97,8 +96,7 @@ describe("brand-brain tools", () => {
 
     it("should return error when no brand profile", async () => {
       mockPrisma.brandProfile.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("brand_score_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_score_content", {
         workspace_slug: "my-ws",
         content: "Hello",
       });
@@ -111,8 +109,7 @@ describe("brand-brain tools", () => {
         vocabulary: [],
         guardrails: [],
       });
-      const handler = registry.handlers.get("brand_score_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_score_content", {
         workspace_slug: "my-ws",
         content: "Hello",
         platform: "TWITTER",
@@ -129,8 +126,7 @@ describe("brand-brain tools", () => {
         ],
         guardrails: [],
       });
-      const handler = registry.handlers.get("brand_score_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_score_content", {
         workspace_slug: "my-ws",
         content: "Our innovative synergy approach",
       });
@@ -151,8 +147,7 @@ describe("brand-brain tools", () => {
           },
         ],
       });
-      const handler = registry.handlers.get("brand_score_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_score_content", {
         workspace_slug: "my-ws",
         content: "I hate this",
       });
@@ -173,8 +168,7 @@ describe("brand-brain tools", () => {
           },
         ],
       });
-      const handler = registry.handlers.get("brand_score_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_score_content", {
         workspace_slug: "my-ws",
         content: "Some content",
       });
@@ -194,8 +188,7 @@ describe("brand-brain tools", () => {
           },
         ],
       });
-      const handler = registry.handlers.get("brand_score_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_score_content", {
         workspace_slug: "my-ws",
         content: "This has badword in it",
       });
@@ -211,8 +204,7 @@ describe("brand-brain tools", () => {
         id: "rw1",
         status: "PENDING",
       });
-      const handler = registry.handlers.get("brand_rewrite_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_rewrite_content", {
         workspace_slug: "my-ws",
         content: "Original content",
         platform: "TWITTER",
@@ -231,8 +223,7 @@ describe("brand-brain tools", () => {
         id: "rw2",
         status: "PENDING",
       });
-      const handler = registry.handlers.get("brand_rewrite_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_rewrite_content", {
         workspace_slug: "my-ws",
         content: "Hello world",
       });
@@ -246,8 +237,7 @@ describe("brand-brain tools", () => {
 
     it("should return error when no brand profile", async () => {
       mockPrisma.brandProfile.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("brand_rewrite_content")!;
-      const result = await handler({
+      const result = await registry.call("brand_rewrite_content", {
         workspace_slug: "my-ws",
         content: "Hello",
       });
@@ -269,8 +259,7 @@ describe("brand-brain tools", () => {
           { type: "PREFERRED" },
         ],
       });
-      const handler = registry.handlers.get("brand_get_profile")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("brand_get_profile", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("Acme Brand");
       expect(getText(result)).toContain("Make great things");
       expect(getText(result)).toContain("Quality, Innovation");
@@ -290,8 +279,7 @@ describe("brand-brain tools", () => {
         guardrails: [],
         vocabulary: [],
       });
-      const handler = registry.handlers.get("brand_get_profile")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("brand_get_profile", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("**Name:** Unnamed");
       expect(getText(result)).toContain("**Mission:** (none)");
       expect(getText(result)).toContain("**Values:** (none)");
@@ -300,8 +288,7 @@ describe("brand-brain tools", () => {
 
     it("should return error when no brand profile", async () => {
       mockPrisma.brandProfile.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("brand_get_profile")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("brand_get_profile", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
   });
@@ -309,8 +296,7 @@ describe("brand-brain tools", () => {
   describe("brand_check_policy", () => {
     it("should pass when no rules configured", async () => {
       mockPrisma.policyRule.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("brand_check_policy")!;
-      const result = await handler({
+      const result = await registry.call("brand_check_policy", {
         workspace_slug: "my-ws",
         content: "Hello world",
       });
@@ -331,8 +317,7 @@ describe("brand-brain tools", () => {
       ]);
       mockPrisma.policyCheck.create.mockResolvedValue({ id: "chk1" });
       mockPrisma.policyViolation.create.mockResolvedValue({});
-      const handler = registry.handlers.get("brand_check_policy")!;
-      const result = await handler({
+      const result = await registry.call("brand_check_policy", {
         workspace_slug: "my-ws",
         content: "This contains badword",
       });
@@ -355,8 +340,7 @@ describe("brand-brain tools", () => {
       ]);
       mockPrisma.policyCheck.create.mockResolvedValue({ id: "chk2" });
       mockPrisma.policyViolation.create.mockResolvedValue({});
-      const handler = registry.handlers.get("brand_check_policy")!;
-      const result = await handler({
+      const result = await registry.call("brand_check_policy", {
         workspace_slug: "my-ws",
         content: "Maybe we could try",
       });
@@ -376,8 +360,7 @@ describe("brand-brain tools", () => {
         },
       ]);
       mockPrisma.policyCheck.create.mockResolvedValue({ id: "chk3" });
-      const handler = registry.handlers.get("brand_check_policy")!;
-      const result = await handler({
+      const result = await registry.call("brand_check_policy", {
         workspace_slug: "my-ws",
         content: "All good here",
       });
@@ -397,8 +380,7 @@ describe("brand-brain tools", () => {
         },
       ]);
       mockPrisma.policyCheck.create.mockResolvedValue({ id: "chk4" });
-      const handler = registry.handlers.get("brand_check_policy")!;
-      const result = await handler({
+      const result = await registry.call("brand_check_policy", {
         workspace_slug: "my-ws",
         content: "This has badword",
       });
@@ -418,8 +400,7 @@ describe("brand-brain tools", () => {
         },
       ]);
       mockPrisma.policyCheck.create.mockResolvedValue({ id: "chk5" });
-      const handler = registry.handlers.get("brand_check_policy")!;
-      const result = await handler({
+      const result = await registry.call("brand_check_policy", {
         workspace_slug: "my-ws",
         content: "Some content",
       });
@@ -440,8 +421,7 @@ describe("brand-brain tools", () => {
       ]);
       mockPrisma.policyCheck.create.mockResolvedValue({ id: "chk6" });
       mockPrisma.policyViolation.create.mockResolvedValue({});
-      const handler = registry.handlers.get("brand_check_policy")!;
-      const result = await handler({
+      const result = await registry.call("brand_check_policy", {
         workspace_slug: "my-ws",
         content: "This is flagged content",
       });
@@ -451,8 +431,7 @@ describe("brand-brain tools", () => {
 
     it("should include platform in policy check when provided", async () => {
       mockPrisma.policyRule.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("brand_check_policy")!;
-      const result = await handler({
+      const result = await registry.call("brand_check_policy", {
         workspace_slug: "my-ws",
         content: "Hello",
         platform: "TWITTER",
@@ -473,8 +452,7 @@ describe("brand-brain tools", () => {
       ]);
       mockPrisma.policyCheck.create.mockResolvedValue({ id: "chk7" });
       mockPrisma.policyViolation.create.mockResolvedValue({});
-      const handler = registry.handlers.get("brand_check_policy")!;
-      const result = await handler({
+      const result = await registry.call("brand_check_policy", {
         workspace_slug: "my-ws",
         content: "This is offensive",
       });
@@ -494,8 +472,7 @@ describe("brand-brain tools", () => {
       ]);
       mockPrisma.policyCheck.create.mockResolvedValue({ id: "chk8" });
       mockPrisma.policyViolation.create.mockResolvedValue({});
-      const handler = registry.handlers.get("brand_check_policy")!;
-      const result = await handler({
+      const result = await registry.call("brand_check_policy", {
         workspace_slug: "my-ws",
         content: "trigger word here",
       });
@@ -517,8 +494,7 @@ describe("brand-brain tools", () => {
           check: { contentType: "POST" },
         },
       ]);
-      const handler = registry.handlers.get("brand_list_violations")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("brand_list_violations", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("Policy Violations");
       expect(getText(result)).toContain("No Profanity");
       expect(getText(result)).toContain("CRITICAL");
@@ -528,15 +504,13 @@ describe("brand-brain tools", () => {
 
     it("should return empty when no violations", async () => {
       mockPrisma.policyViolation.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("brand_list_violations")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("brand_list_violations", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("No violations found");
     });
 
     it("should filter by severity", async () => {
       mockPrisma.policyViolation.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("brand_list_violations")!;
-      await handler({ workspace_slug: "my-ws", severity: "HIGH" });
+      await registry.call("brand_list_violations", { workspace_slug: "my-ws", severity: "HIGH" });
       expect(mockPrisma.policyViolation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ severity: "HIGH" }),
@@ -546,8 +520,7 @@ describe("brand-brain tools", () => {
 
     it("should respect limit parameter", async () => {
       mockPrisma.policyViolation.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("brand_list_violations")!;
-      await handler({ workspace_slug: "my-ws", limit: 5 });
+      await registry.call("brand_list_violations", { workspace_slug: "my-ws", limit: 5 });
       expect(mockPrisma.policyViolation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ take: 5 }),
       );
@@ -565,16 +538,14 @@ describe("brand-brain tools", () => {
           check: null,
         },
       ]);
-      const handler = registry.handlers.get("brand_list_violations")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("brand_list_violations", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("unknown");
       expect(getText(result)).toContain("N/A");
     });
 
     it("should not include severity in where clause when not provided", async () => {
       mockPrisma.policyViolation.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("brand_list_violations")!;
-      await handler({ workspace_slug: "my-ws" });
+      await registry.call("brand_list_violations", { workspace_slug: "my-ws" });
       const call = mockPrisma.policyViolation.findMany.mock.calls[0]![0];
       expect(call.where).not.toHaveProperty("severity");
     });
@@ -597,8 +568,7 @@ describe("brand-brain tools", () => {
           description: "Maintain positive tone",
         },
       ]);
-      const handler = registry.handlers.get("brand_get_guardrails")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("brand_get_guardrails", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("Brand Guardrails");
       expect(getText(result)).toContain("No Competitor Mentions");
       expect(getText(result)).toContain("KEYWORD_BLOCK");
@@ -610,8 +580,7 @@ describe("brand-brain tools", () => {
     it("should return empty when no guardrails", async () => {
       mockPrisma.brandProfile.findUnique.mockResolvedValue({ id: "bp1" });
       mockPrisma.brandGuardrail.findMany.mockResolvedValue([]);
-      const handler = registry.handlers.get("brand_get_guardrails")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("brand_get_guardrails", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("No active guardrails found");
     });
 
@@ -625,15 +594,13 @@ describe("brand-brain tools", () => {
           description: null,
         },
       ]);
-      const handler = registry.handlers.get("brand_get_guardrails")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("brand_get_guardrails", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("No description");
     });
 
     it("should return error when no brand profile", async () => {
       mockPrisma.brandProfile.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("brand_get_guardrails")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("brand_get_guardrails", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
   });
@@ -657,8 +624,7 @@ describe("brand-brain tools", () => {
           { term: "cheap", type: "BANNED" },
         ],
       });
-      const handler = registry.handlers.get("analyze_brand_voice")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("analyze_brand_voice", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("Brand Voice Analysis");
       expect(getText(result)).toContain("Acme Brand");
       expect(getText(result)).toContain("Make great things");
@@ -678,8 +644,7 @@ describe("brand-brain tools", () => {
         guardrails: [],
         vocabulary: [],
       });
-      const handler = registry.handlers.get("analyze_brand_voice")!;
-      const result = await handler({});
+      const result = await registry.call("analyze_brand_voice", {});
       expect(getText(result)).toContain("Brand Voice Analysis");
       expect(getText(result)).toContain("Default Brand");
       expect(mockPrisma.workspace.findFirst).toHaveBeenCalled();
@@ -687,8 +652,7 @@ describe("brand-brain tools", () => {
 
     it("should return error when no brand profile found", async () => {
       mockPrisma.brandProfile.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("analyze_brand_voice")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("analyze_brand_voice", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("NOT_FOUND");
     });
 
@@ -701,8 +665,7 @@ describe("brand-brain tools", () => {
         guardrails: [],
         vocabulary: [],
       });
-      const handler = registry.handlers.get("analyze_brand_voice")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("analyze_brand_voice", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("Minimal Brand");
       expect(getText(result)).toContain("Preferred terms (0)");
       expect(getText(result)).toContain("Banned terms (0)");
@@ -712,8 +675,7 @@ describe("brand-brain tools", () => {
     it("should throw when no workspace found for user (slug omitted)", async () => {
       mockPrisma.workspace.findFirst.mockResolvedValue(null);
       mockPrisma.brandProfile.findUnique.mockResolvedValue(null);
-      const handler = registry.handlers.get("analyze_brand_voice")!;
-      const result = await handler({});
+      const result = await registry.call("analyze_brand_voice", {});
       expect(getText(result)).toContain("No workspace found");
     });
 
@@ -728,8 +690,7 @@ describe("brand-brain tools", () => {
         ],
         vocabulary: [],
       });
-      const handler = registry.handlers.get("analyze_brand_voice")!;
-      const result = await handler({ workspace_slug: "my-ws" });
+      const result = await registry.call("analyze_brand_voice", { workspace_slug: "my-ws" });
       expect(getText(result)).toContain("No description");
     });
   });
@@ -748,8 +709,7 @@ describe("brand-brain tools", () => {
       ]);
       mockPrisma.policyCheck.create.mockResolvedValue({ id: "chk-multi" });
       mockPrisma.policyViolation.create.mockResolvedValue({});
-      const handler = registry.handlers.get("brand_check_policy")!;
-      const result = await handler({
+      const result = await registry.call("brand_check_policy", {
         workspace_slug: "my-ws",
         content: "badword1 and badword2",
       });

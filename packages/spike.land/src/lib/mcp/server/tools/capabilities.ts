@@ -25,13 +25,11 @@ export function registerCapabilitiesTools(
                 reason: z.string().min(1).describe("Why access is needed."),
             })
             .meta({ category: "capabilities", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { tools, categories, reason } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
                 // Find the agent's active capability token
-                const token = await prisma.agentCapabilityToken.findFirst({
+                const token = await ctx.prisma.agentCapabilityToken.findFirst({
                     where: { grantedByUserId: userId, status: "ACTIVE" },
                     select: { id: true, agentId: true },
                 });
@@ -44,7 +42,7 @@ export function registerCapabilitiesTools(
                     );
                 }
 
-                const request = await prisma.permissionRequest.create({
+                const request = await ctx.prisma.permissionRequest.create({
                     data: {
                         agentId: token.agentId,
                         userId,
@@ -75,10 +73,9 @@ export function registerCapabilitiesTools(
         freeTool(userId)
             .tool("capabilities_check_permissions", "Check current capability token scope, budget remaining, and trust level.", {})
             .meta({ category: "capabilities", tier: "free" })
-            .handler(async ({ input: _args, ctx: _ctx }) => {
-                const prisma = (await import("@/lib/prisma")).default;
+            .handler(async ({ input: _args, ctx }) => {
 
-                const token = await prisma.agentCapabilityToken.findFirst({
+                const token = await ctx.prisma.agentCapabilityToken.findFirst({
                     where: { grantedByUserId: userId, status: "ACTIVE" },
                     select: {
                         id: true,
@@ -103,7 +100,7 @@ export function registerCapabilitiesTools(
                     );
                 }
 
-                const trustScore = await prisma.agentTrustScore.findFirst({
+                const trustScore = await ctx.prisma.agentTrustScore.findFirst({
                     where: { userId },
                     select: {
                         trustLevel: true,
@@ -143,12 +140,10 @@ export function registerCapabilitiesTools(
                 ),
             })
             .meta({ category: "capabilities", tier: "free" })
-            .handler(async ({ input, ctx: _ctx }) => {
+            .handler(async ({ input, ctx }) => {
                 const { status } = input;
 
-                const prisma = (await import("@/lib/prisma")).default;
-
-                const requests = await prisma.permissionRequest.findMany({
+                const requests = await ctx.prisma.permissionRequest.findMany({
                     where: {
                         userId,
                         status: status as "PENDING" | "APPROVED" | "DENIED" | "EXPIRED",

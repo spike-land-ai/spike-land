@@ -76,8 +76,7 @@ describe("dev tools", () => {
   describe("dev_logs", () => {
     it("should return error when log file does not exist", async () => {
       mockExistsSync.mockReturnValue(false);
-      const handler = registry.handlers.get("dev_logs")!;
-      const result = await handler({});
+      const result = await registry.call("dev_logs", {});
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("No dev logs found");
     });
@@ -87,8 +86,7 @@ describe("dev tools", () => {
       const logLines = Array.from({ length: 150 }, (_, i) => `line ${i + 1}`);
       mockReadFileSync.mockReturnValue(logLines.join("\n"));
 
-      const handler = registry.handlers.get("dev_logs")!;
-      const result = await handler({});
+      const result = await registry.call("dev_logs", {});
       const text = getText(result);
       expect(text).toContain("line 51");
       expect(text).toContain("line 150");
@@ -100,8 +98,7 @@ describe("dev tools", () => {
       const logLines = Array.from({ length: 50 }, (_, i) => `line ${i + 1}`);
       mockReadFileSync.mockReturnValue(logLines.join("\n"));
 
-      const handler = registry.handlers.get("dev_logs")!;
-      const result = await handler({ lines: 5 });
+      const result = await registry.call("dev_logs", { lines: 5 });
       const text = getText(result);
       expect(text).toContain("line 46");
       expect(text).toContain("line 50");
@@ -113,8 +110,7 @@ describe("dev tools", () => {
         "INFO: server started\nERROR: connection failed\nINFO: request received",
       );
 
-      const handler = registry.handlers.get("dev_logs")!;
-      const result = await handler({ search: "error" });
+      const result = await registry.call("dev_logs", { search: "error" });
       const text = getText(result);
       expect(text).toContain("ERROR: connection failed");
       expect(text).not.toContain("server started");
@@ -124,8 +120,7 @@ describe("dev tools", () => {
       mockExistsSync.mockReturnValue(true);
       mockReadFileSync.mockReturnValue("some log line");
 
-      const handler = registry.handlers.get("dev_logs")!;
-      const result = await handler({ search: "nonexistent" });
+      const result = await registry.call("dev_logs", { search: "nonexistent" });
       const text = getText(result);
       expect(text).toBe("(no matching log lines)");
     });
@@ -136,8 +131,7 @@ describe("dev tools", () => {
   describe("dev_status", () => {
     it("should return error when meta file does not exist", async () => {
       mockExistsSync.mockReturnValue(false);
-      const handler = registry.handlers.get("dev_status")!;
-      const result = await handler({});
+      const result = await registry.call("dev_status", {});
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("No dev server metadata found");
     });
@@ -153,8 +147,7 @@ describe("dev tools", () => {
         }),
       );
 
-      const handler = registry.handlers.get("dev_status")!;
-      const result = await handler({});
+      const result = await registry.call("dev_status", {});
       const text = getText(result);
       expect(text).toContain("**Running:** yes");
       expect(text).toContain("**Port:** 3000");
@@ -172,8 +165,7 @@ describe("dev tools", () => {
         }),
       );
 
-      const handler = registry.handlers.get("dev_status")!;
-      const result = await handler({});
+      const result = await registry.call("dev_status", {});
       const text = getText(result);
       expect(text).toContain("**Running:** no");
       expect(text).toContain("stopped");
@@ -193,8 +185,7 @@ describe("dev tools", () => {
         .mockReturnValueOnce("completed:success\n") // CI status
         .mockReturnValueOnce("#1 My PR (feature-branch)\n"); // PRs
 
-      const handler = registry.handlers.get("github_status")!;
-      const result = await handler({});
+      const result = await registry.call("github_status", {});
       const text = getText(result);
       expect(text).toContain("**Branch:** main");
       expect(text).toContain("**Commit:** abc1234");
@@ -206,8 +197,7 @@ describe("dev tools", () => {
         throw new Error("git not found");
       });
 
-      const handler = registry.handlers.get("github_status")!;
-      const result = await handler({});
+      const result = await registry.call("github_status", {});
       const text = getText(result);
       // Should still return structured output (safeExec returns "" on failure)
       expect(text).toContain("Git & CI Status");
@@ -224,8 +214,7 @@ describe("dev tools", () => {
         .mockReturnValueOnce("completed:success\n") // CI status
         .mockReturnValueOnce(""); // PRs
 
-      const handler = registry.handlers.get("github_status")!;
-      const result = await handler({});
+      const result = await registry.call("github_status", {});
       const text = getText(result);
       expect(text).toContain("**Dirty:** yes");
     });
@@ -239,8 +228,7 @@ describe("dev tools", () => {
         .mockReturnValueOnce("src/app/page.tsx\n") // git diff (non-MCP file)
         .mockReturnValueOnce("Tests passed\n 5 passed\n"); // vitest
 
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({});
+      const result = await registry.call("file_guard", {});
       const text = getText(result);
       expect(text).toContain("File Guard: PASS");
       expect(isError(result)).toBe(false);
@@ -256,8 +244,7 @@ describe("dev tools", () => {
         throw err; // vitest
       });
 
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({});
+      const result = await registry.call("file_guard", {});
       const text = getText(result);
       expect(text).toContain("File Guard: FAIL");
       expect(isError(result)).toBe(true);
@@ -268,8 +255,7 @@ describe("dev tools", () => {
         .mockReturnValueOnce("src/app/page.tsx\n") // git diff
         .mockReturnValueOnce("Tests passed\n"); // vitest
 
-      const handler = registry.handlers.get("file_guard")!;
-      await handler({});
+      await registry.call("file_guard", {});
       expect(mockExecSync).toHaveBeenCalledWith(
         expect.stringContaining("--changed HEAD~1"),
         expect.objectContaining({ timeout: 120_000 }),
@@ -281,8 +267,7 @@ describe("dev tools", () => {
         .mockReturnValueOnce("src/app/page.tsx\n") // git diff
         .mockReturnValueOnce("Tests passed\n"); // vitest
 
-      const handler = registry.handlers.get("file_guard")!;
-      await handler({ commit_hash: "abc123" });
+      await registry.call("file_guard", { commit_hash: "abc123" });
       expect(mockExecSync).toHaveBeenCalledWith(
         expect.stringContaining("--changed abc123"),
         expect.objectContaining({ timeout: 120_000 }),
@@ -290,22 +275,19 @@ describe("dev tools", () => {
     });
 
     it("should reject invalid commit hash to prevent command injection", async () => {
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({ commit_hash: "HEAD; rm -rf /" });
+      const result = await registry.call("file_guard", { commit_hash: "HEAD; rm -rf /" });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("Invalid commit hash format");
     });
 
     it("should reject commit hash with backticks", async () => {
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({ commit_hash: "`whoami`" });
+      const result = await registry.call("file_guard", { commit_hash: "`whoami`" });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("Invalid commit hash format");
     });
 
     it("should reject commit hash with $() subshell", async () => {
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({ commit_hash: "$(whoami)" });
+      const result = await registry.call("file_guard", { commit_hash: "$(whoami)" });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("Invalid commit hash format");
     });
@@ -315,8 +297,7 @@ describe("dev tools", () => {
         .mockReturnValueOnce("src/app/page.tsx\n") // git diff
         .mockReturnValueOnce("Tests passed\n"); // vitest
 
-      const handler = registry.handlers.get("file_guard")!;
-      await handler({ commit_hash: "feature/my-branch" });
+      await registry.call("file_guard", { commit_hash: "feature/my-branch" });
       expect(mockExecSync).toHaveBeenCalled();
     });
 
@@ -329,8 +310,7 @@ describe("dev tools", () => {
         )
         .mockReturnValueOnce("Tests passed\n 5 passed\n");
 
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({});
+      const result = await registry.call("file_guard", {});
       const text = getText(result);
 
       // Should include scope in vitest command
@@ -350,8 +330,7 @@ describe("dev tools", () => {
         )
         .mockReturnValueOnce("Tests passed\n 10 passed\n");
 
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({});
+      const result = await registry.call("file_guard", {});
       const text = getText(result);
 
       // Should NOT include src/lib/mcp scope
@@ -367,8 +346,7 @@ describe("dev tools", () => {
         .mockReturnValueOnce("") // No changed files
         .mockReturnValueOnce("Tests passed\n");
 
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({});
+      const result = await registry.call("file_guard", {});
       const text = getText(result);
 
       expect(text).toContain("full suite");
@@ -383,8 +361,7 @@ describe("dev tools", () => {
           throw err;
         });
 
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({});
+      const result = await registry.call("file_guard", {});
       const text = getText(result);
 
       expect(text).toContain("scoped to MCP layer");
@@ -399,8 +376,7 @@ describe("dev tools", () => {
     it("should create notification and write to files", async () => {
       mockExistsSync.mockReturnValue(false); // No existing notifications
 
-      const handler = registry.handlers.get("notify_agent")!;
-      const result = await handler({
+      const result = await registry.call("notify_agent", {
         event: "test_failure",
         message: "Tests failed in auth module",
         severity: "error",
@@ -425,8 +401,7 @@ describe("dev tools", () => {
         }]),
       );
 
-      const handler = registry.handlers.get("notify_agent")!;
-      await handler({ event: "new_event", message: "new message" });
+      await registry.call("notify_agent", { event: "new_event", message: "new message" });
 
       const writeCall = mockWriteFileSync.mock.calls[0];
       const written = JSON.parse(writeCall?.[1] as string) as unknown[];
@@ -443,8 +418,7 @@ describe("dev tools", () => {
       }));
       mockReadFileSync.mockReturnValue(JSON.stringify(existing));
 
-      const handler = registry.handlers.get("notify_agent")!;
-      await handler({ event: "overflow", message: "cap test" });
+      await registry.call("notify_agent", { event: "overflow", message: "cap test" });
 
       const capCall = mockWriteFileSync.mock.calls[0];
       const written = JSON.parse(capCall?.[1] as string) as unknown[];
@@ -454,8 +428,7 @@ describe("dev tools", () => {
     it("should default severity to info", async () => {
       mockExistsSync.mockReturnValue(false);
 
-      const handler = registry.handlers.get("notify_agent")!;
-      const result = await handler({
+      const result = await registry.call("notify_agent", {
         event: "build_done",
         message: "build ok",
       });
@@ -466,8 +439,7 @@ describe("dev tools", () => {
       mockExistsSync.mockReturnValue(true);
       mockReadFileSync.mockReturnValue("not json{{{");
 
-      const handler = registry.handlers.get("notify_agent")!;
-      const result = await handler({ event: "test", message: "test" });
+      const result = await registry.call("notify_agent", { event: "test", message: "test" });
       // Should not throw, creates fresh array
       expect(isError(result)).toBe(false);
     });
@@ -477,15 +449,13 @@ describe("dev tools", () => {
 
   describe("file_guard - git ref validation", () => {
     it("should reject commit hash exceeding 100 characters", async () => {
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({ commit_hash: "a".repeat(101) });
+      const result = await registry.call("file_guard", { commit_hash: "a".repeat(101) });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("Invalid commit hash format");
     });
 
     it("should reject commit hash with pipe character", async () => {
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({ commit_hash: "HEAD|echo" });
+      const result = await registry.call("file_guard", { commit_hash: "HEAD|echo" });
       expect(isError(result)).toBe(true);
       expect(getText(result)).toContain("Invalid commit hash format");
     });
@@ -495,8 +465,7 @@ describe("dev tools", () => {
         .mockReturnValueOnce("src/app/page.tsx\n")
         .mockReturnValueOnce("Tests passed\n");
 
-      const handler = registry.handlers.get("file_guard")!;
-      await handler({ commit_hash: "HEAD~3" });
+      await registry.call("file_guard", { commit_hash: "HEAD~3" });
       expect(mockExecSync).toHaveBeenCalledWith(
         expect.stringContaining("--changed HEAD~3"),
         expect.objectContaining({ timeout: 120_000 }),
@@ -508,8 +477,7 @@ describe("dev tools", () => {
         .mockReturnValueOnce("src/app/page.tsx\n")
         .mockReturnValueOnce("Tests passed\n");
 
-      const handler = registry.handlers.get("file_guard")!;
-      await handler({ commit_hash: "HEAD^2" });
+      await registry.call("file_guard", { commit_hash: "HEAD^2" });
       expect(mockExecSync).toHaveBeenCalledWith(
         expect.stringContaining("--changed HEAD^2"),
         expect.objectContaining({ timeout: 120_000 }),
@@ -528,8 +496,7 @@ describe("dev tools", () => {
           throw err;
         });
 
-      const handler = registry.handlers.get("file_guard")!;
-      const result = await handler({});
+      const result = await registry.call("file_guard", {});
       const text = getText(result);
       expect(text).toContain("File Guard: FAIL");
       expect(isError(result)).toBe(true);
@@ -546,8 +513,7 @@ describe("dev tools", () => {
         throw new Error("git not found");
       });
 
-      const handler = registry.handlers.get("github_status")!;
-      const result = await handler({});
+      const result = await registry.call("github_status", {});
       const text = getText(result);
       expect(text).toContain("CI:** unknown");
     });

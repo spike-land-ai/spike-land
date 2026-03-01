@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock prisma
-const mockPrisma = {
+const { mockPrisma } = vi.hoisted(() => ({
+  mockPrisma: {
   vaultSecret: {
     count: vi.fn(),
     findMany: vi.fn(),
@@ -12,7 +13,8 @@ const mockPrisma = {
   subscription: {
     findUnique: vi.fn(),
   },
-};
+},
+}));
 
 vi.mock("@/lib/prisma", () => ({
   default: mockPrisma,
@@ -59,8 +61,7 @@ describe("vault tools", () => {
         status: "PENDING",
       });
 
-      const handler = registry.handlers.get("vault_store_secret")!;
-      const result = await handler({
+      const result = await registry.call("vault_store_secret", {
         name: "MY_API_KEY",
         value: "sk-123",
         allowed_urls: ["https://api.example.com"],
@@ -84,8 +85,7 @@ describe("vault tools", () => {
       mockPrisma.vaultSecret.count.mockResolvedValue(25);
       mockPrisma.subscription.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("vault_store_secret")!;
-      const result = await handler({
+      const result = await registry.call("vault_store_secret", {
         name: "NEW_KEY",
         value: "val",
         allowed_urls: [],
@@ -119,8 +119,7 @@ describe("vault tools", () => {
         status: "PENDING",
       });
 
-      const handler = registry.handlers.get("vault_store_secret")!;
-      const result = await handler({
+      const result = await registry.call("vault_store_secret", {
         name: "KEY",
         value: "val",
         allowed_urls: [],
@@ -142,8 +141,7 @@ describe("vault tools", () => {
         new Error("DB connection failed"),
       );
 
-      const handler = registry.handlers.get("vault_store_secret")!;
-      const result = await handler({
+      const result = await registry.call("vault_store_secret", {
         name: "KEY",
         value: "val",
         allowed_urls: [],
@@ -183,8 +181,7 @@ describe("vault tools", () => {
       mockPrisma.vaultSecret.count.mockResolvedValue(2);
       mockPrisma.subscription.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("vault_list_secrets")!;
-      const result = await handler({});
+      const result = await registry.call("vault_list_secrets", {});
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -207,8 +204,7 @@ describe("vault tools", () => {
       mockPrisma.vaultSecret.count.mockResolvedValue(0);
       mockPrisma.subscription.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("vault_list_secrets")!;
-      const result = await handler({});
+      const result = await registry.call("vault_list_secrets", {});
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -226,8 +222,7 @@ describe("vault tools", () => {
         new Error("DB error"),
       );
 
-      const handler = registry.handlers.get("vault_list_secrets")!;
-      const result = await handler({});
+      const result = await registry.call("vault_list_secrets", {});
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -250,8 +245,7 @@ describe("vault tools", () => {
         status: "REVOKED",
       });
 
-      const handler = registry.handlers.get("vault_delete_secret")!;
-      const result = await handler({ secret_id: "s1" });
+      const result = await registry.call("vault_delete_secret", { secret_id: "s1" });
 
       expect(mockPrisma.vaultSecret.update).toHaveBeenCalledWith({
         where: { id: "s1" },
@@ -271,8 +265,7 @@ describe("vault tools", () => {
     it("should return error for non-existent secret", async () => {
       mockPrisma.vaultSecret.findFirst.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("vault_delete_secret")!;
-      const result = await handler({ secret_id: "nonexistent" });
+      const result = await registry.call("vault_delete_secret", { secret_id: "nonexistent" });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -294,8 +287,7 @@ describe("vault tools", () => {
         userId,
       });
 
-      const handler = registry.handlers.get("vault_delete_secret")!;
-      const result = await handler({ secret_id: "s1" });
+      const result = await registry.call("vault_delete_secret", { secret_id: "s1" });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -313,8 +305,7 @@ describe("vault tools", () => {
         new Error("DB error"),
       );
 
-      const handler = registry.handlers.get("vault_delete_secret")!;
-      const result = await handler({ secret_id: "s1" });
+      const result = await registry.call("vault_delete_secret", { secret_id: "s1" });
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -331,8 +322,7 @@ describe("vault tools", () => {
         tier: "FREE",
       });
 
-      const handler = registry.handlers.get("vault_store_secret")!;
-      const result = await handler({
+      const result = await registry.call("vault_store_secret", {
         name: "KEY",
         value: "val",
         allowed_urls: [],
@@ -366,8 +356,7 @@ describe("vault tools", () => {
         status: "PENDING",
       });
 
-      const handler = registry.handlers.get("vault_store_secret")!;
-      const result = await handler({
+      const result = await registry.call("vault_store_secret", {
         name: "KEY",
         value: "val",
         allowed_urls: [],
@@ -392,8 +381,7 @@ describe("vault tools", () => {
         tier: "PREMIUM",
       });
 
-      const handler = registry.handlers.get("vault_store_secret")!;
-      const result = await handler({
+      const result = await registry.call("vault_store_secret", {
         name: "KEY",
         value: "val",
         allowed_urls: [],
@@ -414,8 +402,7 @@ describe("vault tools", () => {
     it("should handle non-Error throws in store", async () => {
       mockPrisma.vaultSecret.count.mockRejectedValue("string error");
 
-      const handler = registry.handlers.get("vault_store_secret")!;
-      const result = await handler({
+      const result = await registry.call("vault_store_secret", {
         name: "KEY",
         value: "val",
         allowed_urls: [],
@@ -438,8 +425,7 @@ describe("vault tools", () => {
     it("should handle non-Error throws in list", async () => {
       mockPrisma.vaultSecret.findMany.mockRejectedValue(42);
 
-      const handler = registry.handlers.get("vault_list_secrets")!;
-      const result = await handler({});
+      const result = await registry.call("vault_list_secrets", {});
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -466,8 +452,7 @@ describe("vault tools", () => {
       mockPrisma.vaultSecret.count.mockResolvedValue(1);
       mockPrisma.subscription.findUnique.mockResolvedValue(null);
 
-      const handler = registry.handlers.get("vault_list_secrets")!;
-      const result = await handler({});
+      const result = await registry.call("vault_list_secrets", {});
 
       const text = (result as { content: Array<{ text: string; }>; }).content[0]!
         .text;
@@ -479,8 +464,7 @@ describe("vault tools", () => {
     it("should handle non-Error throws in delete", async () => {
       mockPrisma.vaultSecret.findFirst.mockRejectedValue(null);
 
-      const handler = registry.handlers.get("vault_delete_secret")!;
-      const result = await handler({ secret_id: "s1" });
+      const result = await registry.call("vault_delete_secret", { secret_id: "s1" });
 
       expect(result).toEqual(
         expect.objectContaining({

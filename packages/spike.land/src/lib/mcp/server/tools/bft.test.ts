@@ -51,8 +51,7 @@ describe("bft MCP tools", () => {
         nodeOrder: ["node-1", "node-2", "node-3", "node-4"],
       });
 
-      const handler = registry.handlers.get("bft_create_cluster")!;
-      const result = await handler({ name: "my-cluster", node_count: 4 });
+      const result = await registry.call("bft_create_cluster", { name: "my-cluster", node_count: 4 });
 
       const text = getText(result);
       expect(text).toContain("BFT Cluster Created");
@@ -69,8 +68,7 @@ describe("bft MCP tools", () => {
 
   describe("bft_set_behavior", () => {
     it("should update behavior to silent with warning", async () => {
-      const handler = registry.handlers.get("bft_set_behavior")!;
-      const result = await handler({
+      const result = await registry.call("bft_set_behavior", {
         cluster_id: "bft-abc-1",
         node_id: "node-2",
         behavior: "silent",
@@ -90,8 +88,7 @@ describe("bft MCP tools", () => {
     });
 
     it("should update behavior to honest without warning", async () => {
-      const handler = registry.handlers.get("bft_set_behavior")!;
-      const result = await handler({
+      const result = await registry.call("bft_set_behavior", {
         cluster_id: "bft-abc-1",
         node_id: "node-2",
         behavior: "honest",
@@ -112,8 +109,7 @@ describe("bft MCP tools", () => {
         messages: [{ type: "pre_prepare" }],
       });
 
-      const handler = registry.handlers.get("bft_propose")!;
-      const result = await handler({
+      const result = await registry.call("bft_propose", {
         cluster_id: "bft-abc-1",
         value: "tx-42",
       });
@@ -138,8 +134,7 @@ describe("bft MCP tools", () => {
         ],
       });
 
-      const handler = registry.handlers.get("bft_run_prepare")!;
-      const result = await handler({
+      const result = await registry.call("bft_run_prepare", {
         cluster_id: "bft-abc-1",
         sequence_number: 1,
       });
@@ -165,8 +160,7 @@ describe("bft MCP tools", () => {
         ],
       });
 
-      const handler = registry.handlers.get("bft_run_commit")!;
-      const result = await handler({
+      const result = await registry.call("bft_run_commit", {
         cluster_id: "bft-abc-1",
         sequence_number: 1,
       });
@@ -188,8 +182,7 @@ describe("bft MCP tools", () => {
         requiredQuorum: 3,
       });
 
-      const handler = registry.handlers.get("bft_check_consensus")!;
-      const result = await handler({
+      const result = await registry.call("bft_check_consensus", {
         cluster_id: "bft-abc-1",
         sequence_number: 1,
       });
@@ -210,8 +203,7 @@ describe("bft MCP tools", () => {
         requiredQuorum: 3,
       });
 
-      const handler = registry.handlers.get("bft_check_consensus")!;
-      const result = await handler({
+      const result = await registry.call("bft_check_consensus", {
         cluster_id: "bft-abc-1",
         sequence_number: 1,
       });
@@ -233,8 +225,7 @@ describe("bft MCP tools", () => {
         requiredQuorum: 3,
       });
 
-      const handler = registry.handlers.get("bft_run_full_round")!;
-      const result = await handler({
+      const result = await registry.call("bft_run_full_round", {
         cluster_id: "bft-abc-1",
         value: "tx-99",
       });
@@ -256,8 +247,7 @@ describe("bft MCP tools", () => {
         requiredQuorum: 3,
       });
 
-      const handler = registry.handlers.get("bft_run_full_round")!;
-      const result = await handler({
+      const result = await registry.call("bft_run_full_round", {
         cluster_id: "bft-abc-1",
         value: "tx-fail",
       });
@@ -303,8 +293,7 @@ describe("bft MCP tools", () => {
         faultTolerance: "f=1 (tolerates 1 Byzantine node out of 4)",
       });
 
-      const handler = registry.handlers.get("bft_inspect")!;
-      const result = await handler({ cluster_id: "bft-abc-1" });
+      const result = await registry.call("bft_inspect", { cluster_id: "bft-abc-1" });
 
       const text = getText(result);
       expect(text).toContain("my-cluster");
@@ -333,7 +322,7 @@ describe("bft MCP tools", () => {
       });
 
       const text = getText(
-        await registry.handlers.get("bft_inspect")!({
+        await registry.call("bft_inspect", {
           cluster_id: "bft-abc-1",
         }),
       );
@@ -347,8 +336,7 @@ describe("bft MCP tools", () => {
         throw new Error("Access denied");
       });
 
-      const handler = registry.handlers.get("bft_propose")!;
-      const result = await handler({
+      const result = await registry.call("bft_propose", {
         cluster_id: "someone-elses",
         value: "hack",
       });
