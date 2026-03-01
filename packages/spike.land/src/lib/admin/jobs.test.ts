@@ -44,7 +44,7 @@ function createMockEnhancementJob(overrides: Record<string, unknown> = {}) {
     retryCount: 0,
     maxRetries: 3,
     geminiPrompt: "Enhance this image",
-    geminiModel: "gemini-2.0-flash",
+    geminiModel: "gemini-3.1-flash-image-preview",
     geminiTemp: 0.7,
     workflowRunId: "wf-123",
     imageId: "img-1",
@@ -77,7 +77,7 @@ function createMockMcpJob(overrides: Record<string, unknown> = {}) {
     errorMessage: null,
     userId: "user-2",
     apiKeyId: "key-1",
-    geminiModel: "gemini-2.0-flash",
+    geminiModel: "gemini-3.1-flash-image-preview",
     createdAt: new Date("2025-01-15T11:00:00Z"),
     updatedAt: new Date("2025-01-15T11:02:00Z"),
     processingStartedAt: new Date("2025-01-15T11:01:00Z"),
@@ -135,7 +135,7 @@ describe("transformEnhancementJob", () => {
     expect(result.imageName).toBe("photo.jpg");
     expect(result.retryCount).toBe(0);
     expect(result.maxRetries).toBe(3);
-    expect(result.geminiModel).toBe("gemini-2.0-flash");
+    expect(result.geminiModel).toBe("gemini-3.1-flash-image-preview");
     expect(result.geminiTemp).toBe(0.7);
     expect(result.workflowRunId).toBe("wf-123");
     expect(result.currentStage).toBe("complete");
@@ -192,7 +192,7 @@ describe("transformMcpJob", () => {
     expect(result.apiKeyName).toBe("My API Key");
     expect(result.inputR2Key).toBe("r2/input.jpg");
     expect(result.outputR2Key).toBeNull();
-    expect(result.geminiModel).toBe("gemini-2.0-flash");
+    expect(result.geminiModel).toBe("gemini-3.1-flash-image-preview");
   });
 
   it("defaults userEmail to Unknown when null", () => {

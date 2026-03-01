@@ -85,7 +85,7 @@ export const codegenTools: MCPTool[] = [
     description: "Dispatch a code generation prompt to AI provider (Mock)",
     schema: z.object({
       bundle_id: z.string(),
-      model: z.string().optional().default("gemini-2.0-flash"),
+      model: z.string().optional().default("gemini-3.1-flash-image-preview"),
     }),
     handler: async (args: unknown) => {
       const a = args as { bundle_id: string; model: string; };

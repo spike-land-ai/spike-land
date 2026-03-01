@@ -126,7 +126,7 @@ export async function analyzeAudience(
     const prompt = buildAnalysisPrompt(input);
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-3.1-flash-image-preview",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         systemInstruction: AUDIENCE_ANALYSIS_SYSTEM_PROMPT,
@@ -250,7 +250,7 @@ export async function recommendBudget(
         .join(" ");
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.0-flash",
+        model: "gemini-3.1-flash-image-preview",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: { maxOutputTokens: 200, temperature: 0.4 },
       });
@@ -316,8 +316,8 @@ function buildHeuristicInsight(input: AudienceAnalysisInput): AudienceInsight {
       ageRanges: platform === "linkedin"
         ? { "25-34": 0.33, "35-54": 0.39, "18-24": 0.17, "55+": 0.11 }
         : platform === "tiktok"
-        ? { "18-24": 0.42, "25-34": 0.31, "13-17": 0.16, "35+": 0.11 }
-        : { "18-24": 0.29, "25-34": 0.32, "35-44": 0.21, "45+": 0.18 },
+          ? { "18-24": 0.42, "25-34": 0.31, "13-17": 0.16, "35+": 0.11 }
+          : { "18-24": 0.29, "25-34": 0.32, "35-44": 0.21, "45+": 0.18 },
       genderSplit: platform === "pinterest"
         ? { female: 0.76, male: 0.17, other: 0.07 }
         : { male: 0.51, female: 0.44, other: 0.05 },
