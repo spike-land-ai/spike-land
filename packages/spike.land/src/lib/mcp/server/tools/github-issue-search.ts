@@ -9,88 +9,84 @@ import { z } from "zod";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolRegistry } from "../tool-registry";
 import { safeToolCall, textResult } from "./tool-helpers";
+import { freeTool, workspaceTool } from "../tool-builder/procedures.js";
 
 interface GitHubSearchItem {
-  number: number;
-  title: string;
-  state: string;
-  labels: Array<{ name: string; }>;
-  created_at: string;
-  html_url: string;
+    number: number;
+    title: string;
+    state: string;
+    labels: Array<{ name: string; }>;
+    created_at: string;
+    html_url: string;
 }
 
 interface GitHubSearchResponse {
-  total_count: number;
-  items: GitHubSearchItem[];
+    total_count: number;
+    items: GitHubSearchItem[];
 }
 
-const GitHubIssueSearchSchema = z.object({
-  query: z.string().describe("Search keywords to find matching issues"),
-  state: z.enum(["open", "closed", "all"]).optional().describe(
-    "Filter by issue state. Default: all",
-  ),
-  limit: z.number().optional().describe("Max results to return. Default: 10"),
-});
-
 export function registerGitHubIssueSearchTools(
-  registry: ToolRegistry,
-  _userId: string,
+    registry: ToolRegistry,
+    _userId: string,
 ): void {
-  registry.register({
-    name: "github_issue_search",
-    description:
-      "Search GitHub issues by keyword in spike.land repo. Use before creating new issues to check for duplicates.",
-    category: "github-admin",
-    tier: "workspace",
-    inputSchema: GitHubIssueSearchSchema.shape,
-    handler: async ({
-      query,
-      state,
-      limit,
-    }: z.infer<typeof GitHubIssueSearchSchema>): Promise<CallToolResult> =>
-      safeToolCall("github_issue_search", async () => {
-        if (!process.env.GH_PAT_TOKEN) {
-          return textResult("GitHub not configured (GH_PAT_TOKEN missing).");
-        }
+    registry.registerBuilt(
+        workspaceTool(_userId)
+            .tool("github_issue_search", "Search GitHub issues by keyword in spike.land repo. Use before creating new issues to check for duplicates.", {
+                query: z.string().describe("Search keywords to find matching issues"),
+                state: z.enum(["open", "closed", "all"]).optional().describe(
+                    "Filter by issue state. Default: all",
+                ),
+                limit: z.number().optional().describe("Max results to return. Default: 10"),
+            })
+            .meta({ category: "github-admin", tier: "workspace" })
+            .handler(async ({ input, ctx: _ctx }) => {
+                const {
+                    query,
+                    state,
+                    limit,
+                } = input;
 
-        const maxResults = limit ?? 10;
-        const stateFilter = state && state !== "all" ? `+state:${state}` : "";
-        const searchQuery = `${
-          encodeURIComponent(query)
-        }+repo:spike-land-ai/spike.land+is:issue${stateFilter}`;
-        const url = `https://api.github.com/search/issues?q=${searchQuery}&per_page=${maxResults}`;
+                if (!process.env.GH_PAT_TOKEN) {
+                    return textResult("GitHub not configured (GH_PAT_TOKEN missing).");
+                }
 
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${process.env.GH_PAT_TOKEN}`,
-            Accept: "application/vnd.github.v3+json",
-          },
-        });
+                const maxResults = limit ?? 10;
+                const stateFilter = state && state !== "all" ? `+state:${state}` : "";
+                const searchQuery = `${encodeURIComponent(query)
+                    }+repo:spike-land-ai/spike.land+is:issue${stateFilter}`;
+                const url = `https://api.github.com/search/issues?q=${searchQuery}&per_page=${maxResults}`;
 
-        if (!response.ok) {
-          const body = await response.text().catch(() => "Unknown error");
-          throw new Error(`GitHub API error (${response.status}): ${body}`);
-        }
+                const response = await fetch(url, {
+                    headers: {
+                        Authorization: `Bearer ${process.env.GH_PAT_TOKEN}`,
+                        Accept: "application/vnd.github.v3+json",
+                    },
+                });
 
-        const data = (await response.json()) as GitHubSearchResponse;
+                if (!response.ok) {
+                    const body = await response.text().catch(() => "Unknown error");
+                    throw new Error(`GitHub API error (${response.status}): ${body}`);
+                }
 
-        if (data.total_count === 0 || data.items.length === 0) {
-          return textResult(`No issues found matching "${query}".`);
-        }
+                const data = (await response.json()) as GitHubSearchResponse;
 
-        const items = data.items.slice(0, maxResults);
-        let text = `**Found ${data.total_count} issue(s) matching "${query}":**\n\n`;
+                if (data.total_count === 0 || data.items.length === 0) {
+                    return textResult(`No issues found matching "${query}".`);
+                }
 
-        for (const item of items) {
-          const labels = item.labels.length > 0
-            ? ` [${item.labels.map(l => l.name).join(", ")}]`
-            : "";
-          const created = item.created_at.split("T")[0];
-          text += `- #${item.number} **${item.title}** (${item.state})${labels} - ${created}\n`;
-          text += `  ${item.html_url}\n`;
-        }
+                const items = data.items.slice(0, maxResults);
+                let text = `**Found ${data.total_count} issue(s) matching "${query}":**\n\n`;
 
-        return textResult(text);
-      }),
-  });
+                for (const item of items) {
+                    const labels = item.labels.length > 0
+                        ? ` [${item.labels.map(l => l.name).join(", ")}]`
+                        : "";
+                    const created = item.created_at.split("T")[0];
+                    text += `- #${item.number} **${item.title}** (${item.state})${labels} - ${created}\n`;
+                    text += `  ${item.html_url}\n`;
+                }
+
+                return textResult(text);
+            })
+    );
 }

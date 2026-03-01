@@ -411,7 +411,7 @@ export class ToolRegistry {
    * Register a tool built with the shared tool-builder.
    * Adapts BuiltTool to ToolDefinition internally -- zero breaking changes.
    */
-  registerBuilt(built: BuiltTool): void {
+  registerBuilt<TInput, TOutput>(built: BuiltTool<TInput, TOutput>): void {
     this.register({
       name: built.name,
       description: built.description,
@@ -421,7 +421,7 @@ export class ToolRegistry {
       ...(built.meta.annotations ? { annotations: built.meta.annotations as ToolAnnotations } : {}),
       ...(built.meta.alwaysEnabled !== undefined ? { alwaysEnabled: built.meta.alwaysEnabled } : {}),
       inputSchema: built.inputSchema,
-      handler: built.handler as ToolDefinition["handler"],
+      handler: built.handler as unknown as ToolDefinition["handler"],
     });
   }
 

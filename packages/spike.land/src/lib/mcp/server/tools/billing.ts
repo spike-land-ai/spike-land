@@ -8,191 +8,182 @@ import { z } from "zod";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolRegistry } from "../tool-registry";
 import { safeToolCall, textResult } from "./tool-helpers";
-
-const CreateCheckoutSchema = z.object({
-  type: z.enum(["tokens", "subscription", "workspace_tier"]).describe(
-    "Checkout type: tokens (one-time), subscription (recurring), or workspace_tier (workspace upgrade).",
-  ),
-  workspace_id: z.string().min(1).describe(
-    "Workspace ID to associate the checkout with.",
-  ),
-  price_id: z.string().optional().describe(
-    "Stripe Price ID (e.g. price_xxx). Required for subscription and workspace_tier types.",
-  ),
-  success_url: z.string().url().optional().describe(
-    "URL to redirect to after successful checkout.",
-  ),
-  cancel_url: z.string().url().optional().describe(
-    "URL to redirect to if the user cancels checkout.",
-  ),
-});
+import { freeTool, workspaceTool } from "../tool-builder/procedures.js";
 
 export function registerBillingTools(
-  registry: ToolRegistry,
-  userId: string,
+    registry: ToolRegistry,
+    userId: string,
 ): void {
-  registry.register({
-    name: "billing_create_checkout",
-    description:
-      "Create a Stripe checkout session for purchasing tokens, subscribing to a plan, or upgrading workspace tier.",
-    category: "billing",
-    tier: "free",
-    inputSchema: CreateCheckoutSchema.shape,
-    handler: async (
-      args: z.infer<typeof CreateCheckoutSchema>,
-    ): Promise<CallToolResult> =>
-      safeToolCall("billing_create_checkout", async () => {
-        const prisma = (await import("@/lib/prisma")).default;
+    registry.registerBuilt(
+        freeTool(userId)
+            .tool("billing_create_checkout", "Create a Stripe checkout session for purchasing tokens, subscribing to a plan, or upgrading workspace tier.", {
+                type: z.enum(["tokens", "subscription", "workspace_tier"]).describe(
+                    "Checkout type: tokens (one-time), subscription (recurring), or workspace_tier (workspace upgrade).",
+                ),
+                workspace_id: z.string().min(1).describe(
+                    "Workspace ID to associate the checkout with.",
+                ),
+                price_id: z.string().optional().describe(
+                    "Stripe Price ID (e.g. price_xxx). Required for subscription and workspace_tier types.",
+                ),
+                success_url: z.string().url().optional().describe(
+                    "URL to redirect to after successful checkout.",
+                ),
+                cancel_url: z.string().url().optional().describe(
+                    "URL to redirect to if the user cancels checkout.",
+                ),
+            })
+            .meta({ category: "billing", tier: "free" })
+            .handler(async ({ input, ctx: _ctx }) => {
+                const args = input;
 
-        // Verify workspace membership
-        const membership = await prisma.workspaceMember.findFirst({
-          where: { userId, workspaceId: args.workspace_id },
-          select: { role: true },
-        });
+                const prisma = (await import("@/lib/prisma")).default;
 
-        if (!membership) {
-          return textResult(
-            "**Error:** Workspace not found or you are not a member.",
-          );
-        }
+                // Verify workspace membership
+                const membership = await prisma.workspaceMember.findFirst({
+                    where: { userId, workspaceId: args.workspace_id },
+                    select: { role: true },
+                });
 
-        // NOTE: Actual Stripe checkout session creation is handled by the
-        // /api/stripe/checkout route. This tool documents the intent and
-        // validates prerequisites. The agent should direct the user to the
-        // checkout UI or call the API route directly.
-        let text = `**Checkout Session Intent**\n\n`
-          + `**Type:** ${args.type}\n`
-          + `**Workspace:** ${args.workspace_id}\n`
-          + `**User Role:** ${membership.role}\n`;
+                if (!membership) {
+                    return textResult(
+                        "**Error:** Workspace not found or you are not a member.",
+                    );
+                }
 
-        if (args.price_id) {
-          text += `**Price ID:** ${args.price_id}\n`;
-        }
-        if (args.success_url) {
-          text += `**Success URL:** ${args.success_url}\n`;
-        }
-        if (args.cancel_url) {
-          text += `**Cancel URL:** ${args.cancel_url}\n`;
-        }
+                // NOTE: Actual Stripe checkout session creation is handled by the
+                // /api/stripe/checkout route. This tool documents the intent and
+                // validates prerequisites. The agent should direct the user to the
+                // checkout UI or call the API route directly.
+                let text = `**Checkout Session Intent**\n\n`
+                    + `**Type:** ${args.type}\n`
+                    + `**Workspace:** ${args.workspace_id}\n`
+                    + `**User Role:** ${membership.role}\n`;
 
-        text +=
-          `\nTo complete checkout, direct the user to the billing page or call POST /api/stripe/checkout with the appropriate price_id/success_url/cancel_url.`;
+                if (args.price_id) {
+                    text += `**Price ID:** ${args.price_id}\n`;
+                }
+                if (args.success_url) {
+                    text += `**Success URL:** ${args.success_url}\n`;
+                }
+                if (args.cancel_url) {
+                    text += `**Cancel URL:** ${args.cancel_url}\n`;
+                }
 
-        return textResult(text);
-      }),
-  });
+                text +=
+                    `\nTo complete checkout, direct the user to the billing page or call POST /api/stripe/checkout with the appropriate price_id/success_url/cancel_url.`;
 
-  registry.register({
-    name: "billing_status",
-    description:
-      "Get current billing status: subscription tier, Stripe subscription info, and AI credit balance across all workspaces.",
-    category: "billing",
-    tier: "free",
-    inputSchema: z.object({}).shape,
-    handler: async (): Promise<CallToolResult> =>
-      safeToolCall("billing_status", async () => {
-        const prisma = (await import("@/lib/prisma")).default;
+                return textResult(text);
+            })
+    );
 
-        // Find user's personal workspace with subscription info
-        const personalWorkspace = await prisma.workspace.findFirst({
-          where: {
-            isPersonal: true,
-            members: { some: { userId } },
-            deletedAt: null,
-          },
-          select: {
-            id: true,
-            name: true,
-            subscriptionTier: true,
-            stripeSubscriptionId: true,
-            monthlyAiCredits: true,
-            usedAiCredits: true,
-          },
-        });
+    registry.registerBuilt(
+        freeTool(userId)
+            .tool("billing_status", "Get current billing status: subscription tier, Stripe subscription info, and AI credit balance across all workspaces.", z.object({}).shape)
+            .meta({ category: "billing", tier: "free" })
+            .handler(async ({ input: _input, ctx: _ctx }) => {
+                const prisma = (await import("@/lib/prisma")).default;
 
-        if (!personalWorkspace) {
-          return textResult(
-            "**Error:** No personal workspace found for the current user.",
-          );
-        }
+                // Find user's personal workspace with subscription info
+                const personalWorkspace = await prisma.workspace.findFirst({
+                    where: {
+                        isPersonal: true,
+                        members: { some: { userId } },
+                        deletedAt: null,
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        subscriptionTier: true,
+                        stripeSubscriptionId: true,
+                        monthlyAiCredits: true,
+                        usedAiCredits: true,
+                    },
+                });
 
-        const hasActiveSubscription = !!personalWorkspace.stripeSubscriptionId;
-        const remaining = Math.max(
-          0,
-          personalWorkspace.monthlyAiCredits - personalWorkspace.usedAiCredits,
-        );
+                if (!personalWorkspace) {
+                    return textResult(
+                        "**Error:** No personal workspace found for the current user.",
+                    );
+                }
 
-        // Also fetch detailed credit balance via WorkspaceCreditManager
-        let creditBalance: {
-          remaining: number;
-          limit: number;
-          used: number;
-          tier: string;
-          workspaceId: string;
-        } | null = null;
-        try {
-          const { WorkspaceCreditManager } = await import(
-            "@/lib/credits/workspace-credit-manager"
-          );
-          creditBalance = await WorkspaceCreditManager.getBalance(userId);
-        } catch {
-          // Credit manager unavailable — continue with workspace data only
-        }
+                const hasActiveSubscription = !!personalWorkspace.stripeSubscriptionId;
+                const remaining = Math.max(
+                    0,
+                    personalWorkspace.monthlyAiCredits - personalWorkspace.usedAiCredits,
+                );
 
-        let text = `**Billing Status**\n\n`;
-        text += `### Personal Subscription\n`;
-        text += `**Workspace:** ${personalWorkspace.name}\n`;
-        text += `**Workspace ID:** ${personalWorkspace.id}\n`;
-        text += `**Tier:** ${personalWorkspace.subscriptionTier}\n`;
-        text += `**Active Stripe Subscription:** ${hasActiveSubscription ? "Yes" : "No"}\n\n`;
+                // Also fetch detailed credit balance via WorkspaceCreditManager
+                let creditBalance: {
+                    remaining: number;
+                    limit: number;
+                    used: number;
+                    tier: string;
+                    workspaceId: string;
+                } | null = null;
+                try {
+                    const { WorkspaceCreditManager } = await import(
+                        "@/lib/credits/workspace-credit-manager"
+                    );
+                    creditBalance = await WorkspaceCreditManager.getBalance(userId);
+                } catch {
+                    // Credit manager unavailable — continue with workspace data only
+                }
 
-        text += `### Credits\n`;
-        text += `**Monthly AI Credits:** ${personalWorkspace.monthlyAiCredits}\n`;
-        text += `**Used:** ${personalWorkspace.usedAiCredits}\n`;
-        text += `**Remaining:** ${remaining}\n`;
+                let text = `**Billing Status**\n\n`;
+                text += `### Personal Subscription\n`;
+                text += `**Workspace:** ${personalWorkspace.name}\n`;
+                text += `**Workspace ID:** ${personalWorkspace.id}\n`;
+                text += `**Tier:** ${personalWorkspace.subscriptionTier}\n`;
+                text += `**Active Stripe Subscription:** ${hasActiveSubscription ? "Yes" : "No"}\n\n`;
 
-        if (creditBalance) {
-          text += `\n### Credit Manager\n`;
-          text += `**Limit:** ${creditBalance.limit}\n`;
-          text += `**Used:** ${creditBalance.used}\n`;
-          text += `**Remaining:** ${creditBalance.remaining}\n`;
-          text += `**Tier:** ${creditBalance.tier}\n`;
-          text += `**Workspace ID:** ${creditBalance.workspaceId}\n`;
-        }
+                text += `### Credits\n`;
+                text += `**Monthly AI Credits:** ${personalWorkspace.monthlyAiCredits}\n`;
+                text += `**Used:** ${personalWorkspace.usedAiCredits}\n`;
+                text += `**Remaining:** ${remaining}\n`;
 
-        // Fetch team/org workspaces the user belongs to
-        const teamWorkspaces = await prisma.workspace.findMany({
-          where: {
-            isPersonal: false,
-            members: { some: { userId } },
-            deletedAt: null,
-          },
-          select: {
-            id: true,
-            name: true,
-            subscriptionTier: true,
-            stripeSubscriptionId: true,
-            monthlyAiCredits: true,
-            usedAiCredits: true,
-          },
-        });
+                if (creditBalance) {
+                    text += `\n### Credit Manager\n`;
+                    text += `**Limit:** ${creditBalance.limit}\n`;
+                    text += `**Used:** ${creditBalance.used}\n`;
+                    text += `**Remaining:** ${creditBalance.remaining}\n`;
+                    text += `**Tier:** ${creditBalance.tier}\n`;
+                    text += `**Workspace ID:** ${creditBalance.workspaceId}\n`;
+                }
 
-        if (teamWorkspaces.length > 0) {
-          text += `\n### Team Workspaces (${teamWorkspaces.length})\n\n`;
-          for (const ws of teamWorkspaces) {
-            const wsRecord = ws as Record<string, unknown>;
-            const wsMonthly = wsRecord.monthlyAiCredits as number;
-            const wsUsed = wsRecord.usedAiCredits as number;
-            const wsRemaining = Math.max(0, wsMonthly - wsUsed);
-            const wsHasSub = !!wsRecord.stripeSubscriptionId;
-            text += `**${wsRecord.name}** (${wsRecord.id})\n`;
-            text += `- Tier: ${wsRecord.subscriptionTier}\n`;
-            text += `- Stripe Subscription: ${wsHasSub ? "Yes" : "No"}\n`;
-            text += `- Credits: ${wsUsed}/${wsMonthly} used, ${wsRemaining} remaining\n\n`;
-          }
-        }
+                // Fetch team/org workspaces the user belongs to
+                const teamWorkspaces = await prisma.workspace.findMany({
+                    where: {
+                        isPersonal: false,
+                        members: { some: { userId } },
+                        deletedAt: null,
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        subscriptionTier: true,
+                        stripeSubscriptionId: true,
+                        monthlyAiCredits: true,
+                        usedAiCredits: true,
+                    },
+                });
 
-        return textResult(text);
-      }),
-  });
+                if (teamWorkspaces.length > 0) {
+                    text += `\n### Team Workspaces (${teamWorkspaces.length})\n\n`;
+                    for (const ws of teamWorkspaces) {
+                        const wsRecord = ws as Record<string, unknown>;
+                        const wsMonthly = wsRecord.monthlyAiCredits as number;
+                        const wsUsed = wsRecord.usedAiCredits as number;
+                        const wsRemaining = Math.max(0, wsMonthly - wsUsed);
+                        const wsHasSub = !!wsRecord.stripeSubscriptionId;
+                        text += `**${wsRecord.name}** (${wsRecord.id})\n`;
+                        text += `- Tier: ${wsRecord.subscriptionTier}\n`;
+                        text += `- Stripe Subscription: ${wsHasSub ? "Yes" : "No"}\n`;
+                        text += `- Credits: ${wsUsed}/${wsMonthly} used, ${wsRemaining} remaining\n\n`;
+                    }
+                }
+
+                return textResult(text);
+            })
+    );
 }

@@ -10,307 +10,286 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolRegistry } from "../tool-registry";
 import { safeToolCall, textResult } from "./tool-helpers";
 import { randomUUID } from "node:crypto";
+import { freeTool, workspaceTool } from "../tool-builder/procedures.js";
 
 interface Decision {
-  id: string;
-  userId: string;
-  title: string;
-  context: string;
-  decision: string;
-  consequences: string;
-  status: "proposed" | "accepted" | "deprecated" | "superseded";
-  tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
+    id: string;
+    userId: string;
+    title: string;
+    context: string;
+    decision: string;
+    consequences: string;
+    status: "proposed" | "accepted" | "deprecated" | "superseded";
+    tags: string[];
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 const decisions = new Map<string, Decision>();
 
 function formatAdr(d: Decision): string {
-  const dateStr = d.createdAt.toISOString().split("T")[0];
-  const tagsStr = d.tags.length > 0 ? d.tags.join(", ") : "none";
+    const dateStr = d.createdAt.toISOString().split("T")[0];
+    const tagsStr = d.tags.length > 0 ? d.tags.join(", ") : "none";
 
-  return (
-    `# ADR-${d.id}: ${d.title}\n`
-    + `**Status:** ${d.status}\n`
-    + `**Date:** ${dateStr}\n`
-    + `**Tags:** ${tagsStr}\n\n`
-    + `## Context\n${d.context}\n\n`
-    + `## Decision\n${d.decision}\n\n`
-    + `## Consequences\n${d.consequences}`
-  );
+    return (
+        `# ADR-${d.id}: ${d.title}\n`
+        + `**Status:** ${d.status}\n`
+        + `**Date:** ${dateStr}\n`
+        + `**Tags:** ${tagsStr}\n\n`
+        + `## Context\n${d.context}\n\n`
+        + `## Decision\n${d.decision}\n\n`
+        + `## Consequences\n${d.consequences}`
+    );
 }
 
 export function registerDecisionsTools(
-  registry: ToolRegistry,
-  userId: string,
+    registry: ToolRegistry,
+    userId: string,
 ): void {
-  // decision_record
-  registry.register({
-    name: "decision_record",
-    description:
-      "Record an Architecture Decision Record (ADR) for tracking decisions made during development.",
-    category: "orchestration",
-    tier: "free",
-    inputSchema: {
-      title: z.string().min(3).max(200).describe("Decision title"),
-      context: z
-        .string()
-        .min(10)
-        .describe("Why this decision was needed"),
-      decision: z.string().min(10).describe("What was decided"),
-      consequences: z
-        .string()
-        .min(10)
-        .describe("Positive and negative outcomes"),
-      status: z
-        .enum(["proposed", "accepted", "deprecated", "superseded"])
-        .optional()
-        .default("proposed")
-        .describe("Decision status"),
-      tags: z
-        .array(z.string())
-        .optional()
-        .default([])
-        .describe("Tags for categorization"),
-    },
-    handler: async ({
-      title,
-      context,
-      decision,
-      consequences,
-      status,
-      tags,
-    }: {
-      title: string;
-      context: string;
-      decision: string;
-      consequences: string;
-      status: "proposed" | "accepted" | "deprecated" | "superseded";
-      tags: string[];
-    }): Promise<CallToolResult> =>
-      safeToolCall("decision_record", async () => {
-        const id = randomUUID();
-        const now = new Date();
+    // decision_record
+    registry.registerBuilt(
+        freeTool(userId)
+            .tool("decision_record", "Record an Architecture Decision Record (ADR) for tracking decisions made during development.", {
+                title: z.string().min(3).max(200).describe("Decision title"),
+                context: z
+                    .string()
+                    .min(10)
+                    .describe("Why this decision was needed"),
+                decision: z.string().min(10).describe("What was decided"),
+                consequences: z
+                    .string()
+                    .min(10)
+                    .describe("Positive and negative outcomes"),
+                status: z
+                    .enum(["proposed", "accepted", "deprecated", "superseded"])
+                    .optional()
+                    .default("proposed")
+                    .describe("Decision status"),
+                tags: z
+                    .array(z.string())
+                    .optional()
+                    .default([])
+                    .describe("Tags for categorization"),
+            })
+            .meta({ category: "orchestration", tier: "free" })
+            .handler(async ({ input, ctx: _ctx }) => {
+                const {
+                    title,
+                    context,
+                    decision,
+                    consequences,
+                    status,
+                    tags,
+                } = input;
 
-        const record: Decision = {
-          id,
-          userId,
-          title,
-          context,
-          decision,
-          consequences,
-          status,
-          tags,
-          createdAt: now,
-          updatedAt: now,
-        };
+                const id = randomUUID();
+                const now = new Date();
 
-        decisions.set(id, record);
+                const record: Decision = {
+                    id,
+                    userId,
+                    title,
+                    context,
+                    decision,
+                    consequences,
+                    status,
+                    tags,
+                    createdAt: now,
+                    updatedAt: now,
+                };
 
-        const dateStr = now.toISOString().split("T")[0];
-        const tagsStr = tags.length > 0 ? tags.join(", ") : "none";
+                decisions.set(id, record);
 
-        return textResult(
-          `**Decision recorded:** \`${id}\`\n\n`
-            + `## ${title}\n`
-            + `**Status:** ${status} | **Date:** ${dateStr} | **Tags:** ${tagsStr}\n\n`
-            + `**Context:** ${context.slice(0, 200)}${context.length > 200 ? "..." : ""}\n\n`
-            + `**Decision:** ${decision.slice(0, 200)}${decision.length > 200 ? "..." : ""}`,
-        );
-      }),
-  });
+                const dateStr = now.toISOString().split("T")[0];
+                const tagsStr = tags.length > 0 ? tags.join(", ") : "none";
 
-  // decision_list
-  registry.register({
-    name: "decision_list",
-    description: "List all Architecture Decision Records with optional filtering by status or tag.",
-    category: "orchestration",
-    tier: "free",
-    inputSchema: {
-      status: z
-        .enum(["proposed", "accepted", "deprecated", "superseded"])
-        .optional()
-        .describe("Filter by decision status"),
-      tag: z.string().optional().describe("Filter by tag"),
-      limit: z
-        .number()
-        .min(1)
-        .max(100)
-        .optional()
-        .default(20)
-        .describe("Maximum results"),
-    },
-    handler: async ({
-      status,
-      tag,
-      limit,
-    }: {
-      status?: string;
-      tag?: string;
-      limit: number;
-    }): Promise<CallToolResult> =>
-      safeToolCall("decision_list", async () => {
-        let filtered = Array.from(decisions.values()).filter(
-          d => d.userId === userId,
-        );
+                return textResult(
+                    `**Decision recorded:** \`${id}\`\n\n`
+                    + `## ${title}\n`
+                    + `**Status:** ${status} | **Date:** ${dateStr} | **Tags:** ${tagsStr}\n\n`
+                    + `**Context:** ${context.slice(0, 200)}${context.length > 200 ? "..." : ""}\n\n`
+                    + `**Decision:** ${decision.slice(0, 200)}${decision.length > 200 ? "..." : ""}`,
+                );
+            })
+    );
 
-        if (status) {
-          filtered = filtered.filter(d => d.status === status);
-        }
+    // decision_list
+    registry.registerBuilt(
+        freeTool(userId)
+            .tool("decision_list", "List all Architecture Decision Records with optional filtering by status or tag.", {
+                status: z
+                    .enum(["proposed", "accepted", "deprecated", "superseded"])
+                    .optional()
+                    .describe("Filter by decision status"),
+                tag: z.string().optional().describe("Filter by tag"),
+                limit: z
+                    .number()
+                    .min(1)
+                    .max(100)
+                    .optional()
+                    .default(20)
+                    .describe("Maximum results"),
+            })
+            .meta({ category: "orchestration", tier: "free" })
+            .handler(async ({ input, ctx: _ctx }) => {
+                const {
+                    status,
+                    tag,
+                    limit,
+                } = input;
 
-        if (tag) {
-          filtered = filtered.filter(d => d.tags.some(t => t.toLowerCase() === tag.toLowerCase()));
-        }
+                let filtered = Array.from(decisions.values()).filter(
+                    d => d.userId === userId,
+                );
 
-        // Sort by creation date descending
-        filtered.sort(
-          (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-        );
+                if (status) {
+                    filtered = filtered.filter(d => d.status === status);
+                }
 
-        filtered = filtered.slice(0, limit);
+                if (tag) {
+                    filtered = filtered.filter(d => d.tags.some(t => t.toLowerCase() === tag.toLowerCase()));
+                }
 
-        if (filtered.length === 0) {
-          const filters: string[] = [];
-          if (status) filters.push(`status="${status}"`);
-          if (tag) filters.push(`tag="${tag}"`);
-          const filterStr = filters.length > 0
-            ? ` matching ${filters.join(", ")}`
-            : "";
-          return textResult(`**No decisions found${filterStr}.**`);
-        }
+                // Sort by creation date descending
+                filtered.sort(
+                    (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+                );
 
-        let text = `**${filtered.length} Decision(s):**\n\n`;
-        for (const d of filtered) {
-          const dateStr = d.createdAt.toISOString().split("T")[0];
-          const tagsStr = d.tags.length > 0 ? d.tags.join(", ") : "none";
-          text += `- **\`${d.id}\`** — ${d.title}\n`;
-          text += `  Status: ${d.status} | Date: ${dateStr} | Tags: ${tagsStr}\n`;
-        }
+                filtered = filtered.slice(0, limit);
 
-        return textResult(text);
-      }),
-  });
+                if (filtered.length === 0) {
+                    const filters: string[] = [];
+                    if (status) filters.push(`status="${status}"`);
+                    if (tag) filters.push(`tag="${tag}"`);
+                    const filterStr = filters.length > 0
+                        ? ` matching ${filters.join(", ")}`
+                        : "";
+                    return textResult(`**No decisions found${filterStr}.**`);
+                }
 
-  // decision_get
-  registry.register({
-    name: "decision_get",
-    description: "Get full details of a specific Architecture Decision Record in markdown format.",
-    category: "orchestration",
-    tier: "free",
-    inputSchema: {
-      decision_id: z.string().min(1).describe("The decision ID"),
-    },
-    handler: async ({
-      decision_id,
-    }: {
-      decision_id: string;
-    }): Promise<CallToolResult> =>
-      safeToolCall("decision_get", async () => {
-        const d = decisions.get(decision_id);
+                let text = `**${filtered.length} Decision(s):**\n\n`;
+                for (const d of filtered) {
+                    const dateStr = d.createdAt.toISOString().split("T")[0];
+                    const tagsStr = d.tags.length > 0 ? d.tags.join(", ") : "none";
+                    text += `- **\`${d.id}\`** — ${d.title}\n`;
+                    text += `  Status: ${d.status} | Date: ${dateStr} | Tags: ${tagsStr}\n`;
+                }
 
-        if (!d) {
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: `**Error:** Decision \`${decision_id}\` not found.`,
-              },
-            ],
-            isError: true,
-          };
-        }
+                return textResult(text);
+            })
+    );
 
-        if (d.userId !== userId) {
-          return {
-            content: [
-              {
-                type: "text" as const,
-                text: `**Error:** Decision \`${decision_id}\` not found.`,
-              },
-            ],
-            isError: true,
-          };
-        }
+    // decision_get
+    registry.registerBuilt(
+        freeTool(userId)
+            .tool("decision_get", "Get full details of a specific Architecture Decision Record in markdown format.", {
+                decision_id: z.string().min(1).describe("The decision ID"),
+            })
+            .meta({ category: "orchestration", tier: "free" })
+            .handler(async ({ input, ctx: _ctx }) => {
+                const {
+                    decision_id,
+                } = input;
 
-        return textResult(formatAdr(d));
-      }),
-  });
+                const d = decisions.get(decision_id);
 
-  // decision_query
-  registry.register({
-    name: "decision_query",
-    description:
-      "Search Architecture Decision Records by keyword across title, context, and decision fields.",
-    category: "orchestration",
-    tier: "free",
-    inputSchema: {
-      query: z.string().min(1).describe("Search keyword(s)"),
-      limit: z
-        .number()
-        .min(1)
-        .max(50)
-        .optional()
-        .default(10)
-        .describe("Maximum results"),
-    },
-    handler: async ({
-      query,
-      limit,
-    }: {
-      query: string;
-      limit: number;
-    }): Promise<CallToolResult> =>
-      safeToolCall("decision_query", async () => {
-        const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+                if (!d) {
+                    return {
+                        content: [
+                            {
+                                type: "text" as const,
+                                text: `**Error:** Decision \`${decision_id}\` not found.`,
+                            },
+                        ],
+                        isError: true,
+                    };
+                }
 
-        if (terms.length === 0) {
-          return textResult("**No search terms provided.**");
-        }
+                if (d.userId !== userId) {
+                    return {
+                        content: [
+                            {
+                                type: "text" as const,
+                                text: `**Error:** Decision \`${decision_id}\` not found.`,
+                            },
+                        ],
+                        isError: true,
+                    };
+                }
 
-        const scored: Array<{ decision: Decision; score: number; }> = [];
+                return textResult(formatAdr(d));
+            })
+    );
 
-        for (const d of decisions.values()) {
-          if (d.userId !== userId) continue;
+    // decision_query
+    registry.registerBuilt(
+        freeTool(userId)
+            .tool("decision_query", "Search Architecture Decision Records by keyword across title, context, and decision fields.", {
+                query: z.string().min(1).describe("Search keyword(s)"),
+                limit: z
+                    .number()
+                    .min(1)
+                    .max(50)
+                    .optional()
+                    .default(10)
+                    .describe("Maximum results"),
+            })
+            .meta({ category: "orchestration", tier: "free" })
+            .handler(async ({ input, ctx: _ctx }) => {
+                const {
+                    query,
+                    limit,
+                } = input;
 
-          const titleLower = d.title.toLowerCase();
-          const contextLower = d.context.toLowerCase();
-          const decisionLower = d.decision.toLowerCase();
+                const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
 
-          let score = 0;
-          for (const term of terms) {
-            if (titleLower.includes(term)) score += 3;
-            if (contextLower.includes(term)) score += 2;
-            if (decisionLower.includes(term)) score += 1;
-          }
+                if (terms.length === 0) {
+                    return textResult("**No search terms provided.**");
+                }
 
-          if (score > 0) {
-            scored.push({ decision: d, score });
-          }
-        }
+                const scored: Array<{ decision: Decision; score: number; }> = [];
 
-        scored.sort((a, b) => b.score - a.score);
-        const results = scored.slice(0, limit);
+                for (const d of decisions.values()) {
+                    if (d.userId !== userId) continue;
 
-        if (results.length === 0) {
-          return textResult(
-            `**No decisions found matching "${query}".**`,
-          );
-        }
+                    const titleLower = d.title.toLowerCase();
+                    const contextLower = d.context.toLowerCase();
+                    const decisionLower = d.decision.toLowerCase();
 
-        let text = `**${results.length} result(s) for "${query}":**\n\n`;
-        for (const { decision: d, score } of results) {
-          const excerpt = d.decision.slice(0, 120);
-          text += `- **\`${d.id}\`** — ${d.title} (score: ${score})\n`;
-          text += `  ${excerpt}${d.decision.length > 120 ? "..." : ""}\n`;
-        }
+                    let score = 0;
+                    for (const term of terms) {
+                        if (titleLower.includes(term)) score += 3;
+                        if (contextLower.includes(term)) score += 2;
+                        if (decisionLower.includes(term)) score += 1;
+                    }
 
-        return textResult(text);
-      }),
-  });
+                    if (score > 0) {
+                        scored.push({ decision: d, score });
+                    }
+                }
+
+                scored.sort((a, b) => b.score - a.score);
+                const results = scored.slice(0, limit);
+
+                if (results.length === 0) {
+                    return textResult(
+                        `**No decisions found matching "${query}".**`,
+                    );
+                }
+
+                let text = `**${results.length} result(s) for "${query}":**\n\n`;
+                for (const { decision: d, score } of results) {
+                    const excerpt = d.decision.slice(0, 120);
+                    text += `- **\`${d.id}\`** — ${d.title} (score: ${score})\n`;
+                    text += `  ${excerpt}${d.decision.length > 120 ? "..." : ""}\n`;
+                }
+
+                return textResult(text);
+            })
+    );
 }
 
 /** Exported for testing: clear all in-memory decisions. */
 export function _clearDecisions(): void {
-  decisions.clear();
+    decisions.clear();
 }

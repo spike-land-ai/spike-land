@@ -29,6 +29,12 @@ export function createMockRegistry(tools: unknown[] = []): MockRegistry {
         handlers.set(def.name, def.handler);
       },
     ),
+    registerBuilt: vi.fn((built: any) => {
+      registry.register({
+        name: built.name,
+        handler: built.handler as any,
+      });
+    }),
     handlers,
     call: async (name: string, args: Record<string, unknown>) => {
       const handler = handlers.get(name);

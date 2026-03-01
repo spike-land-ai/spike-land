@@ -9,7 +9,7 @@ import {
   createProcedure,
   middleware,
 } from "@spike-land-ai/shared/tool-builder";
-import type { CallToolResult } from "@spike-land-ai/shared/tool-builder";
+import type { CallToolResult as McpCallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { safeToolCall } from "../tools/tool-helpers";
 
 // ─── Prisma client type (inferred from dynamic import) ───
@@ -27,7 +27,7 @@ const withSafeCall = middleware<
   { toolName: string }
 >(async ({ ctx, next }) => {
   return safeToolCall(ctx.toolName, async () => {
-    return next(ctx);
+    return next(ctx) as Promise<McpCallToolResult>;
   });
 });
 

@@ -15,270 +15,261 @@ import { z } from "zod";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolRegistry } from "../tool-registry";
 import { encryptSecret } from "../crypto/vault";
+import { freeTool, workspaceTool } from "../tool-builder/procedures.js";
 
 type PrismaClient = Awaited<typeof import("@/lib/prisma")>["default"];
 
 const FREE_SECRET_LIMIT = 25;
 const PREMIUM_SECRET_LIMIT = 500;
 
-const StoreSecretSchema = z.object({
-  name: z
-    .string()
-    .min(1)
-    .max(100)
-    .regex(
-      /^[a-zA-Z][a-zA-Z0-9_]*$/,
-      "Name must start with a letter and contain only letters, numbers, and underscores",
-    ),
-  value: z.string().min(1).max(10000),
-  allowed_urls: z
-    .array(z.string().url())
-    .max(20)
-    .optional()
-    .default([]),
-});
-
-const SecretIdSchema = z.object({
-  secret_id: z.string().min(1),
-});
-
 async function getSecretCount(
-  prisma: PrismaClient,
-  userId: string,
+    prisma: PrismaClient,
+    userId: string,
 ): Promise<number> {
-  return prisma.vaultSecret.count({
-    where: { userId, status: { not: "REVOKED" } },
-  });
+    return prisma.vaultSecret.count({
+        where: { userId, status: { not: "REVOKED" } },
+    });
 }
 
 async function getSecretLimit(
-  prisma: PrismaClient,
-  userId: string,
+    prisma: PrismaClient,
+    userId: string,
 ): Promise<number> {
-  const subscription = await prisma.subscription.findUnique({
-    where: { userId },
-    select: { tier: true },
-  });
-  if (
-    subscription?.tier
-    && subscription.tier !== "FREE"
-  ) {
-    return PREMIUM_SECRET_LIMIT;
-  }
-  return FREE_SECRET_LIMIT;
+    const subscription = await prisma.subscription.findUnique({
+        where: { userId },
+        select: { tier: true },
+    });
+    if (
+        subscription?.tier
+        && subscription.tier !== "FREE"
+    ) {
+        return PREMIUM_SECRET_LIMIT;
+    }
+    return FREE_SECRET_LIMIT;
 }
 
 export function registerVaultTools(
-  registry: ToolRegistry,
-  userId: string,
+    registry: ToolRegistry,
+    userId: string,
 ): void {
-  registry.register({
-    name: "vault_store_secret",
-    description: "Store an encrypted secret (API key, OAuth token, etc.) in the vault. "
-      + "The secret is encrypted at rest and NEVER readable in plaintext. "
-      + "Secrets start in PENDING status until approved by the user.",
-    category: "vault",
-    tier: "free",
-    alwaysEnabled: true,
-    inputSchema: StoreSecretSchema.shape,
-    handler: async ({
-      name,
-      value,
-      allowed_urls,
-    }: z.infer<typeof StoreSecretSchema>): Promise<CallToolResult> => {
-      try {
-        const prisma = (await import("@/lib/prisma")).default;
+    registry.registerBuilt(
+        freeTool(userId)
+            .tool("vault_store_secret", "Store an encrypted secret (API key, OAuth token, etc.) in the vault. "
+                + "The secret is encrypted at rest and NEVER readable in plaintext. "
+                + "Secrets start in PENDING status until approved by the user.", {
+                name: z
+                    .string()
+                    .min(1)
+                    .max(100)
+                    .regex(
+                        /^[a-zA-Z][a-zA-Z0-9_]*$/,
+                        "Name must start with a letter and contain only letters, numbers, and underscores",
+                    ),
+                value: z.string().min(1).max(10000),
+                allowed_urls: z
+                    .array(z.string().url())
+                    .max(20)
+                    .optional()
+                    .default([]),
+            })
+            .meta({ category: "vault", tier: "free" })
+            .handler(async ({ input, ctx: _ctx }) => {
+                const {
+                    name,
+                    value,
+                    allowed_urls,
+                } = input;
 
-        // Check quota
-        const [count, limit] = await Promise.all([
-          getSecretCount(prisma, userId),
-          getSecretLimit(prisma, userId),
-        ]);
+                try {
+                    const prisma = (await import("@/lib/prisma")).default;
 
-        if (count >= limit) {
-          return {
-            content: [
-              {
-                type: "text",
-                text:
-                  `Secret limit reached (${count}/${limit}). Upgrade to Premium for up to ${PREMIUM_SECRET_LIMIT} secrets.`,
-              },
-            ],
-            isError: true,
-          };
-        }
+                    // Check quota
+                    const [count, limit] = await Promise.all([
+                        getSecretCount(prisma, userId),
+                        getSecretLimit(prisma, userId),
+                    ]);
 
-        // Encrypt the secret
-        const { encryptedValue, iv, tag } = encryptSecret(userId, value);
+                    if (count >= limit) {
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text:
+                                        `Secret limit reached (${count}/${limit}). Upgrade to Premium for up to ${PREMIUM_SECRET_LIMIT} secrets.`,
+                                },
+                            ],
+                            isError: true,
+                        };
+                    }
 
-        // Store in database
-        const secret = await prisma.vaultSecret.upsert({
-          where: { userId_name: { userId, name } },
-          update: {
-            encryptedValue,
-            iv,
-            tag,
-            status: "PENDING",
-            allowedUrls: allowed_urls,
-          },
-          create: {
-            userId,
-            name,
-            encryptedValue,
-            iv,
-            tag,
-            status: "PENDING",
-            allowedUrls: allowed_urls,
-          },
-        });
+                    // Encrypt the secret
+                    const { encryptedValue, iv, tag } = encryptSecret(userId, value);
 
-        return {
-          content: [
-            {
-              type: "text",
-              text: `**Secret Stored!**\n\n`
-                + `**ID:** ${secret.id}\n`
-                + `**Name:** ${secret.name}\n`
-                + `**Status:** PENDING (awaiting user approval)\n`
-                + `**Allowed URLs:** ${
-                  allowed_urls.length > 0 ? allowed_urls.join(", ") : "any"
-                }\n\n`
-                + `The secret is encrypted and cannot be read back. `
-                + `It will be available for use in tool handlers after approval.`,
-            },
-          ],
-        };
-      } catch (error) {
-        const msg = error instanceof Error ? error.message : "Unknown error";
-        return {
-          content: [{ type: "text", text: `Error storing secret: ${msg}` }],
-          isError: true,
-        };
-      }
-    },
-  });
+                    // Store in database
+                    const secret = await prisma.vaultSecret.upsert({
+                        where: { userId_name: { userId, name } },
+                        update: {
+                            encryptedValue,
+                            iv,
+                            tag,
+                            status: "PENDING",
+                            allowedUrls: allowed_urls,
+                        },
+                        create: {
+                            userId,
+                            name,
+                            encryptedValue,
+                            iv,
+                            tag,
+                            status: "PENDING",
+                            allowedUrls: allowed_urls,
+                        },
+                    });
 
-  registry.register({
-    name: "vault_list_secrets",
-    description:
-      "List all secrets in the vault. Returns names and status only — NEVER returns secret values.",
-    category: "vault",
-    tier: "free",
-    alwaysEnabled: true,
-    inputSchema: {},
-    handler: async (): Promise<CallToolResult> => {
-      try {
-        const prisma = (await import("@/lib/prisma")).default;
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: `**Secret Stored!**\n\n`
+                                    + `**ID:** ${secret.id}\n`
+                                    + `**Name:** ${secret.name}\n`
+                                    + `**Status:** PENDING (awaiting user approval)\n`
+                                    + `**Allowed URLs:** ${allowed_urls.length > 0 ? allowed_urls.join(", ") : "any"
+                                    }\n\n`
+                                    + `The secret is encrypted and cannot be read back. `
+                                    + `It will be available for use in tool handlers after approval.`,
+                            },
+                        ],
+                    };
+                } catch (error) {
+                    const msg = error instanceof Error ? error.message : "Unknown error";
+                    return {
+                        content: [{ type: "text", text: `Error storing secret: ${msg}` }],
+                        isError: true,
+                    };
+                }
+            })
+    );
 
-        const secrets = await prisma.vaultSecret.findMany({
-          where: { userId },
-          select: {
-            id: true,
-            name: true,
-            status: true,
-            allowedUrls: true,
-            createdAt: true,
-          },
-          orderBy: { createdAt: "desc" },
-        });
+    registry.registerBuilt(
+        freeTool(userId)
+            .tool("vault_list_secrets", "List all secrets in the vault. Returns names and status only — NEVER returns secret values.", {})
+            .meta({ category: "vault", tier: "free" })
+            .handler(async ({ input: _input, ctx: _ctx }) => {
+                try {
+                    const prisma = (await import("@/lib/prisma")).default;
 
-        const [count, limit] = await Promise.all([
-          getSecretCount(prisma, userId),
-          getSecretLimit(prisma, userId),
-        ]);
+                    const secrets = await prisma.vaultSecret.findMany({
+                        where: { userId },
+                        select: {
+                            id: true,
+                            name: true,
+                            status: true,
+                            allowedUrls: true,
+                            createdAt: true,
+                        },
+                        orderBy: { createdAt: "desc" },
+                    });
 
-        if (secrets.length === 0) {
-          return {
-            content: [
-              {
-                type: "text",
-                text:
-                  `**Vault (${count}/${limit} secrets)**\n\nNo secrets stored. Use \`vault_store_secret\` to add one.`,
-              },
-            ],
-          };
-        }
+                    const [count, limit] = await Promise.all([
+                        getSecretCount(prisma, userId),
+                        getSecretLimit(prisma, userId),
+                    ]);
 
-        let text = `**Vault (${count}/${limit} secrets)**\n\n`;
-        for (const s of secrets) {
-          const urls = s.allowedUrls.length > 0
-            ? `URLs: ${s.allowedUrls.join(", ")}`
-            : "URLs: any";
-          text +=
-            `- **${s.name}** (${s.status}) — ID: ${s.id}\n  ${urls} | Created: ${s.createdAt.toISOString()}\n`;
-        }
+                    if (secrets.length === 0) {
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text:
+                                        `**Vault (${count}/${limit} secrets)**\n\nNo secrets stored. Use \`vault_store_secret\` to add one.`,
+                                },
+                            ],
+                        };
+                    }
 
-        return { content: [{ type: "text", text }] };
-      } catch (error) {
-        const msg = error instanceof Error ? error.message : "Unknown error";
-        return {
-          content: [{ type: "text", text: `Error listing secrets: ${msg}` }],
-          isError: true,
-        };
-      }
-    },
-  });
+                    let text = `**Vault (${count}/${limit} secrets)**\n\n`;
+                    for (const s of secrets) {
+                        const urls = s.allowedUrls.length > 0
+                            ? `URLs: ${s.allowedUrls.join(", ")}`
+                            : "URLs: any";
+                        text +=
+                            `- **${s.name}** (${s.status}) — ID: ${s.id}\n  ${urls} | Created: ${s.createdAt.toISOString()}\n`;
+                    }
 
-  registry.register({
-    name: "vault_delete_secret",
-    description: "Revoke and soft-delete a secret from the vault.",
-    category: "vault",
-    tier: "free",
-    inputSchema: SecretIdSchema.shape,
-    handler: async ({
-      secret_id,
-    }: z.infer<typeof SecretIdSchema>): Promise<CallToolResult> => {
-      try {
-        const prisma = (await import("@/lib/prisma")).default;
+                    return { content: [{ type: "text", text }] };
+                } catch (error) {
+                    const msg = error instanceof Error ? error.message : "Unknown error";
+                    return {
+                        content: [{ type: "text", text: `Error listing secrets: ${msg}` }],
+                        isError: true,
+                    };
+                }
+            })
+    );
 
-        const secret = await prisma.vaultSecret.findFirst({
-          where: { id: secret_id, userId },
-        });
+    registry.registerBuilt(
+        freeTool(userId)
+            .tool("vault_delete_secret", "Revoke and soft-delete a secret from the vault.", {
+                secret_id: z.string().min(1),
+            })
+            .meta({ category: "vault", tier: "free" })
+            .handler(async ({ input, ctx: _ctx }) => {
+                const {
+                    secret_id,
+                } = input;
 
-        if (!secret) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Secret not found or you don't have access.`,
-              },
-            ],
-            isError: true,
-          };
-        }
+                try {
+                    const prisma = (await import("@/lib/prisma")).default;
 
-        if (secret.status === "REVOKED") {
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Secret "${secret.name}" is already revoked.`,
-              },
-            ],
-          };
-        }
+                    const secret = await prisma.vaultSecret.findFirst({
+                        where: { id: secret_id, userId },
+                    });
 
-        await prisma.vaultSecret.update({
-          where: { id: secret_id },
-          data: { status: "REVOKED" },
-        });
+                    if (!secret) {
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `Secret not found or you don't have access.`,
+                                },
+                            ],
+                            isError: true,
+                        };
+                    }
 
-        return {
-          content: [
-            {
-              type: "text",
-              text:
-                `**Secret Revoked!**\n\n**Name:** ${secret.name}\n**Status:** REVOKED\n\nThe secret can no longer be used in tool handlers.`,
-            },
-          ],
-        };
-      } catch (error) {
-        const msg = error instanceof Error ? error.message : "Unknown error";
-        return {
-          content: [{ type: "text", text: `Error deleting secret: ${msg}` }],
-          isError: true,
-        };
-      }
-    },
-  });
+                    if (secret.status === "REVOKED") {
+                        return {
+                            content: [
+                                {
+                                    type: "text",
+                                    text: `Secret "${secret.name}" is already revoked.`,
+                                },
+                            ],
+                        };
+                    }
+
+                    await prisma.vaultSecret.update({
+                        where: { id: secret_id },
+                        data: { status: "REVOKED" },
+                    });
+
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text:
+                                    `**Secret Revoked!**\n\n**Name:** ${secret.name}\n**Status:** REVOKED\n\nThe secret can no longer be used in tool handlers.`,
+                            },
+                        ],
+                    };
+                } catch (error) {
+                    const msg = error instanceof Error ? error.message : "Unknown error";
+                    return {
+                        content: [{ type: "text", text: `Error deleting secret: ${msg}` }],
+                        isError: true,
+                    };
+                }
+            })
+    );
 }

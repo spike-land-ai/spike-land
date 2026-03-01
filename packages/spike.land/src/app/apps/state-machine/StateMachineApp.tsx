@@ -168,25 +168,20 @@ export function StateMachineApp() {
         // Add all transitions
         for (const transition of parsed.definition.transitions) {
           const guardExpr = transition.guard?.expression;
-          await sm.addTransition(
-            newId,
-            transition.source,
-            transition.target,
-            transition.event,
+          await sm.addTransition(newId, transition.source, transition.target, transition.event, {
             ...(guardExpr !== undefined ? { guard_expression: guardExpr } : {}),
             ...(transition.actions !== undefined ? { actions: transition.actions } : {}),
             ...(transition.internal !== undefined ? { internal: transition.internal } : {}),
             ...(transition.delayExpression !== undefined ? { delay_expression: transition.delayExpression } : {}),
-            },
-          );
-}
+          });
+        }
 
-await sm.refreshMachine(newId);
+        await sm.refreshMachine(newId);
       } catch {
-  // Import error handled by dialog
-}
+        // Import error handled by dialog
+      }
     },
-[sm],
+    [sm],
   );
 
 const handleSelectTemplate = useCallback(
