@@ -10,3 +10,4 @@ binaryen/
 .eslintcache
 .wrangler/
 .next/
+coverage/

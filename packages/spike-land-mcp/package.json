@@ -27,6 +27,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250620.0",
     "@spike-land-ai/tsconfig": "*",
+    "@vitest/coverage-v8": "^3.2.4",
     "drizzle-kit": "^0.31.1",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",

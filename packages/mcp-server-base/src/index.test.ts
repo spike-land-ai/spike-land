@@ -2,7 +2,7 @@
  * Tests for @spike-land-ai/mcp-server-base
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   type CallToolResult,
   McpError,
@@ -15,10 +15,18 @@ import {
   getText,
   isErrorResult,
   jsonResult,
+  startMcpServer,
   textResult,
 } from "./index.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+
+const mockTransportInstance = {};
+vi.mock("@modelcontextprotocol/sdk/server/stdio.js", () => ({
+  StdioServerTransport: vi.fn(function (this: unknown) {
+    Object.assign(this as object, mockTransportInstance);
+  }),
+}));
 
 // Alias to use McpServer type in casts without tsc complaining about unused imports
 type McpServerType = McpServer;
@@ -165,6 +173,19 @@ describe("createMcpServer", () => {
     const { McpServer } = await import("@modelcontextprotocol/sdk/server/mcp.js");
     const server = createMcpServer({ name: "test-server", version: "1.2.3" });
     expect(server).toBeInstanceOf(McpServer);
+  });
+});
+
+// ─── startMcpServer ──────────────────────────────────────────────────────────
+
+describe("startMcpServer", () => {
+  it("calls server.connect with a StdioServerTransport instance", async () => {
+    const connectSpy = vi.fn().mockResolvedValue(undefined);
+    const fakeServer = { connect: connectSpy } as unknown as McpServer;
+
+    await startMcpServer(fakeServer);
+
+    expect(connectSpy).toHaveBeenCalledOnce();
   });
 });
 

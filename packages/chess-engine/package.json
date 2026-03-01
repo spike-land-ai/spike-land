@@ -15,7 +15,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "typecheck": "echo 'Skipping typecheck for chess-engine'",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
   },

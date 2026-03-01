@@ -25,13 +25,15 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test-disabled": "vitest run",
+    "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/"
   },
   "devDependencies": {
     "@spike-land-ai/tsconfig": "*",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^4.0.18"
   },
   "peerDependencies": {
     "playwright": ">=1.0.0"
