@@ -19,6 +19,19 @@ import { registerUserTools } from "./tools/user-tools.js";
 export * from "./types.js";
 export { createLivePlatformClient } from "./client-live.js";
 export type { SpacetimePlatformClient } from "./client.js";
+export {
+  DbConnection,
+  tables,
+  reducers,
+  type Image,
+  type Album,
+  type AlbumImage,
+  type Pipeline,
+  type EnhancementJob,
+  type GenerationJob,
+  type Subject,
+  type Credits
+} from "./module_bindings/index.js";
 
 const server = new McpServer({
   name: "spacetimedb-platform",

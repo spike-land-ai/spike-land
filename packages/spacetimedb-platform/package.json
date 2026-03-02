@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.27.1",
-    "spacetimedb": "^2.0.2",
+    "spacetimedb": "patch:spacetimedb@npm%3A2.0.2#~/.yarn/patches/spacetimedb-npm-2.0.2-9d60528158.patch",
     "zod": "4.3.6"
   },
   "devDependencies": {

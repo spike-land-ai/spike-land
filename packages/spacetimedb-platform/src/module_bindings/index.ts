@@ -117,13 +117,15 @@ import UserToolPreferenceRow from "./user_tool_preference_table";
 /** Type-only namespace exports for generated type groups. */
 
 /** The schema information for all tables in this module. This is defined the same was as the tables would have been defined in the server. */
-const tablesSchema = __schema({
+const tablesSchema: any = __schema({
   agent: __table({
     name: 'agent',
     indexes: [
-      { name: 'identity', algorithm: 'btree', columns: [
-        'identity',
-      ] },
+      {
+        name: 'identity', algorithm: 'btree', columns: [
+          'identity',
+        ]
+      },
     ],
     constraints: [
       { name: 'agent_identity_key', constraint: 'unique', columns: ['identity'] },
@@ -132,12 +134,16 @@ const tablesSchema = __schema({
   agent_message: __table({
     name: 'agent_message',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'toAgent', algorithm: 'btree', columns: [
-        'toAgent',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'toAgent', algorithm: 'btree', columns: [
+          'toAgent',
+        ]
+      },
     ],
     constraints: [
       { name: 'agent_message_id_key', constraint: 'unique', columns: ['id'] },
@@ -146,15 +152,21 @@ const tablesSchema = __schema({
   album: __table({
     name: 'album',
     indexes: [
-      { name: 'handle', algorithm: 'btree', columns: [
-        'handle',
-      ] },
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'userIdentity', algorithm: 'btree', columns: [
-        'userIdentity',
-      ] },
+      {
+        name: 'handle', algorithm: 'btree', columns: [
+          'handle',
+        ]
+      },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'userIdentity', algorithm: 'btree', columns: [
+          'userIdentity',
+        ]
+      },
     ],
     constraints: [
       { name: 'album_handle_key', constraint: 'unique', columns: ['handle'] },
@@ -164,15 +176,21 @@ const tablesSchema = __schema({
   album_image: __table({
     name: 'album_image',
     indexes: [
-      { name: 'albumId', algorithm: 'btree', columns: [
-        'albumId',
-      ] },
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'imageId', algorithm: 'btree', columns: [
-        'imageId',
-      ] },
+      {
+        name: 'albumId', algorithm: 'btree', columns: [
+          'albumId',
+        ]
+      },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'imageId', algorithm: 'btree', columns: [
+          'imageId',
+        ]
+      },
     ],
     constraints: [
       { name: 'album_image_id_key', constraint: 'unique', columns: ['id'] },
@@ -181,15 +199,21 @@ const tablesSchema = __schema({
   app: __table({
     name: 'app',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'ownerIdentity', algorithm: 'btree', columns: [
-        'ownerIdentity',
-      ] },
-      { name: 'slug', algorithm: 'btree', columns: [
-        'slug',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'ownerIdentity', algorithm: 'btree', columns: [
+          'ownerIdentity',
+        ]
+      },
+      {
+        name: 'slug', algorithm: 'btree', columns: [
+          'slug',
+        ]
+      },
     ],
     constraints: [
       { name: 'app_id_key', constraint: 'unique', columns: ['id'] },
@@ -199,12 +223,16 @@ const tablesSchema = __schema({
   app_message: __table({
     name: 'app_message',
     indexes: [
-      { name: 'appId', algorithm: 'btree', columns: [
-        'appId',
-      ] },
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
+      {
+        name: 'appId', algorithm: 'btree', columns: [
+          'appId',
+        ]
+      },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
     ],
     constraints: [
       { name: 'app_message_id_key', constraint: 'unique', columns: ['id'] },
@@ -213,12 +241,16 @@ const tablesSchema = __schema({
   app_version: __table({
     name: 'app_version',
     indexes: [
-      { name: 'appId', algorithm: 'btree', columns: [
-        'appId',
-      ] },
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
+      {
+        name: 'appId', algorithm: 'btree', columns: [
+          'appId',
+        ]
+      },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
     ],
     constraints: [
       { name: 'app_version_id_key', constraint: 'unique', columns: ['id'] },
@@ -227,9 +259,11 @@ const tablesSchema = __schema({
   code_session: __table({
     name: 'code_session',
     indexes: [
-      { name: 'codeSpace', algorithm: 'btree', columns: [
-        'codeSpace',
-      ] },
+      {
+        name: 'codeSpace', algorithm: 'btree', columns: [
+          'codeSpace',
+        ]
+      },
     ],
     constraints: [
       { name: 'code_session_code_space_key', constraint: 'unique', columns: ['codeSpace'] },
@@ -238,9 +272,11 @@ const tablesSchema = __schema({
   credits: __table({
     name: 'credits',
     indexes: [
-      { name: 'userIdentity', algorithm: 'btree', columns: [
-        'userIdentity',
-      ] },
+      {
+        name: 'userIdentity', algorithm: 'btree', columns: [
+          'userIdentity',
+        ]
+      },
     ],
     constraints: [
       { name: 'credits_user_identity_key', constraint: 'unique', columns: ['userIdentity'] },
@@ -249,12 +285,16 @@ const tablesSchema = __schema({
   direct_message: __table({
     name: 'direct_message',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'toIdentity', algorithm: 'btree', columns: [
-        'toIdentity',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'toIdentity', algorithm: 'btree', columns: [
+          'toIdentity',
+        ]
+      },
     ],
     constraints: [
       { name: 'direct_message_id_key', constraint: 'unique', columns: ['id'] },
@@ -263,15 +303,21 @@ const tablesSchema = __schema({
   enhancement_job: __table({
     name: 'enhancement_job',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'imageId', algorithm: 'btree', columns: [
-        'imageId',
-      ] },
-      { name: 'userIdentity', algorithm: 'btree', columns: [
-        'userIdentity',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'imageId', algorithm: 'btree', columns: [
+          'imageId',
+        ]
+      },
+      {
+        name: 'userIdentity', algorithm: 'btree', columns: [
+          'userIdentity',
+        ]
+      },
     ],
     constraints: [
       { name: 'enhancement_job_id_key', constraint: 'unique', columns: ['id'] },
@@ -280,12 +326,16 @@ const tablesSchema = __schema({
   generation_job: __table({
     name: 'generation_job',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'userIdentity', algorithm: 'btree', columns: [
-        'userIdentity',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'userIdentity', algorithm: 'btree', columns: [
+          'userIdentity',
+        ]
+      },
     ],
     constraints: [
       { name: 'generation_job_id_key', constraint: 'unique', columns: ['id'] },
@@ -294,9 +344,11 @@ const tablesSchema = __schema({
   health_check: __table({
     name: 'health_check',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
     ],
     constraints: [
       { name: 'health_check_id_key', constraint: 'unique', columns: ['id'] },
@@ -305,12 +357,16 @@ const tablesSchema = __schema({
   image: __table({
     name: 'image',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'userIdentity', algorithm: 'btree', columns: [
-        'userIdentity',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'userIdentity', algorithm: 'btree', columns: [
+          'userIdentity',
+        ]
+      },
     ],
     constraints: [
       { name: 'image_id_key', constraint: 'unique', columns: ['id'] },
@@ -319,9 +375,11 @@ const tablesSchema = __schema({
   mcp_task: __table({
     name: 'mcp_task',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
     ],
     constraints: [
       { name: 'mcp_task_id_key', constraint: 'unique', columns: ['id'] },
@@ -330,12 +388,16 @@ const tablesSchema = __schema({
   oauth_link: __table({
     name: 'oauth_link',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'userIdentity', algorithm: 'btree', columns: [
-        'userIdentity',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'userIdentity', algorithm: 'btree', columns: [
+          'userIdentity',
+        ]
+      },
     ],
     constraints: [
       { name: 'oauth_link_id_key', constraint: 'unique', columns: ['id'] },
@@ -344,12 +406,16 @@ const tablesSchema = __schema({
   page: __table({
     name: 'page',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'slug', algorithm: 'btree', columns: [
-        'slug',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'slug', algorithm: 'btree', columns: [
+          'slug',
+        ]
+      },
     ],
     constraints: [
       { name: 'page_id_key', constraint: 'unique', columns: ['id'] },
@@ -359,12 +425,16 @@ const tablesSchema = __schema({
   page_block: __table({
     name: 'page_block',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'pageId', algorithm: 'btree', columns: [
-        'pageId',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'pageId', algorithm: 'btree', columns: [
+          'pageId',
+        ]
+      },
     ],
     constraints: [
       { name: 'page_block_id_key', constraint: 'unique', columns: ['id'] },
@@ -373,9 +443,11 @@ const tablesSchema = __schema({
   pipeline: __table({
     name: 'pipeline',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
     ],
     constraints: [
       { name: 'pipeline_id_key', constraint: 'unique', columns: ['id'] },
@@ -384,9 +456,11 @@ const tablesSchema = __schema({
   platform_event: __table({
     name: 'platform_event',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
     ],
     constraints: [
       { name: 'platform_event_id_key', constraint: 'unique', columns: ['id'] },
@@ -395,15 +469,21 @@ const tablesSchema = __schema({
   registered_tool: __table({
     name: 'registered_tool',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'name', algorithm: 'btree', columns: [
-        'name',
-      ] },
-      { name: 'providerIdentity', algorithm: 'btree', columns: [
-        'providerIdentity',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'name', algorithm: 'btree', columns: [
+          'name',
+        ]
+      },
+      {
+        name: 'providerIdentity', algorithm: 'btree', columns: [
+          'providerIdentity',
+        ]
+      },
     ],
     constraints: [
       { name: 'registered_tool_id_key', constraint: 'unique', columns: ['id'] },
@@ -412,15 +492,21 @@ const tablesSchema = __schema({
   subject: __table({
     name: 'subject',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'imageId', algorithm: 'btree', columns: [
-        'imageId',
-      ] },
-      { name: 'userIdentity', algorithm: 'btree', columns: [
-        'userIdentity',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'imageId', algorithm: 'btree', columns: [
+          'imageId',
+        ]
+      },
+      {
+        name: 'userIdentity', algorithm: 'btree', columns: [
+          'userIdentity',
+        ]
+      },
     ],
     constraints: [
       { name: 'subject_id_key', constraint: 'unique', columns: ['id'] },
@@ -429,12 +515,16 @@ const tablesSchema = __schema({
   tool_usage: __table({
     name: 'tool_usage',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'toolName', algorithm: 'btree', columns: [
-        'toolName',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'toolName', algorithm: 'btree', columns: [
+          'toolName',
+        ]
+      },
     ],
     constraints: [
       { name: 'tool_usage_id_key', constraint: 'unique', columns: ['id'] },
@@ -443,12 +533,16 @@ const tablesSchema = __schema({
   user: __table({
     name: 'user',
     indexes: [
-      { name: 'handle', algorithm: 'btree', columns: [
-        'handle',
-      ] },
-      { name: 'identity', algorithm: 'btree', columns: [
-        'identity',
-      ] },
+      {
+        name: 'handle', algorithm: 'btree', columns: [
+          'handle',
+        ]
+      },
+      {
+        name: 'identity', algorithm: 'btree', columns: [
+          'identity',
+        ]
+      },
     ],
     constraints: [
       { name: 'user_handle_key', constraint: 'unique', columns: ['handle'] },
@@ -458,12 +552,16 @@ const tablesSchema = __schema({
   user_tool_preference: __table({
     name: 'user_tool_preference',
     indexes: [
-      { name: 'id', algorithm: 'btree', columns: [
-        'id',
-      ] },
-      { name: 'userIdentity', algorithm: 'btree', columns: [
-        'userIdentity',
-      ] },
+      {
+        name: 'id', algorithm: 'btree', columns: [
+          'id',
+        ]
+      },
+      {
+        name: 'userIdentity', algorithm: 'btree', columns: [
+          'userIdentity',
+        ]
+      },
     ],
     constraints: [
       { name: 'user_tool_preference_id_key', constraint: 'unique', columns: ['id'] },
@@ -472,7 +570,7 @@ const tablesSchema = __schema({
 });
 
 /** The schema information for all reducers in this module. This is defined the same way as the reducers would have been defined in the server, except the body of the reducer is omitted in code generation. */
-const reducersSchema = __reducers(
+const reducersSchema: any = __reducers(
   __reducerSchema("album_create", AlbumCreateReducer),
   __reducerSchema("album_delete", AlbumDeleteReducer),
   __reducerSchema("album_image_add", AlbumImageAddReducer),
@@ -526,16 +624,16 @@ const reducersSchema = __reducers(
 );
 
 /** The schema information for all procedures in this module. This is defined the same way as the procedures would have been defined in the server. */
-const proceduresSchema = __procedures(
+const proceduresSchema: any = __procedures(
 );
 
 /** The remote SpacetimeDB module schema, both runtime and type information. */
-const REMOTE_MODULE = {
+const REMOTE_MODULE: any = {
   versionInfo: {
     cliVersion: "2.0.2" as const,
   },
-  tables: tablesSchema.schemaType.tables,
-  reducers: reducersSchema.reducersType.reducers,
+  tables: (tablesSchema as any).schemaType.tables,
+  reducers: (reducersSchema as any).reducersType.reducers,
   ...proceduresSchema,
 } satisfies __RemoteModule<
   typeof tablesSchema.schemaType,
@@ -544,10 +642,10 @@ const REMOTE_MODULE = {
 >;
 
 /** The tables available in this remote SpacetimeDB module. Each table reference doubles as a query builder. */
-export const tables: __QueryBuilder<typeof tablesSchema.schemaType> = __makeQueryBuilder(tablesSchema.schemaType);
+export const tables: any = __makeQueryBuilder(tablesSchema.schemaType);
 
 /** The reducers available in this remote SpacetimeDB module. */
-export const reducers = __convertToAccessorMap(reducersSchema.reducersType.reducers);
+export const reducers: any = __convertToAccessorMap(reducersSchema.reducersType.reducers);
 
 /** The context type returned in callbacks for all possible events. */
 export type EventContext = __EventContextInterface<typeof REMOTE_MODULE>;
@@ -561,10 +659,10 @@ export type ErrorContext = __ErrorContextInterface<typeof REMOTE_MODULE>;
 export type SubscriptionHandle = __SubscriptionHandleImpl<typeof REMOTE_MODULE>;
 
 /** Builder class to configure a new subscription to the remote SpacetimeDB instance. */
-export class SubscriptionBuilder extends __SubscriptionBuilderImpl<typeof REMOTE_MODULE> {}
+export class SubscriptionBuilder extends __SubscriptionBuilderImpl<typeof REMOTE_MODULE> { }
 
 /** Builder class to configure a new database connection to the remote SpacetimeDB instance. */
-export class DbConnectionBuilder extends __DbConnectionBuilder<DbConnection> {}
+export class DbConnectionBuilder extends __DbConnectionBuilder<DbConnection> { }
 
 /** The typed database connection to manage connections to the remote SpacetimeDB instance. This class has type information specific to the generated module. */
 export class DbConnection extends __DbConnectionImpl<typeof REMOTE_MODULE> {
@@ -579,3 +677,11 @@ export class DbConnection extends __DbConnectionImpl<typeof REMOTE_MODULE> {
   };
 }
 
+export type Image = __Infer<typeof ImageRow>;
+export type Album = __Infer<typeof AlbumRow>;
+export type AlbumImage = __Infer<typeof AlbumImageRow>;
+export type Pipeline = __Infer<typeof PipelineRow>;
+export type EnhancementJob = __Infer<typeof EnhancementJobRow>;
+export type GenerationJob = __Infer<typeof GenerationJobRow>;
+export type Subject = __Infer<typeof SubjectRow>;
+export type Credits = __Infer<typeof CreditsRow>;

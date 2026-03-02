@@ -63,8 +63,8 @@ a11y audits), State Machine Engine (statechart lifecycle management), CodeSpace
 | **Web App** (`src/`)                                | Next.js 16 application                  |
 | **spike-cli** (`packages/spike-cli/`)               | MCP multiplexer CLI                     |
 | **Code Editor** (`packages/code/`)                  | React code editor (Vite + Monaco)       |
-| **Backend Worker** (`packages/testing.spike.land/`) | Cloudflare Worker backend               |
-| **Transpiler** (`packages/js.spike.land/`)          | Cloudflare Worker transpilation service |
+| **Backend Worker** (`packages/spike-land-backend/`)  | Cloudflare Worker backend               |
+| **Transpiler** (`packages/transpile/`)               | Cloudflare Worker transpilation service |
 | **Shared** (`packages/shared/`)                     | Shared types, constants, and utilities  |
 
 ## Tech Stack
