@@ -11,6 +11,7 @@ import {
   SAMPLE_UPDATES,
   SAMPLE_USER,
 } from "../__test-utils__/index.js";
+import type { FetchFn } from "../types.js";
 import { ALGOLIA_BASE, HN_FIREBASE_BASE } from "../types.js";
 
 describe("HNReadClient", () => {
@@ -326,7 +327,7 @@ describe("HNReadClient", () => {
         status: 200,
         json: async () => { throw new Error("Invalid JSON"); }
       });
-      const client = new HNReadClient(fetch as any);
+      const client = new HNReadClient(fetch as unknown as FetchFn);
       const item = await client.getItem(12345);
       expect(item).toBeNull();
     });
@@ -337,7 +338,7 @@ describe("HNReadClient", () => {
         status: 200,
         json: async () => { throw new Error("Invalid JSON"); }
       });
-      const client = new HNReadClient(fetch as any);
+      const client = new HNReadClient(fetch as unknown as FetchFn);
       const user = await client.getUser("pg");
       expect(user).toBeNull();
     });
@@ -348,7 +349,7 @@ describe("HNReadClient", () => {
         status: 200,
         json: async () => { throw new Error("Invalid JSON"); }
       });
-      const client = new HNReadClient(fetch as any);
+      const client = new HNReadClient(fetch as unknown as FetchFn);
       const ids = await client.getStoryIds("top");
       expect(ids).toEqual([]);
     });
@@ -359,7 +360,7 @@ describe("HNReadClient", () => {
         status: 200,
         json: async () => { throw new Error("Invalid JSON"); }
       });
-      const client = new HNReadClient(fetch as any);
+      const client = new HNReadClient(fetch as unknown as FetchFn);
       const updates = await client.getUpdates();
       expect(updates).toEqual({ items: [], profiles: [] });
     });
@@ -370,7 +371,7 @@ describe("HNReadClient", () => {
         status: 200,
         json: async () => { throw new Error("Invalid JSON"); }
       });
-      const client = new HNReadClient(fetch as any);
+      const client = new HNReadClient(fetch as unknown as FetchFn);
       const result = await client.search({ query: "test" });
       expect(result.hits).toHaveLength(0);
       expect(result.nbHits).toBe(0);

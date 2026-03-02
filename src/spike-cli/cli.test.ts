@@ -19,9 +19,11 @@ describe("cli", () => {
     vi.clearAllMocks();
     vi.spyOn(console, "log").mockImplementation(() => {});
     // Reset program state
-    (program as any).commands = [];
-    (program as any).options = [];
-    vi.spyOn(program, "parse").mockImplementation(() => program as any);
+    // @ts-expect-error - reaching into commander internals
+    program.commands = [];
+    // @ts-expect-error - reaching into commander internals
+    program.options = [];
+    vi.spyOn(program, "parse").mockImplementation(() => program as unknown as typeof program);
   });
 
   afterEach(() => {
@@ -50,7 +52,7 @@ describe("cli", () => {
     const store = await import("./alias/store");
     vi.mocked(store.loadAliases).mockResolvedValue({
       commands: { "st": "status" }
-    } as any);
+    } as unknown as { commands: Record<string, string> });
 
     process.argv = ["node", "spike", "st"];
     await main();

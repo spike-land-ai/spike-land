@@ -74,7 +74,7 @@ describe("WebsocketRoutes", () => {
       const request = new Request("https://example.com/users");
       const url = new URL("https://example.com/users");
 
-      const response = await websocketRoutes.handleUsersRoute(request, url);
+      const _response = await websocketRoutes.handleUsersRoute(request, url);
 
       expect(mockWsHandler.getActiveUsers).toHaveBeenCalledWith("");
     });

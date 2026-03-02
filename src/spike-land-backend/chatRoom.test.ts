@@ -1,18 +1,18 @@
 import type { ICodeSession } from "@spike-land-ai/code";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Code } from "../src/chatRoom";
-import type Env from "../src/env"; // Assuming Env type is exported from env.ts
-import { RouteHandler } from "../src/routeHandler";
-import { WebSocketHandler } from "../src/websocketHandler";
+import { Code } from "./chatRoom";
+import type Env from "./env"; // Assuming Env type is exported from env.ts
+import { RouteHandler } from "./routeHandler";
+import { WebSocketHandler } from "./websocketHandler";
 
 // Mock external dependencies - use function expression for Vitest 4 constructor mocking
-vi.mock("../src/routeHandler", () => ({
+vi.mock("./routeHandler", () => ({
   RouteHandler: vi.fn().mockImplementation(function () {
     return { handleRoute: vi.fn() };
   }),
 }));
 
-vi.mock("../src/websocketHandler", () => ({
+vi.mock("./websocketHandler", () => ({
   WebSocketHandler: vi.fn().mockImplementation(function () {
     return {
       broadcast: vi.fn(),

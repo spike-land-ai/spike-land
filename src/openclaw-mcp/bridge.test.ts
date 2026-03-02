@@ -356,7 +356,7 @@ describe("createMcpBridge", () => {
 
     // Mock process.once to resolve immediately
     const onceSpy = vi.spyOn(process, "once").mockImplementation((event, cb) => {
-      if (event === "SIGINT") (cb as any)();
+      if (event === "SIGINT") (cb as () => void)();
       return process;
     });
 

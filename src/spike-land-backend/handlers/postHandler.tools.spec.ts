@@ -157,7 +157,7 @@ describe("PostHandler - Tool Schema Validation", () => {
       // Each tool should have description, parameters (Zod schema), and execute function
       Object.entries(capturedTools!).forEach(([_toolName, tool]: [string, unknown]) => {
         expect(tool).toHaveProperty("description");
-        expect(tool).toHaveProperty("parameters");
+        expect(tool).toHaveProperty("inputSchema");
         expect(tool).toHaveProperty("execute");
         expect(typeof (tool as { execute: unknown }).execute).toBe("function");
       });

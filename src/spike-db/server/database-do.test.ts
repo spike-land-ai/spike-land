@@ -133,7 +133,7 @@ describe("scheduler", () => {
     let callCount = 0;
     const futureTime = Date.now() + 60000;
     const sql: SqlStorage = {
-      exec(query: string, ..._params: unknown[]): SqlResult {
+      exec(_query: string, ..._params: unknown[]): SqlResult {
         callCount++;
         if (callCount === 1) {
           return { toArray: () => [], rowsRead: 0, rowsWritten: 0 };
@@ -263,7 +263,7 @@ describe("identity", () => {
   it("verifyToken rejects expired token", async () => {
     // Manually create a token with an old timestamp by signing then manipulating
     const identity = "a".repeat(64);
-    const oldTimestamp = (Date.now() - 100_000).toString();
+    const _oldTimestamp = (Date.now() - 100_000).toString();
     // Sign with the old timestamp by calling signToken which uses Date.now(),
     // then verify with a very short maxAge
     const token = await signToken(identity, SECRET);
@@ -280,7 +280,7 @@ describe("identity", () => {
 
 describe("executeReducer", () => {
   it("executes a known reducer and returns mutations", () => {
-    const insertCalled = false;
+    const _insertCalled = false;
     const schema: DatabaseSchema = {
       name: "test",
       tables: {

@@ -12,7 +12,7 @@ class MockWebSocket {
   close = vi.fn();
 }
 
-// @ts-ignore
+// @ts-expect-error -- MockWebSocket is a partial implementation for testing
 global.WebSocket = MockWebSocket;
 
 describe("PlatformClient", () => {
@@ -40,7 +40,7 @@ describe("PlatformClient", () => {
       "registeredTool", "subject", "toolUsage", "userToolPreference"
     ];
     for (const t of tables) {
-      expect((client as any)[t]).toBeDefined();
+      expect((client as unknown as Record<string, unknown>)[t]).toBeDefined();
     }
   });
 

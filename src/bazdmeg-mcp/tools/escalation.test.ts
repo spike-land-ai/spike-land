@@ -12,7 +12,6 @@ import { resetWorkspaceState, enterWorkspace } from "../workspace-state.js";
 
 describe("escalation tools", () => {
   let server: ReturnType<typeof createMockServer>;
-  const stuckFiles: string[] = [];
 
   beforeEach(() => {
     resetWorkspaceState();

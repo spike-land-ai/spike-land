@@ -32,7 +32,7 @@ describe("errors", () => {
       const err = {
         errors: [{ text: "syntax error", location: null }],
         warnings: [{ text: "unused var" }],
-      } as any;
+      } as unknown as Error;
       const result = formatEsbuildError(err);
 
       expect(result.isError).toBe(true);
@@ -43,7 +43,7 @@ describe("errors", () => {
     });
 
     it("handles esbuild errors with only message", () => {
-      const err = { message: "build failed" } as any;
+      const err = { message: "build failed" } as unknown as Error;
       const result = formatEsbuildError(err);
 
       const parsed = JSON.parse(result.content[0].text);
@@ -52,21 +52,21 @@ describe("errors", () => {
     });
 
     it("handles esbuild errors with only message (covers line 28 branch)", () => {
-      const err = { message: "msg only" } as any;
+      const err = { message: "msg only" } as unknown as Error;
       const result = formatEsbuildError(err);
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.errors[0].text).toBe("msg only");
     });
 
     it("handles esbuild errors with errors array (covers line 28 branch)", () => {
-      const err = { errors: [{ text: "err array" }] } as any;
+      const err = { errors: [{ text: "err array" }] } as unknown as Error;
       const result = formatEsbuildError(err);
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.errors[0].text).toBe("err array");
     });
 
     it("handles esbuild errors with neither message nor errors (covers line 28 fallback)", () => {
-      const err = { something: "else" } as any;
+      const err = { something: "else" } as unknown as Error;
       const result = formatEsbuildError(err);
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.errors[0].text).toContain("object");

@@ -17,7 +17,7 @@ import {
   setupStorageServiceMock,
 } from "./postHandler.test-utils";
 
-type StreamResult = StreamTextResult<any, unknown>;
+type StreamResult = StreamTextResult<Record<string, unknown>, unknown>;
 
 // Mock all external dependencies
 vi.mock("@ai-sdk/google", () => ({
@@ -194,7 +194,7 @@ describe("PostHandler - Response", () => {
           (acc, t) => {
             acc[t.name] = {
               description: t.description,
-              parameters: expect.any(Object),
+              inputSchema: expect.any(Object),
               execute: expect.any(Function),
             };
             return acc;
@@ -203,7 +203,7 @@ describe("PostHandler - Response", () => {
             string,
             {
               description: string;
-              parameters: unknown;
+              inputSchema: unknown;
               execute: (args: Record<string, unknown>) => Promise<Record<string, unknown>>;
             }
           >,

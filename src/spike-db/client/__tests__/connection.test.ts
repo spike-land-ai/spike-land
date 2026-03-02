@@ -5,7 +5,7 @@ class MockWebSocket {
   static OPEN = 1;
   static CLOSED = 3;
   readyState = 0;
-  listeners: Record<string, Function[]> = {};
+  listeners: Record<string, ((...args: unknown[]) => void)[]> = {};
   
   constructor(public url: string) {
     // Connect synchronously for tests to avoid timer races
@@ -15,12 +15,12 @@ class MockWebSocket {
     queueMicrotask(() => this.trigger("open", {}));
   }
 
-  addEventListener(event: string, cb: Function) {
+  addEventListener(event: string, cb: (...args: unknown[]) => void) {
     if (!this.listeners[event]) this.listeners[event] = [];
     this.listeners[event].push(cb);
   }
 
-  trigger(event: string, data: any) {
+  trigger(event: string, data: unknown) {
     this.listeners[event]?.forEach(cb => cb(data));
   }
 
@@ -31,12 +31,12 @@ class MockWebSocket {
   });
 }
 
-// @ts-ignore
+// @ts-expect-error -- MockWebSocket is a partial implementation for testing
 global.WebSocket = MockWebSocket;
 
 describe("Connection", () => {
   let conn: Connection;
-  let options: any;
+  let options: { url: string; onMessage: ReturnType<typeof vi.fn>; onOpen: ReturnType<typeof vi.fn>; onClose: ReturnType<typeof vi.fn>; onError: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -63,7 +63,7 @@ describe("Connection", () => {
   it("handles messages", async () => {
     conn.connect();
     await vi.advanceTimersByTimeAsync(10);
-    const ws = (conn as any).ws;
+    const ws = (conn as unknown as { ws: MockWebSocket }).ws;
     ws.trigger("message", { data: JSON.stringify({ hello: "world" }) });
     expect(options.onMessage).toHaveBeenCalledWith({ hello: "world" });
   });
@@ -76,7 +76,7 @@ describe("Connection", () => {
     await vi.advanceTimersByTimeAsync(10);
     
     expect(conn.isConnected).toBe(true);
-    const ws = (conn as any).ws;
+    const ws = (conn as unknown as { ws: MockWebSocket }).ws;
     expect(ws.send).toHaveBeenCalledWith("msg1");
   });
 
@@ -84,7 +84,7 @@ describe("Connection", () => {
     conn.connect();
     await vi.advanceTimersByTimeAsync(10);
     
-    const ws = (conn as any).ws;
+    const ws = (conn as unknown as { ws: MockWebSocket }).ws;
     ws.trigger("close", {});
     
     expect(options.onClose).toHaveBeenCalled();

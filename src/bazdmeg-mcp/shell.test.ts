@@ -18,7 +18,7 @@ describe("shell helper", () => {
 
   describe("runCommand", () => {
     it("returns ok: true when command succeeds", async () => {
-      // @ts-ignore
+      // @ts-expect-error - mock callback signature differs from execFile overloads
       vi.mocked(execFile).mockImplementation((cmd, args, options, callback) => {
         callback(null, "success", "");
       });
@@ -30,10 +30,10 @@ describe("shell helper", () => {
     });
 
     it("returns ok: false when command fails", async () => {
-      // @ts-ignore
+      // @ts-expect-error - mock callback signature differs from execFile overloads
       vi.mocked(execFile).mockImplementation((cmd, args, options, callback) => {
         const err = new Error("fail");
-        (err as any).code = 127;
+        (err as Error & { code?: number }).code = 127;
         callback(err, "", "not found");
       });
 
@@ -44,7 +44,7 @@ describe("shell helper", () => {
     });
 
     it("handles errors without code", async () => {
-      // @ts-ignore
+      // @ts-expect-error - mock callback signature differs from execFile overloads
       vi.mocked(execFile).mockImplementation((cmd, args, options, callback) => {
         callback(new Error("no code"), "", "err");
       });

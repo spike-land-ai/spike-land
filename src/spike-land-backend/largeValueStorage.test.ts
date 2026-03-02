@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { LargeValueStorage } from "../src/largeValueStorage";
+import { LargeValueStorage } from "./largeValueStorage";
 
 function makeR2Object(text: string) {
   return {

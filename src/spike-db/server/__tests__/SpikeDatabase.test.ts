@@ -4,9 +4,9 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 vi.mock("cloudflare:workers", () => {
   return {
     DurableObject: class {
-      ctx: any;
-      env: any;
-      constructor(ctx: any, env: any) {
+      ctx: unknown;
+      env: unknown;
+      constructor(ctx: unknown, env: unknown) {
         this.ctx = ctx;
         this.env = env;
       }
@@ -24,15 +24,16 @@ class MockWebSocket {
   addEventListener = vi.fn();
 }
 
+// @ts-expect-error -- MockWebSocketPair is a partial implementation for testing
 global.WebSocketPair = class {
   0 = new MockWebSocket();
   1 = new MockWebSocket();
-} as any;
+};
 
 const OriginalResponse = global.Response;
-// @ts-ignore
+// @ts-expect-error -- custom Response subclass for WebSocket upgrade testing
 global.Response = class extends OriginalResponse {
-  constructor(body?: any, init?: any) {
+  constructor(body?: BodyInit | null, init?: ResponseInit & { webSocket?: unknown }) {
     if (init && init.status === 101) {
       // Create a dummy 200 response but override status
       super(body, { ...init, status: 200 });
@@ -42,18 +43,24 @@ global.Response = class extends OriginalResponse {
       super(body, init);
     }
   }
-} as any;
-// @ts-ignore
+};
+// @ts-expect-error -- restoring static method on custom Response
 global.Response.json = OriginalResponse.json;
 
 describe("SpikeDatabase", () => {
-  let ctx: any;
-  let env: any;
+  let ctx: {
+    storage: { sql: { exec: ReturnType<typeof vi.fn> }; setAlarm: ReturnType<typeof vi.fn> };
+    blockConcurrencyWhile: ReturnType<typeof vi.fn>;
+    acceptWebSocket: ReturnType<typeof vi.fn>;
+    getTags: ReturnType<typeof vi.fn>;
+    id: { toString: () => string };
+  };
+  let env: { IDENTITY_SECRET: string };
   let db: SpikeDatabase;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     const mockSql = {
       exec: vi.fn().mockReturnValue({
         toArray: () => [],
@@ -65,7 +72,7 @@ describe("SpikeDatabase", () => {
         sql: mockSql,
         setAlarm: vi.fn(),
       },
-      blockConcurrencyWhile: vi.fn(async (fn) => await fn()),
+      blockConcurrencyWhile: vi.fn(async (fn: () => Promise<void>) => await fn()),
       acceptWebSocket: vi.fn(),
       getTags: vi.fn().mockReturnValue(["user-123"]),
       id: { toString: () => "db-id" },
@@ -75,7 +82,7 @@ describe("SpikeDatabase", () => {
       IDENTITY_SECRET: "test-secret",
     };
 
-    db = new SpikeDatabase(ctx, env);
+    db = new SpikeDatabase(ctx as unknown as ConstructorParameters<typeof SpikeDatabase>[0], env);
   });
 
   it("initSchema initializes tables", async () => {
@@ -87,7 +94,7 @@ describe("SpikeDatabase", () => {
           columns: {},
           primaryKey: "id",
           indexes: [],
-        } as any,
+        } as DatabaseSchema["tables"][string],
       },
       reducers: {},
     };
@@ -121,7 +128,7 @@ describe("SpikeDatabase", () => {
 
   it("webSocketMessage handles ping", async () => {
     const ws = new MockWebSocket();
-    await db.webSocketMessage(ws as any, JSON.stringify({ type: "ping" }));
+    await db.webSocketMessage(ws as unknown as WebSocket, JSON.stringify({ type: "ping" }));
     expect(ws.send).toHaveBeenCalledWith(expect.stringContaining('"type":"pong"'));
   });
 
@@ -136,7 +143,7 @@ describe("SpikeDatabase", () => {
       }
     });
 
-    await db.webSocketMessage(ws as any, JSON.stringify({
+    await db.webSocketMessage(ws as unknown as WebSocket, JSON.stringify({
       type: "reducer_call",
       id: "req-1",
       reducer: "my_reducer",
@@ -200,19 +207,19 @@ describe("SpikeDatabase", () => {
 
   it("webSocketMessage handles invalid JSON", async () => {
     const ws = new MockWebSocket();
-    await db.webSocketMessage(ws as any, "invalid-json");
+    await db.webSocketMessage(ws as unknown as WebSocket, "invalid-json");
     expect(ws.send).toHaveBeenCalledWith(expect.stringContaining("pong"));
   });
 
   it("webSocketClose removes subscription", async () => {
     const ws = new MockWebSocket();
-    await db.webSocketClose(ws as any);
+    await db.webSocketClose(ws as unknown as WebSocket);
     // Verified by coverage
   });
 
   it("webSocketError removes subscription", async () => {
     const ws = new MockWebSocket();
-    await db.webSocketError(ws as any);
+    await db.webSocketError(ws as unknown as WebSocket);
     // Verified by coverage
   });
 
@@ -223,7 +230,7 @@ describe("SpikeDatabase", () => {
   });
 
   it("fetch handles /health with schema", async () => {
-    db.initSchema({ name: "t", tables: { t1: {} as any }, reducers: {} });
+    db.initSchema({ name: "t", tables: { t1: {} as DatabaseSchema["tables"][string] }, reducers: {} });
     const req = new Request("http://localhost/health");
     const res = await db.fetch(req);
     const body = await res.json();
@@ -233,14 +240,14 @@ describe("SpikeDatabase", () => {
   it("webSocketMessage handles binary message", async () => {
     const ws = new MockWebSocket();
     const data = new TextEncoder().encode(JSON.stringify({ type: "ping" }));
-    await db.webSocketMessage(ws as any, data.buffer);
+    await db.webSocketMessage(ws as unknown as WebSocket, data.buffer);
     expect(ws.send).toHaveBeenCalledWith(expect.stringContaining("pong"));
   });
 
   it("handleReducerCall errors when schema missing", async () => {
     const ws = new MockWebSocket();
     // No initSchema
-    await (db as any).handleReducerCall(ws, "id", "r", []);
+    await (db as unknown as { handleReducerCall: (ws: unknown, id: string, reducer: string, args: unknown[]) => Promise<void> }).handleReducerCall(ws, "id", "r", []);
     expect(ws.send).toHaveBeenCalledWith(expect.stringContaining('"ok":false'));
     expect(ws.send).toHaveBeenCalledWith(expect.stringContaining("Schema not initialized"));
   });

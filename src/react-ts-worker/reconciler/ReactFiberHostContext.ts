@@ -83,7 +83,7 @@ export function pushHostContext(fiber: Fiber): void {
     typeof fiber.type === "string"
       ? fiber.type
       : typeof fiber.type === "function"
-        ? (fiber.type as any).name
+        ? ((fiber.type as { name?: string }).name ?? "")
         : "";
 
   const nextContext = hostConfig.getChildHostContext(context, type);

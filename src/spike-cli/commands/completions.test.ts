@@ -30,7 +30,8 @@ describe("completions command", () => {
   it("install handles zsh", async () => {
     registerCompletionsCommand(program);
     const install = program.commands[0].commands.find(c => c.name() === "install")!;
-    await (install as any)._actionHandler([{ shell: "zsh" }, []]);
+    // @ts-expect-error - accessing private commander handler
+    await install._actionHandler([{ shell: "zsh" }, []]);
     expect(installer.installCompletions).toHaveBeenCalledWith("zsh");
     expect(console.error).toHaveBeenCalledWith("done");
   });
@@ -38,16 +39,18 @@ describe("completions command", () => {
   it("uninstall handles zsh", async () => {
     registerCompletionsCommand(program);
     const uninstall = program.commands[0].commands.find(c => c.name() === "uninstall")!;
-    await (uninstall as any)._actionHandler([{ shell: "zsh" }, []]);
+    // @ts-expect-error - accessing private commander handler
+    await uninstall._actionHandler([{ shell: "zsh" }, []]);
     expect(installer.uninstallCompletions).toHaveBeenCalledWith("zsh");
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining("removed"));
   });
 
   it("install handles unknown shell", async () => {
-    vi.mocked(installer.detectShell).mockReturnValue("unknown" as any);
+    vi.mocked(installer.detectShell).mockReturnValue("unknown" as unknown as string);
     registerCompletionsCommand(program);
     const install = program.commands[0].commands.find(c => c.name() === "install")!;
-    await (install as any)._actionHandler([{}, []]);
+    // @ts-expect-error - accessing private commander handler
+    await install._actionHandler([{}, []]);
     expect(process.exit).toHaveBeenCalledWith(1);
   });
 
@@ -55,7 +58,8 @@ describe("completions command", () => {
     vi.mocked(installer.installCompletions).mockImplementation(() => { throw new Error("fail"); });
     registerCompletionsCommand(program);
     const install = program.commands[0].commands.find(c => c.name() === "install")!;
-    await (install as any)._actionHandler([{ shell: "zsh" }, []]);
+    // @ts-expect-error - accessing private commander handler
+    await install._actionHandler([{ shell: "zsh" }, []]);
     expect(process.exit).toHaveBeenCalledWith(1);
   });
 });

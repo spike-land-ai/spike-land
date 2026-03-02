@@ -124,8 +124,8 @@ describe("wasm-api", () => {
     });
 
     it("waits for an existing initialization promise if called while initializing", async () => {
-      let resolveInit: (val: any) => void;
-      const initPromise = new Promise((resolve) => {
+      let resolveInit: (val: void | PromiseLike<void>) => void;
+      const initPromise = new Promise<void>((resolve) => {
         resolveInit = resolve;
       });
       mockInitialize.mockReturnValue(initPromise);

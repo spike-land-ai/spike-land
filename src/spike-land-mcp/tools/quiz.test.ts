@@ -201,7 +201,7 @@ describe("Quiz Engine", () => {
         round.questions[1]!.correctIndex,
         round.questions[2]!.correctIndex,
       ];
-      const { allMastered } = evaluateAnswers(session, answers);
+      const { allMastered: _allMastered } = evaluateAnswers(session, answers);
 
       // After 2 correct answers per concept, should be mastered
       const masteredCount = session.conceptStates.filter((s) => s.mastered).length;

@@ -1,3 +1,3 @@
 // Prisma types stub
-export type ChessTimeControl = any;
-export type ChessGameStatus = any;
+export type ChessTimeControl = unknown;
+export type ChessGameStatus = unknown;

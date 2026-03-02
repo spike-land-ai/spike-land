@@ -125,7 +125,9 @@ describe("esbuild_wasm_mcp tools", () => {
       // outputFiles missing
     });
 
-    const result = (await handler!({ entryPoints: ["in.js"] })) as any;
+    const result = (await handler!({ entryPoints: ["in.js"] })) as {
+      content: { text: string }[];
+    };
     const parsed = JSON.parse(result.content[0].text);
     expect(parsed.outputFiles).toEqual([]);
   });

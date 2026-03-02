@@ -5,5 +5,6 @@ export default defineWorkspace([
   "packages/code",
   "packages/spike-app",
   "src/code",
-  "src/spike-app"
+  "src/spike-app",
+  "src/spike-edge"
 ]);

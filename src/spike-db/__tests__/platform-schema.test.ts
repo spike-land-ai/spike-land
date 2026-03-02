@@ -49,7 +49,7 @@ describe("platform-schema", () => {
   });
   
   it("covers all reducers for coverage", () => {
-    const mockDb: any = {};
+    const mockDb: Record<string, unknown> = {};
     const tableNames = Object.keys(platformDatabase.tables);
     for (const name of tableNames) {
       mockDb[name] = { insert: vi.fn(), update: vi.fn(), delete: vi.fn() };
@@ -60,8 +60,9 @@ describe("platform-schema", () => {
     for (const r of Object.values(reducers)) {
       try {
         // Call with enough args to not crash
+        // @ts-expect-error - generic call for coverage
         r.handler(mockCtx, "a", "b", "c", "d");
-      } catch (e) {
+      } catch (_e) {
         // ignore errors from missing args or type mismatches, we just want line coverage
       }
     }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ToolRegistry, validateSchemaDescriptions, type ToolStability } from "./registry";
+import { ToolRegistry, validateSchemaDescriptions } from "./registry";
 import type { McpServer, RegisteredTool } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 

@@ -9,7 +9,7 @@ describe("SpacetimeServerTransport", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     client = createMockClient({ connected: true });
-    transport = new SpacetimeServerTransport(client as any, "test-cat");
+    transport = new SpacetimeServerTransport(client as unknown as ConstructorParameters<typeof SpacetimeServerTransport>[0], "test-cat");
   });
 
   it("start() requests tools and subscribes to events", async () => {
@@ -36,7 +36,7 @@ describe("SpacetimeServerTransport", () => {
       result: {
         tools: [{ name: "t1", description: "d1", inputSchema: {} }]
       }
-    } as any);
+    } as unknown as Parameters<typeof transport.send>[0]);
 
     expect(client.registerTool).toHaveBeenCalledWith("t1", "d1", "{}", "test-cat");
   });
@@ -46,14 +46,14 @@ describe("SpacetimeServerTransport", () => {
     // Pre-populate task in mock client
     client._mcpTasks.push({ id: taskId, toolName: "t1", status: "claimed", argumentsJson: "{}", requesterIdentity: "r", createdAt: BigInt(0) });
     
-    // @ts-ignore - reaching into internals for testing
+    // @ts-expect-error - accessing private pendingTasks for testing
     transport.pendingTasks.set("msg-1", taskId);
 
     await transport.send({
       jsonrpc: "2.0",
       id: "msg-1",
       result: { ok: true }
-    } as any);
+    } as unknown as Parameters<typeof transport.send>[0]);
 
     expect(client.completeMcpTask).toHaveBeenCalledWith(taskId, '{"ok":true}', undefined);
   });
@@ -62,14 +62,14 @@ describe("SpacetimeServerTransport", () => {
     const taskId = BigInt(2);
     client._mcpTasks.push({ id: taskId, toolName: "t1", status: "claimed", argumentsJson: "{}", requesterIdentity: "r", createdAt: BigInt(0) });
     
-    // @ts-ignore
+    // @ts-expect-error - accessing private pendingTasks for testing
     transport.pendingTasks.set("msg-2", taskId);
 
     await transport.send({
       jsonrpc: "2.0",
       id: "msg-2",
       error: { code: -32603, message: "fail" }
-    } as any);
+    } as unknown as Parameters<typeof transport.send>[0]);
 
     expect(client.completeMcpTask).toHaveBeenCalledWith(taskId, undefined, '{"code":-32603,"message":"fail"}');
   });
@@ -79,7 +79,7 @@ describe("SpacetimeServerTransport", () => {
     transport.onmessage = onmessage;
 
     // Register a tool so transport knows it can handle it
-    // @ts-ignore
+    // @ts-expect-error - accessing private supportedTools for testing
     transport.supportedTools.set("my_tool", {});
 
     const task = {
@@ -93,7 +93,7 @@ describe("SpacetimeServerTransport", () => {
     client._mcpTasks.push(task);
     client.listMcpTasks.mockReturnValue([task]);
 
-    // @ts-ignore - call private method
+    // @ts-expect-error - calling private pollTasks method for testing
     await transport.pollTasks();
 
     expect(client.claimMcpTask).toHaveBeenCalledWith(BigInt(10));
@@ -110,15 +110,15 @@ describe("SpacetimeServerTransport", () => {
     const onmessage = vi.fn();
     transport.onmessage = onmessage;
     
-    // @ts-ignore
+    // @ts-expect-error - accessing private supportedTools for testing
     transport.supportedTools.set("my_tool", {});
     const task = { id: BigInt(10), toolName: "my_tool", argumentsJson: "{}", requesterIdentity: "r", createdAt: BigInt(0) };
     client._mcpTasks.push(task);
     client.listMcpTasks.mockReturnValue([task]);
-    
+
     vi.spyOn(client, "claimMcpTask").mockRejectedValue(new Error("Claim failed"));
 
-    // @ts-ignore
+    // @ts-expect-error - calling private pollTasks method for testing
     await transport.pollTasks();
     
     expect(client.claimMcpTask).toHaveBeenCalled();
