@@ -102,7 +102,7 @@ export function registerAiGatewayTools(
                     .describe("Filter by capability, or 'all'."),
             })
             .meta({ category: "ai-gateway", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     provider = "all",
                     capability = "all",
@@ -167,7 +167,7 @@ export function registerAiGatewayTools(
                     .describe("Sampling temperature."),
             })
             .meta({ category: "ai-gateway", tier: "workspace" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     message,
                     provider,

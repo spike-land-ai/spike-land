@@ -91,9 +91,10 @@ const nextConfig: NextConfig = {
     "typescript",
     "webpack",
   ],
-  // Turbopack configuration
+  // Turbopack configuration — root must include monorepo root so that
+  // symlinked content/ and docs/ directories (../../content, ../../docs) are reachable.
   turbopack: {
-    root: __dirname,
+    root: path.resolve(__dirname, "../.."),
   },
   // Transpile ESM packages to avoid runtime resolution issues with PnP
   transpilePackages: ["next-mdx-remote"],

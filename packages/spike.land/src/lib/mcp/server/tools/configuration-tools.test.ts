@@ -639,8 +639,8 @@ describe("environment tools", () => {
     it("should check admin role on every environment tool handler", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ role: "USER" });
       const toolNames = ["env_list", "env_status", "env_compare"];
-      for (const toolName of toolNames) {
-                const result = await handler({});
+      for (const name of toolNames) {
+        const result = await registry.call(name, {});
         expect(getText(result)).toContain("PERMISSION_DENIED");
       }
     });

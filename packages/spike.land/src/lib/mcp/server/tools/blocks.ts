@@ -246,7 +246,7 @@ export function registerBlocksTools(
         freeTool(_userId)
             .tool("blocks_list_types", "List all available block types with descriptions.", {})
             .meta({ category: "blocks", tier: "free" })
-            .handler(async ({ input: _input, _ctx }) => {
+            .handler(async ({ input: _input }) => {
                 
 
                 const { getBlockTypeDescriptions } = await import(

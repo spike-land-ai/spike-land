@@ -142,7 +142,7 @@ export function registerMcpAnalyticsTools(
                 ),
             })
             .meta({ category: "mcp-analytics", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const { tool_name, category } = input;
                 return safeToolCall("mcp_generate_docs", async () => {
                     if (!tool_name && !category) {

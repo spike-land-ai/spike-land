@@ -8,12 +8,20 @@ import type { DocsTool } from "@/lib/docs/types";
 
 import toolsManifest from "@/lib/docs/generated/tools-manifest.json";
 
+interface ToolCategory {
+  name: string;
+  description: string;
+  count: number;
+}
+
+const categories = toolsManifest.categories as ToolCategory[];
+
 interface CategoryPageProps {
   params: Promise<{ category: string; }>;
 }
 
 export async function generateStaticParams() {
-  return toolsManifest.categories.map((cat: { name: string; }) => ({
+  return categories.map((cat: { name: string; }) => ({
     category: cat.name,
   }));
 }
@@ -22,7 +30,7 @@ export async function generateMetadata(
   { params }: CategoryPageProps,
 ): Promise<Metadata> {
   const { category } = await params;
-  const cat = toolsManifest.categories.find((c: { name: string; }) => c.name === category);
+  const cat = categories.find((c: { name: string; }) => c.name === category);
   if (!cat) return { title: "Category Not Found" };
 
   const formatted = category
@@ -38,7 +46,7 @@ export async function generateMetadata(
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = await params;
-  const cat = toolsManifest.categories.find((c: { name: string; }) => c.name === category);
+  const cat = categories.find((c: { name: string; }) => c.name === category);
 
   if (!cat) {
     notFound();

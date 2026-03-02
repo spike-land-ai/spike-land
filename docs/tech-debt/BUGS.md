@@ -1,8 +1,9 @@
 # Confirmed Bugs — spike.land
 
-**Generated**: 2026-02-19 **Updated**: 2026-02-26 **Method**: 16-agent parallel
-codebase scan **Status**: These are confirmed bugs (not theoretical), verified by
+**Generated**: 2026-02-19 **Updated**: 2026-03-01 **Method**: 16-agent parallel
+codebase scan + manual prod testing **Status**: These are confirmed bugs (not theoretical), verified by
 reading actual code. Items marked RESOLVED were fixed in Sprint 4 (2026-02-26).
+New items added 2026-03-01 from production testing.
 
 ---
 
@@ -396,6 +397,84 @@ flag is architecturally disconnected from the override workflow.
 | BUG-028 | `src/lib/allocator/allocator-service.ts:637`        | Audit log uses unawaited `Promise.all` — audit trail silently drops on error             |
 | BUG-029 | `src/lib/agents/capability-token-service.ts:350`    | TOCTOU race on budget check/increment — concurrent requests can exceed budget            |
 | BUG-030 | `src/lib/tracking/visitor-id.ts:26`                 | Server-side unconditionally assumes cookie consent — GDPR violation                      |
+
+---
+
+### BUG-031: OAuth social providers missing from production auth
+
+**Status**: Confirmed (2026-03-01) — production testing
+**File**: `src/auth.ts:49-66`
+
+**Reproduction**:
+
+```bash
+curl -s https://spike.land/api/auth/providers | python3 -m json.tool
+# Only returns: email, credentials, qr-auth
+# Missing: github, google, facebook, apple
+```
+
+**Root cause**: Better Auth migration from NextAuth. Social providers configured with
+`process.env.GITHUB_ID || ""` — empty string fallback causes Better Auth to silently
+drop the provider instead of erroring. Either:
+1. ECS task definition missing OAuth env vars (GITHUB_ID, GITHUB_SECRET, GOOGLE_ID, etc.)
+2. Better Auth ignores social providers when clientId is empty string
+
+**Impact**: Users cannot sign in via GitHub, Google, Facebook, or Apple OAuth.
+Email/password and QR auth still work.
+
+**Fix**: Verify ECS env vars are set. If they are, make Better Auth conditional:
+```ts
+socialProviders: {
+  ...(process.env.GITHUB_ID ? { github: { clientId: process.env.GITHUB_ID, clientSecret: process.env.GITHUB_SECRET! } } : {}),
+  // etc.
+}
+```
+
+---
+
+### BUG-032: Image Studio MCP proxy returns HTML 500 instead of JSON
+
+**Status**: Confirmed (2026-03-01) — production testing
+**File**: `src/app/api/image-studio/mcp/route.ts`
+
+**Reproduction**:
+
+```bash
+curl -s -X POST https://spike.land/api/image-studio/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'
+# Returns HTML error page instead of JSON 401
+```
+
+**Root cause**: The route handler crashes at import time or during execution, causing
+Next.js to render its error page instead of the JSON error response. The route requires
+auth but the crash happens before the auth check can return a proper JSON error.
+
+**Impact**: All image studio MCP calls through spike.land proxy return 500 HTML.
+
+---
+
+### BUG-033: Turbopack build fails with symlinked content directory
+
+**Status**: RESOLVED (2026-03-01)
+**File**: `next.config.ts:95-97`
+
+**Root cause**: `turbopack: { root: __dirname }` limits Turbopack's filesystem root
+to the spike.land package directory. Symlinks `content -> ../../content` and
+`docs -> ../../docs` point outside this root, causing build panic.
+
+**Fix**: Changed root to `path.resolve(__dirname, "../..")` to include monorepo root.
+
+---
+
+### BUG-034: `as any` type violations in auth.ts
+
+**Status**: Confirmed (2026-03-01)
+**File**: `src/auth.ts:88,90,140,274`
+
+**Root cause**: QR auth plugin uses `as any` for body schema and context types,
+and session fetching uses `as any` for headers. Violates the strict no-any rule
+and could mask type errors.
 
 ---
 

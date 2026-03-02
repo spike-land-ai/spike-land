@@ -416,7 +416,7 @@ describe("ToolRegistry", () => {
   describe("schema description validation", () => {
     it("should throw in non-production when schema fields lack .describe()", () => {
       const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "test";
+      (process.env as Record<string, string | undefined>).NODE_ENV ="test";
 
       const tool = makeTool({
         inputSchema: {
@@ -429,7 +429,7 @@ describe("ToolRegistry", () => {
         /has schema fields without \.describe\(\): name, age/,
       );
 
-      process.env.NODE_ENV = originalEnv;
+      (process.env as Record<string, string | undefined>).NODE_ENV =originalEnv;
     });
 
     it("should not throw when all schema fields have .describe()", () => {
@@ -445,7 +445,7 @@ describe("ToolRegistry", () => {
 
     it("should warn in production when schema fields lack .describe()", () => {
       const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "production";
+      (process.env as Record<string, string | undefined>).NODE_ENV ="production";
 
       const tool = makeTool({
         inputSchema: {
@@ -458,7 +458,7 @@ describe("ToolRegistry", () => {
         expect.stringContaining("has schema fields without .describe(): name"),
       );
 
-      process.env.NODE_ENV = originalEnv;
+      (process.env as Record<string, string | undefined>).NODE_ENV =originalEnv;
     });
 
     it("should not throw when inputSchema is undefined", () => {
@@ -468,7 +468,7 @@ describe("ToolRegistry", () => {
 
     it("should report only fields missing .describe()", () => {
       const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "test";
+      (process.env as Record<string, string | undefined>).NODE_ENV ="test";
 
       const tool = makeTool({
         inputSchema: {
@@ -481,7 +481,7 @@ describe("ToolRegistry", () => {
         /has schema fields without \.describe\(\): bad/,
       );
 
-      process.env.NODE_ENV = originalEnv;
+      (process.env as Record<string, string | undefined>).NODE_ENV =originalEnv;
     });
   });
 });

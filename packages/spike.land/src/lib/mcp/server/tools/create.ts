@@ -123,7 +123,7 @@ export function registerCreateTools(
                 ),
             })
             .meta({ category: "create", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     text,
                 } = input;
@@ -151,7 +151,7 @@ export function registerCreateTools(
                 codespace_id: z.string().min(1).describe("Codespace ID to check health for."),
             })
             .meta({ category: "create", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     codespace_id,
                 } = input;

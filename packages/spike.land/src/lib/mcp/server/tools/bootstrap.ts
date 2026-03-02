@@ -177,7 +177,7 @@ export function registerBootstrapTools(
                     .optional(),
             })
             .meta({ category: "bootstrap", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     app_name,
                     description,

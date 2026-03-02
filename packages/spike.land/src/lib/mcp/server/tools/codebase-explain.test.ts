@@ -44,7 +44,7 @@ describe("codebase-explain tools", () => {
         dependencies: { next: "16.0.0", react: "19.0.0" },
         devDependencies: { typescript: "5.5.0", vitest: "3.0.0" },
       });
-      const result = await handler({ files, package_json: packageJson });
+      const result = await registry.call("explain_overview", { files, package_json: packageJson });
       const text = getText(result);
       expect(text).toContain("Next.js");
       expect(text).toContain("React");
@@ -73,7 +73,7 @@ describe("codebase-explain tools", () => {
         dependencies: { next: "16.0.0" },
         devDependencies: { typescript: "5.5.0" },
       });
-      const result = await handler({ files, package_json: packageJson });
+      const result = await registry.call("explain_overview", { files, package_json: packageJson });
       const text = getText(result);
       // Should contain each tech only once (version from package.json)
       const nextMatches = text.match(/Next\.js/g);
@@ -159,7 +159,7 @@ describe("codebase-explain tools", () => {
           jest: "29.0.0",
         },
       });
-      const result = await handler({
+      const result = await registry.call("explain_overview", {
         files: ["src/index.ts"],
         package_json: packageJson,
       });
@@ -979,7 +979,7 @@ const helper = () => {};
       const packageJson = JSON.stringify({
         dependencies: { react: "18.0.0" },
       });
-      const result = await handler({
+      const result = await registry.call("explain_overview", {
         files: ["src/index.ts"],
         package_json: packageJson,
       });

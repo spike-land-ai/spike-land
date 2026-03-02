@@ -237,7 +237,7 @@ describe("review-pr tools", () => {
       expect(getText(quickResult)).toContain("no vulnerabilities found");
 
       mockReadFile.mockResolvedValue("const token = Math.random().toString(36);");
-      const thoroughResult = await handler({
+      const thoroughResult = await registry.call("review_security_scan", {
         file_paths: ["src/lib/token.ts"],
         scan_type: "thorough",
       });

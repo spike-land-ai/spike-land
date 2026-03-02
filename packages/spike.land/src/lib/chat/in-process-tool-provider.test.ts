@@ -36,7 +36,7 @@ describe("InProcessToolProvider", () => {
           category: "test",
           tier: "free",
           alwaysEnabled: true,
-          inputSchema: { query: { _def: {} } },
+          inputSchema: { query: { _def: {}, description: "Search query" } },
           handler: async () => ({
             content: [{ type: "text", text: "test result" }],
           }),
@@ -58,14 +58,14 @@ describe("InProcessToolProvider", () => {
     vi.restoreAllMocks();
   });
 
-  it("should create an instance and register tools", () => {
-    const provider = new InProcessToolProvider("test-user");
+  it("should create an instance and register tools", async () => {
+    const provider = await InProcessToolProvider.create("test-user");
     expect(provider).toBeDefined();
     expect(mockRegisterAllTools).toHaveBeenCalledOnce();
   });
 
-  it("getAllTools returns NamespacedTool[] with correct shape", () => {
-    const provider = new InProcessToolProvider("test-user");
+  it("getAllTools returns NamespacedTool[] with correct shape", async () => {
+    const provider = await InProcessToolProvider.create("test-user");
     const tools = provider.getAllTools();
 
     expect(tools.length).toBeGreaterThan(0);
@@ -78,8 +78,8 @@ describe("InProcessToolProvider", () => {
     }
   });
 
-  it("getAllTools caches results on second call", () => {
-    const provider = new InProcessToolProvider("test-user");
+  it("getAllTools caches results on second call", async () => {
+    const provider = await InProcessToolProvider.create("test-user");
     const tools1 = provider.getAllTools();
     const tools2 = provider.getAllTools();
     expect(tools1).toBe(tools2); // Same reference = cached
@@ -101,7 +101,7 @@ describe("InProcessToolProvider", () => {
       },
     );
 
-    const provider = new InProcessToolProvider("test-user");
+    const provider = await InProcessToolProvider.create("test-user");
     const result = await provider.callTool("echo_tool", { text: "hello" });
 
     expect(result.isError).toBeFalsy();
@@ -112,25 +112,25 @@ describe("InProcessToolProvider", () => {
   });
 
   it("callTool returns error for unknown tool", async () => {
-    const provider = new InProcessToolProvider("test-user");
+    const provider = await InProcessToolProvider.create("test-user");
     const result = await provider.callTool("nonexistent_tool", {});
 
     expect(result.isError).toBe(true);
     expect(result.content[0]?.text).toContain("Tool not found");
   });
 
-  it("getServerNames returns in-process", () => {
-    const provider = new InProcessToolProvider("test-user");
+  it("getServerNames returns in-process", async () => {
+    const provider = await InProcessToolProvider.create("test-user");
     expect(provider.getServerNames()).toEqual(["in-process"]);
   });
 
   it("closeAll resolves without error", async () => {
-    const provider = new InProcessToolProvider("test-user");
+    const provider = await InProcessToolProvider.create("test-user");
     await expect(provider.closeAll()).resolves.toBeUndefined();
   });
 
   it("connectAll resolves without error", async () => {
-    const provider = new InProcessToolProvider("test-user");
+    const provider = await InProcessToolProvider.create("test-user");
     await expect(provider.connectAll()).resolves.toBeUndefined();
   });
 });

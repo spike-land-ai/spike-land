@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "./route";
 import { NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
 import { isBot } from "@/lib/chat/bot-detection";
 import { checkRateLimit } from "@/lib/rate-limiter";
 
@@ -56,7 +55,7 @@ describe("agent-chat API", () => {
     });
 
     vi.mocked(isBot).mockReturnValue(false);
-    vi.mocked(checkRateLimit).mockResolvedValue({ isLimited: false, remaining: 10 });
+    vi.mocked(checkRateLimit).mockResolvedValue({ isLimited: false, remaining: 10, resetAt: Date.now() + 60000 });
 
     const response = await POST(request);
     expect(response.status).toBe(400);
@@ -87,7 +86,7 @@ describe("agent-chat API", () => {
     });
 
     vi.mocked(isBot).mockReturnValue(false);
-    vi.mocked(checkRateLimit).mockResolvedValue({ isLimited: true, remaining: 0 });
+    vi.mocked(checkRateLimit).mockResolvedValue({ isLimited: true, remaining: 0, resetAt: Date.now() + 60000 });
 
     const response = await POST(request);
     expect(response.status).toBe(429);

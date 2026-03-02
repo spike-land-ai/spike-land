@@ -306,7 +306,7 @@ export function registerCalendarAnalyticsTools(
                 ),
             })
             .meta({ category: "calendar-analytics", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const { topic, platform, count } = input;
                 return safeToolCall("calendar_suggest_content", async () => {
                     if (!topic.trim()) {

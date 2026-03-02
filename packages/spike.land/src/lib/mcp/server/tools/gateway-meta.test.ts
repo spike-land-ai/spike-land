@@ -36,6 +36,7 @@ import { registerGatewayMetaTools } from "./gateway-meta";
 
 function createMockRegistry(): ToolRegistry & {
   handlers: Map<string, (...args: unknown[]) => unknown>;
+  call: (name: string, input: unknown) => Promise<unknown>;
   _searchResults: SearchResult[];
   _semanticResults: SearchResult[];
   _enabledTools: string[];
@@ -51,6 +52,16 @@ function createMockRegistry(): ToolRegistry & {
         handlers.set(def.name, def.handler);
       },
     ),
+    registerBuilt: vi.fn(
+      (built: { name: string; handler: (...args: unknown[]) => unknown; }) => {
+        handlers.set(built.name, built.handler);
+      },
+    ),
+    call: async (name: string, input: unknown) => {
+      const handler = handlers.get(name);
+      if (!handler) throw new Error(`Tool not found: ${name}`);
+      return handler(input);
+    },
     handlers,
     _searchResults: [] as SearchResult[],
     _semanticResults: [] as SearchResult[],
@@ -99,7 +110,7 @@ describe("gateway-meta tools", () => {
   });
 
   it("should register 5 gateway-meta tools", () => {
-    expect(registry.register).toHaveBeenCalledTimes(5);
+    expect(registry.registerBuilt).toHaveBeenCalledTimes(5);
     expect(registry.handlers.has("search_tools")).toBe(true);
     expect(registry.handlers.has("list_categories")).toBe(true);
     expect(registry.handlers.has("enable_category")).toBe(true);

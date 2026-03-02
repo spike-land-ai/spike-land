@@ -47,7 +47,7 @@ export function registerAppsTools(
                     ),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     prompt,
                     codespace_id,
@@ -176,7 +176,7 @@ export function registerAppsTools(
                     ),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     app_id,
                 } = input;
@@ -251,7 +251,7 @@ export function registerAppsTools(
                     .describe("Image IDs to attach as references."),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     app_id,
                     message,
@@ -384,7 +384,7 @@ export function registerAppsTools(
                     .describe("ARCHIVED stops the live app. PROMPTING resets to draft state."),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     app_id,
                     status,
@@ -417,7 +417,7 @@ export function registerAppsTools(
                     ),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     app_id,
                 } = input;
@@ -447,7 +447,7 @@ export function registerAppsTools(
                     ),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     app_id,
                 } = input;
@@ -478,7 +478,7 @@ export function registerAppsTools(
                     .describe("Must be true. This action CANNOT be undone."),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     app_id,
                     confirm,
@@ -577,7 +577,7 @@ export function registerAppsTools(
                     .describe("Target status for all apps."),
             })
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     app_ids,
                     status,
@@ -627,7 +627,7 @@ export function registerAppsTools(
         freeTool(userId)
             .tool("apps_clear_messages", "Clear all messages in an app's chat history. This action cannot be undone.", AppsClearMessagesSchema.shape)
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const { app_id } = input;
 
                 await apiRequest(`/api/apps/${encodeURIComponent(app_id)}/messages`, {
@@ -651,7 +651,7 @@ export function registerAppsTools(
         freeTool(userId)
             .tool("apps_upload_images", "Get instructions for uploading images to an app. Returns the upload endpoint and requirements.", AppsUploadImagesSchema.shape)
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const { app_id, image_count } = input;
 
                 return textResult(
@@ -673,7 +673,7 @@ export function registerAppsTools(
         freeTool(userId)
             .tool("apps_generate_codespace_id", "Generate a random codespace ID in the format 'adjective.noun.verb.suffix'. Useful for creating unique app identifiers.", AppsGenerateCodespaceIdSchema.shape)
             .meta({ category: "apps", tier: "free" })
-            .handler(async ({ input: _input, _ctx }) => {
+            .handler(async ({ input: _input }) => {
                 const { generateCodespaceId } = await import("@/lib/apps/codespace-id");
                 const id = generateCodespaceId();
                 return textResult(

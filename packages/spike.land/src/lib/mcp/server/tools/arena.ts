@@ -283,7 +283,7 @@ export function registerArenaTools(
                 comment: z.string().max(2000).optional().describe("Review comment"),
             })
             .meta({ category: "arena", tier: "free" })
-            .handler(async ({ input, _ctx }) => {
+            .handler(async ({ input }) => {
                 const {
                     submission_id,
                     bugs,

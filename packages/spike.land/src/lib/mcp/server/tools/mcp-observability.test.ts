@@ -357,8 +357,8 @@ describe("mcp-observability tools", () => {
         "admin_system_health",
         "admin_user_analytics",
       ];
-      for (const toolName of toolNames) {
-                const result = await handler({});
+      for (const name of toolNames) {
+        const result = await registry.call(name, {});
         expect(getText(result)).not.toContain("PERMISSION_DENIED");
       }
     });

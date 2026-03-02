@@ -95,7 +95,7 @@ describe("filesystem tools", () => {
         file_path: "/src/App.tsx",
         content: "original",
       });
-      const result = await handler({
+      const result = await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/App.tsx",
         content: "updated",
@@ -125,7 +125,7 @@ describe("filesystem tools", () => {
         });
       }
       // 101st file should fail
-      const result = await handler({
+      const result = await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/file100.ts",
         content: "content",
@@ -143,7 +143,7 @@ describe("filesystem tools", () => {
         });
       }
       // Updating an existing file should still work
-      const result = await handler({
+      const result = await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/file0.ts",
         content: "updated content",
@@ -163,7 +163,7 @@ describe("filesystem tools", () => {
         });
       }
       // This should push over 50MB
-      const result = await handler({
+      const result = await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/overflow.ts",
         content: bigContent,
@@ -306,22 +306,22 @@ describe("filesystem tools", () => {
         file_path: "/src/App.tsx",
         content: "app",
       });
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/utils/math.ts",
         content: "math",
       });
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/utils/string.ts",
         content: "string",
       });
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/components/Button.tsx",
         content: "btn",
       });
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/README.md",
         content: "readme",
@@ -402,7 +402,7 @@ describe("filesystem tools", () => {
         content:
           "import React from 'react';\nexport default function App() {\n  return <div>Hello</div>;\n}",
       });
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/utils.ts",
         content:
@@ -493,12 +493,12 @@ describe("filesystem tools", () => {
         file_path: "/src/App.tsx",
         content: "app",
       });
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/utils/math.ts",
         content: "math",
       });
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/package.json",
         content: "{}",
@@ -586,17 +586,17 @@ describe("filesystem tools", () => {
         content:
           "import Button from './components/Button';\nexport default function App() { return <Button />; }",
       });
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/components/Button.tsx",
         content: "export default function Button() { return <button>Click me</button>; }",
       });
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/components/Button.test.tsx",
         content: "import { render } from '@testing-library/react';\ntest('renders', () => {});",
       });
-      await handler({
+      await registry.call("fs_write", {
         codespace_id: "test-app",
         file_path: "/src/utils/math.ts",
         content: "export function add(a: number, b: number) { return a + b; }",
