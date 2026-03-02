@@ -155,7 +155,7 @@ export function registerCodegenTools(registry: ToolRegistry, userId: string, db:
           userId,
           bundleId: input.bundle_id,
           provider: "google",
-          model: input.model ?? "gemini-3.1-flash-image-preview",
+          model: input.model ?? "gemini-3-flash-preview",
           prompt: "Mock prompt",
           generatedCode: "```typescript\nfilepath: test.ts\nexport const x = 1;\n```",
           files: [{ path: "test.ts", content: "export const x = 1;" }],

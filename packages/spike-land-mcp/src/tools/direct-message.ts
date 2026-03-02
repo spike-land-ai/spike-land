@@ -74,7 +74,7 @@ export function registerDirectMessageTools(
       .handler(async ({ input, ctx }) => {
         const { unreadOnly, limit } = input;
 
-        let query = ctx.db
+        const query = ctx.db
           .select({
             id: directMessages.id,
             senderId: directMessages.senderId,

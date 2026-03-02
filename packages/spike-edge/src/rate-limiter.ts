@@ -1,4 +1,6 @@
-export class RateLimiter {
+import { DurableObject } from "cloudflare:workers";
+
+export class RateLimiter extends DurableObject {
   private nextAllowedTime = 0;
   private requestCount = 0;
   private readonly GRACE_LIMIT = 4;

@@ -68,7 +68,7 @@ Response must be valid JSON only, no additional text.`;
 
   const { data: response, error } = await tryCatch(
     ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
+      model: "gemini-3-flash-preview",
       config: {
         responseMimeType: "application/json",
         temperature: 0.3,

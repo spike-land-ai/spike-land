@@ -51,20 +51,20 @@ export const MODEL_REGISTRY: AIModelInfo[] = [
     maxOutputTokens: 8192,
   },
   {
-    id: "gemini-3-pro-image-preview",
-    displayName: "Gemini 3 Pro Image",
+    id: "gemini-3.1-flash-image-preview",
+    displayName: "Gemini 3.1 Flash Image",
     provider: "google",
-    aliases: ["gemini-pro"],
+    aliases: ["gemini-image"],
     capabilities: ["chat", "vision", "image-gen", "structured"],
     maxOutputTokens: 8192,
   },
   {
-    id: "gemini-2.5-flash-image",
-    displayName: "Gemini 2.5 Flash Image",
+    id: "gemini-3.1-pro-preview",
+    displayName: "Gemini 3.1 Pro",
     provider: "google",
-    aliases: ["gemini-nano"],
-    capabilities: ["vision", "image-gen", "structured"],
-    maxOutputTokens: 2048,
+    aliases: ["gemini-pro"],
+    capabilities: ["chat", "vision", "structured"],
+    maxOutputTokens: 8192,
   },
 ];
 

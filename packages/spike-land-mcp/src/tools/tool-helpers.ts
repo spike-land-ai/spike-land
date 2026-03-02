@@ -6,6 +6,7 @@
  */
 
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { tryCatch } from "@spike-land-ai/mcp-server-base";
 import { eq, and } from "drizzle-orm";
 import type { DrizzleDB } from "../db/index";
 import { workspaces, workspaceMembers, vaultSecrets } from "../db/schema";
@@ -253,31 +254,32 @@ export interface SafeToolCallOptions {
 
 /**
  * Wrap a tool handler with error classification and structured error responses.
+ * Uses `tryCatch` from `@spike-land-ai/mcp-server-base` internally.
  */
 export async function safeToolCall(
   toolName: string,
   handler: () => Promise<CallToolResult>,
   options?: SafeToolCallOptions,
 ): Promise<CallToolResult> {
-  try {
-    const handlerPromise = handler();
-    const result = options?.timeoutMs
-      ? await Promise.race([
-          handlerPromise,
-          new Promise<never>((_, reject) =>
-            setTimeout(
-              () => reject(new Error(`Tool ${toolName} timed out after ${options.timeoutMs}ms`)),
-              options.timeoutMs,
-            ),
+  const handlerPromise = options?.timeoutMs
+    ? Promise.race([
+        handler(),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error(`Tool ${toolName} timed out after ${options.timeoutMs}ms`)),
+            options.timeoutMs,
           ),
-        ])
-      : await handlerPromise;
-    return result;
-  } catch (error) {
-    const classified = classifyError(error, toolName);
+        ),
+      ])
+    : handler();
+
+  const result = await tryCatch(handlerPromise);
+  if (!result.ok) {
+    const classified = classifyError(result.error, toolName);
     console.error(`[safeToolCall] ${toolName} failed:`, classified);
     return formatErrorResult(classified);
   }
+  return result.data;
 }
 
 // ─── Result Helpers ───────────────────────────────────────────────────────────

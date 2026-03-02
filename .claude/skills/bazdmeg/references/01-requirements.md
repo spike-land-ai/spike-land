@@ -35,24 +35,26 @@ The value is in understanding and verification.
 
 ---
 
-## The Planning Interview
+## The Planning Interview (MCQ Verification)
 
-This is the single biggest improvement. Before any code is written, the agent
-interviews the developer about the problem.
+This is the single biggest improvement. Before any code is written, the system
+verifies the developer's understanding through multiple-choice questions across
+six concepts: file awareness, test strategy, edge cases, dependency chains,
+failure modes, and verification.
 
-Key questions:
+Unlike free-form Q&A where vague or hand-wavy answers pass undetected, MCQs
+have a single correct answer. The system tracks mastery per concept (2+ correct
+across different question variants) and detects contradictions (previously
+correct answers later contradicted).
 
-1. What is the user flow here?
-2. What data already exists on the server?
-3. Why does this ID appear in the URL?
-4. What happens if this fails?
+**Stopping rules:**
+- Score below 50% on any round: stop and research.
+- 3+ contradictions: stop and review the codebase.
+- All 6 concepts mastered: proceed to implementation.
 
-**Stopping rule:** If you cannot answer a question, stop. Go back to the
-documentation. Do not proceed until you understand.
-
-If the agent had interviewed the developer before the basket PR, it would have
-asked: "What data already exists on the server?" And there would have been no
-answer. That would have stopped the mistake.
+If the MCQ system had been in place for the basket PR, the developer would have
+failed the "dependency chain" and "file awareness" concepts — because they did
+not know what data already existed on the server or which files were relevant.
 
 ---
 

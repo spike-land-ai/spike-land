@@ -134,6 +134,70 @@ export function formatError(err: unknown): CallToolResult {
   return errorResult("INTERNAL_ERROR", message, false);
 }
 
+// ─── Result<T> & tryCatch ─────────────────────────────────────────────────
+
+/**
+ * Discriminated union for functional error handling.
+ *
+ * Use `ok(data)` to create a success, `fail(error)` for a failure, and
+ * `tryCatch(promise)` to wrap any async call.
+ */
+export type Result<T> =
+  | {
+      ok: true;
+      data: T;
+      unwrap(): T;
+      map<U>(fn: (val: T) => U): Result<U>;
+      flatMap<U>(fn: (val: T) => Result<U>): Result<U>;
+    }
+  | {
+      ok: false;
+      error: Error;
+      unwrap(): never;
+      map<U>(fn: (val: T) => U): Result<U>;
+      flatMap<U>(fn: (val: T) => Result<U>): Result<U>;
+    };
+
+export function ok<T>(data: T): Result<T> {
+  return {
+    ok: true,
+    data,
+    unwrap: () => data,
+    map: <U>(fn: (val: T) => U) => ok(fn(data)),
+    flatMap: <U>(fn: (val: T) => Result<U>) => fn(data),
+  };
+}
+
+export function fail<T = never>(error: Error): Result<T> {
+  return {
+    ok: false,
+    error,
+    unwrap: () => {
+      throw error;
+    },
+    map: () => fail(error),
+    flatMap: () => fail(error),
+  };
+}
+
+/**
+ * Async wrapper — returns `Result<T>` with `ok` discriminant.
+ *
+ * ```ts
+ * const result = await tryCatch(fetchSomething());
+ * if (!result.ok) return errorResult("FETCH_FAILED", result.error.message);
+ * return jsonResult(result.data);
+ * ```
+ */
+export async function tryCatch<T>(promise: Promise<T>): Promise<Result<T>> {
+  try {
+    const data = await promise;
+    return ok(data);
+  } catch (err) {
+    return fail(err instanceof Error ? err : new Error(String(err)));
+  }
+}
+
 // ─── Server Factory ───────────────────────────────────────────────────────────
 
 /**

@@ -28,11 +28,11 @@ interface UniqueIndex<Row, Key = string> {
 }
 
 /** A table handle with `.iter()` and named unique-index accessors. */
-interface TableAccessor<Row, _Indexes extends Record<string, UniqueIndex<Row, any>> = Record<string, never>> {
+interface TableAccessor<Row> {
   iter(): Iterable<Row>;
 }
 
-type TableWith<Row, I extends Record<string, any>> = TableAccessor<Row, I> & I;
+type TableWith<Row, I extends Record<string, unknown>> = TableAccessor<Row> & I;
 
 // ─── Per-table types (only the tables consumers actually use) ────────
 
@@ -137,6 +137,7 @@ export interface TypedReducers {
   subjectDelete(id: bigint): void;
   creditsConsume(amount: bigint): void;
   creditsAdd(userId: string, amount: bigint): void;
+  recordPlatformEvent(source: string, eventType: string, metadataJson: string): void;
 }
 
 // ─── Typed re-exports ────────────────────────────────────────────────

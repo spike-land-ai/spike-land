@@ -7,21 +7,18 @@
  * This allowlist prevents runtime errors from invalid model names.
  */
 export const VALID_GEMINI_MODELS = [
-  "gemini-3-pro-image-preview",
-  "gemini-3-flash-preview",
-  "gemini-2.5-flash-image",
+  "gemini-3.1-flash-image-preview",
 ] as const;
 
 /**
  * Model mapping by enhancement tier.
- * - FREE: Uses nano model (gemini-2.5-flash-image) for free tier
- * - TIER_1K/2K/4K: Uses premium model (gemini-3-pro-image-preview)
+ * All tiers use gemini-3.1-flash-image-preview (only available image model).
  */
 const TIER_MODELS = {
-  FREE: "gemini-2.5-flash-image", // Nano model (free tier)
-  TIER_1K: "gemini-3-pro-image-preview", // Premium model
-  TIER_2K: "gemini-3-pro-image-preview", // Premium model
-  TIER_4K: "gemini-3-pro-image-preview", // Premium model
+  FREE: "gemini-3.1-flash-image-preview",
+  TIER_1K: "gemini-3.1-flash-image-preview",
+  TIER_2K: "gemini-3.1-flash-image-preview",
+  TIER_4K: "gemini-3.1-flash-image-preview",
 } as const;
 
 type TierModelKey = keyof typeof TIER_MODELS;
@@ -36,19 +33,16 @@ export function getModelForTier(tier: TierModelKey): string {
 }
 
 /**
- * Default model for backward compatibility.
- * Uses premium model (gemini-3-flash-preview) as default.
+ * Default model for image generation.
  */
-export const DEFAULT_MODEL = "gemini-3-flash-preview";
+export const DEFAULT_MODEL = "gemini-3.1-flash-image-preview";
 export const DEFAULT_TEMPERATURE: number | null = null; // Uses Gemini API defaults
 
 /**
  * Check if a model supports the imageSize parameter.
- * Only gemini-3-pro-image-preview supports imageSize.
- * gemini-2.5-flash-image always outputs 1024px and doesn't accept imageSize.
  */
 export function supportsImageSize(model: string): boolean {
-  return model === "gemini-3-pro-image-preview" || model === "gemini-3-flash-preview";
+  return model === "gemini-3.1-flash-image-preview";
 }
 
 // Timeout for Gemini API requests (configurable via env, default 10 minutes)

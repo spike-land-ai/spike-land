@@ -2,13 +2,14 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    environment: "node",
+    name: "spike-land-mcp",
+    reporter: "../../vitest-minimal-reporter.ts",
+    logLevel: "error",
     globals: true,
+    environment: "node",
     include: ["src/**/*.test.ts"],
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html"],
-      reportsDirectory: "coverage",
       // Include only infra modules; tool definitions are data-only registrations
       // that require integration tests against the real MCP transport
       include: [

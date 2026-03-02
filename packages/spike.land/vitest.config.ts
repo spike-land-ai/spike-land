@@ -8,7 +8,7 @@ export default defineConfig({
     noExternal: ["next-auth"],
   },
   test: {
-    name: "root",
+    name: "spike.land",
     environment: "jsdom",
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
@@ -23,7 +23,7 @@ export default defineConfig({
       "src/middleware.{test,spec}.{ts,tsx}",
       "apps/**/*.{test,spec}.{ts,tsx}",
     ],
-    exclude: ["**/node_modules/**", "**/dist/**", "**/.git/**", "**/mcp-explorer.spec.ts"],
+    exclude: ["**/node_modules/**", "**/dist/**", "**/.git/**", "**/.next/**", "**/mcp-explorer.spec.ts"],
     // Use forks pool for better memory isolation in CI
     // Each test file runs in separate process with fresh memory
     pool: "forks",
@@ -31,17 +31,17 @@ export default defineConfig({
     fileParallelism: true,
     // Suppress console output for a cleaner test run
     silent: true,
-    // Use reporter optimized for CI
+    // Minimal one-line reporter locally, github-actions in CI
     // When VITEST_COVERAGE is set, also use the coverage mapper for intelligent caching
     reporters: process.env.CI
       ? [
           "github-actions",
           ...(process.env.VITEST_COVERAGE ? ["./scripts/vitest-coverage-mapper-reporter.ts"] : []),
         ]
-      : ["default"],
+      : ["../../vitest-minimal-reporter.ts"],
     coverage: {
       provider: "v8",
-      reporter: ["text", "json", "html", "lcov"],
+      reporter: ["text-summary"],
       // Coverage: all src/lib business logic
       include: ["src/lib/**/*.ts"],
       exclude: [

@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { magicLink, createAuthEndpoint, type AuthEndpoint } from "better-auth/plugins";
+import { magicLink } from "better-auth/plugins";
+import { createAuthEndpoint } from "better-auth/api";
 import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
 import * as schema from "./db/schema";
@@ -82,7 +83,7 @@ export function createAuth(env: Env) {
               path: string,
               options: { method: string; body: ReturnType<typeof z.object>; use: never[] },
               handler: (ctx: QRAuthContext) => Promise<Response>,
-            ) => AuthEndpoint
+            ) => unknown
           )(
             "/sign-in/qr",
             {

@@ -10,7 +10,7 @@ import { oauthRoute } from "./oauth";
 import { createMockD1, createMockKV } from "../__test-utils__/mock-env";
 import type { Env } from "../env";
 
-function makeApp(d1Handler?: Parameters<typeof createMockD1>[0]) {
+function makeApp(_d1Handler?: Parameters<typeof createMockD1>[0]) {
   const app = new Hono<{ Bindings: Env }>();
   app.route("/oauth", oauthRoute);
   return app;

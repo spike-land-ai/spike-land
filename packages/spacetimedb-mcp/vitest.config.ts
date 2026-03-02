@@ -3,6 +3,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     name: "spacetimedb-mcp",
+    reporter: "../../vitest-minimal-reporter.ts",
+    logLevel: "error",
     globals: true,
     pool: "forks",
     fileParallelism: true,

@@ -11,14 +11,17 @@ import {
   createMcpServer,
   createZodTool,
   errorResult,
+  fail,
   formatError,
   getText,
   isErrorResult,
   jsonResult,
+  ok,
   startMcpServer,
   textResult,
+  tryCatch,
 } from "./index.js";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
 const mockTransportInstance = {};
@@ -163,6 +166,91 @@ describe("isErrorResult", () => {
 
   it("returns false when isError is false", () => {
     expect(isErrorResult({ content: [], isError: false })).toBe(false);
+  });
+});
+
+// ─── ok ──────────────────────────────────────────────────────────────────
+
+describe("ok", () => {
+  it("creates a success result with data", () => {
+    const result = ok(42);
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.data).toBe(42);
+  });
+
+  it("unwrap returns the data", () => {
+    expect(ok("hello").unwrap()).toBe("hello");
+  });
+
+  it("map transforms the data", () => {
+    const result = ok(3).map((x) => x * 2);
+    expect(result.ok).toBe(true);
+    expect(result.unwrap()).toBe(6);
+  });
+
+  it("flatMap chains results", () => {
+    const result = ok(5).flatMap((x) => ok(x + 1));
+    expect(result.unwrap()).toBe(6);
+  });
+
+  it("flatMap can return a failure", () => {
+    const result = ok(5).flatMap(() => fail(new Error("nope")));
+    expect(result.ok).toBe(false);
+  });
+});
+
+// ─── fail ─────────────────────────────────────────────────────────────────
+
+describe("fail", () => {
+  it("creates a failure result", () => {
+    const result = fail(new Error("bad"));
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.message).toBe("bad");
+  });
+
+  it("unwrap throws the error", () => {
+    expect(() => fail(new Error("boom")).unwrap()).toThrow("boom");
+  });
+
+  it("map propagates the failure", () => {
+    const result = fail<number>(new Error("e")).map((x) => x * 2);
+    expect(result.ok).toBe(false);
+  });
+
+  it("flatMap propagates the failure", () => {
+    const result = fail<number>(new Error("e")).flatMap((x) => ok(x));
+    expect(result.ok).toBe(false);
+  });
+});
+
+// ─── tryCatch ─────────────────────────────────────────────────────────────
+
+describe("tryCatch", () => {
+  it("returns ok for a resolved promise", async () => {
+    const result = await tryCatch(Promise.resolve(42));
+    expect(result.ok).toBe(true);
+    expect(result.unwrap()).toBe(42);
+  });
+
+  it("returns fail for a rejected promise with Error", async () => {
+    const result = await tryCatch(Promise.reject(new Error("oops")));
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.message).toBe("oops");
+  });
+
+  it("wraps non-Error rejections in an Error", async () => {
+    const result = await tryCatch(Promise.reject("string rejection"));
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.message).toBe("string rejection");
+  });
+
+  it("works with async functions", async () => {
+    const asyncFn = async () => {
+      return { name: "test" };
+    };
+    const result = await tryCatch(asyncFn());
+    expect(result.ok).toBe(true);
+    expect(result.unwrap()).toEqual({ name: "test" });
   });
 });
 

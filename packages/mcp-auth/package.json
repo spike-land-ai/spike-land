@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint src/"
+    "lint": "eslint --quiet src/"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",

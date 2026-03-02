@@ -9,7 +9,7 @@ import { detectMimeType, getImageDimensionsFromBuffer } from "../src/lib/images/
 dotenv.config({ path: path.join(__dirname, "..", ".env.local"), quiet: true });
 
 const GEMINI_API_TIMEOUT_MS = 55000; // 55 seconds (under Vercel's 60s limit)
-const DEFAULT_MODEL = "gemini-3-pro-image-preview";
+const DEFAULT_MODEL = "gemini-3.1-flash-image-preview";
 
 interface EnhanceImageParams {
   imageData: string;

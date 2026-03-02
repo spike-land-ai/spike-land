@@ -32,6 +32,10 @@ vi.mock("better-auth/adapters/drizzle", () => ({
 // Mock better-auth/plugins
 vi.mock("better-auth/plugins", () => ({
   magicLink: vi.fn((_opts: unknown) => ({ id: "magic-link" })),
+}));
+
+// Mock better-auth/api
+vi.mock("better-auth/api", () => ({
   createAuthEndpoint: vi.fn((_path: string, _opts: unknown, handler: unknown) => handler),
 }));
 
@@ -67,7 +71,7 @@ describe("createAuth", () => {
     const env = makeEnv({ BETTER_AUTH_SECRET: "my-secret-123" });
     createAuth(env);
     expect(betterAuth).toHaveBeenCalledOnce();
-    const callArg = (betterAuth as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    const callArg = vi.mocked(betterAuth).mock.calls[0][0] as Record<string, unknown>;
     expect(callArg.secret).toBe("my-secret-123");
   });
 
@@ -75,7 +79,7 @@ describe("createAuth", () => {
     const { betterAuth } = await import("better-auth");
     const env = makeEnv({ APP_URL: "https://myapp.example.com" });
     createAuth(env);
-    const callArg = (betterAuth as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    const callArg = vi.mocked(betterAuth).mock.calls[0][0] as Record<string, unknown>;
     expect(callArg.baseURL).toBe("https://myapp.example.com");
   });
 
@@ -83,7 +87,7 @@ describe("createAuth", () => {
     const { betterAuth } = await import("better-auth");
     const env = makeEnv({ APP_URL: undefined });
     createAuth(env);
-    const callArg = (betterAuth as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    const callArg = vi.mocked(betterAuth).mock.calls[0][0] as Record<string, unknown>;
     expect(callArg.baseURL).toBe("http://localhost:3000");
   });
 
@@ -98,7 +102,7 @@ describe("createAuth", () => {
       APPLE_CLIENT_SECRET: "asecret",
     });
     createAuth(env);
-    const callArg = (betterAuth as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    const callArg = vi.mocked(betterAuth).mock.calls[0][0] as Record<string, unknown>;
     expect(callArg.socialProviders.google.clientId).toBe("gid");
     expect(callArg.socialProviders.google.clientSecret).toBe("gsecret");
     expect(callArg.socialProviders.github.clientId).toBe("ghid");
@@ -118,7 +122,7 @@ describe("createAuth", () => {
       APPLE_CLIENT_SECRET: undefined,
     });
     createAuth(env);
-    const callArg = (betterAuth as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    const callArg = vi.mocked(betterAuth).mock.calls[0][0] as Record<string, unknown>;
     expect(callArg.socialProviders.google.clientId).toBe("");
     expect(callArg.socialProviders.github.clientId).toBe("");
     expect(callArg.socialProviders.apple.clientId).toBe("");
@@ -128,7 +132,7 @@ describe("createAuth", () => {
     const { betterAuth } = await import("better-auth");
     const env = makeEnv();
     createAuth(env);
-    const callArg = (betterAuth as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    const callArg = vi.mocked(betterAuth).mock.calls[0][0] as Record<string, unknown>;
     expect(callArg.emailAndPassword.enabled).toBe(true);
   });
 
@@ -136,7 +140,7 @@ describe("createAuth", () => {
     const { betterAuth } = await import("better-auth");
     const env = makeEnv();
     createAuth(env);
-    const callArg = (betterAuth as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    const callArg = vi.mocked(betterAuth).mock.calls[0][0] as Record<string, unknown>;
     expect(callArg.session.cookieCache.enabled).toBe(true);
     expect(callArg.session.cookieCache.maxAge).toBe(60);
   });
@@ -145,7 +149,7 @@ describe("createAuth", () => {
     const { betterAuth } = await import("better-auth");
     const env = makeEnv();
     createAuth(env);
-    const callArg = (betterAuth as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    const callArg = vi.mocked(betterAuth).mock.calls[0][0] as Record<string, unknown>;
     expect(callArg.user.additionalFields.role.type).toBe("string");
   });
 
@@ -153,7 +157,7 @@ describe("createAuth", () => {
     const { betterAuth } = await import("better-auth");
     const env = makeEnv();
     createAuth(env);
-    const callArg = (betterAuth as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    const callArg = vi.mocked(betterAuth).mock.calls[0][0] as Record<string, unknown>;
     expect(Array.isArray(callArg.plugins)).toBe(true);
     expect(callArg.plugins.length).toBeGreaterThanOrEqual(2);
     // qr-auth plugin has id field
@@ -166,7 +170,7 @@ describe("createAuth", () => {
     const env = makeEnv();
     createAuth(env);
     expect(drizzleAdapter).toHaveBeenCalledOnce();
-    const adapterArgs = (drizzleAdapter as ReturnType<typeof vi.fn>).mock.calls[0];
+    const adapterArgs = vi.mocked(drizzleAdapter).mock.calls[0] as unknown[];
     expect(adapterArgs[1]).toEqual({ provider: "sqlite" });
   });
 

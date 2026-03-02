@@ -1,16 +1,58 @@
-import { Outlet, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { Outlet, Link, useRouterState } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useStdb } from "@/hooks/useStdb";
 import { LoginButton } from "@/components/LoginButton";
+
+const DEFAULT_TITLE = "spike.land - AI Development Platform";
+const DEFAULT_DESCRIPTION =
+  "Build, deploy, and manage AI-powered applications with real-time collaboration";
+
+const ROUTE_META: Record<string, { title: string; description: string }> = {
+  "/": { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },
+  "/tools": {
+    title: "Tools - spike.land",
+    description: "Browse and manage AI tools on the spike.land platform",
+  },
+  "/apps": {
+    title: "Apps - spike.land",
+    description: "Build and deploy AI-powered applications on spike.land",
+  },
+  "/store": {
+    title: "Store - spike.land",
+    description: "Discover and install AI tools and applications from the spike.land store",
+  },
+  "/messages": {
+    title: "Messages - spike.land",
+    description: "Real-time messaging and collaboration on spike.land",
+  },
+  "/analytics": {
+    title: "Analytics - spike.land",
+    description: "View usage analytics and insights for your spike.land apps",
+  },
+  "/learn": {
+    title: "Learn & Verify - spike.land",
+    description: "Learn from any content and prove your understanding through interactive quizzes",
+  },
+  "/settings": {
+    title: "Settings - spike.land",
+    description: "Configure your spike.land account and preferences",
+  },
+  "/login": {
+    title: "Sign In - spike.land",
+    description: "Sign in to spike.land to access your AI development platform",
+  },
+};
 
 const navItems = [
   { to: "/", label: "Dashboard" },
   { to: "/tools", label: "Tools" },
   { to: "/apps", label: "Apps" },
   { to: "/store", label: "Store" },
+  { to: "/learn", label: "Learn" },
   { to: "/messages", label: "Messages" },
   { to: "/analytics", label: "Analytics" },
+  { to: "/dashboard/bazdmeg", label: "BAZDMEG" },
   { to: "/settings", label: "Settings" },
 ] as const;
 
@@ -18,6 +60,39 @@ export function RootLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { connected } = useStdb();
   useAnalytics();
+
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    // Match exact path first, then strip dynamic segments for a best-effort match
+    const meta =
+      ROUTE_META[pathname] ??
+      ROUTE_META[pathname.replace(/\/[^/]+$/, "")] ??
+      { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION };
+
+    document.title = meta.title;
+
+    const descEl = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (descEl) descEl.content = meta.description;
+
+    const ogTitle = document.querySelector<HTMLMetaElement>('meta[property="og:title"]');
+    if (ogTitle) ogTitle.content = meta.title;
+
+    const ogDesc = document.querySelector<HTMLMetaElement>('meta[property="og:description"]');
+    if (ogDesc) ogDesc.content = meta.description;
+
+    const twTitle = document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]');
+    if (twTitle) twTitle.content = meta.title;
+
+    const twDesc = document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]');
+    if (twDesc) twDesc.content = meta.description;
+
+    const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (canonical) canonical.href = `https://spike.land${pathname === "/" ? "" : pathname}`;
+
+    const ogUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
+    if (ogUrl) ogUrl.content = `https://spike.land${pathname === "/" ? "" : pathname}`;
+  }, [pathname]);
 
   return (
     <div className="flex h-screen bg-gray-50 text-gray-900">

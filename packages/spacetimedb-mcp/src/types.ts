@@ -76,6 +76,10 @@ export type StdbErrorCode =
   | "INVALID_INPUT"
   | "ALREADY_CONNECTED";
 
+// ─── Re-export tryCatch from mcp-server-base ───
+
+export { tryCatch } from "@spike-land-ai/mcp-server-base";
+
 // ─── Result Helpers ───
 
 export interface CallToolResult {

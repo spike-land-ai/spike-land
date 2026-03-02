@@ -16,7 +16,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src/",
+    "lint": "eslint --quiet src/",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
   },

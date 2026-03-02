@@ -3,6 +3,8 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     name: "state-machine",
+    reporter: "../../vitest-minimal-reporter.ts",
+    logLevel: "error",
     globals: true,
     environment: "node",
     include: ["src/**/*.test.ts"],

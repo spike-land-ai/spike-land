@@ -26,7 +26,7 @@ function makeEnv(d1Override?: Parameters<typeof createMockD1>[0]) {
 }
 
 // Create a simple test app that uses authMiddleware
-async function createTestApp(d1Override?: Parameters<typeof createMockD1>[0]) {
+async function createTestApp(_d1Override?: Parameters<typeof createMockD1>[0]) {
   const { authMiddleware } = await import("./middleware");
   const app = new Hono<{ Bindings: Env }>();
 

@@ -3,7 +3,7 @@ import { getGeminiClient } from "../ai/gemini-client";
 import { AnalyzeMessageResponseSchema } from "../validations/smart-routing";
 import { logger } from "@/lib/logger";
 
-const ANALYSIS_MODEL = "gemini-3-flash-preview-exp";
+const ANALYSIS_MODEL = "gemini-3-flash-preview";
 
 export interface AnalysisInput {
   content: string;

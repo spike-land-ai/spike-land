@@ -32,32 +32,50 @@ production.
 
 ---
 
-## Workflow: Planning Interview
+## Workflow: Planning Interview (MCQ Verification)
 
-Run this interview BEFORE any code is written. The agent asks the developer
-these questions and does not proceed until all are answered.
+Run this interview BEFORE any code is written. The system tests understanding
+across 6 concepts using multiple-choice questions. Free-form answers are
+replaced by verifiable MCQ rounds.
 
-1. **What problem are we solving?** -- State the problem in your own words, not
-   the ticket's words.
-2. **What data already exists?** -- What is the server-side source of truth?
-   What APIs exist? What state is already managed?
-3. **What is the user flow?** -- Walk through every step the user takes,
-   including edge cases and error states.
-4. **What should NOT change?** -- Identify existing behavior, contracts, or
-   interfaces that must be preserved.
-5. **What happens on failure?** -- Network errors, invalid input, race
-   conditions, missing data.
-6. **How will we verify it works?** -- Name the specific tests: unit, E2E,
-   agent-based. What constitutes "done"?
-7. **Can I explain this to a teammate?** -- If you cannot explain the approach
-   to someone else, stop and learn more.
+### How it works
 
-**Stopping rules:**
+1. **First call**: Provide `taskDescription` (and optionally `packageName`).
+   The system generates a session with 6 concepts, each with 3 variant MCQs
+   (4 options, 1 correct). Returns a `sessionId` and the first round of 3
+   questions.
 
-- If any answer is "I don't know" -- stop and research before proceeding.
-- If the developer defers to "the AI will figure it out" -- stop. The
-  requirement IS the product.
-- If no test plan exists -- stop. Untested code is unshippable code.
+2. **Follow-up calls**: Provide `sessionId` and `answers: [a, b, c]` (0-3
+   indices). The system evaluates answers, tracks mastery per concept, and
+   detects contradictions.
+
+3. **Mastery**: A concept is mastered when 2+ correct answers are given across
+   different question variants.
+
+### Six Concepts Tested
+
+| # | Concept          | What it tests                                      |
+|---|------------------|----------------------------------------------------|
+| 1 | file_awareness   | Which files to modify, test files, config files     |
+| 2 | test_strategy    | Test types, failure testing, mocking strategy       |
+| 3 | edge_cases       | Empty input, service unavailability, concurrency    |
+| 4 | dependency_chain | Internal packages, external deps, build order       |
+| 5 | failure_modes    | Runtime errors, partial failures, rollback strategy |
+| 6 | verification     | Proving correctness, commands, monitoring metrics   |
+
+### Stopping Rules
+
+- **Score < 50% on a round** (fewer than 2/3 correct): FAILED. "Research
+  before continuing. Score too low."
+- **3+ total contradictions** (correct answer later contradicted): FAILED.
+  "Too many contradictions. Review codebase before continuing."
+- **All 6 concepts mastered**: PASSED. "Proceed to implementation."
+
+### Contradiction Detection
+
+If you previously answered a question correctly but later give a different
+(wrong) answer to the same question variant, that counts as a contradiction.
+Contradictions reset the concept's mastery to 0.
 
 ---
 

@@ -4,5 +4,18 @@
   },
   "enabledPlugins": {
     "frontend-design@claude-code-plugins": true
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Write|Edit|MultiEdit|Glob|Grep|LS",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/bazdmeg-jail.sh"
+          }
+        ]
+      }
+    ]
   }
 }

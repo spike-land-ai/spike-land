@@ -92,8 +92,7 @@ export async function enhanceImageWithGemini(params: EnhanceImageParams): Promis
       : undefined;
 
   // Build config based on model capabilities
-  // gemini-2.5-flash-image doesn't support imageSize (always 1024px)
-  // gemini-3-pro-image-preview supports imageSize
+  // gemini-3.1-flash-image-preview supports imageSize
   const config = {
     responseModalities: ["IMAGE", "TEXT"],
     ...(supportsImageSize(modelToUse) && {
@@ -182,7 +181,7 @@ export async function generateImageWithGemini(params: GenerateImageParams): Prom
   };
 
   // Build config based on model capabilities
-  // DEFAULT_MODEL (gemini-3-pro-image-preview) supports imageSize
+  // DEFAULT_MODEL (gemini-3.1-flash-image-preview) supports imageSize
   const config = {
     responseModalities: ["IMAGE", "TEXT"],
     ...(supportsImageSize(DEFAULT_MODEL) && {
@@ -253,7 +252,7 @@ export async function modifyImageWithGemini(params: ModifyImageParams): Promise<
   };
 
   // Build config based on model capabilities
-  // DEFAULT_MODEL (gemini-3-pro-image-preview) supports imageSize
+  // DEFAULT_MODEL (gemini-3.1-flash-image-preview) supports imageSize
   const config = {
     responseModalities: ["IMAGE", "TEXT"],
     ...(supportsImageSize(DEFAULT_MODEL) && {

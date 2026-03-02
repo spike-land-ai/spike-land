@@ -10,9 +10,13 @@ import { StorePage } from "./routes/store";
 import { MessagesIndexPage } from "./routes/messages/index";
 import { MessageThreadPage } from "./routes/messages/$userId";
 import { AnalyticsPage } from "./routes/analytics";
+import { BazdmegDashboardPage } from "./routes/dashboard/bazdmeg";
 import { SettingsPage } from "./routes/settings";
 import { LoginPage } from "./routes/login";
 import { CallbackPage } from "./routes/callback";
+import { LearnIndexPage } from "./routes/learn/index";
+import { LearnSessionPage } from "./routes/learn/$sessionId";
+import { BadgePage } from "./routes/learn/badge/$token";
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -78,6 +82,12 @@ const analyticsRoute = createRoute({
   component: AnalyticsPage,
 });
 
+const bazdmegDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/bazdmeg",
+  component: BazdmegDashboardPage,
+});
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
@@ -96,6 +106,24 @@ const callbackRoute = createRoute({
   component: CallbackPage,
 });
 
+const learnIndexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/learn",
+  component: LearnIndexPage,
+});
+
+const learnSessionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/learn/$sessionId",
+  component: LearnSessionPage,
+});
+
+const learnBadgeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/learn/badge/$token",
+  component: BadgePage,
+});
+
 export const routeTree = rootRoute.addChildren([
   indexRoute,
   toolsIndexRoute,
@@ -107,9 +135,13 @@ export const routeTree = rootRoute.addChildren([
   messagesIndexRoute,
   messageThreadRoute,
   analyticsRoute,
+  bazdmegDashboardRoute,
   settingsRoute,
   loginRoute,
   callbackRoute,
+  learnBadgeRoute,
+  learnSessionRoute,
+  learnIndexRoute,
 ]);
 
 export const router = createRouter({ routeTree });

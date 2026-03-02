@@ -49,11 +49,12 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint --quiet .",
     "start": "node dist/index.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.27.1",
+    "@spike-land-ai/mcp-server-base": "workspace:*",
     "zod": "4.3.6"
   },
   "devDependencies": {

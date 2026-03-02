@@ -144,6 +144,9 @@ const TOOL_MODULES: Array<[string, string]> = [
   // ─── esbuild ───
   ["../tools/esbuild", "registerEsbuildTools"],
   ["../tools/build-from-github", "registerBuildFromGithubTools"],
+
+  // ─── Learning Quiz ───
+  ["../tools/quiz", "registerQuizTools"],
 ];
 
 /**

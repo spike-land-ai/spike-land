@@ -81,7 +81,7 @@ export class SpacetimeServerTransport implements Transport {
       if (this.supportedTools.has(task.toolName)) {
         try {
           await this.client.claimMcpTask(task.id);
-        } catch (e) {
+        } catch (_e) {
           // Task might have been claimed by another node, or already completed
           continue;
         }
@@ -93,7 +93,7 @@ export class SpacetimeServerTransport implements Transport {
         let args = {};
         try {
           args = JSON.parse(task.argumentsJson);
-        } catch (e) {
+        } catch (_e) {
           // ignore
         }
 

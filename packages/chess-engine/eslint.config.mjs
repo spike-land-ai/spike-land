@@ -1,2 +1,2 @@
-import config from "@spike-land-ai/eslint-config";
-export default config;
+import { createConfig } from "@spike-land-ai/eslint-config";
+export default createConfig({ ignores: ["src/generated/**"] });

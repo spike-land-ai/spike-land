@@ -12,35 +12,33 @@ import {
 
 describe("gemini-models", () => {
   describe("VALID_GEMINI_MODELS", () => {
-    it("should contain three known models", () => {
-      expect(VALID_GEMINI_MODELS).toHaveLength(3);
-      expect(VALID_GEMINI_MODELS).toContain("gemini-3-pro-image-preview");
-      expect(VALID_GEMINI_MODELS).toContain("gemini-3-flash-preview");
-      expect(VALID_GEMINI_MODELS).toContain("gemini-2.5-flash-image");
+    it("should contain only the available image model", () => {
+      expect(VALID_GEMINI_MODELS).toHaveLength(1);
+      expect(VALID_GEMINI_MODELS).toContain("gemini-3.1-flash-image-preview");
     });
   });
 
   describe("getModelForTier", () => {
-    it("should return nano model for FREE tier", () => {
-      expect(getModelForTier("FREE")).toBe("gemini-2.5-flash-image");
+    it("should return gemini-3.1-flash-image-preview for FREE tier", () => {
+      expect(getModelForTier("FREE")).toBe("gemini-3.1-flash-image-preview");
     });
 
-    it("should return premium model for TIER_1K", () => {
-      expect(getModelForTier("TIER_1K")).toBe("gemini-3-pro-image-preview");
+    it("should return gemini-3.1-flash-image-preview for TIER_1K", () => {
+      expect(getModelForTier("TIER_1K")).toBe("gemini-3.1-flash-image-preview");
     });
 
-    it("should return premium model for TIER_2K", () => {
-      expect(getModelForTier("TIER_2K")).toBe("gemini-3-pro-image-preview");
+    it("should return gemini-3.1-flash-image-preview for TIER_2K", () => {
+      expect(getModelForTier("TIER_2K")).toBe("gemini-3.1-flash-image-preview");
     });
 
-    it("should return premium model for TIER_4K", () => {
-      expect(getModelForTier("TIER_4K")).toBe("gemini-3-pro-image-preview");
+    it("should return gemini-3.1-flash-image-preview for TIER_4K", () => {
+      expect(getModelForTier("TIER_4K")).toBe("gemini-3.1-flash-image-preview");
     });
   });
 
   describe("DEFAULT_MODEL and DEFAULT_TEMPERATURE", () => {
-    it("should use gemini-3-flash-preview as default model", () => {
-      expect(DEFAULT_MODEL).toBe("gemini-3-flash-preview");
+    it("should use gemini-3.1-flash-image-preview as default model", () => {
+      expect(DEFAULT_MODEL).toBe("gemini-3.1-flash-image-preview");
     });
 
     it("should have null default temperature (uses API defaults)", () => {
@@ -49,16 +47,8 @@ describe("gemini-models", () => {
   });
 
   describe("supportsImageSize", () => {
-    it("should return true for gemini-3-pro-image-preview", () => {
-      expect(supportsImageSize("gemini-3-pro-image-preview")).toBe(true);
-    });
-
-    it("should return true for gemini-3-flash-preview", () => {
-      expect(supportsImageSize("gemini-3-flash-preview")).toBe(true);
-    });
-
-    it("should return false for gemini-2.5-flash-image", () => {
-      expect(supportsImageSize("gemini-2.5-flash-image")).toBe(false);
+    it("should return true for gemini-3.1-flash-image-preview", () => {
+      expect(supportsImageSize("gemini-3.1-flash-image-preview")).toBe(true);
     });
 
     it("should return false for unknown model names", () => {

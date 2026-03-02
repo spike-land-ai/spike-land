@@ -52,24 +52,24 @@ vi.mock("@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js", () => (
 }));
 
 // Mock drizzle — expose a setter so tests can override findFirst behavior
-let mockFindFirst = vi.fn(async (..._args: any[]) => null as any);
+let mockFindFirst = vi.fn(async (..._args: unknown[]) => null);
 vi.mock("drizzle-orm/d1", () => ({
   drizzle: vi.fn(() => ({
     query: {
       user: {
-        findFirst: (...args: any[]) => mockFindFirst(...args),
+        findFirst: (...args: unknown[]) => mockFindFirst(...args),
       },
     },
   })),
 }));
 
 // Mock auth module
-let mockGetSession = vi.fn(async (..._args: any[]) => null as any);
+let mockGetSession = vi.fn(async (..._args: unknown[]) => null);
 vi.mock("./auth", () => ({
   createAuth: vi.fn(() => ({
     handler: vi.fn(async (_req: Request) => new Response("auth response", { status: 200 })),
     api: {
-      getSession: (...args: any[]) => mockGetSession(...args),
+      getSession: (...args: unknown[]) => mockGetSession(...args),
     },
   })),
 }));
@@ -89,8 +89,8 @@ const makeRequest = (method: string, path: string, headers?: Record<string, stri
 describe("worker fetch handler", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockFindFirst = vi.fn(async (..._args: any[]) => null as any);
-    mockGetSession = vi.fn(async (..._args: any[]) => null as any);
+    mockFindFirst = vi.fn(async (..._args: unknown[]) => null);
+    mockGetSession = vi.fn(async (..._args: unknown[]) => null);
     registeredTools.length = 0;
   });
 
@@ -234,7 +234,7 @@ describe("MCP tool: verify-session", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     registeredTools.length = 0;
-    mockGetSession = vi.fn(async (..._args: any[]) => null as any);
+    mockGetSession = vi.fn(async (..._args: unknown[]) => null);
   });
 
   async function getVerifySessionTool() {
@@ -304,7 +304,7 @@ describe("MCP tool: get-user-by-email", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     registeredTools.length = 0;
-    mockFindFirst = vi.fn(async (..._args: any[]) => null as any);
+    mockFindFirst = vi.fn(async (..._args: unknown[]) => null);
   });
 
   async function getEmailTool() {

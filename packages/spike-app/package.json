@@ -8,16 +8,15 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src/",
+    "lint": "eslint --quiet src/",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@tanstack/react-router": "^1.163.3",
-    "oidc-client-ts": "^3.4.1",
+    "better-auth": "^1.5.1",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-oidc-context": "^3.3.0"
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@spike-land-ai/eslint-config": "*",

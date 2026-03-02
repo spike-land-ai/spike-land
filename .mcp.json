@@ -3,6 +3,10 @@
     "spacetimedb-platform": {
       "command": "node",
       "args": ["./packages/spacetimedb-platform/dist/index.js"]
+    },
+    "bazdmeg-mcp": {
+      "command": "node",
+      "args": ["./packages/bazdmeg-mcp/dist/index.js"]
     }
   }
 }

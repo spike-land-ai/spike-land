@@ -8,6 +8,8 @@ export default defineConfig({
     },
   },
   test: {
+    reporter: "../../vitest-minimal-reporter.ts",
+    logLevel: "error",
     environment: "jsdom",
     globals: true,
     passWithNoTests: true,

@@ -9,4 +9,5 @@ export interface Env {
   GITHUB_TOKEN: string;
   SPACETIMEDB_URI: string;
   ALLOWED_ORIGINS: string;
+  QUIZ_BADGE_SECRET: string;
 }

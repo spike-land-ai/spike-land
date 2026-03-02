@@ -5,7 +5,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { SpacetimeMcpClient } from "../client.js";
-import { errorResult, jsonResult } from "../types.js";
+import { errorResult, jsonResult, tryCatch } from "../types.js";
 
 export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient): void {
   // ─── stdb_connect ───
@@ -19,21 +19,19 @@ export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient
       token: z.string().optional().describe("Auth token for reconnection"),
     },
     async ({ uri, moduleName, token }) => {
-      try {
-        const state = await client.connect(uri, moduleName, token);
-        return jsonResult({
-          connected: true,
-          identity: state.identity,
-          token: state.token,
-          moduleName: state.moduleName,
-        });
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Already connected")) {
-          return errorResult("ALREADY_CONNECTED", message, false);
+      const result = await tryCatch(client.connect(uri, moduleName, token));
+      if (!result.ok) {
+        if (result.error.message.includes("Already connected")) {
+          return errorResult("ALREADY_CONNECTED", result.error.message, false);
         }
-        return errorResult("CONNECTION_FAILED", message, true);
+        return errorResult("CONNECTION_FAILED", result.error.message, true);
       }
+      return jsonResult({
+        connected: true,
+        identity: result.data.identity,
+        token: result.data.token,
+        moduleName: result.data.moduleName,
+      });
     },
   );
 
@@ -44,13 +42,9 @@ export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient
     "Disconnect from the current SpacetimeDB Swarm",
     {},
     async () => {
-      try {
-        client.disconnect();
-        return jsonResult({ disconnected: true });
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        return errorResult("NOT_CONNECTED", message, false);
-      }
+      const result = await tryCatch(Promise.resolve(client.disconnect()));
+      if (!result.ok) return errorResult("NOT_CONNECTED", result.error.message, false);
+      return jsonResult({ disconnected: true });
     },
   );
 
@@ -63,25 +57,23 @@ export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient
       category: z.string().optional().describe("Category filter (e.g. 'code', 'image')"),
     },
     async ({ category }) => {
-      try {
-        const tools = client.listRegisteredTools(category);
-        return jsonResult({
-          count: tools.length,
-          tools: tools.map((t) => ({
-            name: t.name,
-            description: t.description,
-            inputSchema: t.inputSchema,
-            providerIdentity: t.providerIdentity,
-            category: t.category,
-          })),
-        });
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) {
-          return errorResult("NOT_CONNECTED", message, false);
+      const result = await tryCatch(Promise.resolve(client.listRegisteredTools(category)));
+      if (!result.ok) {
+        if (result.error.message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", result.error.message, false);
         }
-        return errorResult("QUERY_FAILED", message, false);
+        return errorResult("QUERY_FAILED", result.error.message, false);
       }
+      return jsonResult({
+        count: result.data.length,
+        tools: result.data.map((t) => ({
+          name: t.name,
+          description: t.description,
+          inputSchema: t.inputSchema,
+          providerIdentity: t.providerIdentity,
+          category: t.category,
+        })),
+      });
     },
   );
 
@@ -95,19 +87,17 @@ export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient
       argumentsJson: z.string().describe("JSON string of the tool arguments"),
     },
     async ({ toolName, argumentsJson }) => {
-      try {
-        await client.invokeToolRequest(toolName, argumentsJson);
-        return jsonResult({
-          status: "pending",
-          message: "Task dispatched to swarm.",
-        });
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) {
-          return errorResult("NOT_CONNECTED", message, false);
+      const result = await tryCatch(client.invokeToolRequest(toolName, argumentsJson));
+      if (!result.ok) {
+        if (result.error.message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", result.error.message, false);
         }
-        return errorResult("REDUCER_FAILED", message, true);
+        return errorResult("REDUCER_FAILED", result.error.message, true);
       }
+      return jsonResult({
+        status: "pending",
+        message: "Task dispatched to swarm.",
+      });
     },
   );
 
@@ -120,25 +110,23 @@ export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient
       statusFilter: z.string().optional().describe("Filter by 'pending', 'claimed', 'completed', 'failed'"),
     },
     async ({ statusFilter }) => {
-      try {
-        const tasks = client.listMcpTasks(statusFilter);
-        return jsonResult({
-          count: tasks.length,
-          tasks: tasks.map((t) => ({
-            id: t.id.toString(),
-            toolName: t.toolName,
-            status: t.status,
-            resultJson: t.resultJson,
-            error: t.error,
-          })),
-        });
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) {
-          return errorResult("NOT_CONNECTED", message, false);
+      const result = await tryCatch(Promise.resolve(client.listMcpTasks(statusFilter)));
+      if (!result.ok) {
+        if (result.error.message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", result.error.message, false);
         }
-        return errorResult("QUERY_FAILED", message, false);
+        return errorResult("QUERY_FAILED", result.error.message, false);
       }
+      return jsonResult({
+        count: result.data.length,
+        tasks: result.data.map((t) => ({
+          id: t.id.toString(),
+          toolName: t.toolName,
+          status: t.status,
+          resultJson: t.resultJson,
+          error: t.error,
+        })),
+      });
     },
   );
 }
