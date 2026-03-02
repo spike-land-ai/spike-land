@@ -2,7 +2,7 @@ type ConnectionState = "disconnected" | "connecting" | "connected" | "error";
 
 type Listener = () => void;
 
-interface StdbClient {
+export interface StdbClient {
   state: ConnectionState;
   error: Error | null;
   ws: WebSocket | null;

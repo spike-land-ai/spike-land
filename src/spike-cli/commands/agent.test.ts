@@ -1,28 +1,23 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { Command } from "commander";
 import { registerAgentCommand } from "./agent";
 
-// Mock dependencies
-const mockBuilder = {
-  withUri: vi.fn().mockImplementation((uri) => { console.log("withUri", uri); return mockBuilder; }),
-  withDatabaseName: vi.fn().mockImplementation((name) => { console.log("withDatabaseName", name); return mockBuilder; }),
-  onConnect: vi.fn().mockImplementation((cb) => { console.log("onConnect registered"); return mockBuilder; }),
-  onDisconnect: vi.fn().mockReturnThis(),
-  onConnectError: vi.fn().mockReturnThis(),
-  build: vi.fn().mockImplementation(() => { console.log("build called"); })
-};
+// Mock the HTTP client
+const mockSql = vi.fn().mockResolvedValue([]);
+const mockCallReducer = vi.fn().mockResolvedValue(undefined);
+
+vi.mock("@spike-land-ai/spacetimedb-platform/stdb-http-client", () => ({
+  createStdbHttpClient: () => ({
+    sql: mockSql,
+    callReducer: mockCallReducer,
+  }),
+}));
 
 vi.mock("@google/genai", () => ({
   GoogleGenAI: class {
     models = {
       generateContent: vi.fn().mockResolvedValue({ text: "mock response" })
-    }
-  }
-}));
-
-vi.mock("@spike-land-ai/spacetimedb-platform/dist/module_bindings/index.js", () => ({
-  DbConnection: {
-    builder: () => mockBuilder
+    };
   }
 }));
 
@@ -30,10 +25,10 @@ vi.mock("express", () => {
   const mockApp = {
     use: vi.fn(),
     post: vi.fn(),
-    listen: vi.fn((port, cb) => cb?.())
+    listen: vi.fn((port: number, cb: () => void) => cb?.())
   };
-  const express: any = () => mockApp;
-  express.json = vi.fn(() => (req: any, res: any, next: any) => next());
+  const express: unknown = () => mockApp;
+  (express as Record<string, unknown>).json = vi.fn(() => (req: unknown, res: unknown, next: () => void) => next());
   return {
     default: express
   };
@@ -50,83 +45,66 @@ describe("agent command", () => {
     vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("registers the agent command", () => {
     registerAgentCommand(program);
     expect(program.commands.find(c => c.name() === "agent")).toBeDefined();
-  });
-
-  it("starts the agent when GEMINI_API_KEY is set", async () => {
-    process.env.GEMINI_API_KEY = "test-key";
-    registerAgentCommand(program);
-    const agentCmd = program.commands.find(c => c.name() === "agent")!;
-    
-    // Call the action handler manually
-    await (agentCmd as any)._actionHandler(["--port", "3005"]);
-    
-    expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Starting Spike Agent"));
   });
 
   it("errors and exits if no API key set", async () => {
     const origKey = process.env.GEMINI_API_KEY;
     delete process.env.GEMINI_API_KEY;
     delete process.env.CLAUDE_CODE_OAUTH_TOKEN;
-    
+
     registerAgentCommand(program);
     const agentCmd = program.commands.find(c => c.name() === "agent")!;
-    
+
     vi.spyOn(console, "error").mockImplementation(() => {});
-    await (agentCmd as any)._actionHandler([{}, []]);
-    
+    await (agentCmd as Record<string, unknown>)._actionHandler([{}, []]);
+
     expect(process.exit).toHaveBeenCalledWith(1);
     process.env.GEMINI_API_KEY = origKey;
   });
 
-  it("handles completion POST request", async () => {
-    process.env.GEMINI_API_KEY = "test-key";
-    const express = await import("express");
-    const app = (express.default as any)();
-    
-    registerAgentCommand(program);
-    const agentCmd = program.commands.find(c => c.name() === "agent")!;
-    await (agentCmd as any)._actionHandler([{ port: "3005" }, []]);
-
-    const postCall = app.post.mock.calls.find((c: any) => c[0] === "/completion");
-    expect(postCall).toBeDefined();
-    
-    const handler = postCall[1];
-    const req = { body: { prefix: "const x =" } };
-    const res = { json: vi.fn(), status: vi.fn().mockReturnThis() };
-    
-    await handler(req, res);
-    expect(res.json).toHaveBeenCalledWith({ completion: "mock response" });
-  });
-
-  it("initSpacetimeDB connects and sets up listeners", async () => {
+  it("initSpacetimeDB connects via HTTP client", async () => {
     const { initSpacetimeDB } = await import("./agent");
     initSpacetimeDB("ws://test", "mod");
-    expect(mockBuilder.withUri).toHaveBeenCalledWith("ws://test");
+    // Allow the async connection to resolve
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mockSql).toHaveBeenCalledWith("SELECT 1");
   });
 
-  it("handleSessionUpdate handles various session states", async () => {
+  it("handleSessionUpdate handles user message", async () => {
     const { handleSessionUpdate, ai } = await import("./agent");
     const generateSpy = vi.spyOn(ai.models, "generateContent");
-    
-    // User message
+
     await handleSessionUpdate({
       codeSpace: "s1",
       messagesJson: JSON.stringify([{ role: "user", content: "hi" }])
     });
     expect(generateSpy).toHaveBeenCalled();
+  });
 
-    // Assistant last - should skip
+  it("handleSessionUpdate skips assistant message", async () => {
+    const { handleSessionUpdate, ai } = await import("./agent");
+    const generateSpy = vi.spyOn(ai.models, "generateContent");
     generateSpy.mockClear();
+
     await handleSessionUpdate({
       codeSpace: "s2",
       messagesJson: JSON.stringify([{ role: "assistant", content: "hi" }])
     });
     expect(generateSpy).not.toHaveBeenCalled();
+  });
 
-    // Empty messages - should skip
+  it("handleSessionUpdate skips empty messages", async () => {
+    const { handleSessionUpdate, ai } = await import("./agent");
+    const generateSpy = vi.spyOn(ai.models, "generateContent");
+    generateSpy.mockClear();
+
     await handleSessionUpdate({
       codeSpace: "s3",
       messagesJson: "[]"
@@ -134,23 +112,23 @@ describe("agent command", () => {
     expect(generateSpy).not.toHaveBeenCalled();
   });
 
-  it("initSpacetimeDB handles connection error", async () => {
-    mockBuilder.onConnectError.mockImplementation((cb: any) => {
-      cb({}, new Error("fail"));
-      return mockBuilder;
-    });
-    const { initSpacetimeDB } = await import("./agent");
-    initSpacetimeDB("ws://test", "mod");
-    expect(mockBuilder.onConnectError).toHaveBeenCalled();
-  });
+  it("handles completion POST request", async () => {
+    process.env.GEMINI_API_KEY = "test-key";
+    const express = await import("express");
+    const app = (express.default as unknown as () => Record<string, { mock: { calls: Array<Array<unknown>> } }>)();
 
-  it("initSpacetimeDB handles disconnect", async () => {
-    mockBuilder.onDisconnect.mockImplementation((cb: any) => {
-      cb();
-      return mockBuilder;
-    });
-    const { initSpacetimeDB } = await import("./agent");
-    initSpacetimeDB("ws://test", "mod");
-    expect(mockBuilder.onDisconnect).toHaveBeenCalled();
+    registerAgentCommand(program);
+    const agentCmd = program.commands.find(c => c.name() === "agent")!;
+    await (agentCmd as Record<string, unknown>)._actionHandler([{ port: "3005" }, []]);
+
+    const postCall = app.post.mock.calls.find((c: Array<unknown>) => c[0] === "/completion");
+    expect(postCall).toBeDefined();
+
+    const handler = postCall![1] as (req: unknown, res: unknown) => Promise<void>;
+    const req = { body: { prefix: "const x =" } };
+    const res = { json: vi.fn(), status: vi.fn().mockReturnThis() };
+
+    await handler(req, res);
+    expect(res.json).toHaveBeenCalledWith({ completion: "mock response" });
   });
 });

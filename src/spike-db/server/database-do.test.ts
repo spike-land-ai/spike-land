@@ -280,7 +280,7 @@ describe("identity", () => {
 
 describe("executeReducer", () => {
   it("executes a known reducer and returns mutations", () => {
-    let insertCalled = false;
+    const insertCalled = false;
     const schema: DatabaseSchema = {
       name: "test",
       tables: {

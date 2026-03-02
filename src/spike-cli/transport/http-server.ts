@@ -9,6 +9,7 @@ import http from "node:http";
 import { randomUUID } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ServerManager, NamespacedTool } from "../multiplexer/server-manager.js";
 
 export interface HttpServerOptions {
@@ -41,7 +42,7 @@ export function createMcpServer(manager: ServerManager): McpServer {
       tool.inputSchema as Parameters<typeof server.tool>[2],
       async (args: Record<string, unknown>) => {
         const result = await manager.callTool(tool.namespacedName, args);
-        return result as ReturnType<Parameters<typeof server.tool>[3]>;
+        return result as unknown as CallToolResult;
       },
     );
   }

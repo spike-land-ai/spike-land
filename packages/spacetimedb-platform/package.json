@@ -12,9 +12,16 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./src/module_bindings/index": "./src/module_bindings/index.ts",
-    "./src/module_bindings/index.js": "./src/module_bindings/index.ts",
-    "./dist/module_bindings/index.js": "./dist/module_bindings/index.js"
+    "./stdb-http-client": {
+      "types": "./dist/stdb-http-client.d.ts",
+      "import": "./dist/stdb-http-client.js",
+      "default": "./dist/stdb-http-client.js"
+    },
+    "./image-types": {
+      "types": "./dist/image-types.d.ts",
+      "import": "./dist/image-types.js",
+      "default": "./dist/image-types.js"
+    }
   },
   "files": [
     "dist",
@@ -42,7 +49,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.27.1",
-    "spacetimedb": "patch:spacetimedb@npm%3A2.0.2#~/.yarn/patches/spacetimedb-npm-2.0.2-9d60528158.patch",
+
     "zod": "4.3.6"
   },
   "devDependencies": {

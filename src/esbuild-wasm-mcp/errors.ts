@@ -19,14 +19,15 @@ export function formatEsbuildError(err: Error): {
   isError: true;
 } {
   if (isEsbuildError(err)) {
+    const esbuildErr = err as EsbuildError & Error;
     return {
       content: [
         {
           type: "text",
           text: JSON.stringify(
             {
-              errors: err.errors ?? [{ text: err.message ?? String(err) }],
-              warnings: err.warnings ?? [],
+              errors: esbuildErr.errors ?? [{ text: esbuildErr.message ?? String(err) }],
+              warnings: esbuildErr.warnings ?? [],
             },
             null,
             2,

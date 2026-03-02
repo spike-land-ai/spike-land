@@ -1,5 +1,6 @@
 // Remove unused import
 import { applySessionDelta, computeSessionHash, tryCatch } from "@spike-land-ai/code";
+import type { SessionDelta } from "@spike-land-ai/code";
 import type { Code } from "./chatRoom";
 
 /**
@@ -139,7 +140,8 @@ export class WebSocketHandler {
     }
 
     if (data.type === "subscribe") {
-      for (const topic of data.topics) {
+      const subscribeTopics = Array.isArray(data.topics) ? (data.topics as string[]) : [];
+      for (const topic of subscribeTopics) {
         session.subscribedTopics.add(topic);
         if (!this.topics.has(topic)) {
           this.topics.set(topic, new Set());
@@ -150,13 +152,14 @@ export class WebSocketHandler {
       this.safeSend(session.webSocket, {
         type: "ack",
         action: "subscribe",
-        topics: data.topics,
+        topics: subscribeTopics,
       });
       return;
     }
 
     if (data.type === "unsubscribe") {
-      for (const topic of data.topics) {
+      const unsubscribeTopics = Array.isArray(data.topics) ? (data.topics as string[]) : [];
+      for (const topic of unsubscribeTopics) {
         session.subscribedTopics.delete(topic);
         this.topics.get(topic)?.delete(session.webSocket);
       }
@@ -164,13 +167,13 @@ export class WebSocketHandler {
       this.safeSend(session.webSocket, {
         type: "ack",
         action: "unsubscribe",
-        topics: data.topics,
+        topics: unsubscribeTopics,
       });
       return;
     }
 
     if (data.type === "publish") {
-      const subscribers = this.topics.get(data.topic);
+      const subscribers = this.topics.get(data.topic as string);
       if (subscribers) {
         const message = JSON.stringify({
           type: "message",
@@ -194,16 +197,16 @@ export class WebSocketHandler {
 
     if (data.type === "swarm_register") {
       session.swarmAgent = {
-        agentId: data.agent_id || session.name || `agent-${Date.now()}`,
-        displayName: data.display_name || session.name || "anonymous",
-        capabilities: Array.isArray(data.capabilities) ? data.capabilities : [],
+        agentId: (typeof data.agent_id === "string" ? data.agent_id : "") || session.name || `agent-${Date.now()}`,
+        displayName: (typeof data.display_name === "string" ? data.display_name : "") || session.name || "anonymous",
+        capabilities: Array.isArray(data.capabilities) ? (data.capabilities as string[]) : [],
         registeredAt: Date.now(),
       };
-      session.name = session.swarmAgent.agentId;
+      session.name = session.swarmAgent!.agentId;
       this.safeSend(session.webSocket, {
         type: "swarm_registered",
-        agent_id: session.swarmAgent.agentId,
-        display_name: session.swarmAgent.displayName,
+        agent_id: session.swarmAgent!.agentId,
+        display_name: session.swarmAgent!.displayName,
       });
       return;
     }
@@ -300,7 +303,7 @@ export class WebSocketHandler {
         return;
       }
 
-      const patchedSession = applySessionDelta(currentSession, data);
+      const patchedSession = applySessionDelta(currentSession, data as unknown as SessionDelta);
       const { error } = await tryCatch(this.code.updateAndBroadcastSession(patchedSession));
       if (error) {
         this.safeSend(session.webSocket, {
@@ -328,7 +331,7 @@ export class WebSocketHandler {
     }
 
     if (data.name && session.name !== data.name) {
-      session.name = data.name;
+      session.name = typeof data.name === "string" ? data.name : String(data.name);
 
       // Deliver blocked messages from previous sessions with the same name
       for (const prevSession of this.wsSessions) {

@@ -2,11 +2,6 @@ import { defineConfig } from "vitest/config";
 import { resolve } from "path";
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "src"),
-    },
-  },
   test: {
     reporter: "../../vitest-minimal-reporter.ts",
     logLevel: "error",
@@ -15,6 +10,9 @@ export default defineConfig({
     passWithNoTests: true,
     setupFiles: ["./src/test-setup.ts"],
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
+    alias: {
+      "@": resolve(__dirname, "src"),
+    },
     coverage: {
       provider: "v8",
       include: ["src/**/*.ts", "src/**/*.tsx"],

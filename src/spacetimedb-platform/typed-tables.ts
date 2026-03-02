@@ -1,24 +1,22 @@
 /**
- * Typed wrappers for SpacetimeDB auto-generated table and reducer accessors.
+ * Typed wrappers for SpacetimeDB table and reducer accessors.
  *
- * The codegen emits `tables: any` and `reducers: any` because internal schema
- * types don't survive the `any` annotation on intermediate variables.
- * This module re-exports them with proper generic interfaces so consumers
- * get full type safety without touching auto-generated code.
+ * These interfaces define the shape of typed table/reducer access
+ * used by consumers like mcp-image-studio. With the SDK removed,
+ * the runtime values are stubs — consumers should migrate to the
+ * HTTP client for actual data access.
  */
 
-import {
-  tables as rawTables,
-  reducers as rawReducers,
-  type Image,
-  type Album,
-  type AlbumImage,
-  type Pipeline,
-  type EnhancementJob,
-  type GenerationJob,
-  type Subject,
-  type Credits,
-} from "./module_bindings/index.js";
+import type {
+  Image,
+  Album,
+  AlbumImage,
+  Pipeline,
+  EnhancementJob,
+  GenerationJob,
+  Subject,
+  Credits,
+} from "./image-types.js";
 
 // ─── Table accessor shape ───────────────────────────────────────────
 
@@ -140,7 +138,22 @@ export interface TypedReducers {
   recordPlatformEvent(source: string, eventType: string, metadataJson: string): void;
 }
 
-// ─── Typed re-exports ────────────────────────────────────────────────
+// ─── Stub re-exports ────────────────────────────────────────────────
+// These were backed by the spacetimedb SDK's in-memory tables.
+// Now stubs — consumers should migrate to the HTTP client.
 
-export const typedTables = rawTables as unknown as TypedTables;
-export const typedReducers = rawReducers as unknown as TypedReducers;
+export const typedTables: TypedTables = new Proxy({} as TypedTables, {
+  get(_target, prop) {
+    throw new Error(
+      `typedTables.${String(prop)} is no longer available. Use the HTTP client (stdb-http-client) instead.`,
+    );
+  },
+});
+
+export const typedReducers: TypedReducers = new Proxy({} as TypedReducers, {
+  get(_target, prop) {
+    throw new Error(
+      `typedReducers.${String(prop)} is no longer available. Use the HTTP client (stdb-http-client) instead.`,
+    );
+  },
+});

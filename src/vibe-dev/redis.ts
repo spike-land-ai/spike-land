@@ -53,8 +53,8 @@ async function redisCommand<T>(config: RedisConfig, command: string[]): Promise<
     throw new Error(`Redis command failed: ${response.status} - ${error}`);
   }
 
-  const data = await response.json();
-  return data.result as T;
+  const data = await response.json() as { result: T };
+  return data.result;
 }
 
 /**
@@ -83,8 +83,8 @@ async function redisPipeline<T>(config: RedisConfig, commands: string[][]): Prom
     throw new Error(`Redis pipeline failed: ${response.status} - ${error}`);
   }
 
-  const data = await response.json();
-  return data.map((r: { result: T }) => r.result);
+  const data = await response.json() as Array<{ result: T }>;
+  return data.map((r) => r.result);
 }
 
 /**

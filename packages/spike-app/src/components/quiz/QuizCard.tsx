@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 interface QuizCardProps {
   questionIndex: number;
   question: string;

@@ -32,7 +32,7 @@ module/                # SpacetimeDB server module (deployed to Maincloud)
     └── lib.ts         # Tables (Agent, AgentMessage, Task) + reducers
 ```
 
-**Dependencies**: `@modelcontextprotocol/sdk`, `zod` for validation, `spacetimedb` (runtime-only, dynamically imported).
+**Dependencies**: `@modelcontextprotocol/sdk`, `zod` for validation. Live client uses `stdb-http-client` from spacetimedb-platform (native HTTP fetch, no SDK).
 
 ## MCP Tools
 

@@ -48,7 +48,7 @@ export class SpikeDatabase extends DurableObject<Env> {
 
     const reducerMatch = url.pathname.match(/^\/reducer\/(.+)$/);
     if (reducerMatch && request.method === "POST") {
-      return this.handleReducerHttp(reducerMatch[1], request);
+      return this.handleReducerHttp(reducerMatch[1]!, request);
     }
 
     if (url.pathname === "/health") {

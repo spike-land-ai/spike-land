@@ -43,7 +43,7 @@ async function hmacVerify(secret: string, data: string, signatureB64: string): P
     ["verify"],
   );
   const signatureBytes = fromBase64Url(signatureB64);
-  return crypto.subtle.verify("HMAC", key, signatureBytes, encoder.encode(data));
+  return crypto.subtle.verify("HMAC", key, signatureBytes as BufferSource, encoder.encode(data));
 }
 
 /** Generate a new identity (64 hex chars) and signed token. */
@@ -63,7 +63,7 @@ export async function verifyToken(
   const parts = token.split(".");
   if (parts.length !== 3) return null;
 
-  const [identity, timestampStr, signature] = parts;
+  const [identity, timestampStr, signature] = parts as [string, string, string];
   const timestamp = Number(timestampStr);
   if (!Number.isFinite(timestamp)) return null;
 

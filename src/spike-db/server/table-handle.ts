@@ -74,7 +74,7 @@ export class TableHandle<T extends Record<string, unknown>> {
   insert(row: T): T {
     const colNames = Object.keys(this.tableDef.columns);
     const values = colNames.map((name) =>
-      serializeValue(row[name], this.tableDef.columns[name]),
+      serializeValue(row[name], this.tableDef.columns[name]!),
     );
     const placeholders = colNames.map(() => "?").join(", ");
 
@@ -103,7 +103,7 @@ export class TableHandle<T extends Record<string, unknown>> {
     );
     const rows = result.toArray();
     if (rows.length === 0) return undefined;
-    return deserializeRow<T>(rows[0], this.tableDef.columns);
+    return deserializeRow<T>(rows[0]!, this.tableDef.columns);
   }
 
   /** Find all rows matching column = value. */
@@ -131,7 +131,7 @@ export class TableHandle<T extends Record<string, unknown>> {
 
     const setClauses = updateEntries.map(([key]) => `${key} = ?`).join(", ");
     const setValues = updateEntries.map(([key, val]) =>
-      serializeValue(val, this.tableDef.columns[key]),
+      serializeValue(val, this.tableDef.columns[key]!),
     );
 
     const pkCol = this.tableDef.columns[pk];

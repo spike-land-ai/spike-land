@@ -5,7 +5,7 @@
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { ListToolsRequestSchema, CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { ListToolsRequestSchema, CallToolRequestSchema, type CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ServerManager } from "./server-manager.js";
 
 export class MultiplexerServer {
@@ -29,16 +29,16 @@ export class MultiplexerServer {
       return { tools };
     });
 
-    this.server.setRequestHandler(CallToolRequestSchema, async (req) => {
+    this.server.setRequestHandler(CallToolRequestSchema, async (req, _extra) => {
       const { name, arguments: args } = req.params;
       try {
         const result = await this.manager.callTool(name, (args ?? {}) as Record<string, unknown>);
-        return result;
+        return result as unknown as CallToolResult;
       } catch (err) {
         return {
           content: [{ type: "text", text: String(err) }],
           isError: true,
-        };
+        } as CallToolResult;
       }
     });
   }

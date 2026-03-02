@@ -308,6 +308,7 @@ export class Code implements DurableObject {
       html: "<div></div>",
       css: "",
       codeSpace: "default",
+      messages: [],
     });
 
     this.session = this.backupSession;
@@ -464,9 +465,9 @@ export class Code implements DurableObject {
 
       if (sessionCore && sessionCore.codeSpace === codeSpace) {
         // Ensure loaded core is for the correct codespace
-        const code = (await this.largeStorage.get<string>("session_code")) ?? sessionCore.code;
+        const code = (await this.largeStorage.get<string>("session_code")) ?? "";
         const transpiled =
-          (await this.largeStorage.get<string>("session_transpiled")) ?? sessionCore.transpiled;
+          (await this.largeStorage.get<string>("session_transpiled")) ?? "";
 
         const r2HtmlKey = `r2_html_${codeSpace}`;
         const r2CssKey = `r2_css_${codeSpace}`;
@@ -520,6 +521,8 @@ export class Code implements DurableObject {
               `,
             html: "<div>Write your code here!</div>",
             css: "",
+            transpiled: "",
+            messages: [],
           });
         } else {
           // Don't fetch from ourselves - use a default template instead
@@ -553,6 +556,8 @@ export class Code implements DurableObject {
                 code: `export default () => (<>Write your code here!</>);`,
                 html: "<div>Write your code here!</div>",
                 css: "",
+                transpiled: "",
+                messages: [],
               });
             }
           } else {
@@ -562,6 +567,8 @@ export class Code implements DurableObject {
               code: `export default () => (<>Write your code here!</>);`,
               html: "<div>Write your code here!</div>",
               css: "",
+              transpiled: "",
+              messages: [],
             });
           }
 
@@ -627,7 +634,7 @@ export class Code implements DurableObject {
 
       if (request.method === "POST" && request.url.endsWith("/session")) {
         try {
-          const newSession = await request.json();
+          const newSession = await request.json() as ICodeSession;
           await this.updateAndBroadcastSession(newSession);
         } catch (_error) {
           return new Response("Invalid session data", { status: 400 });
@@ -693,11 +700,11 @@ export class Code implements DurableObject {
 
     console.log(`[updateAndBroadcastSession] Broadcasting patch to WebSocket clients`);
     console.log(
-      `[updateAndBroadcastSession] Patch includes code change: ${patch.delta?.code !== undefined}`,
+      `[updateAndBroadcastSession] Patch includes code change: ${(patch.delta as Record<string, unknown>)?.code !== undefined}`,
     );
     console.log(
       `[updateAndBroadcastSession] Patch includes transpiled change: ${
-        patch.delta?.transpiled !== undefined
+        (patch.delta as Record<string, unknown>)?.transpiled !== undefined
       }`,
     );
     console.log(

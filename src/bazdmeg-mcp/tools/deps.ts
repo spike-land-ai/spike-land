@@ -25,7 +25,7 @@ function buildTree(
 
   if (pkg?.deps) {
     for (let i = 0; i < pkg.deps.length; i++) {
-      const dep = pkg.deps[i];
+      const dep = pkg.deps[i]!;
       const isLast = i === pkg.deps.length - 1;
       const prefix = isLast ? "  └── " : "  ├── ";
       const childIndent = indent + (isLast ? "      " : "  │   ");
@@ -38,7 +38,7 @@ function buildTree(
           const childPkg = packages[dep];
           if (childPkg?.deps) {
             for (let j = 0; j < childPkg.deps.length; j++) {
-              const childDep = childPkg.deps[j];
+              const childDep = childPkg.deps[j]!;
               const childIsLast = j === childPkg.deps.length - 1;
               const childPrefix = childIsLast ? "  └── " : "  ├── ";
               output += `${childIndent}${childPrefix}${childDep}${visited.has(childDep) ? " (circular)" : ""}\n`;
@@ -131,7 +131,7 @@ function buildList(
 
     let output = "## Topological Order (build order)\n\n";
     for (let i = 0; i < filtered.length; i++) {
-      const name = filtered[i];
+      const name = filtered[i]!;
       const pkg = packages[name];
       const deps = pkg?.deps?.length ?? 0;
       output += `${i + 1}. \`${name}\` (${pkg?.kind ?? "?"}, ${deps} deps)\n`;

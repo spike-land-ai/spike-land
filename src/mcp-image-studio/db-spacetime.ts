@@ -1,5 +1,4 @@
 import {
-    type DbConnection,
     typedTables as tables,
     typedReducers as reducers,
     type Image as SpacetimeImage,
@@ -40,7 +39,7 @@ function fromMicros(micros: bigint): Date {
 function toImageRow(row: SpacetimeImage): ImageRow {
     return {
         id: row.id as ImageId,
-        userId: row.userIdentity.toHexString(),
+        userId: row.userIdentity,
         name: row.name,
         description: row.description || null,
         originalUrl: row.originalUrl,
@@ -62,7 +61,7 @@ function toJobRow(row: SpacetimeEnhancementJob): EnhancementJobRow {
     return {
         id: row.id as JobId,
         imageId: row.imageId as ImageId,
-        userId: row.userIdentity.toHexString(),
+        userId: row.userIdentity,
         tier: row.tier as EnhancementTier,
         creditsCost: Number(row.creditsCost),
         status: row.status as JobStatus,
@@ -85,7 +84,7 @@ function toAlbumRow(row: SpacetimeAlbum): AlbumRow {
     return {
         id: row.id.toString(),
         handle: row.handle as AlbumHandle,
-        userId: row.userIdentity.toHexString(),
+        userId: row.userIdentity,
         name: row.name,
         description: row.description || null,
         coverImageId: (row.coverImageId as ImageId) || null,
@@ -114,7 +113,7 @@ function toPipelineRow(row: SpacetimePipeline): PipelineRow {
         id: row.id as PipelineId,
         name: row.name,
         description: row.description || null,
-        userId: row.userIdentity ? row.userIdentity.toHexString() : null,
+        userId: row.userIdentity ? row.userIdentity : null,
         visibility: row.visibility as PipelineVisibility,
         shareToken: row.shareToken || null,
         tier: row.tier as EnhancementTier,
@@ -131,7 +130,7 @@ function toPipelineRow(row: SpacetimePipeline): PipelineRow {
 function toGenerationJobRow(row: SpacetimeGenerationJob): GenerationJobRow {
     return {
         id: row.id as JobId,
-        userId: row.userIdentity.toHexString(),
+        userId: row.userIdentity,
         type: row.jobType as "GENERATE" | "MODIFY",
         tier: row.tier as EnhancementTier,
         creditsCost: Number(row.creditsCost),
@@ -151,7 +150,7 @@ function toGenerationJobRow(row: SpacetimeGenerationJob): GenerationJobRow {
 function toSubjectRow(row: SpacetimeSubject): SubjectRow {
     return {
         id: row.id.toString(),
-        userId: row.userIdentity.toHexString(),
+        userId: row.userIdentity,
         imageId: row.imageId as ImageId,
         label: row.label,
         type: row.subjectType as SubjectType,
@@ -160,7 +159,7 @@ function toSubjectRow(row: SpacetimeSubject): SubjectRow {
     };
 }
 
-export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
+export function createSpacetimeDb(_conn: unknown): ImageStudioDeps["db"] {
     return {
         async imageCreate(data) {
             reducers.imageCreate(
@@ -181,7 +180,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
             const start = Date.now();
             while (Date.now() - start < 5000) {
                 const found = Array.from(tables.image.iter()).find(
-                    (img) => img.originalR2Key === data.originalR2Key && img.userIdentity.toHexString() === data.userId
+                    (img) => img.originalR2Key === data.originalR2Key && img.userIdentity === data.userId
                 );
                 if (found) return toImageRow(found);
                 await new Promise((resolve) => setTimeout(resolve, 100));
@@ -196,7 +195,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
 
         async imageFindMany(opts) {
             let results = Array.from(tables.image.iter())
-                .filter((img) => img.userIdentity.toHexString() === opts.userId)
+                .filter((img) => img.userIdentity === opts.userId)
                 .map((img) => toImageRow(img));
 
             if (opts.search) {
@@ -241,7 +240,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
         },
 
         async imageCount(userId) {
-            return Array.from(tables.image.iter()).filter((img) => img.userIdentity.toHexString() === userId)
+            return Array.from(tables.image.iter()).filter((img) => img.userIdentity === userId)
                 .length;
         },
 
@@ -257,7 +256,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
             const start = Date.now();
             while (Date.now() - start < 5000) {
                 const found = Array.from(tables.enhancement_job.iter()).find(
-                    (j) => j.imageId === data.imageId && j.userIdentity.toHexString() === data.userId && j.status === data.status
+                    (j) => j.imageId === data.imageId && j.userIdentity === data.userId && j.status === data.status
                 );
                 if (found) return toJobRow(found);
                 await new Promise((resolve) => setTimeout(resolve, 100));
@@ -278,7 +277,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
 
         async jobFindMany(opts) {
             let results = Array.from(tables.enhancement_job.iter()).filter(
-                (j) => j.userIdentity.toHexString() === opts.userId,
+                (j) => j.userIdentity === opts.userId,
             );
             if (opts.imageId) results = results.filter((j) => j.imageId === opts.imageId);
             if (opts.status) results = results.filter((j) => j.status === opts.status);
@@ -353,7 +352,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
 
         async albumFindMany(opts) {
             const results = Array.from(tables.album.iter()).filter(
-                (a) => a.userIdentity.toHexString() === opts.userId,
+                (a) => a.userIdentity === opts.userId,
             );
             let rows = results.map((a) => {
                 const row = toAlbumRow(a);
@@ -394,7 +393,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
 
         async albumMaxSortOrder(userId) {
             const results = Array.from(tables.album.iter()).filter(
-                (a) => a.userIdentity.toHexString() === userId,
+                (a) => a.userIdentity === userId,
             );
             if (results.length === 0) return 0;
             return Math.max(...results.map((a) => a.sortOrder));
@@ -479,7 +478,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
             const start = Date.now();
             while (Date.now() - start < 5000) {
                 const found = Array.from(tables.pipeline.iter()).find(
-                    (p) => p.name === data.name && (data.userId ? p.userIdentity && p.userIdentity.toHexString() === data.userId : !p.userIdentity)
+                    (p) => p.name === data.name && (data.userId ? p.userIdentity && p.userIdentity === data.userId : !p.userIdentity)
                 );
                 if (found) return toPipelineRow(found);
                 await new Promise((resolve) => setTimeout(resolve, 100));
@@ -497,7 +496,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
 
         async pipelineFindMany(opts) {
             const results = Array.from(tables.pipeline.iter()).filter(
-                (p) => p.userIdentity && p.userIdentity.toHexString() === opts.userId,
+                (p) => p.userIdentity && p.userIdentity === opts.userId,
             );
             let rows = results.map((p) => toPipelineRow(p));
             rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
@@ -542,7 +541,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
             const start = Date.now();
             while (Date.now() - start < 5000) {
                 const found = Array.from(tables.generation_job.iter()).find(
-                    (j) => j.prompt === data.prompt && j.userIdentity.toHexString() === data.userId && j.status === data.status
+                    (j) => j.prompt === data.prompt && j.userIdentity === data.userId && j.status === data.status
                 );
                 if (found) return toGenerationJobRow(found);
                 await new Promise((resolve) => setTimeout(resolve, 100));
@@ -579,7 +578,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
             const start = Date.now();
             while (Date.now() - start < 5000) {
                 const found = Array.from(tables.subject.iter()).find(
-                    (s) => s.imageId === data.imageId && s.label === data.label && s.userIdentity.toHexString() === data.userId
+                    (s) => s.imageId === data.imageId && s.label === data.label && s.userIdentity === data.userId
                 );
                 if (found) return toSubjectRow(found);
                 await new Promise((resolve) => setTimeout(resolve, 100));
@@ -589,7 +588,7 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
 
         async subjectFindMany(opts) {
             return Array.from(tables.subject.iter())
-                .filter((s) => s.userIdentity.toHexString() === opts.userId)
+                .filter((s) => s.userIdentity === opts.userId)
                 .map((s) => toSubjectRow(s));
         },
 
@@ -630,18 +629,18 @@ export function createSpacetimeDb(_conn: DbConnection): ImageStudioDeps["db"] {
     };
 }
 
-export function createSpacetimeCredits(_conn: DbConnection): ImageStudioDeps["credits"] {
+export function createSpacetimeCredits(_conn: unknown): ImageStudioDeps["credits"] {
     return {
         async hasEnough(userId, amount) {
             const creds = Array.from(tables.credits.iter()).find(
-                (c) => c.userIdentity.toHexString() === userId,
+                (c) => c.userIdentity === userId,
             );
             return (creds?.balance ?? 0n) >= BigInt(amount);
         },
 
         async consume(opts) {
             const creds = Array.from(tables.credits.iter()).find(
-                (c) => c.userIdentity.toHexString() === opts.userId,
+                (c) => c.userIdentity === opts.userId,
             );
             if (!creds || creds.balance < BigInt(opts.amount)) {
                 return { success: false, remaining: Number(creds?.balance ?? 0n), error: "Insufficient balance" };
@@ -657,7 +656,7 @@ export function createSpacetimeCredits(_conn: DbConnection): ImageStudioDeps["cr
 
         async getBalance(userId) {
             const creds = Array.from(tables.credits.iter()).find(
-                (c) => c.userIdentity.toHexString() === userId,
+                (c) => c.userIdentity === userId,
             );
             return creds ? { remaining: Number(creds.balance) } : null;
         },

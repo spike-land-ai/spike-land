@@ -13,8 +13,6 @@ SpacetimeDB 2.0 platform module for spike.land — users, tools, apps, agents, c
 # SpacetimeDB module
 spacetime build                                                          # Compile WASM module
 spacetime publish rightful-dirt-5033                                     # Deploy to maincloud
-spacetime generate --lang=typescript --out-dir=src/module_bindings       # Regenerate TS bindings
-
 # TypeScript / MCP server
 npm run build        # tsc
 npm run dev          # tsc --watch
@@ -34,10 +32,9 @@ src/
 ├── client-live.ts        # Live SpacetimeDB client (maincloud)
 ├── types.ts              # Shared TypeScript types
 ├── types.test.ts         # Type tests
-├── module_bindings/      # Auto-generated SpacetimeDB TypeScript bindings (49 files)
-│   ├── index.ts          # Re-exports all tables and reducers
-│   ├── *_table.ts        # Table definitions (14 tables)
-│   └── *_reducer.ts      # Reducer definitions (30+ reducers)
+├── stdb-http-client.ts   # Native HTTP fetch client for SpacetimeDB (no SDK)
+├── image-types.ts        # Image-related type definitions
+├── typed-tables.ts       # Typed table definitions
 ├── tools/                # MCP tool implementations
 │   ├── user-tools.ts     # User registration, profile, OAuth
 │   ├── app-tools.ts      # App CRUD, versioning, status
@@ -80,14 +77,6 @@ Messaging: `send_dm`, `mark_dm_read`, `send_agent_message`, `mark_agent_message_
 Agents: `register_agent`, `unregister_agent`
 Tasks: `claim_mcp_task`, `complete_mcp_task`
 Monitoring: `record_health_check`, `record_platform_event`
-
-### Module Bindings
-
-Never edit files in `src/module_bindings/` by hand. Regenerate after any schema change:
-
-```bash
-spacetime generate --lang=typescript --out-dir=src/module_bindings
-```
 
 ### MCP Server Pattern
 

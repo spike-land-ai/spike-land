@@ -39,6 +39,39 @@ export default defineConfig({
           ...(process.env.VITEST_COVERAGE ? ["./scripts/vitest-coverage-mapper-reporter.ts"] : []),
         ]
       : ["../../vitest-minimal-reporter.ts"],
+    alias: [
+      // Map @store-apps/* sub-path imports to packages/store-apps/*
+      {
+        find: /^@store-apps\/(.+)$/,
+        replacement: path.resolve(__dirname, "./packages/store-apps/$1"),
+      },
+      { find: "@/components", replacement: path.resolve(__dirname, "./src/components") },
+      { find: "@/ui", replacement: path.resolve(__dirname, "./src/components/ui") },
+      { find: "@/lib", replacement: path.resolve(__dirname, "./src/lib") },
+      { find: "@/utils", replacement: path.resolve(__dirname, "./src/lib/utils") },
+      { find: "@/hooks", replacement: path.resolve(__dirname, "./src/hooks") },
+      { find: "@/auth", replacement: path.resolve(__dirname, "./src/auth.ts") },
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+      { find: "@apps", replacement: path.resolve(__dirname, "./apps") },
+      { find: "@vercel/kv", replacement: path.resolve(__dirname, "./vitest.mock-vercel-kv.ts") },
+      // Mock next-view-transitions to avoid ESM import issues
+      {
+        find: "next-view-transitions",
+        replacement: path.resolve(__dirname, "./vitest.mock-next-view-transitions.tsx"),
+      },
+      // Fix ESM module resolution for next-auth imports
+      // Using require.resolve for Yarn PnP compatibility
+      { find: "next/link", replacement: require.resolve("next/link") },
+      { find: "next/image", replacement: require.resolve("next/image") },
+      { find: "next/server", replacement: require.resolve("next/server") },
+      // Map @prisma/client to the generated Prisma client location
+      { find: "@prisma/client", replacement: path.resolve(__dirname, "./src/generated/prisma") },
+      // Fix: spike-cli exports field references index.mjs but only index.js exists in dist
+      {
+        find: "@spike-land-ai/spike-cli",
+        replacement: path.resolve(__dirname, "../../packages/spike-cli/dist/index.js"),
+      },
+    ],
     coverage: {
       provider: "v8",
       reporter: ["text-summary"],

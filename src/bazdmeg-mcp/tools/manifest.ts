@@ -55,7 +55,7 @@ export function registerManifestTools(server: McpServer): void {
           report += `|---------|${"-".repeat(field.length + 2)}|\n`;
 
           for (const [name, pkg] of entries) {
-            const value = (pkg as Record<string, unknown>)[field];
+            const value = (pkg as unknown as Record<string, unknown>)[field];
             const display = value === undefined ? "—" : JSON.stringify(value);
             report += `| ${name} | ${display} |\n`;
           }

@@ -2,7 +2,7 @@ import type { ICodeSession } from "@/lib/interfaces";
 import { computeSessionHash, sanitizeSession } from "@/lib/make-sess";
 import { tryCatch } from "@/lib/try-catch";
 import type { ISessionSynchronizer } from "./types";
-import { getStdbClient, connectToSpacetimeDB, onStdbConnect } from "@/lib/stdb";
+import { getStdbClient, connectToSpacetimeDB } from "@/lib/stdb";
 
 /**
  * SessionSynchronizer enables communication for code sessions
@@ -23,56 +23,10 @@ export class SessionSynchronizer implements ISessionSynchronizer {
     // Ensure connection is started
     connectToSpacetimeDB();
 
-    // Subscribe when connected
-    onStdbConnect((conn) => {
-      conn.db.code_session?.onInsert((ctx, row) => {
-        if (row.codeSpace === this.codeSpace) {
-          const event = ctx.event as Record<string, unknown>;
-          const identity = event.callerIdentity as { toHexString(): string } | undefined;
-          this.handleDbUpdate(row, identity?.toHexString() ?? "unknown");
-        }
-      });
-
-      conn.db.code_session?.onUpdate((ctx, _oldRow, newRow) => {
-        if (newRow.codeSpace === this.codeSpace) {
-          const event = ctx.event as Record<string, unknown>;
-          const identity = event.callerIdentity as { toHexString(): string } | undefined;
-          this.handleDbUpdate(newRow, identity?.toHexString() ?? "unknown");
-        }
-      });
-    });
+    // TODO: Real-time subscriptions not supported via HTTP client
   }
 
-  private handleDbUpdate(row: Record<string, unknown>, senderId: string) {
-    try {
-      let messages = [];
-      try {
-        messages = JSON.parse((row.messagesJson as string) || "[]");
-      } catch (_e) {}
-
-      const newData: ICodeSession = {
-        codeSpace: row.codeSpace as string,
-        code: row.code as string,
-        html: row.html as string,
-        css: row.css as string,
-        transpiled: row.transpiled as string,
-        messages: messages,
-      };
-
-      if (!this.session) {
-        this.session = sanitizeSession(newData);
-      } else {
-        this.session = sanitizeSession({
-          ...this.session,
-          ...newData,
-        });
-      }
-
-      this.notifySubscribers({ ...this.session, sender: senderId });
-    } catch (error) {
-      console.error("Error in SessionSynchronizer SpacetimeDB handler:", error);
-    }
-  }
+  // handleDbUpdate removed — will be re-added when real-time WebSocket subscriptions are implemented
 
   private notifySubscribers(session: ICodeSession & { sender: string }): void {
     this.subscribers.forEach((cb) => {
@@ -125,7 +79,7 @@ export class SessionSynchronizer implements ISessionSynchronizer {
         transpiled: "",
       });
     } else {
-      this.session = sanitizeSession(data);
+      this.session = sanitizeSession(data as ICodeSession);
     }
     return this.session!;
   }
@@ -154,16 +108,15 @@ export class SessionSynchronizer implements ISessionSynchronizer {
 
       // Sync to SpacetimeDB
       const client = getStdbClient();
-      if (client?.reducers) {
-        const reducers = client.reducers as Record<string, ((...args: unknown[]) => void) | undefined>;
-        reducers.update_code_session?.(
+      if (client) {
+        client.callReducer("update_code_session", [
           this.session.codeSpace,
           this.session.code || "",
           this.session.html || "",
           this.session.css || "",
           this.session.transpiled || "",
           JSON.stringify(this.session.messages || []),
-        );
+        ]);
       }
     } catch (error) {
       console.error("Error in SessionSynchronizer.broadcastSession", error);

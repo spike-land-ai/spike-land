@@ -7,7 +7,7 @@ export class RateLimiter extends DurableObject {
   private readonly GRACE_PERIOD = 20;
   private readonly RATE_LIMIT = 0.5;
 
-  async fetch(request: Request): Promise<Response> {
+  override async fetch(request: Request): Promise<Response> {
     try {
       const now = Date.now() / 1000;
 

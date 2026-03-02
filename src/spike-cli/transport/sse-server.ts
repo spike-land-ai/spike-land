@@ -8,7 +8,7 @@
 import http from "node:http";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
-import { ListToolsRequestSchema, CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { ListToolsRequestSchema, CallToolRequestSchema, type CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ServerManager } from "../multiplexer/server-manager.js";
 
 export interface SseServerOptions {
@@ -36,15 +36,16 @@ function buildMcpServer(manager: ServerManager): Server {
     })),
   }));
 
-  server.setRequestHandler(CallToolRequestSchema, async (req) => {
+  server.setRequestHandler(CallToolRequestSchema, async (req, _extra) => {
     const { name, arguments: args } = req.params;
     try {
-      return await manager.callTool(name, (args ?? {}) as Record<string, unknown>);
+      const result = await manager.callTool(name, (args ?? {}) as Record<string, unknown>);
+      return result as unknown as CallToolResult;
     } catch (err) {
       return {
         content: [{ type: "text", text: String(err) }],
         isError: true,
-      };
+      } as CallToolResult;
     }
   });
 

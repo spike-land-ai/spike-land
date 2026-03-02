@@ -16,7 +16,7 @@ import {
   createSpacetimeCredits,
   createSpacetimeResolvers,
 } from "./db-spacetime.js";
-import { DbConnection } from "@spike-land-ai/spacetimedb-platform";
+import { createStdbHttpClient } from "@spike-land-ai/spacetimedb-platform";
 
 // --- 1. Mock the Dependencies so the tools can run without a real DB ---
 
@@ -229,14 +229,12 @@ function createMockDeps(): ImageStudioDeps {
 const SPACETIMEDB_URI = process.env.SPACETIMEDB_URI || "ws://localhost:3000";
 const SPACETIMEDB_MODULE = process.env.SPACETIMEDB_MODULE || "spike-platform";
 
-const conn = DbConnection.builder()
-  .withUri(SPACETIMEDB_URI)
-  .withDatabaseName(SPACETIMEDB_MODULE)
-  .build();
-
-
-// conn starts connecting automatically on build()
-// await conn.connect(); // This method does not exist in this version of the SDK
+// Convert ws:// to http:// for HTTP API
+const httpHost = SPACETIMEDB_URI.replace(/^ws(s?):\/\//, "http$1://");
+const conn = createStdbHttpClient({
+  host: httpHost,
+  database: SPACETIMEDB_MODULE,
+});
 
 const DEFAULT_USER_ID = process.env.IMAGE_STUDIO_USER_ID || "test-user";
 const mockDeps = createMockDeps();

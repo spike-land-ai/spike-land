@@ -9,6 +9,7 @@ import { getAssetFromKV } from "@cloudflare/kv-asset-handler";
 import { serveWithCache } from "@spike-land-ai/code";
 import type Env from "./env.js";
 import { makeResponse } from "./makeResponse.js";
+// @ts-expect-error no type declarations for generated mjs asset manifest
 import { ASSET_HASH, ASSET_MANIFEST, files } from "./staticContent.mjs";
 
 const main = {

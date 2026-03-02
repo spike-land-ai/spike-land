@@ -19,25 +19,23 @@ import { registerUserTools } from "./tools/user-tools.js";
 export * from "./types.js";
 export { createLivePlatformClient } from "./client-live.js";
 export type { SpacetimePlatformClient } from "./client.js";
-export {
-  DbConnection,
-  tables,
-  reducers,
-  type Image,
-  type Album,
-  type AlbumImage,
-  type Pipeline,
-  type EnhancementJob,
-  type GenerationJob,
-  type Subject,
-  type Credits
-  } from "./module_bindings/index.js";
+export type {
+  Image,
+  Album,
+  AlbumImage,
+  Pipeline,
+  EnhancementJob,
+  GenerationJob,
+  Subject,
+  Credits,
+} from "./image-types.js";
 export {
   typedTables,
   typedReducers,
   type TypedTables,
   type TypedReducers,
 } from "./typed-tables.js";
+export { createStdbHttpClient, type StdbHttpClient, type StdbHttpClientConfig } from "./stdb-http-client.js";
 
 const server = new McpServer({
   name: "spacetimedb-platform",

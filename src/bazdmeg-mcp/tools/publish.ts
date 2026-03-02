@@ -7,7 +7,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { textResult, formatError } from "@spike-land-ai/mcp-server-base";
 import { GeneratePackageJsonSchema, PublishNpmSchema } from "../types.js";
-import { getManifestPackage, readManifest } from "../manifest.js";
+import { readManifest } from "../manifest.js";
 import { runCommand } from "../shell.js";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";

@@ -17,15 +17,15 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "declaration": true,
-    "declarationMap": true,
     "sourceMap": true,
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
-    "outDir": "dist",
-    "rootDir": "src",
-    "lib": ["ES2022"],
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "paths": {
+      "@/*": ["./src/code/@/*"],
       "@spike-land-ai/shared": ["./src/shared/index.ts"],
       "@spike-land-ai/shared/*": ["./src/shared/*"],
       "@spike-land-ai/mcp-server-base": ["./src/mcp-server-base/index.ts"],
@@ -34,6 +34,7 @@
       "@spike-land-ai/react-ts-worker": ["./src/react-ts-worker/react/index.ts"],
       "@spike-land-ai/react-ts-worker/*": ["./src/react-ts-worker/*"],
       "@spike-land-ai/spacetimedb-platform": ["./src/spacetimedb-platform/index.ts"],
+      "@spike-land-ai/spacetimedb-platform/stdb-http-client": ["./src/spacetimedb-platform/stdb-http-client.ts"],
       "@spike-land-ai/spacetimedb-mcp": ["./src/spacetimedb-mcp/index.ts"],
       "@spike-land-ai/code": ["./src/code/modules.ts"],
       "@spike-land-ai/code/*": ["./src/code/*"],
@@ -63,6 +64,9 @@
     "packages",
     "**/*.test.ts",
     "**/*.test.tsx",
-    "**/*.spec.ts"
-  ]
+    "**/*.spec.ts",
+    "src/spike-app/**",
+    "src/code/**",
+    "src/chess-engine/**"
+  ],
 }

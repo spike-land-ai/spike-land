@@ -595,7 +595,7 @@ export class PostHandler {
       // Create the tool using the AI SDK's tool() function
       const aiTool = tool<Record<string, unknown>, unknown>({
         description: mcpTool.description,
-        parameters: schemaDefinition,
+        inputSchema: schemaDefinition,
         execute: async (args: Record<string, unknown>) => {
           try {
             const response = await mcpServerRef.executeTool(toolName, { ...args, codeSpace });

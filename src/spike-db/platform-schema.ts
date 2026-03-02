@@ -397,7 +397,7 @@ export const registerUserReducer = defineReducer(
   "register_user",
   (ctx: unknown, handle: unknown, displayName: unknown, email: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.user.insert({
+    c.db.user!.insert({
       identity: c.sender,
       handle: handle as string,
       displayName: displayName as string,
@@ -415,7 +415,7 @@ export const updateProfileReducer = defineReducer(
   "update_profile",
   (ctx: unknown, displayName: unknown, email: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.user.update(c.sender, {
+    c.db.user!.update(c.sender, {
       displayName: displayName as string,
       email: email as string,
       lastSeen: c.timestamp,
@@ -427,7 +427,7 @@ export const sendDmReducer = defineReducer(
   "send_dm",
   (ctx: unknown, toIdentity: unknown, content: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.direct_message.insert({
+    c.db.direct_message!.insert({
       id: c.timestamp,
       fromIdentity: c.sender,
       toIdentity: toIdentity as string,
@@ -442,7 +442,7 @@ export const markDmReadReducer = defineReducer(
   "mark_dm_read",
   (ctx: unknown, messageId: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.direct_message.update(messageId, { readStatus: true });
+    c.db.direct_message!.update(messageId, { readStatus: true });
   },
 );
 
@@ -450,7 +450,7 @@ export const registerAgentReducer = defineReducer(
   "register_agent",
   (ctx: unknown, displayName: unknown, capabilities: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.agent.insert({
+    c.db.agent!.insert({
       identity: c.sender,
       displayName: displayName as string,
       capabilities: capabilities as string[],
@@ -464,7 +464,7 @@ export const unregisterAgentReducer = defineReducer(
   "unregister_agent",
   (ctx: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.agent.delete(c.sender);
+    c.db.agent!.delete(c.sender);
   },
 );
 
@@ -472,7 +472,7 @@ export const sendAgentMessageReducer = defineReducer(
   "send_agent_message",
   (ctx: unknown, toAgent: unknown, content: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.agent_message.insert({
+    c.db.agent_message!.insert({
       id: c.timestamp,
       fromAgent: c.sender,
       toAgent: toAgent as string,
@@ -487,7 +487,7 @@ export const markAgentMessageDeliveredReducer = defineReducer(
   "mark_agent_message_delivered",
   (ctx: unknown, messageId: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.agent_message.update(messageId, { delivered: true });
+    c.db.agent_message!.update(messageId, { delivered: true });
   },
 );
 
@@ -495,7 +495,7 @@ export const createAppReducer = defineReducer(
   "create_app",
   (ctx: unknown, slug: unknown, name: unknown, description: unknown, r2CodeKey: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.app.insert({
+    c.db.app!.insert({
       id: c.timestamp,
       slug: slug as string,
       name: name as string,
@@ -513,7 +513,7 @@ export const updateAppReducer = defineReducer(
   "update_app",
   (ctx: unknown, appId: unknown, name: unknown, description: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.app.update(appId, {
+    c.db.app!.update(appId, {
       name: name as string,
       description: description as string,
       updatedAt: c.timestamp,
@@ -525,7 +525,7 @@ export const deleteAppReducer = defineReducer(
   "delete_app",
   (ctx: unknown, appId: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.app.update(appId, { status: "deleted", updatedAt: c.timestamp });
+    c.db.app!.update(appId, { status: "deleted", updatedAt: c.timestamp });
   },
 );
 
@@ -533,7 +533,7 @@ export const restoreAppReducer = defineReducer(
   "restore_app",
   (ctx: unknown, appId: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.app.update(appId, { status: "active", updatedAt: c.timestamp });
+    c.db.app!.update(appId, { status: "active", updatedAt: c.timestamp });
   },
 );
 
@@ -541,7 +541,7 @@ export const updateAppStatusReducer = defineReducer(
   "update_app_status",
   (ctx: unknown, appId: unknown, status: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.app.update(appId, { status: status as string, updatedAt: c.timestamp });
+    c.db.app!.update(appId, { status: status as string, updatedAt: c.timestamp });
   },
 );
 
@@ -549,7 +549,7 @@ export const createPageReducer = defineReducer(
   "create_page",
   (ctx: unknown, slug: unknown, title: unknown, description: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.page.insert({
+    c.db.page!.insert({
       id: c.timestamp,
       slug: slug as string,
       title: title as string,
@@ -565,7 +565,7 @@ export const updatePageReducer = defineReducer(
   "update_page",
   (ctx: unknown, pageId: unknown, title: unknown, description: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.page.update(pageId, {
+    c.db.page!.update(pageId, {
       title: title as string,
       description: description as string,
       updatedAt: c.timestamp,
@@ -577,7 +577,7 @@ export const deletePageReducer = defineReducer(
   "delete_page",
   (ctx: unknown, pageId: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.page.delete(pageId);
+    c.db.page!.delete(pageId);
   },
 );
 
@@ -585,7 +585,7 @@ export const sendAppMessageReducer = defineReducer(
   "send_app_message",
   (ctx: unknown, appId: unknown, role: unknown, content: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.app_message.insert({
+    c.db.app_message!.insert({
       id: c.timestamp,
       appId: appId as number,
       role: role as string,
@@ -599,7 +599,7 @@ export const registerToolReducer = defineReducer(
   "register_tool",
   (ctx: unknown, name: unknown, description: unknown, inputSchema: unknown, category: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.registered_tool.insert({
+    c.db.registered_tool!.insert({
       id: c.timestamp,
       name: name as string,
       description: description as string,
@@ -615,7 +615,7 @@ export const recordPlatformEventReducer = defineReducer(
   "record_platform_event",
   (ctx: unknown, source: unknown, eventType: unknown, metadataJson: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.platform_event.insert({
+    c.db.platform_event!.insert({
       id: c.timestamp,
       source: source as string,
       eventType: eventType as string,
@@ -630,7 +630,7 @@ export const recordHealthCheckReducer = defineReducer(
   "record_health_check",
   (ctx: unknown, service: unknown, status: unknown, latencyMs: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.health_check.insert({
+    c.db.health_check!.insert({
       id: c.timestamp,
       service: service as string,
       status: status as string,

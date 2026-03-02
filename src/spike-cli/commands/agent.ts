@@ -1,6 +1,6 @@
 import type { Command } from "commander";
 import { GoogleGenAI } from "@google/genai";
-import { DbConnection } from "@spike-land-ai/spacetimedb-platform/dist/module_bindings/index.js";
+import { createStdbHttpClient, type StdbHttpClient } from "@spike-land-ai/spacetimedb-platform/stdb-http-client";
 import express from "express";
 import cors from "cors";
 
@@ -9,63 +9,68 @@ export const ai = new GoogleGenAI(
   process.env.GEMINI_API_KEY ? { apiKey: process.env.GEMINI_API_KEY } : {}
 );
 
-export let stdbConn: DbConnection | null = null;
+export let stdbClient: StdbHttpClient | null = null;
 
 export function initSpacetimeDB(baseUrl: string, moduleName: string) {
-  DbConnection.builder()
-    .withUri(baseUrl)
-    .withDatabaseName(moduleName)
-    .onConnect((conn, identity) => {
-      console.log("[Agent] Connected to SpacetimeDB with identity:", identity.toHexString());
-      stdbConn = conn;
+  // Convert ws:// to http:// for HTTP API
+  const httpHost = baseUrl.replace(/^ws(s?):\/\//, "http$1://");
 
-      conn.db.code_session.onInsert((ctx, row) => {
-        handleSessionUpdate(row);
-      });
+  const client = createStdbHttpClient({
+    host: httpHost,
+    database: moduleName,
+  });
 
-      conn.db.code_session.onUpdate((ctx, oldRow, newRow) => {
-        handleSessionUpdate(newRow);
-      });
+  client.sql("SELECT 1").then(() => {
+    console.log("[Agent] Connected to SpacetimeDB via HTTP");
+    stdbClient = client;
 
-      conn.subscriptionBuilder().onApplied(() => {
-        console.log("[Agent] Subscribed to CodeSession");
-      }).subscribe("SELECT * FROM code_session");
-    })
-    .onDisconnect(() => {
-      console.log("[Agent] Disconnected from SpacetimeDB");
-      stdbConn = null;
-    })
-    .onConnectError((_conn, err) => {
-      console.error("[Agent] Connection error:", err);
-    })
-    .build();
+    // Poll for code_session changes every 2 seconds
+    setInterval(async () => {
+      try {
+        const sessions = await client.sql<Record<string, unknown>>(
+          "SELECT * FROM code_session"
+        );
+        for (const session of sessions) {
+          await handleSessionUpdate(session);
+        }
+      } catch (err) {
+        console.error("[Agent] Poll error:", err);
+      }
+    }, 2000);
+  }).catch((err: unknown) => {
+    console.error("[Agent] Connection error:", err);
+  });
 }
 
 const processingSessions = new Set<string>();
 
-export async function handleSessionUpdate(session: any) {
-  if (processingSessions.has(session.codeSpace)) return;
-  
+export async function handleSessionUpdate(session: Record<string, unknown>) {
+  const codeSpace = String(session.codeSpace ?? session.code_space ?? "");
+  if (!codeSpace || processingSessions.has(codeSpace)) return;
+
   try {
-    let messages: any[] = [];
-    if (session.messagesJson) {
-      messages = JSON.parse(session.messagesJson);
+    let messages: Array<{ role: string; content: string; id?: string }> = [];
+    const messagesJson = String(session.messagesJson ?? session.messages_json ?? "");
+    if (messagesJson) {
+      messages = JSON.parse(messagesJson);
     }
-    
+
     if (messages.length === 0) return;
-    
+
     const lastMessage = messages[messages.length - 1];
-    
+    if (!lastMessage) return;
+
     // Only respond if the last message is from the user
     if (lastMessage.role === "user") {
-      processingSessions.add(session.codeSpace);
-      console.log(`[Agent] Processing request for ${session.codeSpace}: ${lastMessage.content}`);
-      
-      const systemPrompt = `You are an expert AI programming assistant. 
+      processingSessions.add(codeSpace);
+      console.log(`[Agent] Processing request for ${codeSpace}: ${lastMessage.content}`);
+
+      const code = String(session.code ?? "");
+      const systemPrompt = `You are an expert AI programming assistant.
 You are helping the user with their code in the SpacetimeDB-backed Monaco editor.
 The user is currently working on the following code:
 \`\`\`typescript
-${session.code}
+${code}
 \`\`\`
 Provide helpful, concise code modifications.`;
 
@@ -87,30 +92,30 @@ Provide helpful, concise code modifications.`;
       });
 
       const replyContent = response.text || "I couldn't process that.";
-      
+
       const newMessages = [...messages, {
         id: Math.random().toString(36).substring(7),
         role: "assistant",
         content: replyContent
       }];
-      
-      if (stdbConn) {
-        stdbConn.reducers.update_code_session(
-          session.codeSpace,
-          session.code,
-          session.html,
-          session.css,
-          session.transpiled,
-          JSON.stringify(newMessages)
-        );
+
+      if (stdbClient) {
+        await stdbClient.callReducer("update_code_session", [
+          codeSpace,
+          code,
+          String(session.html ?? ""),
+          String(session.css ?? ""),
+          String(session.transpiled ?? ""),
+          JSON.stringify(newMessages),
+        ]);
       }
-      
-      console.log(`[Agent] Replied to ${session.codeSpace}`);
+
+      console.log(`[Agent] Replied to ${codeSpace}`);
     }
   } catch (error) {
-    console.error(`[Agent] Error processing session ${session.codeSpace}:`, error);
+    console.error(`[Agent] Error processing session ${codeSpace}:`, error);
   } finally {
-    processingSessions.delete(session.codeSpace);
+    processingSessions.delete(codeSpace);
   }
 }
 
@@ -122,14 +127,14 @@ export function startCompletionServer(port: number) {
   app.post("/completion", async (req, res) => {
     try {
       const { prefix, suffix } = req.body;
-      
+
       if (!prefix) {
         res.status(400).json({ error: "Missing prefix" });
         return;
       }
 
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash", 
+        model: "gemini-2.5-flash",
         contents: [
           {
             role: "user",
@@ -167,11 +172,11 @@ export function registerAgentCommand(program: Command): void {
         console.error("Error: GEMINI_API_KEY is not set.");
         process.exit(1);
       }
-      
+
       console.log("Starting Spike Agent with Gemini...");
       initSpacetimeDB(options.stdbUrl, options.stdbModule);
       startCompletionServer(parseInt(options.port, 10));
-      
+
       // Keep process alive
       setInterval(() => {}, 1000 * 60 * 60);
     });

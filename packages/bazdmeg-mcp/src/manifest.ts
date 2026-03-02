@@ -73,7 +73,7 @@ interface ParseResult {
 
 function getIndent(line: string): number {
   const match = line.match(/^(\s*)/);
-  return match ? match[1].length : 0;
+  return match ? match[1]!.length : 0;
 }
 
 function isComment(line: string): boolean {
@@ -85,24 +85,24 @@ function parseObject(lines: string[], start: number, baseIndent: number): ParseR
   let i = start;
 
   while (i < lines.length) {
-    if (isComment(lines[i])) {
+    if (isComment(lines[i]!)) {
       i++;
       continue;
     }
 
-    const indent = getIndent(lines[i]);
+    const indent = getIndent(lines[i]!);
     if (indent < baseIndent) break;
     if (indent > baseIndent) break;
 
-    const line = lines[i].trim();
+    const line = lines[i]!.trim();
     const keyMatch = line.match(/^([^:]+?):\s*(.*)/);
     if (!keyMatch) {
       i++;
       continue;
     }
 
-    const key = keyMatch[1].trim();
-    const inlineValue = keyMatch[2].trim();
+    const key = keyMatch[1]!.trim();
+    const inlineValue = keyMatch[2]!.trim();
 
     if (inlineValue && !inlineValue.startsWith("#")) {
       // Inline scalar value
@@ -111,7 +111,7 @@ function parseObject(lines: string[], start: number, baseIndent: number): ParseR
     } else {
       // Check next non-empty line for indent
       let nextLine = i + 1;
-      while (nextLine < lines.length && isComment(lines[nextLine])) {
+      while (nextLine < lines.length && isComment(lines[nextLine]!)) {
         nextLine++;
       }
 
@@ -121,7 +121,7 @@ function parseObject(lines: string[], start: number, baseIndent: number): ParseR
         continue;
       }
 
-      const nextIndent = getIndent(lines[nextLine]);
+      const nextIndent = getIndent(lines[nextLine]!);
       if (nextIndent <= baseIndent) {
         obj[key] = null;
         i++;
@@ -129,7 +129,7 @@ function parseObject(lines: string[], start: number, baseIndent: number): ParseR
       }
 
       // Check if it's a list or nested object
-      const nextTrimmed = lines[nextLine].trim();
+      const nextTrimmed = lines[nextLine]!.trim();
       if (nextTrimmed.startsWith("- ")) {
         const listResult = parseList(lines, nextLine, nextIndent);
         obj[key] = listResult.value;
@@ -150,15 +150,15 @@ function parseList(lines: string[], start: number, baseIndent: number): ParseRes
   let i = start;
 
   while (i < lines.length) {
-    if (isComment(lines[i])) {
+    if (isComment(lines[i]!)) {
       i++;
       continue;
     }
 
-    const indent = getIndent(lines[i]);
+    const indent = getIndent(lines[i]!);
     if (indent < baseIndent) break;
 
-    const line = lines[i].trim();
+    const line = lines[i]!.trim();
     if (!line.startsWith("- ")) break;
 
     const itemContent = line.slice(2).trim();
@@ -169,23 +169,23 @@ function parseList(lines: string[], start: number, baseIndent: number): ParseRes
       const mapObj: Record<string, unknown> = {};
       const firstPair = itemContent.match(/^([^:]+?):\s*(.*)/);
       if (firstPair) {
-        mapObj[firstPair[1].trim()] = parseScalar(firstPair[2].trim());
+        mapObj[firstPair[1]!.trim()] = parseScalar(firstPair[2]!.trim());
       }
 
       // Check for continuation lines at deeper indent
       let j = i + 1;
       const itemIndent = indent + 2;
       while (j < lines.length) {
-        if (isComment(lines[j])) {
+        if (isComment(lines[j]!)) {
           j++;
           continue;
         }
-        const jIndent = getIndent(lines[j]);
+        const jIndent = getIndent(lines[j]!);
         if (jIndent < itemIndent) break;
-        const jLine = lines[j].trim();
+        const jLine = lines[j]!.trim();
         const jPair = jLine.match(/^([^:]+?):\s*(.*)/);
         if (jPair) {
-          mapObj[jPair[1].trim()] = parseScalar(jPair[2].trim());
+          mapObj[jPair[1]!.trim()] = parseScalar(jPair[2]!.trim());
         }
         j++;
       }

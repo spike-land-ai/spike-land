@@ -129,8 +129,8 @@ export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpC
       notifyListeners();
     }),
 
-    listRegisteredTools: vi.fn(async (categoryFilter?: string) => {
-      await requireConnectedAsync();
+    listRegisteredTools: vi.fn((categoryFilter?: string) => {
+      requireConnectedSync();
       if (categoryFilter) return tools.filter(t => t.category === categoryFilter);
       return [...tools];
     }),
@@ -168,8 +168,8 @@ export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpC
       notifyListeners();
     }),
 
-    listMcpTasks: vi.fn(async (statusFilter?: string) => {
-      await requireConnectedAsync();
+    listMcpTasks: vi.fn((statusFilter?: string) => {
+      requireConnectedSync();
       if (statusFilter) return mcpTasks.filter(t => t.status === statusFilter);
       return [...mcpTasks];
     }),

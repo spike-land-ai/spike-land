@@ -28,6 +28,7 @@ export interface McpTextContent {
  * Standard MCP tool call result shape, compatible with all existing packages.
  */
 export interface CallToolResult {
+  [x: string]: unknown;
   content: McpTextContent[];
   isError?: boolean;
 }

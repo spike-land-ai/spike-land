@@ -112,7 +112,7 @@ export async function fakeServer(request: Request) {
       if (!r.ok) {
         throw new Error(`Failed to fetch initial session for ${codeSpace}: ${r.status}`);
       }
-      return r.json();
+      return r.json() as Promise<ICodeSession>;
     });
     const { data: initialSessionData, error: fetchError } =
       await tryCatch<ICodeSession>(sessionFetchPromise);
@@ -253,7 +253,7 @@ async function handleSessionJson(
     if (!r.ok) {
       throw new Error(`Failed to fetch session for ${codeSpace} in handleSessionJson: ${r.status}`);
     }
-    return r.json();
+    return r.json() as Promise<ICodeSession>;
   });
   const { data: newSessionData, error: fetchError } =
     await tryCatch<ICodeSession>(sessionFetchPromise);

@@ -28,3 +28,11 @@ QUIZ_BADGE_SECRET = "dev-quiz-badge-secret"
 [[routes]]
 pattern = "edge.spike.land"
 custom_domain = true
+
+[[routes]]
+pattern = "spike.land/*"
+zone_name = "spike.land"
+
+[[routes]]
+pattern = "www.spike.land/*"
+zone_name = "spike.land"

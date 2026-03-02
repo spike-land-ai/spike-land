@@ -850,7 +850,7 @@ async function handleDirectToolCall(
       .join("\n");
     return {
       output: `${yellow("Missing required parameters:")}\n${paramList}\n\nUsage: /${command} {"${
-        missingParams[0].name
+        missingParams[0]!.name
       }": "value"}`,
       exit: false,
       cleared: false,
@@ -940,24 +940,24 @@ function resolveToolName(
 
   if (fuzzyResults.length === 0) return null;
 
-  if (fuzzyResults.length === 1) return fuzzyResults[0];
+  if (fuzzyResults.length === 1) return fuzzyResults[0] ?? null;
 
   // Auto-execute if best match is significantly better (2x score gap)
   const bestScore = fuzzyScore(
     command,
-    stripNamespace(fuzzyResults[0].namespacedName, fuzzyResults[0].serverName),
+    stripNamespace(fuzzyResults[0]!.namespacedName, fuzzyResults[0]!.serverName),
   );
   const runnerUpScore = fuzzyScore(
     command,
-    stripNamespace(fuzzyResults[1].namespacedName, fuzzyResults[1].serverName),
+    stripNamespace(fuzzyResults[1]!.namespacedName, fuzzyResults[1]!.serverName),
   );
 
   if (bestScore >= runnerUpScore * 2) {
-    return fuzzyResults[0];
+    return fuzzyResults[0] ?? null;
   }
 
   // Ambiguous — still return best match with a note logged
-  return fuzzyResults[0];
+  return fuzzyResults[0] ?? null;
 }
 
 /**

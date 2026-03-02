@@ -33,17 +33,17 @@ export class SpikeDbClient {
   } | null = null;
   private idCounter = 0;
 
-  constructor(private options: SpikeDbClientOptions) {
+  constructor(_options: SpikeDbClientOptions) {
     this.cache = new TableCache();
 
     // Register tables from schema
-    for (const [key, tableDef] of Object.entries(options.schema.tables)) {
+    for (const [key, tableDef] of Object.entries(_options.schema.tables)) {
       this.cache.registerTable(key, tableDef.primaryKey);
     }
 
     this.connection = new Connection({
-      url: options.url,
-      token: options.token,
+      url: _options.url,
+      token: _options.token,
       onMessage: (data: unknown) => this.handleMessage(data),
       onOpen: () => {},
       onClose: () => this.emit("disconnected"),

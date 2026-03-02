@@ -114,11 +114,13 @@ function evaluateMockAnswers(
   for (let i = 0; i < 3; i++) {
     const q = state.currentRound.questions[i];
     if (q && newProgress[q.conceptIndex]) {
+      const current = newProgress[q.conceptIndex]!;
       newProgress[q.conceptIndex] = {
-        ...newProgress[q.conceptIndex],
-        attempts: newProgress[q.conceptIndex].attempts + 1,
-        correctCount: newProgress[q.conceptIndex].correctCount + (results[i]?.correct ? 1 : 0),
-        mastered: newProgress[q.conceptIndex].correctCount + (results[i]?.correct ? 1 : 0) >= 2,
+        ...current,
+        concept: current.concept,
+        attempts: current.attempts + 1,
+        correctCount: current.correctCount + (results[i]?.correct ? 1 : 0),
+        mastered: current.correctCount + (results[i]?.correct ? 1 : 0) >= 2,
       };
     }
   }
@@ -178,7 +180,7 @@ export function LearnSessionPage() {
   const [state, setState] = useState<SessionState | null>(null);
   const [articleCollapsed, setArticleCollapsed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [roundHistory, setRoundHistory] = useState<Array<{ round: RoundData; results: AnswerResult[] }>>([]);
+  const [_roundHistory, setRoundHistory] = useState<Array<{ round: RoundData; results: AnswerResult[] }>>([]);
 
   useEffect(() => {
     // Load session data from sessionStorage

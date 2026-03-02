@@ -86,7 +86,6 @@ make health
 # SpacetimeDB (spacetimedb-platform)
 spacetime build                          # Compile WASM module
 spacetime publish rightful-dirt-5033     # Deploy to maincloud
-spacetime generate --lang=typescript --out-dir=src/module_bindings  # Regen bindings
 
 # spike-app (Vite + TanStack Router frontend)
 cd packages/spike-app

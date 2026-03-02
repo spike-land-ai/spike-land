@@ -14,7 +14,7 @@ import { join } from "node:path";
 import type { ManifestWorkerConfig } from "../manifest.js";
 
 function generateToml(
-  packageName: string,
+  _packageName: string,
   worker: ManifestWorkerConfig,
   entry?: string,
 ): string {
