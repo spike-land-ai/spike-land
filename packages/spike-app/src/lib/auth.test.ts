@@ -1,30 +1,21 @@
 import { describe, it, expect } from "vitest";
-import { oidcConfig, authProviders } from "./auth";
+import { authClient, authProviders } from "./auth";
 
-// Cast to Record to access OIDC fields that exist at runtime
-// but are hidden behind a union type (AuthProviderProps = ...Settings | ...UserManager)
-const config = oidcConfig as Record<string, unknown>;
-
-describe("oidcConfig", () => {
-  it("has required OIDC fields", () => {
-    expect(config.authority).toBeDefined();
-    expect(config.client_id).toBeDefined();
-    expect(config.redirect_uri).toContain("/callback");
-    expect(config.scope).toContain("openid");
-    expect(config.response_type).toBe("code");
+describe("authClient", () => {
+  it("is defined", () => {
+    expect(authClient).toBeDefined();
   });
 
-  it("enables silent renew", () => {
-    expect(config.automaticSilentRenew).toBe(true);
-    expect(config.silent_redirect_uri).toContain("/silent-renew.html");
+  it("has useSession hook", () => {
+    expect(typeof authClient.useSession).toBe("function");
   });
 
-  it("monitors session", () => {
-    expect(config.monitorSession).toBe(true);
+  it("has signIn method", () => {
+    expect(authClient.signIn).toBeDefined();
   });
 
-  it("uses localStorage for state", () => {
-    expect(config.userStore).toBeDefined();
+  it("has signOut method", () => {
+    expect(typeof authClient.signOut).toBe("function");
   });
 });
 

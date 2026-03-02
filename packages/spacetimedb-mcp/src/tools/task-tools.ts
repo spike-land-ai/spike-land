@@ -5,7 +5,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { SpacetimeClient } from "../client.js";
-import { errorResult, jsonResult } from "../types.js";
+import { errorResult, jsonResult, tryCatch } from "../types.js";
 
 export function registerTaskTools(server: McpServer, client: SpacetimeClient): void {
   // ─── stdb_create_task ───
@@ -23,13 +23,9 @@ export function registerTaskTools(server: McpServer, client: SpacetimeClient): v
       if (!state.connected) {
         return errorResult("NOT_CONNECTED", "Not connected to SpacetimeDB", false);
       }
-      try {
-        await client.createTask(description, priority, context);
-        return jsonResult({ created: true, description, priority });
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        return errorResult("REDUCER_FAILED", message, true);
-      }
+      const result = await tryCatch(client.createTask(description, priority, context));
+      if (!result.ok) return errorResult("REDUCER_FAILED", result.error.message, true);
+      return jsonResult({ created: true, description, priority });
     },
   );
 
@@ -46,25 +42,23 @@ export function registerTaskTools(server: McpServer, client: SpacetimeClient): v
       if (!state.connected) {
         return errorResult("NOT_CONNECTED", "Not connected to SpacetimeDB", false);
       }
-      try {
-        const tasks = client.listTasks(status);
-        return jsonResult({
-          count: tasks.length,
-          tasks: tasks.map((t) => ({
-            id: t.id.toString(),
-            description: t.description,
-            assignedTo: t.assignedTo ?? null,
-            status: t.status,
-            priority: t.priority,
-            context: t.context,
-            createdBy: t.createdBy,
-            createdAt: t.createdAt.toString(),
-          })),
-        });
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        return errorResult("QUERY_FAILED", message, false);
-      }
+      const result = await tryCatch(
+        (async () => client.listTasks(status))(),
+      );
+      if (!result.ok) return errorResult("QUERY_FAILED", result.error.message, false);
+      return jsonResult({
+        count: result.data.length,
+        tasks: result.data.map((t) => ({
+          id: t.id.toString(),
+          description: t.description,
+          assignedTo: t.assignedTo ?? null,
+          status: t.status,
+          priority: t.priority,
+          context: t.context,
+          createdBy: t.createdBy,
+          createdAt: t.createdAt.toString(),
+        })),
+      });
     },
   );
 
@@ -81,13 +75,9 @@ export function registerTaskTools(server: McpServer, client: SpacetimeClient): v
       if (!state.connected) {
         return errorResult("NOT_CONNECTED", "Not connected to SpacetimeDB", false);
       }
-      try {
-        await client.claimTask(BigInt(taskId));
-        return jsonResult({ claimed: true, taskId });
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        return errorResult("REDUCER_FAILED", message, true);
-      }
+      const result = await tryCatch(client.claimTask(BigInt(taskId)));
+      if (!result.ok) return errorResult("REDUCER_FAILED", result.error.message, true);
+      return jsonResult({ claimed: true, taskId });
     },
   );
 
@@ -104,13 +94,9 @@ export function registerTaskTools(server: McpServer, client: SpacetimeClient): v
       if (!state.connected) {
         return errorResult("NOT_CONNECTED", "Not connected to SpacetimeDB", false);
       }
-      try {
-        await client.completeTask(BigInt(taskId));
-        return jsonResult({ completed: true, taskId });
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        return errorResult("REDUCER_FAILED", message, true);
-      }
+      const result = await tryCatch(client.completeTask(BigInt(taskId)));
+      if (!result.ok) return errorResult("REDUCER_FAILED", result.error.message, true);
+      return jsonResult({ completed: true, taskId });
     },
   );
 }
