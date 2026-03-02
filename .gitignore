@@ -11,3 +11,4 @@ binaryen/
 .wrangler/
 .next/
 coverage/
+.claude/
