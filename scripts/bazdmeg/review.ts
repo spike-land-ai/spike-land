@@ -3,12 +3,12 @@ import type { ReviewVerdict } from "./types.js";
 
 export function getChangedFiles(): string[] {
   try {
-    // Tracked modified + untracked files
-    const tracked = execSync("git diff --name-only", {
+    // Tracked modified + untracked files (ignore submodule dirty state)
+    const tracked = execSync("git diff --name-only --ignore-submodules=dirty", {
       encoding: "utf-8",
       cwd: process.cwd(),
     }).trim();
-    const staged = execSync("git diff --cached --name-only", {
+    const staged = execSync("git diff --cached --name-only --ignore-submodules=dirty", {
       encoding: "utf-8",
       cwd: process.cwd(),
     }).trim();
@@ -96,8 +96,18 @@ export function parseVerdicts(agentOutput: string): ReviewVerdict[] {
 export function commitFiles(files: string[], message: string): void {
   if (files.length === 0) return;
   for (const file of files) {
-    execSync(`git add -- "${file}"`, { cwd: process.cwd() });
+    try {
+      execSync(`git add -- "${file}"`, { cwd: process.cwd() });
+    } catch {
+      // File may be a dirty submodule or otherwise un-stageable — skip
+    }
   }
+  // Check if anything was actually staged before committing
+  const staged = execSync("git diff --cached --name-only", {
+    encoding: "utf-8",
+    cwd: process.cwd(),
+  }).trim();
+  if (!staged) return; // nothing to commit
   // Use -- to prevent message from being interpreted as flags
   const escaped = message.replace(/'/g, "'\\''");
   execSync(`git commit -m '${escaped}'`, { cwd: process.cwd() });
