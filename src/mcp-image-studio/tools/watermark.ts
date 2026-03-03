@@ -2,9 +2,9 @@ import { z } from "zod";
 import { IMG_DEFAULTS, jsonResult } from "../types.js";
 import {
   imageProcedure,
-  withResolves,
   withCredits,
   withJob,
+  withResolves,
 } from "../tool-builder/image-middleware.js";
 
 export const watermarkTool = imageProcedure

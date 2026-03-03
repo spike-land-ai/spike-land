@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Metafile } from "@spike-land-ai/esbuild-wasm";
 import { z } from "zod";
 import { getEsbuildWasm } from "../wasm-api.js";
-import { tryCatch, errorResult, formatEsbuildError } from "../errors.js";
+import { errorResult, formatEsbuildError, tryCatch } from "../errors.js";
 
 const AnalyzeSchema = {
   metafile: z

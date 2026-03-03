@@ -482,8 +482,8 @@ engagement metrics from within the platform.
 ### Error boundaries
 
 16 `error.tsx` files and 23 `loading.tsx` files provide comprehensive error
-handling and loading states across the application. Every major route segment has
-graceful error recovery.
+handling and loading states across the application. Every major route segment
+has graceful error recovery.
 
 ### Storybook pages
 

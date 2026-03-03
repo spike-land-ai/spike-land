@@ -5,7 +5,7 @@
  * Writes workspace config to /tmp/bazdmeg-workspace.json for the hook script.
  */
 
-import { writeFile, unlink } from "node:fs/promises";
+import { unlink, writeFile } from "node:fs/promises";
 import type { WorkspaceConfig, WorkspaceConfigFile } from "./types.js";
 
 const WORKSPACE_CONFIG_PATH = "/tmp/bazdmeg-workspace.json";

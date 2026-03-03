@@ -6,12 +6,12 @@
  */
 
 import { z } from "zod";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import { freeTool } from "../procedures/index";
 import { textResult } from "./tool-helpers";
 import type { DrizzleDB } from "../db/index";
-import { workspaces, workspaceMembers } from "../db/schema";
+import { workspaceMembers, workspaces } from "../db/schema";
 
 function generateSlug(name: string): string {
   return name
@@ -50,7 +50,9 @@ export function registerWorkspacesTools(
 
         let text = `**Workspaces (${memberships.length}):**\n\n`;
         for (const m of memberships) {
-          text += `- **${m.workspaceName}** [${m.workspacePlan}] (${m.role})\n  Slug: ${m.workspaceSlug}\n  ID: ${m.workspaceId}\n  Created: ${new Date(m.workspaceCreatedAt).toISOString()}\n\n`;
+          text += `- **${m.workspaceName}** [${m.workspacePlan}] (${m.role})\n  Slug: ${m.workspaceSlug}\n  ID: ${m.workspaceId}\n  Created: ${new Date(
+            m.workspaceCreatedAt,
+          ).toISOString()}\n\n`;
         }
         return textResult(text);
       }),

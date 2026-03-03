@@ -34,7 +34,9 @@ export interface PrismaStateMachineDelegate {
 
   upsert(args: {
     where: { id: string };
-    create: Omit<StateMachineRecord, "id" | "forkedFrom"> & { forkedFrom?: string | null };
+    create: Omit<StateMachineRecord, "id" | "forkedFrom"> & {
+      forkedFrom?: string | null;
+    };
     update: Partial<Omit<StateMachineRecord, "id" | "userId" | "shareToken">>;
   }): Promise<StateMachineRecord>;
 }

@@ -173,7 +173,11 @@ vi.mock("@/lib/state-machine/engine", () => ({
   }),
   listMachines: vi.fn().mockReturnValue([]),
   shareMachine: vi.fn().mockResolvedValue("share-token-123"),
-  getSharedMachine: vi.fn().mockResolvedValue({ definition: {}, currentStates: [], context: {} }),
+  getSharedMachine: vi.fn().mockResolvedValue({
+    definition: {},
+    currentStates: [],
+    context: {},
+  }),
 }));
 
 vi.mock("@/lib/state-machine/visualizer-template", () => ({
@@ -258,7 +262,12 @@ describe("state-machine standalone tools", () => {
 
       const result = await registry.call(
         "sm_add_transition",
-        { machine_id: "machine-1", source: "idle", target: "active", event: "START" },
+        {
+          machine_id: "machine-1",
+          source: "idle",
+          target: "active",
+          event: "START",
+        },
         ctx,
       );
       expect(result.isError).toBeFalsy();
@@ -315,7 +324,13 @@ describe("state-machine standalone tools", () => {
     it("returns current state", async () => {
       const ctx = createMockContext();
       await registry.call("sm_create", { name: "m1", initial_state: "idle" }, ctx);
-      const result = await registry.call("sm_get_state", { machine_id: "machine-1" }, ctx);
+      const result = await registry.call(
+        "sm_get_state",
+        {
+          machine_id: "machine-1",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("Current State");
@@ -327,7 +342,13 @@ describe("state-machine standalone tools", () => {
     it("returns no issues for valid machine", async () => {
       const ctx = createMockContext();
       await registry.call("sm_create", { name: "m1", initial_state: "idle" }, ctx);
-      const result = await registry.call("sm_validate", { machine_id: "machine-1" }, ctx);
+      const result = await registry.call(
+        "sm_validate",
+        {
+          machine_id: "machine-1",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("No issues found");
@@ -338,7 +359,13 @@ describe("state-machine standalone tools", () => {
     it("exports machine as JSON", async () => {
       const ctx = createMockContext();
       await registry.call("sm_create", { name: "m1", initial_state: "idle" }, ctx);
-      const result = await registry.call("sm_export", { machine_id: "machine-1" }, ctx);
+      const result = await registry.call(
+        "sm_export",
+        {
+          machine_id: "machine-1",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("Machine Export");
@@ -356,7 +383,9 @@ describe("state-machine standalone tools", () => {
     });
 
     it("filters by category", async () => {
-      const result = await registry.call("sm_list_templates", { category: "iot" });
+      const result = await registry.call("sm_list_templates", {
+        category: "iot",
+      });
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("traffic-light");
@@ -476,9 +505,22 @@ describe("state-machine standalone tools", () => {
   describe("sm_share", () => {
     it("generates a share token", async () => {
       const ctx = createMockContext();
-      await registry.call("sm_create", { name: "share-test", initial_state: "idle" }, ctx);
+      await registry.call(
+        "sm_create",
+        {
+          name: "share-test",
+          initial_state: "idle",
+        },
+        ctx,
+      );
 
-      const result = await registry.call("sm_share", { machine_id: "machine-1" }, ctx);
+      const result = await registry.call(
+        "sm_share",
+        {
+          machine_id: "machine-1",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("Machine Shared Successfully");
@@ -488,7 +530,9 @@ describe("state-machine standalone tools", () => {
 
   describe("sm_get_shared", () => {
     it("retrieves shared machine data", async () => {
-      const result = await registry.call("sm_get_shared", { token: "share-token-123" });
+      const result = await registry.call("sm_get_shared", {
+        token: "share-token-123",
+      });
       expect(result.isError).toBeFalsy();
     });
   });

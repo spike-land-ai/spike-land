@@ -8,7 +8,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "../types";
 import { freeTool } from "../../procedures/index";
-import { textResult, safeToolCall, apiRequest } from "../tool-helpers";
+import { apiRequest, safeToolCall, textResult } from "../tool-helpers";
 import type { DrizzleDB } from "../../db/index";
 
 export function registerStoreSkillsTools(
@@ -39,7 +39,9 @@ export function registerStoreSkillsTools(
       .handler(async ({ input }) => {
         return safeToolCall("store_skills_list", async () => {
           const params = new URLSearchParams();
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const skills = await apiRequest<
             Array<{
@@ -57,7 +59,9 @@ export function registerStoreSkillsTools(
           const list = skills
             .map(
               (s) =>
-                `- **${s.name}** (${s.slug}) — ${s.description ?? "No description"}\n  *Installs: ${s.installCount}*`,
+                `- **${s.name}** (${s.slug}) — ${
+                  s.description ?? "No description"
+                }\n  *Installs: ${s.installCount}*`,
             )
             .join("\n");
           return textResult(`## Skill Store\n\n${list}`);

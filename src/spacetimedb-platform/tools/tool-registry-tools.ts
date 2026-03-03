@@ -34,7 +34,9 @@ export function registerToolRegistryTools(
         });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("QUERY_FAILED", message, false);
       }
     },
@@ -54,7 +56,9 @@ export function registerToolRegistryTools(
         return jsonResult({ enabled: true, name });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },
@@ -74,7 +78,9 @@ export function registerToolRegistryTools(
         return jsonResult({ disabled: true, name });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },
@@ -88,7 +94,9 @@ export function registerToolRegistryTools(
       return jsonResult({ count: categories.length, categories });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+      if (message.includes("Not connected")) {
+        return errorResult("NOT_CONNECTED", message, false);
+      }
       return errorResult("QUERY_FAILED", message, false);
     }
   });
@@ -116,7 +124,9 @@ export function registerToolRegistryTools(
         });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("QUERY_FAILED", message, false);
       }
     },

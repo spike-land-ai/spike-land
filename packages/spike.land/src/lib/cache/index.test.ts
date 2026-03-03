@@ -51,7 +51,9 @@ describe("cache utilities", () => {
 
       expect(result).toEqual(fresh);
       expect(fetcher).toHaveBeenCalledOnce();
-      expect(mockRedis.set).toHaveBeenCalledWith("miss-key", fresh, { ex: 600 });
+      expect(mockRedis.set).toHaveBeenCalledWith("miss-key", fresh, {
+        ex: 600,
+      });
     });
 
     it("falls back to fetcher when Redis get throws", async () => {
@@ -99,7 +101,13 @@ describe("cache utilities", () => {
     it("sets value with TTL", async () => {
       await setCacheRaw("set-key", { data: "value" }, 300);
 
-      expect(mockRedis.set).toHaveBeenCalledWith("set-key", { data: "value" }, { ex: 300 });
+      expect(mockRedis.set).toHaveBeenCalledWith(
+        "set-key",
+        { data: "value" },
+        {
+          ex: 300,
+        },
+      );
     });
 
     it("does not throw on Redis error", async () => {
@@ -127,7 +135,10 @@ describe("cache utilities", () => {
     it("returns cached value without calling query on cache hit", async () => {
       const cached = { id: 10, email: "user@example.com" };
       mockRedis.get.mockResolvedValueOnce(cached);
-      const query = vi.fn().mockResolvedValue({ id: 10, email: "different@example.com" });
+      const query = vi.fn().mockResolvedValue({
+        id: 10,
+        email: "different@example.com",
+      });
 
       const result = await cachedPrismaQuery("prisma:user:10", 300, query);
 
@@ -145,7 +156,9 @@ describe("cache utilities", () => {
 
       expect(result).toEqual(fresh);
       expect(query).toHaveBeenCalledOnce();
-      expect(mockRedis.set).toHaveBeenCalledWith("prisma:user:20", fresh, { ex: 600 });
+      expect(mockRedis.set).toHaveBeenCalledWith("prisma:user:20", fresh, {
+        ex: 600,
+      });
     });
 
     it("falls back to query when Redis throws", async () => {

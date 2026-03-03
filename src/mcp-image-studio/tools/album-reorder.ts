@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { asImageId, errorResult, jsonResult, toolEvent } from "../types.js";
 import { tryCatch } from "./try-catch.js";
-import { imageProcedure, withResolves, withOwnership } from "../tool-builder/image-middleware.js";
+import { imageProcedure, withOwnership, withResolves } from "../tool-builder/image-middleware.js";
 
 export const albumReorderTool = imageProcedure
   .use(withResolves({ album_handle: "album" }))

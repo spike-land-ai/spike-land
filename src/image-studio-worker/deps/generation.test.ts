@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createGeminiGeneration } from "./generation.ts";
 
 vi.mock("@google/genai", () => {
@@ -8,14 +8,23 @@ vi.mock("@google/genai", () => {
         generateContent: vi.fn().mockImplementation((opts) => {
           const prompt = opts.contents[0].parts.find((p: any) => p.text)?.text || "";
           let text = "";
-          if (prompt.includes("Describe")) text = '{"description":"desc","tags":["t"]}';
-          else if (prompt.includes("Extract")) text = '["#000"]';
-          else if (prompt.includes("Compare")) text = '{"similarity":1,"differences":[]}';
+          if (prompt.includes("Describe")) {
+            text = '{"description":"desc","tags":["t"]}';
+          } else if (prompt.includes("Extract")) {
+            text = '["#000"]';
+          } else if (prompt.includes("Compare")) {
+            text = '{"similarity":1,"differences":[]}';
+          }
           return Promise.resolve({
             candidates: [
               {
                 content: {
-                  parts: [{ inlineData: { data: "base64", mimeType: "image/png" }, text }],
+                  parts: [
+                    {
+                      inlineData: { data: "base64", mimeType: "image/png" },
+                      text,
+                    },
+                  ],
                 },
               },
             ],
@@ -30,7 +39,10 @@ describe("generation", () => {
   const db = {
     generationJobCreate: vi.fn().mockResolvedValue({ id: "job-1" }),
     generationJobUpdate: vi.fn().mockResolvedValue({}),
-    imageFindById: vi.fn().mockResolvedValue({ originalR2Key: "k", originalFormat: "png" }),
+    imageFindById: vi.fn().mockResolvedValue({
+      originalR2Key: "k",
+      originalFormat: "png",
+    }),
   } as any;
 
   const credits = {
@@ -47,7 +59,10 @@ describe("generation", () => {
     vi.clearAllMocks();
     db.generationJobCreate.mockResolvedValue({ id: "job-1" });
     db.generationJobUpdate.mockResolvedValue({});
-    db.imageFindById.mockResolvedValue({ originalR2Key: "k", originalFormat: "png" });
+    db.imageFindById.mockResolvedValue({
+      originalR2Key: "k",
+      originalFormat: "png",
+    });
     credits.consume.mockResolvedValue({ success: true });
     storage.upload.mockResolvedValue({ url: "u", sizeBytes: 1 });
     storage.download.mockResolvedValue(Buffer.from("a"));
@@ -105,19 +120,28 @@ describe("generation", () => {
 
   it("describeImage", async () => {
     const gen = createGeminiGeneration({ GEMINI_API_KEY: "k" } as any, db, credits, storage);
-    const res = await gen.describeImage!({ userId: "u", imageId: "img" as any });
+    const res = await gen.describeImage!({
+      userId: "u",
+      imageId: "img" as any,
+    });
     expect(res.description).toBe("desc");
   });
 
   it("extractPalette", async () => {
     const gen = createGeminiGeneration({ GEMINI_API_KEY: "k" } as any, db, credits, storage);
-    const res = await gen.extractPalette!({ userId: "u", imageId: "img" as any });
+    const res = await gen.extractPalette!({
+      userId: "u",
+      imageId: "img" as any,
+    });
     expect(res.palette[0]).toBe("#000");
   });
 
   it("compareImages", async () => {
     const gen = createGeminiGeneration({ GEMINI_API_KEY: "k" } as any, db, credits, storage);
-    const res = await gen.compareImages!({ userId: "u", image1Id: "img" as any });
+    const res = await gen.compareImages!({
+      userId: "u",
+      image1Id: "img" as any,
+    });
     expect(res.comparison.similarity).toBe(1);
   });
 });

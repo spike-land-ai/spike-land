@@ -61,7 +61,9 @@ describe("HTTP server — API key validation", () => {
   let baseUrl: string;
 
   beforeEach(async () => {
-    const result = await withHttpServer(makeManager(), { apiKey: "secret-key" });
+    const result = await withHttpServer(makeManager(), {
+      apiKey: "secret-key",
+    });
     closeServer = result.closeServer;
     baseUrl = result.baseUrl;
   });

@@ -159,7 +159,12 @@ describe("useAgentChat", () => {
 
   it("clears messages", async () => {
     fetchSpy.mockResolvedValueOnce(
-      createMockSSEResponse([{ type: "text_delta", text: "response" }, { type: "done" }]),
+      createMockSSEResponse([
+        { type: "text_delta", text: "response" },
+        {
+          type: "done",
+        },
+      ]),
     );
 
     const { result } = renderHook(() => useAgentChat("session-5"));

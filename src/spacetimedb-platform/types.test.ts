@@ -6,7 +6,10 @@ describe("jsonResult", () => {
     const result = jsonResult({ status: "ok", count: 42 });
     expect(result.content).toHaveLength(1);
     expect(result.content[0].type).toBe("text");
-    expect(JSON.parse(result.content[0].text)).toEqual({ status: "ok", count: 42 });
+    expect(JSON.parse(result.content[0].text)).toEqual({
+      status: "ok",
+      count: 42,
+    });
     expect(result.isError).toBeUndefined();
   });
 

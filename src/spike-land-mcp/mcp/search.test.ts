@@ -4,7 +4,7 @@
  * Covers keyword search and semantic search over registered tools.
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ToolSearch } from "./search";
 import type { RegisteredTool } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ToolDefinition } from "./registry";
@@ -46,7 +46,9 @@ function makeToolMap(
         category: t.category,
         description: t.description,
         tier: t.tier ?? "free",
-        handler: async () => ({ content: [{ type: "text" as const, text: "ok" }] }),
+        handler: async () => ({
+          content: [{ type: "text" as const, text: "ok" }],
+        }),
       },
       registered: makeRegisteredTool(t.enabled ?? false),
     });
@@ -60,7 +62,11 @@ describe("ToolSearch.search", () => {
   it("returns empty array for empty query", () => {
     const search = new ToolSearch();
     const tools = makeToolMap([
-      { name: "upload_file", category: "storage", description: "Upload a file" },
+      {
+        name: "upload_file",
+        category: "storage",
+        description: "Upload a file",
+      },
     ]);
 
     const results = search.search(tools, "");
@@ -70,7 +76,11 @@ describe("ToolSearch.search", () => {
   it("returns empty array for whitespace-only query", () => {
     const search = new ToolSearch();
     const tools = makeToolMap([
-      { name: "upload_file", category: "storage", description: "Upload a file" },
+      {
+        name: "upload_file",
+        category: "storage",
+        description: "Upload a file",
+      },
     ]);
 
     const results = search.search(tools, "   ");
@@ -83,8 +93,16 @@ describe("ToolSearch.search", () => {
     search.index("send_message", "chat", "Send a chat message");
 
     const tools = makeToolMap([
-      { name: "upload_file", category: "storage", description: "Upload a file to cloud storage" },
-      { name: "send_message", category: "chat", description: "Send a chat message" },
+      {
+        name: "upload_file",
+        category: "storage",
+        description: "Upload a file to cloud storage",
+      },
+      {
+        name: "send_message",
+        category: "chat",
+        description: "Send a chat message",
+      },
     ]);
 
     const results = search.search(tools, "upload");
@@ -97,7 +115,11 @@ describe("ToolSearch.search", () => {
     search.index("send_message", "chat", "Send a message");
 
     const tools = makeToolMap([
-      { name: "upload_file", category: "storage", description: "Upload a file" },
+      {
+        name: "upload_file",
+        category: "storage",
+        description: "Upload a file",
+      },
       { name: "send_message", category: "chat", description: "Send a message" },
     ]);
 
@@ -112,8 +134,16 @@ describe("ToolSearch.search", () => {
     search.index("upload_file", "storage", "Upload a file to cloud");
 
     const tools = makeToolMap([
-      { name: "bulk_export", category: "data", description: "Export all records to CSV format" },
-      { name: "upload_file", category: "storage", description: "Upload a file to cloud" },
+      {
+        name: "bulk_export",
+        category: "data",
+        description: "Export all records to CSV format",
+      },
+      {
+        name: "upload_file",
+        category: "storage",
+        description: "Upload a file to cloud",
+      },
     ]);
 
     const results = search.search(tools, "csv");
@@ -126,8 +156,16 @@ describe("ToolSearch.search", () => {
     search.index("upload_file", "storage", "Upload a file");
 
     const tools = makeToolMap([
-      { name: "search_tools", category: "gateway-meta", description: "Search for available tools" },
-      { name: "upload_file", category: "storage", description: "Upload a file" },
+      {
+        name: "search_tools",
+        category: "gateway-meta",
+        description: "Search for available tools",
+      },
+      {
+        name: "upload_file",
+        category: "storage",
+        description: "Upload a file",
+      },
     ]);
 
     const results = search.search(tools, "search");
@@ -159,7 +197,11 @@ describe("ToolSearch.search", () => {
 
     const tools = makeToolMap([
       { name: "upload_tool", category: "general", description: "Generic tool" },
-      { name: "generic_tool", category: "general", description: "Tool that uploads files" },
+      {
+        name: "generic_tool",
+        category: "general",
+        description: "Tool that uploads files",
+      },
     ]);
 
     const results = search.search(tools, "upload");
@@ -233,7 +275,11 @@ describe("ToolSearch.searchSemantic", () => {
         category: "storage",
         description: "Save a document to cloud storage",
       },
-      { name: "send_chat", category: "chat", description: "Send a message to a user" },
+      {
+        name: "send_chat",
+        category: "chat",
+        description: "Send a message to a user",
+      },
     ]);
 
     const results = search.searchSemantic(tools, "save file to storage");
@@ -246,8 +292,16 @@ describe("ToolSearch.searchSemantic", () => {
     search.index("find_files", "storage", "Find files in storage");
 
     const tools = makeToolMap([
-      { name: "search_tools", category: "gateway-meta", description: "Search for tools" },
-      { name: "find_files", category: "storage", description: "Find files in storage" },
+      {
+        name: "search_tools",
+        category: "gateway-meta",
+        description: "Search for tools",
+      },
+      {
+        name: "find_files",
+        category: "storage",
+        description: "Find files in storage",
+      },
     ]);
 
     const results = search.searchSemantic(tools, "search find");
@@ -259,7 +313,11 @@ describe("ToolSearch.searchSemantic", () => {
     search.index("upload_file", "storage", "Upload a file to storage");
 
     const tools = makeToolMap([
-      { name: "upload_file", category: "storage", description: "Upload a file to storage" },
+      {
+        name: "upload_file",
+        category: "storage",
+        description: "Upload a file to storage",
+      },
     ]);
 
     const results = search.searchSemantic(tools, "upload file");

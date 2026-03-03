@@ -134,9 +134,9 @@
    // Use type guards
    function isValidMessage(message: unknown): message is Message {
      return (
-       typeof message === "object"
-       && message !== null
-       && "type" in message
+       typeof message === "object" &&
+       message !== null &&
+       "type" in message
      );
    }
    ```

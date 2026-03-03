@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "@tanstack/react-router";
 import { ArticleView } from "@/components/quiz/ArticleView";
 import { QuizRound } from "@/components/quiz/QuizRound";
@@ -86,7 +86,12 @@ function generateMockSession(content: string): SessionState {
     article: content,
     concepts,
     currentRound: { roundNumber: 1, questions },
-    progress: concepts.map((c) => ({ concept: c, mastered: false, correctCount: 0, attempts: 0 })),
+    progress: concepts.map((c) => ({
+      concept: c,
+      mastered: false,
+      correctCount: 0,
+      attempts: 0,
+    })),
     results: null,
     conflicts: [],
     score: 0,
@@ -201,7 +206,10 @@ export function LearnSessionPage() {
     const raw = sessionStorage.getItem(`quiz-${sessionId}`);
     if (raw) {
       try {
-        const data = JSON.parse(raw) as { contentUrl?: string; contentText?: string };
+        const data = JSON.parse(raw) as {
+          contentUrl?: string;
+          contentText?: string;
+        };
         const content = data.contentText ?? data.contentUrl ?? "No content provided";
         setState(generateMockSession(content));
       } catch {

@@ -211,8 +211,7 @@ export function EnhancementSettings({
       )}
 
       {/* Action buttons - different layout for dialog vs card */}
-      {trigger ? // Dialog mode - buttons in footer
-      null : (
+      {trigger ? null : ( // Dialog mode - buttons in footer
         // Card mode - single button
         <Button
           onClick={handleEnhance}

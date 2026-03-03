@@ -391,7 +391,10 @@ export async function sendHealthAlerts(
     if (config.notifyChannels.includes("email")) {
       for (const admin of validAdmins) {
         await sendHealthAlertEmail(
-          { email: admin.user.email!, ...(admin.user.name ? { name: admin.user.name } : {}) },
+          {
+            email: admin.user.email!,
+            ...(admin.user.name ? { name: admin.user.name } : {}),
+          },
           {
             accountName: account.accountName,
             platform: account.platform,

@@ -23,8 +23,8 @@ Quick start guide for developers integrating with the Spike Land API.
 ### Base Configuration
 
 ```typescript
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
-  || "http://localhost:3000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:3000/api";
 
 interface ApiResponse<T> {
   data?: T;
@@ -160,7 +160,7 @@ async function pollJobStatus(jobId: string): Promise<string> {
       case "PROCESSING":
       case "PENDING":
         // Continue polling
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         attempts++;
         break;
     }
@@ -258,14 +258,14 @@ async function batchEnhanceImages(
   if (!response.ok) throw new Error(result.error);
 
   // Poll all jobs
-  return Promise.all(result.jobIds.map(jobId => pollJobStatus(jobId)));
+  return Promise.all(result.jobIds.map((jobId) => pollJobStatus(jobId)));
 }
 ```
 
 ### Referral Program
 
 ```typescript
-async function getReferralLink(): Promise<{ code: string; url: string; }> {
+async function getReferralLink(): Promise<{ code: string; url: string }> {
   const response = await fetch(`${API_BASE_URL}/referral/link`);
   const link = await response.json();
   if (!response.ok) throw new Error(link.error);
@@ -361,7 +361,9 @@ async function apiCallWithRetry<T>(
         );
 
         if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+          await new Promise((resolve) =>
+            setTimeout(resolve, retryAfter * 1000)
+          );
           continue;
         }
       }
@@ -425,8 +427,8 @@ class SpikeClient implements ApiClient {
   private session: Session | null;
 
   constructor(session: Session | null) {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL
-      || "http://localhost:3000/api";
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL ||
+      "http://localhost:3000/api";
     this.session = session;
   }
 
@@ -437,9 +439,9 @@ class SpikeClient implements ApiClient {
   images = {
     enhance: (imageId, tier) =>
       this.post<ImageEnhancementJob>("/images/enhance", { imageId, tier }).then(
-        job => this.waitForCompletion(job.id),
+        (job) => this.waitForCompletion(job.id),
       ),
-    upload: file => {
+    upload: (file) => {
       const formData = new FormData();
       formData.append("file", file);
       return this.post<Image>("/images/upload", formData);
@@ -447,8 +449,10 @@ class SpikeClient implements ApiClient {
   };
 
   albums = {
-    create: (name, privacy) => this.post<Album>("/albums", { name, privacy }).then(a => a.id),
-    addImages: (albumId, imageIds) => this.post(`/albums/${albumId}/images`, { imageIds }),
+    create: (name, privacy) =>
+      this.post<Album>("/albums", { name, privacy }).then((a) => a.id),
+    addImages: (albumId, imageIds) =>
+      this.post(`/albums/${albumId}/images`, { imageIds }),
   };
 
   referral = {

@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { ImageRow } from "../types.js";
 import { errorResult, jsonResult, toolEvent } from "../types.js";
 import { tryCatch } from "./try-catch.js";
-import { imageProcedure, withResolves, withOwnership } from "../tool-builder/image-middleware.js";
+import { imageProcedure, withOwnership, withResolves } from "../tool-builder/image-middleware.js";
 
 export const updateTool = imageProcedure
   .use(withResolves({ image_id: "image" }))

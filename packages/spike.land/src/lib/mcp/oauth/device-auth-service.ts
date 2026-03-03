@@ -70,7 +70,10 @@ export async function generateDeviceCode(
       },
     });
   } catch (error) {
-    logger.error("Failed to create device authorization code", { clientId, error });
+    logger.error("Failed to create device authorization code", {
+      clientId,
+      error,
+    });
     throw error;
   }
 

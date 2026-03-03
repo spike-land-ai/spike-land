@@ -50,7 +50,10 @@ describe("provider config", () => {
     it("returns config when both env vars are set", () => {
       process.env.GOOGLE_ID = "g-id";
       process.env.GOOGLE_SECRET = "g-secret";
-      expect(getGoogleConfig()).toEqual({ clientId: "g-id", clientSecret: "g-secret" });
+      expect(getGoogleConfig()).toEqual({
+        clientId: "g-id",
+        clientSecret: "g-secret",
+      });
     });
 
     it("returns null when missing", () => {
@@ -64,7 +67,10 @@ describe("provider config", () => {
     it("returns config when both env vars are set", () => {
       process.env.AUTH_APPLE_ID = "a-id";
       process.env.AUTH_APPLE_SECRET = "a-secret";
-      expect(getAppleConfig()).toEqual({ clientId: "a-id", clientSecret: "a-secret" });
+      expect(getAppleConfig()).toEqual({
+        clientId: "a-id",
+        clientSecret: "a-secret",
+      });
     });
 
     it("returns null when missing", () => {
@@ -77,7 +83,10 @@ describe("provider config", () => {
     it("returns config when both env vars are set", () => {
       process.env.AUTH_FACEBOOK_ID = "fb-id";
       process.env.AUTH_FACEBOOK_SECRET = "fb-secret";
-      expect(getFacebookConfig()).toEqual({ clientId: "fb-id", clientSecret: "fb-secret" });
+      expect(getFacebookConfig()).toEqual({
+        clientId: "fb-id",
+        clientSecret: "fb-secret",
+      });
     });
 
     it("returns null when missing", () => {

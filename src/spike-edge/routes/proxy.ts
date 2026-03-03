@@ -38,7 +38,9 @@ proxy.post("/proxy/stripe", async (c) => {
 
   return new Response(response.body, {
     status: response.status,
-    headers: { "content-type": response.headers.get("content-type") ?? "application/json" },
+    headers: {
+      "content-type": response.headers.get("content-type") ?? "application/json",
+    },
   });
 });
 
@@ -60,7 +62,9 @@ proxy.post("/proxy/ai", async (c) => {
 
   return new Response(response.body, {
     status: response.status,
-    headers: { "content-type": response.headers.get("content-type") ?? "application/json" },
+    headers: {
+      "content-type": response.headers.get("content-type") ?? "application/json",
+    },
   });
 });
 
@@ -87,7 +91,9 @@ proxy.post("/proxy/github", async (c) => {
 
   return new Response(response.body, {
     status: response.status,
-    headers: { "content-type": response.headers.get("content-type") ?? "application/json" },
+    headers: {
+      "content-type": response.headers.get("content-type") ?? "application/json",
+    },
   });
 });
 

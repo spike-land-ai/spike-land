@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback, type KeyboardEvent } from "react";
-import { MessageCircle, X, Send, Trash2, Sparkles, Maximize2, Minimize2 } from "lucide-react";
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import { Maximize2, MessageCircle, Minimize2, Send, Sparkles, Trash2, X } from "lucide-react";
 import { useChat } from "../../hooks/useChat";
 import { ChatMessage } from "./ChatMessage";
 import { useEventBus } from "../../hooks/useEventBus";

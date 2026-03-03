@@ -201,9 +201,9 @@ from ad spend, not API access.
 ## CLI Access (spike-cli)
 
 All 455+ MCP tools available through the web dashboard are also accessible
-programmatically via **spike-cli** (`@spike-land-ai/spike-cli`, bin:
-`spike`). spike-cli is an MCP multiplexer that aggregates multiple MCP servers
-into one unified CLI/REPL interface, giving developers and AI agents the same
+programmatically via **spike-cli** (`@spike-land-ai/spike-cli`, bin: `spike`).
+spike-cli is an MCP multiplexer that aggregates multiple MCP servers into one
+unified CLI/REPL interface, giving developers and AI agents the same
 capabilities as the web dashboard without a browser. No additional subscription
 cost -- spike-cli uses the same API credentials and rate limits as the web
 platform.

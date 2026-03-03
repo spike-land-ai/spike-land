@@ -1,8 +1,8 @@
-import { useParams, Link } from "@tanstack/react-router";
-import { useState, useCallback } from "react";
-import { StatusBadge, type AppStatus } from "@/components/StatusBadge";
+import { Link, useParams } from "@tanstack/react-router";
+import { useCallback, useState } from "react";
+import { type AppStatus, StatusBadge } from "@/components/StatusBadge";
 import { ChatThread, type Message } from "@/components/ChatThread";
-import { VersionHistory, type AppVersion } from "@/components/VersionHistory";
+import { type AppVersion, VersionHistory } from "@/components/VersionHistory";
 import { LivePreview } from "@/components/LivePreview";
 import { useStdb } from "@/hooks/useStdb";
 
@@ -54,7 +54,10 @@ export function AppDetailPage() {
         const assistantMsg: Message = {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: `I received your message about "${content.slice(0, 50)}...". I'll work on that change now.`,
+          content: `I received your message about "${content.slice(
+            0,
+            50,
+          )}...". I'll work on that change now.`,
           timestamp: new Date().toISOString(),
         };
         setMessages((prev) => [...prev, assistantMsg]);

@@ -2,7 +2,9 @@
 
 ## Overview
 
-Auth MCP server for spike.land, handling authentication via Better Auth with Drizzle ORM. Runs as a Cloudflare Worker. Published as `@spike-land-ai/mcp-auth`.
+Auth MCP server for spike.land, handling authentication via Better Auth with
+Drizzle ORM. Runs as a Cloudflare Worker. Published as
+`@spike-land-ai/mcp-auth`.
 
 ## Commands
 

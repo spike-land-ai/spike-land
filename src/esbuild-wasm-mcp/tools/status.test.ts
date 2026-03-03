@@ -44,7 +44,9 @@ describe("registerStatusTool", () => {
       initializedAt: null,
     });
 
-    const result = (await handler({})) as { content: { type: string; text: string }[] };
+    const result = (await handler({})) as {
+      content: { type: string; text: string }[];
+    };
 
     expect(result.content[0]!.type).toBe("text");
     const parsed = JSON.parse(result.content[0]!.text);

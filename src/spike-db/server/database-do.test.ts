@@ -4,7 +4,7 @@ import { executeReducer } from "./reducer-engine.js";
 import { parseClientMessage, serialize } from "../protocol/messages.js";
 import { generateIdentity, signToken, verifyToken } from "./identity.js";
 import type { DatabaseSchema } from "../schema/types.js";
-import type { SqlStorage, SqlResult } from "./table-handle.js";
+import type { SqlResult, SqlStorage } from "./table-handle.js";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -35,8 +35,18 @@ function createTestSchema(): DatabaseSchema {
       users: {
         name: "users",
         columns: {
-          id: { kind: "string", zodSchema: {} as never, sqlType: "TEXT", nullable: false },
-          name: { kind: "string", zodSchema: {} as never, sqlType: "TEXT", nullable: false },
+          id: {
+            kind: "string",
+            zodSchema: {} as never,
+            sqlType: "TEXT",
+            nullable: false,
+          },
+          name: {
+            kind: "string",
+            zodSchema: {} as never,
+            sqlType: "TEXT",
+            nullable: false,
+          },
         },
         primaryKey: "id",
         indexes: [],
@@ -100,7 +110,12 @@ describe("scheduler", () => {
           // SELECT scheduled reducers
           return {
             toArray: () => [
-              { id: 1, reducer: "test_reducer", args_json: '["hello"]', run_at: Date.now() - 1000 },
+              {
+                id: 1,
+                reducer: "test_reducer",
+                args_json: '["hello"]',
+                run_at: Date.now() - 1000,
+              },
             ],
             rowsRead: 1,
             rowsWritten: 0,
@@ -121,9 +136,9 @@ describe("scheduler", () => {
     const schema = createTestSchema();
     const setAlarm = vi.fn();
     const scheduleFn = vi.fn();
-    const executor = vi
-      .fn()
-      .mockReturnValue({ mutations: [{ table: "users", op: "insert", newRow: { id: "1" } }] });
+    const executor = vi.fn().mockReturnValue({
+      mutations: [{ table: "users", op: "insert", newRow: { id: "1" } }],
+    });
 
     const mutations = processAlarm(sql, schema, executor, setAlarm, scheduleFn);
 
@@ -300,8 +315,18 @@ describe("executeReducer", () => {
         users: {
           name: "users",
           columns: {
-            id: { kind: "string", zodSchema: {} as never, sqlType: "TEXT", nullable: false },
-            name: { kind: "string", zodSchema: {} as never, sqlType: "TEXT", nullable: false },
+            id: {
+              kind: "string",
+              zodSchema: {} as never,
+              sqlType: "TEXT",
+              nullable: false,
+            },
+            name: {
+              kind: "string",
+              zodSchema: {} as never,
+              sqlType: "TEXT",
+              nullable: false,
+            },
           },
           primaryKey: "id",
           indexes: [],

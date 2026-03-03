@@ -5,15 +5,15 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
-import { SessionBootstrapSchema, PlanningInterviewSchema, PrePRCheckSchema } from "../types.js";
+import { createZodTool, textResult } from "@spike-land-ai/mcp-server-base";
+import { PlanningInterviewSchema, PrePRCheckSchema, SessionBootstrapSchema } from "../types.js";
 import { getWorkspace } from "../workspace-state.js";
 import {
-  getBuiltinRules,
-  runGates,
-  formatGateResults,
-  getChangedFiles,
   countChanges,
+  formatGateResults,
+  getBuiltinRules,
+  getChangedFiles,
+  runGates,
 } from "../gates/engine.js";
 
 // ── MCQ Interview Types ─────────────────────────────────────────────────────
@@ -387,7 +387,10 @@ export function registerWorkflowTools(server: McpServer): void {
     description: "Checkpoint 0: verify branch, git status, workspace readiness",
     schema: SessionBootstrapSchema.shape,
     handler: async (args) => {
-      const { packageName, branch } = args as { packageName: string; branch?: string };
+      const { packageName, branch } = args as {
+        packageName: string;
+        branch?: string;
+      };
       const workspace = getWorkspace();
 
       const checks: string[] = [];
@@ -508,7 +511,9 @@ export function registerWorkflowTools(server: McpServer): void {
             conceptState.answerHistory.set(q.variantIndex, givenAnswer);
             const correctOption = q.options[q.correctIndex] ?? "unknown";
             roundResults.push(
-              `  Q${i + 1} [${conceptName}]: WRONG (correct: ${q.correctIndex} — "${correctOption}")`,
+              `  Q${
+                i + 1
+              } [${conceptName}]: WRONG (correct: ${q.correctIndex} — "${correctOption}")`,
             );
           }
         }
@@ -528,7 +533,9 @@ export function registerWorkflowTools(server: McpServer): void {
             `## INTERVIEW FAILED — Too Many Contradictions\n\n` +
               `**${session.conflicts.length} contradictions detected.** Review the codebase before continuing.\n\n` +
               `### Conflicts:\n${conflictDetails}\n\n` +
-              `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join("\n")}`,
+              `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join(
+                "\n",
+              )}`,
           );
         }
 
@@ -539,7 +546,9 @@ export function registerWorkflowTools(server: McpServer): void {
 
           return textResult(
             `## INTERVIEW FAILED — Research Before Continuing\n\n` +
-              `**Score: ${roundCorrect}/3 (${Math.round((roundCorrect / 3) * 100)}%).** Score too low.\n\n` +
+              `**Score: ${roundCorrect}/3 (${Math.round(
+                (roundCorrect / 3) * 100,
+              )}%).** Score too low.\n\n` +
               `### Round ${session.roundNumber} Results:\n${roundResults.join("\n")}\n\n` +
               `Research the codebase and start a new interview.`,
           );
@@ -558,7 +567,9 @@ export function registerWorkflowTools(server: McpServer): void {
           return textResult(
             `## INTERVIEW PASSED — Proceed to Implementation\n\n` +
               `All 6 concepts mastered.\n\n` +
-              `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join("\n")}\n\n` +
+              `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join(
+                "\n",
+              )}\n\n` +
               `### Mastery Report:\n${masteryReport}\n\n` +
               `### Conflicts: ${session.conflicts.length}`,
           );

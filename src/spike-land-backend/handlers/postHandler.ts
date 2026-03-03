@@ -527,7 +527,10 @@ export class PostHandler {
         inputSchema: schemaDefinition,
         execute: async (args: Record<string, unknown>) => {
           try {
-            const response = await mcpServerRef.executeTool(toolName, { ...args, codeSpace });
+            const response = await mcpServerRef.executeTool(toolName, {
+              ...args,
+              codeSpace,
+            });
             return response;
           } catch (error) {
             console.error(`[AI Routes][${requestId}] Error executing tool ${toolName}:`, error);

@@ -8,14 +8,14 @@
  */
 
 import type {
-  Image,
   Album,
   AlbumImage,
-  Pipeline,
+  Credits,
   EnhancementJob,
   GenerationJob,
+  Image,
+  Pipeline,
   Subject,
-  Credits,
 } from "./image-types.js";
 
 // ─── Table accessor shape ───────────────────────────────────────────
@@ -223,7 +223,9 @@ export interface TypedReducers {
 export const typedTables: TypedTables = new Proxy({} as TypedTables, {
   get(_target, prop) {
     throw new Error(
-      `typedTables.${String(prop)} is no longer available. Use the HTTP client (stdb-http-client) instead.`,
+      `typedTables.${String(
+        prop,
+      )} is no longer available. Use the HTTP client (stdb-http-client) instead.`,
     );
   },
 });
@@ -231,7 +233,9 @@ export const typedTables: TypedTables = new Proxy({} as TypedTables, {
 export const typedReducers: TypedReducers = new Proxy({} as TypedReducers, {
   get(_target, prop) {
     throw new Error(
-      `typedReducers.${String(prop)} is no longer available. Use the HTTP client (stdb-http-client) instead.`,
+      `typedReducers.${String(
+        prop,
+      )} is no longer available. Use the HTTP client (stdb-http-client) instead.`,
     );
   },
 });

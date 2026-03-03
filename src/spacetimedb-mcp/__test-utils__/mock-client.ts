@@ -9,9 +9,9 @@ import type {
   Agent,
   AgentMessage,
   ConnectionState,
-  Task,
-  RegisteredTool,
   McpTask,
+  RegisteredTool,
+  Task,
 } from "../types.js";
 
 export interface MockClientOptions {
@@ -99,7 +99,9 @@ export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpC
     getState: vi.fn(() => ({ ...state })),
 
     connect: vi.fn(async (uri: string, moduleName: string, token?: string) => {
-      if (state.connected) throw new Error("Already connected. Disconnect first.");
+      if (state.connected) {
+        throw new Error("Already connected. Disconnect first.");
+      }
       if (options.failConnect) throw new Error("Connection refused");
       state.connected = true;
       state.uri = uri;
@@ -149,7 +151,9 @@ export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpC
 
     listRegisteredTools: vi.fn((categoryFilter?: string) => {
       requireConnectedSync();
-      if (categoryFilter) return tools.filter((t) => t.category === categoryFilter);
+      if (categoryFilter) {
+        return tools.filter((t) => t.category === categoryFilter);
+      }
       return [...tools];
     }),
 
@@ -188,7 +192,9 @@ export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpC
 
     listMcpTasks: vi.fn((statusFilter?: string) => {
       requireConnectedSync();
-      if (statusFilter) return mcpTasks.filter((t) => t.status === statusFilter);
+      if (statusFilter) {
+        return mcpTasks.filter((t) => t.status === statusFilter);
+      }
       return [...mcpTasks];
     }),
 

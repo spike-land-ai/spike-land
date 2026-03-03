@@ -16,7 +16,9 @@ export function registerVoteTools(server: McpServer, writeClient: HNWriteClient)
     },
     async ({ itemId }) => {
       const result = await tryCatch(writeClient.upvote(itemId));
-      if (!result.ok) return errorResult("NETWORK_ERROR", result.error.message, true);
+      if (!result.ok) {
+        return errorResult("NETWORK_ERROR", result.error.message, true);
+      }
       if (result.data.success) {
         return jsonResult({ status: "upvoted", itemId });
       }

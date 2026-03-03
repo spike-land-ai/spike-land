@@ -5,8 +5,8 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
-import { GenerateWranglerTomlSchema, DeployWorkerSchema } from "../types.js";
+import { createZodTool, textResult } from "@spike-land-ai/mcp-server-base";
+import { DeployWorkerSchema, GenerateWranglerTomlSchema } from "../types.js";
 import { getManifestPackage } from "../manifest.js";
 import { runCommand } from "../shell.js";
 import { writeFile } from "node:fs/promises";
@@ -206,7 +206,9 @@ export function registerDeployTools(server: McpServer): void {
 
         if (!buildResult.ok) {
           report += `**FAILED** (${buildDur}s)\n`;
-          report += `\`\`\`\n${(buildResult.stderr || buildResult.stdout).trim().slice(0, 1000)}\n\`\`\`\n`;
+          report += `\`\`\`\n${(buildResult.stderr || buildResult.stdout)
+            .trim()
+            .slice(0, 1000)}\n\`\`\`\n`;
           report += `\n**BLOCKED** at build step.`;
           return textResult(report);
         }
@@ -225,7 +227,9 @@ export function registerDeployTools(server: McpServer): void {
             const installResult = await runCommand("npm", ["install"], frontendDir);
             if (!installResult.ok) {
               report += `**npm install FAILED**\n`;
-              report += `\`\`\`\n${(installResult.stderr || installResult.stdout).trim().slice(0, 1000)}\n\`\`\`\n`;
+              report += `\`\`\`\n${(installResult.stderr || installResult.stdout)
+                .trim()
+                .slice(0, 1000)}\n\`\`\`\n`;
               report += `\n**BLOCKED** at frontend install step.`;
               return textResult(report);
             }
@@ -236,7 +240,9 @@ export function registerDeployTools(server: McpServer): void {
 
           if (!viteBuild.ok) {
             report += `**FAILED** (${viteDur}s)\n`;
-            report += `\`\`\`\n${(viteBuild.stderr || viteBuild.stdout).trim().slice(0, 1000)}\n\`\`\`\n`;
+            report += `\`\`\`\n${(viteBuild.stderr || viteBuild.stdout)
+              .trim()
+              .slice(0, 1000)}\n\`\`\`\n`;
             report += `\n**BLOCKED** at frontend build step.`;
             return textResult(report);
           }
@@ -275,7 +281,9 @@ export function registerDeployTools(server: McpServer): void {
         }
       } else {
         report += `**FAILED** (${deployDur}s)\n`;
-        report += `\`\`\`\n${(deployResult.stderr || deployResult.stdout).trim().slice(0, 1000)}\n\`\`\``;
+        report += `\`\`\`\n${(deployResult.stderr || deployResult.stdout)
+          .trim()
+          .slice(0, 1000)}\n\`\`\``;
       }
 
       return textResult(report);

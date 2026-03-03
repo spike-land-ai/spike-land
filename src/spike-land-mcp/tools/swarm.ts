@@ -10,10 +10,10 @@
  */
 
 import { z } from "zod";
-import { eq, desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import { freeTool, textResult } from "../procedures/index";
-import { claudeCodeAgents, agentMessages } from "../db/schema";
+import { agentMessages, claudeCodeAgents } from "../db/schema";
 import type { DrizzleDB } from "../db/index";
 
 export function registerSwarmTools(registry: ToolRegistry, userId: string, db: DrizzleDB): void {
@@ -111,7 +111,9 @@ export function registerSwarmTools(registry: ToolRegistry, userId: string, db: D
             `- Status: ${agent.status}\n` +
             `- Workspace: ${agent.workspaceId || "(none)"}\n` +
             `- Metadata: ${JSON.stringify(meta)}\n` +
-            `- Last Active: ${agent.lastActiveAt ? new Date(agent.lastActiveAt).toISOString() : "never"}\n` +
+            `- Last Active: ${
+              agent.lastActiveAt ? new Date(agent.lastActiveAt).toISOString() : "never"
+            }\n` +
             `- Created: ${new Date(agent.createdAt).toISOString()}`,
         );
       }),
@@ -198,7 +200,10 @@ export function registerSwarmTools(registry: ToolRegistry, userId: string, db: D
         const { agent_id, project_path, working_directory } = input;
 
         const results = await ctx.db
-          .select({ userId: claudeCodeAgents.userId, metadata: claudeCodeAgents.metadata })
+          .select({
+            userId: claudeCodeAgents.userId,
+            metadata: claudeCodeAgents.metadata,
+          })
           .from(claudeCodeAgents)
           .where(eq(claudeCodeAgents.id, agent_id))
           .limit(1);
@@ -210,7 +215,9 @@ export function registerSwarmTools(registry: ToolRegistry, userId: string, db: D
 
         const meta = JSON.parse(agent.metadata || "{}") as Record<string, unknown>;
         if (project_path !== undefined) meta.projectPath = project_path;
-        if (working_directory !== undefined) meta.workingDirectory = working_directory;
+        if (working_directory !== undefined) {
+          meta.workingDirectory = working_directory;
+        }
 
         await ctx.db
           .update(claudeCodeAgents)
@@ -272,7 +279,10 @@ export function registerSwarmTools(registry: ToolRegistry, userId: string, db: D
         const { target_agent_id, content, metadata } = input;
 
         const results = await ctx.db
-          .select({ userId: claudeCodeAgents.userId, name: claudeCodeAgents.name })
+          .select({
+            userId: claudeCodeAgents.userId,
+            name: claudeCodeAgents.name,
+          })
           .from(claudeCodeAgents)
           .where(eq(claudeCodeAgents.id, target_agent_id))
           .limit(1);
@@ -387,7 +397,10 @@ export function registerSwarmTools(registry: ToolRegistry, userId: string, db: D
         const { target_agent_id, task_description, priority = "medium", context } = input;
 
         const results = await ctx.db
-          .select({ userId: claudeCodeAgents.userId, name: claudeCodeAgents.name })
+          .select({
+            userId: claudeCodeAgents.userId,
+            name: claudeCodeAgents.name,
+          })
           .from(claudeCodeAgents)
           .where(eq(claudeCodeAgents.id, target_agent_id))
           .limit(1);

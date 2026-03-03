@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { hashApiKey, lookupApiKey } from "./api-key";
 
 describe("hashApiKey", () => {
@@ -56,7 +56,12 @@ describe("lookupApiKey", () => {
 
   it("returns null for expired key", async () => {
     const pastTimestamp = Date.now() - 60_000; // expired 1 minute ago
-    const db = createMockDb([{ userId: "user-expired", expiresAt: pastTimestamp }]);
+    const db = createMockDb([
+      {
+        userId: "user-expired",
+        expiresAt: pastTimestamp,
+      },
+    ]);
 
     const result = await lookupApiKey("sk_test_expired", db);
     expect(result).toBeNull();
@@ -64,7 +69,12 @@ describe("lookupApiKey", () => {
 
   it("returns userId for key with future expiration", async () => {
     const futureTimestamp = Date.now() + 3_600_000; // expires in 1 hour
-    const db = createMockDb([{ userId: "user-valid", expiresAt: futureTimestamp }]);
+    const db = createMockDb([
+      {
+        userId: "user-valid",
+        expiresAt: futureTimestamp,
+      },
+    ]);
 
     const result = await lookupApiKey("sk_test_future", db);
     expect(result).toEqual({ userId: "user-valid" });

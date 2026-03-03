@@ -18,7 +18,7 @@ import type {
   ToolEvent,
 } from "../types.js";
 import { errorResult, toolEvent } from "../types.js";
-import { resolveImageOrError, consumeCreditsOrError } from "../define-tool.js";
+import { consumeCreditsOrError, resolveImageOrError } from "../define-tool.js";
 import { tryCatch } from "../tools/try-catch.js";
 
 // ─── Entity type mapping ───
@@ -42,7 +42,11 @@ function withToolContext(
 ) {
   return middleware<
     Record<string, unknown>,
-    { userId: string; deps: ImageStudioDeps; notify?: (event: ToolEvent) => void }
+    {
+      userId: string;
+      deps: ImageStudioDeps;
+      notify?: (event: ToolEvent) => void;
+    }
   >(async ({ ctx, next }) => {
     return next({ ...ctx, userId, deps, notify });
   });
@@ -155,7 +159,11 @@ interface CreditsConfig {
  */
 function withCredits(config: CreditsConfig) {
   return middleware<
-    { userId: string; deps: ImageStudioDeps; notify?: (event: ToolEvent) => void },
+    {
+      userId: string;
+      deps: ImageStudioDeps;
+      notify?: (event: ToolEvent) => void;
+    },
     {
       userId: string;
       deps: ImageStudioDeps;
@@ -284,4 +292,4 @@ export function createImageProcedure(
 /** Pre-composed procedure for static tool definitions that receive ToolContext at runtime */
 export const imageProcedure = createProcedure<ToolContext>();
 
-export { withResolves, withOwnership, withCredits, withJob, withToolContext };
+export { withCredits, withJob, withOwnership, withResolves, withToolContext };

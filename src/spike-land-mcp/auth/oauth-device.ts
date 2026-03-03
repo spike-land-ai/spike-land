@@ -1,6 +1,6 @@
 import type { DrizzleDB } from "../db/index";
 import { deviceAuthCodes, oauthAccessTokens } from "../db/schema";
-import { eq, and, gt } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 
 function generateUserCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no ambiguous chars
@@ -94,12 +94,18 @@ export async function exchangeDeviceCode(
     .limit(1);
 
   if (result.length === 0) {
-    return { error: "expired_token", errorDescription: "Device code expired or not found" };
+    return {
+      error: "expired_token",
+      errorDescription: "Device code expired or not found",
+    };
   }
 
   const code = result[0];
   if (!code) {
-    return { error: "expired_token", errorDescription: "Device code not found" };
+    return {
+      error: "expired_token",
+      errorDescription: "Device code not found",
+    };
   }
 
   if (!code.approved || !code.userId) {

@@ -5,7 +5,8 @@ description: This skill provides guidance and enforcement rules for implementing
 
 ## Setting Up Organizations
 
-When adding organizations to your application, configure the `organization` plugin with appropriate limits and permissions.
+When adding organizations to your application, configure the `organization`
+plugin with appropriate limits and permissions.
 
 ```ts
 import { betterAuth } from "better-auth";
@@ -22,7 +23,8 @@ export const auth = betterAuth({
 });
 ```
 
-**Note**: After adding the plugin, run `npx @better-auth/cli migrate` to add the required database tables.
+**Note**: After adding the plugin, run `npx @better-auth/cli migrate` to add the
+required database tables.
 
 ### Client-Side Setup
 
@@ -39,7 +41,8 @@ export const authClient = createAuthClient({
 
 ## Creating Organizations
 
-Organizations are the top-level entity for grouping users. When created, the creator is automatically assigned the `owner` role.
+Organizations are the top-level entity for grouping users. When created, the
+creator is automatically assigned the `owner` role.
 
 ```ts
 const createOrg = async () => {
@@ -84,10 +87,10 @@ await auth.api.createOrganization({
 
 **Note**: The `userId` parameter cannot be used alongside session headers.
 
-
 ## Active Organizations
 
-The active organization is stored in the session and scopes subsequent API calls. Always set an active organization after the user selects one.
+The active organization is stored in the session and scopes subsequent API
+calls. Always set an active organization after the user selects one.
 
 ```ts
 const setActive = async (organizationId: string) => {
@@ -97,13 +100,17 @@ const setActive = async (organizationId: string) => {
 };
 ```
 
-Many endpoints use the active organization when `organizationId` is not provided:
+Many endpoints use the active organization when `organizationId` is not
+provided:
 
 ```ts
 // These use the active organization automatically
 await authClient.organization.listMembers();
 await authClient.organization.listInvitations();
-await authClient.organization.inviteMember({ email: "user@example.com", role: "member" });
+await authClient.organization.inviteMember({
+  email: "user@example.com",
+  role: "member",
+});
 ```
 
 ### Getting Full Organization Data
@@ -117,7 +124,8 @@ const { data } = await authClient.organization.getFullOrganization();
 
 ## Members
 
-Members are users who belong to an organization. Each member has a role that determines their permissions.
+Members are users who belong to an organization. Each member has a role that
+determines their permissions.
 
 ### Adding Members (Server-Side)
 
@@ -159,7 +167,8 @@ await authClient.organization.removeMember({
 });
 ```
 
-**Important**: The last owner cannot be removed. Assign the owner role to another member first.
+**Important**: The last owner cannot be removed. Assign the owner role to
+another member first.
 
 ### Updating Member Roles
 
@@ -187,7 +196,8 @@ organization({
 
 ## Invitations
 
-The invitation system allows admins to invite users via email. Configure email sending to enable invitations.
+The invitation system allows admins to invite users via email. Configure email
+sending to enable invitations.
 
 ### Setting Up Invitation Emails
 
@@ -241,7 +251,8 @@ const { data } = await authClient.organization.getInvitationURL({
 // Share data.url via any channel
 ```
 
-**Note**: This endpoint does not call `sendInvitationEmail`. Handle delivery yourself.
+**Note**: This endpoint does not call `sendInvitationEmail`. Handle delivery
+yourself.
 
 ### Accepting Invitations
 
@@ -265,12 +276,11 @@ organization({
 
 The plugin provides role-based access control (RBAC) with three default roles:
 
-| Role | Description |
-|------|-------------|
-| `owner` | Full access, can delete organization |
-| `admin` | Can manage members, invitations, settings |
-| `member` | Basic access to organization resources |
-
+| Role     | Description                               |
+| -------- | ----------------------------------------- |
+| `owner`  | Full access, can delete organization      |
+| `admin`  | Can manage members, invitations, settings |
+| `member` | Basic access to organization resources    |
 
 ### Checking Permissions
 
@@ -295,7 +305,8 @@ const canManageMembers = authClient.organization.checkRolePermission({
 });
 ```
 
-**Note**: For dynamic access control, the client side role permission check will not work. Please use the `hasPermission` endpoint.
+**Note**: For dynamic access control, the client side role permission check will
+not work. Please use the `hasPermission` endpoint.
 
 ## Teams
 
@@ -309,9 +320,9 @@ import { organization } from "better-auth/plugins";
 export const auth = betterAuth({
   plugins: [
     organization({
-        teams: {
-            enabled: true
-        }
+      teams: {
+        enabled: true,
+      },
     }),
   ],
 });
@@ -356,16 +367,17 @@ await authClient.organization.setActiveTeam({
 ```ts
 organization({
   teams: {
-      maximumTeams: 20, // Max teams per org
-      maximumMembersPerTeam: 50, // Max members per team
-      allowRemovingAllTeams: false, // Prevent removing last team
-  }
+    maximumTeams: 20, // Max teams per org
+    maximumMembersPerTeam: 50, // Max members per team
+    allowRemovingAllTeams: false, // Prevent removing last team
+  },
 });
 ```
 
 ## Dynamic Access Control
 
-For applications needing custom roles per organization at runtime, enable dynamic access control.
+For applications needing custom roles per organization at runtime, enable
+dynamic access control.
 
 ### Enabling Dynamic Access Control
 
@@ -376,9 +388,9 @@ import { dynamicAccessControl } from "@better-auth/organization/addons";
 export const auth = betterAuth({
   plugins: [
     organization({
-        dynamicAccessControl: {
-            enabled: true
-        }
+      dynamicAccessControl: {
+        enabled: true,
+      },
     }),
   ],
 });
@@ -413,7 +425,8 @@ await authClient.organization.deleteRole({
 });
 ```
 
-**Note**: Pre-defined roles (owner, admin, member) cannot be deleted. Roles assigned to members cannot be deleted until members are reassigned.
+**Note**: Pre-defined roles (owner, admin, member) cannot be deleted. Roles
+assigned to members cannot be deleted until members are reassigned.
 
 ## Lifecycle Hooks
 
@@ -512,7 +525,8 @@ await authClient.organization.updateMemberRole({
 
 ### Organization Deletion
 
-Deleting an organization removes all associated data (members, invitations, teams). Prevent accidental deletion:
+Deleting an organization removes all associated data (members, invitations,
+teams). Prevent accidental deletion:
 
 ```ts
 organization({
@@ -568,7 +582,8 @@ export const auth = betterAuth({
         await sendEmail({
           to: data.email,
           subject: `Join ${data.organization.name}`,
-          html: `<a href="https://app.com/invite/${data.invitation.id}">Accept</a>`,
+          html:
+            `<a href="https://app.com/invite/${data.invitation.id}">Accept</a>`,
         });
       },
 

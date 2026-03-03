@@ -51,8 +51,8 @@ GitHub repository.
 
 To restore the database from a backup, follow these steps:
 
-1. **Download the backup file:** Download the desired backup file from the
-   S3 bucket (`spike-land-backups`) or legacy Cloudflare R2 bucket.
+1. **Download the backup file:** Download the desired backup file from the S3
+   bucket (`spike-land-backups`) or legacy Cloudflare R2 bucket.
 2. **Decompress the backup file:** Use the `gunzip` command to decompress the
    backup file:
 
@@ -89,14 +89,14 @@ To restore the database from a backup, follow these steps:
 
 **Symptom**: Pre-flight checks fail with S3 connectivity errors.
 
-**Cause**: S3 bucket doesn't exist, OIDC role misconfigured, or insufficient
-IAM permissions.
+**Cause**: S3 bucket doesn't exist, OIDC role misconfigured, or insufficient IAM
+permissions.
 
 **Solution**:
 
 1. Verify the S3 bucket `spike-land-backups` exists in AWS Console
-2. Verify the IAM role referenced by `AWS_DEPLOY_ROLE_ARN` has S3 PutObject
-   and DeleteObject permissions for the backup bucket
+2. Verify the IAM role referenced by `AWS_DEPLOY_ROLE_ARN` has S3 PutObject and
+   DeleteObject permissions for the backup bucket
 3. Check OIDC trust policy allows GitHub Actions from this repository
 4. Test locally (if possible):
    ```bash

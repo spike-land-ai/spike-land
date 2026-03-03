@@ -2,7 +2,8 @@
 
 ## Overview
 
-Chess engine with ELO rating, game/player/challenge managers for spike.land. Published as `@spike-land-ai/chess-engine`, runs in Node.js.
+Chess engine with ELO rating, game/player/challenge managers for spike.land.
+Published as `@spike-land-ai/chess-engine`, runs in Node.js.
 
 ## Commands
 

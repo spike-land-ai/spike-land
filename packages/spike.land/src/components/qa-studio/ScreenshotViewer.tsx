@@ -43,7 +43,9 @@ export function ScreenshotViewer({ screenshots }: ScreenshotViewerProps) {
             </div>
             <div
               className="relative rounded-md bg-zinc-800 border border-zinc-700 overflow-hidden w-full"
-              style={{ aspectRatio: `${screenshot.width} / ${screenshot.height}` }}
+              style={{
+                aspectRatio: `${screenshot.width} / ${screenshot.height}`,
+              }}
             >
               {screenshot.url ? (
                 <NextImage

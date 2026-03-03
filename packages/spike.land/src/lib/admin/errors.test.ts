@@ -101,7 +101,12 @@ describe("getErrorStats", () => {
         { sourceFile: "index.ts", _count: { sourceFile: 10 } },
         { sourceFile: "app.ts", _count: { sourceFile: 5 } },
       ]) // topFiles
-      .mockResolvedValueOnce([{ errorType: "TypeError", _count: { errorType: 8 } }]) // topErrors
+      .mockResolvedValueOnce([
+        {
+          errorType: "TypeError",
+          _count: { errorType: 8 },
+        },
+      ]) // topErrors
       .mockResolvedValueOnce([
         { environment: "production", _count: { environment: 30 } },
         { environment: "development", _count: { environment: 20 } },
@@ -123,7 +128,12 @@ describe("getErrorStats", () => {
       .mockResolvedValueOnce(0);
 
     mockPrisma.errorLog.groupBy
-      .mockResolvedValueOnce([{ sourceFile: "utils.ts", _count: { sourceFile: 3 } }])
+      .mockResolvedValueOnce([
+        {
+          sourceFile: "utils.ts",
+          _count: { sourceFile: 3 },
+        },
+      ])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([]);
 
@@ -163,7 +173,12 @@ describe("getErrorStats", () => {
     mockPrisma.errorLog.groupBy
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([{ environment: "staging", _count: { environment: 12 } }]);
+      .mockResolvedValueOnce([
+        {
+          environment: "staging",
+          _count: { environment: 12 },
+        },
+      ]);
 
     const result = await getErrorStats();
 

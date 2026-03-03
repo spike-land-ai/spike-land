@@ -12,7 +12,9 @@ export function createGeminiGeneration(
   const { userApiKey, modelName: preferredImageModel } = options;
   const AI_GATEWAY_BASE =
     "https://gateway.ai.cloudflare.com/v1/1f98921051196545ebe79a450d3c71ed/image-studio/google-ai-studio";
-  const gatewayHeaders = () => ({ "cf-aig-authorization": `Bearer ${env.CF_AIG_TOKEN}` });
+  const gatewayHeaders = () => ({
+    "cf-aig-authorization": `Bearer ${env.CF_AIG_TOKEN}`,
+  });
   const useGateway = !userApiKey && env.CF_AIG_TOKEN;
 
   const IMAGE_MODELS = [preferredImageModel || "gemini-3.1-flash-image-preview"];
@@ -27,7 +29,9 @@ export function createGeminiGeneration(
     const ai = new GoogleGenAI({
       apiKey: userApiKey || env.GEMINI_API_KEY,
       ...(useGateway
-        ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } }
+        ? {
+            httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() },
+          }
         : {}),
     });
 
@@ -257,7 +261,9 @@ export function createGeminiGeneration(
     async describeImage(opts) {
       try {
         const image = await db.imageFindById(opts.imageId);
-        if (!image) return { description: "", tags: [], error: "Image not found" };
+        if (!image) {
+          return { description: "", tags: [], error: "Image not found" };
+        }
 
         const imageData = await storage.download(image.originalR2Key);
         const base64 = imageData.toString("base64");
@@ -266,7 +272,12 @@ export function createGeminiGeneration(
         const ai = new GoogleGenAI({
           apiKey: userApiKey || env.GEMINI_API_KEY,
           ...(useGateway
-            ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } }
+            ? {
+                httpOptions: {
+                  baseUrl: AI_GATEWAY_BASE,
+                  headers: gatewayHeaders(),
+                },
+              }
             : {}),
         });
 
@@ -276,7 +287,12 @@ export function createGeminiGeneration(
             {
               role: "user",
               parts: [
-                { inlineData: { data: base64, mimeType: `image/${image.originalFormat}` } },
+                {
+                  inlineData: {
+                    data: base64,
+                    mimeType: `image/${image.originalFormat}`,
+                  },
+                },
                 {
                   text: 'Describe this image in detail. Also provide 5-10 relevant tags. Format as JSON: {"description": "...", "tags": ["..."]}',
                 },
@@ -288,7 +304,10 @@ export function createGeminiGeneration(
         const text = response.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]) as { description: string; tags: string[] };
+          const parsed = JSON.parse(jsonMatch[0]) as {
+            description: string;
+            tags: string[];
+          };
           return { description: parsed.description, tags: parsed.tags };
         }
         return { description: text, tags: [] };
@@ -313,7 +332,12 @@ export function createGeminiGeneration(
         const ai = new GoogleGenAI({
           apiKey: userApiKey || env.GEMINI_API_KEY,
           ...(useGateway
-            ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } }
+            ? {
+                httpOptions: {
+                  baseUrl: AI_GATEWAY_BASE,
+                  headers: gatewayHeaders(),
+                },
+              }
             : {}),
         });
 
@@ -323,7 +347,12 @@ export function createGeminiGeneration(
             {
               role: "user",
               parts: [
-                { inlineData: { data: base64, mimeType: `image/${image.originalFormat}` } },
+                {
+                  inlineData: {
+                    data: base64,
+                    mimeType: `image/${image.originalFormat}`,
+                  },
+                },
                 {
                   text: 'Extract the 5 most dominant colors from this image as hex codes. Return only a JSON array of hex strings like ["#ff0000", ...]',
                 },
@@ -353,7 +382,12 @@ export function createGeminiGeneration(
         const ai = new GoogleGenAI({
           apiKey: userApiKey || env.GEMINI_API_KEY,
           ...(useGateway
-            ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } }
+            ? {
+                httpOptions: {
+                  baseUrl: AI_GATEWAY_BASE,
+                  headers: gatewayHeaders(),
+                },
+              }
             : {}),
         });
 

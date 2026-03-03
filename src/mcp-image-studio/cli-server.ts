@@ -6,8 +6,8 @@ import { registerImageStudioTools } from "./register.js";
 import type { ImageStudioDeps, ImageStudioToolRegistry, ToolDefinition } from "./types.js";
 import { asAlbumHandle, asImageId, asJobId, asPipelineId } from "./types.js";
 import {
-  createSpacetimeDb,
   createSpacetimeCredits,
+  createSpacetimeDb,
   createSpacetimeResolvers,
 } from "./db-spacetime.js";
 import { createStdbHttpClient } from "@spike-land-ai/spacetimedb-platform";

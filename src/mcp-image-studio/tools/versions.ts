@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { jsonResult } from "../types.js";
 import { tryCatch } from "./try-catch.js";
-import { imageProcedure, withResolves, withOwnership } from "../tool-builder/image-middleware.js";
+import { imageProcedure, withOwnership, withResolves } from "../tool-builder/image-middleware.js";
 
 export const versionsTool = imageProcedure
   .use(withResolves({ image_id: "image" }))

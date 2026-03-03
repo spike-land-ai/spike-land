@@ -6,7 +6,7 @@
  */
 
 import { z } from "zod";
-import { eq, and, desc, gt, gte, lte } from "drizzle-orm";
+import { and, desc, eq, gt, gte, lte } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import { freeTool, textResult } from "../procedures/index";
 import { auditLogs } from "../db/schema";
@@ -38,7 +38,9 @@ export function registerAuditTools(registry: ToolRegistry, userId: string, db: D
         // Build conditions
         const conditions = [eq(auditLogs.userId, ctx.userId), gt(auditLogs.createdAt, sinceTs)];
         if (action) conditions.push(eq(auditLogs.action, action));
-        if (resource_type) conditions.push(eq(auditLogs.resourceType, resource_type));
+        if (resource_type) {
+          conditions.push(eq(auditLogs.resourceType, resource_type));
+        }
 
         const logs = await ctx.db
           .select()
@@ -53,7 +55,11 @@ export function registerAuditTools(registry: ToolRegistry, userId: string, db: D
 
         const lines = logs.map(
           (log) =>
-            `- [${new Date(log.createdAt).toISOString()}] **${log.action}** on ${log.resourceType ?? "unknown"} (${log.resourceId ?? "n/a"})`,
+            `- [${new Date(
+              log.createdAt,
+            ).toISOString()}] **${log.action}** on ${log.resourceType ?? "unknown"} (${
+              log.resourceId ?? "n/a"
+            })`,
         );
         return textResult(`**Audit Logs (${logs.length})**\n\n${lines.join("\n")}`);
       }),

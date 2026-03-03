@@ -3,9 +3,9 @@ import type { EnhancementTier } from "../types.js";
 import { jsonResult } from "../types.js";
 import {
   imageProcedure,
-  withResolves,
   withCredits,
   withJob,
+  withResolves,
 } from "../tool-builder/image-middleware.js";
 
 const FIT_VALUES = ["cover", "contain", "fill", "inside", "outside"] as const;

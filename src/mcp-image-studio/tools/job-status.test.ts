@@ -283,7 +283,13 @@ describe("jobStatus", () => {
     mocks.resolverMocks.resolveGenerationJob.mockResolvedValue(null);
     mocks.db.jobFindById.mockResolvedValue(null);
 
-    const result = await jobStatus({ job_id: "e-null", job_type: "enhancement" }, ctx);
+    const result = await jobStatus(
+      {
+        job_id: "e-null",
+        job_type: "enhancement",
+      },
+      ctx,
+    );
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("NOT_FOUND");

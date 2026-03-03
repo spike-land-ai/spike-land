@@ -19,7 +19,9 @@ export function registerStoriesTools(server: McpServer, readClient: HNReadClient
     StoriesSchema,
     async ({ category, limit }) => {
       const result = await tryCatch(readClient.getStories(category, limit));
-      if (!result.ok) return errorResult("NETWORK_ERROR", result.error.message, true);
+      if (!result.ok) {
+        return errorResult("NETWORK_ERROR", result.error.message, true);
+      }
 
       const stories = result.data;
       return jsonResult({

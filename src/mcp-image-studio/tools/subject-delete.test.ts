@@ -56,7 +56,13 @@ describe("subjectDelete", () => {
     const ctx: ToolContext = { userId, deps };
     mocks.db.subjectFindMany.mockResolvedValue([]);
 
-    const result = await subjectDelete({ subject_id: "sub-missing", confirm: true }, ctx);
+    const result = await subjectDelete(
+      {
+        subject_id: "sub-missing",
+        confirm: true,
+      },
+      ctx,
+    );
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("SUBJECT_NOT_FOUND");

@@ -104,7 +104,9 @@ describe("user-tools", () => {
     });
 
     it("returns NOT_FOUND for missing user", async () => {
-      const result = await server.call("stdb_get_user", { identity: "nonexistent" });
+      const result = await server.call("stdb_get_user", {
+        identity: "nonexistent",
+      });
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain("**Error: NOT_FOUND**");
     });
@@ -114,7 +116,9 @@ describe("user-tools", () => {
       const dcServer = createMockServer();
       registerUserTools(dcServer as unknown as McpServer, dcClient);
 
-      const result = await dcServer.call("stdb_get_user", { identity: "user-1" });
+      const result = await dcServer.call("stdb_get_user", {
+        identity: "user-1",
+      });
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
@@ -145,7 +149,9 @@ describe("user-tools", () => {
         },
       );
 
-      const result = await server.call("stdb_list_users", { onlineOnly: false });
+      const result = await server.call("stdb_list_users", {
+        onlineOnly: false,
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(2);
     });
@@ -209,7 +215,9 @@ describe("user-tools", () => {
       const dcServer = createMockServer();
       registerUserTools(dcServer as unknown as McpServer, dcClient);
 
-      const result = await dcServer.call("stdb_update_profile", { displayName: "X" });
+      const result = await dcServer.call("stdb_update_profile", {
+        displayName: "X",
+      });
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
@@ -218,7 +226,9 @@ describe("user-tools", () => {
       client.updateProfile = vi.fn(async () => {
         throw new Error("Permission denied");
       });
-      const result = await server.call("stdb_update_profile", { displayName: "X" });
+      const result = await server.call("stdb_update_profile", {
+        displayName: "X",
+      });
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });

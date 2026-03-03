@@ -306,7 +306,9 @@ export function EffortInversionDemo() {
           />
           <span
             className="text-[10px] font-mono transition-colors duration-500"
-            style={{ color: progress > 0.7 ? "#22c55e" : "rgba(148,163,184,0.8)" }}
+            style={{
+              color: progress > 0.7 ? "#22c55e" : "rgba(148,163,184,0.8)",
+            }}
           >
             {progress > 0.5 ? "Execution" : "Iteration & Correction"}
           </span>
@@ -325,7 +327,10 @@ export function EffortInversionDemo() {
         >
           <span
             className="w-1.5 h-1.5 rounded-full"
-            style={{ background: phaseColor, boxShadow: `0 0 6px ${phaseColor}` }}
+            style={{
+              background: phaseColor,
+              boxShadow: `0 0 6px ${phaseColor}`,
+            }}
           />
           {phaseLabel}
         </div>

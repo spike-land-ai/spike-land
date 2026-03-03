@@ -17,7 +17,9 @@ export function registerCommentTools(server: McpServer, writeClient: HNWriteClie
     },
     async ({ parentId, text }) => {
       const result = await tryCatch(writeClient.postComment(parentId, text));
-      if (!result.ok) return errorResult("NETWORK_ERROR", result.error.message, true);
+      if (!result.ok) {
+        return errorResult("NETWORK_ERROR", result.error.message, true);
+      }
       if (result.data.success) {
         return jsonResult({ status: "commented", parentId });
       }

@@ -13,8 +13,8 @@ deployment platform where developers vibe-code full-stack apps and deploy
 instantly, powered by an AI assistant with 455+ MCP tools accessible via CLI,
 web chat, WhatsApp, and Telegram.
 
-- **Next.js 16 web platform** with ~557 routes, 233 Prisma models, 19 first-party
-  apps
+- **Next.js 16 web platform** with ~557 routes, 233 Prisma models, 19
+  first-party apps
 - **Cloudflare Workers** for real-time code editor + transpiler
 - **Migrating production to AWS** -- ECS Fargate, Aurora PostgreSQL, ElastiCache
   Redis

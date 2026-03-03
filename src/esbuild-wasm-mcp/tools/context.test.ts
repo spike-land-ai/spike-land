@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerContextTool } from "./context.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 

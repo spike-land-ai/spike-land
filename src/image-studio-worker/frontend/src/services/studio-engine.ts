@@ -28,7 +28,10 @@ export class StudioEngine {
    */
   static async smartEnhance(imageId: string): Promise<unknown> {
     // 1. Trigger Enhancement
-    const enhanceResult = await callTool("img_enhance", { image_id: imageId, tier: "TIER_2K" });
+    const enhanceResult = await callTool("img_enhance", {
+      image_id: imageId,
+      tier: "TIER_2K",
+    });
     const enhanceData = parseToolResult<{ jobId: string }>(enhanceResult);
 
     // 2. Trigger Auto-Tagging (can run in parallel or sequence)

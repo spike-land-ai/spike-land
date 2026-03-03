@@ -216,7 +216,9 @@ function runConventionCheck(content: string, filePath: string): ConventionIssue[
   const lines = content.split("\n");
   const issues: ConventionIssue[] = [];
   for (const { rule, pattern, severity, message } of CONVENTION_CHECKS) {
-    if (lines.some((line) => pattern.test(line))) issues.push({ rule, message, severity });
+    if (lines.some((line) => pattern.test(line))) {
+      issues.push({ rule, message, severity });
+    }
   }
   const fileName = filePath.split("/").pop() ?? "";
   if (
@@ -312,8 +314,14 @@ export const codeReviewAgentTools: StandaloneToolDefinition[] = [
         const { checkConventions, getBuiltInRules } = await import("@/lib/review/engine");
         const conventions = a.convention_set_id
           ? conventionSets.get(a.convention_set_id)
-          : { id: "default", name: "Default", rules: getBuiltInRules("nextjs") };
-        if (!conventions) throw new Error(`Convention set ${a.convention_set_id} not found`);
+          : {
+              id: "default",
+              name: "Default",
+              rules: getBuiltInRules("nextjs"),
+            };
+        if (!conventions) {
+          throw new Error(`Convention set ${a.convention_set_id} not found`);
+        }
         const findings = checkConventions(a.files, conventions.rules);
         const id = Math.random().toString(36).substring(2, 11);
         const report: ReviewReport = {
@@ -422,7 +430,9 @@ export const codeReviewAgentTools: StandaloneToolDefinition[] = [
       const a = args as { convention_id: string };
       return safeToolCall("review_get_conventions", async () => {
         const set = conventionSets.get(a.convention_id);
-        if (!set) throw new Error(`Convention set ${a.convention_id} not found`);
+        if (!set) {
+          throw new Error(`Convention set ${a.convention_id} not found`);
+        }
         return jsonResult(`Convention set ${a.convention_id}`, set);
       });
     },
@@ -469,10 +479,30 @@ export const codeReviewAgentTools: StandaloneToolDefinition[] = [
         }
         const label = pr_number ? `PR #${pr_number}` : `branch '${branch}'`;
         const rawFiles: FileDiff[] = [
-          { path: "src/app/api/example/route.ts", additions: 42, deletions: 8, isKeyFile: true },
-          { path: "src/lib/utils/helper.ts", additions: 15, deletions: 3, isKeyFile: false },
-          { path: "package.json", additions: 2, deletions: 2, isKeyFile: false },
-          { path: "src/components/Button.tsx", additions: 5, deletions: 0, isKeyFile: false },
+          {
+            path: "src/app/api/example/route.ts",
+            additions: 42,
+            deletions: 8,
+            isKeyFile: true,
+          },
+          {
+            path: "src/lib/utils/helper.ts",
+            additions: 15,
+            deletions: 3,
+            isKeyFile: false,
+          },
+          {
+            path: "package.json",
+            additions: 2,
+            deletions: 2,
+            isKeyFile: false,
+          },
+          {
+            path: "src/components/Button.tsx",
+            additions: 5,
+            deletions: 0,
+            isKeyFile: false,
+          },
         ];
         const filtered = file_filter
           ? rawFiles.filter((f) => matchesGlob(f.path, file_filter))
@@ -597,7 +627,13 @@ export const codeReviewAgentTools: StandaloneToolDefinition[] = [
     alwaysEnabled: true,
     inputSchema: SecurityScanSchema.shape,
     handler: async (
-      { file_paths, scan_type = "quick" }: { file_paths: string[]; scan_type?: string },
+      {
+        file_paths,
+        scan_type = "quick",
+      }: {
+        file_paths: string[];
+        scan_type?: string;
+      },
       _ctx: ServerContext,
     ): Promise<CallToolResult> =>
       safeToolCall("review_security_scan", async () => {
@@ -614,7 +650,11 @@ export const codeReviewAgentTools: StandaloneToolDefinition[] = [
           }
           const vulns = runSecurityScan(content, filePath, scan_type === "thorough");
           allVulns.push(...vulns);
-          fileResults.push({ path: filePath, vulnCount: vulns.length, skipped: false });
+          fileResults.push({
+            path: filePath,
+            vulnCount: vulns.length,
+            skipped: false,
+          });
         }
         const criticalCount = allVulns.filter((v) => v.severity === "critical").length;
         const highCount = allVulns.filter((v) => v.severity === "high").length;
@@ -626,8 +666,9 @@ export const codeReviewAgentTools: StandaloneToolDefinition[] = [
         }
         text += "\n\n";
         for (const fr of fileResults) {
-          if (fr.skipped) text += `- **${fr.path}** — could not read file (skipped)\n`;
-          else if (fr.vulnCount === 0) text += `- **${fr.path}** — no vulnerabilities found\n`;
+          if (fr.skipped) {
+            text += `- **${fr.path}** — could not read file (skipped)\n`;
+          } else if (fr.vulnCount === 0) text += `- **${fr.path}** — no vulnerabilities found\n`;
           else text += `- **${fr.path}** — ${fr.vulnCount} vulnerability(s)\n`;
         }
         if (allVulns.length > 0) {

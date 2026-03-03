@@ -24,7 +24,9 @@ export function registerSearchTools(server: McpServer, readClient: HNReadClient)
     },
     async (params) => {
       const result = await tryCatch(readClient.search(params));
-      if (!result.ok) return errorResult("NETWORK_ERROR", result.error.message, true);
+      if (!result.ok) {
+        return errorResult("NETWORK_ERROR", result.error.message, true);
+      }
 
       return jsonResult({
         query: params.query,
@@ -49,7 +51,9 @@ export function registerSearchTools(server: McpServer, readClient: HNReadClient)
 
   server.tool("hn_get_updates", "Get recently changed HN items and profiles", {}, async () => {
     const result = await tryCatch(readClient.getUpdates());
-    if (!result.ok) return errorResult("NETWORK_ERROR", result.error.message, true);
+    if (!result.ok) {
+      return errorResult("NETWORK_ERROR", result.error.message, true);
+    }
     return jsonResult(result.data);
   });
 }

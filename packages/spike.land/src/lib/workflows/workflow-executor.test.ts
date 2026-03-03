@@ -117,7 +117,12 @@ describe("workflow-executor – built-in handlers", () => {
     it("returns empty output", async () => {
       const handler = getStepHandler("trigger");
       expect(handler).toBeDefined();
-      const step = makeStep({ id: "s1", name: "Trigger", type: "TRIGGER", config: {} });
+      const step = makeStep({
+        id: "s1",
+        name: "Trigger",
+        type: "TRIGGER",
+        config: {},
+      });
       const context = {
         workflowId: "wf-1",
         runId: "run-1",
@@ -176,7 +181,12 @@ describe("workflow-executor – built-in handlers", () => {
     it("uses default duration of 1000ms when not specified", async () => {
       vi.useFakeTimers();
       const handler = getStepHandler("delay");
-      const step = makeStep({ id: "s1", name: "Delay", type: "ACTION", config: {} });
+      const step = makeStep({
+        id: "s1",
+        name: "Delay",
+        type: "ACTION",
+        config: {},
+      });
       const context = {
         workflowId: "wf-1",
         runId: "run-1",
@@ -199,7 +209,12 @@ describe("workflow-executor – built-in handlers", () => {
     ) {
       const handler = getStepHandler("condition");
       expect(handler).toBeDefined();
-      const step = makeStep({ id: "s1", name: "Cond", type: "CONDITION", config });
+      const step = makeStep({
+        id: "s1",
+        name: "Cond",
+        type: "CONDITION",
+        config,
+      });
       const context = {
         workflowId: "wf-1",
         runId: "run-1",
@@ -209,40 +224,76 @@ describe("workflow-executor – built-in handlers", () => {
     }
 
     it("evaluates equals (==) operator correctly – true case", async () => {
-      const result = await evalCondition({ leftOperand: "a", rightOperand: "a", operator: "==" });
+      const result = await evalCondition({
+        leftOperand: "a",
+        rightOperand: "a",
+        operator: "==",
+      });
       expect(result.output?.result).toBe(true);
     });
 
     it("evaluates equals (==) operator correctly – false case", async () => {
-      const result = await evalCondition({ leftOperand: "a", rightOperand: "b", operator: "==" });
+      const result = await evalCondition({
+        leftOperand: "a",
+        rightOperand: "b",
+        operator: "==",
+      });
       expect(result.output?.result).toBe(false);
     });
 
     it("evaluates not_equals (!=) operator", async () => {
-      const result = await evalCondition({ leftOperand: 1, rightOperand: 2, operator: "!=" });
+      const result = await evalCondition({
+        leftOperand: 1,
+        rightOperand: 2,
+        operator: "!=",
+      });
       expect(result.output?.result).toBe(true);
     });
 
     it("evaluates greater_than (>) operator", async () => {
-      const result = await evalCondition({ leftOperand: 5, rightOperand: 3, operator: ">" });
+      const result = await evalCondition({
+        leftOperand: 5,
+        rightOperand: 3,
+        operator: ">",
+      });
       expect(result.output?.result).toBe(true);
     });
 
     it("evaluates less_than (<) operator", async () => {
-      const result = await evalCondition({ leftOperand: 2, rightOperand: 10, operator: "<" });
+      const result = await evalCondition({
+        leftOperand: 2,
+        rightOperand: 10,
+        operator: "<",
+      });
       expect(result.output?.result).toBe(true);
     });
 
     it("evaluates greater_than_or_equals (>=) operator", async () => {
-      const r1 = await evalCondition({ leftOperand: 5, rightOperand: 5, operator: ">=" });
-      const r2 = await evalCondition({ leftOperand: 4, rightOperand: 5, operator: ">=" });
+      const r1 = await evalCondition({
+        leftOperand: 5,
+        rightOperand: 5,
+        operator: ">=",
+      });
+      const r2 = await evalCondition({
+        leftOperand: 4,
+        rightOperand: 5,
+        operator: ">=",
+      });
       expect(r1.output?.result).toBe(true);
       expect(r2.output?.result).toBe(false);
     });
 
     it("evaluates less_than_or_equals (<=) operator", async () => {
-      const r1 = await evalCondition({ leftOperand: 5, rightOperand: 5, operator: "<=" });
-      const r2 = await evalCondition({ leftOperand: 6, rightOperand: 5, operator: "<=" });
+      const r1 = await evalCondition({
+        leftOperand: 5,
+        rightOperand: 5,
+        operator: "<=",
+      });
+      const r2 = await evalCondition({
+        leftOperand: 6,
+        rightOperand: 5,
+        operator: "<=",
+      });
       expect(r1.output?.result).toBe(true);
       expect(r2.output?.result).toBe(false);
     });
@@ -308,22 +359,34 @@ describe("workflow-executor – built-in handlers", () => {
     });
 
     it("evaluates is_empty operator – null", async () => {
-      const result = await evalCondition({ leftOperand: null, operator: "is_empty" });
+      const result = await evalCondition({
+        leftOperand: null,
+        operator: "is_empty",
+      });
       expect(result.output?.result).toBe(true);
     });
 
     it("evaluates is_empty operator – empty string", async () => {
-      const result = await evalCondition({ leftOperand: "", operator: "is_empty" });
+      const result = await evalCondition({
+        leftOperand: "",
+        operator: "is_empty",
+      });
       expect(result.output?.result).toBe(true);
     });
 
     it("evaluates is_empty operator – empty array", async () => {
-      const result = await evalCondition({ leftOperand: [], operator: "is_empty" });
+      const result = await evalCondition({
+        leftOperand: [],
+        operator: "is_empty",
+      });
       expect(result.output?.result).toBe(true);
     });
 
     it("evaluates is_not_empty operator", async () => {
-      const result = await evalCondition({ leftOperand: "value", operator: "is_not_empty" });
+      const result = await evalCondition({
+        leftOperand: "value",
+        operator: "is_not_empty",
+      });
       expect(result.output?.result).toBe(true);
     });
 
@@ -358,7 +421,11 @@ describe("workflow-executor – built-in handlers", () => {
       previousOutputs.set("step-x", { nested: { value: "deep" } });
 
       const result = await evalCondition(
-        { leftOperand: "{{step-x.nested.value}}", rightOperand: "deep", operator: "==" },
+        {
+          leftOperand: "{{step-x.nested.value}}",
+          rightOperand: "deep",
+          operator: "==",
+        },
         previousOutputs,
       );
       expect(result.output?.result).toBe(true);
@@ -376,8 +443,16 @@ describe("workflow-executor – built-in handlers", () => {
     });
 
     it("includes evaluated details in output", async () => {
-      const result = await evalCondition({ leftOperand: 5, rightOperand: 3, operator: ">" });
-      expect(result.output?.evaluated).toMatchObject({ left: 5, right: 3, operator: ">" });
+      const result = await evalCondition({
+        leftOperand: 5,
+        rightOperand: 3,
+        operator: ">",
+      });
+      expect(result.output?.evaluated).toMatchObject({
+        left: 5,
+        right: 3,
+        operator: ">",
+      });
     });
   });
 });
@@ -646,7 +721,10 @@ describe("executeWorkflow", () => {
 
   it("skips IF_FALSE branch when condition is true", async () => {
     registerStepHandler("condition", async () => ({
-      output: { result: true, evaluated: { left: true, right: undefined, operator: undefined } },
+      output: {
+        result: true,
+        evaluated: { left: true, right: undefined, operator: undefined },
+      },
     }));
     registerStepHandler("if_true_action", async () => ({ output: { branch: "true" } }));
     registerStepHandler("if_false_action", async () => ({ output: { branch: "false" } }));
@@ -691,7 +769,10 @@ describe("executeWorkflow", () => {
 
   it("skips IF_TRUE branch when condition is false", async () => {
     registerStepHandler("condition_false", async () => ({
-      output: { result: false, evaluated: { left: false, right: undefined, operator: undefined } },
+      output: {
+        result: false,
+        evaluated: { left: false, right: undefined, operator: undefined },
+      },
     }));
     registerStepHandler("true_side", async () => ({ output: {} }));
     registerStepHandler("false_side", async () => ({ output: {} }));
@@ -733,7 +814,10 @@ describe("executeWorkflow", () => {
 
   it("always executes DEFAULT branches regardless of condition result", async () => {
     registerStepHandler("cond_handler", async () => ({
-      output: { result: true, evaluated: { left: true, right: undefined, operator: undefined } },
+      output: {
+        result: true,
+        evaluated: { left: true, right: undefined, operator: undefined },
+      },
     }));
     registerStepHandler("default_action", async () => ({ output: { default: true } }));
 
@@ -764,7 +848,10 @@ describe("executeWorkflow", () => {
 
   it("recursively skips descendants of skipped steps", async () => {
     registerStepHandler("cond_true", async () => ({
-      output: { result: true, evaluated: { left: true, right: undefined, operator: undefined } },
+      output: {
+        result: true,
+        evaluated: { left: true, right: undefined, operator: undefined },
+      },
     }));
     registerStepHandler("child_action", async () => ({ output: {} }));
 
@@ -813,7 +900,11 @@ describe("executeWorkflow", () => {
     ];
     mockPrisma.workflow.findFirst.mockResolvedValue(makePrismaWorkflow(steps));
 
-    await executeWorkflow({ ...BASE_CTX, triggerType: "webhook", triggerId: "hook-1" });
+    await executeWorkflow({
+      ...BASE_CTX,
+      triggerType: "webhook",
+      triggerId: "hook-1",
+    });
 
     expect(mockPrisma.workflowRunLog.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -842,7 +933,10 @@ describe("executeWorkflow", () => {
     ];
     mockPrisma.workflow.findFirst.mockResolvedValue(makePrismaWorkflow(steps));
 
-    await executeWorkflow({ ...BASE_CTX, triggerData: { event: "purchase", amount: 99 } });
+    await executeWorkflow({
+      ...BASE_CTX,
+      triggerData: { event: "purchase", amount: 99 },
+    });
 
     expect(receivedTriggerData).toEqual({ event: "purchase", amount: 99 });
   });
@@ -874,7 +968,12 @@ describe("executeWorkflow", () => {
     registerStepHandler("ok_step", async () => ({ output: {} }));
 
     const steps = [
-      makePrismaStep({ id: "s1", name: "Ok", type: "ACTION", config: { actionType: "ok_step" } }),
+      makePrismaStep({
+        id: "s1",
+        name: "Ok",
+        type: "ACTION",
+        config: { actionType: "ok_step" },
+      }),
     ];
     mockPrisma.workflow.findFirst.mockResolvedValue(makePrismaWorkflow(steps));
 
@@ -911,7 +1010,12 @@ describe("executeWorkflow", () => {
   it("uses step type as fallback actionType when config.actionType is not set", async () => {
     // TRIGGER type falls back to "trigger" handler (registered as built-in)
     const steps = [
-      makePrismaStep({ id: "s1", name: "Trigger", type: "TRIGGER", config: {} }), // no actionType in config
+      makePrismaStep({
+        id: "s1",
+        name: "Trigger",
+        type: "TRIGGER",
+        config: {},
+      }), // no actionType in config
     ];
     mockPrisma.workflow.findFirst.mockResolvedValue(makePrismaWorkflow(steps));
 
@@ -962,7 +1066,9 @@ describe("triggerWorkflowManually", () => {
     ];
     mockPrisma.workflow.findFirst.mockResolvedValueOnce(makePrismaWorkflow(steps));
 
-    const result = await triggerWorkflowManually("wf-1", "ws-1", { input: "test" });
+    const result = await triggerWorkflowManually("wf-1", "ws-1", {
+      input: "test",
+    });
 
     expect(result.status).toBe("COMPLETED");
   });
@@ -990,7 +1096,10 @@ describe("triggerWorkflowManually", () => {
     ];
     mockPrisma.workflow.findFirst.mockResolvedValueOnce(makePrismaWorkflow(steps));
 
-    await triggerWorkflowManually("wf-1", "ws-1", { userId: "u-123", mode: "fast" });
+    await triggerWorkflowManually("wf-1", "ws-1", {
+      userId: "u-123",
+      mode: "fast",
+    });
 
     expect(receivedParams).toEqual({ userId: "u-123", mode: "fast" });
   });

@@ -2,19 +2,19 @@
  * Quiz Engine Tests
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
-  generateConceptsFromContent,
-  generateNextRound,
+  type BadgePayload,
+  clearQuizSessions,
+  type ConceptDefinition,
+  type ConceptState,
   evaluateAnswers,
   generateBadgeToken,
-  verifyBadgeToken,
-  clearQuizSessions,
-  type QuizSession,
-  type ConceptState,
-  type ConceptDefinition,
+  generateConceptsFromContent,
+  generateNextRound,
   type QuizRound,
-  type BadgePayload,
+  type QuizSession,
+  verifyBadgeToken,
 } from "./quiz";
 
 function createTestSession(overrides?: Partial<QuizSession>): QuizSession {
@@ -95,7 +95,10 @@ function createTestSession(overrides?: Partial<QuizSession>): QuizSession {
     article: "Test article content",
     concepts,
     conceptStates,
-    currentRound: { roundNumber: 0, questions: [] as unknown as [never, never, never] },
+    currentRound: {
+      roundNumber: 0,
+      questions: [] as unknown as [never, never, never],
+    },
     roundNumber: 1,
     conflicts: [],
     completed: false,

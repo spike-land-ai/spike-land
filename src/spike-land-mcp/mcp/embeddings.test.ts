@@ -5,15 +5,15 @@
  * cosineSimilarity, ToolEmbeddingIndex, and suggestParameters.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  tokenize,
-  expandWithSynonyms,
-  buildVector,
   buildQueryVector,
+  buildVector,
   cosineSimilarity,
-  ToolEmbeddingIndex,
+  expandWithSynonyms,
   suggestParameters,
+  tokenize,
+  ToolEmbeddingIndex,
 } from "./embeddings";
 
 // ─── tokenize ────────────────────────────────────────────────────────────────

@@ -197,7 +197,12 @@ describe("createAgentLoopStream", () => {
 
     const stream = createAgentLoopStream(
       makeOptions({
-        attachments: [{ type: "image/png", data: "data:image/png;base64,iVBORw0KGgo=" }],
+        attachments: [
+          {
+            type: "image/png",
+            data: "data:image/png;base64,iVBORw0KGgo=",
+          },
+        ],
       }),
     );
     await collectStream(stream);

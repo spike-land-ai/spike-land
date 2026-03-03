@@ -4,8 +4,8 @@ import {
   errorResult,
   IMG_DEFAULTS,
   jsonResult,
-  toolEvent,
   MODEL_PREFERENCE_VALUES,
+  toolEvent,
 } from "../types.js";
 import { tryCatch } from "./try-catch.js";
 import { imageProcedure, withResolves } from "../tool-builder/image-middleware.js";

@@ -382,7 +382,9 @@ export function ParadigmGuiltTimeline() {
                   </span>
                   <motion.span
                     initial={{ opacity: 0 }}
-                    animate={{ opacity: phase === "hidden" ? 0 : phaseProgress * 0.8 }}
+                    animate={{
+                      opacity: phase === "hidden" ? 0 : phaseProgress * 0.8,
+                    }}
                     className="text-[11px] font-mono italic"
                     style={{ color: `${color}88` }}
                   >

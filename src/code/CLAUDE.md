@@ -2,7 +2,9 @@
 
 ## Overview
 
-Monaco-based collaborative code editor with live preview, TypeScript support, and Web Worker compilation. Browser runtime (Vite), published as `@spike-land-ai/code`.
+Monaco-based collaborative code editor with live preview, TypeScript support,
+and Web Worker compilation. Browser runtime (Vite), published as
+`@spike-land-ai/code`.
 
 ## Commands
 
@@ -36,9 +38,11 @@ npm run test:coverage # Tests with coverage
 └── __tests__/        # Test files
 ```
 
-**Key technologies**: Vite, Monaco Editor, TanStack Router, esbuild-wasm (in-browser compilation), Web Workers.
+**Key technologies**: Vite, Monaco Editor, TanStack Router, esbuild-wasm
+(in-browser compilation), Web Workers.
 
-**Dependencies**: `@spike-land-ai/esbuild-wasm`, `@spike-land-ai/esbuild-wasm-mcp`, `@spike-land-ai/shared`
+**Dependencies**: `@spike-land-ai/esbuild-wasm`,
+`@spike-land-ai/esbuild-wasm-mcp`, `@spike-land-ai/shared`
 
 ## Code Quality Rules
 

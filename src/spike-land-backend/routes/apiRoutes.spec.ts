@@ -192,7 +192,10 @@ describe("ApiRoutes", () => {
         const response = await apiRoutes.handleApiRoute(request, url, ["api", "run"]);
 
         expect(response.status).toBe(200);
-        const body = (await response.json()) as { success: boolean; updated: string[] };
+        const body = (await response.json()) as {
+          success: boolean;
+          updated: string[];
+        };
         expect(body.success).toBe(true);
         expect(body.updated).toContain("transpiled");
 
@@ -200,7 +203,10 @@ describe("ApiRoutes", () => {
       });
 
       it("should return 400 when there is no code to run", async () => {
-        mockCode.getSession = vi.fn().mockReturnValue({ ...mockSession, code: "" });
+        mockCode.getSession = vi.fn().mockReturnValue({
+          ...mockSession,
+          code: "",
+        });
 
         const request = new Request("https://example.com/api/run", {
           method: "POST",
@@ -326,11 +332,11 @@ describe("ApiRoutes", () => {
       });
 
       it("should return valid:false with parsed errors when transpilation fails", async () => {
-        const mockFetch = vi
-          .fn()
-          .mockResolvedValue(
-            new Response("file.tsx:5:10: error: Unexpected token", { status: 400 }),
-          );
+        const mockFetch = vi.fn().mockResolvedValue(
+          new Response("file.tsx:5:10: error: Unexpected token", {
+            status: 400,
+          }),
+        );
         vi.stubGlobal("fetch", mockFetch);
 
         const request = new Request("https://example.com/api/validate", {

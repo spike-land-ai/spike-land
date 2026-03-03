@@ -5,7 +5,7 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
+import { createZodTool, textResult } from "@spike-land-ai/mcp-server-base";
 import { writeFile } from "node:fs/promises";
 import { SignalStuckSchema } from "../types.js";
 import type { StuckSignal } from "../types.js";

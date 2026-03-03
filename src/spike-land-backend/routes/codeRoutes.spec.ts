@@ -76,7 +76,9 @@ describe("CodeRoutes", () => {
       const response = await codeRoutes.handleSessionRoute(request, url);
 
       expect(response.status).toBe(200);
-      const body = (await response.json()) as typeof mockSession & { hash: string };
+      const body = (await response.json()) as typeof mockSession & {
+        hash: string;
+      };
       expect(body.code).toBe(mockSession.code);
       expect(body.hash).toBe("mock-hash-12345");
     });

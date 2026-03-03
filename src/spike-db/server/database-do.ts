@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import type { Delta } from "../protocol/messages.js";
 import { parseClientMessage, serialize } from "../protocol/messages.js";
-import { generateCreateTable, generateCreateIndexes } from "../schema/sql-gen.js";
+import { generateCreateIndexes, generateCreateTable } from "../schema/sql-gen.js";
 import type { DatabaseSchema } from "../schema/types.js";
 import type { Env } from "../worker/env.js";
 import { generateIdentity, verifyToken } from "./identity.js";
@@ -95,10 +95,18 @@ export class SpikeDatabase extends DurableObject<Env> {
 
   private async handleReducerHttp(reducerName: string, request: Request): Promise<Response> {
     if (!this.schema) {
-      return Response.json({ ok: false, error: "Schema not initialized" }, { status: 500 });
+      return Response.json(
+        { ok: false, error: "Schema not initialized" },
+        {
+          status: 500,
+        },
+      );
     }
 
-    const body = (await request.json()) as { args?: unknown[]; sender?: string };
+    const body = (await request.json()) as {
+      args?: unknown[];
+      sender?: string;
+    };
     const args = body.args ?? [];
     const sender = body.sender ?? "http";
 
@@ -157,7 +165,12 @@ export class SpikeDatabase extends DurableObject<Env> {
   private handleReducerCall(ws: WebSocket, id: string, reducerName: string, args: unknown[]): void {
     if (!this.schema) {
       ws.send(
-        serialize({ type: "reducer_result", id, ok: false, error: "Schema not initialized" }),
+        serialize({
+          type: "reducer_result",
+          id,
+          ok: false,
+          error: "Schema not initialized",
+        }),
       );
       return;
     }

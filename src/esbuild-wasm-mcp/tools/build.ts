@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { BuildOptions } from "@spike-land-ai/esbuild-wasm";
 
 import { getEsbuildWasm } from "../wasm-api.js";
-import { tryCatch, formatEsbuildError } from "../errors.js";
+import { formatEsbuildError, tryCatch } from "../errors.js";
 import { BuildOnlySchema, CommonSchema, prepareBuildOptions } from "./schemas.js";
 
 const BuildSchema = { ...BuildOnlySchema, ...CommonSchema };

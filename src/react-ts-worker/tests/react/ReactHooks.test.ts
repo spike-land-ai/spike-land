@@ -1,15 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
   useCallback,
-  useReducer,
   useContext,
   useDebugValue,
+  useEffect,
   useId,
   useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
 } from "../../react/ReactHooks.js";
 import ReactSharedInternals from "../../react/ReactSharedInternals.js";
 import type { Dispatcher, ReactContext } from "../../react/ReactTypes.js";

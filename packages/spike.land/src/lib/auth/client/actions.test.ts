@@ -70,7 +70,11 @@ describe("auth client actions", () => {
 
     it("passes extra options fields through", async () => {
       mockSignIn.mockResolvedValue(null);
-      await signIn("email", { callbackUrl: "/home", redirect: false, email: "user@test.com" });
+      await signIn("email", {
+        callbackUrl: "/home",
+        redirect: false,
+        email: "user@test.com",
+      });
       expect(mockSignIn).toHaveBeenCalledWith("email", {
         callbackUrl: "/home",
         redirect: false,

@@ -313,7 +313,9 @@ export const aiOrchestratorTools: StandaloneToolDefinition[] = [
         const prisma = (await import("@/lib/prisma")).default;
         const data: Record<string, string> = {};
         if (project_path !== undefined) data.projectPath = project_path;
-        if (working_directory !== undefined) data.workingDirectory = working_directory;
+        if (working_directory !== undefined) {
+          data.workingDirectory = working_directory;
+        }
         await prisma.claudeCodeAgent.update({ where: { id: agent_id }, data });
         return textResult(`Agent ${agent_id} redirected.`);
       }),
@@ -396,16 +398,24 @@ export const aiOrchestratorTools: StandaloneToolDefinition[] = [
             id: true,
             displayName: true,
             lastSeenAt: true,
-            trustScore: { select: { trustLevel: true, totalSuccessful: true, totalFailed: true } },
+            trustScore: {
+              select: {
+                trustLevel: true,
+                totalSuccessful: true,
+                totalFailed: true,
+              },
+            },
           },
         });
         if (agents.length === 0) return textResult("No agents in the swarm.");
         let text = `**Swarm Topology (${agents.length} agents):**\n\n`;
         for (const a of agents) {
           const trust = a.trustScore;
-          text += `- **${a.displayName}** — Trust: ${trust?.trustLevel || "SANDBOX"} (${
-            trust?.totalSuccessful || 0
-          } ok / ${trust?.totalFailed || 0} fail)\n  ID: ${a.id}\n\n`;
+          text += `- **${a.displayName}** — Trust: ${
+            trust?.trustLevel || "SANDBOX"
+          } (${trust?.totalSuccessful || 0} ok / ${
+            trust?.totalFailed || 0
+          } fail)\n  ID: ${a.id}\n\n`;
         }
         return textResult(text);
       }),
@@ -450,7 +460,9 @@ export const aiOrchestratorTools: StandaloneToolDefinition[] = [
             content,
             isRead: false,
             ...(metadata != null
-              ? { metadata: metadata as import("@/generated/prisma").Prisma.InputJsonValue }
+              ? {
+                  metadata: metadata as import("@/generated/prisma").Prisma.InputJsonValue,
+                }
               : {}),
           },
         });
@@ -483,7 +495,9 @@ export const aiOrchestratorTools: StandaloneToolDefinition[] = [
       safeToolCall("swarm_read_messages", async () => {
         await requireAdminRole(ctx.userId);
         const prisma = (await import("@/lib/prisma")).default;
-        const where: { agentId: string; isRead?: boolean } = { agentId: agent_id };
+        const where: { agentId: string; isRead?: boolean } = {
+          agentId: agent_id,
+        };
         if (unread_only) where.isRead = false;
         const messages = await prisma.agentMessage.findMany({
           where,
@@ -653,7 +667,12 @@ export const aiOrchestratorTools: StandaloneToolDefinition[] = [
         const prisma = (await import("@/lib/prisma")).default;
         const agents = await prisma.claudeCodeAgent.findMany({
           where: agent_id ? { id: agent_id, deletedAt: null } : { deletedAt: null },
-          select: { id: true, displayName: true, totalTokensUsed: true, totalTasksCompleted: true },
+          select: {
+            id: true,
+            displayName: true,
+            totalTokensUsed: true,
+            totalTasksCompleted: true,
+          },
           orderBy: { totalTokensUsed: "desc" },
         });
         if (agents.length === 0) {
@@ -683,7 +702,15 @@ export const aiOrchestratorTools: StandaloneToolDefinition[] = [
     alwaysEnabled: true,
     inputSchema: ReplaySchema.shape,
     handler: async (
-      { agent_id, from_step, to_step }: { agent_id: string; from_step?: number; to_step?: number },
+      {
+        agent_id,
+        from_step,
+        to_step,
+      }: {
+        agent_id: string;
+        from_step?: number;
+        to_step?: number;
+      },
       ctx: ServerContext,
     ): Promise<CallToolResult> =>
       safeToolCall("swarm_replay", async () => {

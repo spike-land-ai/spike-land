@@ -63,7 +63,12 @@ describe("tracking/google-analytics", () => {
     const body = JSON.parse(options.body as string) as Record<string, unknown>;
     expect(body.client_id).toBe("client-1");
     expect(body.user_id).toBe("user-1");
-    expect(body.events).toEqual([{ name: "test_event", params: { key: "value" } }]);
+    expect(body.events).toEqual([
+      {
+        name: "test_event",
+        params: { key: "value" },
+      },
+    ]);
   });
 
   it("should use NEXT_PUBLIC_GA_MEASUREMENT_ID as fallback", async () => {

@@ -19,7 +19,9 @@ for full company documentation.
 
 ## 📚 Documentation References
 
-**Note:** `docs/` and `content/` are symlinks to the umbrella repo root (`../../docs/`, `../../content/`). All doc paths below resolve through the symlink.
+**Note:** `docs/` and `content/` are symlinks to the umbrella repo root
+(`../../docs/`, `../../content/`). All doc paths below resolve through the
+symlink.
 
 **DO NOT duplicate content from these docs in this file. Link to them instead.**
 
@@ -404,8 +406,8 @@ When running tests across multiple agents (e.g., parallel test sweeps):
   3. Typecheck + Lint: `yarn typecheck && yarn lint`
   4. Manifest audit (code-reviewer agent)
   5. Coverage analysis: `npx vitest run --coverage src/lib/mcp/`
-- **After 2 MCP vitest tool failures, switch to Bash exclusively** — don't
-  retry the MCP tool more than twice
+- **After 2 MCP vitest tool failures, switch to Bash exclusively** — don't retry
+  the MCP tool more than twice
 
 ---
 

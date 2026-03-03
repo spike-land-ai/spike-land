@@ -691,7 +691,9 @@ describe("provisionEC2Box", () => {
 
       const sendArg = mockEC2Send.mock.calls[0]?.[0] as
         | {
-            input: { TagSpecifications: Array<{ Tags: Array<{ Key: string; Value: string }> }> };
+            input: {
+              TagSpecifications: Array<{ Tags: Array<{ Key: string; Value: string }> }>;
+            };
           }
         | undefined;
       expect(sendArg).toBeDefined();

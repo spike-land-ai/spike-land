@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Component, PureComponent } from "../../react/ReactBaseClasses.js";
 
 describe("Component", () => {

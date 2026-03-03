@@ -2,7 +2,8 @@
 
 ## Overview
 
-Cloudflare Worker providing on-demand JavaScript/TypeScript transpilation using esbuild-wasm at the edge. Published as `@spike-land-ai/transpile` (private).
+Cloudflare Worker providing on-demand JavaScript/TypeScript transpilation using
+esbuild-wasm at the edge. Published as `@spike-land-ai/transpile` (private).
 
 ## Commands
 
@@ -24,7 +25,8 @@ npm run lint         # ESLint
 └── wasm.d.ts      # WASM type declarations
 ```
 
-**Runtime**: Cloudflare Workers. Receives code via HTTP, transpiles with esbuild-wasm, returns result.
+**Runtime**: Cloudflare Workers. Receives code via HTTP, transpiles with
+esbuild-wasm, returns result.
 
 **Dependencies**: `@spike-land-ai/code`, `@spike-land-ai/esbuild-wasm`
 

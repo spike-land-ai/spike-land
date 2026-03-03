@@ -4405,7 +4405,8 @@ Properties as follows:
 
 Scout Competitor - Tracks competitor social media accounts for benchmarking.
 Stores basic information about competitors that a workspace is monitoring.
-Related to ScoutCompetitorPost for historical post data and ScoutBenchmark for performance comparisons.
+Related to ScoutCompetitorPost for historical post data and ScoutBenchmark for
+performance comparisons.
 
 Properties as follows:
 
@@ -4421,8 +4422,8 @@ Properties as follows:
 ### `scout_competitor_posts`
 
 Scout Competitor Post - Historical posts from tracked competitor accounts.
-Stores social media posts with engagement metrics for competitor analysis.
-Posts are synced periodically and used for engagement benchmarking.
+Stores social media posts with engagement metrics for competitor analysis. Posts
+are synced periodically and used for engagement benchmarking.
 
 Properties as follows:
 
@@ -4439,9 +4440,10 @@ Properties as follows:
 
 ### `scout_benchmarks`
 
-Scout Benchmark - Performance comparison reports between workspace and competitors.
-Stores aggregated metrics comparing a workspace's social performance against tracked competitors.
-Generated periodically (e.g., weekly/monthly) for trend analysis.
+Scout Benchmark - Performance comparison reports between workspace and
+competitors. Stores aggregated metrics comparing a workspace's social
+performance against tracked competitors. Generated periodically (e.g.,
+weekly/monthly) for trend analysis.
 
 Properties as follows:
 
@@ -4527,8 +4529,7 @@ Properties as follows:
 
 ### `social_metric_anomalies`
 
-Detected anomalies in social media metrics
-Used by Pulse AI Agent for alerting
+Detected anomalies in social media metrics Used by Pulse AI Agent for alerting
 Resolves #647
 
 Properties as follows:
@@ -4568,9 +4569,8 @@ Properties as follows:
 
 ### `social_post_ab_tests`
 
-A/B testing for social media posts
-Allows testing different variations of content
-Resolves #840
+A/B testing for social media posts Allows testing different variations of
+content Resolves #840
 
 Properties as follows:
 
@@ -4586,8 +4586,7 @@ Properties as follows:
 
 ### `social_post_ab_test_variants`
 
-Individual variant in an A/B test
-Tracks performance metrics for comparison
+Individual variant in an A/B test Tracks performance metrics for comparison
 Resolves #840
 
 Properties as follows:
@@ -4833,8 +4832,8 @@ Properties as follows:
 
 ### `scheduled_posts`
 
-Scheduled posts for the Calendar feature
-Supports multi-platform cross-posting and recurrence
+Scheduled posts for the Calendar feature Supports multi-platform cross-posting
+and recurrence
 
 Properties as follows:
 
@@ -4873,8 +4872,8 @@ Properties as follows:
 
 ### `posting_time_recommendations`
 
-AI-generated posting time recommendations per social account
-Stores optimal posting times based on historical engagement data
+AI-generated posting time recommendations per social account Stores optimal
+posting times based on historical engagement data
 
 Properties as follows:
 
@@ -4889,8 +4888,8 @@ Properties as follows:
 
 ### `calendar_content_suggestions`
 
-AI-generated content suggestions for the calendar
-Provides content ideas based on trends, gaps, and optimal times
+AI-generated content suggestions for the calendar Provides content ideas based
+on trends, gaps, and optimal times
 
 Properties as follows:
 
@@ -5051,8 +5050,8 @@ Properties as follows:
 
 ### `social_account_health`
 
-Tracks the health status of each connected social account
-Provides real-time monitoring of sync status, rate limits, and token health
+Tracks the health status of each connected social account Provides real-time
+monitoring of sync status, rate limits, and token health
 
 Properties as follows:
 
@@ -5077,8 +5076,8 @@ Properties as follows:
 
 ### `recovery_guidance`
 
-Recovery guidance templates for common account issues
-Provides step-by-step instructions for resolving problems
+Recovery guidance templates for common account issues Provides step-by-step
+instructions for resolving problems
 
 Properties as follows:
 
@@ -5119,8 +5118,8 @@ Properties as follows:
 
 ### `notifications`
 
-Stores notifications for workspace users
-Supports various notification types: health alerts, pulse anomalies, inbox mentions, system messages
+Stores notifications for workspace users Supports various notification types:
+health alerts, pulse anomalies, inbox mentions, system messages
 
 Properties as follows:
 
@@ -5140,8 +5139,8 @@ Properties as follows:
 
 ### `policy_rules`
 
-Policy rules for content validation across platforms
-Stores platform-specific and global policy configurations
+Policy rules for content validation across platforms Stores platform-specific
+and global policy configurations
 
 Properties as follows:
 
@@ -5164,8 +5163,8 @@ Properties as follows:
 
 ### `policy_checks`
 
-Records of policy check executions
-Tracks what content was checked and the overall result
+Records of policy check executions Tracks what content was checked and the
+overall result
 
 Properties as follows:
 
@@ -5191,8 +5190,8 @@ Properties as follows:
 
 ### `policy_violations`
 
-Individual policy violations detected during checks
-Links violations to specific rules and provides remediation guidance
+Individual policy violations detected during checks Links violations to specific
+rules and provides remediation guidance
 
 Properties as follows:
 
@@ -5684,8 +5683,8 @@ Properties as follows:
 
 ### `organic_post_conversions`
 
-Tracks the conversion of organic social posts into ad campaigns
-Links original post performance to resulting ad campaigns
+Tracks the conversion of organic social posts into ad campaigns Links original
+post performance to resulting ad campaigns
 
 Properties as follows:
 
@@ -5720,8 +5719,8 @@ Properties as follows:
 
 ### `organic_post_engagers`
 
-Stores aggregated data about users who engaged with organic posts
-Used for AI-powered targeting analysis (anonymized & aggregated)
+Stores aggregated data about users who engaged with organic posts Used for
+AI-powered targeting analysis (anonymized & aggregated)
 
 Properties as follows:
 
@@ -6080,7 +6079,8 @@ Properties as follows:
 
 ### `agent_learning_notes`
 
-This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+This model contains an expression index which requires additional setup for
+migrations. Visit https://pris.ly/d/expression-indexes for more info.
 
 Properties as follows:
 

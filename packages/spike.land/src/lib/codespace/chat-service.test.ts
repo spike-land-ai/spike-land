@@ -369,7 +369,14 @@ describe("executeTool", () => {
     });
     vi.mocked(transpileCode).mockResolvedValue("transpiled");
 
-    const result = await executeTool("search_and_replace", { search: "x", replace: "y" }, "test");
+    const result = await executeTool(
+      "search_and_replace",
+      {
+        search: "x",
+        replace: "y",
+      },
+      "test",
+    );
     expect(result).toBe("success");
   });
 
@@ -426,7 +433,14 @@ describe("executeTool", () => {
     });
     vi.mocked(transpileCode).mockRejectedValue(new Error("Transpile fail"));
 
-    const result = await executeTool("search_and_replace", { search: "x", replace: "y" }, "test");
+    const result = await executeTool(
+      "search_and_replace",
+      {
+        search: "x",
+        replace: "y",
+      },
+      "test",
+    );
     expect(result).toContain("Transpilation error");
   });
 });

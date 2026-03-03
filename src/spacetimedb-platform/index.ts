@@ -19,20 +19,20 @@ export * from "./types.js";
 export { createLivePlatformClient } from "./client-live.js";
 export type { SpacetimePlatformClient } from "./client.js";
 export type {
-  Image,
   Album,
   AlbumImage,
-  Pipeline,
+  Credits,
   EnhancementJob,
   GenerationJob,
+  Image,
+  Pipeline,
   Subject,
-  Credits,
 } from "./image-types.js";
 export {
-  typedTables,
+  type TypedReducers,
   typedReducers,
   type TypedTables,
-  type TypedReducers,
+  typedTables,
 } from "./typed-tables.js";
 export {
   createStdbHttpClient,

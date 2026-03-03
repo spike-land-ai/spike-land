@@ -4,7 +4,7 @@
  * Verifies that the public API surface re-exported from index.ts is intact.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import * as indexExports from "./index.js";
 
 describe("index.ts re-exports", () => {

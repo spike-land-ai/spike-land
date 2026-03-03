@@ -5,8 +5,8 @@
 
 import { vi } from "vitest";
 import {
-  createMockServer as createBaseServer,
   type CallToolResult,
+  createMockServer as createBaseServer,
   type ToolHandler,
 } from "@spike-land-ai/mcp-server-base";
 

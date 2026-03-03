@@ -46,7 +46,9 @@ describe("registerInitializeTool", () => {
     const { handler } = makeServer();
     mockInitializeWasm.mockResolvedValue(readyState);
 
-    const result = (await handler({})) as { content: { type: string; text: string }[] };
+    const result = (await handler({})) as {
+      content: { type: string; text: string }[];
+    };
 
     expect(mockInitializeWasm).toHaveBeenCalledWith({});
     expect(result.content[0]!.type).toBe("text");
@@ -66,7 +68,9 @@ describe("registerInitializeTool", () => {
     await handler({ wasmURL: "https://cdn.example.com/esbuild.wasm" });
 
     expect(mockInitializeWasm).toHaveBeenCalledWith(
-      expect.objectContaining({ wasmURL: "https://cdn.example.com/esbuild.wasm" }),
+      expect.objectContaining({
+        wasmURL: "https://cdn.example.com/esbuild.wasm",
+      }),
     );
   });
 
@@ -86,7 +90,10 @@ describe("registerInitializeTool", () => {
 
   it("passes worker flag to initializeWasm", async () => {
     const { handler } = makeServer();
-    mockInitializeWasm.mockResolvedValue({ ...readyState, options: { worker: true } });
+    mockInitializeWasm.mockResolvedValue({
+      ...readyState,
+      options: { worker: true },
+    });
 
     await handler({ worker: true });
 
@@ -97,7 +104,10 @@ describe("registerInitializeTool", () => {
     const { handler } = makeServer();
     mockInitializeWasm.mockRejectedValue(new Error("WASM init failed"));
 
-    const result = (await handler({})) as { isError: boolean; content: { text: string }[] };
+    const result = (await handler({})) as {
+      isError: boolean;
+      content: { text: string }[];
+    };
 
     expect(result.isError).toBe(true);
     expect(result.content[0]!.text).toContain("WASM init failed");

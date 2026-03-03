@@ -194,7 +194,9 @@ describe("registry add command", () => {
     const configPath = join(tempDir, ".mcp.json");
     await writeFile(
       configPath,
-      JSON.stringify({ mcpServers: { existing: { type: "url", url: "http://existing" } } }),
+      JSON.stringify({
+        mcpServers: { existing: { type: "url", url: "http://existing" } },
+      }),
       "utf-8",
     );
 
@@ -211,7 +213,9 @@ describe("registry add command", () => {
     });
 
     const program = makeProgram();
-    await program.parseAsync(["registry", "add", "new-server"], { from: "user" });
+    await program.parseAsync(["registry", "add", "new-server"], {
+      from: "user",
+    });
 
     const { readFile } = await import("node:fs/promises");
     const content = JSON.parse(await readFile(configPath, "utf-8")) as {
@@ -290,7 +294,9 @@ describe("registry search — not-logged-in path", () => {
     const program = new Command("spike");
     program.exitOverride();
     registerRegistryCommand(program);
-    await program.parseAsync(["registry", "search", "nothing"], { from: "user" });
+    await program.parseAsync(["registry", "search", "nothing"], {
+      from: "user",
+    });
 
     expect(errorSpy).toHaveBeenCalledWith("No servers found.");
   });
@@ -339,7 +345,9 @@ describe("registry search — not-logged-in path", () => {
     const program = new Command("spike");
     program.exitOverride();
     registerRegistryCommand(program);
-    await program.parseAsync(["registry", "search", "notags"], { from: "user" });
+    await program.parseAsync(["registry", "search", "notags"], {
+      from: "user",
+    });
 
     const output = errorSpy.mock.calls.map((c) => c.join(" ")).join("\n");
     expect(output).toContain("No Tags Server");

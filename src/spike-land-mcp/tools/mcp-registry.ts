@@ -215,9 +215,11 @@ export function registerMcpRegistryTools(
           "mcp_registry_get",
           async () => {
             let results: McpServerInfo[];
-            if (source === "smithery") results = await searchSmithery(serverId, 1);
-            else if (source === "official") results = await searchOfficialRegistry(serverId, 1);
-            else results = await searchGlama(serverId, 1);
+            if (source === "smithery") {
+              results = await searchSmithery(serverId, 1);
+            } else if (source === "official") {
+              results = await searchOfficialRegistry(serverId, 1);
+            } else results = await searchGlama(serverId, 1);
 
             const server = results.find((s) => s.id === serverId);
             if (!server) {
@@ -264,9 +266,11 @@ export function registerMcpRegistryTools(
           "mcp_registry_install",
           async () => {
             let results: McpServerInfo[];
-            if (source === "smithery") results = await searchSmithery(serverId, 1);
-            else if (source === "official") results = await searchOfficialRegistry(serverId, 1);
-            else results = await searchGlama(serverId, 1);
+            if (source === "smithery") {
+              results = await searchSmithery(serverId, 1);
+            } else if (source === "official") {
+              results = await searchOfficialRegistry(serverId, 1);
+            } else results = await searchGlama(serverId, 1);
 
             const server = results.find((s) => s.id === serverId);
             if (!server) {
@@ -285,7 +289,11 @@ export function registerMcpRegistryTools(
 
             return textResult(
               `**MCP Server Configured:** ${server.name}\n\n` +
-                `Add to your \`.mcp.json\`:\n\`\`\`json\n${JSON.stringify(config, null, 2)}\n\`\`\`\n\n` +
+                `Add to your \`.mcp.json\`:\n\`\`\`json\n${JSON.stringify(
+                  config,
+                  null,
+                  2,
+                )}\n\`\`\`\n\n` +
                 `**Transport:** ${server.transport}\n` +
                 `**Source:** ${server.source}`,
             );

@@ -4,8 +4,8 @@
 
 ## Overview
 
-This document tracks known technical debt across the spike.land monorepo.
-Items are prioritized P0 (critical) through P3 (minor/nice-to-have).
+This document tracks known technical debt across the spike.land monorepo. Items
+are prioritized P0 (critical) through P3 (minor/nice-to-have).
 
 ## Active Items
 
@@ -52,8 +52,8 @@ Items are prioritized P0 (critical) through P3 (minor/nice-to-have).
 - **Details**: ErrorBoundary previously existed in both
   `src/components/errors/error-boundary.tsx` and
   `src/code/@/components/app/error-boundary.tsx`.
-- **Resolution**: `src/code` extracted to external `@spike-land-ai/code`
-  repo. Only `src/components/errors/error-boundary.tsx` remains in this repo.
+- **Resolution**: `src/code` extracted to external `@spike-land-ai/code` repo.
+  Only `src/components/errors/error-boundary.tsx` remains in this repo.
 
 #### TD-P1-2: Duplicate route handling logic in testing.spike.land
 
@@ -74,8 +74,8 @@ Items are prioritized P0 (critical) through P3 (minor/nice-to-have).
 - **Status**: Mostly resolved (14 packages extracted to external repos)
 - **Impact**: Bloated node_modules, slower installs, unnecessary security
   surface
-- **Details**: Previously `src/code` had 38 unused, `src/testing.spike.land`
-  had 8, `src/js.spike.land` had 1. All 14 packages now extracted to
+- **Details**: Previously `src/code` had 38 unused, `src/testing.spike.land` had
+  8, `src/js.spike.land` had 1. All 14 packages now extracted to
   `@spike-land-ai` npm org.
 - **Action**: Continue cleaning root-level unused dependencies.
 

@@ -50,6 +50,8 @@ export function logBypassAttempt(method: "env" | "header", success: boolean): vo
   if (success) {
     logger.debug(`[Auth] E2E bypass via ${method}`, { route: "/api/auth" });
   } else {
-    logger.error(`[Auth] E2E bypass FAILED via ${method}`, undefined, { route: "/api/auth" });
+    logger.error(`[Auth] E2E bypass FAILED via ${method}`, undefined, {
+      route: "/api/auth",
+    });
   }
 }

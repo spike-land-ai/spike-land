@@ -6,7 +6,7 @@ import {
 } from "../__test-utils__/mock-deps.js";
 import { albumImages } from "./album-images.js";
 import type { ToolContext } from "../types.js";
-import { asImageId, asAlbumHandle } from "../types.js";
+import { asAlbumHandle, asImageId } from "../types.js";
 import { standardScenarios } from "../__test-utils__/standard-scenarios.js";
 
 describe("albumImages", () => {
@@ -43,7 +43,10 @@ describe("albumImages", () => {
   it("should add images to an album", async () => {
     const notify = vi.fn();
     const ctx: ToolContext = { userId, deps, notify };
-    const albumRow = mockAlbumRow({ userId, handle: asAlbumHandle("vacation") });
+    const albumRow = mockAlbumRow({
+      userId,
+      handle: asAlbumHandle("vacation"),
+    });
     mocks.resolverMocks.resolveAlbum.mockResolvedValue(albumRow);
     mocks.resolverMocks.resolveImages.mockResolvedValue([
       mockImageRow({ userId, id: asImageId("img-1") }),
@@ -69,7 +72,10 @@ describe("albumImages", () => {
 
     expect(result.isError).toBeUndefined();
     expect(notify).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "album:images_changed", entityId: "vacation" }),
+      expect.objectContaining({
+        type: "album:images_changed",
+        entityId: "vacation",
+      }),
     );
     const data = JSON.parse(result.content[0].text);
     expect(data.action).toBe("add");
@@ -95,7 +101,10 @@ describe("albumImages", () => {
 
     expect(result.isError).toBeUndefined();
     expect(notify).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "album:images_changed", entityId: "work" }),
+      expect.objectContaining({
+        type: "album:images_changed",
+        entityId: "work",
+      }),
     );
     const data = JSON.parse(result.content[0].text);
     expect(data.action).toBe("remove");
@@ -119,7 +128,9 @@ describe("albumImages", () => {
     );
 
     expect(result.isError).toBeUndefined();
-    expect(mocks.db.albumUpdate).toHaveBeenCalledWith(expect.anything(), { coverImageId: null });
+    expect(mocks.db.albumUpdate).toHaveBeenCalledWith(expect.anything(), {
+      coverImageId: null,
+    });
   });
 
   it("should not call albumUpdate when removed image is not the cover", async () => {
@@ -132,7 +143,14 @@ describe("albumImages", () => {
     mocks.resolverMocks.resolveAlbum.mockResolvedValue(albumRow);
     mocks.db.albumImageRemove.mockResolvedValue(1);
 
-    await albumImages({ album_handle: "misc", action: "remove", image_ids: ["other-img"] }, ctx);
+    await albumImages(
+      {
+        album_handle: "misc",
+        action: "remove",
+        image_ids: ["other-img"],
+      },
+      ctx,
+    );
 
     expect(mocks.db.albumUpdate).not.toHaveBeenCalled();
   });
@@ -158,7 +176,10 @@ describe("albumImages", () => {
 
   it("should handle albumImageMaxSortOrder rejection by defaulting to 0", async () => {
     const ctx: ToolContext = { userId, deps };
-    const albumRow = mockAlbumRow({ userId, handle: asAlbumHandle("vacation") });
+    const albumRow = mockAlbumRow({
+      userId,
+      handle: asAlbumHandle("vacation"),
+    });
     mocks.resolverMocks.resolveAlbum.mockResolvedValue(albumRow);
     mocks.resolverMocks.resolveImages.mockResolvedValue([
       mockImageRow({ userId, id: asImageId("img-1") }),

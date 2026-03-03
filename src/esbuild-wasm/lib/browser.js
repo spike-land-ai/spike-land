@@ -391,7 +391,9 @@ is not a problem with esbuild. You need to fix your environment instead.
     let absPaths = getFlag(options, keys, "absPaths", mustBeArrayOfStrings);
     if (legalComments) flags.push(`--legal-comments=${legalComments}`);
     if (sourceRoot !== void 0) flags.push(`--source-root=${sourceRoot}`);
-    if (sourcesContent !== void 0) flags.push(`--sources-content=${sourcesContent}`);
+    if (sourcesContent !== void 0) {
+      flags.push(`--sources-content=${sourcesContent}`);
+    }
     if (target) {
       flags.push(
         `--target=${validateAndJoinStringArray(
@@ -419,14 +421,22 @@ is not a problem with esbuild. You need to fix your environment instead.
     if (treeShaking !== void 0) flags.push(`--tree-shaking=${treeShaking}`);
     if (ignoreAnnotations) flags.push(`--ignore-annotations`);
     if (drop) {
-      for (let what of drop) flags.push(`--drop:${validateStringValue(what, "drop")}`);
+      for (let what of drop) {
+        flags.push(`--drop:${validateStringValue(what, "drop")}`);
+      }
     }
     if (dropLabels) {
       flags.push(`--drop-labels=${validateAndJoinStringArray(dropLabels, "drop label")}`);
     }
-    if (absPaths) flags.push(`--abs-paths=${validateAndJoinStringArray(absPaths, "abs paths")}`);
-    if (mangleProps) flags.push(`--mangle-props=${jsRegExpToGoRegExp(mangleProps)}`);
-    if (reserveProps) flags.push(`--reserve-props=${jsRegExpToGoRegExp(reserveProps)}`);
+    if (absPaths) {
+      flags.push(`--abs-paths=${validateAndJoinStringArray(absPaths, "abs paths")}`);
+    }
+    if (mangleProps) {
+      flags.push(`--mangle-props=${jsRegExpToGoRegExp(mangleProps)}`);
+    }
+    if (reserveProps) {
+      flags.push(`--reserve-props=${jsRegExpToGoRegExp(reserveProps)}`);
+    }
     if (mangleQuoted !== void 0) flags.push(`--mangle-quoted=${mangleQuoted}`);
     if (jsx) flags.push(`--jsx=${jsx}`);
     if (jsxFactory) flags.push(`--jsx-factory=${jsxFactory}`);
@@ -442,7 +452,9 @@ is not a problem with esbuild. You need to fix your environment instead.
     }
     if (logOverride) {
       for (let key in logOverride) {
-        if (key.indexOf("=") >= 0) throw new Error(`Invalid log override: ${key}`);
+        if (key.indexOf("=") >= 0) {
+          throw new Error(`Invalid log override: ${key}`);
+        }
         flags.push(
           `--log-override:${key}=${validateStringValue(logOverride[key], "log override", key)}`,
         );
@@ -463,7 +475,9 @@ is not a problem with esbuild. You need to fix your environment instead.
       }
     }
     if (pure) {
-      for (let fn of pure) flags.push(`--pure:${validateStringValue(fn, "pure")}`);
+      for (let fn of pure) {
+        flags.push(`--pure:${validateStringValue(fn, "pure")}`);
+      }
     }
     if (keepNames) flags.push(`--keep-names`);
   }
@@ -509,7 +523,9 @@ is not a problem with esbuild. You need to fix your environment instead.
     let mangleCache = getFlag(options, keys, "mangleCache", mustBeObject);
     keys.plugins = true;
     checkForInvalidFlags(options, keys, `in ${callName}() call`);
-    if (sourcemap) flags.push(`--sourcemap${sourcemap === true ? "" : `=${sourcemap}`}`);
+    if (sourcemap) {
+      flags.push(`--sourcemap${sourcemap === true ? "" : `=${sourcemap}`}`);
+    }
     if (bundle) flags.push("--bundle");
     if (allowOverwrite) flags.push("--allow-overwrite");
     if (splitting) flags.push("--splitting");
@@ -545,34 +561,46 @@ is not a problem with esbuild. You need to fix your environment instead.
     }
     if (alias) {
       for (let old in alias) {
-        if (old.indexOf("=") >= 0) throw new Error(`Invalid package name in alias: ${old}`);
+        if (old.indexOf("=") >= 0) {
+          throw new Error(`Invalid package name in alias: ${old}`);
+        }
         flags.push(`--alias:${old}=${validateStringValue(alias[old], "alias", old)}`);
       }
     }
     if (banner) {
       for (let type in banner) {
-        if (type.indexOf("=") >= 0) throw new Error(`Invalid banner file type: ${type}`);
+        if (type.indexOf("=") >= 0) {
+          throw new Error(`Invalid banner file type: ${type}`);
+        }
         flags.push(`--banner:${type}=${validateStringValue(banner[type], "banner", type)}`);
       }
     }
     if (footer) {
       for (let type in footer) {
-        if (type.indexOf("=") >= 0) throw new Error(`Invalid footer file type: ${type}`);
+        if (type.indexOf("=") >= 0) {
+          throw new Error(`Invalid footer file type: ${type}`);
+        }
         flags.push(`--footer:${type}=${validateStringValue(footer[type], "footer", type)}`);
       }
     }
     if (inject) {
-      for (let path of inject) flags.push(`--inject:${validateStringValue(path, "inject")}`);
+      for (let path of inject) {
+        flags.push(`--inject:${validateStringValue(path, "inject")}`);
+      }
     }
     if (loader) {
       for (let ext in loader) {
-        if (ext.indexOf("=") >= 0) throw new Error(`Invalid loader extension: ${ext}`);
+        if (ext.indexOf("=") >= 0) {
+          throw new Error(`Invalid loader extension: ${ext}`);
+        }
         flags.push(`--loader:${ext}=${validateStringValue(loader[ext], "loader", ext)}`);
       }
     }
     if (outExtension) {
       for (let ext in outExtension) {
-        if (ext.indexOf("=") >= 0) throw new Error(`Invalid out extension: ${ext}`);
+        if (ext.indexOf("=") >= 0) {
+          throw new Error(`Invalid out extension: ${ext}`);
+        }
         flags.push(
           `--out-extension:${ext}=${validateStringValue(outExtension[ext], "out extension", ext)}`,
         );
@@ -647,7 +675,9 @@ is not a problem with esbuild. You need to fix your environment instead.
     let footer = getFlag(options, keys, "footer", mustBeString);
     let mangleCache = getFlag(options, keys, "mangleCache", mustBeObject);
     checkForInvalidFlags(options, keys, `in ${callName}() call`);
-    if (sourcemap) flags.push(`--sourcemap=${sourcemap === true ? "external" : sourcemap}`);
+    if (sourcemap) {
+      flags.push(`--sourcemap=${sourcemap === true ? "external" : sourcemap}`);
+    }
     if (sourcefile) flags.push(`--sourcefile=${sourcefile}`);
     if (loader) flags.push(`--loader=${loader}`);
     if (banner) flags.push(`--banner=${banner}`);
@@ -905,13 +935,17 @@ is not a problem with esbuild. You need to fix your environment instead.
       start(null);
     };
     let formatMessages2 = ({ callName, refs, messages, options, callback }) => {
-      if (!options) throw new Error(`Missing second argument in ${callName}() call`);
+      if (!options) {
+        throw new Error(`Missing second argument in ${callName}() call`);
+      }
       let keys = {};
       let kind = getFlag(options, keys, "kind", mustBeString);
       let color = getFlag(options, keys, "color", mustBeBoolean);
       let terminalWidth = getFlag(options, keys, "terminalWidth", mustBeInteger);
       checkForInvalidFlags(options, keys, `in ${callName}() call`);
-      if (kind === void 0) throw new Error(`Missing "kind" in ${callName}() call`);
+      if (kind === void 0) {
+        throw new Error(`Missing "kind" in ${callName}() call`);
+      }
       if (kind !== "error" && kind !== "warning") {
         throw new Error(`Expected "kind" to be "error" or "warning" in ${callName}() call`);
       }
@@ -988,7 +1022,9 @@ is not a problem with esbuild. You need to fix your environment instead.
     if (typeof options === "object") {
       const value = options.plugins;
       if (value !== void 0) {
-        if (!Array.isArray(value)) return handleError(new Error(`"plugins" must be an array`), "");
+        if (!Array.isArray(value)) {
+          return handleError(new Error(`"plugins" must be an array`), "");
+        }
         plugins = value;
       }
     }
@@ -1071,7 +1107,9 @@ is not a problem with esbuild. You need to fix your environment instead.
         };
         const originalErrors = result.errors.slice();
         const originalWarnings = result.warnings.slice();
-        if (response.outputFiles) result.outputFiles = response.outputFiles.map(convertOutputFiles);
+        if (response.outputFiles) {
+          result.outputFiles = response.outputFiles.map(convertOutputFiles);
+        }
         if (response.metafile) result.metafile = JSON.parse(response.metafile);
         if (response.mangleCache) result.mangleCache = response.mangleCache;
         if (response.writeToStdout !== void 0) {
@@ -1128,7 +1166,9 @@ is not a problem with esbuild. You need to fix your environment instead.
               latestResultPromise = new Promise((resolve, reject) => {
                 let settlePromise;
                 provideLatestResult = (err, result2) => {
-                  if (!settlePromise) settlePromise = () => (err ? reject(err) : resolve(result2));
+                  if (!settlePromise) {
+                    settlePromise = () => (err ? reject(err) : resolve(result2));
+                  }
                 };
                 const triggerAnotherBuild = () => {
                   const request2 = {
@@ -1267,14 +1307,18 @@ is not a problem with esbuild. You need to fix your environment instead.
       plugins = [...plugins];
       for (let item of plugins) {
         let keys = {};
-        if (typeof item !== "object") throw new Error(`Plugin at index ${i} must be an object`);
+        if (typeof item !== "object") {
+          throw new Error(`Plugin at index ${i} must be an object`);
+        }
         const name = getFlag(item, keys, "name", mustBeString);
         if (typeof name !== "string" || name === "") {
           throw new Error(`Plugin at index ${i} is missing a name`);
         }
         try {
           let setup = getFlag(item, keys, "setup", mustBeFunction);
-          if (typeof setup !== "function") throw new Error(`Plugin is missing a setup function`);
+          if (typeof setup !== "function") {
+            throw new Error(`Plugin is missing a setup function`);
+          }
           checkForInvalidFlags(item, keys, `on plugin ${quote(name)}`);
           let plugin = {
             name,
@@ -1288,7 +1332,9 @@ is not a problem with esbuild. You need to fix your environment instead.
             if (!isSetupDone) {
               throw new Error('Cannot call "resolve" before plugin setup has completed');
             }
-            if (typeof path !== "string") throw new Error(`The path to resolve must be a string`);
+            if (typeof path !== "string") {
+              throw new Error(`The path to resolve must be a string`);
+            }
             let keys2 = /* @__PURE__ */ Object.create(null);
             let pluginName = getFlag(options, keys2, "pluginName", mustBeString);
             let importer = getFlag(options, keys2, "importer", mustBeString);
@@ -1310,8 +1356,12 @@ is not a problem with esbuild. You need to fix your environment instead.
               if (namespace != null) request.namespace = namespace;
               if (resolveDir != null) request.resolveDir = resolveDir;
               if (kind != null) request.kind = kind;
-              else throw new Error(`Must specify "kind" when calling "resolve"`);
-              if (pluginData != null) request.pluginData = details.store(pluginData);
+              else {
+                throw new Error(`Must specify "kind" when calling "resolve"`);
+              }
+              if (pluginData != null) {
+                request.pluginData = details.store(pluginData);
+              }
               if (importAttributes != null) {
                 request.with = sanitizeStringMap(importAttributes, "with");
               }
@@ -1359,7 +1409,9 @@ is not a problem with esbuild. You need to fix your environment instead.
               let filter = getFlag(options, keys2, "filter", mustBeRegExp);
               let namespace = getFlag(options, keys2, "namespace", mustBeString);
               checkForInvalidFlags(options, keys2, `in onResolve() call for plugin ${quote(name)}`);
-              if (filter == null) throw new Error(`onResolve() call is missing a filter`);
+              if (filter == null) {
+                throw new Error(`onResolve() call is missing a filter`);
+              }
               let id = nextCallbackID++;
               onResolveCallbacks[id] = { name, callback, note: registeredNote };
               plugin.onResolve.push({
@@ -1375,7 +1427,9 @@ is not a problem with esbuild. You need to fix your environment instead.
               let filter = getFlag(options, keys2, "filter", mustBeRegExp);
               let namespace = getFlag(options, keys2, "namespace", mustBeString);
               checkForInvalidFlags(options, keys2, `in onLoad() call for plugin ${quote(name)}`);
-              if (filter == null) throw new Error(`onLoad() call is missing a filter`);
+              if (filter == null) {
+                throw new Error(`onLoad() call is missing a filter`);
+              }
               let id = nextCallbackID++;
               onLoadCallbacks[id] = { name, callback, note: registeredNote };
               plugin.onLoad.push({
@@ -1487,7 +1541,9 @@ is not a problem with esbuild. You need to fix your environment instead.
                 if (suffix != null) response.suffix = suffix;
                 if (external != null) response.external = external;
                 if (sideEffects != null) response.sideEffects = sideEffects;
-                if (pluginData != null) response.pluginData = details.store(pluginData);
+                if (pluginData != null) {
+                  response.pluginData = details.store(pluginData);
+                }
                 if (errors != null) {
                   response.errors = sanitizeMessages(errors, "errors", details, name, void 0);
                 }
@@ -1551,10 +1607,15 @@ is not a problem with esbuild. You need to fix your environment instead.
                 );
                 response.id = id2;
                 if (pluginName != null) response.pluginName = pluginName;
-                if (contents instanceof Uint8Array) response.contents = contents;
-                else if (contents != null) response.contents = encodeUTF8(contents);
+                if (contents instanceof Uint8Array) {
+                  response.contents = contents;
+                } else if (contents != null) {
+                  response.contents = encodeUTF8(contents);
+                }
                 if (resolveDir != null) response.resolveDir = resolveDir;
-                if (pluginData != null) response.pluginData = details.store(pluginData);
+                if (pluginData != null) {
+                  response.pluginData = details.store(pluginData);
+                }
                 if (loader != null) response.loader = loader;
                 if (errors != null) {
                   response.errors = sanitizeMessages(errors, "errors", details, name, void 0);
@@ -1947,7 +2008,9 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e.text}`;
     if (!wasmURL && !wasmModule) {
       throw new Error('Must provide either the "wasmURL" option or the "wasmModule" option');
     }
-    if (initializePromise) throw new Error('Cannot call "initialize" more than once');
+    if (initializePromise) {
+      throw new Error('Cannot call "initialize" more than once');
+    }
     initializePromise = startRunningService(wasmURL || "", wasmModule, useWorker);
     initializePromise.catch(() => {
       initializePromise = void 0;
@@ -2608,7 +2671,9 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e.text}`;
               } else if (fd === 2) {
                 stderr += decoder.decode(buffer);
                 let parts = stderr.split("\n");
-                if (parts.length > 1) console.log(parts.slice(0, -1).join("\n"));
+                if (parts.length > 1) {
+                  console.log(parts.slice(0, -1).join("\n"));
+                }
                 stderr = parts[parts.length - 1];
               } else {
                 throw new Error("Bad write");
@@ -2662,7 +2727,9 @@ ${file}:${line}:${column}: ERROR: ${pluginText}${e.text}`;
                 return WebAssembly.instantiate(wasm, go.importObject);
               }
               const res = yield fetch(wasm);
-              if (!res.ok) throw new Error(`Failed to download ${JSON.stringify(wasm)}`);
+              if (!res.ok) {
+                throw new Error(`Failed to download ${JSON.stringify(wasm)}`);
+              }
               if (
                 "instantiateStreaming" in WebAssembly &&
                 /^application\/wasm($|;)/i.test(res.headers.get("Content-Type") || "")

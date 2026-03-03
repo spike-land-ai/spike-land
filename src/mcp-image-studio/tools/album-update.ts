@@ -1,14 +1,14 @@
 import { z } from "zod";
 import {
+  ALBUM_PRIVACY_VALUES,
   asImageId,
   asPipelineId,
   errorResult,
   jsonResult,
-  ALBUM_PRIVACY_VALUES,
   toolEvent,
 } from "../types.js";
 import { tryCatch } from "./try-catch.js";
-import { imageProcedure, withResolves, withOwnership } from "../tool-builder/image-middleware.js";
+import { imageProcedure, withOwnership, withResolves } from "../tool-builder/image-middleware.js";
 
 export const albumUpdateTool = imageProcedure
   .use(withResolves({ album_handle: "album" }))
@@ -82,7 +82,10 @@ export const albumUpdateTool = imageProcedure
     const updated = updateResult.data;
 
     ctx.notify?.(
-      toolEvent("album:updated", updated.handle, { name: updated.name, privacy: updated.privacy }),
+      toolEvent("album:updated", updated.handle, {
+        name: updated.name,
+        privacy: updated.privacy,
+      }),
     );
 
     return jsonResult({

@@ -8,7 +8,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "../types";
 import { freeTool } from "../../procedures/index";
-import { textResult, safeToolCall, apiRequest } from "../tool-helpers";
+import { apiRequest, safeToolCall, textResult } from "../tool-helpers";
 import type { DrizzleDB } from "../../db/index";
 
 export function registerStoreInstallTools(
@@ -73,7 +73,9 @@ export function registerStoreInstallTools(
           }>(`/api/store/install/${input.slug}/status`);
 
           return textResult(
-            `## Install Status: ${input.slug}\n\nTotal installs: ${result.count}\nInstalled: ${result.installed ? "Yes" : "No"}`,
+            `## Install Status: ${input.slug}\n\nTotal installs: ${result.count}\nInstalled: ${
+              result.installed ? "Yes" : "No"
+            }`,
           );
         });
       }),

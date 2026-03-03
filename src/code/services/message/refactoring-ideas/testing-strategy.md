@@ -135,7 +135,7 @@ describe("Performance", () => {
     const messages = generateTestMessages(1000);
 
     const start = Date.now();
-    await Promise.all(messages.map(msg => service.handleMessage(msg)));
+    await Promise.all(messages.map((msg) => service.handleMessage(msg)));
     const duration = Date.now() - start;
 
     expect(duration).toBeLessThan(5000); // 5 seconds max

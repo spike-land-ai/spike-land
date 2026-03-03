@@ -125,7 +125,10 @@ describe("analytics-tools", () => {
           timestamp: 2000n,
         },
       );
-      const result = await server.call("stdb_query_events", { eventType: "click", limit: 100 });
+      const result = await server.call("stdb_query_events", {
+        eventType: "click",
+        limit: 100,
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(1);
       expect(parsed.events[0].eventType).toBe("click");
@@ -150,7 +153,10 @@ describe("analytics-tools", () => {
           timestamp: 2000n,
         },
       );
-      const result = await server.call("stdb_query_events", { source: "api", limit: 100 });
+      const result = await server.call("stdb_query_events", {
+        source: "api",
+        limit: 100,
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(1);
       expect(parsed.events[0].source).toBe("api");
@@ -240,8 +246,20 @@ describe("analytics-tools", () => {
   describe("stdb_health_check", () => {
     it("returns health status", async () => {
       client._healthChecks.push(
-        { id: 1n, service: "spacetimedb", status: "healthy", latencyMs: 12, checkedAt: 1000n },
-        { id: 2n, service: "r2", status: "healthy", latencyMs: 45, checkedAt: 1000n },
+        {
+          id: 1n,
+          service: "spacetimedb",
+          status: "healthy",
+          latencyMs: 12,
+          checkedAt: 1000n,
+        },
+        {
+          id: 2n,
+          service: "r2",
+          status: "healthy",
+          latencyMs: 45,
+          checkedAt: 1000n,
+        },
       );
       const result = await server.call("stdb_health_check", {});
       const parsed = JSON.parse(result.content[0].text);

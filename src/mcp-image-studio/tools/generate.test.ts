@@ -396,7 +396,14 @@ describe("generate", () => {
       creditsCost: 2,
     });
 
-    const result = await generate({ prompt: "test", seed: 42, thinking_mode: true }, ctx);
+    const result = await generate(
+      {
+        prompt: "test",
+        seed: 42,
+        thinking_mode: true,
+      },
+      ctx,
+    );
 
     expect(result.isError).toBeUndefined();
     expect(mocks.generation.createAdvancedGenerationJob).toHaveBeenCalledWith(
@@ -437,7 +444,14 @@ describe("generate", () => {
       creditsCost: 2,
     });
 
-    await generate({ prompt: "test", output_format: "webp", thinking_mode: true }, ctx);
+    await generate(
+      {
+        prompt: "test",
+        output_format: "webp",
+        thinking_mode: true,
+      },
+      ctx,
+    );
 
     expect(mocks.generation.createAdvancedGenerationJob).toHaveBeenCalledWith(
       expect.objectContaining({

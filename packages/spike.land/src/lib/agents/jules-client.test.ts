@@ -221,7 +221,12 @@ describe("jules-client", () => {
     });
 
     it("should handle API errors", async () => {
-      mockFetchSuccess({ error: { code: 404, message: "Not found", status: "NOT_FOUND" } }, 404);
+      mockFetchSuccess(
+        {
+          error: { code: 404, message: "Not found", status: "NOT_FOUND" },
+        },
+        404,
+      );
 
       const result = await getSource("bad");
 

@@ -86,7 +86,10 @@ if (fs.existsSync(toolFile)) {
 
 function generateHandler(op: string): string {
   const toolId = `${snakeName}_${op}`;
-  const description = `${op.charAt(0).toUpperCase() + op.slice(1)} ${toolName.replace(/-/g, " ")} items.`;
+  const description = `${op.charAt(0).toUpperCase() + op.slice(1)} ${toolName.replace(
+    /-/g,
+    " ",
+  )} items.`;
 
   return `    registry.registerBuilt(
         ${builderFn}(userId)
@@ -158,7 +161,9 @@ describe("${pascalName} MCP Tools", () => {
 
     it("registers ${operations.length} tools", () => {
         expect(registry.register).toHaveBeenCalledTimes(${operations.length});
-${operations.map((op) => `        expect(registry.handlers.has("${snakeName}_${op}")).toBe(true);`).join("\n")}
+${operations
+  .map((op) => `        expect(registry.handlers.has("${snakeName}_${op}")).toBe(true);`)
+  .join("\n")}
     });
 
 ${operations.map(generateTestDescribe).join("\n\n")}

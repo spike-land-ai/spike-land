@@ -29,7 +29,13 @@ export async function getPortfolioItems(options?: {
       ...(options?.category && { category: options.category }),
       ...(options?.featured !== undefined && { featured: options.featured }),
     },
-    orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { createdAt: "desc" }],
+    orderBy: [
+      { featured: "desc" },
+      { sortOrder: "asc" },
+      {
+        createdAt: "desc",
+      },
+    ],
     ...(options?.limit !== undefined ? { take: options.limit } : {}),
   });
 }

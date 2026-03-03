@@ -5,19 +5,19 @@
  * resolveWorkspace, and getVaultSecret.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  McpError,
-  McpErrorCode,
+  apiRequest,
+  getVaultSecret,
+  jsonResult,
   MCP_ERROR_MESSAGES,
   MCP_ERROR_RETRYABLE,
-  safeToolCall,
-  textResult,
-  jsonResult,
-  apiRequest,
+  McpError,
+  McpErrorCode,
   resolveWorkspace,
-  getVaultSecret,
+  safeToolCall,
   SPIKE_LAND_BASE_URL,
+  textResult,
 } from "./tool-helpers";
 import { createMockD1 } from "../__test-utils__/mock-env";
 import { createDb } from "../db/index";
@@ -234,7 +234,9 @@ describe("apiRequest", () => {
     expect(mockFetch).toHaveBeenCalledWith(
       `${SPIKE_LAND_BASE_URL}/api/test`,
       expect.objectContaining({
-        headers: expect.objectContaining({ "Content-Type": "application/json" }),
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+        }),
       }),
     );
   });

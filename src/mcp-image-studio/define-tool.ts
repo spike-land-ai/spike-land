@@ -1,13 +1,13 @@
 import type {
+  AlbumHandle,
+  AlbumRow,
   CallToolResult,
+  EnhancementJobRow,
   EnhancementTier,
   ImageId,
+  ImageRow,
   ImageStudioDeps,
   ToolContext,
-  AlbumHandle,
-  EnhancementJobRow,
-  ImageRow,
-  AlbumRow,
 } from "./types.js";
 import { errorResult, toolEvent } from "./types.js";
 import { tryCatch } from "./tools/try-catch.js";
@@ -18,10 +18,14 @@ export async function resolveImageOrError(
 ): Promise<{ image?: ImageRow; error?: CallToolResult }> {
   const resolveResult = await tryCatch(deps.resolvers.resolveImage(imageId));
   if (!resolveResult.ok) {
-    return { error: errorResult("IMAGE_NOT_FOUND", resolveResult.error.message) };
+    return {
+      error: errorResult("IMAGE_NOT_FOUND", resolveResult.error.message),
+    };
   }
   if (!resolveResult.data) {
-    return { error: errorResult("IMAGE_NOT_FOUND", `Image not found: ${imageId}`) };
+    return {
+      error: errorResult("IMAGE_NOT_FOUND", `Image not found: ${imageId}`),
+    };
   }
   return { image: resolveResult.data };
 }
@@ -33,7 +37,9 @@ export async function resolveImagesOrError(
 ): Promise<{ images?: ImageRow[]; error?: CallToolResult }> {
   const resolveResult = await tryCatch(deps.resolvers.resolveImages(imageIds));
   if (!resolveResult.ok) {
-    return { error: errorResult("RESOLVE_FAILED", resolveResult.error.message) };
+    return {
+      error: errorResult("RESOLVE_FAILED", resolveResult.error.message),
+    };
   }
   if (!resolveResult.data) {
     return { error: errorResult("RESOLVE_FAILED", "Failed to resolve images") };
@@ -60,7 +66,9 @@ export async function consumeCreditsOrError(
   );
 
   if (!consumeResult.ok) {
-    return { error: errorResult("CREDIT_CONSUME_FAILED", consumeResult.error.message) };
+    return {
+      error: errorResult("CREDIT_CONSUME_FAILED", consumeResult.error.message),
+    };
   }
   if (!consumeResult.data.success) {
     return {
@@ -197,7 +205,10 @@ class ToolBuilder<TInput, TCtx extends ToolContext, TFields extends z.ZodRawShap
         return { success: true as const, data: parsed.data as TInput };
       } else {
         /* v8 ignore next */
-        return { success: false as const, error: { message: parsed.error.message } };
+        return {
+          success: false as const,
+          error: { message: parsed.error.message },
+        };
       }
     };
 
@@ -339,7 +350,11 @@ class ToolBuilder<TInput, TCtx extends ToolContext, TFields extends z.ZodRawShap
 
           if (ctx.notify) {
             ctx.notify(
-              toolEvent("job:created", jobResult.data.id, { imageId, tier, creditsCost: cost }),
+              toolEvent("job:created", jobResult.data.id, {
+                imageId,
+                tier,
+                creditsCost: cost,
+              }),
             );
           }
         }

@@ -117,11 +117,21 @@ describe("Zod validation", () => {
     const rowSchema = z.object(shape);
 
     // Valid row
-    const valid = rowSchema.safeParse({ id: 1, name: "Alice", online: true, bio: null });
+    const valid = rowSchema.safeParse({
+      id: 1,
+      name: "Alice",
+      online: true,
+      bio: null,
+    });
     expect(valid.success).toBe(true);
 
     // Invalid row (wrong type for name)
-    const invalid = rowSchema.safeParse({ id: 1, name: 42, online: true, bio: null });
+    const invalid = rowSchema.safeParse({
+      id: 1,
+      name: 42,
+      online: true,
+      bio: null,
+    });
     expect(invalid.success).toBe(false);
   });
 });
@@ -156,7 +166,11 @@ describe("defineTable", () => {
       primaryKey: "id",
       indexes: [
         { name: "idx_events_source", columns: ["source"], unique: false },
-        { name: "idx_events_type_time", columns: ["eventType", "timestamp"], unique: false },
+        {
+          name: "idx_events_type_time",
+          columns: ["eventType", "timestamp"],
+          unique: false,
+        },
       ],
     });
 

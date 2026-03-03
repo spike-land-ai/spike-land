@@ -180,7 +180,10 @@ function SoftmaxBars({
                 }}
                 initial={{ width: 0 }}
                 animate={{ width: `${barWidth}%` }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.5, ease: "easeOut" }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.5,
+                  ease: "easeOut",
+                }}
               />
             </div>
             <span className="text-[10px] font-mono text-slate-500 w-10 flex-shrink-0">
@@ -326,7 +329,9 @@ function ContextWindowBar({ tokenCount, maxTokens }: ContextWindowBarProps) {
       <div className="h-3 bg-slate-800 rounded-full overflow-hidden relative">
         <motion.div
           className="h-full rounded-full"
-          style={{ background: `linear-gradient(90deg, ${barColor}99, ${barColor})` }}
+          style={{
+            background: `linear-gradient(90deg, ${barColor}99, ${barColor})`,
+          }}
           animate={{ width: `${fillPercent}%` }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         />
@@ -472,7 +477,9 @@ export function AttentionSpotlightDemo() {
               <div className="absolute left-0 w-full h-1 bg-slate-800 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 transition-all duration-300"
-                  style={{ width: `${((tokenCount - 1) / (MAX_CONTEXT_TOKENS - 1)) * 100}%` }}
+                  style={{
+                    width: `${((tokenCount - 1) / (MAX_CONTEXT_TOKENS - 1)) * 100}%`,
+                  }}
                 />
               </div>
               <input

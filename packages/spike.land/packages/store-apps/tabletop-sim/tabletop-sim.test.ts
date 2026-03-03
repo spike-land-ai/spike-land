@@ -140,7 +140,13 @@ describe("tabletop-sim tools", () => {
         expect(match).toBeTruthy();
 
         if (match?.[1]) {
-          const loadResult = await registry.call("tabletop_load_game", { save_id: match[1] }, ctx);
+          const loadResult = await registry.call(
+            "tabletop_load_game",
+            {
+              save_id: match[1],
+            },
+            ctx,
+          );
           expect(loadResult.isError).toBeUndefined();
           const loadText = loadResult.content[0];
           if (loadText && loadText.type === "text") {
@@ -153,7 +159,13 @@ describe("tabletop-sim tools", () => {
 
     it("tabletop_load_game returns error for unknown save", async () => {
       const ctx = createMockContext();
-      const result = await registry.call("tabletop_load_game", { save_id: "nonexistent" }, ctx);
+      const result = await registry.call(
+        "tabletop_load_game",
+        {
+          save_id: "nonexistent",
+        },
+        ctx,
+      );
       expect(result.isError).toBeUndefined();
       const text = result.content[0];
       if (text && text.type === "text") {

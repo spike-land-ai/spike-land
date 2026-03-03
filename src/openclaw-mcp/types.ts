@@ -30,7 +30,12 @@ export type McpContentItem =
   | { type: "text"; text: string }
   | {
       type: "image";
-      source: { type: "base64"; data: string; mediaType: string } | { type: "url"; url: string };
+      source:
+        | { type: "base64"; data: string; mediaType: string }
+        | {
+            type: "url";
+            url: string;
+          };
     };
 
 export type McpCallResult = {

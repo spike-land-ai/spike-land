@@ -46,7 +46,9 @@ function frameworkImport(framework: string): string {
   if (framework === "playwright") {
     return `import { test, expect } from "@playwright/test";`;
   }
-  return `import { describe, it, expect, beforeEach, afterEach, vi } from "${framework === "vitest" ? "vitest" : "@jest/globals"}";`;
+  return `import { describe, it, expect, beforeEach, afterEach, vi } from "${
+    framework === "vitest" ? "vitest" : "@jest/globals"
+  }";`;
 }
 
 /** Extract exported function/class names from source code for targeted test generation. */
@@ -200,7 +202,9 @@ function generateTestCodeFromSource(sourceCode: string, targetPath: string): str
       `    it("should handle invalid input gracefully", ${isAsync ? "async " : ""}() => {`,
     );
     lines.push(
-      `      ${isAsync ? "await " : ""}expect(${isAsync ? "async " : ""}() => ${awaitKw}${name}(null as never)).rejects // or .toThrow()`,
+      `      ${isAsync ? "await " : ""}expect(${
+        isAsync ? "async " : ""
+      }() => ${awaitKw}${name}(null as never)).rejects // or .toThrow()`,
     );
     lines.push(`        // .toThrow("expected error message");`);
     lines.push(
@@ -341,7 +345,9 @@ export function registerTestgenTools(registry: ToolRegistry, userId: string, db:
       .handler(async ({ input }) => {
         const suite = suites.get(input.suite_id);
         if (!suite) throw new Error(`Suite ${input.suite_id} not found`);
-        return jsonResult(`Suite ${input.suite_id} is valid`, { isValid: true });
+        return jsonResult(`Suite ${input.suite_id} is valid`, {
+          isValid: true,
+        });
       }),
   );
 }

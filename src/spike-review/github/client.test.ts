@@ -214,27 +214,59 @@ describe("GitHubClient", () => {
     const client = new GitHubClient({ token: "fake-token" });
 
     it("returns valid for line within hunk", () => {
-      const hunks = [{ oldStart: 1, oldLines: 3, newStart: 1, newLines: 4, lines: [] }];
+      const hunks = [
+        {
+          oldStart: 1,
+          oldLines: 3,
+          newStart: 1,
+          newLines: 4,
+          lines: [],
+        },
+      ];
       const result = client.validateCommentTarget(hunks, 2);
       expect(result.valid).toBe(true);
     });
 
     it("returns invalid for line outside hunk", () => {
-      const hunks = [{ oldStart: 1, oldLines: 3, newStart: 1, newLines: 4, lines: [] }];
+      const hunks = [
+        {
+          oldStart: 1,
+          oldLines: 3,
+          newStart: 1,
+          newLines: 4,
+          lines: [],
+        },
+      ];
       const result = client.validateCommentTarget(hunks, 10);
       expect(result.valid).toBe(false);
       expect(result.reason).toContain("not within any diff hunk");
     });
 
     it("returns nearest valid line when target is invalid", () => {
-      const hunks = [{ oldStart: 10, oldLines: 5, newStart: 10, newLines: 5, lines: [] }];
+      const hunks = [
+        {
+          oldStart: 10,
+          oldLines: 5,
+          newStart: 10,
+          newLines: 5,
+          lines: [],
+        },
+      ];
       const result = client.validateCommentTarget(hunks, 20);
       expect(result.valid).toBe(false);
       expect(result.nearestValidLine?.line).toBe(14);
     });
 
     it("validates on LEFT side", () => {
-      const hunks = [{ oldStart: 5, oldLines: 3, newStart: 5, newLines: 4, lines: [] }];
+      const hunks = [
+        {
+          oldStart: 5,
+          oldLines: 3,
+          newStart: 5,
+          newLines: 4,
+          lines: [],
+        },
+      ];
       const result = client.validateCommentTarget(hunks, 6, "LEFT" as const);
       expect(result.valid).toBe(true);
     });

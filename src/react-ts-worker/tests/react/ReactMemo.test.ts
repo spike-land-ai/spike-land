@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { memo } from "../../react/ReactMemo.js";
 import { REACT_MEMO_TYPE } from "../../react/ReactSymbols.js";
 

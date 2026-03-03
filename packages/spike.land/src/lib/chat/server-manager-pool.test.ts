@@ -29,7 +29,12 @@ const { mockConnectAll, mockCloseAll, mockDiscoverConfig, MockInProcessToolProvi
       }
     }
 
-    return { mockConnectAll, mockCloseAll, mockDiscoverConfig, MockInProcessToolProvider };
+    return {
+      mockConnectAll,
+      mockCloseAll,
+      mockDiscoverConfig,
+      MockInProcessToolProvider,
+    };
   },
 );
 

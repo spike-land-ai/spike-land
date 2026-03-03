@@ -123,7 +123,13 @@ describe("status command", () => {
         if (callCount === 2) throw new Error("fail");
       });
       mockConnected.mockReturnValue(true);
-      mockGetTools.mockReturnValue([{ name: "t1", description: "", inputSchema: {} }]);
+      mockGetTools.mockReturnValue([
+        {
+          name: "t1",
+          description: "",
+          inputSchema: {},
+        },
+      ]);
       mockClose.mockResolvedValue(undefined);
 
       const result = await collectStatus();
@@ -166,7 +172,14 @@ describe("status command", () => {
   describe("formatStatus", () => {
     it("formats connected server with checkmark", () => {
       const output = formatStatus({
-        servers: [{ name: "vitest", connected: true, toolCount: 5, latencyMs: 42 }],
+        servers: [
+          {
+            name: "vitest",
+            connected: true,
+            toolCount: 5,
+            latencyMs: 42,
+          },
+        ],
         env: { CLAUDE_CODE_OAUTH_TOKEN: true, MCP_API_KEY: false },
       });
 

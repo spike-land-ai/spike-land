@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { lazy } from "../../react/ReactLazy.js";
 import { REACT_LAZY_TYPE } from "../../react/ReactSymbols.js";
 

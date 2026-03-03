@@ -139,7 +139,9 @@ describe("app-lookup", () => {
     });
 
     it("should fall back to slug", async () => {
-      mockFindFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: "app-2" });
+      mockFindFirst.mockResolvedValueOnce(null).mockResolvedValueOnce({
+        id: "app-2",
+      });
 
       const result = await findAppByIdentifierSimple("my-slug", userId);
 

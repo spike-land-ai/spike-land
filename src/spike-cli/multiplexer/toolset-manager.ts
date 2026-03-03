@@ -137,13 +137,20 @@ export class ToolsetManager {
           content: [
             {
               type: "text",
-              text: `Loaded toolset "${toolsetName}": ${result.loaded.join(", ")} (${result.toolCount} tools)`,
+              text: `Loaded toolset "${toolsetName}": ${result.loaded.join(
+                ", ",
+              )} (${result.toolCount} tools)`,
             },
           ],
         };
       } catch (err) {
         return {
-          content: [{ type: "text", text: String(err instanceof Error ? err.message : err) }],
+          content: [
+            {
+              type: "text",
+              text: String(err instanceof Error ? err.message : err),
+            },
+          ],
           isError: true,
         };
       }
@@ -166,7 +173,12 @@ export class ToolsetManager {
       }
       if (!this.loadedToolsets.has(toolsetName)) {
         return {
-          content: [{ type: "text", text: `Toolset "${toolsetName}" is not currently loaded` }],
+          content: [
+            {
+              type: "text",
+              text: `Toolset "${toolsetName}" is not currently loaded`,
+            },
+          ],
           isError: true,
         };
       }

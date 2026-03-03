@@ -106,7 +106,7 @@ class BatchMessageHandler {
     this.batch = [];
 
     await Promise.all(
-      currentBatch.map(msg => this.processMessage(msg)),
+      currentBatch.map((msg) => this.processMessage(msg)),
     );
   }
 }

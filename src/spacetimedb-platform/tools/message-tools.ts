@@ -20,10 +20,16 @@ export function registerMessageTools(server: McpServer, client: SpacetimePlatfor
     async ({ toIdentity, content }) => {
       try {
         await client.sendDM(toIdentity, content);
-        return jsonResult({ sent: true, toIdentity, contentLength: content.length });
+        return jsonResult({
+          sent: true,
+          toIdentity,
+          contentLength: content.length,
+        });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },
@@ -57,7 +63,9 @@ export function registerMessageTools(server: McpServer, client: SpacetimePlatfor
         });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("QUERY_FAILED", message, false);
       }
     },
@@ -77,7 +85,9 @@ export function registerMessageTools(server: McpServer, client: SpacetimePlatfor
         return jsonResult({ marked: true, messageId });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },

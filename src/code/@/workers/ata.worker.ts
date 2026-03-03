@@ -152,14 +152,20 @@ export async function ata({
       typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
     const cached = await getAtaCache(url);
     if (cached !== null) {
-      return new Response(cached, { status: 200, headers: { "x-idb-cache": "hit" } });
+      return new Response(cached, {
+        status: 200,
+        headers: { "x-idb-cache": "hit" },
+      });
     }
     const fetchInput = input instanceof URL ? input.toString() : input;
     const response = await queuedFetch.fetch(fetchInput, init);
     if (response.ok) {
       const text = await response.text();
       await setAtaCache(url, text);
-      return new Response(text, { status: response.status, headers: response.headers });
+      return new Response(text, {
+        status: response.status,
+        headers: response.headers,
+      });
     }
     return response;
   };

@@ -29,7 +29,10 @@ export const BROWSER_TOOLS: BrowserToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
-        selector: { type: "string", description: "CSS selector of the element to click" },
+        selector: {
+          type: "string",
+          description: "CSS selector of the element to click",
+        },
       },
       required: ["selector"],
     },
@@ -40,7 +43,10 @@ export const BROWSER_TOOLS: BrowserToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
-        selector: { type: "string", description: "CSS selector of the input element" },
+        selector: {
+          type: "string",
+          description: "CSS selector of the input element",
+        },
         value: { type: "string", description: "Text value to fill" },
       },
       required: ["selector", "value"],
@@ -61,7 +67,10 @@ export const BROWSER_TOOLS: BrowserToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
-        selector: { type: "string", description: "CSS selector (optional, defaults to body)" },
+        selector: {
+          type: "string",
+          description: "CSS selector (optional, defaults to body)",
+        },
       },
       required: [],
     },
@@ -83,8 +92,14 @@ export const BROWSER_TOOLS: BrowserToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
-        selector: { type: "string", description: "CSS selector to scroll to (optional)" },
-        y: { type: "string", description: "Y pixel offset (optional, used if no selector)" },
+        selector: {
+          type: "string",
+          description: "CSS selector to scroll to (optional)",
+        },
+        y: {
+          type: "string",
+          description: "Y pixel offset (optional, used if no selector)",
+        },
       },
       required: [],
     },

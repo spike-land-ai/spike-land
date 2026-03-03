@@ -524,7 +524,10 @@ describe("HNWriteClient", () => {
         {
           url: `${HN_WEB_BASE}/r`,
           method: "POST",
-          response: { status: 200, body: "<html>Something went wrong but not expired</html>" },
+          response: {
+            status: 200,
+            body: "<html>Something went wrong but not expired</html>",
+          },
         },
       ]);
       const client = new HNWriteClient(session, fetch);

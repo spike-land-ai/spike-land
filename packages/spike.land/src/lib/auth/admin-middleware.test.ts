@@ -101,7 +101,10 @@ describe("admin-middleware", () => {
     });
 
     it("returns false when session has no user id", () => {
-      const session = { user: { name: "Test" }, expires: "2099-01-01" } as unknown as Session;
+      const session = {
+        user: { name: "Test" },
+        expires: "2099-01-01",
+      } as unknown as Session;
       expect(isAdmin(session)).toBe(false);
     });
   });
@@ -191,7 +194,10 @@ describe("admin-middleware", () => {
     });
 
     it("returns false for session with no id", async () => {
-      const session = { user: { name: "Test" }, expires: "2099-01-01" } as unknown as Session;
+      const session = {
+        user: { name: "Test" },
+        expires: "2099-01-01",
+      } as unknown as Session;
       expect(await verifyAdminAccess(session)).toBe(false);
     });
 

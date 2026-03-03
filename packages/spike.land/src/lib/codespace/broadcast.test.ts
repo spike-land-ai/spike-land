@@ -65,8 +65,12 @@ describe("broadcast", () => {
     });
 
     it("should add multiple connections to same codespace", () => {
-      const c1 = { enqueue: vi.fn() } as unknown as ReadableStreamDefaultController<Uint8Array>;
-      const c2 = { enqueue: vi.fn() } as unknown as ReadableStreamDefaultController<Uint8Array>;
+      const c1 = {
+        enqueue: vi.fn(),
+      } as unknown as ReadableStreamDefaultController<Uint8Array>;
+      const c2 = {
+        enqueue: vi.fn(),
+      } as unknown as ReadableStreamDefaultController<Uint8Array>;
 
       addConnection("test-space-multi", c1);
       addConnection("test-space-multi", c2);

@@ -66,7 +66,9 @@ export function useComposerImages(options?: UseComposerImagesOptions): UseCompos
         });
 
         if (!res.ok) {
-          const data = await res.json().catch(() => ({ error: "Upload failed" }));
+          const data = await res.json().catch(() => ({
+            error: "Upload failed",
+          }));
           throw new Error(data.error || "Upload failed");
         }
 

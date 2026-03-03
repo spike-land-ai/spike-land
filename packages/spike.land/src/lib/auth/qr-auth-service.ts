@@ -19,7 +19,9 @@ export async function initiateQRAuth(): Promise<{ token: string; hash: string }>
   const hash = createHash("sha256").update(token).digest("hex");
 
   const session: QRSession = { status: "PENDING" };
-  await redis.set(`qr_auth:${hash}`, JSON.stringify(session), { ex: QR_SESSION_TTL_SECONDS });
+  await redis.set(`qr_auth:${hash}`, JSON.stringify(session), {
+    ex: QR_SESSION_TTL_SECONDS,
+  });
 
   return { token, hash };
 }
@@ -59,7 +61,9 @@ export async function approveQRAuth(
   // Keep the same TTL - get remaining TTL first
   const ttl = await redis.ttl(`qr_auth:${hash}`);
   const expirySeconds = ttl > 0 ? ttl : QR_SESSION_TTL_SECONDS;
-  await redis.set(`qr_auth:${hash}`, JSON.stringify(updatedSession), { ex: expirySeconds });
+  await redis.set(`qr_auth:${hash}`, JSON.stringify(updatedSession), {
+    ex: expirySeconds,
+  });
 
   return { hash, oneTimeCode };
 }

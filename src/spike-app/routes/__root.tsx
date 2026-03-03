@@ -1,5 +1,5 @@
-import { Outlet, Link, useRouterState } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useStdb } from "@/hooks/useStdb";
 import { LoginButton } from "@/components/LoginButton";
@@ -89,10 +89,14 @@ export function RootLayout() {
     if (twDesc) twDesc.content = meta.description;
 
     const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-    if (canonical) canonical.href = `https://spike.land${pathname === "/" ? "" : pathname}`;
+    if (canonical) {
+      canonical.href = `https://spike.land${pathname === "/" ? "" : pathname}`;
+    }
 
     const ogUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
-    if (ogUrl) ogUrl.content = `https://spike.land${pathname === "/" ? "" : pathname}`;
+    if (ogUrl) {
+      ogUrl.content = `https://spike.land${pathname === "/" ? "" : pathname}`;
+    }
   }, [pathname]);
 
   return (

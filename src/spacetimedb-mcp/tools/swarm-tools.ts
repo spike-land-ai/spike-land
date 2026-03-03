@@ -39,7 +39,9 @@ export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient
 
   server.tool("stdb_disconnect", "Disconnect from the current SpacetimeDB Swarm", {}, async () => {
     const result = await tryCatch(Promise.resolve().then(() => client.disconnect()));
-    if (!result.ok) return errorResult("NOT_CONNECTED", result.error.message, false);
+    if (!result.ok) {
+      return errorResult("NOT_CONNECTED", result.error.message, false);
+    }
     return jsonResult({ disconnected: true });
   });
 

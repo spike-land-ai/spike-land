@@ -8,7 +8,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "../types";
 import { freeTool } from "../../procedures/index";
-import { textResult, safeToolCall, apiRequest } from "../tool-helpers";
+import { apiRequest, safeToolCall, textResult } from "../tool-helpers";
 import type { DrizzleDB } from "../../db/index";
 
 // ─── Schemas ────────────────────────────────────────────────────────────────
@@ -127,7 +127,11 @@ export function registerCareerTools(
             total: number;
           }>("/api/career/search", {
             method: "POST",
-            body: JSON.stringify({ query: input.query, limit: input.limit, offset: input.offset }),
+            body: JSON.stringify({
+              query: input.query,
+              limit: input.limit,
+              offset: input.offset,
+            }),
           });
 
           if (result.results.length === 0) {
@@ -228,7 +232,10 @@ export function registerCareerTools(
             }>;
           }>("/api/career/compare", {
             method: "POST",
-            body: JSON.stringify({ skills: input.skills, occupationUri: input.occupationUri }),
+            body: JSON.stringify({
+              skills: input.skills,
+              occupationUri: input.occupationUri,
+            }),
           });
 
           let text = `**Skill Comparison: ${result.occupationTitle}**\n`;

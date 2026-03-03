@@ -83,7 +83,13 @@ describe("mcp-explorer tools", () => {
 
   describe("mcp_registry_search", () => {
     it("returns matching servers", async () => {
-      const result = await registry.call("mcp_registry_search", { query: "test" }, ctx);
+      const result = await registry.call(
+        "mcp_registry_search",
+        {
+          query: "test",
+        },
+        ctx,
+      );
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("MCP Servers Found");
       expect(text).toContain("Test Server");
@@ -138,7 +144,13 @@ describe("mcp-explorer tools", () => {
 
   describe("mcp_tool_usage_stats", () => {
     it("returns usage stats", async () => {
-      const result = await registry.call("mcp_tool_usage_stats", { period: "7d" }, ctx);
+      const result = await registry.call(
+        "mcp_tool_usage_stats",
+        {
+          period: "7d",
+        },
+        ctx,
+      );
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("MCP Tool Usage Stats");
       expect(text).toContain("Total Calls");
@@ -165,7 +177,13 @@ describe("mcp-explorer tools", () => {
     });
 
     it("generates docs for a category", async () => {
-      const result = await registry.call("mcp_generate_docs", { category: "mcp-registry" }, ctx);
+      const result = await registry.call(
+        "mcp_generate_docs",
+        {
+          category: "mcp-registry",
+        },
+        ctx,
+      );
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("mcp-registry");
       expect(text).toContain("4 tool(s)");

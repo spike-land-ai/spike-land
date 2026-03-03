@@ -2,7 +2,7 @@
  * Tests for gates tools
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 import { registerGatesTools } from "./gates.js";
@@ -90,7 +90,12 @@ describe("gates tools", () => {
   });
 
   it("run_gates without prTitle/prBody uses defaults", async () => {
-    const diff = buildDiff([{ path: "src/index.test.ts", added: ["it('works', () => {});"] }]);
+    const diff = buildDiff([
+      {
+        path: "src/index.test.ts",
+        added: ["it('works', () => {});"],
+      },
+    ]);
     const result = await server.call("bazdmeg_run_gates", { diff });
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain("BAZDMEG Quality Gates");

@@ -221,7 +221,7 @@ export function PublicGallery() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {photos.map(photo => (
+      {photos.map((photo) => (
         <div key={photo.id} className="space-y-2">
           <h3 className="font-semibold">{photo.title}</h3>
           <div className="grid grid-cols-2 gap-2">
@@ -271,7 +271,7 @@ export default async function GalleryPage() {
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">Featured Enhancements</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {data.items.map(photo => (
+        {data.items.map((photo) => (
           <div key={photo.id} className="border rounded-lg overflow-hidden">
             <div className="aspect-video relative">
               <Image
@@ -299,16 +299,16 @@ export default async function GalleryPage() {
 
 ```javascript
 fetch("/api/gallery/public-albums")
-  .then(response => response.json())
-  .then(data => {
+  .then((response) => response.json())
+  .then((data) => {
     console.log(`Loaded ${data.items.length} photos`);
-    data.items.forEach(photo => {
+    data.items.forEach((photo) => {
       console.log(
         `${photo.title}: ${photo.originalUrl} → ${photo.enhancedUrl}`,
       );
     });
   })
-  .catch(error => console.error("Error:", error));
+  .catch((error) => console.error("Error:", error));
 ```
 
 ### React Query Integration
@@ -335,7 +335,7 @@ function usePublicGallery() {
       if (!response.ok) {
         throw new Error("Failed to fetch gallery");
       }
-      return response.json() as Promise<{ items: GalleryPhoto[]; }>;
+      return response.json() as Promise<{ items: GalleryPhoto[] }>;
     },
     staleTime: 5 * 60 * 1000, // Match server cache (5 minutes)
     gcTime: 10 * 60 * 1000, // Match stale-while-revalidate (10 minutes)
@@ -351,7 +351,7 @@ export function GalleryWithQuery() {
 
   return (
     <div className="grid grid-cols-3 gap-4">
-      {data?.items.map(photo => (
+      {data?.items.map((photo) => (
         <div key={photo.id}>
           <img src={photo.enhancedUrl} alt={photo.title} />
         </div>
@@ -366,7 +366,7 @@ export function GalleryWithQuery() {
 ```typescript
 import useSWR from "swr";
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export function GalleryWithSWR() {
   const { data, error, isLoading } = useSWR(
@@ -384,7 +384,7 @@ export function GalleryWithSWR() {
 
   return (
     <div>
-      {data?.items.map(photo => <div key={photo.id}>{photo.title}</div>)}
+      {data?.items.map((photo) => <div key={photo.id}>{photo.title}</div>)}
     </div>
   );
 }
@@ -402,12 +402,12 @@ export function PublicGalleryMobile() {
 
   useEffect(() => {
     fetch("https://spike.land/api/gallery/public-albums")
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setPhotos(data.items);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Failed to fetch gallery:", err);
         setLoading(false);
       });
@@ -419,7 +419,7 @@ export function PublicGalleryMobile() {
 
   return (
     <ScrollView>
-      {photos.map(photo => (
+      {photos.map((photo) => (
         <View key={photo.id}>
           <Image
             source={{ uri: photo.enhancedUrl }}

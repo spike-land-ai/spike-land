@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock cloudflare:workers before importing SpikeDatabase
 vi.mock("cloudflare:workers", () => {
@@ -49,7 +49,10 @@ global.Response.json = OriginalResponse.json;
 
 describe("SpikeDatabase", () => {
   let ctx: {
-    storage: { sql: { exec: ReturnType<typeof vi.fn> }; setAlarm: ReturnType<typeof vi.fn> };
+    storage: {
+      sql: { exec: ReturnType<typeof vi.fn> };
+      setAlarm: ReturnType<typeof vi.fn>;
+    };
     blockConcurrencyWhile: ReturnType<typeof vi.fn>;
     acceptWebSocket: ReturnType<typeof vi.fn>;
     getTags: ReturnType<typeof vi.fn>;
@@ -158,7 +161,11 @@ describe("SpikeDatabase", () => {
   });
 
   it("alarm executes scheduled reducers", async () => {
-    db.initSchema({ name: "test", tables: {}, reducers: { r: { name: "r", handler: vi.fn() } } });
+    db.initSchema({
+      name: "test",
+      tables: {},
+      reducers: { r: { name: "r", handler: vi.fn() } },
+    });
 
     // Mock SQL to return a scheduled task
     ctx.storage.sql.exec
@@ -231,7 +238,10 @@ describe("SpikeDatabase", () => {
   });
 
   it("handleReducerHttp errors when schema not initialized", async () => {
-    const req = new Request("http://localhost/reducer/r", { method: "POST", body: "{}" });
+    const req = new Request("http://localhost/reducer/r", {
+      method: "POST",
+      body: "{}",
+    });
     const res = await db.fetch(req);
     expect(res.status).toBe(500);
   });

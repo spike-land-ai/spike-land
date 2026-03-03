@@ -4,7 +4,12 @@ import { tryCatch } from "./try-catch.js";
 import { imageProcedure, withCredits } from "../tool-builder/image-middleware.js";
 
 export const compareTool = imageProcedure
-  .use(withCredits({ cost: () => ADVANCED_FEATURE_COSTS.compare, source: "compare" }))
+  .use(
+    withCredits({
+      cost: () => ADVANCED_FEATURE_COSTS.compare,
+      source: "compare",
+    }),
+  )
   .tool("compare", "AI-powered comparison of two images (use either IDs or URLs for each slot).", {
     image1_id: z.string().describe("First image ID (from library)").optional(),
     image2_id: z.string().describe("Second image ID (from library)").optional(),

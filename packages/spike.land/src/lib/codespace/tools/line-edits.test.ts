@@ -66,7 +66,13 @@ describe("applyLineEdits", () => {
   });
 
   it("should handle empty newContent (deletion)", () => {
-    const result = applyLineEdits(sampleCode, [{ startLine: 3, endLine: 3, newContent: "" }]);
+    const result = applyLineEdits(sampleCode, [
+      {
+        startLine: 3,
+        endLine: 3,
+        newContent: "",
+      },
+    ]);
     // Empty newContent produces no replacement lines, so the line is removed
     const lines = result.newCode.split("\n");
     expect(lines).toHaveLength(4);
@@ -75,19 +81,37 @@ describe("applyLineEdits", () => {
 
   it("should throw on line numbers less than 1", () => {
     expect(() =>
-      applyLineEdits(sampleCode, [{ startLine: 0, endLine: 1, newContent: "x" }]),
+      applyLineEdits(sampleCode, [
+        {
+          startLine: 0,
+          endLine: 1,
+          newContent: "x",
+        },
+      ]),
     ).toThrow("1-based and positive");
   });
 
   it("should throw when startLine > endLine", () => {
     expect(() =>
-      applyLineEdits(sampleCode, [{ startLine: 3, endLine: 2, newContent: "x" }]),
+      applyLineEdits(sampleCode, [
+        {
+          startLine: 3,
+          endLine: 2,
+          newContent: "x",
+        },
+      ]),
     ).toThrow("less than or equal to end line");
   });
 
   it("should throw when endLine exceeds code length", () => {
     expect(() =>
-      applyLineEdits(sampleCode, [{ startLine: 1, endLine: 10, newContent: "x" }]),
+      applyLineEdits(sampleCode, [
+        {
+          startLine: 1,
+          endLine: 10,
+          newContent: "x",
+        },
+      ]),
     ).toThrow("exceeds code length");
   });
 

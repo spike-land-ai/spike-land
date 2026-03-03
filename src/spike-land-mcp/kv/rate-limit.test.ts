@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { checkRateLimit } from "./rate-limit";
 import { createMockKV } from "../__test-utils__/mock-env";
 

@@ -1,5 +1,5 @@
-import { MoreVertical, Edit3 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { Edit3, MoreVertical } from "lucide-react";
+import { type ReactNode, useState } from "react";
 
 interface ImageCardProps {
   id: string;
@@ -101,7 +101,11 @@ export function ImageCard({
             <div className="relative shrink-0">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className={`p-1.5 rounded-lg transition-all ${menuOpen ? "bg-amber-neon text-obsidian-950" : "hover:bg-white/10 text-gray-500 hover:text-white"}`}
+                className={`p-1.5 rounded-lg transition-all ${
+                  menuOpen
+                    ? "bg-amber-neon text-obsidian-950"
+                    : "hover:bg-white/10 text-gray-500 hover:text-white"
+                }`}
               >
                 <MoreVertical className="w-3.5 h-3.5" />
               </button>

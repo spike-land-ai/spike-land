@@ -2,14 +2,14 @@
 
 ## Infrastructure Summary
 
-| Platform | Count | Services |
-|----------|-------|----------|
-| Cloudflare Workers | 6 | spike-land-backend, transpile, spike-land-mcp, mcp-auth, mcp-image-studio, spike-edge |
-| Cloudflare Pages/Assets | 1 | spike-app (via spike-edge) |
-| AWS ECS | 1 | spike.land (legacy Next.js) |
-| SpacetimeDB | 1 | spacetimedb-platform (rightful-dirt-5033) |
-| npm (GitHub Packages) | 27 | All @spike-land-ai/* packages |
-| MCP stdio servers | 6 | spacetimedb-mcp, esbuild-wasm-mcp, hackernews-mcp, mcp-image-studio, openclaw-mcp, spike-cli |
+| Platform                | Count | Services                                                                                     |
+| ----------------------- | ----- | -------------------------------------------------------------------------------------------- |
+| Cloudflare Workers      | 6     | spike-land-backend, transpile, spike-land-mcp, mcp-auth, mcp-image-studio, spike-edge        |
+| Cloudflare Pages/Assets | 1     | spike-app (via spike-edge)                                                                   |
+| AWS ECS                 | 1     | spike.land (legacy Next.js)                                                                  |
+| SpacetimeDB             | 1     | spacetimedb-platform (rightful-dirt-5033)                                                    |
+| npm (GitHub Packages)   | 27    | All @spike-land-ai/* packages                                                                |
+| MCP stdio servers       | 6     | spacetimedb-mcp, esbuild-wasm-mcp, hackernews-mcp, mcp-image-studio, openclaw-mcp, spike-cli |
 
 ## Service Details
 
@@ -58,24 +58,29 @@
    - Database: PostgreSQL (RDS)
    - URLs: https://spike.land, https://staging.spike.land
    - Deploy: `.github/workflows/deploy.yml` in spike-land-ai/spike.land
-   - Manual deploy: `gh workflow run deploy.yml --repo spike-land-ai/spike.land -f target_environment=production`
+   - Manual deploy:
+     `gh workflow run deploy.yml --repo spike-land-ai/spike.land -f target_environment=production`
 
 ### SpacetimeDB
 
 8. **spacetimedb-platform** — Real-time data backbone
    - Server: maincloud
    - Database: rightful-dirt-5033
-   - Tables: 14 (users, tools, apps, agents, content, messaging, images, albums, pipelines, etc.)
+   - Tables: 14 (users, tools, apps, agents, content, messaging, images, albums,
+     pipelines, etc.)
    - Reducers: 30+
    - SDK: spacetimedb@^2.0.2
-   - Config: `src/spacetimedb-platform/spacetime.json` (maincloud), `spacetime.local.json` (local dev)
+   - Config: `src/spacetimedb-platform/spacetime.json` (maincloud),
+     `spacetime.local.json` (local dev)
    - Build: `spacetime build`
    - Publish: `spacetime publish rightful-dirt-5033`
-   - Bindings: `spacetime generate --lang=typescript --out-dir=src/module_bindings`
+   - Bindings:
+     `spacetime generate --lang=typescript --out-dir=src/module_bindings`
 
 ### MCP stdio Servers (local process, not deployed)
 
-These packages are consumed as npm dependencies or run as stdio processes, not deployed as standalone services:
+These packages are consumed as npm dependencies or run as stdio processes, not
+deployed as standalone services:
 
 9. **spacetimedb-mcp** — Agent coordination, real-time messaging, tasks
    - Config: `src/spacetimedb-mcp/package.json`
@@ -110,7 +115,8 @@ These packages are published to npm but not deployed as services:
 - **eslint-config** — Shared ESLint configuration
 - **mcp-server-base** — Shared base utilities for MCP servers
 - **qa-studio** — Browser automation utilities (Playwright)
-- **react-ts-worker** — From-scratch React implementation (Fiber reconciler, scheduler, multi-target rendering)
+- **react-ts-worker** — From-scratch React implementation (Fiber reconciler,
+  scheduler, multi-target rendering)
 - **shared** — Shared types, validations, constants, utilities
 - **spike-review** — AI code review bot with GitHub integration
 - **state-machine** — Statechart engine with guard parser and CLI
@@ -121,31 +127,34 @@ These packages are published to npm but not deployed as services:
 
 ## D1 Databases
 
-| Worker | Database Name | Purpose | Tables |
-|--------|--------------|---------|--------|
-| spike-land-mcp | spike-land-mcp | MCP registry | tools, tool_categories, tool_usage, registered_tools |
-| mcp-auth | auth-mcp | User authentication | users, sessions, accounts, verification_tokens |
-| mcp-image-studio | pixel-studio | Image management | images, enhancement_jobs, albums, album_images, pipelines, generation_jobs, subjects, tool_calls, credits |
+| Worker           | Database Name  | Purpose             | Tables                                                                                                    |
+| ---------------- | -------------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
+| spike-land-mcp   | spike-land-mcp | MCP registry        | tools, tool_categories, tool_usage, registered_tools                                                      |
+| mcp-auth         | auth-mcp       | User authentication | users, sessions, accounts, verification_tokens                                                            |
+| mcp-image-studio | pixel-studio   | Image management    | images, enhancement_jobs, albums, album_images, pipelines, generation_jobs, subjects, tool_calls, credits |
 
 ## R2 Buckets
 
-| Worker | Bucket Name | Purpose |
-|--------|-------------|---------|
-| mcp-image-studio | pixel-studio | Image storage (user uploads, generated images) |
-| spike-land-backend | (check wrangler.toml) | Asset storage |
+| Worker             | Bucket Name           | Purpose                                        |
+| ------------------ | --------------------- | ---------------------------------------------- |
+| mcp-image-studio   | pixel-studio          | Image storage (user uploads, generated images) |
+| spike-land-backend | (check wrangler.toml) | Asset storage                                  |
 
 ## Secrets Management
 
 All secrets are set via `wrangler secret put <NAME>` per worker.
 
 ### mcp-image-studio
+
 - `GEMINI_API_KEY` — Google Gemini API key for image analysis
 - `CF_AIG_TOKEN` — Cloudflare AI Gateway token
 - `DEMO_TOKEN` — Demo mode token
 - `ANTHROPIC_API_KEY` — Anthropic API key for Claude integration
-- `AUTH_SERVICE_URL` — URL to auth-mcp.spike.land (defaults to https://auth-mcp.spike.land)
+- `AUTH_SERVICE_URL` — URL to auth-mcp.spike.land (defaults to
+  https://auth-mcp.spike.land)
 
 ### mcp-auth
+
 - `BETTER_AUTH_SECRET` — Session encryption secret
 - `GOOGLE_CLIENT_ID` — Google OAuth client ID
 - `GOOGLE_CLIENT_SECRET` — Google OAuth client secret
@@ -153,9 +162,11 @@ All secrets are set via `wrangler secret put <NAME>` per worker.
 - `GITHUB_CLIENT_SECRET` — GitHub OAuth client secret
 
 ### spike-edge
+
 - (Check `src/spike-edge/wrangler.toml` for required secrets)
 
 ### spike-land-backend
+
 - (Check `src/spike-land-backend/wrangler.toml` for required secrets)
 
 ## Frontend Deployment
@@ -194,7 +205,8 @@ All secrets are set via `wrangler secret put <NAME>` per worker.
 
 - **Workflow**: `spike-land-ai/spike.land/.github/workflows/deploy.yml`
 - **Triggers**: Manual workflow_dispatch or push to main
-- **Steps**: ESLint, TypeScript, Vitest (4 shards), Next.js build, AWS ECS deploy
+- **Steps**: ESLint, TypeScript, Vitest (4 shards), Next.js build, AWS ECS
+  deploy
 - **Environments**: staging, production
 - **Deploy role**: arn:aws:iam::382539351820:role/github-actions-deploy
 
@@ -213,9 +225,11 @@ All secrets are set via `wrangler secret put <NAME>` per worker.
 
 ## Dependency Cascade System
 
-When any `@spike-land-ai/*` package publishes, consuming repos automatically receive a PR bumping the version.
+When any `@spike-land-ai/*` package publishes, consuming repos automatically
+receive a PR bumping the version.
 
 ### How it works
+
 1. `ci-publish.yml` `notify` job fires after Changesets publishes
 2. Reads `.github/dependency-map.json` to find downstream repos
 3. Sends `repository_dispatch` (type: `dependency-updated`) to each consumer
@@ -223,55 +237,69 @@ When any `@spike-land-ai/*` package publishes, consuming repos automatically rec
 5. `bump-dependency.yml` patches `package.json` and opens a PR with auto-merge
 
 ### Key files
+
 - `.github/dependency-map.json` — source-of-truth DAG
 - `.github/.github/workflows/bump-dependency.yml` — reusable bump workflow
-- `.github/.github/workflows/dep-sync-sweep.yml` — nightly safety-net (06:00 UTC)
+- `.github/.github/workflows/dep-sync-sweep.yml` — nightly safety-net (06:00
+  UTC)
 - `.github/scripts/verify-deps.sh` — run locally to check for drift
 
 ### Verify drift locally
+
 ```bash
 bash .github/scripts/verify-deps.sh
 ```
 
 ## Migration Status
 
-| Component | Current State | Target State | Status |
-|-----------|--------------|--------------|--------|
-| Auth in mcp-image-studio | Embedded Better Auth | Delegated to auth-mcp.spike.land | In progress |
-| Domain data (images, albums) | D1 in CF Worker | Keep D1 (CF Worker path), SpacetimeDB (MCP stdio path) | Done |
-| Tool call logging | D1 only | D1 (worker) + SpacetimeDB PlatformEvent (stdio) | In progress |
-| Full D1→SpacetimeDB | N/A | Requires HTTP adapter or proxy | Deferred to P1 |
-| Frontend | spike.land (Next.js) | spike-app (Vite + TanStack Router) | In progress |
-| Edge API | spike-land-backend | spike-edge | In progress |
+| Component                    | Current State        | Target State                                           | Status         |
+| ---------------------------- | -------------------- | ------------------------------------------------------ | -------------- |
+| Auth in mcp-image-studio     | Embedded Better Auth | Delegated to auth-mcp.spike.land                       | In progress    |
+| Domain data (images, albums) | D1 in CF Worker      | Keep D1 (CF Worker path), SpacetimeDB (MCP stdio path) | Done           |
+| Tool call logging            | D1 only              | D1 (worker) + SpacetimeDB PlatformEvent (stdio)        | In progress    |
+| Full D1→SpacetimeDB          | N/A                  | Requires HTTP adapter or proxy                         | Deferred to P1 |
+| Frontend                     | spike.land (Next.js) | spike-app (Vite + TanStack Router)                     | In progress    |
+| Edge API                     | spike-land-backend   | spike-edge                                             | In progress    |
 
 ## Quick Reference
 
 ### Deployments by Package Type
 
-**Cloudflare Workers**: spike-land-backend, transpile, spike-land-mcp, mcp-auth, mcp-image-studio, spike-edge
+**Cloudflare Workers**: spike-land-backend, transpile, spike-land-mcp, mcp-auth,
+mcp-image-studio, spike-edge
+
 - Deploy command: `npm run w:deploy:prod`
 - Config: `wrangler.toml` in each package
 
 **AWS ECS**: spike.land (legacy)
+
 - Deploy: Manual via GitHub workflow or push to main
 - Cluster: spike-land (production)
 - ALB: spike-land-alb
 
 **SpacetimeDB**: spacetimedb-platform
+
 - Deploy: `spacetime publish rightful-dirt-5033`
 - Server: maincloud
 
 **npm Registry**: All 27 packages
+
 - Deploy: Automatic via Changesets on main branch
 - Registry: npm.pkg.github.com/@spike-land-ai
 
-**MCP stdio**: spacetimedb-mcp, esbuild-wasm-mcp, hackernews-mcp, mcp-image-studio, openclaw-mcp, spike-cli
+**MCP stdio**: spacetimedb-mcp, esbuild-wasm-mcp, hackernews-mcp,
+mcp-image-studio, openclaw-mcp, spike-cli
+
 - Deploy method: npm installation + local execution
 
-**npm-only (no deployment)**: chess-engine, code, eslint-config, mcp-server-base, qa-studio, react-ts-worker, shared, spike-review, state-machine, tsconfig, vibe-dev, video, bazdmeg-mcp
+**npm-only (no deployment)**: chess-engine, code, eslint-config,
+mcp-server-base, qa-studio, react-ts-worker, shared, spike-review,
+state-machine, tsconfig, vibe-dev, video, bazdmeg-mcp
+
 - Deploy method: npm publication only
 
 ### Health Check
+
 ```bash
 # Org-wide health check (PRs, CI, issues, worktrees, dep drift)
 make health

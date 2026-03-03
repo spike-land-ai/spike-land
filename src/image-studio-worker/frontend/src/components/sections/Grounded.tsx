@@ -1,9 +1,9 @@
 import { toast } from "sonner";
 import { useState } from "react";
 import { Globe, Newspaper, Sparkles } from "lucide-react";
-import { Button, Select, TextArea, CreditBadge, JobPoller } from "@/components/ui";
+import { Button, CreditBadge, JobPoller, Select, TextArea } from "@/components/ui";
 import { callTool, parseToolResult } from "@/api/client";
-import { ENHANCEMENT_TIERS, ENHANCEMENT_COSTS, CURRENT_EVENT_STYLES } from "@/constants/enums";
+import { CURRENT_EVENT_STYLES, ENHANCEMENT_COSTS, ENHANCEMENT_TIERS } from "@/constants/enums";
 
 type Tab = "grounded" | "current-event";
 
@@ -21,7 +21,11 @@ export function Grounded() {
     setJobId(null);
     try {
       const toolName = "img_generate";
-      const args: Record<string, unknown> = { prompt, tier, google_search_grounding: true };
+      const args: Record<string, unknown> = {
+        prompt,
+        tier,
+        google_search_grounding: true,
+      };
       if (tab === "current-event") args.style = eventStyle;
       const res = await callTool(toolName, args);
       const data = parseToolResult<{ jobId?: string; job_id?: string }>(res);
@@ -84,7 +88,10 @@ export function Grounded() {
               label="Style"
               value={eventStyle}
               onChange={(e) => setEventStyle(e.target.value)}
-              options={CURRENT_EVENT_STYLES.map((s) => ({ value: s, label: s }))}
+              options={CURRENT_EVENT_STYLES.map((s) => ({
+                value: s,
+                label: s,
+              }))}
             />
           )}
         </div>

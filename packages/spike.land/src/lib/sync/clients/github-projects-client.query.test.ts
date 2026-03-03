@@ -692,7 +692,13 @@ describe("GitHubProjectsClient – getProjectFields", () => {
 
   it("returns error on HTTP error", async () => {
     fetchMock.mockResolvedValueOnce(
-      mockFetchResponse({}, { status: 500, statusText: "Internal Server Error" }),
+      mockFetchResponse(
+        {},
+        {
+          status: 500,
+          statusText: "Internal Server Error",
+        },
+      ),
     );
 
     const result = await client.getProjectFields();
@@ -956,7 +962,12 @@ describe("GitHubProjectsClient – status field mapping", () => {
   it("prefers text over name over date when all present", async () => {
     fetchMock.mockResolvedValueOnce(
       singleItemResponse([
-        { text: "TextVal", name: "NameVal", date: "2024-01-01", field: { name: "Multi" } },
+        {
+          text: "TextVal",
+          name: "NameVal",
+          date: "2024-01-01",
+          field: { name: "Multi" },
+        },
       ]),
     );
 

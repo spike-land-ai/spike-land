@@ -117,7 +117,13 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
             if (i === j) continue;
             const from = nodeOrder[i]!,
               to = nodeOrder[j]!;
-            links.set(linkKey(from, to), { from, to, state: "up", latencyMs: 0, lossRate: 0 });
+            links.set(linkKey(from, to), {
+              from,
+              to,
+              state: "up",
+              latencyMs: 0,
+              lossRate: 0,
+            });
           }
         }
         const topo: NetworkTopology = {
@@ -133,7 +139,9 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
         };
         topologies.set(id, topo);
         return textResult(
-          `**Network Topology Created**\n\n**ID:** ${topo.id}\n**Name:** ${topo.name}\n**Nodes:** ${topo.nodeOrder.join(", ")}\n**Links:** ${topo.links.size} (full mesh, all up)\n\nUse \`netsim_set_link_state\` to simulate partitions, latency, or packet loss.`,
+          `**Network Topology Created**\n\n**ID:** ${topo.id}\n**Name:** ${topo.name}\n**Nodes:** ${topo.nodeOrder.join(
+            ", ",
+          )}\n**Links:** ${topo.links.size} (full mesh, all up)\n\nUse \`netsim_set_link_state\` to simulate partitions, latency, or packet loss.`,
         );
       }),
   );
@@ -158,7 +166,9 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
         if (input.latency_ms !== undefined) link.latencyMs = input.latency_ms;
         if (input.loss_rate !== undefined) link.lossRate = input.loss_rate;
         return textResult(
-          `**Link Updated**\n\n**${link.from} -> ${link.to}**\n**State:** ${link.state}\n**Latency:** ${link.latencyMs}ms\n**Loss Rate:** ${(link.lossRate * 100).toFixed(0)}%`,
+          `**Link Updated**\n\n**${link.from} -> ${link.to}**\n**State:** ${link.state}\n**Latency:** ${link.latencyMs}ms\n**Loss Rate:** ${(
+            link.lossRate * 100
+          ).toFixed(0)}%`,
         );
       }),
   );
@@ -176,7 +186,9 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
         if (!node) throw new Error(`Node ${input.node_id} not found`);
         node.partitioned = true;
         for (const link of topo.links.values()) {
-          if (link.from === input.node_id || link.to === input.node_id) link.state = "partitioned";
+          if (link.from === input.node_id || link.to === input.node_id) {
+            link.state = "partitioned";
+          }
         }
         return textResult(
           `**Node Partitioned**\n\n**Node:** ${input.node_id}\nAll links to/from this node are now partitioned.\n\nUse \`netsim_heal_node\` to restore connectivity.`,
@@ -228,8 +240,12 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
       .meta({ category: "netsim", tier: "free" })
       .handler(async ({ input }) => {
         const topo = getTopology(input.topology_id, userId);
-        if (!topo.nodes.has(input.from)) throw new Error(`Node ${input.from} not found`);
-        if (!topo.nodes.has(input.to)) throw new Error(`Node ${input.to} not found`);
+        if (!topo.nodes.has(input.from)) {
+          throw new Error(`Node ${input.from} not found`);
+        }
+        if (!topo.nodes.has(input.to)) {
+          throw new Error(`Node ${input.to} not found`);
+        }
         const msg: NetworkMessage = {
           id: `msg-${topo.messageLog.length + 1}`,
           from: input.from,

@@ -204,7 +204,9 @@ export async function executeSearchAndReplace(
     try {
       transpiled = await transpileCode(newCode, origin);
     } catch (error) {
-      logger.error("[MCP] Transpilation error in search_and_replace", { error });
+      logger.error("[MCP] Transpilation error in search_and_replace", {
+        error,
+      });
     }
     transpilationPending = !transpiled;
 

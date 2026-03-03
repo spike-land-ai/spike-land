@@ -389,7 +389,10 @@ describe("getWorkflowEventSubscriptions", () => {
   it("returns all subscriptions for a workflow", async () => {
     const subs = [
       makeSubscription({ id: "s1" }),
-      makeSubscription({ id: "s2", eventType: "USER_JOINED" as WorkflowEvent["type"] }),
+      makeSubscription({
+        id: "s2",
+        eventType: "USER_JOINED" as WorkflowEvent["type"],
+      }),
     ];
     mockWorkflowFindFirst.mockResolvedValue(makeWorkflow());
     mockWorkflowEventSubscriptionFindMany.mockResolvedValue(subs);
@@ -437,7 +440,9 @@ describe("findMatchingSubscriptions", () => {
     ];
     mockWorkflowEventSubscriptionFindMany.mockResolvedValue(dbSubs);
 
-    const event = makeEvent({ type: "POST_PUBLISHED" as WorkflowEvent["type"] });
+    const event = makeEvent({
+      type: "POST_PUBLISHED" as WorkflowEvent["type"],
+    });
     const result = await findMatchingSubscriptions(event);
 
     expect(result).toHaveLength(1);
@@ -502,8 +507,14 @@ describe("registerWorkflowEventSubscriptions", () => {
 
   it("subscribes to the event bus for each active subscription", async () => {
     const subs = [
-      makeSubscription({ id: "s1", eventType: "POST_PUBLISHED" as WorkflowEvent["type"] }),
-      makeSubscription({ id: "s2", eventType: "USER_JOINED" as WorkflowEvent["type"] }),
+      makeSubscription({
+        id: "s1",
+        eventType: "POST_PUBLISHED" as WorkflowEvent["type"],
+      }),
+      makeSubscription({
+        id: "s2",
+        eventType: "USER_JOINED" as WorkflowEvent["type"],
+      }),
     ];
     mockWorkflowEventSubscriptionFindMany.mockResolvedValue(subs);
 

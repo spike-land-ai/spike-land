@@ -321,7 +321,7 @@ import { CustomWorld } from "../support/world";
 
 When(
   "I click {string} button",
-  async function(this: CustomWorld, buttonText: string) {
+  async function (this: CustomWorld, buttonText: string) {
     const button = this.page
       .getByRole("button", { name: new RegExp(buttonText, "i") })
       .and(this.page.locator(":not([data-nextjs-dev-tools-button])"));
@@ -330,16 +330,16 @@ When(
   },
 );
 
-Then("I should see a success message", async function(this: CustomWorld) {
+Then("I should see a success message", async function (this: CustomWorld) {
   const successMessage = this.page.locator(
-    "[role=\"status\"], .success, .toast, [class*=\"success\"]",
+    '[role="status"], .success, .toast, [class*="success"]',
   );
   await expect(successMessage).toBeVisible({ timeout: 10000 });
 });
 
 Then(
   "I should be redirected to {string}",
-  async function(this: CustomWorld, url: string) {
+  async function (this: CustomWorld, url: string) {
     await this.page.waitForURL(new RegExp(url), { timeout: 10000 });
     await expect(this.page).toHaveURL(new RegExp(url));
   },
@@ -606,8 +606,8 @@ describe("useCounter", () => {
 ```typescript
 Given(
   "I have {int} tokens",
-  async function(this: CustomWorld, tokenCount: number) {
-    await this.page.route("**/api/tokens/balance", async route => {
+  async function (this: CustomWorld, tokenCount: number) {
+    await this.page.route("**/api/tokens/balance", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -621,7 +621,7 @@ Given(
 #### Waiting for Elements
 
 ```typescript
-Then("I should see the success message", async function(this: CustomWorld) {
+Then("I should see the success message", async function (this: CustomWorld) {
   const message = this.page.getByText(/success/i);
   await expect(message).toBeVisible({ timeout: 10000 });
 });
@@ -632,7 +632,7 @@ Then("I should see the success message", async function(this: CustomWorld) {
 ```typescript
 When(
   "I click the {string} link",
-  async function(this: CustomWorld, linkText: string) {
+  async function (this: CustomWorld, linkText: string) {
     const link = this.page.getByRole("link", {
       name: new RegExp(linkText, "i"),
     });
@@ -641,7 +641,7 @@ When(
     await link.first().click();
 
     await this.page.waitForFunction(
-      oldUrl => window.location.href !== oldUrl,
+      (oldUrl) => window.location.href !== oldUrl,
       currentUrl,
       { timeout: 10000 },
     );

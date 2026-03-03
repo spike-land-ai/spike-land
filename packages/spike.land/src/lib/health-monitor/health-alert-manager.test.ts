@@ -390,7 +390,10 @@ describe("logRateLimitEvent", () => {
       id: "ev-rl-3",
     } as never);
 
-    const account = makeSocialAccount({ platform: "FACEBOOK", accountName: "MyPage" });
+    const account = makeSocialAccount({
+      platform: "FACEBOOK",
+      accountName: "MyPage",
+    });
     const health = makeHealth({ healthScore: 40 });
 
     await logRateLimitEvent(account, health, true);
@@ -664,7 +667,10 @@ describe("sendHealthAlerts", () => {
       { ...account, health } as never,
     ]);
     vi.mocked(prisma.workspaceMember.findMany).mockResolvedValueOnce([
-      { role: "ADMIN", user: { email: "admin@test.com", name: "Admin" } } as never,
+      {
+        role: "ADMIN",
+        user: { email: "admin@test.com", name: "Admin" },
+      } as never,
     ]);
     vi.mocked(prisma.workspace.findUnique).mockResolvedValueOnce({
       slug: "my-workspace",
@@ -686,7 +692,10 @@ describe("sendHealthAlerts", () => {
       { ...account, health } as never,
     ]);
     vi.mocked(prisma.workspaceMember.findMany).mockResolvedValueOnce([
-      { role: "ADMIN", user: { email: "admin@test.com", name: "Admin" } } as never,
+      {
+        role: "ADMIN",
+        user: { email: "admin@test.com", name: "Admin" },
+      } as never,
     ]);
     vi.mocked(prisma.workspace.findUnique).mockResolvedValueOnce({
       slug: "my-workspace",
@@ -756,7 +765,10 @@ describe("sendHealthAlerts", () => {
     ]);
     // Must have at least one admin with email to pass the early-return guard
     vi.mocked(prisma.workspaceMember.findMany).mockResolvedValueOnce([
-      { role: "ADMIN", user: { email: "admin@test.com", name: "Admin" } } as never,
+      {
+        role: "ADMIN",
+        user: { email: "admin@test.com", name: "Admin" },
+      } as never,
     ]);
     vi.mocked(prisma.workspace.findUnique).mockResolvedValueOnce({
       slug: "ws",
@@ -803,7 +815,10 @@ describe("sendHealthAlerts", () => {
       { ...account, health: null } as never,
     ]);
     vi.mocked(prisma.workspaceMember.findMany).mockResolvedValueOnce([
-      { role: "ADMIN", user: { email: "admin@test.com", name: "Admin" } } as never,
+      {
+        role: "ADMIN",
+        user: { email: "admin@test.com", name: "Admin" },
+      } as never,
     ]);
     vi.mocked(prisma.workspace.findUnique).mockResolvedValueOnce({
       slug: "ws",
@@ -824,8 +839,14 @@ describe("sendHealthAlerts", () => {
       { ...account, health } as never,
     ]);
     vi.mocked(prisma.workspaceMember.findMany).mockResolvedValueOnce([
-      { role: "OWNER", user: { email: "owner@test.com", name: "Owner" } } as never,
-      { role: "ADMIN", user: { email: "admin@test.com", name: "Admin" } } as never,
+      {
+        role: "OWNER",
+        user: { email: "owner@test.com", name: "Owner" },
+      } as never,
+      {
+        role: "ADMIN",
+        user: { email: "admin@test.com", name: "Admin" },
+      } as never,
     ]);
     vi.mocked(prisma.workspace.findUnique).mockResolvedValueOnce({
       slug: "ws",

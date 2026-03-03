@@ -5,16 +5,16 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, jsonResult, createZodTool } from "@spike-land-ai/mcp-server-base";
-import { RunGatesSchema, CheckGateSchema } from "../types.js";
+import { createZodTool, jsonResult, textResult } from "@spike-land-ai/mcp-server-base";
+import { CheckGateSchema, RunGatesSchema } from "../types.js";
 import { getWorkspace } from "../workspace-state.js";
 import {
+  countChanges,
+  formatGateResults,
   getBuiltinRules,
+  getChangedFiles,
   getRuleByName,
   runGates,
-  formatGateResults,
-  getChangedFiles,
-  countChanges,
 } from "../gates/engine.js";
 import { logGateCheck } from "../telemetry.js";
 

@@ -172,7 +172,10 @@ describe("PostHandler", () => {
       const response = await postHandler.handle(mockRequest, mockUrl);
 
       expect(response.status).toBe(500);
-      const body = (await response.json()) as { error: string; details?: string };
+      const body = (await response.json()) as {
+        error: string;
+        details?: string;
+      };
       expect(body.error).toBe("Failed to process message");
       expect(body.details).toContain("Invalid JSON");
     });
@@ -458,7 +461,10 @@ describe("PostHandler", () => {
       );
 
       expect(response.status).toBe(500);
-      const body = (await response.json()) as { error: string; details?: string };
+      const body = (await response.json()) as {
+        error: string;
+        details?: string;
+      };
       expect(body.error).toBe("Failed to process message");
       expect(body.details).toBe("Stream failed");
 

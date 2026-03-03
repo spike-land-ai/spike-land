@@ -2,7 +2,9 @@
 
 ## Overview
 
-Lightweight Docker-based development workflow CLI for vibe-coded apps. Watches local files, syncs to containers, and manages dev environments. Node.js runtime, bundled with tsup, published as `@spike-land-ai/vibe-dev`.
+Lightweight Docker-based development workflow CLI for vibe-coded apps. Watches
+local files, syncs to containers, and manages dev environments. Node.js runtime,
+bundled with tsup, published as `@spike-land-ai/vibe-dev`.
 
 ## Commands
 

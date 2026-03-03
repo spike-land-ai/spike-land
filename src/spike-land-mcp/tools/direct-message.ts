@@ -6,7 +6,7 @@
  */
 
 import { z } from "zod";
-import { eq, and, desc, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import { freeTool, textResult } from "../procedures/index";
 import { directMessages, users } from "../db/schema";

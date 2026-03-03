@@ -595,7 +595,10 @@ function ClientPageContent() {
         videoTracks.forEach((track) => {
           track.enabled = !track.enabled;
         });
-        setCamera((prev) => ({ ...prev, isVideoEnabled: !prev.isVideoEnabled }));
+        setCamera((prev) => ({
+          ...prev,
+          isVideoEnabled: !prev.isVideoEnabled,
+        }));
       }
     },
     [frontCamera, backCamera],

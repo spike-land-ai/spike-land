@@ -129,7 +129,9 @@ describe("task-tools", () => {
         },
       );
 
-      const result = await server.call("stdb_list_tasks", { status: "pending" });
+      const result = await server.call("stdb_list_tasks", {
+        status: "pending",
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(1);
       expect(parsed.tasks[0].description).toBe("Pending");

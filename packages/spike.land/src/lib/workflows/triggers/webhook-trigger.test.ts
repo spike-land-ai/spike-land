@@ -226,7 +226,9 @@ describe("createWebhookTrigger", () => {
     mockWorkflowFindFirst.mockResolvedValue(makeWorkflow());
     mockWorkflowWebhookCreate.mockResolvedValue(webhook);
 
-    const result = await createWebhookTrigger("wf-1", "ws-1", { secret: "mysecret" });
+    const result = await createWebhookTrigger("wf-1", "ws-1", {
+      secret: "mysecret",
+    });
 
     expect(mockSafeEncryptToken).toHaveBeenCalledWith("mysecret");
     expect(result.hasSecret).toBe(true);
@@ -303,7 +305,9 @@ describe("updateWebhookTrigger", () => {
       makeWebhook({ secretEncrypted: "encrypted:newsecret" }),
     );
 
-    await updateWebhookTrigger("webhook-1", "wf-1", "ws-1", { secret: "newsecret" });
+    await updateWebhookTrigger("webhook-1", "wf-1", "ws-1", {
+      secret: "newsecret",
+    });
 
     expect(mockSafeEncryptToken).toHaveBeenCalledWith("newsecret");
   });

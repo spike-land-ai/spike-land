@@ -480,7 +480,10 @@ export function HourglassModelDemo() {
             <motion.div
               key={zone.id}
               initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: zoneProgress, y: zoneProgress < 0.1 ? 12 : 0 }}
+              animate={{
+                opacity: zoneProgress,
+                y: zoneProgress < 0.1 ? 12 : 0,
+              }}
               transition={{ type: "spring", stiffness: 280, damping: 28 }}
               style={{
                 border: `1px solid ${zone.color}${zone.isDashed ? "30" : "35"}`,

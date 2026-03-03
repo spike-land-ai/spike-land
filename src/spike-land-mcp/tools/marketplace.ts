@@ -10,7 +10,7 @@
  */
 
 import { z } from "zod";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import type { ToolRegistryAdapter } from "./types";
 import { freeTool } from "../procedures/index";
 import { textResult } from "./tool-helpers";

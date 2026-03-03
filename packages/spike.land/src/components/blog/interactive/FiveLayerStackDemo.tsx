@@ -278,7 +278,14 @@ function LayerCard({
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+            }}
+          >
             <span
               style={{
                 color: layer.color,
@@ -542,7 +549,12 @@ export function FiveLayerStackDemo() {
       </div>
 
       <motion.div
-        style={{ rotateX, rotateY, transformStyle: "preserve-3d", width: "100%" }}
+        style={{
+          rotateX,
+          rotateY,
+          transformStyle: "preserve-3d",
+          width: "100%",
+        }}
         className="relative z-10"
       >
         <div className="hidden md:block">
@@ -604,7 +616,12 @@ export function FiveLayerStackDemo() {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
-                      style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        flexWrap: "wrap",
+                      }}
                     >
                       <span
                         style={{

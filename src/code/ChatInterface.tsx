@@ -1,5 +1,5 @@
 import type { ICode, Message } from "@/lib/interfaces";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Send } from "lucide-react";
 
 interface ChatInterfaceProps {

@@ -1,4 +1,4 @@
-import { FolderOpen, Trash2, Copy } from "lucide-react";
+import { Copy, FolderOpen, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui";
 import type { Album } from "./albumTypes";
 

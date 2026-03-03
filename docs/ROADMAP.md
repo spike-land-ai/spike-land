@@ -170,8 +170,10 @@ Merge all credits into "Spike Credits":
 #### Phase 10: Recent Feature Completions (February 2026)
 
 - [x] EC2 provisioning (Box/BoxTier models, sync-box-status cron, VNC sessions)
-- [x] TikTok social integration (4 API routes: connect, callback, metrics, posts)
-- [x] 12 app storybook pages with components and unit tests (46 storybooks total)
+- [x] TikTok social integration (4 API routes: connect, callback, metrics,
+      posts)
+- [x] 12 app storybook pages with components and unit tests (46 storybooks
+      total)
 - [x] Error boundaries across the app (16 error.tsx, 23 loading.tsx)
 - [x] Dead code removal (~420 files removed)
 - [x] Logger refactoring (~300 files)

@@ -1,6 +1,6 @@
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { ChatThread, type Message } from "./ChatThread";
 
 describe("ChatThread", () => {
@@ -123,7 +123,12 @@ describe("ChatThread", () => {
 
   it("renders message timestamps when provided", () => {
     const msgs: Message[] = [
-      { id: "1", role: "user", content: "Hi", timestamp: "2025-06-15T10:30:00Z" },
+      {
+        id: "1",
+        role: "user",
+        content: "Hi",
+        timestamp: "2025-06-15T10:30:00Z",
+      },
     ];
     render(<ChatThread messages={msgs} onSendMessage={mockSend} />);
     // The timestamp is rendered via toLocaleTimeString
@@ -139,7 +144,13 @@ describe("ChatThread", () => {
   });
 
   it("applies assistant message styling", () => {
-    const msgs: Message[] = [{ id: "1", role: "assistant", content: "Bot msg" }];
+    const msgs: Message[] = [
+      {
+        id: "1",
+        role: "assistant",
+        content: "Bot msg",
+      },
+    ];
     render(<ChatThread messages={msgs} onSendMessage={mockSend} />);
 
     const msgEl = screen.getByText("Bot msg").closest("div[class*='bg-']");

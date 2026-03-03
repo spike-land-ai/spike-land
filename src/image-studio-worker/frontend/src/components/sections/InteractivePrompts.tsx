@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Sparkles, Loader2, Edit3 } from "lucide-react";
+import { Edit3, Loader2, Sparkles } from "lucide-react";
 
 const PRE_GENERATED = [
   {
@@ -68,14 +68,24 @@ function InteractiveCard({
     <div
       onClick={state === "idle" ? handleClick : undefined}
       className={`group relative aspect-square rounded-3xl overflow-hidden border transition-all duration-700 bg-obsidian-900 cursor-pointer
-        ${state === "idle" ? "hover:border-amber-neon/50 border-white/10 hover:shadow-[0_0_30px_rgba(255,170,0,0.15)] hover:scale-[1.02]" : ""}
-        ${state === "loading" ? "border-amber-neon shadow-[0_0_40px_rgba(255,170,0,0.2)] scale-[1.02]" : ""}
+        ${
+          state === "idle"
+            ? "hover:border-amber-neon/50 border-white/10 hover:shadow-[0_0_30px_rgba(255,170,0,0.15)] hover:scale-[1.02]"
+            : ""
+        }
+        ${
+          state === "loading"
+            ? "border-amber-neon shadow-[0_0_40px_rgba(255,170,0,0.2)] scale-[1.02]"
+            : ""
+        }
         ${state === "done" ? "border-emerald-neon shadow-[0_0_40px_rgba(16,185,129,0.2)]" : ""}
       `}
     >
       {/* Idle State */}
       <div
-        className={`absolute inset-0 p-6 flex flex-col justify-center items-center text-center transition-all duration-1000 ${state !== "idle" ? "opacity-0 scale-90 pointer-events-none" : "opacity-100 scale-100"}`}
+        className={`absolute inset-0 p-6 flex flex-col justify-center items-center text-center transition-all duration-1000 ${
+          state !== "idle" ? "opacity-0 scale-90 pointer-events-none" : "opacity-100 scale-100"
+        }`}
       >
         <Sparkles className="w-8 h-8 text-gray-600 mb-6 group-hover:text-amber-neon transition-colors duration-500" />
         <p className="text-sm font-semibold text-gray-300 leading-relaxed">"{item.prompt}"</p>
@@ -86,7 +96,9 @@ function InteractiveCard({
 
       {/* Loading State */}
       <div
-        className={`absolute inset-0 bg-obsidian-900 flex flex-col justify-center items-center transition-all duration-1000 z-10 ${state === "loading" ? "opacity-100 scale-100" : "opacity-0 scale-110 pointer-events-none"}`}
+        className={`absolute inset-0 bg-obsidian-900 flex flex-col justify-center items-center transition-all duration-1000 z-10 ${
+          state === "loading" ? "opacity-100 scale-100" : "opacity-0 scale-110 pointer-events-none"
+        }`}
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-amber-neon/5 to-transparent animate-pulse" />
         <Loader2 className="w-10 h-10 text-amber-neon animate-spin mb-4" />
@@ -97,7 +109,9 @@ function InteractiveCard({
 
       {/* Done State */}
       <div
-        className={`absolute inset-0 transition-all duration-1000 z-20 ${state === "done" ? "opacity-100 scale-100" : "opacity-0 scale-110 pointer-events-none"}`}
+        className={`absolute inset-0 transition-all duration-1000 z-20 ${
+          state === "done" ? "opacity-100 scale-100" : "opacity-0 scale-110 pointer-events-none"
+        }`}
       >
         <img src={item.url} alt={item.prompt} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950 via-obsidian-950/20 to-transparent" />

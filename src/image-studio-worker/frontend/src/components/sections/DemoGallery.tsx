@@ -1,13 +1,13 @@
 import { useState } from "react";
 import {
-  Sparkles,
-  Tags,
-  Maximize2,
-  Scissors,
+  Check,
+  Copy,
   FolderOpen,
   GitCompare,
-  Copy,
-  Check,
+  Maximize2,
+  Scissors,
+  Sparkles,
+  Tags,
 } from "lucide-react";
 
 const EXAMPLE_PROMPTS = [

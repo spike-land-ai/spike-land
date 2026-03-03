@@ -118,7 +118,9 @@ describe("handleMcpRequest", () => {
           params: { name: "read_code", arguments: {} },
         },
         "test-cs",
-      )) as unknown as { result: { content: { type: string; text: string }[] } };
+      )) as unknown as {
+        result: { content: { type: string; text: string }[] };
+      };
 
       expect(response.result).toBeDefined();
       expect(response.result.content).toBeDefined();
@@ -139,7 +141,9 @@ describe("handleMcpRequest", () => {
           params: { name: "read_session", arguments: {} },
         },
         "test-cs",
-      )) as unknown as { result: { content: { type: string; text: string }[] } };
+      )) as unknown as {
+        result: { content: { type: string; text: string }[] };
+      };
 
       expect(response.result).toBeDefined();
       const text = response.result.content[0]!.text;
@@ -158,7 +162,9 @@ describe("handleMcpRequest", () => {
           params: { name: "find_lines", arguments: { pattern: "const" } },
         },
         "test-cs",
-      )) as unknown as { result: { content: { type: string; text: string }[] } };
+      )) as unknown as {
+        result: { content: { type: string; text: string }[] };
+      };
 
       expect(response.result).toBeDefined();
       const text = response.result.content[0]!.text;
@@ -176,7 +182,9 @@ describe("handleMcpRequest", () => {
           params: { name: "read_html", arguments: {} },
         },
         "test-cs",
-      )) as unknown as { result: { content: { type: string; text: string }[] } };
+      )) as unknown as {
+        result: { content: { type: string; text: string }[] };
+      };
 
       expect(response.result).toBeDefined();
       const text = response.result.content[0]!.text;
@@ -194,7 +202,9 @@ describe("handleMcpRequest", () => {
           params: { name: "update_code", arguments: { code: "const y = 2;" } },
         },
         "test-cs",
-      )) as unknown as { result: { content: { type: string; text: string }[] } };
+      )) as unknown as {
+        result: { content: { type: string; text: string }[] };
+      };
 
       expect(response.result).toBeDefined();
       const text = response.result.content[0]!.text;
@@ -328,7 +338,9 @@ describe("handleMcpRequest", () => {
         },
         "test-cs",
         "https://custom-origin.example.com",
-      )) as unknown as { result: { content: { type: string; text: string }[] } };
+      )) as unknown as {
+        result: { content: { type: string; text: string }[] };
+      };
 
       expect(response.result).toBeDefined();
     });

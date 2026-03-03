@@ -1,9 +1,9 @@
 import { toast } from "sonner";
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
-import { Button, Input, Select, CreditBadge, JobPoller } from "@/components/ui";
+import { Button, CreditBadge, Input, JobPoller, Select } from "@/components/ui";
 import { callTool, parseToolResult } from "@/api/client";
-import { BRAND_ASSETS, ENHANCEMENT_TIERS, ENHANCEMENT_COSTS } from "@/constants/enums";
+import { BRAND_ASSETS, ENHANCEMENT_COSTS, ENHANCEMENT_TIERS } from "@/constants/enums";
 
 export function BrandKit() {
   const [brandName, setBrandName] = useState("");
@@ -27,12 +27,17 @@ export function BrandKit() {
     setJobId(null);
     setResultData(null);
     try {
-      const args: Record<string, unknown> = { brand_name: brandName, assets, tier };
-      if (colors)
+      const args: Record<string, unknown> = {
+        brand_name: brandName,
+        assets,
+        tier,
+      };
+      if (colors) {
         args.colors = colors
           .split(",")
           .map((c) => c.trim())
           .filter(Boolean);
+      }
       if (tagline) args.tagline = tagline;
       const res = await callTool("img_generate", args);
       const data = parseToolResult<{ jobId?: string; job_id?: string }>(res);

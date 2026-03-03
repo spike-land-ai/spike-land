@@ -2,7 +2,9 @@
 
 ## Overview
 
-MCP server wrapping esbuild-wasm with full WASM lifecycle control — initialize, bundle, transform, and dispose. Node.js runtime, published as `@spike-land-ai/esbuild-wasm-mcp`.
+MCP server wrapping esbuild-wasm with full WASM lifecycle control — initialize,
+bundle, transform, and dispose. Node.js runtime, published as
+`@spike-land-ai/esbuild-wasm-mcp`.
 
 ## Commands
 
@@ -24,7 +26,8 @@ npm start            # Run the MCP server
 └── tools/       # MCP tool implementations
 ```
 
-**Dependencies**: `@spike-land-ai/esbuild-wasm`, `@modelcontextprotocol/sdk`, Zod.
+**Dependencies**: `@spike-land-ai/esbuild-wasm`, `@modelcontextprotocol/sdk`,
+Zod.
 
 ## Code Quality Rules
 

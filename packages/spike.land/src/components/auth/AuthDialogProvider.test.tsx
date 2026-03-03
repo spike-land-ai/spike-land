@@ -14,7 +14,11 @@ vi.mock("./AuthDialog", () => ({
 
 // Mock next-auth/react
 vi.mock("next-auth/react", () => ({
-  useSession: () => ({ data: null, status: "unauthenticated", update: vi.fn() }),
+  useSession: () => ({
+    data: null,
+    status: "unauthenticated",
+    update: vi.fn(),
+  }),
   signIn: vi.fn(),
 }));
 

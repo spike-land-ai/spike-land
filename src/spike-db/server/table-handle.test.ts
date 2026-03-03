@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { t, defineTable } from "../schema/index.js";
+import { defineTable, t } from "../schema/index.js";
 import type { SqlResult, SqlStorage } from "./table-handle.js";
 import { TableHandle } from "./table-handle.js";
 
@@ -194,7 +194,14 @@ describe("TableHandle", () => {
 
   it("findBy() returns matching row", () => {
     const { handle } = setup();
-    const row: UserRow = { id: "u1", name: "Alice", age: 30, active: true, tags: ["a"], bio: "hi" };
+    const row: UserRow = {
+      id: "u1",
+      name: "Alice",
+      age: 30,
+      active: true,
+      tags: ["a"],
+      bio: "hi",
+    };
     handle.insert(row);
 
     const found = handle.findBy("id", "u1");
@@ -215,8 +222,22 @@ describe("TableHandle", () => {
 
   it("filterBy() returns all matching rows", () => {
     const { handle } = setup();
-    handle.insert({ id: "u1", name: "Alice", age: 30, active: true, tags: [], bio: null });
-    handle.insert({ id: "u2", name: "Bob", age: 30, active: false, tags: [], bio: null });
+    handle.insert({
+      id: "u1",
+      name: "Alice",
+      age: 30,
+      active: true,
+      tags: [],
+      bio: null,
+    });
+    handle.insert({
+      id: "u2",
+      name: "Bob",
+      age: 30,
+      active: false,
+      tags: [],
+      bio: null,
+    });
 
     const results = handle.filterBy("age", 30);
     expect(results).toHaveLength(2);
@@ -257,7 +278,14 @@ describe("TableHandle", () => {
 
   it("delete() removes row and records delete mutation", () => {
     const { handle } = setup();
-    handle.insert({ id: "u1", name: "Alice", age: 30, active: true, tags: [], bio: null });
+    handle.insert({
+      id: "u1",
+      name: "Alice",
+      age: 30,
+      active: true,
+      tags: [],
+      bio: null,
+    });
     handle.mutations.length = 0;
 
     const deleted = handle.delete("u1");
@@ -277,8 +305,22 @@ describe("TableHandle", () => {
 
   it("iter() returns all rows", () => {
     const { handle } = setup();
-    handle.insert({ id: "u1", name: "Alice", age: 30, active: true, tags: [], bio: null });
-    handle.insert({ id: "u2", name: "Bob", age: 25, active: false, tags: [], bio: "hey" });
+    handle.insert({
+      id: "u1",
+      name: "Alice",
+      age: 30,
+      active: true,
+      tags: [],
+      bio: null,
+    });
+    handle.insert({
+      id: "u2",
+      name: "Bob",
+      age: 25,
+      active: false,
+      tags: [],
+      bio: "hey",
+    });
 
     const all = handle.iter();
     expect(all).toHaveLength(2);
@@ -288,16 +330,37 @@ describe("TableHandle", () => {
     const { handle } = setup();
     expect(handle.count()).toBe(0);
 
-    handle.insert({ id: "u1", name: "Alice", age: 30, active: true, tags: [], bio: null });
+    handle.insert({
+      id: "u1",
+      name: "Alice",
+      age: 30,
+      active: true,
+      tags: [],
+      bio: null,
+    });
     expect(handle.count()).toBe(1);
 
-    handle.insert({ id: "u2", name: "Bob", age: 25, active: true, tags: [], bio: null });
+    handle.insert({
+      id: "u2",
+      name: "Bob",
+      age: 25,
+      active: true,
+      tags: [],
+      bio: null,
+    });
     expect(handle.count()).toBe(2);
   });
 
   it("serializes booleans as 0/1 and arrays as JSON", () => {
     const { sql, handle } = setup();
-    handle.insert({ id: "u1", name: "Alice", age: 30, active: true, tags: ["a", "b"], bio: null });
+    handle.insert({
+      id: "u1",
+      name: "Alice",
+      age: 30,
+      active: true,
+      tags: ["a", "b"],
+      bio: null,
+    });
 
     // Check INSERT call params
     const insertCall = sql.calls.find((c) => c.query.includes("INSERT"));

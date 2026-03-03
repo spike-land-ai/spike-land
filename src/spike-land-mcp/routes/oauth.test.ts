@@ -4,7 +4,7 @@
  * Covers: POST /oauth/device, POST /oauth/token, POST /oauth/device/approve
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Hono } from "hono";
 import { oauthRoute } from "./oauth";
 import { createMockD1, createMockKV } from "../__test-utils__/mock-env";

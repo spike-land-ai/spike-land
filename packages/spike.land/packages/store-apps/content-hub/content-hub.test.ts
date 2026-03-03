@@ -141,7 +141,13 @@ describe("content-hub tools", () => {
     });
 
     it("returns empty message when no posts found", async () => {
-      const result = await registry.call("blog_list_posts", { category: "nonexistent" }, ctx);
+      const result = await registry.call(
+        "blog_list_posts",
+        {
+          category: "nonexistent",
+        },
+        ctx,
+      );
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("No blog posts found");
     });
@@ -149,14 +155,26 @@ describe("content-hub tools", () => {
 
   describe("blog_get_post", () => {
     it("returns post by slug", async () => {
-      const result = await registry.call("blog_get_post", { slug: "hello-world" }, ctx);
+      const result = await registry.call(
+        "blog_get_post",
+        {
+          slug: "hello-world",
+        },
+        ctx,
+      );
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("Hello World");
       expect(text).toContain("Test Author");
     });
 
     it("returns NOT_FOUND for missing slug", async () => {
-      const result = await registry.call("blog_get_post", { slug: "nonexistent" }, ctx);
+      const result = await registry.call(
+        "blog_get_post",
+        {
+          slug: "nonexistent",
+        },
+        ctx,
+      );
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("NOT_FOUND");
     });
@@ -209,7 +227,13 @@ describe("content-hub tools", () => {
     });
 
     it("returns no-changes message when no fields provided", async () => {
-      const result = await registry.call("blog_update_post", { post_id: "post-1" }, ctx);
+      const result = await registry.call(
+        "blog_update_post",
+        {
+          post_id: "post-1",
+        },
+        ctx,
+      );
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("No changes specified");
     });
@@ -219,7 +243,13 @@ describe("content-hub tools", () => {
     it("returns NOT_FOUND for missing post", async () => {
       const prisma = (await import("@/lib/prisma")).default;
       vi.mocked(prisma.blogPost.findUnique).mockResolvedValueOnce(null as never);
-      const result = await registry.call("blog_publish_post", { post_id: "missing" }, ctx);
+      const result = await registry.call(
+        "blog_publish_post",
+        {
+          post_id: "missing",
+        },
+        ctx,
+      );
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("NOT_FOUND");
     });
@@ -230,7 +260,13 @@ describe("content-hub tools", () => {
         ...mockBlogPost,
         status: "published",
       } as never);
-      const result = await registry.call("blog_publish_post", { post_id: "post-1" }, ctx);
+      const result = await registry.call(
+        "blog_publish_post",
+        {
+          post_id: "post-1",
+        },
+        ctx,
+      );
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("INVALID_STATE");
     });
@@ -240,7 +276,13 @@ describe("content-hub tools", () => {
     it("returns INVALID_STATE for already draft post", async () => {
       const prisma = (await import("@/lib/prisma")).default;
       vi.mocked(prisma.blogPost.findUnique).mockResolvedValueOnce(mockBlogPost as never);
-      const result = await registry.call("blog_revert_to_draft", { post_id: "post-1" }, ctx);
+      const result = await registry.call(
+        "blog_revert_to_draft",
+        {
+          post_id: "post-1",
+        },
+        ctx,
+      );
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("INVALID_STATE");
     });

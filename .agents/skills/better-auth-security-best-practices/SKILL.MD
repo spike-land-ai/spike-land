@@ -5,7 +5,9 @@ description: This skill provides guidance for implementing security features tha
 
 ## Secret Management
 
-The auth secret is the foundation of Better Auth's security. It's used for signing session tokens, encrypting sensitive data, and generating secure cookies.
+The auth secret is the foundation of Better Auth's security. It's used for
+signing session tokens, encrypting sensitive data, and generating secure
+cookies.
 
 ### Configuring the Secret
 
@@ -18,6 +20,7 @@ export const auth = betterAuth({
 ```
 
 Better Auth looks for secrets in this order:
+
 1. `options.secret` in your config
 2. `BETTER_AUTH_SECRET` environment variable
 3. `AUTH_SECRET` environment variable
@@ -25,6 +28,7 @@ Better Auth looks for secrets in this order:
 ### Secret Requirements
 
 Better Auth validates your secret and will:
+
 - **Reject** default/placeholder secrets in production
 - **Warn** if the secret is shorter than 32 characters
 - **Warn** if entropy is below 120 bits
@@ -35,15 +39,18 @@ Generate a secure secret:
 openssl rand -base64 32
 ```
 
-**Important**: Never commit secrets to version control. Use environment variables or a secrets manager.
+**Important**: Never commit secrets to version control. Use environment
+variables or a secrets manager.
 
 ## Rate Limiting
 
-Rate limiting protects your authentication endpoints from brute-force attacks and abuse.
-By default, rate limiting is enabled in production but disabled in development. To explicitly enable it, set `rateLimit.enabled` to `true` in your auth config.
-Better Auth applies rate limiting to all endpoints by default.
+Rate limiting protects your authentication endpoints from brute-force attacks
+and abuse. By default, rate limiting is enabled in production but disabled in
+development. To explicitly enable it, set `rateLimit.enabled` to `true` in your
+auth config. Better Auth applies rate limiting to all endpoints by default.
 
-Each plugin can optionally have it's own configuration to adjust rate-limit rules for a given endpoint.
+Each plugin can optionally have it's own configuration to adjust rate-limit
+rules for a given endpoint.
 
 ### Default Configuration
 
@@ -69,11 +76,14 @@ rateLimit: {
 }
 ```
 
-- **`memory`**: Fast, but resets on server restart (default when no secondary storage)
+- **`memory`**: Fast, but resets on server restart (default when no secondary
+  storage)
 - **`database`**: Persistent, but adds database load
-- **`secondary-storage`**: Uses configured secondary storage like Redis (default when available)
+- **`secondary-storage`**: Uses configured secondary storage like Redis (default
+  when available)
 
-**Note**: It is not recommended to use `memory` especially on serverless platforms.
+**Note**: It is not recommended to use `memory` especially on serverless
+platforms.
 
 ### Custom Storage
 
@@ -95,7 +105,9 @@ rateLimit: {
 ### Per-Endpoint Rules
 
 Better Auth applies stricter limits to sensitive endpoints by default:
-- `/sign-in`, `/sign-up`, `/change-password`, `/change-email`: 3 requests per 10 seconds
+
+- `/sign-in`, `/sign-up`, `/change-password`, `/change-email`: 3 requests per 10
+  seconds
 
 Override or customize rules for specific paths:
 
@@ -113,13 +125,17 @@ rateLimit: {
 
 ## CSRF Protection
 
-Better Auth implements multiple layers of CSRF protection to prevent cross-site request forgery attacks.
+Better Auth implements multiple layers of CSRF protection to prevent cross-site
+request forgery attacks.
 
 ### How CSRF Protection Works
 
-1. **Origin Header Validation**: When cookies are present, the `Origin` or `Referer` header must match a trusted origin
-2. **Fetch Metadata**: Uses `Sec-Fetch-Site`, `Sec-Fetch-Mode`, and `Sec-Fetch-Dest` headers to detect cross-site requests
-3. **First-Login Protection**: Even without cookies, validates origin when Fetch Metadata indicates a cross-site navigation
+1. **Origin Header Validation**: When cookies are present, the `Origin` or
+   `Referer` header must match a trusted origin
+2. **Fetch Metadata**: Uses `Sec-Fetch-Site`, `Sec-Fetch-Mode`, and
+   `Sec-Fetch-Dest` headers to detect cross-site requests
+3. **First-Login Protection**: Even without cookies, validates origin when Fetch
+   Metadata indicates a cross-site navigation
 
 ### Configuration
 
@@ -133,20 +149,25 @@ export const auth = betterAuth({
 });
 ```
 
-**Warning**: Only disable CSRF protection for testing or if you have an alternative CSRF mechanism in place.
+**Warning**: Only disable CSRF protection for testing or if you have an
+alternative CSRF mechanism in place.
 
 ### Fetch Metadata Blocking
 
 Better Auth automatically blocks requests where:
+
 - `Sec-Fetch-Site: cross-site` AND
 - `Sec-Fetch-Mode: navigate` AND
 - `Sec-Fetch-Dest: document`
 
-This prevents form-based CSRF attacks even on first login when no session cookie exists.
+This prevents form-based CSRF attacks even on first login when no session cookie
+exists.
 
 ## Trusted Origins
 
-Trusted origins control which domains can make authenticated requests to your Better Auth instance. This protects against open redirect attacks and cross-origin abuse.
+Trusted origins control which domains can make authenticated requests to your
+Better Auth instance. This protects against open redirect attacks and
+cross-origin abuse.
 
 ### Configuring Trusted Origins
 
@@ -181,7 +202,7 @@ trustedOrigins: [
   "*.example.com", // Matches any subdomain
   "https://*.example.com", // Protocol-specific wildcard
   "exp://192.168.*.*:*/*", // Custom schemes (e.g., Expo)
-]
+];
 ```
 
 ### Dynamic Trusted Origins
@@ -189,28 +210,30 @@ trustedOrigins: [
 Compute trusted origins based on the request:
 
 ```ts
-trustedOrigins: async (request) => {
+trustedOrigins: (async (request) => {
   // Validate against database, header, etc.
   const tenant = getTenantFromRequest(request);
   return [`https://${tenant}.myapp.com`];
-}
+});
 ```
 
 ### What Gets Validated
 
 Better Auth validates these URL parameters against trusted origins:
+
 - `callbackURL` - Where to redirect after authentication
 - `redirectTo` - General redirect parameter
 - `errorCallbackURL` - Where to redirect on errors
 - `newUserCallbackURL` - Where to redirect new users
 - `origin` - Request origin header
-- and more... 
+- and more...
 
 Invalid URLs receive a 403 Forbidden response.
 
 ## Session Security
 
-Sessions control how long users stay authenticated and how session data is secured.
+Sessions control how long users stay authenticated and how session data is
+secured.
 
 ### Session Expiration
 
@@ -227,7 +250,8 @@ export const auth = betterAuth({
 
 ### Fresh Sessions for Sensitive Actions
 
-The `freshAge` setting defines how recently a user must have authenticated to perform sensitive operations:
+The `freshAge` setting defines how recently a user must have authenticated to
+perform sensitive operations:
 
 ```ts
 session: {
@@ -235,7 +259,8 @@ session: {
 }
 ```
 
-Use this to require re-authentication for actions like changing passwords or viewing sensitive data.
+Use this to require re-authentication for actions like changing passwords or
+viewing sensitive data.
 
 ### Session Caching Strategies
 
@@ -255,12 +280,13 @@ session: {
 - **`jwt`**: HS256 JWT (standard, signed)
 - **`jwe`**: A256CBC-HS512 encrypted (largest, encrypted)
 
-**Note**: Use `jwe` strategy when session data contains sensitive information that shouldn't be readable client-side.
-
+**Note**: Use `jwe` strategy when session data contains sensitive information
+that shouldn't be readable client-side.
 
 ## Cookie Security
 
-Better Auth uses secure cookie defaults but allows customization for specific deployment scenarios.
+Better Auth uses secure cookie defaults but allows customization for specific
+deployment scenarios.
 
 ### Default Cookie Settings
 
@@ -318,11 +344,13 @@ advanced: {
 }
 ```
 
-**Security Note**: Cross-subdomain cookies expand the attack surface. Only enable if you need authentication sharing and trust all subdomains.
+**Security Note**: Cross-subdomain cookies expand the attack surface. Only
+enable if you need authentication sharing and trust all subdomains.
 
 ## OAuth / Social Provider Security
 
-When using social login providers, Better Auth implements industry-standard security measures.
+When using social login providers, Better Auth implements industry-standard
+security measures.
 
 ### PKCE (Proof Key for Code Exchange)
 
@@ -350,6 +378,7 @@ export const auth = betterAuth({
 ```
 
 State tokens:
+
 - Are 32-character random strings
 - Expire after 10 minutes
 - Contain callback URLs and PKCE verifier (encrypted)
@@ -364,7 +393,8 @@ account: {
 }
 ```
 
-**Recommendation**: Enable this if you store OAuth tokens for API access on behalf of users.
+**Recommendation**: Enable this if you store OAuth tokens for API access on
+behalf of users.
 
 ### Skipping State Cookie Check
 
@@ -376,7 +406,8 @@ account: {
 }
 ```
 
-**Warning**: Only use this for mobile apps that cannot maintain cookies across redirects.
+**Warning**: Only use this for mobile apps that cannot maintain cookies across
+redirects.
 
 ## IP-Based Security
 
@@ -409,7 +440,8 @@ advanced: {
 }
 ```
 
-Smaller values group more addresses together, which is useful when users share IPv6 prefixes.
+Smaller values group more addresses together, which is useful when users share
+IPv6 prefixes.
 
 ### Trusted Proxy Headers
 
@@ -421,7 +453,8 @@ advanced: {
 }
 ```
 
-**Security Note**: Only enable this if you trust your proxy. Malicious clients could spoof these headers otherwise.
+**Security Note**: Only enable this if you trust your proxy. Malicious clients
+could spoof these headers otherwise.
 
 ## Database Hooks for Security Auditing
 
@@ -519,17 +552,22 @@ export const auth = betterAuth({
 });
 ```
 
-This ensures operations like sending emails don't affect response timing, which could leak information about whether a user exists.
+This ensures operations like sending emails don't affect response timing, which
+could leak information about whether a user exists.
 
 ## Account Enumeration Prevention
 
-Better Auth implements several measures to prevent attackers from discovering valid accounts.
+Better Auth implements several measures to prevent attackers from discovering
+valid accounts.
 
 ### Built-in Protections
 
-1. **Consistent Response Messages**: Password reset always returns "If this email exists in our system, check your email for the reset link"
-2. **Dummy Operations**: When a user isn't found, Better Auth still performs token generation and database lookups with dummy values
-3. **Background Email Sending**: Emails are sent asynchronously to prevent timing differences
+1. **Consistent Response Messages**: Password reset always returns "If this
+   email exists in our system, check your email for the reset link"
+2. **Dummy Operations**: When a user isn't found, Better Auth still performs
+   token generation and database lookups with dummy values
+3. **Background Email Sending**: Emails are sent asynchronously to prevent
+   timing differences
 
 ### Additional Recommendations
 
@@ -546,7 +584,8 @@ export const auth = betterAuth({
 });
 ```
 
-Return generic error messages like "Invalid credentials" rather than "User not found" or "Incorrect password".
+Return generic error messages like "Invalid credentials" rather than "User not
+found" or "Incorrect password".
 
 ## Complete Security Configuration Example
 
@@ -560,7 +599,7 @@ export const auth = betterAuth({
     "https://app.example.com",
     "https://*.preview.example.com",
   ],
-  
+
   // Rate limiting
   rateLimit: {
     enabled: true,
@@ -570,7 +609,7 @@ export const auth = betterAuth({
       "/api/auth/sign-up/email": { window: 60, max: 3 },
     },
   },
-  
+
   // Session security
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
@@ -582,14 +621,13 @@ export const auth = betterAuth({
       strategy: "jwe", // Encrypted session data
     },
   },
-  
+
   // OAuth security
   account: {
     encryptOAuthTokens: true,
     storeStateStrategy: "cookie",
   },
-  
-  
+
   // Advanced settings
   advanced: {
     useSecureCookies: true,
@@ -605,7 +643,7 @@ export const auth = betterAuth({
       handler: (promise) => waitUntil(promise),
     },
   },
-  
+
   // Security auditing
   databaseHooks: {
     session: {

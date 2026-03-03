@@ -1,9 +1,9 @@
 import { toast } from "sonner";
 import { useState } from "react";
-import { ImagePlus, Blend, Sparkles } from "lucide-react";
-import { Button, Select, TextArea, CreditBadge, JobPoller, ImagePicker } from "@/components/ui";
+import { Blend, ImagePlus, Sparkles } from "lucide-react";
+import { Button, CreditBadge, ImagePicker, JobPoller, Select, TextArea } from "@/components/ui";
 import { callTool, parseToolResult } from "@/api/client";
-import { REFERENCE_ROLES, ENHANCEMENT_TIERS, ENHANCEMENT_COSTS } from "@/constants/enums";
+import { ENHANCEMENT_COSTS, ENHANCEMENT_TIERS, REFERENCE_ROLES } from "@/constants/enums";
 
 type Tab = "references" | "style-blend";
 
@@ -16,7 +16,12 @@ export function ReferenceGen() {
   const [tab, setTab] = useState<Tab>("references");
   const [prompt, setPrompt] = useState("");
   const [tier, setTier] = useState("FREE");
-  const [refs, setRefs] = useState<RefImage[]>([{ image_id: "", role: "style" }]);
+  const [refs, setRefs] = useState<RefImage[]>([
+    {
+      image_id: "",
+      role: "style",
+    },
+  ]);
   const [loading, setLoading] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
   // Style blend
@@ -124,7 +129,10 @@ export function ReferenceGen() {
                 <Select
                   value={ref.role}
                   onChange={(e) => updateRef(i, "role", e.target.value)}
-                  options={REFERENCE_ROLES.map((r) => ({ value: r, label: r }))}
+                  options={REFERENCE_ROLES.map((r) => ({
+                    value: r,
+                    label: r,
+                  }))}
                 />
                 {refs.length > 1 && (
                   <Button variant="ghost" size="sm" onClick={() => removeRef(i)}>

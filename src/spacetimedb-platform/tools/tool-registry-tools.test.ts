@@ -47,7 +47,9 @@ describe("tool-registry-tools", () => {
           createdAt: 1000n,
         },
       );
-      const result = await server.call("stdb_search_tools", { query: "review" });
+      const result = await server.call("stdb_search_tools", {
+        query: "review",
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(1);
       expect(parsed.tools[0].name).toBe("code_review");
@@ -72,7 +74,9 @@ describe("tool-registry-tools", () => {
           createdAt: 1000n,
         },
       );
-      const result = await server.call("stdb_search_tools", { category: "media" });
+      const result = await server.call("stdb_search_tools", {
+        category: "media",
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(1);
       expect(parsed.tools[0].name).toBe("t2");
@@ -134,7 +138,9 @@ describe("tool-registry-tools", () => {
 
   describe("stdb_disable_tool", () => {
     it("disables a tool", async () => {
-      const result = await server.call("stdb_disable_tool", { name: "my_tool" });
+      const result = await server.call("stdb_disable_tool", {
+        name: "my_tool",
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.disabled).toBe(true);
       expect(client.disableTool).toHaveBeenCalledWith("my_tool");
@@ -242,7 +248,9 @@ describe("tool-registry-tools", () => {
           timestamp: 2000n,
         },
       );
-      const result = await server.call("stdb_tool_usage_stats", { toolName: "t1" });
+      const result = await server.call("stdb_tool_usage_stats", {
+        toolName: "t1",
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(1);
       expect(parsed.stats[0].toolName).toBe("t1");

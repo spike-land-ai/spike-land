@@ -67,8 +67,14 @@ describe("createClaudeChatStream", () => {
 
   it("streams text deltas as SSE events", async () => {
     const events = [
-      { type: "content_block_delta", delta: { type: "text_delta", text: "Hello" } },
-      { type: "content_block_delta", delta: { type: "text_delta", text: " world" } },
+      {
+        type: "content_block_delta",
+        delta: { type: "text_delta", text: "Hello" },
+      },
+      {
+        type: "content_block_delta",
+        delta: { type: "text_delta", text: " world" },
+      },
     ];
     mockStream.mockReturnValue(createMockMessageStream(events));
 
@@ -89,7 +95,10 @@ describe("createClaudeChatStream", () => {
     const events = [
       { type: "message_start" },
       { type: "content_block_start" },
-      { type: "content_block_delta", delta: { type: "text_delta", text: "Ok" } },
+      {
+        type: "content_block_delta",
+        delta: { type: "text_delta", text: "Ok" },
+      },
       { type: "content_block_stop" },
     ];
     mockStream.mockReturnValue(createMockMessageStream(events));
@@ -106,7 +115,12 @@ describe("createClaudeChatStream", () => {
   });
 
   it("calls onComplete with full answer and usage", async () => {
-    const events = [{ type: "content_block_delta", delta: { type: "text_delta", text: "Answer" } }];
+    const events = [
+      {
+        type: "content_block_delta",
+        delta: { type: "text_delta", text: "Answer" },
+      },
+    ];
     const usage = { input_tokens: 5, output_tokens: 15 };
     mockStream.mockReturnValue(createMockMessageStream(events, usage));
 

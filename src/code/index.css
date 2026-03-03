@@ -54,12 +54,12 @@
   --radius-sm: calc(var(--radius) - 4px);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 @custom-variant light (&:where(.light, .light *));
-@custom-variant theme-soft-light (&:where(.theme-soft-light, .theme-soft-light *));
+@custom-variant theme-soft-light (&:where(.theme-soft-light, .theme-soft-light
+  *));
 @custom-variant theme-deep-dark (&:where(.theme-deep-dark, .theme-deep-dark *));
 
 /**
@@ -76,30 +76,13 @@
   :root {
     /* Font families - using system fonts as fallback */
     --font-geist-sans:
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      Roboto,
-      "Helvetica Neue",
-      Arial,
-      sans-serif;
+      system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
     --font-geist-mono:
-      ui-monospace,
-      SFMono-Regular,
-      "SF Mono",
-      Menlo,
-      Monaco,
-      Consolas,
-      "Liberation Mono",
-      "Courier New",
-      monospace;
+      ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace;
     --font-montserrat:
-      "Montserrat",
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
+      "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
       sans-serif;
 
     /* Glass-morphism variables - Refined for "Sleek/Tech" feel */
@@ -447,7 +430,11 @@
     /* Subtle noise texture + top spotlight for premium feel */
     background-image:
       url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"),
-      radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 60%),
+      radial-gradient(
+      circle at 50% 0%,
+      rgba(255, 255, 255, 0.03) 0%,
+      transparent 60%
+    ),
       hsl(var(--background));
     background-size: 200px 200px, 100% 100%, 100% 100%;
   }
@@ -506,11 +493,15 @@
   }
 
   .h-safe-screen {
-    height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    height: calc(
+      100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+    );
   }
 
   .min-h-safe-screen {
-    min-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    min-height: calc(
+      100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+    );
   }
 
   /* Glass-morphism System Tiers */
@@ -541,7 +532,11 @@
   /* Aura Surfaces: Vibrant, colorful glass variants with deep saturation and bloom glows */
   /* Mobile-first: lighter blur; desktop upgrades to full --glass-blur-lg */
   .glass-aura-blue {
-    background: linear-gradient(135deg, rgba(30, 58, 138, 0.6), rgba(30, 58, 138, 0.3));
+    background: linear-gradient(
+      135deg,
+      rgba(30, 58, 138, 0.6),
+      rgba(30, 58, 138, 0.3)
+    );
     backdrop-filter: blur(var(--glass-blur-sm));
     -webkit-backdrop-filter: blur(var(--glass-blur-sm));
     box-shadow:
@@ -553,7 +548,11 @@
   /* glass-aura-green and glass-aura-purple share the same violet base */
   .glass-aura-green,
   .glass-aura-purple {
-    background: linear-gradient(135deg, rgba(88, 28, 135, 0.6), rgba(88, 28, 135, 0.3));
+    background: linear-gradient(
+      135deg,
+      rgba(88, 28, 135, 0.6),
+      rgba(88, 28, 135, 0.3)
+    );
     backdrop-filter: blur(var(--glass-blur-sm));
     -webkit-backdrop-filter: blur(var(--glass-blur-sm));
     box-shadow:
@@ -565,7 +564,11 @@
   /* glass-aura-orange and glass-aura-pink share the same pink base */
   .glass-aura-orange,
   .glass-aura-pink {
-    background: linear-gradient(135deg, rgba(157, 23, 77, 0.6), rgba(157, 23, 77, 0.3));
+    background: linear-gradient(
+      135deg,
+      rgba(157, 23, 77, 0.6),
+      rgba(157, 23, 77, 0.3)
+    );
     backdrop-filter: blur(var(--glass-blur-sm));
     -webkit-backdrop-filter: blur(var(--glass-blur-sm));
     box-shadow:
@@ -575,7 +578,11 @@
   }
 
   .glass-aura-fuchsia {
-    background: linear-gradient(135deg, rgba(112, 26, 117, 0.6), rgba(112, 26, 117, 0.3));
+    background: linear-gradient(
+      135deg,
+      rgba(112, 26, 117, 0.6),
+      rgba(112, 26, 117, 0.3)
+    );
     backdrop-filter: blur(var(--glass-blur-sm));
     -webkit-backdrop-filter: blur(var(--glass-blur-sm));
     box-shadow:
@@ -598,10 +605,16 @@
   }
 
   .glass-layers {
-    background: linear-gradient(135deg, rgba(24, 24, 27, 0.8), rgba(24, 24, 27, 0.6));
+    background: linear-gradient(
+      135deg,
+      rgba(24, 24, 27, 0.8),
+      rgba(24, 24, 27, 0.6)
+    );
     backdrop-filter: blur(var(--glass-blur-mobile));
     -webkit-backdrop-filter: blur(var(--glass-blur-mobile));
-    box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.1), 0 20px 50px -10px rgba(0, 0, 0, 0.5);
+    box-shadow:
+      inset 0 1px 1px 0 rgba(255, 255, 255, 0.1),
+      0 20px 50px -10px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
@@ -624,7 +637,9 @@
     background: rgba(255, 255, 255, 12%);
     backdrop-filter: blur(var(--glass-blur-mobile));
     -webkit-backdrop-filter: blur(var(--glass-blur-mobile));
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.15),
+      0 10px 30px -10px rgba(0, 0, 0, 0.5);
   }
 
   @media (min-width: 768px) {
@@ -668,7 +683,9 @@
   .glass-input:focus,
   .glass-input:focus-within {
     border-color: hsl(var(--primary)) !important;
-    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    box-shadow:
+      0 0 0 1px hsl(var(--primary) / 0.5),
+      inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
     background: rgba(0, 0, 0, 0.3) !important;
   }
 
@@ -710,19 +727,35 @@
 
   /* Gradient backgrounds for package cards - using HSL for consistency */
   .gradient-blue {
-    background: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(221 83% 53%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(217 91% 60%) 0%,
+      hsl(221 83% 53%) 100%
+    );
   }
 
   .gradient-purple {
-    background: linear-gradient(135deg, hsl(258 90% 66%) 0%, hsl(263 70% 50%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(258 90% 66%) 0%,
+      hsl(263 70% 50%) 100%
+    );
   }
 
   .gradient-pink {
-    background: linear-gradient(135deg, hsl(330 81% 60%) 0%, hsl(338 78% 48%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(330 81% 60%) 0%,
+      hsl(338 78% 48%) 100%
+    );
   }
 
   .gradient-orange {
-    background: linear-gradient(135deg, hsl(25 95% 53%) 0%, hsl(21 90% 48%) 100%);
+    background: linear-gradient(
+      135deg,
+      hsl(25 95% 53%) 0%,
+      hsl(21 90% 48%) 100%
+    );
   }
 
   /* Theme-aware gradient text utility for hero headings */
@@ -740,11 +773,19 @@
 
   /* Gradient background utilities */
   .bg-gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary)),
+      hsl(var(--secondary))
+    );
   }
 
   .bg-gradient-accent {
-    background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)));
+    background: linear-gradient(
+      135deg,
+      hsl(var(--accent)),
+      hsl(var(--primary))
+    );
   }
 
   .bg-gradient-hero {
@@ -776,11 +817,15 @@
 
   /* Shadow utilities for depth */
   .shadow-glow-primary {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.3), 0 4px 12px hsl(var(--primary) / 0.2);
+    box-shadow:
+      0 0 20px hsl(var(--primary) / 0.3),
+      0 4px 12px hsl(var(--primary) / 0.2);
   }
 
   .shadow-glow-secondary {
-    box-shadow: 0 0 20px hsl(var(--secondary) / 0.3), 0 4px 12px hsl(var(--secondary) / 0.2);
+    box-shadow:
+      0 0 20px hsl(var(--secondary) / 0.3),
+      0 4px 12px hsl(var(--secondary) / 0.2);
   }
 
   /* Pixel Cyan glow effects */
@@ -792,11 +837,15 @@
   }
 
   .shadow-glow-cyan-sm {
-    box-shadow: 0 0 10px hsl(var(--pixel-cyan) / 0.3), 0 2px 8px hsl(var(--pixel-cyan) / 0.2);
+    box-shadow:
+      0 0 10px hsl(var(--pixel-cyan) / 0.3),
+      0 2px 8px hsl(var(--pixel-cyan) / 0.2);
   }
 
   .shadow-negative {
-    box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.4), inset -4px -4px 8px rgba(255, 255, 255, 0.05);
+    box-shadow:
+      inset 4px 4px 8px rgba(0, 0, 0, 0.4),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.05);
   }
 
   .shadow-floating {
@@ -817,12 +866,16 @@
   @keyframes pulse-cyan {
     0%,
     100% {
-      box-shadow: 0 0 20px hsl(var(--pixel-cyan) / 0.3), 0 0 40px hsl(var(--pixel-cyan) / 0.1);
+      box-shadow:
+        0 0 20px hsl(var(--pixel-cyan) / 0.3),
+        0 0 40px hsl(var(--pixel-cyan) / 0.1);
       background-color: hsl(var(--pixel-cyan) / 0.4);
     }
 
     50% {
-      box-shadow: 0 0 30px hsl(var(--pixel-cyan) / 0.5), 0 0 60px hsl(var(--pixel-cyan) / 0.2);
+      box-shadow:
+        0 0 30px hsl(var(--pixel-cyan) / 0.5),
+        0 0 60px hsl(var(--pixel-cyan) / 0.2);
       background-color: hsl(var(--pixel-cyan) / 0.7);
     }
   }
@@ -919,7 +972,9 @@
 
   /* Border glow effect for active/drag states */
   .border-glow-cyan {
-    box-shadow: inset 0 0 0 1px hsl(var(--primary)), 0 0 15px hsl(var(--primary) / 0.3);
+    box-shadow:
+      inset 0 0 0 1px hsl(var(--primary)),
+      0 0 15px hsl(var(--primary) / 0.3);
   }
 
   /* Cyan-to-Fuchsia gradient */
@@ -942,12 +997,16 @@
 
   /* Combined cyan-fuchsia glow */
   .shadow-glow-gradient {
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.3), 0 0 30px rgba(255, 0, 255, 0.2);
+    box-shadow:
+      0 0 20px rgba(0, 229, 255, 0.3),
+      0 0 30px rgba(255, 0, 255, 0.2);
   }
 
   /* Input focus glow (for glow effects demo) */
   .input-glow-cyan {
-    box-shadow: 0 0 0 1px hsl(var(--pixel-cyan)), 0 0 15px hsl(var(--pixel-cyan) / 0.4);
+    box-shadow:
+      0 0 0 1px hsl(var(--pixel-cyan)),
+      0 0 15px hsl(var(--pixel-cyan) / 0.4);
     border-color: hsl(var(--pixel-cyan));
   }
 
@@ -1034,7 +1093,10 @@
     text-decoration-color: rgba(245, 158, 11, 0.4);
     text-decoration-thickness: 2px;
     text-underline-offset: 4px;
-    transition: text-decoration-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    transition:
+      text-decoration-color 0.2s ease,
+      background-color 0.2s ease,
+      color 0.2s ease;
   }
 
   .prose-blog a:hover {
@@ -1280,7 +1342,9 @@
     }
 
     50% {
-      text-shadow: 0 0 40px rgba(34, 211, 238, 0.8), 0 0 60px rgba(34, 211, 238, 0.2);
+      text-shadow:
+        0 0 40px rgba(34, 211, 238, 0.8),
+        0 0 60px rgba(34, 211, 238, 0.2);
     }
   }
 
@@ -1533,7 +1597,9 @@
 
   /* Cyan text glow */
   .text-glow-cyan {
-    text-shadow: 0 0 10px rgba(34, 211, 238, 0.5), 0 0 20px rgba(34, 211, 238, 0.3);
+    text-shadow:
+      0 0 10px rgba(34, 211, 238, 0.5),
+      0 0 20px rgba(34, 211, 238, 0.3);
   }
 
   /* Beat flash - synced to seconds during countdown */
@@ -2178,7 +2244,9 @@
   @keyframes text-shimmer {
     0%,
     100% {
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 215, 0, 0.3);
+      text-shadow:
+        0 0 20px rgba(255, 255, 255, 0.5),
+        0 0 40px rgba(255, 215, 0, 0.3);
     }
 
     50% {
@@ -2243,7 +2311,9 @@
   @keyframes victory-glow {
     0%,
     100% {
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 0 0 40px rgba(255, 100, 0, 0.3);
+      box-shadow:
+        0 0 20px rgba(255, 215, 0, 0.5),
+        0 0 40px rgba(255, 100, 0, 0.3);
     }
 
     50% {
@@ -2647,7 +2717,11 @@
     position: absolute;
     inset: -1px;
     border-radius: inherit;
-    background: linear-gradient(135deg, hsl(var(--accent) / 0.5), hsl(var(--primary) / 0.5));
+    background: linear-gradient(
+      135deg,
+      hsl(var(--accent) / 0.5),
+      hsl(var(--primary) / 0.5)
+    );
     z-index: -1;
   }
 }

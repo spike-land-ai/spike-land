@@ -99,6 +99,12 @@ export {
   EXPORT_FORMAT_VALUES,
   GENERATION_OUTPUT_FORMAT_VALUES,
   GENERATION_RESOLUTION_VALUES,
+  // Resolver helpers
+  ImageStudioResolverError,
+  /** @deprecated Use ImageStudioResolverError */
+  ImageStudioResolverError as NanoResolverError,
+  /** @deprecated Use ImageStudioResolverError */
+  ImageStudioResolverError as PixelResolverError,
   IMG_DEFAULTS,
   /** @deprecated Use IMG_DEFAULTS */
   IMG_DEFAULTS as PIXEL_DEFAULTS,
@@ -112,12 +118,6 @@ export {
   jsonResult,
   MAX_BATCH_SIZE,
   MODEL_PREFERENCE_VALUES,
-  // Resolver helpers
-  ImageStudioResolverError,
-  /** @deprecated Use ImageStudioResolverError */
-  ImageStudioResolverError as NanoResolverError,
-  /** @deprecated Use ImageStudioResolverError */
-  ImageStudioResolverError as PixelResolverError,
   PIPELINE_VISIBILITY_VALUES,
   REFERENCE_ROLE_VALUES,
   resolve,

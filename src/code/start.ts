@@ -45,7 +45,12 @@ router
     // Render the main app
     const { error } = await tryCatch(renderApp({ App, codeSpace: "", transpiled: "", code: "" }));
     if (error) {
-      console.error("Error rendering app:", { error, App, pathname, codeSpace });
+      console.error("Error rendering app:", {
+        error,
+        App,
+        pathname,
+        codeSpace,
+      });
     }
   })
   .catch(handleError);

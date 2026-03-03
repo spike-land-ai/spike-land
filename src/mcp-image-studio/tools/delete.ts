@@ -3,10 +3,10 @@ import { errorResult, jsonResult, toolEvent } from "../types.js";
 import type { ImageRow, ImageStudioDeps, ToolEvent } from "../types.js";
 import { tryCatch } from "./try-catch.js";
 import {
-  imageProcedure,
   createImageProcedure,
-  withResolves,
+  imageProcedure,
   withOwnership,
+  withResolves,
 } from "../tool-builder/image-middleware.js";
 
 function createHandler() {

@@ -55,7 +55,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 async function createCheckoutSession(
   customerId: string,
-  items: Array<{ priceId: string; quantity: number; }>,
+  items: Array<{ priceId: string; quantity: number }>,
 ) {
   try {
     const session = await stripe.checkout.sessions.create({
@@ -69,7 +69,8 @@ async function createCheckoutSession(
       line_items: items,
 
       // Success and cancel handling
-      success_url: `${process.env.APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url:
+        `${process.env.APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.APP_URL}/checkout/cancel`,
 
       // Metadata for tracking
@@ -163,7 +164,8 @@ export async function POST(req: Request) {
       customer: customerId,
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.APP_URL}/account/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url:
+        `${process.env.APP_URL}/account/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.APP_URL}/account/billing`,
     });
 
@@ -629,7 +631,7 @@ async function handleWebhookEvent(event: Stripe.Event) {
 }
 
 // Process queued events
-webhookQueue.process(async job => {
+webhookQueue.process(async (job) => {
   const { event } = job.data;
   await processEvent(event);
 });
@@ -973,7 +975,8 @@ async function handlePaymentError(
     // Require immediate customer action
     await sendPaymentFailedEmail({
       customer: paymentIntent.customer as string,
-      reason: "We were unable to process your payment. Please update your payment method.",
+      reason:
+        "We were unable to process your payment. Please update your payment method.",
       actionUrl: `${process.env.APP_URL}/account/update-payment`,
     });
   }
@@ -1153,11 +1156,12 @@ async function startPaymentFlow(userId: string, items: CartItem[]) {
   const session = await stripe.checkout.sessions.create({
     customer: customer.customerId,
     mode: "payment",
-    line_items: items.map(item => ({
+    line_items: items.map((item) => ({
       price: item.priceId,
       quantity: item.quantity,
     })),
-    success_url: `${process.env.APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+    success_url:
+      `${process.env.APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.APP_URL}/checkout/cancel`,
     metadata: {
       userId,
@@ -1184,7 +1188,8 @@ async function verifyPaymentCompletion(sessionId: string) {
     where: { id: metadata.orderId },
     data: {
       status: "paid",
-      stripePaymentIntentId: (session.payment_intent as Stripe.PaymentIntent).id,
+      stripePaymentIntentId:
+        (session.payment_intent as Stripe.PaymentIntent).id,
     },
   });
 
@@ -1203,7 +1208,8 @@ async function startSubscription(userId: string, priceId: string) {
     customer: customer.customerId,
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${process.env.APP_URL}/account/success?session_id={CHECKOUT_SESSION_ID}`,
+    success_url:
+      `${process.env.APP_URL}/account/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.APP_URL}/account/billing`,
     billing_address_collection: "required",
     payment_settings: {
@@ -1361,7 +1367,7 @@ async function reportStripeMetrics() {
   const metrics = {
     failedPayments,
     failedWebhooks,
-    declinedCharges: declinedCharges.data.filter(c => !c.paid).length,
+    declinedCharges: declinedCharges.data.filter((c) => !c.paid).length,
     timestamp: now,
   };
 

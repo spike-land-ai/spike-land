@@ -92,7 +92,9 @@ describe("share", () => {
     expect(data.action).toBe("unshare");
     expect(data.isPublic).toBe(false);
     expect(data.shareToken).toBeUndefined();
-    expect(mocks.db.imageUpdate).toHaveBeenCalledWith(image.id, { isPublic: false });
+    expect(mocks.db.imageUpdate).toHaveBeenCalledWith(image.id, {
+      isPublic: false,
+    });
   });
 
   it("should return error when resolver throws", async () => {

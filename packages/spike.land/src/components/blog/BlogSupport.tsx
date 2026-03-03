@@ -25,9 +25,9 @@ const SHARE_PLATFORMS = [
     name: "LinkedIn",
     icon: Linkedin,
     getUrl: (url: string, title: string) =>
-      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(
-        title,
-      )}`,
+      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+        url,
+      )}&title=${encodeURIComponent(title)}`,
   },
   {
     name: "Facebook",

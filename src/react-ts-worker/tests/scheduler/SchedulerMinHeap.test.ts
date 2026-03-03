@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { push, pop, peek } from "../../scheduler/SchedulerMinHeap.js";
+import { describe, expect, it } from "vitest";
+import { peek, pop, push } from "../../scheduler/SchedulerMinHeap.js";
 import type { HeapNode } from "../../scheduler/SchedulerMinHeap.js";
 
 describe("SchedulerMinHeap", () => {

@@ -2,7 +2,9 @@
 
 ## Overview
 
-Vite + React 19 + TanStack Router SPA replacing the Next.js UI (`spike.land`). Talks to `spike-edge` (via `/api` proxy) and SpacetimeDB directly over WebSocket. Published as `@spike-land-ai/spike-app`.
+Vite + React 19 + TanStack Router SPA replacing the Next.js UI (`spike.land`).
+Talks to `spike-edge` (via `/api` proxy) and SpacetimeDB directly over
+WebSocket. Published as `@spike-land-ai/spike-app`.
 
 ## Commands
 
@@ -54,39 +56,52 @@ npm run test:coverage # Vitest with v8 coverage
 
 ### Routing
 
-TanStack Router with file-based route tree. `routeTree.gen.ts` is auto-generated — run `npm run dev` to regenerate after adding routes. Route files live under `routes/`; nested directories create nested routes.
+TanStack Router with file-based route tree. `routeTree.gen.ts` is auto-generated
+— run `npm run dev` to regenerate after adding routes. Route files live under
+`routes/`; nested directories create nested routes.
 
 ### State Management
 
 No global state library. State lives in:
-- **SpacetimeDB** — authoritative server state via `lib/stdb.ts` singleton (WebSocket, exponential-backoff reconnect)
-- **React hooks** — `useStdb` (connection state via `useSyncExternalStore`), `useTable` (table subscriptions)
-- **OIDC context** — `react-oidc-context` + `oidc-client-ts` for auth (see `lib/auth.ts`)
-- **Local component state** — `useState` for UI-only state (sidebar open/close, etc.)
+
+- **SpacetimeDB** — authoritative server state via `lib/stdb.ts` singleton
+  (WebSocket, exponential-backoff reconnect)
+- **React hooks** — `useStdb` (connection state via `useSyncExternalStore`),
+  `useTable` (table subscriptions)
+- **OIDC context** — `react-oidc-context` + `oidc-client-ts` for auth (see
+  `lib/auth.ts`)
+- **Local component state** — `useState` for UI-only state (sidebar open/close,
+  etc.)
 
 ### Auth
 
-OIDC via `react-oidc-context`. Authority defaults to `https://auth.spacetimedb.com/oidc`. Override with:
+OIDC via `react-oidc-context`. Authority defaults to
+`https://auth.spacetimedb.com/oidc`. Override with:
+
 - `VITE_OIDC_AUTHORITY`
 - `VITE_OIDC_CLIENT_ID`
 
-Supports GitHub and Google providers. The `/callback` route handles the OIDC redirect.
+Supports GitHub and Google providers. The `/callback` route handles the OIDC
+redirect.
 
 ### Styling
 
-Tailwind CSS v4 via `@tailwindcss/vite` plugin. No config file — uses CSS-first configuration in `app.css`. Path alias `@/` maps to the package root.
+Tailwind CSS v4 via `@tailwindcss/vite` plugin. No config file — uses CSS-first
+configuration in `app.css`. Path alias `@/` maps to the package root.
 
 ### Dev Proxy
 
-`vite.config.ts` proxies `/api/*` to `http://localhost:8787` (spike-edge). Start spike-edge with `npm run dev` in `packages/spike-edge` before running the frontend for full-stack local dev.
+`vite.config.ts` proxies `/api/*` to `http://localhost:8787` (spike-edge). Start
+spike-edge with `npm run dev` in `packages/spike-edge` before running the
+frontend for full-stack local dev.
 
 ## Environment Variables
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `VITE_STDB_URL` | `ws://localhost:3000/stdb/ws` | SpacetimeDB WebSocket URL |
-| `VITE_OIDC_AUTHORITY` | `https://auth.spacetimedb.com/oidc` | OIDC authority |
-| `VITE_OIDC_CLIENT_ID` | `spike-platform-client-id` | OIDC client ID |
+| Variable              | Default                             | Purpose                   |
+| --------------------- | ----------------------------------- | ------------------------- |
+| `VITE_STDB_URL`       | `ws://localhost:3000/stdb/ws`       | SpacetimeDB WebSocket URL |
+| `VITE_OIDC_AUTHORITY` | `https://auth.spacetimedb.com/oidc` | OIDC authority            |
+| `VITE_OIDC_CLIENT_ID` | `spike-platform-client-id`          | OIDC client ID            |
 
 ## Code Quality Rules
 

@@ -91,7 +91,9 @@ describe("alias set-composite", () => {
   it("exits with 1 when name is reserved", async () => {
     const program = makeProgram();
     // "alias" is in the RESERVED_NAMES set in AliasResolver
-    await program.parseAsync(["alias", "set-composite", "help", "tool__name"], { from: "user" });
+    await program.parseAsync(["alias", "set-composite", "help", "tool__name"], {
+      from: "user",
+    });
 
     expect(exitSpy).toHaveBeenCalledWith(1);
     const output = errorSpy.mock.calls.map((c) => c.join(" ")).join("\n");
@@ -121,7 +123,9 @@ describe("alias set — section detection", () => {
 
   it("detects 'tools' section for expansions containing '__'", async () => {
     const program = makeProgram();
-    await program.parseAsync(["alias", "set", "mytool", "chess__move"], { from: "user" });
+    await program.parseAsync(["alias", "set", "mytool", "chess__move"], {
+      from: "user",
+    });
 
     const output = errorSpy.mock.calls.map((c) => c.join(" ")).join("\n");
     expect(output).toContain("tools");
@@ -129,7 +133,9 @@ describe("alias set — section detection", () => {
 
   it("detects 'servers' section for non-command, non-tool expansions", async () => {
     const program = makeProgram();
-    await program.parseAsync(["alias", "set", "myserver", "my-custom-server"], { from: "user" });
+    await program.parseAsync(["alias", "set", "myserver", "my-custom-server"], {
+      from: "user",
+    });
 
     const output = errorSpy.mock.calls.map((c) => c.join(" ")).join("\n");
     expect(output).toContain("servers");
@@ -140,7 +146,9 @@ describe("alias set — section detection", () => {
 
     const program = makeProgram();
     // "quit" is in the RESERVED_NAMES set in AliasResolver
-    await program.parseAsync(["alias", "set", "quit", "some-expansion"], { from: "user" });
+    await program.parseAsync(["alias", "set", "quit", "some-expansion"], {
+      from: "user",
+    });
 
     expect(exitSpy).toHaveBeenCalledWith(1);
     exitSpy.mockRestore();
@@ -185,7 +193,10 @@ describe("alias list — multiple sections", () => {
 
   it("shows composite alias as JSON in list output", async () => {
     const { addAlias } = await import("../../alias/store.js");
-    await addAlias("composite", "quickmove", { tool: "chess__move", args: { from: "e2" } });
+    await addAlias("composite", "quickmove", {
+      tool: "chess__move",
+      args: { from: "e2" },
+    });
 
     const program = new Command("spike");
     program.exitOverride();

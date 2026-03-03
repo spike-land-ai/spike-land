@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
 import type { Env } from "../env";
 import type { AuthVariables } from "../auth/middleware";
@@ -30,7 +30,10 @@ vi.mock("@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js", () => {
           },
           id: 1,
         }),
-        { status: 200, headers: new Headers({ "Content-Type": "application/json" }) },
+        {
+          status: 200,
+          headers: new Headers({ "Content-Type": "application/json" }),
+        },
       );
     }
   }
@@ -129,7 +132,10 @@ describe("POST /mcp (mcpRoute handler)", () => {
     );
 
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { jsonrpc: string; result: { tools: unknown[] } };
+    const body = (await res.json()) as {
+      jsonrpc: string;
+      result: { tools: unknown[] };
+    };
     expect(body.jsonrpc).toBe("2.0");
     expect(body.result.tools).toHaveLength(5);
   });

@@ -20,7 +20,11 @@ export type {
   TableDefinition,
 } from "./types.js";
 
-export { generateCreateTable, generateCreateIndexes, generateAllTables } from "./sql-gen.js";
+export {
+  generateAllTables,
+  generateCreateIndexes,
+  generateCreateTable,
+} from "./sql-gen.js";
 export { diffSchemas, generateMigrationSql } from "./migrations.js";
 
 /**
@@ -29,7 +33,12 @@ export { diffSchemas, generateMigrationSql } from "./migrations.js";
  */
 export const t = {
   string(): ColumnType {
-    return { kind: "string", zodSchema: z.string(), sqlType: "TEXT", nullable: false };
+    return {
+      kind: "string",
+      zodSchema: z.string(),
+      sqlType: "TEXT",
+      nullable: false,
+    };
   },
 
   u64(): ColumnType {
@@ -69,7 +78,12 @@ export const t = {
   },
 
   bool(): ColumnType {
-    return { kind: "bool", zodSchema: z.boolean(), sqlType: "INTEGER", nullable: false };
+    return {
+      kind: "bool",
+      zodSchema: z.boolean(),
+      sqlType: "INTEGER",
+      nullable: false,
+    };
   },
 
   array(inner: ColumnType): ColumnType {

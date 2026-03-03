@@ -7,7 +7,7 @@
 
 import { createProcedure, middleware } from "@spike-land-ai/shared/tool-builder";
 import type { DrizzleDB } from "../db/index";
-import { textResult, jsonResult } from "../tools/tool-helpers";
+import { jsonResult, textResult } from "../tools/tool-helpers";
 
 // ─── Middleware: userId injection ───
 
@@ -60,4 +60,4 @@ export function workspaceTool(userId: string, db: DrizzleDB) {
   return freeTool(userId, db);
 }
 
-export { withUserId, withDrizzle, textResult, jsonResult };
+export { jsonResult, textResult, withDrizzle, withUserId };

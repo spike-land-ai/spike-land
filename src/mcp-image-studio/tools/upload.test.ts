@@ -1,4 +1,4 @@
-import { asImageId, asAlbumHandle } from "../types.js";
+import { asAlbumHandle, asImageId } from "../types.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createMockImageStudioDeps,
@@ -47,7 +47,10 @@ describe("upload", () => {
 
     expect(result.isError).toBeUndefined();
     expect(notify).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "image:created", entityId: expect.any(String) }),
+      expect.objectContaining({
+        type: "image:created",
+        entityId: expect.any(String),
+      }),
     );
     const data = JSON.parse(result.content[0].text);
     expect(data.id).toBeDefined();

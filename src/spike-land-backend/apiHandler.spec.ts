@@ -80,7 +80,9 @@ describe("ApiHandler", () => {
 
       const response = await handleApiRequest(["server-fetch"], mockRequest, mockEnv as Env);
 
-      expect(mockFetch).toHaveBeenCalledWith("https://api.example.com/data", { method: "GET" });
+      expect(mockFetch).toHaveBeenCalledWith("https://api.example.com/data", {
+        method: "GET",
+      });
       expect(response.status).toBe(200);
       expect(await response.text()).toBe("Fetch result");
     });

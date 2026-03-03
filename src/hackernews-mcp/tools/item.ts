@@ -14,8 +14,12 @@ export function registerItemTools(server: McpServer, readClient: HNReadClient): 
     { id: z.number().int().positive().describe("HN item ID") },
     async ({ id }) => {
       const result = await tryCatch(readClient.getItem(id));
-      if (!result.ok) return errorResult("NETWORK_ERROR", result.error.message, true);
-      if (!result.data) return errorResult("NOT_FOUND", `Item ${id} does not exist`);
+      if (!result.ok) {
+        return errorResult("NETWORK_ERROR", result.error.message, true);
+      }
+      if (!result.data) {
+        return errorResult("NOT_FOUND", `Item ${id} does not exist`);
+      }
       return jsonResult(result.data);
     },
   );
@@ -29,8 +33,12 @@ export function registerItemTools(server: McpServer, readClient: HNReadClient): 
     },
     async ({ id, depth }) => {
       const result = await tryCatch(readClient.getItemWithComments(id, depth));
-      if (!result.ok) return errorResult("NETWORK_ERROR", result.error.message, true);
-      if (!result.data) return errorResult("NOT_FOUND", `Item ${id} does not exist`);
+      if (!result.ok) {
+        return errorResult("NETWORK_ERROR", result.error.message, true);
+      }
+      if (!result.data) {
+        return errorResult("NOT_FOUND", `Item ${id} does not exist`);
+      }
       return jsonResult(result.data);
     },
   );

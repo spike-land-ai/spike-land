@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
 import type { Env } from "../env.js";
 import { health } from "../routes/health.js";
@@ -196,7 +196,10 @@ describe("r2 route — POST /r2/upload", () => {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: "uploads/file.txt", contentType: "text/plain" }),
+        body: JSON.stringify({
+          key: "uploads/file.txt",
+          contentType: "text/plain",
+        }),
       },
       env,
     );
@@ -214,7 +217,13 @@ describe("r2 route — DELETE", () => {
     app.route("/", r2);
 
     const env = createMockEnv();
-    const res = await app.request("/r2/some/nested/key.txt", { method: "DELETE" }, env);
+    const res = await app.request(
+      "/r2/some/nested/key.txt",
+      {
+        method: "DELETE",
+      },
+      env,
+    );
 
     expect(res.status).toBe(200);
     const body = await res.json<{ deleted: string }>();
@@ -354,11 +363,12 @@ describe("proxy route — ai", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi
-      .fn()
-      .mockResolvedValue(
-        new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
-      );
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response("{}", {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
     vi.stubGlobal("fetch", mockFetch);
 
     await app.request(
@@ -565,7 +575,9 @@ describe("analytics route", () => {
     app.route("/", analytics);
 
     const env = createMockEnv();
-    const limiterStub = { fetch: vi.fn().mockResolvedValue(new Response("0.5")) };
+    const limiterStub = {
+      fetch: vi.fn().mockResolvedValue(new Response("0.5")),
+    };
     (env.LIMITERS.get as ReturnType<typeof vi.fn>).mockReturnValue(limiterStub);
 
     const res = await app.request(
@@ -841,11 +853,12 @@ describe("proxy route — body forwarding", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi
-      .fn()
-      .mockResolvedValue(
-        new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
-      );
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response("{}", {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
     vi.stubGlobal("fetch", mockFetch);
 
     await app.request(
@@ -874,11 +887,12 @@ describe("proxy route — body forwarding", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi
-      .fn()
-      .mockResolvedValue(
-        new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
-      );
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response("{}", {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
     vi.stubGlobal("fetch", mockFetch);
 
     await app.request(
@@ -902,11 +916,12 @@ describe("proxy route — body forwarding", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi
-      .fn()
-      .mockResolvedValue(
-        new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
-      );
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response("{}", {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
     vi.stubGlobal("fetch", mockFetch);
 
     await app.request(
@@ -935,11 +950,12 @@ describe("proxy route — body forwarding", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi
-      .fn()
-      .mockResolvedValue(
-        new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
-      );
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response("{}", {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
     vi.stubGlobal("fetch", mockFetch);
 
     await app.request(
@@ -963,11 +979,12 @@ describe("proxy route — body forwarding", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi
-      .fn()
-      .mockResolvedValue(
-        new Response("{}", { status: 201, headers: { "content-type": "application/json" } }),
-      );
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response("{}", {
+        status: 201,
+        headers: { "content-type": "application/json" },
+      }),
+    );
     vi.stubGlobal("fetch", mockFetch);
 
     const res = await app.request(
@@ -1117,10 +1134,11 @@ describe("app middleware (index.ts)", () => {
     const { default: appModule } = await import("../index.js");
     const env = createMockEnv();
 
-    const res = await (appModule as { fetch: (req: Request, env: Env) => Promise<Response> }).fetch(
-      new Request("https://spike.land/health"),
-      env,
-    );
+    const res = await (
+      appModule as {
+        fetch: (req: Request, env: Env) => Promise<Response>;
+      }
+    ).fetch(new Request("https://spike.land/health"), env);
 
     expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
     expect(res.headers.get("X-XSS-Protection")).toBe("1; mode=block");
@@ -1131,7 +1149,11 @@ describe("app middleware (index.ts)", () => {
     const { default: appModule } = await import("../index.js");
     const env = createMockEnv();
 
-    const res = await (appModule as { fetch: (req: Request, env: Env) => Promise<Response> }).fetch(
+    const res = await (
+      appModule as {
+        fetch: (req: Request, env: Env) => Promise<Response>;
+      }
+    ).fetch(
       new Request("https://spike.land/health", {
         method: "OPTIONS",
         headers: {
@@ -1150,7 +1172,11 @@ describe("app middleware (index.ts)", () => {
     const env = createMockEnv();
     env.ALLOWED_ORIGINS = "";
 
-    const res = await (appModule as { fetch: (req: Request, env: Env) => Promise<Response> }).fetch(
+    const res = await (
+      appModule as {
+        fetch: (req: Request, env: Env) => Promise<Response>;
+      }
+    ).fetch(
       new Request("https://spike.land/health", {
         method: "OPTIONS",
         headers: {
@@ -1189,10 +1215,11 @@ describe("app middleware (index.ts)", () => {
     // R2 head throws to trigger 503 from health, which exercises the error path
     (env.R2.head as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("storage error"));
 
-    const res = await (appModule as { fetch: (req: Request, env: Env) => Promise<Response> }).fetch(
-      new Request("https://spike.land/health"),
-      env,
-    );
+    const res = await (
+      appModule as {
+        fetch: (req: Request, env: Env) => Promise<Response>;
+      }
+    ).fetch(new Request("https://spike.land/health"), env);
 
     // health route catches the error itself and returns 503 (not 500 from global handler)
     expect(res.status).toBe(503);
@@ -1223,10 +1250,11 @@ describe("app middleware (index.ts)", () => {
     // Make SPA_ASSETS.get throw (not return null) to bypass route's own error handling
     (env.SPA_ASSETS.get as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("bucket error"));
 
-    const res = await (appModule as { fetch: (req: Request, env: Env) => Promise<Response> }).fetch(
-      new Request("https://spike.land/some/route/that/does/not/exist"),
-      env,
-    );
+    const res = await (
+      appModule as {
+        fetch: (req: Request, env: Env) => Promise<Response>;
+      }
+    ).fetch(new Request("https://spike.land/some/route/that/does/not/exist"), env);
 
     expect(res.status).toBe(500);
     const body = await res.json<{ error: string }>();

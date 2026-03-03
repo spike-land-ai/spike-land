@@ -68,7 +68,10 @@ describe("albumDelete tool", () => {
 
     expect(res.isError).toBeUndefined();
     expect(notify).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "album:deleted", entityId: "mock-album-123" }),
+      expect.objectContaining({
+        type: "album:deleted",
+        entityId: "mock-album-123",
+      }),
     );
     expect(deps.db.albumDelete).toHaveBeenCalledWith("mock-album-123");
 

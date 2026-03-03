@@ -1,10 +1,25 @@
-import { useParams, Link } from "@tanstack/react-router";
+import { Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 
 const placeholderMessages = [
-  { id: 1, from: "them", text: "Hey, have you seen the latest build?", time: "10:30 AM" },
-  { id: 2, from: "me", text: "Yes, looks great! The performance improved.", time: "10:32 AM" },
-  { id: 3, from: "them", text: "Awesome. Let me push the final changes.", time: "10:35 AM" },
+  {
+    id: 1,
+    from: "them",
+    text: "Hey, have you seen the latest build?",
+    time: "10:30 AM",
+  },
+  {
+    id: 2,
+    from: "me",
+    text: "Yes, looks great! The performance improved.",
+    time: "10:32 AM",
+  },
+  {
+    id: 3,
+    from: "them",
+    text: "Awesome. Let me push the final changes.",
+    time: "10:35 AM",
+  },
 ];
 
 export function MessageThreadPage() {

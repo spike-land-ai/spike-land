@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createD1Db } from "./db.ts";
 
 describe("db", () => {
@@ -6,7 +6,11 @@ describe("db", () => {
     const mockRun = vi.fn().mockResolvedValue({ meta: { changes: 1 } });
     const mockFirst = vi.fn().mockResolvedValue({});
     const mockAll = vi.fn().mockResolvedValue({ results: [{}] });
-    const bind = vi.fn().mockReturnValue({ run: mockRun, first: mockFirst, all: mockAll });
+    const bind = vi.fn().mockReturnValue({
+      run: mockRun,
+      first: mockFirst,
+      all: mockAll,
+    });
     const prepare = vi.fn().mockReturnValue({ bind });
     return { prepare, mockRun, mockFirst, mockAll, bind };
   };
@@ -43,9 +47,15 @@ describe("db", () => {
 
   it("imageFindMany", async () => {
     const d1 = createMockDb();
-    d1.mockAll.mockResolvedValueOnce({ results: [{ id: "img-1", tags: "[]" }] });
+    d1.mockAll.mockResolvedValueOnce({
+      results: [{ id: "img-1", tags: "[]" }],
+    });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    const res = await db.imageFindMany({ userId: "u", search: "test", limit: 10 });
+    const res = await db.imageFindMany({
+      userId: "u",
+      search: "test",
+      limit: 10,
+    });
     expect(res.length).toBe(1);
   });
 
@@ -111,7 +121,12 @@ describe("db", () => {
     const d1 = createMockDb();
     d1.mockAll.mockResolvedValueOnce({ results: [{ id: "job-1" }] });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.jobFindMany({ userId: "u", imageId: "img-1" as any, status: "PENDING", limit: 10 });
+    await db.jobFindMany({
+      userId: "u",
+      imageId: "img-1" as any,
+      status: "PENDING",
+      limit: 10,
+    });
     expect(d1.prepare).toHaveBeenCalled();
   });
 
@@ -153,7 +168,9 @@ describe("db", () => {
 
   it("albumFindByHandle", async () => {
     const d1 = createMockDb();
-    d1.mockFirst.mockResolvedValueOnce({ id: "alb-1" }).mockResolvedValueOnce({ count: 5 });
+    d1.mockFirst.mockResolvedValueOnce({ id: "alb-1" }).mockResolvedValueOnce({
+      count: 5,
+    });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
     const res = await db.albumFindByHandle("h" as any);
     expect(res?.id).toBe("alb-1");
@@ -164,7 +181,9 @@ describe("db", () => {
 
   it("albumFindById", async () => {
     const d1 = createMockDb();
-    d1.mockFirst.mockResolvedValueOnce({ id: "alb-1" }).mockResolvedValueOnce({ count: 5 });
+    d1.mockFirst.mockResolvedValueOnce({ id: "alb-1" }).mockResolvedValueOnce({
+      count: 5,
+    });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
     const res = await db.albumFindById("alb-1");
     expect(res?.id).toBe("alb-1");
@@ -242,7 +261,9 @@ describe("db", () => {
 
   it("albumImageList", async () => {
     const d1 = createMockDb();
-    d1.mockAll.mockResolvedValueOnce({ results: [{ id: "ai-1", img_id: "img-1" }] });
+    d1.mockAll.mockResolvedValueOnce({
+      results: [{ id: "ai-1", img_id: "img-1" }],
+    });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
     await db.albumImageList("alb-1");
     expect(d1.prepare).toHaveBeenCalled();
@@ -275,7 +296,9 @@ describe("db", () => {
 
   it("pipelineFindById", async () => {
     const d1 = createMockDb();
-    d1.mockFirst.mockResolvedValueOnce({ id: "p-1" }).mockResolvedValueOnce({ count: 1 });
+    d1.mockFirst.mockResolvedValueOnce({ id: "p-1" }).mockResolvedValueOnce({
+      count: 1,
+    });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
     const res = await db.pipelineFindById("p-1" as any);
     expect(res?.id).toBe("p-1");
@@ -362,7 +385,14 @@ describe("db", () => {
       result: "err",
     });
     d1.mockAll.mockResolvedValueOnce({
-      results: [{ id: "tc-1", isError: 1, status: "ERROR", createdAt: new Date().toISOString() }],
+      results: [
+        {
+          id: "tc-1",
+          isError: 1,
+          status: "ERROR",
+          createdAt: new Date().toISOString(),
+        },
+      ],
     });
     const calls = await db.toolCallList!({ limit: 10 });
     expect(calls[0].id).toBe("tc-1");

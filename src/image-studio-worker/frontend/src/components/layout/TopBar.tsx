@@ -1,4 +1,4 @@
-import { Zap, Github, Globe, LogOut } from "lucide-react";
+import { Github, Globe, LogOut, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface TopBarProps {

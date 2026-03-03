@@ -6,7 +6,7 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
+import { createZodTool, textResult } from "@spike-land-ai/mcp-server-base";
 import { DepGraphSchema } from "../types.js";
 import { readManifest, topologicalSort } from "../manifest.js";
 import type { ManifestPackage } from "../manifest.js";
@@ -41,7 +41,9 @@ function buildTree(
               const childDep = childPkg.deps[j]!;
               const childIsLast = j === childPkg.deps.length - 1;
               const childPrefix = childIsLast ? "  └── " : "  ├── ";
-              output += `${childIndent}${childPrefix}${childDep}${visited.has(childDep) ? " (circular)" : ""}\n`;
+              output += `${childIndent}${childPrefix}${childDep}${
+                visited.has(childDep) ? " (circular)" : ""
+              }\n`;
             }
           }
         }
@@ -161,7 +163,9 @@ export function registerDepGraphTools(server: McpServer): void {
       switch (format) {
         case "mermaid": {
           const mermaid = buildMermaid(manifest.packages, packageName);
-          report = `## Dependency Graph — ${packageName ?? "All Packages"}\n\n\`\`\`mermaid\n${mermaid}\n\`\`\``;
+          report = `## Dependency Graph — ${
+            packageName ?? "All Packages"
+          }\n\n\`\`\`mermaid\n${mermaid}\n\`\`\``;
           break;
         }
         case "list": {
@@ -190,7 +194,9 @@ export function registerDepGraphTools(server: McpServer): void {
               tree += "\n";
             }
 
-            report = `## Dependency Tree — All Packages\n\n**Roots**: ${roots.length} | **Total**: ${Object.keys(manifest.packages).length}\n\n\`\`\`\n${tree}\`\`\``;
+            report = `## Dependency Tree — All Packages\n\n**Roots**: ${roots.length} | **Total**: ${
+              Object.keys(manifest.packages).length
+            }\n\n\`\`\`\n${tree}\`\`\``;
           }
           break;
         }

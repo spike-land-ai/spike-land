@@ -1,4 +1,4 @@
-import { Fragment, type FC } from "react";
+import { type FC, Fragment } from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile } from "remotion";
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";

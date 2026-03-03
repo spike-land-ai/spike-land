@@ -19,17 +19,26 @@ describe("blogPostFrontmatterSchema", () => {
   });
 
   it("rejects empty title", () => {
-    const result = blogPostFrontmatterSchema.safeParse({ ...validFrontmatter, title: "" });
+    const result = blogPostFrontmatterSchema.safeParse({
+      ...validFrontmatter,
+      title: "",
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects empty slug", () => {
-    const result = blogPostFrontmatterSchema.safeParse({ ...validFrontmatter, slug: "" });
+    const result = blogPostFrontmatterSchema.safeParse({
+      ...validFrontmatter,
+      slug: "",
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects empty description", () => {
-    const result = blogPostFrontmatterSchema.safeParse({ ...validFrontmatter, description: "" });
+    const result = blogPostFrontmatterSchema.safeParse({
+      ...validFrontmatter,
+      description: "",
+    });
     expect(result.success).toBe(false);
   });
 
@@ -51,17 +60,26 @@ describe("blogPostFrontmatterSchema", () => {
   });
 
   it("rejects empty author", () => {
-    const result = blogPostFrontmatterSchema.safeParse({ ...validFrontmatter, author: "" });
+    const result = blogPostFrontmatterSchema.safeParse({
+      ...validFrontmatter,
+      author: "",
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects empty category", () => {
-    const result = blogPostFrontmatterSchema.safeParse({ ...validFrontmatter, category: "" });
+    const result = blogPostFrontmatterSchema.safeParse({
+      ...validFrontmatter,
+      category: "",
+    });
     expect(result.success).toBe(false);
   });
 
   it("accepts empty tags array", () => {
-    const result = blogPostFrontmatterSchema.safeParse({ ...validFrontmatter, tags: [] });
+    const result = blogPostFrontmatterSchema.safeParse({
+      ...validFrontmatter,
+      tags: [],
+    });
     expect(result.success).toBe(true);
   });
 
@@ -74,7 +92,10 @@ describe("blogPostFrontmatterSchema", () => {
   });
 
   it("accepts optional featured boolean", () => {
-    const result = blogPostFrontmatterSchema.safeParse({ ...validFrontmatter, featured: true });
+    const result = blogPostFrontmatterSchema.safeParse({
+      ...validFrontmatter,
+      featured: true,
+    });
     expect(result.success).toBe(true);
   });
 
@@ -87,7 +108,10 @@ describe("blogPostFrontmatterSchema", () => {
   });
 
   it("allows listed to be set to false", () => {
-    const result = blogPostFrontmatterSchema.safeParse({ ...validFrontmatter, listed: false });
+    const result = blogPostFrontmatterSchema.safeParse({
+      ...validFrontmatter,
+      listed: false,
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.listed).toBe(false);

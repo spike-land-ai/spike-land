@@ -62,7 +62,14 @@ describe("computeDiffHunks", () => {
 describe("transformRewriteResult", () => {
   const mockResult = {
     rewrittenContent: "Brand aligned text",
-    changes: [{ id: "hunk-0", type: "unchanged" as const, value: "test", selected: true }],
+    changes: [
+      {
+        id: "hunk-0",
+        type: "unchanged" as const,
+        value: "test",
+        selected: true,
+      },
+    ],
     toneAnalysis: {
       formalCasual: 60,
       technicalSimple: 40,

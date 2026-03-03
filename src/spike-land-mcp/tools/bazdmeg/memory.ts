@@ -11,7 +11,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "../types";
 import { freeTool } from "../../procedures/index";
-import { textResult, safeToolCall, apiRequest } from "../tool-helpers";
+import { apiRequest, safeToolCall, textResult } from "../tool-helpers";
 import type { DrizzleDB } from "../../db/index";
 
 export function registerBazdmegMemoryTools(
@@ -42,7 +42,9 @@ export function registerBazdmegMemoryTools(
       .handler(async ({ input }) => {
         return safeToolCall("bazdmeg_memory_search", async () => {
           const params = new URLSearchParams({ query: input.query });
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const memories = await apiRequest<
             Array<{
@@ -64,9 +66,10 @@ export function registerBazdmegMemoryTools(
           for (const m of memories) {
             const tags = m.tags.length > 0 ? ` [${m.tags.join(", ")}]` : "";
             text += `- **${m.insight}**${tags}\n`;
-            text += `  _Source: "${m.sourceQuestion.slice(0, 100)}"_ | Confidence: ${m.confidence.toFixed(
-              2,
-            )}\n\n`;
+            text += `  _Source: "${m.sourceQuestion.slice(
+              0,
+              100,
+            )}"_ | Confidence: ${m.confidence.toFixed(2)}\n\n`;
           }
 
           return textResult(text);
@@ -94,7 +97,9 @@ export function registerBazdmegMemoryTools(
       .handler(async ({ input }) => {
         return safeToolCall("bazdmeg_memory_list", async () => {
           const params = new URLSearchParams();
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const memories = await apiRequest<
             Array<{

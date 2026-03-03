@@ -64,7 +64,10 @@ describe("isActionError", () => {
 
 describe("type shape validation", () => {
   it("QaNavigateResult has url and title", () => {
-    const result: QaNavigateResult = { url: "https://example.com", title: "Example" };
+    const result: QaNavigateResult = {
+      url: "https://example.com",
+      title: "Example",
+    };
     expect(result.url).toBe("https://example.com");
     expect(result.title).toBe("Example");
   });
@@ -174,7 +177,11 @@ describe("type shape validation", () => {
   });
 
   it("QaTestResult has passed, output, target", () => {
-    const result: QaTestResult = { passed: true, output: "All tests passed", target: "homepage" };
+    const result: QaTestResult = {
+      passed: true,
+      output: "All tests passed",
+      target: "homepage",
+    };
     expect(result.passed).toBe(true);
     expect(result.target).toBe("homepage");
   });

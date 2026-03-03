@@ -70,24 +70,24 @@ pre-revenue stage.
 
 ### Verified Codebase Metrics
 
-| Metric                       | Value                                                       |
-| ---------------------------- | ----------------------------------------------------------- |
-| TypeScript lines (src/)      | 844,494                                                     |
-| TypeScript lines (src/ packages) | 99,229                                                  |
-| **Total TypeScript lines**   | **~943,723**                                                |
-| Prisma database models       | 233 (5,807-line schema)                                     |
-| Page routes (page.tsx)       | 204                                                         |
-| API route files (route.ts)   | 393                                                         |
-| MCP tool files (non-test)    | 147                                                         |
-| MCP test files               | 150 (102% file coverage — some tools have multiple tests)   |
-| Store apps                   | 18 (180 declared MCP tools)                                 |
-| First-party app directories  | 19                                                          |
-| Storybook pages              | 46                                                          |
-| Lib modules                  | 104                                                         |
-| Monorepo packages            | 9 (including spike-cli)                                     |
-| spike-cli source files       | 46                                                          |
-| spike-cli subsystems         | Auth, Commands, Chat, Config, Multiplexer, Shell, Transport |
-| Git commits                  | 1,955+                                                      |
+| Metric                           | Value                                                       |
+| -------------------------------- | ----------------------------------------------------------- |
+| TypeScript lines (src/)          | 844,494                                                     |
+| TypeScript lines (src/ packages) | 99,229                                                      |
+| **Total TypeScript lines**       | **~943,723**                                                |
+| Prisma database models           | 233 (5,807-line schema)                                     |
+| Page routes (page.tsx)           | 204                                                         |
+| API route files (route.ts)       | 393                                                         |
+| MCP tool files (non-test)        | 147                                                         |
+| MCP test files                   | 150 (102% file coverage — some tools have multiple tests)   |
+| Store apps                       | 18 (180 declared MCP tools)                                 |
+| First-party app directories      | 19                                                          |
+| Storybook pages                  | 46                                                          |
+| Lib modules                      | 104                                                         |
+| Monorepo packages                | 9 (including spike-cli)                                     |
+| spike-cli source files           | 46                                                          |
+| spike-cli subsystems             | Auth, Commands, Chat, Config, Multiplexer, Shell, Transport |
+| Git commits                      | 1,955+                                                      |
 
 ### Multi-Channel Architecture
 
@@ -422,15 +422,15 @@ materially.
 
 #### Development Cost Calculation
 
-| Component                                       | TS Lines            | Dev Days (50-100 LOC/day) | Cost @ £600/day    | Notes                                                                                                                  |
-| ----------------------------------------------- | ------------------- | ------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| **Core Application** (src/)                     | 844,494             | 8,445 - 16,889            | £5.1M - £10.1M     | App Router, API routes, UI components                                                                                  |
-| **Worker Packages** (src/ excl. spike-cli)      | 99,229              | 992 - 1,985               | £0.6M - £1.2M      | Cloudflare Workers, shared libs                                                                                        |
-| **spike-cli** (src/spike-cli/)                  | ~9,200              | 184 - 368                 | £110K - £221K      | 46 files: multiplexer, auth, shell, transport, config                                                                  |
-| **spike-cli Architecture Premium**              | —                   | 100 - 200                 | £60K - £120K       | Multiplexer design, server discovery, auto-reconnection, namespace isolation — architectural complexity beyond raw LOC |
-| **Database Schema**                             | 5,807 (233 models)  | 290 - 581                 | £0.2M - £0.3M      | Prisma schema, migrations, indexes                                                                                     |
-| **MCP Tooling**                                 | ~25,000 (147 tools) | 250 - 500                 | £0.2M - £0.3M      | Business logic exposed as tools                                                                                        |
-| **Subtotal (Core Development)**                 | ~953,000            | 10,261 - 20,523           | **£6.3M - £12.3M** | Pure coding effort                                                                                                     |
+| Component                                  | TS Lines            | Dev Days (50-100 LOC/day) | Cost @ £600/day    | Notes                                                                                                                  |
+| ------------------------------------------ | ------------------- | ------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **Core Application** (src/)                | 844,494             | 8,445 - 16,889            | £5.1M - £10.1M     | App Router, API routes, UI components                                                                                  |
+| **Worker Packages** (src/ excl. spike-cli) | 99,229              | 992 - 1,985               | £0.6M - £1.2M      | Cloudflare Workers, shared libs                                                                                        |
+| **spike-cli** (src/spike-cli/)             | ~9,200              | 184 - 368                 | £110K - £221K      | 46 files: multiplexer, auth, shell, transport, config                                                                  |
+| **spike-cli Architecture Premium**         | —                   | 100 - 200                 | £60K - £120K       | Multiplexer design, server discovery, auto-reconnection, namespace isolation — architectural complexity beyond raw LOC |
+| **Database Schema**                        | 5,807 (233 models)  | 290 - 581                 | £0.2M - £0.3M      | Prisma schema, migrations, indexes                                                                                     |
+| **MCP Tooling**                            | ~25,000 (147 tools) | 250 - 500                 | £0.2M - £0.3M      | Business logic exposed as tools                                                                                        |
+| **Subtotal (Core Development)**            | ~953,000            | 10,261 - 20,523           | **£6.3M - £12.3M** | Pure coding effort                                                                                                     |
 
 #### spike-cli Detailed Cost Breakdown
 
@@ -725,8 +725,8 @@ strategic premium of the dual-interface positioning.
 
 ### Immediate (This Week)
 
-- **Publish spike-cli to npm** as `@spike-land-ai/spike-cli` — transforms
-  the CLI from codebase asset to distributable product
+- **Publish spike-cli to npm** as `@spike-land-ai/spike-cli` — transforms the
+  CLI from codebase asset to distributable product
 - **List on MCP registries** (Smithery, Glama) — organic discovery channel for
   developer audience
 - **Create demo video** — 3-minute walkthrough of web dashboard + spike-cli

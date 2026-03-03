@@ -124,7 +124,9 @@ describe("app-tools", () => {
           updatedAt: 1000n,
         },
       );
-      const result = await server.call("stdb_list_apps", { ownerIdentity: "o1" });
+      const result = await server.call("stdb_list_apps", {
+        ownerIdentity: "o1",
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(1);
       expect(parsed.apps[0].slug).toBe("a1");
@@ -207,7 +209,9 @@ describe("app-tools", () => {
         changeDescription: "Initial",
         createdAt: 1000n,
       });
-      const result = await server.call("stdb_list_app_versions", { appId: "10" });
+      const result = await server.call("stdb_list_app_versions", {
+        appId: "10",
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(1);
       expect(parsed.versions[0].version).toBe("1.0.0");
@@ -217,7 +221,9 @@ describe("app-tools", () => {
       const dcClient = createMockPlatformClient({ connected: false });
       const dcServer = createMockServer();
       registerAppTools(dcServer as unknown as McpServer, dcClient);
-      const result = await dcServer.call("stdb_list_app_versions", { appId: "1" });
+      const result = await dcServer.call("stdb_list_app_versions", {
+        appId: "1",
+      });
       expect(result.isError).toBe(true);
     });
   });
@@ -237,7 +243,10 @@ describe("app-tools", () => {
         createdAt: 1000n,
         updatedAt: 1000n,
       });
-      const result = await server.call("stdb_update_app_status", { appId: "1", status: "paused" });
+      const result = await server.call("stdb_update_app_status", {
+        appId: "1",
+        status: "paused",
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.updated).toBe(true);
       expect(parsed.status).toBe("paused");

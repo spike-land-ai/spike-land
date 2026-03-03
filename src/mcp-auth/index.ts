@@ -78,7 +78,9 @@ export default {
             cookie: `better-auth.session_token=${sessionToken}`,
           },
         });
-        const sessionResult = await auth.api.getSession({ headers: req.headers });
+        const sessionResult = await auth.api.getSession({
+          headers: req.headers,
+        });
         if (!sessionResult?.session) {
           return {
             content: [{ type: "text", text: JSON.stringify({ valid: false }) }],

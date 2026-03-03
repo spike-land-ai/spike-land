@@ -94,7 +94,9 @@ export async function registerAgent(data: AgentRedisData): Promise<void> {
 
   await Promise.all([
     // Store agent data with TTL to prevent orphaned keys
-    redis.set(AGENT_KEYS.AGENT_DATA(agentId), JSON.stringify(data), { ex: AGENT_DATA_TTL }),
+    redis.set(AGENT_KEYS.AGENT_DATA(agentId), JSON.stringify(data), {
+      ex: AGENT_DATA_TTL,
+    }),
     // Set initial status as online
     redis.set(AGENT_KEYS.AGENT_STATUS(agentId), "online", { ex: STATUS_TTL }),
     // Add to user's agent set
@@ -146,7 +148,9 @@ export async function processHeartbeat(
       }
       data.lastHeartbeat = Date.now();
       promises.push(
-        redis.set(AGENT_KEYS.AGENT_DATA(agentId), JSON.stringify(data), { ex: AGENT_DATA_TTL }),
+        redis.set(AGENT_KEYS.AGENT_DATA(agentId), JSON.stringify(data), {
+          ex: AGENT_DATA_TTL,
+        }),
       );
     }
   }

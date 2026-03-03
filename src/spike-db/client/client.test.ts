@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Delta } from "../protocol/messages.js";
-import { TableCache, ClientTable } from "./cache.js";
+import { ClientTable, TableCache } from "./cache.js";
 import { SubscriptionBuilder } from "./subscription.js";
 
 // ---------------------------------------------------------------------------
@@ -74,7 +74,12 @@ describe("TableCache", () => {
       oldRow: { id: "1", name: "Alice" },
       newRow: { id: "1", name: "Alice Updated" },
     });
-    expect(cache.getRows("users")).toEqual([{ id: "1", name: "Alice Updated" }]);
+    expect(cache.getRows("users")).toEqual([
+      {
+        id: "1",
+        name: "Alice Updated",
+      },
+    ]);
   });
 
   it("applyDelta delete removes a row", () => {

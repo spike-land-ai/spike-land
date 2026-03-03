@@ -58,7 +58,10 @@ export const subjectSaveTool = imageProcedure
     const subject = subjectResult.data;
 
     ctx.notify?.(
-      toolEvent("subject:created", subject.id, { label: subject.label, type: subject.type }),
+      toolEvent("subject:created", subject.id, {
+        label: subject.label,
+        type: subject.type,
+      }),
     );
 
     return jsonResult({

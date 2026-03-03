@@ -216,7 +216,9 @@ describe("downloadCodeToLocal", () => {
     });
 
     await agent.downloadCodeToLocal("myspace");
-    expect(mkdirSync).toHaveBeenCalledWith(expect.any(String), { recursive: true });
+    expect(mkdirSync).toHaveBeenCalledWith(expect.any(String), {
+      recursive: true,
+    });
   });
 });
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createAuth } from "./auth";
 import type { Env } from "./auth";
 
@@ -26,7 +26,9 @@ vi.mock("better-auth", () => ({
 
 // Mock better-auth/adapters/drizzle
 vi.mock("better-auth/adapters/drizzle", () => ({
-  drizzleAdapter: vi.fn((_db: unknown, _opts: unknown) => ({ type: "drizzle-adapter" })),
+  drizzleAdapter: vi.fn((_db: unknown, _opts: unknown) => ({
+    type: "drizzle-adapter",
+  })),
 }));
 
 // Mock better-auth/plugins

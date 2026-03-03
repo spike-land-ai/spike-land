@@ -251,9 +251,13 @@ describe("RouteHandler", () => {
     describe("handleVersionsRoute", () => {
       it("should return versions list", async () => {
         // Add getVersionsList and getVersionCount mocks
-        (mockCode.getVersionsList as ReturnType<typeof vi.fn>) = vi
-          .fn()
-          .mockResolvedValue([{ versionNumber: 1, timestamp: Date.now(), codeLength: 100 }]);
+        (mockCode.getVersionsList as ReturnType<typeof vi.fn>) = vi.fn().mockResolvedValue([
+          {
+            versionNumber: 1,
+            timestamp: Date.now(),
+            codeLength: 100,
+          },
+        ]);
         (mockCode.getVersionCount as ReturnType<typeof vi.fn>) = vi.fn().mockReturnValue(1);
 
         const request = new Request("https://example.com/versions");

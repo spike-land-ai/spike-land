@@ -1170,7 +1170,7 @@ async function enhanceWithRetry(imageId, tier, maxRetries = 3) {
     const delay = retryAfter * 1000 * Math.pow(2, attempt);
 
     console.log(`Rate limited. Retrying in ${delay}ms...`);
-    await new Promise(resolve => setTimeout(resolve, delay));
+    await new Promise((resolve) => setTimeout(resolve, delay));
   }
 
   throw new Error("Max retries exceeded");
@@ -1204,7 +1204,7 @@ async function enhanceImage() {
     const statusRes = await fetch(`/api/images/${image.id}`);
     const { image: imageData } = await statusRes.json();
 
-    const job = imageData.jobs.find(j => j.id === enhancement.jobId);
+    const job = imageData.jobs.find((j) => j.id === enhancement.jobId);
     console.log(`Job status: ${job.status}`);
 
     if (job.status === "COMPLETED") {
@@ -1214,7 +1214,7 @@ async function enhanceImage() {
       console.error(`Job failed: ${job.errorMessage}`);
       completed = true;
     } else {
-      await new Promise(r => setTimeout(r, 2000)); // Wait 2 seconds
+      await new Promise((r) => setTimeout(r, 2000)); // Wait 2 seconds
     }
   }
 }

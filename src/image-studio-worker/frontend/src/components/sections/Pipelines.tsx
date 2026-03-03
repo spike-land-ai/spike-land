@@ -4,8 +4,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Plus, Trash2, Copy } from "lucide-react";
-import { Button, Input, Select, TextArea, Badge, Modal } from "@/components/ui";
+import { Copy, Plus, Trash2 } from "lucide-react";
+import { Badge, Button, Input, Modal, Select, TextArea } from "@/components/ui";
 import { callTool, parseToolResult } from "@/api/client";
 import { ENHANCEMENT_TIERS, PIPELINE_VISIBILITY } from "@/constants/enums";
 
@@ -117,7 +117,10 @@ export function Pipelines() {
     }
   };
 
-  const visibilityOptions = PIPELINE_VISIBILITY.map((v) => ({ value: v, label: v }));
+  const visibilityOptions = PIPELINE_VISIBILITY.map((v) => ({
+    value: v,
+    label: v,
+  }));
   const tierOptions = ENHANCEMENT_TIERS.map((t) => ({ value: t, label: t }));
 
   return (

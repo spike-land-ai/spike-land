@@ -7,23 +7,23 @@
  * raise actions, and edge cases.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
-  createMachine,
-  getMachine,
   addState,
   addTransition,
+  clearMachines,
+  createMachine,
+  exportMachine,
+  getHistory,
+  getMachine,
+  getState,
+  listMachines,
   removeState,
   removeTransition,
-  sendEvent,
-  getState,
-  getHistory,
   resetMachine,
-  validateMachine,
-  exportMachine,
-  listMachines,
+  sendEvent,
   setContext,
-  clearMachines,
+  validateMachine,
 } from "./engine.js";
 
 // ---------------------------------------------------------------------------
@@ -35,8 +35,20 @@ function buildToggleMachine(userId = "user-1") {
   const id = machine.definition.id;
   addState(id, { id: "off", type: "atomic" });
   addState(id, { id: "on", type: "atomic" });
-  addTransition(id, { source: "off", target: "on", event: "TOGGLE", actions: [], internal: false });
-  addTransition(id, { source: "on", target: "off", event: "TOGGLE", actions: [], internal: false });
+  addTransition(id, {
+    source: "off",
+    target: "on",
+    event: "TOGGLE",
+    actions: [],
+    internal: false,
+  });
+  addTransition(id, {
+    source: "on",
+    target: "off",
+    event: "TOGGLE",
+    actions: [],
+    internal: false,
+  });
   machine.currentStates = ["off"];
   return { machine, id };
 }
@@ -85,7 +97,13 @@ describe("createMachine", () => {
       userId: "u1",
       initial: "start",
       states: {
-        start: { id: "start", type: "atomic", children: [], entryActions: [], exitActions: [] },
+        start: {
+          id: "start",
+          type: "atomic",
+          children: [],
+          entryActions: [],
+          exitActions: [],
+        },
       },
       transitions: [],
       context: {},
@@ -139,7 +157,11 @@ describe("removeState", () => {
   });
 
   it("removes state from parent children array", () => {
-    const machine = createMachine({ name: "M", userId: "u1", initial: "parent" });
+    const machine = createMachine({
+      name: "M",
+      userId: "u1",
+      initial: "parent",
+    });
     const id = machine.definition.id;
     addState(id, { id: "parent", type: "compound", initial: "child" });
     addState(id, { id: "child", type: "atomic", parent: "parent" });
@@ -330,7 +352,11 @@ describe("validateMachine", () => {
   });
 
   it("reports error for missing machine initial state", () => {
-    const machine = createMachine({ name: "M", userId: "u1", initial: "ghost" });
+    const machine = createMachine({
+      name: "M",
+      userId: "u1",
+      initial: "ghost",
+    });
     const issues = validateMachine(machine.definition.id);
     expect(issues.some((i) => i.message.includes("initial state") && i.level === "error")).toBe(
       true,
@@ -338,7 +364,11 @@ describe("validateMachine", () => {
   });
 
   it("reports error for compound state without initial child", () => {
-    const machine = createMachine({ name: "M", userId: "u1", initial: "parent" });
+    const machine = createMachine({
+      name: "M",
+      userId: "u1",
+      initial: "parent",
+    });
     const id = machine.definition.id;
     addState(id, { id: "parent", type: "compound" }); // no initial
     const issues = validateMachine(id);
@@ -346,7 +376,11 @@ describe("validateMachine", () => {
   });
 
   it("reports error for compound state with non-existent initial child", () => {
-    const machine = createMachine({ name: "M", userId: "u1", initial: "parent" });
+    const machine = createMachine({
+      name: "M",
+      userId: "u1",
+      initial: "parent",
+    });
     const id = machine.definition.id;
     addState(id, { id: "parent", type: "compound", initial: "missing-child" });
     const issues = validateMachine(id);
@@ -380,8 +414,22 @@ describe("validateMachine", () => {
     addState(id, { id: "a", type: "atomic" });
     addState(id, { id: "b", type: "atomic" });
     getMachine(id).definition.transitions.push(
-      { id: "dup", source: "a", target: "b", event: "GO", actions: [], internal: false },
-      { id: "dup", source: "a", target: "b", event: "GO2", actions: [], internal: false },
+      {
+        id: "dup",
+        source: "a",
+        target: "b",
+        event: "GO",
+        actions: [],
+        internal: false,
+      },
+      {
+        id: "dup",
+        source: "a",
+        target: "b",
+        event: "GO2",
+        actions: [],
+        internal: false,
+      },
     );
     const issues = validateMachine(id);
     expect(issues.some((i) => i.transitionId === "dup" && i.message.includes("Duplicate"))).toBe(
@@ -407,7 +455,13 @@ describe("validateMachine", () => {
     const id = machine.definition.id;
     addState(id, { id: "a", type: "atomic" });
     addState(id, { id: "b", type: "atomic" }); // no outgoing
-    addTransition(id, { source: "a", target: "b", event: "GO", actions: [], internal: false });
+    addTransition(id, {
+      source: "a",
+      target: "b",
+      event: "GO",
+      actions: [],
+      internal: false,
+    });
     const issues = validateMachine(id);
     expect(
       issues.some(
@@ -733,7 +787,12 @@ describe("history states", () => {
     });
     const id = machine.definition.id;
     addState(id, { id: "outer", type: "compound", initial: "inner" });
-    addState(id, { id: "inner", type: "compound", initial: "a", parent: "outer" });
+    addState(id, {
+      id: "inner",
+      type: "compound",
+      initial: "a",
+      parent: "outer",
+    });
     addState(id, { id: "a", type: "atomic", parent: "inner" });
     addState(id, { id: "b", type: "atomic", parent: "inner" });
     addState(id, { id: "h", type: "history", parent: "inner" });

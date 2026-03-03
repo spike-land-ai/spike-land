@@ -2,19 +2,19 @@
  * Tests for gates/engine.ts
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  getAddedLines,
-  getChangedFiles,
+  computeOverallStatus,
   countChanges,
+  formatGateResults,
+  getAddedLines,
   getBuiltinRules,
+  getChangedFiles,
   getRuleByName,
   runGates,
-  computeOverallStatus,
-  formatGateResults,
 } from "./engine.js";
 import { buildDiff } from "../__test-utils__/fixtures.js";
-import type { RuleContext, GateResult } from "../types.js";
+import type { GateResult, RuleContext } from "../types.js";
 
 function makeContext(overrides: Partial<RuleContext> = {}): RuleContext {
   return {
@@ -269,7 +269,13 @@ describe("computeOverallStatus", () => {
 
 describe("formatGateResults", () => {
   it("produces markdown table", () => {
-    const gates: GateResult[] = [{ name: "Test Gate", status: "GREEN", detail: "All good" }];
+    const gates: GateResult[] = [
+      {
+        name: "Test Gate",
+        status: "GREEN",
+        detail: "All good",
+      },
+    ];
     const text = formatGateResults(gates);
     expect(text).toContain("BAZDMEG Quality Gates");
     expect(text).toContain("Test Gate");

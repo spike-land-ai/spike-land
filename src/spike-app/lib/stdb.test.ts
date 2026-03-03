@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // We need to test the createStdbClient logic. Since stdb.ts exports a singleton,
 // we re-import each test to get fresh module state via vi.importActual won't help.
@@ -126,7 +126,11 @@ describe("stdbClient", () => {
 
     stdbClient.recordEvent("test_event", { foo: "bar" });
     expect(wsInstances[0].send).toHaveBeenCalledWith(
-      JSON.stringify({ type: "event", event: "test_event", data: { foo: "bar" } }),
+      JSON.stringify({
+        type: "event",
+        event: "test_event",
+        data: { foo: "bar" },
+      }),
     );
   });
 

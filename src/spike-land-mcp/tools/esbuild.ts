@@ -9,7 +9,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "./types";
 import { freeTool } from "../procedures/index";
-import { textResult, jsonResult, safeToolCall, apiRequest } from "./tool-helpers";
+import { apiRequest, jsonResult, safeToolCall, textResult } from "./tool-helpers";
 import type { DrizzleDB } from "../db/index";
 
 const LOADER_ENUM = ["tsx", "ts", "jsx", "js"] as const;
@@ -58,7 +58,9 @@ export function registerEsbuildTools(
 
           const warnings =
             result.warnings.length > 0
-              ? `\n\n**Warnings (${result.warnings.length}):**\n${result.warnings.map((w) => `- ${w.text}`).join("\n")}`
+              ? `\n\n**Warnings (${result.warnings.length}):**\n${result.warnings
+                  .map((w) => `- ${w.text}`)
+                  .join("\n")}`
               : "";
 
           return textResult(

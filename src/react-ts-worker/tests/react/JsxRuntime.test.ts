@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { jsx, jsxs, Fragment } from "../../react/jsx-runtime.js";
+import { describe, expect, it } from "vitest";
+import { Fragment, jsx, jsxs } from "../../react/jsx-runtime.js";
 import { REACT_ELEMENT_TYPE, REACT_FRAGMENT_TYPE } from "../../react/ReactSymbols.js";
 
 describe("jsx runtime", () => {

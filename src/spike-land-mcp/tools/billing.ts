@@ -7,12 +7,12 @@
  */
 
 import { z } from "zod";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import { freeTool } from "../procedures/index";
 import { textResult } from "./tool-helpers";
 import type { DrizzleDB } from "../db/index";
-import { workspaces, workspaceMembers, subscriptions } from "../db/schema";
+import { subscriptions, workspaceMembers, workspaces } from "../db/schema";
 
 export function registerBillingTools(registry: ToolRegistry, userId: string, db: DrizzleDB): void {
   const t = freeTool(userId, db);

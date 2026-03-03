@@ -7,7 +7,7 @@
  */
 
 import { z } from "zod";
-import { eq, and, isNull, isNotNull } from "drizzle-orm";
+import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import type { ToolRegistryAdapter } from "./types";
 import { freeTool } from "../procedures/index";
 import { textResult } from "./tool-helpers";

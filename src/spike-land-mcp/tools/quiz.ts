@@ -392,7 +392,11 @@ export function generateNextRound(session: QuizSession): QuizRound {
 export function evaluateAnswers(
   session: QuizSession,
   answers: [number, number, number],
-): { results: AnswerResult[]; conflicts: ConflictRecord[]; allMastered: boolean } {
+): {
+  results: AnswerResult[];
+  conflicts: ConflictRecord[];
+  allMastered: boolean;
+} {
   const results: AnswerResult[] = [];
   const newConflicts: ConflictRecord[] = [];
 
@@ -648,7 +652,9 @@ export function registerQuizTools(registry: ToolRegistry, userId: string, db: Dr
         session.currentRound = generateNextRound(session);
 
         return jsonResult(
-          `Round ${session.roundNumber - 1} results: ${results.filter((r) => r.correct).length}/${QUESTIONS_PER_ROUND} correct` +
+          `Round ${session.roundNumber - 1} results: ${
+            results.filter((r) => r.correct).length
+          }/${QUESTIONS_PER_ROUND} correct` +
             (conflicts.length > 0 ? `. ${conflicts.length} conflict(s) detected!` : ""),
           {
             results,

@@ -2,7 +2,9 @@
 
 ## Overview
 
-Shared base utilities for `@spike-land-ai` MCP server packages. Provides common patterns for building MCP servers. Published as `@spike-land-ai/mcp-server-base`, runs in Node.js.
+Shared base utilities for `@spike-land-ai` MCP server packages. Provides common
+patterns for building MCP servers. Published as
+`@spike-land-ai/mcp-server-base`, runs in Node.js.
 
 ## Commands
 
@@ -24,7 +26,8 @@ npm run lint          # ESLint
 
 **Peer dependencies**: `@modelcontextprotocol/sdk` (>=1.0.0), `zod` (>=3.0.0).
 
-**Consumers**: Used by other `@spike-land-ai` MCP server packages as a foundation.
+**Consumers**: Used by other `@spike-land-ai` MCP server packages as a
+foundation.
 
 ## Code Quality Rules
 

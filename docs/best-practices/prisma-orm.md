@@ -321,7 +321,7 @@ const users = await prisma.user.findMany({
 });
 
 // All data available without additional queries
-users.forEach(user => {
+users.forEach((user) => {
   console.log(user.posts);
 });
 ```
@@ -375,7 +375,7 @@ const posts = await prisma.post.findMany({
 
 // Then map to users manually or use in-memory joining
 const postsMap = new Map();
-posts.forEach(post => {
+posts.forEach((post) => {
   if (!postsMap.has(post.userId)) {
     postsMap.set(post.userId, []);
   }
@@ -389,13 +389,13 @@ posts.forEach(post => {
 import DataLoader from "dataloader";
 
 // Batch loader for posts
-const postsLoader = new DataLoader(async userIds => {
+const postsLoader = new DataLoader(async (userIds) => {
   const posts = await prisma.post.findMany({
     where: { userId: { in: userIds } },
   });
 
   // Return posts in the same order as userIds
-  return userIds.map(id => posts.filter(p => p.userId === id));
+  return userIds.map((id) => posts.filter((p) => p.userId === id));
 });
 
 // In resolver
@@ -765,7 +765,8 @@ pooling:
 ```typescript
 // .env.production
 // Connection URL for application (through PgBouncer)
-DATABASE_URL = "postgresql://user:password@pgbouncer-host:6543/db?pgbouncer=true";
+DATABASE_URL =
+  "postgresql://user:password@pgbouncer-host:6543/db?pgbouncer=true";
 
 // Direct URL for Prisma CLI commands (bypass PgBouncer)
 DIRECT_URL = "postgresql://user:password@postgres-host:5432/db";
@@ -857,7 +858,7 @@ prisma.$on("beforeExit", async () => {
   console.log("Prisma exiting");
 });
 
-prisma.$on("query", e => {
+prisma.$on("query", (e) => {
   console.log(`Query: ${e.query}`);
   console.log(`Params: ${e.params}`);
   console.log(`Duration: ${e.duration}ms`);
@@ -984,9 +985,9 @@ const userSelect = {
 } as const;
 
 type UserSelects = typeof userSelect;
-type BasicUser = Prisma.UserGetPayload<{ select: UserSelects["basic"]; }>;
+type BasicUser = Prisma.UserGetPayload<{ select: UserSelects["basic"] }>;
 type UserWithPosts = Prisma.UserGetPayload<
-  { select: UserSelects["withPosts"]; }
+  { select: UserSelects["withPosts"] }
 >;
 
 // Use in queries
@@ -1264,7 +1265,7 @@ async function main() {
 }
 
 main()
-  .catch(e => {
+  .catch((e) => {
     console.error(e);
     process.exit(1);
   })
@@ -1319,7 +1320,7 @@ const prisma = new PrismaClient({
 });
 
 // Listen to query events
-prisma.$on("query", e => {
+prisma.$on("query", (e) => {
   console.log("Query duration:", e.duration);
   console.log("Query:", e.query);
 });
@@ -1340,7 +1341,7 @@ const prisma = new PrismaClient({
 
 ```typescript
 // Identify slow queries
-prisma.$on("query", e => {
+prisma.$on("query", (e) => {
   if (e.duration > 1000) { // > 1 second
     console.warn("SLOW QUERY:", {
       query: e.query,
@@ -1368,7 +1369,7 @@ const interval = setInterval(() => {
     SELECT datname, count(*) as connections
     FROM pg_stat_activity
     GROUP BY datname
-  `.then(result => {
+  `.then((result) => {
     console.log("Database connections:", result);
   });
 }, 30000);

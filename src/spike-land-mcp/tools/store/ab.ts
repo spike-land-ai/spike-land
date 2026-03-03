@@ -9,7 +9,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "../types";
 import { freeTool } from "../../procedures/index";
-import { textResult, safeToolCall, apiRequest } from "../tool-helpers";
+import { apiRequest, safeToolCall, textResult } from "../tool-helpers";
 import type { DrizzleDB } from "../../db/index";
 
 export function registerStoreAbTools(
@@ -218,7 +218,9 @@ export function registerStoreAbTools(
           text += `|---------|-------|-----------|-------------|-------------|--------|--------|\n`;
 
           for (const v of deployment.variants) {
-            text += `| \`${v.id}\` | ${v.variantLabel} | ${v.dimension} | ${v.impressions} | ${v.engagements} | ${v.errorCount} | ${v.isWinner ? "Yes" : "No"} |\n`;
+            text += `| \`${v.id}\` | ${v.variantLabel} | ${v.dimension} | ${v.impressions} | ${v.engagements} | ${v.errorCount} | ${
+              v.isWinner ? "Yes" : "No"
+            } |\n`;
           }
           return textResult(text);
         });

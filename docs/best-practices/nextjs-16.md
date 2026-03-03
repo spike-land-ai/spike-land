@@ -118,7 +118,7 @@ src/
 
 ```typescript
 // layout.tsx - Persistent wrapper for segments
-export default function Layout({ children }: { children: React.ReactNode; }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <body>
@@ -200,7 +200,7 @@ export default async function ProductList() {
   const products = await db.products.findMany();
   return (
     <ul>
-      {products.map(p => <li key={p.id}>{p.name}</li>)}
+      {products.map((p) => <li key={p.id}>{p.name}</li>)}
     </ul>
   );
 }
@@ -252,12 +252,12 @@ export default function Counter() {
 "use client";
 
 export default function LocationDetector() {
-  const [coords, setCoords] = useState<{ lat: number; lng: number; } | null>(
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
     null,
   );
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(pos => {
+    navigator.geolocation.getCurrentPosition((pos) => {
       setCoords({
         lat: pos.coords.latitude,
         lng: pos.coords.longitude,
@@ -339,7 +339,7 @@ export function ClientFilter({ children }: ClientFilterProps) {
 
   return (
     <div>
-      <input value={filter} onChange={e => setFilter(e.target.value)} />
+      <input value={filter} onChange={(e) => setFilter(e.target.value)} />
       <div>{/* Server component children are passed through */}</div>
     </div>
   );
@@ -380,11 +380,11 @@ export default async function ProductsPage() {
     {
       next: { revalidate: 3600 }, // ISR: Revalidate every hour
     },
-  ).then(res => res.json());
+  ).then((res) => res.json());
 
   return (
     <ul>
-      {products.map(product => <li key={product.id}>{product.name}</li>)}
+      {products.map((product) => <li key={product.id}>{product.name}</li>)}
     </ul>
   );
 }
@@ -529,7 +529,7 @@ For client-only needs, use community libraries like SWR or TanStack Query:
 
 import useSWR from "swr";
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function UserProfile() {
   const { data, error, isLoading } = useSWR("/api/user", fetcher);
@@ -567,7 +567,7 @@ export default function Hero() {
 }
 
 // Remote images - require dimensions
-export default function ProductImage({ imageUrl }: { imageUrl: string; }) {
+export default function ProductImage({ imageUrl }: { imageUrl: string }) {
   return (
     <Image
       src={imageUrl}
@@ -749,14 +749,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
 // Generate static routes at build time
 export async function generateStaticParams() {
   const products = await db.products.findMany();
-  return products.map(p => ({ id: p.id }));
+  return products.map((p) => ({ id: p.id }));
 }
 
 // Generate metadata for each product
 import type { Metadata } from "next";
 
 interface MetadataProps {
-  params: { id: string; };
+  params: { id: string };
 }
 
 export async function generateMetadata(
@@ -840,7 +840,7 @@ export default function Feed() {
 
 import { Modal } from "@/components/Modal";
 
-export default function PhotoModal({ params }: { params: { id: string; }; }) {
+export default function PhotoModal({ params }: { params: { id: string } }) {
   return (
     <Modal>
       <img src={`/photos/${params.id}`} />
@@ -1101,7 +1101,7 @@ Time-based revalidation:
 export const revalidate = 3600; // Revalidate every hour
 
 export default async function BlogPost(
-  { params }: { params: { slug: string; }; },
+  { params }: { params: { slug: string } },
 ) {
   const post = await db.posts.findBySlug(params.slug);
   return <article>{post.content}</article>;
@@ -1218,7 +1218,7 @@ async function ProductList() {
   const products = await db.products.findMany();
   return (
     <ul>
-      {products.map(p => <li key={p.id}>{p.name}</li>)}
+      {products.map((p) => <li key={p.id}>{p.name}</li>)}
     </ul>
   );
 }
@@ -1236,7 +1236,9 @@ import { useFormStatus } from "react-dom";
 function SubmitButton() {
   const { pending } = useFormStatus();
 
-  return <button disabled={pending}>{pending ? "Creating..." : "Create"}</button>;
+  return (
+    <button disabled={pending}>{pending ? "Creating..." : "Create"}</button>
+  );
 }
 
 export default function CreateProductPage() {
@@ -1262,7 +1264,7 @@ export default function Error({
   error,
   reset,
 }: {
-  error: Error & { digest?: string; };
+  error: Error & { digest?: string };
   reset: () => void;
 }) {
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { SYSTEM_PROMPT } from "./system-prompt.ts";
 
 describe("system-prompt", () => {

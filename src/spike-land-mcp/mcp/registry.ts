@@ -116,8 +116,9 @@ export class ToolRegistry {
     const missingDescriptions = validateSchemaDescriptions(def.inputSchema);
     if (missingDescriptions.length > 0) {
       const msg =
-        `Tool "${def.name}" has schema fields without .describe(): ${missingDescriptions.join(", ")}. ` +
-        `Add .describe() to every Zod field for accurate LLM tool selection.`;
+        `Tool "${def.name}" has schema fields without .describe(): ${missingDescriptions.join(
+          ", ",
+        )}. ` + `Add .describe() to every Zod field for accurate LLM tool selection.`;
       // In development, throw to catch missing .describe() early
       console.warn(msg);
     }
@@ -165,10 +166,14 @@ export class ToolRegistry {
         ? { version: (built.meta as Record<string, unknown>).version as string }
         : {}),
       ...((built.meta as Record<string, unknown>).stability
-        ? { stability: (built.meta as Record<string, unknown>).stability as ToolStability }
+        ? {
+            stability: (built.meta as Record<string, unknown>).stability as ToolStability,
+          }
         : {}),
       ...((built.meta as Record<string, unknown>).examples
-        ? { examples: (built.meta as Record<string, unknown>).examples as ToolExample[] }
+        ? {
+            examples: (built.meta as Record<string, unknown>).examples as ToolExample[],
+          }
         : {}),
       inputSchema: built.inputSchema,
       handler: built.handler as unknown as ToolDefinition["handler"],

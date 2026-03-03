@@ -7,7 +7,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
-import { magicLink, createAuthEndpoint } from "better-auth/plugins";
+import { createAuthEndpoint, magicLink } from "better-auth/plugins";
 import { z } from "zod";
 import { bootstrapAdminIfNeeded } from "@/lib/auth/bootstrap-admin";
 import { completeQRAuth } from "@/lib/auth/qr-auth-service";
@@ -110,7 +110,12 @@ export const authInstance = betterAuth({
           }) => {
             const { qrHash, qrOneTimeCode } = ctx.body;
             if (!qrHash || !qrOneTimeCode) {
-              return ctx.json({ error: "Missing required fields" }, { status: 400 });
+              return ctx.json(
+                { error: "Missing required fields" },
+                {
+                  status: 400,
+                },
+              );
             }
 
             const userId = await completeQRAuth(qrHash, qrOneTimeCode);
@@ -121,7 +126,13 @@ export const authInstance = betterAuth({
             const { data: user, error } = await tryCatch(
               prisma.user.findUnique({
                 where: { id: userId },
-                select: { id: true, email: true, name: true, image: true, role: true },
+                select: {
+                  id: true,
+                  email: true,
+                  name: true,
+                  image: true,
+                  role: true,
+                },
               }),
             );
             if (error || !user) {

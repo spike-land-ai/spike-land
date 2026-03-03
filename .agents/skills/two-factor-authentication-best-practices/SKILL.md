@@ -5,7 +5,9 @@ description: This skill provides guidance and enforcement rules for implementing
 
 ## Setting Up Two-Factor Authentication
 
-When adding 2FA to your application, configure the `twoFactor` plugin with your app name as the issuer. This name appears in authenticator apps when users scan the QR code.
+When adding 2FA to your application, configure the `twoFactor` plugin with your
+app name as the issuer. This name appears in authenticator apps when users scan
+the QR code.
 
 ```ts
 import { betterAuth } from "better-auth";
@@ -21,7 +23,8 @@ export const auth = betterAuth({
 });
 ```
 
-**Note**: After adding the plugin, run `npx @better-auth/cli migrate` to add the required database fields and tables.
+**Note**: After adding the plugin, run `npx @better-auth/cli migrate` to add the
+required database fields and tables.
 
 ### Client-Side Setup
 
@@ -44,7 +47,9 @@ export const authClient = createAuthClient({
 
 ## Enabling 2FA for Users
 
-When a user enables 2FA, require their password for verification. The enable endpoint returns a TOTP URI for QR code generation and backup codes for account recovery.
+When a user enables 2FA, require their password for verification. The enable
+endpoint returns a TOTP URI for QR code generation and backup codes for account
+recovery.
 
 ```ts
 const enable2FA = async (password: string) => {
@@ -59,11 +64,14 @@ const enable2FA = async (password: string) => {
 };
 ```
 
-**Important**: The `twoFactorEnabled` flag on the user is not set to `true` until the user successfully verifies their first TOTP code. This ensures users have properly configured their authenticator app before 2FA is fully active.
+**Important**: The `twoFactorEnabled` flag on the user is not set to `true`
+until the user successfully verifies their first TOTP code. This ensures users
+have properly configured their authenticator app before 2FA is fully active.
 
 ### Skipping Initial Verification
 
-If you want to enable 2FA immediately without requiring verification, set `skipVerificationOnEnable`:
+If you want to enable 2FA immediately without requiring verification, set
+`skipVerificationOnEnable`:
 
 ```ts
 twoFactor({
@@ -71,11 +79,13 @@ twoFactor({
 });
 ```
 
-**Note**: This is generally not recommended as it doesn't confirm the user has successfully set up their authenticator app.
+**Note**: This is generally not recommended as it doesn't confirm the user has
+successfully set up their authenticator app.
 
 ## TOTP (Authenticator App)
 
-TOTP generates time-based codes using an authenticator app (Google Authenticator, Authy, etc.). Codes are valid for 30 seconds by default.
+TOTP generates time-based codes using an authenticator app (Google
+Authenticator, Authy, etc.). Codes are valid for 30 seconds by default.
 
 ### Displaying the QR Code
 
@@ -91,7 +101,8 @@ const TotpSetup = ({ totpURI }: { totpURI: string }) => {
 
 ### Verifying TOTP Codes
 
-Better Auth accepts codes from one period before and one after the current time, accommodating minor clock differences between devices:
+Better Auth accepts codes from one period before and one after the current time,
+accommodating minor clock differences between devices:
 
 ```ts
 const verifyTotp = async (code: string) => {
@@ -115,7 +126,8 @@ twoFactor({
 
 ## OTP (Email/SMS)
 
-OTP sends a one-time code to the user's email or phone. You must implement the `sendOTP` function to deliver codes.
+OTP sends a one-time code to the user's email or phone. You must implement the
+`sendOTP` function to deliver codes.
 
 ### Configuring OTP Delivery
 
@@ -188,7 +200,9 @@ twoFactor({
 
 ## Backup Codes
 
-Backup codes provide account recovery when users lose access to their authenticator app or phone. They are generated automatically when 2FA is enabled.
+Backup codes provide account recovery when users lose access to their
+authenticator app or phone. They are generated automatically when 2FA is
+enabled.
 
 ### Displaying Backup Codes
 
@@ -200,9 +214,7 @@ const BackupCodes = ({ codes }: { codes: string[] }) => {
     <div>
       <p>Save these codes in a secure location:</p>
       <ul>
-        {codes.map((code, i) => (
-          <li key={i}>{code}</li>
-        ))}
+        {codes.map((code, i) => <li key={i}>{code}</li>)}
       </ul>
     </div>
   );
@@ -211,7 +223,8 @@ const BackupCodes = ({ codes }: { codes: string[] }) => {
 
 ### Regenerating Backup Codes
 
-When users need new codes, regenerate them (this invalidates all previous codes):
+When users need new codes, regenerate them (this invalidates all previous
+codes):
 
 ```ts
 const regenerateBackupCodes = async (password: string) => {
@@ -233,7 +246,8 @@ const verifyBackupCode = async (code: string) => {
 };
 ```
 
-**Note**: Each backup code can only be used once and is removed from the database after successful verification.
+**Note**: Each backup code can only be used once and is removed from the
+database after successful verification.
 
 ### Backup Code Configuration
 
@@ -249,7 +263,8 @@ twoFactor({
 
 ## Handling 2FA During Sign-In
 
-When a user with 2FA enabled signs in, the response includes `twoFactorRedirect: true`:
+When a user with 2FA enabled signs in, the response includes
+`twoFactorRedirect: true`:
 
 ```ts
 const signIn = async (email: string, password: string) => {
@@ -265,7 +280,7 @@ const signIn = async (email: string, password: string) => {
           window.location.href = "/2fa";
         }
       },
-    }
+    },
   );
 };
 ```
@@ -289,7 +304,8 @@ if ("twoFactorRedirect" in response) {
 
 ## Trusted Devices
 
-Trusted devices allow users to skip 2FA verification on subsequent sign-ins for a configurable period.
+Trusted devices allow users to skip 2FA verification on subsequent sign-ins for
+a configurable period.
 
 ### Enabling Trust on Verification
 
@@ -310,7 +326,8 @@ twoFactor({
 });
 ```
 
-**Note**: The trust period refreshes on each successful sign-in within the trust window.
+**Note**: The trust period refreshes on each successful sign-in within the trust
+window.
 
 ## Security Considerations
 
@@ -334,7 +351,8 @@ twoFactor({
 
 ### Rate Limiting
 
-Better Auth applies built-in rate limiting to all 2FA endpoints (3 requests per 10 seconds). For OTP verification, additional attempt limiting is applied:
+Better Auth applies built-in rate limiting to all 2FA endpoints (3 requests per
+10 seconds). For OTP verification, additional attempt limiting is applied:
 
 ```ts
 twoFactor({
@@ -352,11 +370,13 @@ twoFactor({
 
 ### Constant-Time Comparison
 
-Better Auth uses constant-time comparison for OTP verification to prevent timing attacks.
+Better Auth uses constant-time comparison for OTP verification to prevent timing
+attacks.
 
 ### Credential Account Requirement
 
-Two-factor authentication can only be enabled for credential (email/password) accounts. For social accounts, it's assumed the provider already handles 2FA.
+Two-factor authentication can only be enabled for credential (email/password)
+accounts. For social accounts, it's assumed the provider already handles 2FA.
 
 ## Disabling 2FA
 

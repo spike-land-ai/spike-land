@@ -479,7 +479,9 @@ export function ConvergenceDemo() {
       <div className="relative">
         <div
           className="flex flex-col md:flex-row gap-4 md:gap-5"
-          style={{ opacity: mergePhase > 0.7 ? Math.max(0, 1 - (mergePhase - 0.7) / 0.3) : 1 }}
+          style={{
+            opacity: mergePhase > 0.7 ? Math.max(0, 1 - (mergePhase - 0.7) / 0.3) : 1,
+          }}
         >
           {PATTERNS.map((pattern, i) => (
             <PatternCard

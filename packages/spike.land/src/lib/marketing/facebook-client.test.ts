@@ -164,9 +164,15 @@ describe("FacebookMarketingClient – exchangeCodeForTokens", () => {
     const mockFetch = vi
       .fn()
       // First call: exchange code for short-lived token
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(shortLivedResponse) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(shortLivedResponse),
+      })
       // Second call: exchange short-lived for long-lived token
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(longLivedResponse) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(longLivedResponse),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -188,9 +194,16 @@ describe("FacebookMarketingClient – exchangeCodeForTokens", () => {
     const mockFetch = vi
       .fn()
       // Exchange code -> short-lived token
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(shortLivedResponse) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(shortLivedResponse),
+      })
       // Long-lived exchange fails
-      .mockResolvedValueOnce({ ok: false, statusText: "Error", json: () => Promise.resolve({}) });
+      .mockResolvedValueOnce({
+        ok: false,
+        statusText: "Error",
+        json: () => Promise.resolve({}),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -208,7 +221,10 @@ describe("FacebookMarketingClient – exchangeCodeForTokens", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(shortLivedResponse) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(shortLivedResponse),
+      })
       .mockRejectedValueOnce(new Error("Connection refused"));
 
     vi.stubGlobal("fetch", mockFetch);
@@ -259,8 +275,14 @@ describe("FacebookMarketingClient – exchangeCodeForTokens", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(shortLivedResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(longLivedResponse) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(shortLivedResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(longLivedResponse),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -603,9 +625,15 @@ describe("FacebookMarketingClient – listCampaigns", () => {
     const mockFetch = vi
       .fn()
       // currency
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
       // campaigns
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -620,9 +648,15 @@ describe("FacebookMarketingClient – listCampaigns", () => {
     const mockFetch = vi
       .fn()
       // currency (normalizedId = act_act_123 is NOT used; baseId = 123 is looked up)
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
       // campaigns
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -637,7 +671,10 @@ describe("FacebookMarketingClient – listCampaigns", () => {
   it("maps status using effective_status when available", async () => {
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
       .mockResolvedValueOnce({
         ok: true,
         json: () =>
@@ -677,10 +714,16 @@ describe("FacebookMarketingClient – listCampaigns", () => {
     for (const { fb, expected } of objectiveMappings) {
       const mockFetch = vi
         .fn()
-        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({ data: [makeFacebookCampaign({ objective: fb })] }),
+          json: () => Promise.resolve({ currency: "USD" }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: [makeFacebookCampaign({ objective: fb })],
+            }),
         });
 
       vi.stubGlobal("fetch", mockFetch);
@@ -694,7 +737,10 @@ describe("FacebookMarketingClient – listCampaigns", () => {
   it("sets budgetType DAILY when daily_budget is present", async () => {
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
       .mockResolvedValueOnce({
         ok: true,
         json: () =>
@@ -718,7 +764,10 @@ describe("FacebookMarketingClient – listCampaigns", () => {
     });
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
       .mockResolvedValueOnce({
         ok: true,
         json: () =>
@@ -740,7 +789,10 @@ describe("FacebookMarketingClient – listCampaigns", () => {
     const { daily_budget: _, ...noBudget } = makeFacebookCampaign({});
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
       .mockResolvedValueOnce({
         ok: true,
         json: () =>
@@ -761,7 +813,10 @@ describe("FacebookMarketingClient – listCampaigns", () => {
   it("parses start_time and stop_time to Date objects", async () => {
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
       .mockResolvedValueOnce({
         ok: true,
         json: () =>
@@ -788,7 +843,10 @@ describe("FacebookMarketingClient – listCampaigns", () => {
   it("sets startDate/endDate to null when fields are absent", async () => {
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
       .mockResolvedValueOnce({
         ok: true,
         json: () =>
@@ -850,7 +908,10 @@ describe("FacebookMarketingClient – listCampaigns", () => {
 
 describe("FacebookMarketingClient – getCampaign", () => {
   it("returns a single campaign by ID", async () => {
-    const currencyFetch = { ok: true, json: () => Promise.resolve({ currency: "USD" }) };
+    const currencyFetch = {
+      ok: true,
+      json: () => Promise.resolve({ currency: "USD" }),
+    };
     const campaignFetch = {
       ok: true,
       json: () => Promise.resolve(makeFacebookCampaign({ id: "c123", name: "Single Campaign" })),
@@ -875,7 +936,10 @@ describe("FacebookMarketingClient – getCampaign", () => {
   it("returns null when API returns error", async () => {
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
       .mockResolvedValueOnce({
         ok: false,
         statusText: "Not Found",
@@ -893,7 +957,10 @@ describe("FacebookMarketingClient – getCampaign", () => {
   it("returns null on network error for campaign fetch", async () => {
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
       .mockRejectedValueOnce(new Error("Network failure"));
 
     vi.stubGlobal("fetch", mockFetch);
@@ -907,7 +974,10 @@ describe("FacebookMarketingClient – getCampaign", () => {
   it("includes correct fields in API request URL", async () => {
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
       .mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve(makeFacebookCampaign()),
@@ -951,8 +1021,14 @@ describe("FacebookMarketingClient – getCampaignMetrics", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(insightsResponse) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(insightsResponse),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -981,8 +1057,14 @@ describe("FacebookMarketingClient – getCampaignMetrics", () => {
   it("returns zeros when no insights data for date range", async () => {
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -1005,8 +1087,14 @@ describe("FacebookMarketingClient – getCampaignMetrics", () => {
   it("includes dateRange in result", async () => {
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -1023,8 +1111,14 @@ describe("FacebookMarketingClient – getCampaignMetrics", () => {
   it("encodes date range as time_range parameter in request URL", async () => {
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -1062,8 +1156,14 @@ describe("FacebookMarketingClient – getCampaignMetrics", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "USD" }) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(insightsResponse) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "USD" }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(insightsResponse),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -1089,9 +1189,10 @@ describe("FacebookMarketingClient – getCampaignMetrics", () => {
     await client.getAccounts();
 
     // Now getCampaignMetrics should use cached GBP
-    const metricsFetch = vi
-      .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) });
+    const metricsFetch = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ data: [] }),
+    });
 
     vi.stubGlobal("fetch", metricsFetch);
 
@@ -1117,11 +1218,20 @@ describe("FacebookMarketingClient – getAccountCurrency (cache behavior)", () =
     const mockFetch = vi
       .fn()
       // currency
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "JPY" }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "JPY" }),
+      })
       // campaigns
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      })
       // Second listCampaigns — only campaigns (currency cached)
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -1139,10 +1249,19 @@ describe("FacebookMarketingClient – getAccountCurrency (cache behavior)", () =
     const mockFetch = vi
       .fn()
       // First call uses act_123 format → currency fetch
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ currency: "CAD" }) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ currency: "CAD" }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      })
       // Second call uses plain 123 format → should use cache (no extra fetch)
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ data: [] }) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 

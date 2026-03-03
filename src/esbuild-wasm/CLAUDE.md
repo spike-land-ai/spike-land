@@ -2,11 +2,14 @@
 
 ## Overview
 
-Cross-platform WebAssembly binary for esbuild — a JavaScript bundler and minifier. Provides the esbuild API backed by a WASM binary for use in browsers and non-native environments. Published as `@spike-land-ai/esbuild-wasm`.
+Cross-platform WebAssembly binary for esbuild — a JavaScript bundler and
+minifier. Provides the esbuild API backed by a WASM binary for use in browsers
+and non-native environments. Published as `@spike-land-ai/esbuild-wasm`.
 
 ## Commands
 
-This package primarily distributes pre-built binaries. There is no build step from source in this repo.
+This package primarily distributes pre-built binaries. There is no build step
+from source in this repo.
 
 ```bash
 # No build/test scripts — this is a binary distribution package

@@ -21,7 +21,9 @@ export const BAZDMEG_PLACEHOLDERS = [
 ];
 
 export function getRandomPlaceholder(defaultPlaceholder: string = "Ask anything..."): string {
-  if (!CHAT_PLACEHOLDERS || CHAT_PLACEHOLDERS.length === 0) return defaultPlaceholder;
+  if (!CHAT_PLACEHOLDERS || CHAT_PLACEHOLDERS.length === 0) {
+    return defaultPlaceholder;
+  }
   const randomIndex = Math.floor(Math.random() * CHAT_PLACEHOLDERS.length);
   return CHAT_PLACEHOLDERS[randomIndex] ?? defaultPlaceholder;
 }
@@ -29,7 +31,9 @@ export function getRandomPlaceholder(defaultPlaceholder: string = "Ask anything.
 export function getRandomBazdmegPlaceholder(
   defaultPlaceholder: string = "Ask about quality gates, CI, PRs, or give commands...",
 ): string {
-  if (!BAZDMEG_PLACEHOLDERS || BAZDMEG_PLACEHOLDERS.length === 0) return defaultPlaceholder;
+  if (!BAZDMEG_PLACEHOLDERS || BAZDMEG_PLACEHOLDERS.length === 0) {
+    return defaultPlaceholder;
+  }
   const randomIndex = Math.floor(Math.random() * BAZDMEG_PLACEHOLDERS.length);
   return BAZDMEG_PLACEHOLDERS[randomIndex] ?? defaultPlaceholder;
 }

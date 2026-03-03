@@ -1,17 +1,17 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  REACT_ELEMENT_TYPE,
-  REACT_PORTAL_TYPE,
-  REACT_FRAGMENT_TYPE,
-  REACT_STRICT_MODE_TYPE,
-  REACT_PROFILER_TYPE,
+  getIteratorFn,
   REACT_CONSUMER_TYPE,
   REACT_CONTEXT_TYPE,
+  REACT_ELEMENT_TYPE,
   REACT_FORWARD_REF_TYPE,
-  REACT_SUSPENSE_TYPE,
-  REACT_MEMO_TYPE,
+  REACT_FRAGMENT_TYPE,
   REACT_LAZY_TYPE,
-  getIteratorFn,
+  REACT_MEMO_TYPE,
+  REACT_PORTAL_TYPE,
+  REACT_PROFILER_TYPE,
+  REACT_STRICT_MODE_TYPE,
+  REACT_SUSPENSE_TYPE,
 } from "../../react/ReactSymbols.js";
 
 describe("React Symbols", () => {

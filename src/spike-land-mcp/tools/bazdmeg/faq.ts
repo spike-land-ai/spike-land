@@ -11,7 +11,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "../types";
 import { freeTool } from "../../procedures/index";
-import { textResult, safeToolCall, apiRequest } from "../tool-helpers";
+import { apiRequest, safeToolCall, textResult } from "../tool-helpers";
 import type { DrizzleDB } from "../../db/index";
 
 export function registerBazdmegFaqTools(
@@ -40,7 +40,9 @@ export function registerBazdmegFaqTools(
         return safeToolCall("bazdmeg_faq_list", async () => {
           const params = new URLSearchParams();
           if (input.category) params.set("category", input.category);
-          if (input.include_unpublished) params.set("include_unpublished", "true");
+          if (input.include_unpublished) {
+            params.set("include_unpublished", "true");
+          }
 
           const entries = await apiRequest<
             Array<{

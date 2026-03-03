@@ -147,7 +147,9 @@ export function startCompletionServer(port: number) {
             role: "user",
             parts: [
               {
-                text: `<prefix>\n${prefix}\n</prefix>\n<suffix>\n${suffix || ""}\n</suffix>\n\nComplete the code exactly where prefix ends and suffix begins. Output only the missing code.`,
+                text: `<prefix>\n${prefix}\n</prefix>\n<suffix>\n${
+                  suffix || ""
+                }\n</suffix>\n\nComplete the code exactly where prefix ends and suffix begins. Output only the missing code.`,
               },
             ],
           },

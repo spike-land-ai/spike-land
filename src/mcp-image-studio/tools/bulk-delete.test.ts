@@ -27,7 +27,13 @@ describe("bulkDelete", () => {
     mocks.storage.delete.mockResolvedValue(undefined);
     mocks.db.imageDelete.mockResolvedValue(undefined);
 
-    const result = await bulkDelete({ image_ids: ["img-1", "img-2", "img-3"], confirm: true }, ctx);
+    const result = await bulkDelete(
+      {
+        image_ids: ["img-1", "img-2", "img-3"],
+        confirm: true,
+      },
+      ctx,
+    );
 
     expect(result.isError).toBeUndefined();
     expect(notify).toHaveBeenCalledTimes(3);
@@ -69,7 +75,13 @@ describe("bulkDelete", () => {
     const ctx: ToolContext = { userId, deps };
     mocks.resolverMocks.resolveImages.mockRejectedValue(new Error("Not found"));
 
-    const result = await bulkDelete({ image_ids: ["img-1", "img-2"], confirm: true }, ctx);
+    const result = await bulkDelete(
+      {
+        image_ids: ["img-1", "img-2"],
+        confirm: true,
+      },
+      ctx,
+    );
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("RESOLVE_FAILED");
@@ -114,7 +126,13 @@ describe("bulkDelete", () => {
       .mockResolvedValueOnce(undefined);
     mocks.db.imageDelete.mockResolvedValue(undefined);
 
-    const result = await bulkDelete({ image_ids: ["img-1", "img-2", "img-3"], confirm: true }, ctx);
+    const result = await bulkDelete(
+      {
+        image_ids: ["img-1", "img-2", "img-3"],
+        confirm: true,
+      },
+      ctx,
+    );
 
     expect(result.isError).toBeUndefined();
     const data = JSON.parse(result.content[0].text);
@@ -137,7 +155,13 @@ describe("bulkDelete", () => {
     deps.db.imageDeleteMany = vi.fn().mockResolvedValue(2);
     deps.storage.deleteMany = vi.fn().mockResolvedValue(2);
 
-    const result = await bulkDelete({ image_ids: ["img-1", "img-2"], confirm: true }, ctx);
+    const result = await bulkDelete(
+      {
+        image_ids: ["img-1", "img-2"],
+        confirm: true,
+      },
+      ctx,
+    );
 
     expect(result.isError).toBeUndefined();
     expect(deps.storage.deleteMany).toHaveBeenCalledWith(["key-1", "key-2"]);

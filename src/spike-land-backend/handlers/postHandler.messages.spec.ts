@@ -146,7 +146,12 @@ describe("PostHandler - Messages", () => {
 
       const result = callConvertMessages(messages);
 
-      expect(result).toEqual([{ role: "user", content: "[invalid content format]" }]);
+      expect(result).toEqual([
+        {
+          role: "user",
+          content: "[invalid content format]",
+        },
+      ]);
     });
 
     it("should throw on invalid role", () => {
@@ -212,7 +217,12 @@ describe("PostHandler - Messages", () => {
 
       const result = callConvertMessages(messages);
 
-      expect(result[0]?.content).toEqual([{ type: "image", image: "https://example.com/img.jpg" }]);
+      expect(result[0]?.content).toEqual([
+        {
+          type: "image",
+          image: "https://example.com/img.jpg",
+        },
+      ]);
     });
 
     it("should handle unsupported part types", () => {

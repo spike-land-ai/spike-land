@@ -2,8 +2,8 @@ name: CI/CD Pipeline
 
 permissions:
   contents: read
-  packages: read        # Read @spike-land-ai/* packages from GitHub Packages
-  pull-requests: write  # For PR comments
+  packages: read # Read @spike-land-ai/* packages from GitHub Packages
+  pull-requests: write # For PR comments
 
 # Cancel in-progress runs for the same PR/branch
 concurrency:

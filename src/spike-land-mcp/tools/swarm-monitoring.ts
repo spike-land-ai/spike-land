@@ -10,10 +10,10 @@
  */
 
 import { z } from "zod";
-import { eq, desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import { freeTool, textResult } from "../procedures/index";
-import { claudeCodeAgents, agentMessages } from "../db/schema";
+import { agentMessages, claudeCodeAgents } from "../db/schema";
 import type { DrizzleDB } from "../db/index";
 
 export function registerSwarmMonitoringTools(
@@ -174,14 +174,19 @@ export function registerSwarmMonitoringTools(
 
         // Verify ownership
         const agentRows = await ctx.db
-          .select({ userId: claudeCodeAgents.userId, name: claudeCodeAgents.name })
+          .select({
+            userId: claudeCodeAgents.userId,
+            name: claudeCodeAgents.name,
+          })
           .from(claudeCodeAgents)
           .where(eq(claudeCodeAgents.id, agent_id))
           .limit(1);
 
         const agent = agentRows[0];
         if (!agent) return textResult(`Agent ${agent_id} not found.`);
-        if (agent.userId !== ctx.userId) return textResult(`Agent ${agent_id} not found.`);
+        if (agent.userId !== ctx.userId) {
+          return textResult(`Agent ${agent_id} not found.`);
+        }
 
         const allMessages = await ctx.db
           .select({
@@ -204,18 +209,24 @@ export function registerSwarmMonitoringTools(
 
         if (sliced.length === 0) {
           return textResult(
-            `No steps in range [${startIdx}, ${to_step ?? allMessages.length - 1}] for agent ${agent_id}.`,
+            `No steps in range [${startIdx}, ${
+              to_step ?? allMessages.length - 1
+            }] for agent ${agent_id}.`,
           );
         }
 
-        let text = `**Replay: ${agent.name}** (steps ${startIdx}–${startIdx + sliced.length - 1} of ${allMessages.length} total)\n\n`;
+        let text = `**Replay: ${agent.name}** (steps ${startIdx}–${
+          startIdx + sliced.length - 1
+        } of ${allMessages.length} total)\n\n`;
 
         sliced.forEach((msg, i) => {
           const stepNum = startIdx + i;
           text += `**Step ${stepNum}**\n`;
           text += `  Role: ${msg.role}\n`;
           text += `  Time: ${new Date(msg.createdAt).toISOString()}\n`;
-          text += `  Content: ${msg.content.slice(0, 120)}${msg.content.length > 120 ? "..." : ""}\n`;
+          text += `  Content: ${msg.content.slice(0, 120)}${
+            msg.content.length > 120 ? "..." : ""
+          }\n`;
           text += "\n";
         });
 

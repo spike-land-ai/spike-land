@@ -56,7 +56,9 @@ export function QuizCard({
               key={idx}
               onClick={() => !disabled && onSelect(questionIndex, idx)}
               disabled={disabled}
-              className={`flex w-full items-center gap-3 rounded-lg border-2 px-4 py-3 text-left text-sm transition-colors ${borderColor} ${bgColor} ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+              className={`flex w-full items-center gap-3 rounded-lg border-2 px-4 py-3 text-left text-sm transition-colors ${borderColor} ${bgColor} ${
+                disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+              }`}
             >
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-medium text-gray-500">
                 {String.fromCharCode(65 + idx)}

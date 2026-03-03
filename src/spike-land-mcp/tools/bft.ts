@@ -139,8 +139,9 @@ function doPropose(cluster: BftCluster, value: string): ConsensusRound {
 
 function doPrepare(cluster: BftCluster, roundSeq: number): ConsensusRound {
   const round = getRound(cluster, roundSeq);
-  if (round.phase !== "pre_prepare")
+  if (round.phase !== "pre_prepare") {
     throw new Error(`Round ${roundSeq} is in phase "${round.phase}", expected "pre_prepare"`);
+  }
   const prepareMessages: PbftMessage[] = [];
   for (const nodeId of cluster.nodeOrder) {
     const node = cluster.nodes.get(nodeId)!;
@@ -182,8 +183,9 @@ function doPrepare(cluster: BftCluster, roundSeq: number): ConsensusRound {
 
 function doCommit(cluster: BftCluster, roundSeq: number): ConsensusRound {
   const round = getRound(cluster, roundSeq);
-  if (round.phase !== "prepare")
+  if (round.phase !== "prepare") {
     throw new Error(`Round ${roundSeq} is in phase "${round.phase}", expected "prepare"`);
+  }
   const n = cluster.nodeOrder.length;
   const q = quorumSize(n);
   const commitMessages: PbftMessage[] = [];
@@ -241,8 +243,9 @@ interface ConsensusResult {
 
 function doCheckConsensus(cluster: BftCluster, roundSeq: number): ConsensusResult {
   const round = getRound(cluster, roundSeq);
-  if (round.phase !== "commit")
+  if (round.phase !== "commit") {
     throw new Error(`Round ${roundSeq} is in phase "${round.phase}", expected "commit"`);
+  }
   const n = cluster.nodeOrder.length;
   const q = quorumSize(n);
   const prepareCount = round.messages.filter(
@@ -328,7 +331,9 @@ export function registerBftTools(registry: ToolRegistry, userId: string, db: Dri
         clusters.set(id, cluster);
         const f = maxFaults(input.node_count);
         return textResult(
-          `**BFT Cluster Created**\n\n**ID:** ${cluster.id}\n**Name:** ${cluster.name}\n**Nodes:** ${cluster.nodeOrder.join(", ")}\n**Fault Tolerance:** f=${f} (tolerates ${f} Byzantine node(s) out of ${input.node_count})\n\nAll nodes are honest. Use \`bft_set_behavior\` to simulate Byzantine faults.`,
+          `**BFT Cluster Created**\n\n**ID:** ${cluster.id}\n**Name:** ${cluster.name}\n**Nodes:** ${cluster.nodeOrder.join(
+            ", ",
+          )}\n**Fault Tolerance:** f=${f} (tolerates ${f} Byzantine node(s) out of ${input.node_count})\n\nAll nodes are honest. Use \`bft_set_behavior\` to simulate Byzantine faults.`,
         );
       }),
   );
@@ -347,7 +352,11 @@ export function registerBftTools(registry: ToolRegistry, userId: string, db: Dri
         if (!node) throw new Error(`Node ${input.node_id} not found`);
         node.behavior = input.behavior;
         return textResult(
-          `**Node Behavior Updated**\n\n**Node:** ${input.node_id}\n**Behavior:** ${input.behavior}\n\n${input.behavior !== "honest" ? "Warning: This node will now behave as a Byzantine fault." : "This node will follow the PBFT protocol faithfully."}`,
+          `**Node Behavior Updated**\n\n**Node:** ${input.node_id}\n**Behavior:** ${input.behavior}\n\n${
+            input.behavior !== "honest"
+              ? "Warning: This node will now behave as a Byzantine fault."
+              : "This node will follow the PBFT protocol faithfully."
+          }`,
         );
       }),
   );
@@ -379,7 +388,9 @@ export function registerBftTools(registry: ToolRegistry, userId: string, db: Dri
         const cluster = getCluster(input.cluster_id, userId);
         const round = doPrepare(cluster, input.sequence_number);
         return textResult(
-          `**Prepare Phase Complete**\n\n**Sequence:** ${round.sequenceNumber}\n**Phase:** ${round.phase}\n**Prepare Messages:** ${round.messages.filter((m) => m.type === "prepare").length}\n\nUse \`bft_run_commit\` to advance.`,
+          `**Prepare Phase Complete**\n\n**Sequence:** ${round.sequenceNumber}\n**Phase:** ${round.phase}\n**Prepare Messages:** ${
+            round.messages.filter((m) => m.type === "prepare").length
+          }\n\nUse \`bft_run_commit\` to advance.`,
         );
       }),
   );
@@ -395,7 +406,9 @@ export function registerBftTools(registry: ToolRegistry, userId: string, db: Dri
         const cluster = getCluster(input.cluster_id, userId);
         const round = doCommit(cluster, input.sequence_number);
         return textResult(
-          `**Commit Phase Complete**\n\n**Sequence:** ${round.sequenceNumber}\n**Phase:** ${round.phase}\n**Commit Messages:** ${round.messages.filter((m) => m.type === "commit").length}\n\nUse \`bft_check_consensus\` to check.`,
+          `**Commit Phase Complete**\n\n**Sequence:** ${round.sequenceNumber}\n**Phase:** ${round.phase}\n**Commit Messages:** ${
+            round.messages.filter((m) => m.type === "commit").length
+          }\n\nUse \`bft_check_consensus\` to check.`,
         );
       }),
   );
@@ -411,7 +424,9 @@ export function registerBftTools(registry: ToolRegistry, userId: string, db: Dri
         const cluster = getCluster(input.cluster_id, userId);
         const result = doCheckConsensus(cluster, input.sequence_number);
         return textResult(
-          `**Consensus Check**\n\n**Decided:** ${result.decided ? "YES" : "NO"}\n**Value:** ${result.value ?? "(none)"}\n**Phase:** ${result.phase}\n**Prepare Count:** ${result.prepareCount}\n**Commit Count:** ${result.commitCount}\n**Required Quorum:** ${result.requiredQuorum}`,
+          `**Consensus Check**\n\n**Decided:** ${result.decided ? "YES" : "NO"}\n**Value:** ${
+            result.value ?? "(none)"
+          }\n**Phase:** ${result.phase}\n**Prepare Count:** ${result.prepareCount}\n**Commit Count:** ${result.commitCount}\n**Required Quorum:** ${result.requiredQuorum}`,
         );
       }),
   );
@@ -435,7 +450,13 @@ export function registerBftTools(registry: ToolRegistry, userId: string, db: Dri
         doCommit(cluster, seqNum);
         const result = doCheckConsensus(cluster, seqNum);
         return textResult(
-          `**Full Consensus Round**\n\n**Decided:** ${result.decided ? "YES" : "NO"}\n**Value:** ${result.value ?? "(none)"}\n**Phase:** ${result.phase}\n**Prepare Count:** ${result.prepareCount}\n**Commit Count:** ${result.commitCount}\n**Required Quorum:** ${result.requiredQuorum}\n\n${result.decided ? `Consensus reached! All honest nodes agreed on "${result.value}".` : `Consensus NOT reached. Quorum not met (need ${result.requiredQuorum}).`}`,
+          `**Full Consensus Round**\n\n**Decided:** ${result.decided ? "YES" : "NO"}\n**Value:** ${
+            result.value ?? "(none)"
+          }\n**Phase:** ${result.phase}\n**Prepare Count:** ${result.prepareCount}\n**Commit Count:** ${result.commitCount}\n**Required Quorum:** ${result.requiredQuorum}\n\n${
+            result.decided
+              ? `Consensus reached! All honest nodes agreed on "${result.value}".`
+              : `Consensus NOT reached. Quorum not met (need ${result.requiredQuorum}).`
+          }`,
         );
       }),
   );
@@ -453,7 +474,9 @@ export function registerBftTools(registry: ToolRegistry, userId: string, db: Dri
         const nodeRows = cluster.nodeOrder
           .map((nodeId) => {
             const node = cluster.nodes.get(nodeId)!;
-            return `| ${node.id} | ${node.behavior} | ${node.phase} | ${node.decidedValue ?? "-"} |`;
+            return `| ${node.id} | ${node.behavior} | ${node.phase} | ${
+              node.decidedValue ?? "-"
+            } |`;
           })
           .join("\n");
         return textResult(

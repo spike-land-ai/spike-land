@@ -7,15 +7,15 @@ import * as z from "zod";
 import { Plus, Sparkles } from "lucide-react";
 import {
   Button,
+  CreditBadge,
+  ImagePicker,
   Input,
+  JobPoller,
   Select,
   TextArea,
-  CreditBadge,
-  JobPoller,
-  ImagePicker,
 } from "@/components/ui";
 import { callTool, parseToolResult } from "@/api/client";
-import { SUBJECT_TYPES, ENHANCEMENT_TIERS, ENHANCEMENT_COSTS } from "@/constants/enums";
+import { ENHANCEMENT_COSTS, ENHANCEMENT_TIERS, SUBJECT_TYPES } from "@/constants/enums";
 
 interface Subject {
   id: string;

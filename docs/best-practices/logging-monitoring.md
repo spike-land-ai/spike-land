@@ -557,8 +557,8 @@ request as it flows through your system.
    import type { NextRequest } from "next/server";
 
    export function proxy(request: NextRequest) {
-     const requestId = request.headers.get("x-request-id")
-       || crypto.randomUUID();
+     const requestId = request.headers.get("x-request-id") ||
+       crypto.randomUUID();
 
      const response = NextResponse.next();
      response.headers.set("x-request-id", requestId);
@@ -610,8 +610,8 @@ import {
 
 const traceExporter = process.env.NODE_ENV === "production"
   ? new OTLPTraceExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT
-      || "http://localhost:4318/v1/traces",
+    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
+      "http://localhost:4318/v1/traces",
   })
   : new ConsoleSpanExporter();
 
@@ -628,7 +628,9 @@ export async function register() {
     process.on("SIGTERM", () => {
       sdk.shutdown()
         .then(() => console.log("OpenTelemetry SDK shut down gracefully"))
-        .catch(err => console.log("Error shutting down OpenTelemetry SDK", err))
+        .catch((err) =>
+          console.log("Error shutting down OpenTelemetry SDK", err)
+        )
         .finally(() => process.exit(0));
     });
   }
@@ -1034,7 +1036,8 @@ const cloudwatchTransport = new WinstonCloudWatch({
   logGroupName: "/aws/lambda/spike-land-nextjs",
   logStreamName: `${process.env.ENVIRONMENT}-${Date.now()}`,
   awsRegion: "us-east-1",
-  messageFormatter: ({ level, message, meta }) => `[${level}] ${message} ${JSON.stringify(meta)}`,
+  messageFormatter: ({ level, message, meta }) =>
+    `[${level}] ${message} ${JSON.stringify(meta)}`,
 });
 
 logger.add(cloudwatchTransport);
@@ -1067,7 +1070,7 @@ function redactSensitiveData(obj: any): any {
   const sensitiveFields = ["password", "token", "secret", "api_key"];
   const redacted = { ...obj };
 
-  sensitiveFields.forEach(field => {
+  sensitiveFields.forEach((field) => {
     if (field in redacted) {
       redacted[field] = "***REDACTED***";
     }

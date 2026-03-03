@@ -19,7 +19,12 @@ vi.mock("@/lib/prisma", () => ({ default: mockPrisma }));
 vi.mock("@/lib/logger", () => ({ default: mockLogger }));
 vi.mock("@/lib/try-catch", () => ({
   tryCatch: (p: Promise<unknown>) =>
-    p.then((data) => ({ data, error: null })).catch((error) => ({ data: null, error })),
+    p
+      .then((data) => ({ data, error: null }))
+      .catch((error) => ({
+        data: null,
+        error,
+      })),
 }));
 
 import { cleanupExpiredBinApps, getBinStats } from "./bin-cleanup";

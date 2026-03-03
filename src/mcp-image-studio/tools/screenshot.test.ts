@@ -24,7 +24,10 @@ describe("screenshot", () => {
     mocks.resolverMocks.resolveImage.mockResolvedValueOnce(
       mockImageRow({ userId, id: asImageId(imageId), originalFormat: format }),
     );
-    mocks.credits.consume.mockResolvedValue({ success: true, remaining: 100 - cost });
+    mocks.credits.consume.mockResolvedValue({
+      success: true,
+      remaining: 100 - cost,
+    });
     mocks.credits.calculateGenerationCost.mockReturnValue(cost);
     mocks.generation.createModificationJob.mockResolvedValue({
       success: true,

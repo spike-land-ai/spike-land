@@ -1,532 +1,591 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1e293b">
     <title>Image Studio Watch</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100dvh;
-            background: radial-gradient(circle at top left, #1f2937, #312e81, #0f766e);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: white;
-            overflow: hidden;
-            /* Prevent overscroll bounce on mobile */
-            overscroll-behavior: none;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100dvh;
+        background: radial-gradient(
+          circle at top left,
+          #1f2937,
+          #312e81,
+          #0f766e
+        );
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        color: white;
+        overflow: hidden;
+        /* Prevent overscroll bounce on mobile */
+        overscroll-behavior: none;
+      }
 
+      .dashboard {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        width: 100%;
+        max-width: 1200px;
+        padding: 20px;
+        height: 100dvh;
+        align-items: center;
+      }
+
+      @media (min-width: 768px) {
         .dashboard {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-            width: 100%;
-            max-width: 1200px;
-            padding: 20px;
-            height: 100dvh;
-            align-items: center;
+          grid-template-columns: 350px 1fr 350px;
+          padding: 40px;
         }
+      }
 
-        @media (min-width: 768px) {
-            .dashboard {
-                grid-template-columns: 350px 1fr 350px;
-                padding: 40px;
-            }
+      .panel {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      }
+
+      .panel.center {
+        aspect-ratio: 1;
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        align-items: center;
+      }
+
+      .watch-wrapper {
+        container-type: size;
+        width: 100%;
+        height: 100%;
+        max-width: 600px;
+        max-height: 600px;
+        margin: 0 auto;
+        position: relative;
+      }
+
+      .watch {
+        --tick-color: #2c2c2c;
+        --tick-major-color: #1a1a1a;
+
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90cqmin;
+        height: 90cqmin;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 30% 30%,
+          #f5f5f0,
+          #e8e4d8,
+          #d4cfc0
+        );
+        box-shadow:
+          0 0 0 3cqmin #2c2c2c,
+          0 0 0 4cqmin #c9a96e,
+          0 0 0 5cqmin #2c2c2c,
+          0 10cqmin 20cqmin rgba(0, 0, 0, 0.6),
+          inset 0 1cqmin 3cqmin rgba(0, 0, 0, 0.2);
+        transition: background 0.3s ease;
+      }
+
+      .watch-brand {
+        position: absolute;
+        top: 22%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 5cqmin;
+        font-weight: bold;
+        color: #2c2c2c;
+        letter-spacing: 0.5cqmin;
+        text-transform: uppercase;
+        transition: color 0.3s ease;
+      }
+
+      .watch-sub {
+        position: absolute;
+        top: 30%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 3cqmin;
+        color: #666;
+        letter-spacing: 0.2cqmin;
+        font-family: "Georgia", serif;
+        transition: color 0.3s ease;
+      }
+
+      .hour-number {
+        position: absolute;
+        font-size: 6cqmin;
+        font-weight: bold;
+        color: #2c2c2c;
+        transform: translate(-50%, -50%);
+        font-family: "Georgia", serif;
+        transition: color 0.3s ease;
+      }
+
+      .hand {
+        position: absolute;
+        bottom: 50%;
+        left: 50%;
+        transform-origin: bottom center;
+        border-radius: 2cqmin;
+      }
+
+      .hour-hand {
+        width: 2cqmin;
+        height: 23cqmin;
+        background: linear-gradient(to top, #2c2c2c, #444);
+        margin-left: -1cqmin;
+        z-index: 3;
+      }
+
+      .minute-hand {
+        width: 1.2cqmin;
+        height: 33cqmin;
+        background: linear-gradient(to top, #2c2c2c, #555);
+        margin-left: -0.6cqmin;
+        z-index: 4;
+      }
+
+      .second-hand {
+        width: 0.6cqmin;
+        height: 38cqmin;
+        background: #14b8a6;
+        margin-left: -0.3cqmin;
+        z-index: 5;
+      }
+
+      .second-hand::after {
+        content: "";
+        position: absolute;
+        bottom: -8cqmin;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0.6cqmin;
+        height: 8cqmin;
+        background: #14b8a6;
+      }
+
+      .center-dot {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 4cqmin;
+        height: 4cqmin;
+        background: radial-gradient(circle, #14b8a6, #0f766e);
+        border-radius: 50%;
+        z-index: 6;
+      }
+
+      .center-dot-inner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 1.5cqmin;
+        height: 1.5cqmin;
+        background: #fff;
+        border-radius: 50%;
+        z-index: 7;
+      }
+
+      .date-window {
+        position: absolute;
+        top: 50%;
+        right: 12%;
+        transform: translateY(-50%);
+        width: 10cqmin;
+        height: 7cqmin;
+        background: #fff;
+        border: 1cqmin solid #ccc;
+        border-radius: 1cqmin;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5cqmin;
+        font-weight: bold;
+        color: #2c2c2c;
+        z-index: 2;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        font-family: "Georgia", serif;
+        transition: all 0.3s ease;
+      }
+
+      .tick {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 1cqmin;
+        height: 100%;
+        transform-origin: center center;
+      }
+
+      .tick::before {
+        content: "";
+        position: absolute;
+        top: 3.5cqmin;
+        left: 0;
+        width: 0.5cqmin;
+        height: 3cqmin;
+        background: var(--tick-color);
+        transition: background 0.3s ease;
+      }
+
+      .tick.major::before {
+        width: 1cqmin;
+        height: 6cqmin;
+        top: 2cqmin;
+        left: -0.25cqmin;
+        background: var(--tick-major-color);
+      }
+
+      .digital-time {
+        font-size: 3rem;
+        font-weight: 300;
+        letter-spacing: 4px;
+        margin-bottom: 10px;
+        font-variant-numeric: tabular-nums;
+        color: white;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .digital-date {
+        font-size: 1.2rem;
+        color: #94a3b8;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+
+      .studio-badge {
+        font-size: 0.85rem;
+        background: rgba(20, 184, 166, 0.2);
+        color: #5eead4;
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid rgba(20, 184, 166, 0.3);
+        margin-bottom: 20px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-weight: 600;
+        box-shadow: 0 0 15px rgba(20, 184, 166, 0.2);
+      }
+
+      .controls {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        outline: none;
+      }
+
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
+
+      .btn.active {
+        background: #14b8a6;
+        border-color: #0d9488;
+        color: #042f2e;
+        font-weight: bold;
+        box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
+      }
+
+      .telemetry-header {
+        margin-bottom: 25px;
+        color: #cbd5e1;
+        font-weight: 500;
+        letter-spacing: 3px;
+        font-size: 1.1rem;
+      }
+
+      .telemetry-row {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 12px;
+        width: 100%;
+      }
+
+      .telemetry-label {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+      }
+
+      .telemetry-value {
+        color: #f8fafc;
+        font-size: 0.9rem;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+
+      .telemetry-value.active {
+        color: #5eead4;
+      }
+
+      /* Mobile adjustments */
+      @media (max-width: 767px) {
+        .dashboard {
+          grid-template-rows: auto 1fr auto;
+          align-content: space-between;
+          gap: 20px;
+          padding: 15px;
         }
-
-        .panel {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        .panel.left-panel {
+          order: 1;
+          padding: 20px;
+          align-items: center;
+          text-align: center;
+          border-radius: 20px;
         }
-
         .panel.center {
-            aspect-ratio: 1;
-            padding: 0;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            backdrop-filter: none;
-            -webkit-backdrop-filter: none;
-            align-items: center;
+          order: 2;
+          margin: 20px 0;
         }
-
-        .watch-wrapper {
-            container-type: size;
-            width: 100%;
-            height: 100%;
-            max-width: 600px;
-            max-height: 600px;
-            margin: 0 auto;
-            position: relative;
+        .panel.right-panel {
+          order: 3;
+          padding: 20px;
+          border-radius: 20px;
         }
-
-        .watch {
-            --tick-color: #2c2c2c;
-            --tick-major-color: #1a1a1a;
-            
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90cqmin;
-            height: 90cqmin;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #f5f5f0, #e8e4d8, #d4cfc0);
-            box-shadow: 
-                0 0 0 3cqmin #2c2c2c, 
-                0 0 0 4cqmin #c9a96e, 
-                0 0 0 5cqmin #2c2c2c, 
-                0 10cqmin 20cqmin rgba(0, 0, 0, 0.6), 
-                inset 0 1cqmin 3cqmin rgba(0, 0, 0, 0.2);
-            transition: background 0.3s ease;
-        }
-
-        .watch-brand {
-            position: absolute;
-            top: 22%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 5cqmin;
-            font-weight: bold;
-            color: #2c2c2c;
-            letter-spacing: 0.5cqmin;
-            text-transform: uppercase;
-            transition: color 0.3s ease;
-        }
-
-        .watch-sub {
-            position: absolute;
-            top: 30%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 3cqmin;
-            color: #666;
-            letter-spacing: 0.2cqmin;
-            font-family: 'Georgia', serif;
-            transition: color 0.3s ease;
-        }
-
-        .hour-number {
-            position: absolute;
-            font-size: 6cqmin;
-            font-weight: bold;
-            color: #2c2c2c;
-            transform: translate(-50%, -50%);
-            font-family: 'Georgia', serif;
-            transition: color 0.3s ease;
-        }
-
-        .hand {
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom center;
-            border-radius: 2cqmin;
-        }
-
-        .hour-hand {
-            width: 2cqmin;
-            height: 23cqmin;
-            background: linear-gradient(to top, #2c2c2c, #444);
-            margin-left: -1cqmin;
-            z-index: 3;
-        }
-
-        .minute-hand {
-            width: 1.2cqmin;
-            height: 33cqmin;
-            background: linear-gradient(to top, #2c2c2c, #555);
-            margin-left: -0.6cqmin;
-            z-index: 4;
-        }
-
-        .second-hand {
-            width: 0.6cqmin;
-            height: 38cqmin;
-            background: #14b8a6;
-            margin-left: -0.3cqmin;
-            z-index: 5;
-        }
-
-        .second-hand::after {
-            content: '';
-            position: absolute;
-            bottom: -8cqmin;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0.6cqmin;
-            height: 8cqmin;
-            background: #14b8a6;
-        }
-
-        .center-dot {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 4cqmin;
-            height: 4cqmin;
-            background: radial-gradient(circle, #14b8a6, #0f766e);
-            border-radius: 50%;
-            z-index: 6;
-        }
-
-        .center-dot-inner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 1.5cqmin;
-            height: 1.5cqmin;
-            background: #fff;
-            border-radius: 50%;
-            z-index: 7;
-        }
-
-        .date-window {
-            position: absolute;
-            top: 50%;
-            right: 12%;
-            transform: translateY(-50%);
-            width: 10cqmin;
-            height: 7cqmin;
-            background: #fff;
-            border: 1cqmin solid #ccc;
-            border-radius: 1cqmin;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3.5cqmin;
-            font-weight: bold;
-            color: #2c2c2c;
-            z-index: 2;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
-            font-family: 'Georgia', serif;
-            transition: all 0.3s ease;
-        }
-
-        .tick {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 1cqmin;
-            height: 100%;
-            transform-origin: center center;
-        }
-
-        .tick::before {
-            content: '';
-            position: absolute;
-            top: 3.5cqmin;
-            left: 0;
-            width: 0.5cqmin;
-            height: 3cqmin;
-            background: var(--tick-color);
-            transition: background 0.3s ease;
-        }
-
-        .tick.major::before {
-            width: 1cqmin;
-            height: 6cqmin;
-            top: 2cqmin;
-            left: -0.25cqmin;
-            background: var(--tick-major-color);
-        }
-
         .digital-time {
-            font-size: 3rem;
-            font-weight: 300;
-            letter-spacing: 4px;
-            margin-bottom: 10px;
-            font-variant-numeric: tabular-nums;
-            color: white;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+          font-size: 2.5rem;
         }
-
-        .digital-date {
-            font-size: 1.2rem;
-            color: #94a3b8;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .studio-badge {
-            font-size: 0.85rem;
-            background: rgba(20, 184, 166, 0.2);
-            color: #5eead4;
-            padding: 6px 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(20, 184, 166, 0.3);
-            margin-bottom: 20px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-weight: 600;
-            box-shadow: 0 0 15px rgba(20, 184, 166, 0.2);
-        }
-
         .controls {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
+          justify-content: center;
+          margin-top: 20px;
         }
-
-        .btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-            outline: none;
+        .studio-badge {
+          margin-bottom: 15px;
         }
-
-        .btn:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateY(-2px);
-        }
-
-        .btn.active {
-            background: #14b8a6;
-            border-color: #0d9488;
-            color: #042f2e;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
-        }
-
         .telemetry-header {
-            margin-bottom: 25px;
-            color: #cbd5e1;
-            font-weight: 500;
-            letter-spacing: 3px;
-            font-size: 1.1rem;
+          text-align: center;
+          width: 100%;
         }
-
-        .telemetry-row {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 12px;
-            width: 100%;
-        }
-
-        .telemetry-label {
-            color: #94a3b8;
-            font-size: 0.9rem;
-            letter-spacing: 1px;
-        }
-
-        .telemetry-value {
-            color: #f8fafc;
-            font-size: 0.9rem;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        }
-
-        .telemetry-value.active {
-            color: #5eead4;
-        }
-
-        /* Mobile adjustments */
-        @media (max-width: 767px) {
-            .dashboard {
-                grid-template-rows: auto 1fr auto;
-                align-content: space-between;
-                gap: 20px;
-                padding: 15px;
-            }
-            .panel.left-panel {
-                order: 1;
-                padding: 20px;
-                align-items: center;
-                text-align: center;
-                border-radius: 20px;
-            }
-            .panel.center {
-                order: 2;
-                margin: 20px 0;
-            }
-            .panel.right-panel {
-                order: 3;
-                padding: 20px;
-                border-radius: 20px;
-            }
-            .digital-time {
-                font-size: 2.5rem;
-            }
-            .controls {
-                justify-content: center;
-                margin-top: 20px;
-            }
-            .studio-badge {
-                margin-bottom: 15px;
-            }
-            .telemetry-header {
-                text-align: center;
-                width: 100%;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="dashboard">
-        <div class="panel left-panel">
-            <div class="studio-badge">Image Studio</div>
-            <div class="digital-time" id="digitalTime"></div>
-            <div class="digital-date" id="digitalDate"></div>
-            
-            <div class="controls">
-                <button class="btn active" onclick="setTheme('default')">Light Dial</button>
-                <button class="btn" onclick="setTheme('dark')">Dark Dial</button>
-            </div>
-        </div>
+      <div class="panel left-panel">
+        <div class="studio-badge">Image Studio</div>
+        <div class="digital-time" id="digitalTime"></div>
+        <div class="digital-date" id="digitalDate"></div>
 
-        <div class="panel center">
-            <div class="watch-wrapper">
-                <div class="watch" id="watch">
-                    <div class="watch-brand">FLORY</div>
-                    <div class="watch-sub">LONDON</div>
-                    <div class="date-window" id="dateWindow"></div>
-                    <div class="hand hour-hand" id="hourHand"></div>
-                    <div class="hand minute-hand" id="minuteHand"></div>
-                    <div class="hand second-hand" id="secondHand"></div>
-                    <div class="center-dot"></div>
-                    <div class="center-dot-inner"></div>
-                </div>
-            </div>
+        <div class="controls">
+          <button class="btn active" onclick="setTheme('default')">
+            Light Dial
+          </button>
+          <button class="btn" onclick="setTheme('dark')">Dark Dial</button>
         </div>
+      </div>
 
-        <div class="panel right-panel">
-            <h3 class="telemetry-header">TELEMETRY</h3>
-            <div style="width: 100%; display: flex; flex-direction: column; gap: 15px;">
-                <div class="telemetry-row">
-                    <span class="telemetry-label">SYNC</span>
-                    <span class="telemetry-value active">ACTIVE</span>
-                </div>
-                <div class="telemetry-row">
-                    <span class="telemetry-label">LATENCY</span>
-                    <span class="telemetry-value">12ms</span>
-                </div>
-                <div class="telemetry-row">
-                    <span class="telemetry-label">TIMEZONE</span>
-                    <span class="telemetry-value" id="tzDisplay">UTC</span>
-                </div>
-                <div class="telemetry-row">
-                    <span class="telemetry-label">FRAME RATE</span>
-                    <span class="telemetry-value">60fps</span>
-                </div>
-            </div>
+      <div class="panel center">
+        <div class="watch-wrapper">
+          <div class="watch" id="watch">
+            <div class="watch-brand">FLORY</div>
+            <div class="watch-sub">LONDON</div>
+            <div class="date-window" id="dateWindow"></div>
+            <div class="hand hour-hand" id="hourHand"></div>
+            <div class="hand minute-hand" id="minuteHand"></div>
+            <div class="hand second-hand" id="secondHand"></div>
+            <div class="center-dot"></div>
+            <div class="center-dot-inner"></div>
+          </div>
         </div>
+      </div>
+
+      <div class="panel right-panel">
+        <h3 class="telemetry-header">TELEMETRY</h3>
+        <div
+          style="width: 100%; display: flex; flex-direction: column; gap: 15px"
+        >
+          <div class="telemetry-row">
+            <span class="telemetry-label">SYNC</span>
+            <span class="telemetry-value active">ACTIVE</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">LATENCY</span>
+            <span class="telemetry-value">12ms</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">TIMEZONE</span>
+            <span class="telemetry-value" id="tzDisplay">UTC</span>
+          </div>
+          <div class="telemetry-row">
+            <span class="telemetry-label">FRAME RATE</span>
+            <span class="telemetry-value">60fps</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
-        const watch = document.getElementById('watch');
-        
-        // Generate Ticks
-        for (let i = 0; i < 60; i++) {
-            const tick = document.createElement('div');
-            tick.className = i % 5 === 0 ? 'tick major' : 'tick';
-            tick.style.transform = `rotate(${i * 6}deg)`;
-            watch.appendChild(tick);
+      const watch = document.getElementById("watch");
+
+      // Generate Ticks
+      for (let i = 0; i < 60; i++) {
+        const tick = document.createElement("div");
+        tick.className = i % 5 === 0 ? "tick major" : "tick";
+        tick.style.transform = `rotate(${i * 6}deg)`;
+        watch.appendChild(tick);
+      }
+
+      // Generate Numbers
+      [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].forEach((num, i) => {
+        const angle = (i * 30 - 90) * (Math.PI / 180);
+        const span = document.createElement("span");
+        span.className = "hour-number";
+        span.textContent = num;
+
+        // 38cqmin radius from center (50%)
+        span.style.left = `calc(50% + 38cqmin * ${Math.cos(angle)})`;
+        span.style.top = `calc(50% + 38cqmin * ${Math.sin(angle)})`;
+        watch.appendChild(span);
+      });
+
+      // Setup Timezone Display
+      document.getElementById("tzDisplay").textContent =
+        Intl.DateTimeFormat().resolvedOptions().timeZone.split("/")
+          .pop() || "UTC";
+
+      const monthNames = [
+        "JAN",
+        "FEB",
+        "MAR",
+        "APR",
+        "MAY",
+        "JUN",
+        "JUL",
+        "AUG",
+        "SEP",
+        "OCT",
+        "NOV",
+        "DEC",
+      ];
+      const dayNames = [
+        "SUNDAY",
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+      ];
+
+      function updateClock() {
+        const now = new Date();
+        const s = now.getSeconds() + now.getMilliseconds() / 1000;
+        const m = now.getMinutes() + s / 60;
+        const h = (now.getHours() % 12) + m / 60;
+
+        // Analog
+        document.getElementById("secondHand").style.transform =
+          `rotate(${s * 6}deg)`;
+        document.getElementById("minuteHand").style.transform =
+          `rotate(${m * 6}deg)`;
+        document.getElementById("hourHand").style.transform = `rotate(${
+          h * 30
+        }deg)`;
+        document.getElementById("dateWindow").textContent = now
+          .getDate();
+
+        // Digital
+        document.getElementById("digitalTime").textContent =
+          String(now.getHours()).padStart(2, "0") + ":" +
+          String(now.getMinutes()).padStart(2, "0") + ":" +
+          String(now.getSeconds()).padStart(2, "0");
+
+        document.getElementById("digitalDate").textContent = `${
+          dayNames[now.getDay()]
+        }, ${now.getDate()} ${
+          monthNames[now.getMonth()]
+        } ${now.getFullYear()}`;
+
+        requestAnimationFrame(updateClock);
+      }
+
+      updateClock();
+
+      // Theme Switcher Logic
+      function setTheme(theme) {
+        document.querySelectorAll(".btn").forEach((b) =>
+          b.classList.remove("active")
+        );
+        event.target.classList.add("active");
+
+        const watchEl = document.getElementById("watch");
+        const hourNumbers = document.querySelectorAll(".hour-number");
+        const dateWindow = document.getElementById("dateWindow");
+        const watchBrand = document.querySelector(".watch-brand");
+        const watchSub = document.querySelector(".watch-sub");
+
+        if (theme === "dark") {
+          watchEl.style.background =
+            "radial-gradient(circle at 30% 30%, #2c3e50, #1a252f, #0f171e)";
+          watchEl.style.setProperty("--tick-color", "#64748b");
+          watchEl.style.setProperty("--tick-major-color", "#cbd5e1");
+
+          hourNumbers.forEach((n) => n.style.color = "#e2e8f0");
+          watchBrand.style.color = "#e2e8f0";
+          watchSub.style.color = "#94a3b8";
+
+          dateWindow.style.background = "#1e293b";
+          dateWindow.style.color = "#e2e8f0";
+          dateWindow.style.borderColor = "#334155";
+        } else {
+          watchEl.style.background =
+            "radial-gradient(circle at 30% 30%, #f5f5f0, #e8e4d8, #d4cfc0)";
+          watchEl.style.setProperty("--tick-color", "#2c2c2c");
+          watchEl.style.setProperty("--tick-major-color", "#1a1a1a");
+
+          hourNumbers.forEach((n) => n.style.color = "#2c2c2c");
+          watchBrand.style.color = "#2c2c2c";
+          watchSub.style.color = "#666";
+
+          dateWindow.style.background = "#fff";
+          dateWindow.style.color = "#2c2c2c";
+          dateWindow.style.borderColor = "#ccc";
         }
-        
-        // Generate Numbers
-        [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].forEach((num, i) => {
-            const angle = (i * 30 - 90) * (Math.PI / 180);
-            const span = document.createElement('span');
-            span.className = 'hour-number';
-            span.textContent = num;
-            
-            // 38cqmin radius from center (50%)
-            span.style.left = `calc(50% + 38cqmin * ${Math.cos(angle)})`;
-            span.style.top = `calc(50% + 38cqmin * ${Math.sin(angle)})`;
-            watch.appendChild(span);
-        });
-
-        // Setup Timezone Display
-        document.getElementById('tzDisplay').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone.split('/').pop() || 'UTC';
-
-        const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-        const dayNames = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
-
-        function updateClock() {
-            const now = new Date();
-            const s = now.getSeconds() + now.getMilliseconds() / 1000;
-            const m = now.getMinutes() + s / 60;
-            const h = (now.getHours() % 12) + m / 60;
-            
-            // Analog
-            document.getElementById('secondHand').style.transform = `rotate(${s * 6}deg)`;
-            document.getElementById('minuteHand').style.transform = `rotate(${m * 6}deg)`;
-            document.getElementById('hourHand').style.transform = `rotate(${h * 30}deg)`;
-            document.getElementById('dateWindow').textContent = now.getDate();
-            
-            // Digital
-            document.getElementById('digitalTime').textContent = 
-                String(now.getHours()).padStart(2, '0') + ':' +
-                String(now.getMinutes()).padStart(2, '0') + ':' +
-                String(now.getSeconds()).padStart(2, '0');
-                
-            document.getElementById('digitalDate').textContent = 
-                `${dayNames[now.getDay()]}, ${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-                
-            requestAnimationFrame(updateClock);
-        }
-        
-        updateClock();
-
-        // Theme Switcher Logic
-        function setTheme(theme) {
-            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            const watchEl = document.getElementById('watch');
-            const hourNumbers = document.querySelectorAll('.hour-number');
-            const dateWindow = document.getElementById('dateWindow');
-            const watchBrand = document.querySelector('.watch-brand');
-            const watchSub = document.querySelector('.watch-sub');
-            
-            if (theme === 'dark') {
-                watchEl.style.background = 'radial-gradient(circle at 30% 30%, #2c3e50, #1a252f, #0f171e)';
-                watchEl.style.setProperty('--tick-color', '#64748b');
-                watchEl.style.setProperty('--tick-major-color', '#cbd5e1');
-                
-                hourNumbers.forEach(n => n.style.color = '#e2e8f0');
-                watchBrand.style.color = '#e2e8f0';
-                watchSub.style.color = '#94a3b8';
-                
-                dateWindow.style.background = '#1e293b';
-                dateWindow.style.color = '#e2e8f0';
-                dateWindow.style.borderColor = '#334155';
-            } else {
-                watchEl.style.background = 'radial-gradient(circle at 30% 30%, #f5f5f0, #e8e4d8, #d4cfc0)';
-                watchEl.style.setProperty('--tick-color', '#2c2c2c');
-                watchEl.style.setProperty('--tick-major-color', '#1a1a1a');
-                
-                hourNumbers.forEach(n => n.style.color = '#2c2c2c');
-                watchBrand.style.color = '#2c2c2c';
-                watchSub.style.color = '#666';
-                
-                dateWindow.style.background = '#fff';
-                dateWindow.style.color = '#2c2c2c';
-                dateWindow.style.borderColor = '#ccc';
-            }
-        }
+      }
     </script>
-</body>
+  </body>
 </html>

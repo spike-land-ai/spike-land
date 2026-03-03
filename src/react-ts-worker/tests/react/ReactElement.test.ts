@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { createElement, cloneElement, isValidElement } from "../../react/ReactElement.js";
+import { describe, expect, it } from "vitest";
+import { cloneElement, createElement, isValidElement } from "../../react/ReactElement.js";
 import { REACT_ELEMENT_TYPE } from "../../react/ReactSymbols.js";
 
 describe("createElement", () => {
@@ -38,7 +38,11 @@ describe("createElement", () => {
   });
 
   it("excludes __self and __source from props", () => {
-    const el = createElement("div", { __self: "self", __source: "source", id: "x" });
+    const el = createElement("div", {
+      __self: "self",
+      __source: "source",
+      id: "x",
+    });
     expect((el.props as Record<string, unknown>).__self).toBeUndefined();
     expect((el.props as Record<string, unknown>).__source).toBeUndefined();
     expect((el.props as Record<string, unknown>).id).toBe("x");
@@ -79,7 +83,10 @@ describe("createElement", () => {
   it("applies defaultProps for missing props on object type", () => {
     // createElement only applies defaultProps when typeof type === "object"
     // (i.e. class-like objects, not plain functions)
-    const MyComp = { defaultProps: { color: "red", size: 10 }, render: () => null };
+    const MyComp = {
+      defaultProps: { color: "red", size: 10 },
+      render: () => null,
+    };
     const el = createElement(MyComp, { size: 20 });
     expect((el.props as Record<string, unknown>).color).toBe("red");
     expect((el.props as Record<string, unknown>).size).toBe(20);

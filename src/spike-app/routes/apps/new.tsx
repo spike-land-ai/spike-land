@@ -1,6 +1,6 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { type ChangeEvent, type FormEvent, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { StatusBadge, type AppStatus } from "@/components/StatusBadge";
+import { type AppStatus, StatusBadge } from "@/components/StatusBadge";
 import { useStdb } from "@/hooks/useStdb";
 
 const steps = ["Details", "Prompt", "Review"] as const;
@@ -33,8 +33,9 @@ function validate(data: FormData, step: number): FormErrors {
   if (step >= 0) {
     if (!data.name.trim()) errors.name = "Name is required";
     if (!data.slug.trim()) errors.slug = "Slug is required";
-    else if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(data.slug))
+    else if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(data.slug)) {
       errors.slug = "Slug must be lowercase letters, numbers, and hyphens";
+    }
   }
   if (step >= 1) {
     if (!data.prompt.trim()) errors.prompt = "Describe what your app should do";

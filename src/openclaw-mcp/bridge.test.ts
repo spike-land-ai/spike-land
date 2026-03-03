@@ -257,7 +257,10 @@ describe("createMcpBridge", () => {
       content: [{ type: "image", data: "base64data", mimeType: "image/jpeg" }],
     });
 
-    const bridge = createMcpBridge({ transport, serverInfo: { name: "t", version: "v" } });
+    const bridge = createMcpBridge({
+      transport,
+      serverInfo: { name: "t", version: "v" },
+    });
     await bridge.loadGatewayTools();
     const result = await bridge.callTool("img", {});
     expect(result.content[0]).toEqual({
@@ -273,7 +276,10 @@ describe("createMcpBridge", () => {
       content: [{ type: "image", url: "https://example.com/i.png" }],
     });
 
-    const bridge = createMcpBridge({ transport, serverInfo: { name: "t", version: "v" } });
+    const bridge = createMcpBridge({
+      transport,
+      serverInfo: { name: "t", version: "v" },
+    });
     await bridge.loadGatewayTools();
     const result = await bridge.callTool("img", {});
     expect(result.content[0]).toEqual({

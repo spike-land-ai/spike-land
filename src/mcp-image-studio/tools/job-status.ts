@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { asImageId, asJobId, errorResult, jsonResult, JOB_TYPE_VALUES } from "../types.js";
+import { asImageId, asJobId, errorResult, JOB_TYPE_VALUES, jsonResult } from "../types.js";
 import { tryCatch } from "./try-catch.js";
 import { imageProcedure } from "../tool-builder/image-middleware.js";
 

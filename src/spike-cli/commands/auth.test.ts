@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { registerAuthCommand } from "./auth";
 import * as flow from "../auth/device-flow";

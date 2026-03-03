@@ -106,7 +106,13 @@ describe("careerNavigatorTools", () => {
   });
 
   it("career_search_occupations returns results", async () => {
-    const result = await registry.call("career_search_occupations", { query: "developer" }, ctx);
+    const result = await registry.call(
+      "career_search_occupations",
+      {
+        query: "developer",
+      },
+      ctx,
+    );
     expect(result.isError).toBeUndefined();
     const text = (result.content[0] as { text: string }).text;
     expect(text).toContain("Occupations Found");
@@ -114,7 +120,13 @@ describe("careerNavigatorTools", () => {
   });
 
   it("career_get_occupation returns full details", async () => {
-    const result = await registry.call("career_get_occupation", { uri: "http://esco/1" }, ctx);
+    const result = await registry.call(
+      "career_get_occupation",
+      {
+        uri: "http://esco/1",
+      },
+      ctx,
+    );
     expect(result.isError).toBeUndefined();
     const text = (result.content[0] as { text: string }).text;
     expect(text).toContain("Software Developer");

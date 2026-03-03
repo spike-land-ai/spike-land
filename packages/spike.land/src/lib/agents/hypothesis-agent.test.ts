@@ -160,7 +160,12 @@ describe("HypothesisAgent", () => {
         workspace: { brandProfile: { toneDescriptors: ["bold"] } },
       });
       mockGenerateContent.mockResolvedValue({
-        text: JSON.stringify([{ content: "Hello! 👋", variationType: "emoji_heavy" }]),
+        text: JSON.stringify([
+          {
+            content: "Hello! 👋",
+            variationType: "emoji_heavy",
+          },
+        ]),
       });
 
       const result = await agent.generateVariants({

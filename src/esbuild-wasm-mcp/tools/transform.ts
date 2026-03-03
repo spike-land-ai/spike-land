@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { TransformOptions } from "@spike-land-ai/esbuild-wasm";
 import { getEsbuildWasm } from "../wasm-api.js";
-import { tryCatch, formatEsbuildError } from "../errors.js";
+import { formatEsbuildError, tryCatch } from "../errors.js";
 import { CommonSchema, prepareBuildOptions, TransformOnlySchema } from "./schemas.js";
 
 const TransformSchema = { ...TransformOnlySchema, ...CommonSchema };

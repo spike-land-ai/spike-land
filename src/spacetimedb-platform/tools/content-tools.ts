@@ -24,7 +24,9 @@ export function registerContentTools(server: McpServer, client: SpacetimePlatfor
         return jsonResult({ created: true, slug });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },
@@ -41,7 +43,9 @@ export function registerContentTools(server: McpServer, client: SpacetimePlatfor
     async ({ slug }) => {
       try {
         const page = client.getPage(slug);
-        if (!page) return errorResult("NOT_FOUND", `Page "${slug}" not found`, false);
+        if (!page) {
+          return errorResult("NOT_FOUND", `Page "${slug}" not found`, false);
+        }
         return jsonResult({
           id: page.id.toString(),
           slug: page.slug,
@@ -53,7 +57,9 @@ export function registerContentTools(server: McpServer, client: SpacetimePlatfor
         });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("QUERY_FAILED", message, false);
       }
     },
@@ -75,7 +81,9 @@ export function registerContentTools(server: McpServer, client: SpacetimePlatfor
         return jsonResult({ updated: true, slug });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },
@@ -95,7 +103,9 @@ export function registerContentTools(server: McpServer, client: SpacetimePlatfor
         return jsonResult({ deleted: true, slug });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },
@@ -118,7 +128,9 @@ export function registerContentTools(server: McpServer, client: SpacetimePlatfor
         return jsonResult({ created: true, pageId, blockType });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },
@@ -140,7 +152,9 @@ export function registerContentTools(server: McpServer, client: SpacetimePlatfor
         return jsonResult({ updated: true, blockId });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },
@@ -160,7 +174,9 @@ export function registerContentTools(server: McpServer, client: SpacetimePlatfor
         return jsonResult({ deleted: true, blockId });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },
@@ -184,7 +200,9 @@ export function registerContentTools(server: McpServer, client: SpacetimePlatfor
         return jsonResult({ reordered: true, pageId, count: blockIds.length });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },

@@ -68,12 +68,13 @@ interface JobStatus {
 import { useParallelEnhancement } from "@/hooks/useParallelEnhancement";
 
 function MyComponent() {
-  const { startEnhancement, jobs, isProcessing, completedCount } = useParallelEnhancement({
-    imageId: "image-123",
-    onAllComplete: jobs => {
-      console.log("All enhancements complete!", jobs);
-    },
-  });
+  const { startEnhancement, jobs, isProcessing, completedCount } =
+    useParallelEnhancement({
+      imageId: "image-123",
+      onAllComplete: (jobs) => {
+        console.log("All enhancements complete!", jobs);
+      },
+    });
 
   const handleEnhance = async () => {
     await startEnhancement(["TIER_1K", "TIER_2K", "TIER_4K"]);
@@ -98,7 +99,7 @@ function EnhancementProgress() {
   const { startEnhancement, jobs, isProcessing, completedCount, failedCount } =
     useParallelEnhancement({
       imageId: "image-123",
-      onJobUpdate: job => {
+      onJobUpdate: (job) => {
         console.log(`Job ${job.jobId} updated:`, job.status);
       },
       onError: (jobId, error) => {
@@ -111,7 +112,7 @@ function EnhancementProgress() {
   return (
     <div>
       <ProgressBar value={progress} />
-      {jobs.map(job => (
+      {jobs.map((job) => (
         <div key={job.jobId}>
           {job.tier}: {job.status}
         </div>
@@ -126,9 +127,10 @@ function EnhancementProgress() {
 
 ```typescript
 function CancellableEnhancement() {
-  const { startEnhancement, cancelAll, isProcessing, jobs } = useParallelEnhancement({
-    imageId: "image-123",
-  });
+  const { startEnhancement, cancelAll, isProcessing, jobs } =
+    useParallelEnhancement({
+      imageId: "image-123",
+    });
 
   return (
     <div>
@@ -150,8 +152,8 @@ function CancellableEnhancement() {
 function EnhancementResults() {
   const { startEnhancement, jobs, completedCount } = useParallelEnhancement({
     imageId: "image-123",
-    onAllComplete: jobs => {
-      const completed = jobs.filter(j => j.status === "COMPLETED");
+    onAllComplete: (jobs) => {
+      const completed = jobs.filter((j) => j.status === "COMPLETED");
       console.log(`${completed.length} enhancements completed`);
     },
   });
@@ -164,7 +166,7 @@ function EnhancementResults() {
         Enhance
       </button>
       <div className="results">
-        {jobs.map(job => (
+        {jobs.map((job) => (
           <div key={job.jobId}>
             <h3>{job.tier}</h3>
             {job.status === "COMPLETED" && job.enhancedUrl && (
@@ -252,9 +254,9 @@ yarn test:run src/hooks/useParallelEnhancement.test.ts
 
 ## Related Files
 
-- `/Users/z/Developer/spike-land-ai/spike.land/src/hooks/useJobStream.ts` - Single job
-  SSE hook
+- `/Users/z/Developer/spike-land-ai/spike.land/src/hooks/useJobStream.ts` -
+  Single job SSE hook
 - `/Users/z/Developer/spike-land-ai/spike.land/src/hooks/useParallelEnhancement.test.ts` -
   Test suite
-- `/Users/z/Developer/spike-land-ai/spike.land/prisma/schema.prisma` - Database schema
-  (EnhancementTier, JobStatus enums)
+- `/Users/z/Developer/spike-land-ai/spike.land/prisma/schema.prisma` - Database
+  schema (EnhancementTier, JobStatus enums)

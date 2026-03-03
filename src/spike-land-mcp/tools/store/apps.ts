@@ -8,7 +8,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "../types";
 import { freeTool } from "../../procedures/index";
-import { textResult, safeToolCall, apiRequest } from "../tool-helpers";
+import { apiRequest, safeToolCall, textResult } from "../tool-helpers";
 import type { DrizzleDB } from "../../db/index";
 
 export function registerStoreAppsTools(
@@ -73,7 +73,9 @@ export function registerStoreAppsTools(
       .handler(async ({ input }) => {
         return safeToolCall("store_app_reviews", async () => {
           const params = new URLSearchParams({ appSlug: input.appSlug });
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const result = await apiRequest<{
             appName: string;
@@ -169,7 +171,9 @@ export function registerStoreAppsTools(
       .handler(async ({ input }) => {
         return safeToolCall("store_recommendations_get", async () => {
           const params = new URLSearchParams({ appSlug: input.appSlug });
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const recs = await apiRequest<Array<{ name: string; tagline: string }>>(
             `/api/store/recommendations?${params.toString()}`,
@@ -206,7 +210,9 @@ export function registerStoreAppsTools(
       .handler(async ({ input }) => {
         return safeToolCall("store_app_personalized", async () => {
           const params = new URLSearchParams();
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const apps = await apiRequest<Array<{ name: string; tagline: string }>>(
             `/api/store/personalized?${params.toString()}`,

@@ -53,7 +53,11 @@ function makeDbGuidance(overrides: Partial<RecoveryGuidance> = {}): RecoveryGuid
     title: "Reconnect Your Account",
     description: "Your account authorization has expired.",
     steps: [
-      { order: 1, title: "Go to settings", description: "Navigate to settings." },
+      {
+        order: 1,
+        title: "Go to settings",
+        description: "Navigate to settings.",
+      },
     ] as unknown as RecoveryGuidance["steps"],
     estimatedTime: "2-5 minutes",
     requiresAction: true,
@@ -188,7 +192,10 @@ describe("getAllRecoveryGuidance", () => {
 
   it("returns all guidance formatted", async () => {
     const guidances = [
-      makeDbGuidance({ id: "g-1", issueType: "TOKEN_EXPIRED" as AccountIssueType }),
+      makeDbGuidance({
+        id: "g-1",
+        issueType: "TOKEN_EXPIRED" as AccountIssueType,
+      }),
       makeDbGuidance({
         id: "g-2",
         issueType: "RATE_LIMITED" as AccountIssueType,
@@ -218,7 +225,12 @@ describe("getAllRecoveryGuidance", () => {
     await getAllRecoveryGuidance();
 
     const findArg = vi.mocked(prisma.recoveryGuidance.findMany).mock.calls[0]?.[0];
-    expect(findArg?.orderBy).toEqual([{ severity: "desc" }, { issueType: "asc" }]);
+    expect(findArg?.orderBy).toEqual([
+      { severity: "desc" },
+      {
+        issueType: "asc",
+      },
+    ]);
   });
 
   it("formats steps correctly for all returned items", async () => {
@@ -342,7 +354,10 @@ describe("upsertRecoveryGuidance", () => {
   it("uses update data from options when updating", async () => {
     const existing = makeDbGuidance({ id: "old-id" });
     vi.mocked(prisma.recoveryGuidance.findFirst).mockResolvedValueOnce(existing);
-    const updated = makeDbGuidance({ id: "old-id", severity: "CRITICAL" as IssueSeverity });
+    const updated = makeDbGuidance({
+      id: "old-id",
+      severity: "CRITICAL" as IssueSeverity,
+    });
     vi.mocked(prisma.recoveryGuidance.update).mockResolvedValueOnce(updated);
 
     await upsertRecoveryGuidance({ ...baseOptions, severity: "CRITICAL" });

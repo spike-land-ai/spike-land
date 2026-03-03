@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Box, Archive, Cpu, Share2, Settings, Activity, Zap, LogOut, Grid } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Activity, Archive, Box, Cpu, Grid, LogOut, Settings, Share2, Zap } from "lucide-react";
 
 export type Workspace = "studio" | "gallery" | "archive" | "intelligence" | "showcase" | "settings";
 
@@ -110,7 +110,9 @@ export function Sidebar({ active, onNavigate, user, onLogout }: SidebarProps) {
                 aria-current={isActive ? "page" : undefined}
               >
                 <Icon
-                  className={`w-5 h-5 ${isActive ? "drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]" : ""}`}
+                  className={`w-5 h-5 ${
+                    isActive ? "drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]" : ""
+                  }`}
                 />
                 {isActive && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-amber-neon rounded-r-full shadow-[0_0_8px_rgba(255,184,0,0.8)]" />
@@ -192,7 +194,9 @@ export function Sidebar({ active, onNavigate, user, onLogout }: SidebarProps) {
             >
               <div className={`p-2 rounded-xl transition-all ${isActive ? "bg-amber-neon/5" : ""}`}>
                 <Icon
-                  className={`w-5 h-5 ${isActive ? "drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]" : ""}`}
+                  className={`w-5 h-5 ${
+                    isActive ? "drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]" : ""
+                  }`}
                 />
               </div>
               <span className="text-[7px] font-black uppercase tracking-[0.2em]">{label}</span>

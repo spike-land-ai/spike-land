@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { forwardRef } from "../../react/ReactForwardRef.js";
 import { REACT_FORWARD_REF_TYPE } from "../../react/ReactSymbols.js";
 import type { Ref } from "../../react/ReactTypes.js";
@@ -23,7 +23,9 @@ describe("forwardRef", () => {
     };
     const ForwardComp = forwardRef(render);
     // The render function should be callable
-    const result = ForwardComp.render({ id: "test" }, mockRef) as { id: string };
+    const result = ForwardComp.render({ id: "test" }, mockRef) as {
+      id: string;
+    };
     expect(result.id).toBe("test");
   });
 

@@ -16,13 +16,13 @@ import { formatAppGroupedTools, formatAppsList, formatGroupedTools } from "./too
 import { coerceValue, extractIdsFromResult, promptForParam } from "./tool-interaction";
 
 // Re-export types and utilities used by consumers
-export type { ToolGroup, AppToolGroup } from "./tool-grouping";
+export type { AppToolGroup, ToolGroup } from "./tool-grouping";
 export {
   extractPrefix,
-  groupToolsByPrefix,
-  groupToolsByApp,
   getVisibleTools,
   getVisibleToolsEnhanced,
+  groupToolsByApp,
+  groupToolsByPrefix,
   isEntryPointTool,
   stripNamespace,
 } from "./tool-grouping";

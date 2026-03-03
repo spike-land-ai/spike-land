@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Sparkles, MousePointer2 } from "lucide-react";
+import { MousePointer2, Sparkles } from "lucide-react";
 
 interface GeneratedImage {
   id: string;
@@ -133,7 +133,11 @@ export function AnimatedGenerations() {
         <div
           key={img.id}
           className={`absolute inset-0 transition-all duration-[2000ms] ease-out
-            ${idx === activeIndex ? "opacity-100 scale-100 saturate-100 blur-0" : "opacity-0 scale-110 saturate-0 blur-xl"}
+            ${
+              idx === activeIndex
+                ? "opacity-100 scale-100 saturate-100 blur-0"
+                : "opacity-0 scale-110 saturate-0 blur-xl"
+            }
           `}
         >
           <img src={img.url} alt={img.prompt} className="w-full h-full object-cover opacity-60" />

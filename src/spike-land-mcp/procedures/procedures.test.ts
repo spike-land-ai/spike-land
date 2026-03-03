@@ -5,8 +5,8 @@
  * textResult / jsonResult.
  */
 
-import { describe, it, expect, vi } from "vitest";
-import { freeTool, workspaceTool, textResult, jsonResult } from "./index";
+import { describe, expect, it, vi } from "vitest";
+import { freeTool, jsonResult, textResult, workspaceTool } from "./index";
 import { createMockD1 } from "../__test-utils__/mock-env";
 import { createDb } from "../db/index";
 import type { McpServer, RegisteredTool } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -41,7 +41,10 @@ function createMockMcpServer(): McpServer {
 describe("re-exported textResult", () => {
   it("returns a text content result", () => {
     const result = textResult("hello from procedures");
-    expect(result.content[0]).toEqual({ type: "text", text: "hello from procedures" });
+    expect(result.content[0]).toEqual({
+      type: "text",
+      text: "hello from procedures",
+    });
   });
 });
 

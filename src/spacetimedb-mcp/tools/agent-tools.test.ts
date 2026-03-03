@@ -172,7 +172,9 @@ describe("agent-tools", () => {
         },
       );
 
-      const result = await server.call("stdb_list_agents", { onlineOnly: false });
+      const result = await server.call("stdb_list_agents", {
+        onlineOnly: false,
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(2);
       expect(parsed.agents[0].displayName).toBe("Agent1");
@@ -196,7 +198,9 @@ describe("agent-tools", () => {
         },
       );
 
-      const result = await server.call("stdb_list_agents", { onlineOnly: true });
+      const result = await server.call("stdb_list_agents", {
+        onlineOnly: true,
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(1);
       expect(parsed.agents[0].displayName).toBe("Agent1");
@@ -254,7 +258,9 @@ describe("agent-tools", () => {
         delivered: false,
       });
 
-      const result = await server.call("stdb_get_messages", { includeDelivered: false });
+      const result = await server.call("stdb_get_messages", {
+        includeDelivered: false,
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(1);
       expect(parsed.messages[0].content).toBe("Hi!");
@@ -281,7 +287,9 @@ describe("agent-tools", () => {
         },
       );
 
-      const result = await server.call("stdb_get_messages", { includeDelivered: true });
+      const result = await server.call("stdb_get_messages", {
+        includeDelivered: true,
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(2);
     });
@@ -304,7 +312,9 @@ describe("agent-tools", () => {
       client.getMessages = vi.fn(() => {
         throw new Error("Subscription expired");
       });
-      const result = await server.call("stdb_get_messages", { includeDelivered: false });
+      const result = await server.call("stdb_get_messages", {
+        includeDelivered: false,
+      });
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain("**Error: QUERY_FAILED**");
     });
@@ -314,7 +324,9 @@ describe("agent-tools", () => {
 
   describe("stdb_mark_delivered", () => {
     it("marks message as delivered", async () => {
-      const result = await server.call("stdb_mark_delivered", { messageId: "42" });
+      const result = await server.call("stdb_mark_delivered", {
+        messageId: "42",
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.marked).toBe(true);
       expect(parsed.messageId).toBe("42");
@@ -326,7 +338,9 @@ describe("agent-tools", () => {
       const dcServer = createMockServer();
       registerAgentTools(dcServer as unknown as McpServer, dcClient);
 
-      const result = await dcServer.call("stdb_mark_delivered", { messageId: "1" });
+      const result = await dcServer.call("stdb_mark_delivered", {
+        messageId: "1",
+      });
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
@@ -335,7 +349,9 @@ describe("agent-tools", () => {
       client.markDelivered = vi.fn(async () => {
         throw new Error("Permission denied");
       });
-      const result = await server.call("stdb_mark_delivered", { messageId: "1" });
+      const result = await server.call("stdb_mark_delivered", {
+        messageId: "1",
+      });
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
       expect(result.content[0].text).toContain("**Retryable:** true");
@@ -381,7 +397,9 @@ describe("agent-tools", () => {
       client.listAgents = vi.fn(() => {
         throw new Error("DB corrupt");
       });
-      const result = await server.call("stdb_list_agents", { onlineOnly: false });
+      const result = await server.call("stdb_list_agents", {
+        onlineOnly: false,
+      });
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain("**Error: QUERY_FAILED**");
     });

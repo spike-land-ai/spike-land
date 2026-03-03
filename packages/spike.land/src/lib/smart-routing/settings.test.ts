@@ -150,7 +150,9 @@ describe("updateSmartRoutingSettings", () => {
   });
 
   it("returns the new merged settings object", async () => {
-    mockWorkspaceFindUnique.mockResolvedValueOnce(null).mockResolvedValueOnce({ settings: {} });
+    mockWorkspaceFindUnique.mockResolvedValueOnce(null).mockResolvedValueOnce({
+      settings: {},
+    });
     mockWorkspaceUpdate.mockResolvedValue({});
 
     const result = await updateSmartRoutingSettings("ws-1", {

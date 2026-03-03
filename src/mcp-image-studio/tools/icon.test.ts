@@ -463,7 +463,10 @@ describe("icon", () => {
     // Remove createReferenceGenerationJob capability
     const depsNoRef = {
       ...deps,
-      generation: { ...deps.generation, createReferenceGenerationJob: undefined },
+      generation: {
+        ...deps.generation,
+        createReferenceGenerationJob: undefined,
+      },
     };
     const ctxNoRef: ToolContext = { userId, deps: depsNoRef };
     mocks.resolverMocks.resolveImage.mockResolvedValue(

@@ -3,16 +3,16 @@ import type { EnhancementTier } from "../types.js";
 import {
   errorResult,
   jsonResult,
-  toolEvent,
-  SCREENSHOT_DEVICE_VALUES,
   SCREENSHOT_BACKGROUND_VALUES,
+  SCREENSHOT_DEVICE_VALUES,
+  toolEvent,
 } from "../types.js";
 import { tryCatch } from "./try-catch.js";
 import {
   imageProcedure,
-  withResolves,
-  withOwnership,
   withCredits,
+  withOwnership,
+  withResolves,
 } from "../tool-builder/image-middleware.js";
 
 export const screenshotTool = imageProcedure

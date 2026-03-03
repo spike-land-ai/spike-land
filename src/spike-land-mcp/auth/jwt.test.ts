@@ -1,11 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { signJwt, verifyJwt } from "./jwt";
 
 const SECRET = "test-jwt-secret-at-least-32-chars-long";
 
 describe("JWT sign + verify", () => {
   it("roundtrip: sign then verify returns original payload", async () => {
-    const payload = { sub: "user-123", exp: Math.floor(Date.now() / 1000) + 3600 };
+    const payload = {
+      sub: "user-123",
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    };
     const token = await signJwt(payload, SECRET);
 
     expect(typeof token).toBe("string");
@@ -18,7 +21,11 @@ describe("JWT sign + verify", () => {
   });
 
   it("preserves custom fields in payload", async () => {
-    const payload = { sub: "user-456", exp: Math.floor(Date.now() / 1000) + 3600, role: "admin" };
+    const payload = {
+      sub: "user-456",
+      exp: Math.floor(Date.now() / 1000) + 3600,
+      role: "admin",
+    };
     const token = await signJwt(payload, SECRET);
     const result = await verifyJwt(token, SECRET);
 
@@ -27,7 +34,10 @@ describe("JWT sign + verify", () => {
   });
 
   it("rejects token signed with different secret", async () => {
-    const payload = { sub: "user-123", exp: Math.floor(Date.now() / 1000) + 3600 };
+    const payload = {
+      sub: "user-123",
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    };
     const token = await signJwt(payload, SECRET);
 
     const result = await verifyJwt(token, "wrong-secret-that-is-different!!");
@@ -36,7 +46,10 @@ describe("JWT sign + verify", () => {
 
   it("rejects expired token", async () => {
     // Create a token that expired 10 seconds ago
-    const payload = { sub: "user-123", exp: Math.floor(Date.now() / 1000) - 10 };
+    const payload = {
+      sub: "user-123",
+      exp: Math.floor(Date.now() / 1000) - 10,
+    };
     const token = await signJwt(payload, SECRET);
 
     const result = await verifyJwt(token, SECRET);
@@ -52,7 +65,10 @@ describe("JWT sign + verify", () => {
   });
 
   it("rejects token with tampered payload", async () => {
-    const payload = { sub: "user-123", exp: Math.floor(Date.now() / 1000) + 3600 };
+    const payload = {
+      sub: "user-123",
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    };
     const token = await signJwt(payload, SECRET);
     const parts = token.split(".");
 

@@ -170,7 +170,11 @@ describe("qr-auth-service", () => {
     it("returns null when session is already APPROVED (not PENDING)", async () => {
       const token = "test-token-value";
       mockRedis.get.mockResolvedValue(
-        JSON.stringify({ status: "APPROVED", userId: "user-123", oneTimeCode: "code" }),
+        JSON.stringify({
+          status: "APPROVED",
+          userId: "user-123",
+          oneTimeCode: "code",
+        }),
       );
 
       const result = await approveQRAuth(token, "user-456");
@@ -254,7 +258,11 @@ describe("qr-auth-service", () => {
 
     it("returns null when oneTimeCode does not match", async () => {
       mockRedis.get.mockResolvedValue(
-        JSON.stringify({ status: "APPROVED", oneTimeCode: "correct-code", userId: "user-123" }),
+        JSON.stringify({
+          status: "APPROVED",
+          oneTimeCode: "correct-code",
+          userId: "user-123",
+        }),
       );
 
       const result = await completeQRAuth("testhash", "wrong-code");
@@ -265,7 +273,11 @@ describe("qr-auth-service", () => {
 
     it("returns null when oneTimeCode differs by length (timing-safe check)", async () => {
       mockRedis.get.mockResolvedValue(
-        JSON.stringify({ status: "APPROVED", oneTimeCode: "correct-code", userId: "user-123" }),
+        JSON.stringify({
+          status: "APPROVED",
+          oneTimeCode: "correct-code",
+          userId: "user-123",
+        }),
       );
 
       const result = await completeQRAuth("testhash", "short");
@@ -298,7 +310,11 @@ describe("qr-auth-service", () => {
       const oneTimeCode = "one-time-use";
       mockRedis.get
         .mockResolvedValueOnce(
-          JSON.stringify({ status: "APPROVED", oneTimeCode, userId: "user-123" }),
+          JSON.stringify({
+            status: "APPROVED",
+            oneTimeCode,
+            userId: "user-123",
+          }),
         )
         .mockResolvedValueOnce(null);
       mockRedis.del.mockResolvedValue(1);

@@ -11,7 +11,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "./types";
 import { freeTool } from "../procedures/index";
-import { textResult, safeToolCall, apiRequest } from "./tool-helpers";
+import { apiRequest, safeToolCall, textResult } from "./tool-helpers";
 import type { DrizzleDB } from "../db/index";
 
 const MAX_CONTENT_LENGTH = 4000;
@@ -96,7 +96,9 @@ export function registerLearnItTools(
       .handler(async ({ input }) => {
         return safeToolCall("learnit_search_topics", async () => {
           const params = new URLSearchParams({ query: input.query });
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const topics = await apiRequest<
             Array<{
@@ -181,7 +183,9 @@ export function registerLearnItTools(
           }
 
           if (!input.type || input.type === "parent") {
-            text += `**Parent:** ${result.parent ? `${result.parent.title} (\`${result.parent.slug}\`)` : "(none)"}\n`;
+            text += `**Parent:** ${
+              result.parent ? `${result.parent.title} (\`${result.parent.slug}\`)` : "(none)"
+            }\n`;
           }
 
           return textResult(text);
@@ -202,7 +206,9 @@ export function registerLearnItTools(
       .handler(async ({ input }) => {
         return safeToolCall("learnit_list_popular", async () => {
           const params = new URLSearchParams();
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const topics = await apiRequest<
             Array<{
@@ -237,7 +243,9 @@ export function registerLearnItTools(
       .handler(async ({ input }) => {
         return safeToolCall("learnit_list_recent", async () => {
           const params = new URLSearchParams();
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const topics = await apiRequest<
             Array<{

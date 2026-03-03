@@ -50,7 +50,6 @@ export default tseslint.config(
       ".yarn/**",
     ],
   },
-
   // TypeScript files (non-React)
   {
     files: ["src/**/*.ts"],
@@ -66,7 +65,6 @@ export default tseslint.config(
     },
     rules: sharedRules,
   },
-
   // React/TSX files
   {
     files: ["src/**/*.tsx"],
@@ -93,7 +91,6 @@ export default tseslint.config(
       react: { version: "detect" },
     },
   },
-
   // Test file overrides
   {
     files: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
@@ -101,7 +98,6 @@ export default tseslint.config(
       "dot-notation": "off",
     },
   },
-
   // Config files at root
   {
     files: ["*.config.ts", "*.config.mjs"],

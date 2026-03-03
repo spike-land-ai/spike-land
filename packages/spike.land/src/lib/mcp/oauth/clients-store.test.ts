@@ -194,7 +194,13 @@ describe("clients-store", () => {
     });
 
     it("should return error when redirect_uris is empty for non-device-flow", async () => {
-      const result = await registerClient({ client_name: "Test", redirect_uris: [] }, "127.0.0.7");
+      const result = await registerClient(
+        {
+          client_name: "Test",
+          redirect_uris: [],
+        },
+        "127.0.0.7",
+      );
 
       expect(result).toEqual({
         error: "At least one redirect_uri is required",
@@ -357,7 +363,13 @@ describe("clients-store", () => {
         tokenEndpointAuthMethod: "none",
       });
 
-      await registerClient({ ...validRequest, token_endpoint_auth_method: "none" }, "127.0.0.20");
+      await registerClient(
+        {
+          ...validRequest,
+          token_endpoint_auth_method: "none",
+        },
+        "127.0.0.20",
+      );
 
       expect(mockPrisma.oAuthClient.create).toHaveBeenCalledWith(
         expect.objectContaining({

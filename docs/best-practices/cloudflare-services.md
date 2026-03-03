@@ -521,7 +521,7 @@ export class Document {
 
       this.sessions.add(server);
 
-      server.addEventListener("message", async msg => {
+      server.addEventListener("message", async (msg) => {
         // Store change
         await this.state.put("content", msg.data);
 
@@ -1271,7 +1271,8 @@ export async function POST(request: Request) {
 
   const s3Client = new S3Client({
     region: "auto",
-    endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    endpoint:
+      `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
     credentials: {
       accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID,
       secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY,

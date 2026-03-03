@@ -1,10 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult as SdkCallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import {
-  registerImageStudioTools,
   type CallToolResult,
   type ImageStudioDeps,
   type ImageStudioToolRegistry,
+  registerImageStudioTools,
 } from "@spike-land-ai/mcp-image-studio";
 import { z } from "zod";
 
@@ -41,12 +41,13 @@ function createRegistryAdapter(server: McpServer): ImageStudioToolRegistry {
 
           if (field.description) zField = zField.describe(field.description);
           if (field.optional) zField = zField.optional();
-          if (field.default !== undefined) zField = zField.default(field.default);
+          if (field.default !== undefined) {
+            zField = zField.default(field.default);
+          }
 
           shape[key] = zField;
         }
-      }
-      // Support old ToolDefinition format
+      } // Support old ToolDefinition format
       else if (def.inputSchema?.properties) {
         const required = new Set<string>((def.inputSchema.required as string[]) ?? []);
         for (const [key, prop] of Object.entries(def.inputSchema.properties) as [

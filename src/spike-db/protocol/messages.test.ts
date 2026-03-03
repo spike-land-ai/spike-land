@@ -3,10 +3,10 @@ import { ZodError } from "zod";
 import {
   type ClientMessage,
   DeltaSchema,
-  type ServerMessage,
   parseClientMessage,
   parseServerMessage,
   serialize,
+  type ServerMessage,
 } from "./messages.js";
 
 // ---------------------------------------------------------------------------
@@ -29,7 +29,13 @@ describe("ClientMessage round-trip", () => {
       msg: {
         type: "subscribe",
         id: "s1",
-        queries: [{ table: "users" }, { table: "posts", filter: { authorId: "u1" } }],
+        queries: [
+          { table: "users" },
+          {
+            table: "posts",
+            filter: { authorId: "u1" },
+          },
+        ],
       },
     },
     {
@@ -83,7 +89,13 @@ describe("ServerMessage round-trip", () => {
         reducerName: "addUser",
         callerIdentity: "caller-1",
         status: "committed",
-        deltas: [{ table: "users", op: "insert", newRow: { id: 1, name: "bob" } }],
+        deltas: [
+          {
+            table: "users",
+            op: "insert",
+            newRow: { id: 1, name: "bob" },
+          },
+        ],
       },
     },
     {

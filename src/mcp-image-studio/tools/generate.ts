@@ -7,10 +7,10 @@ import {
   GENERATION_RESOLUTION_VALUES,
   IMG_DEFAULTS,
   jsonResult,
-  toolEvent,
   MODEL_PREFERENCE_VALUES,
   REFERENCE_ROLE_VALUES,
   SUPPORTED_ASPECT_RATIOS,
+  toolEvent,
 } from "../types.js";
 import { tryCatch } from "./try-catch.js";
 import { imageProcedure } from "../tool-builder/image-middleware.js";

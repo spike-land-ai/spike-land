@@ -66,7 +66,9 @@ function createMockIDB() {
     const names = typeof storeNames === "string" ? [storeNames] : storeNames;
     return {
       objectStore: (name: string) => {
-        if (!names.includes(name)) throw new Error(`Store ${name} not in transaction`);
+        if (!names.includes(name)) {
+          throw new Error(`Store ${name} not in transaction`);
+        }
         return mockObjectStore(name);
       },
     };
@@ -157,7 +159,9 @@ describe("idb-cache", () => {
     // Manually age the entry by modifying the store
     const ataStore = mockIDB.stores["ata-cache"];
     if (ataStore) {
-      const entry = ataStore.get("https://old.com/types.d.ts") as { timestamp: number };
+      const entry = ataStore.get("https://old.com/types.d.ts") as {
+        timestamp: number;
+      };
       if (entry) {
         entry.timestamp = Date.now() - 8 * 24 * 60 * 60 * 1000; // 8 days ago
       }
@@ -187,7 +191,9 @@ describe("idb-cache", () => {
     // Age the entry beyond TTL
     const ataStore = mockIDB.stores["ata-cache"];
     if (ataStore) {
-      const entry = ataStore.get("https://stale.com/types.d.ts") as { timestamp: number };
+      const entry = ataStore.get("https://stale.com/types.d.ts") as {
+        timestamp: number;
+      };
       if (entry) {
         entry.timestamp = Date.now() - 8 * 24 * 60 * 60 * 1000;
       }

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Terminal, CheckCircle2, Activity } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Activity, CheckCircle2, Terminal } from "lucide-react";
 
 interface ToolCallLog {
   id: string;
@@ -78,12 +78,16 @@ export function LiveActivity() {
         {logs.map((log, index) => (
           <div
             key={log.id}
-            className={`animate-in fade-in slide-in-from-right-4 duration-500 rounded-2xl bg-white/5 border border-white/5 p-4 hover:bg-white/10 transition-all ${index === 0 ? "neon-border-emerald" : ""}`}
+            className={`animate-in fade-in slide-in-from-right-4 duration-500 rounded-2xl bg-white/5 border border-white/5 p-4 hover:bg-white/10 transition-all ${
+              index === 0 ? "neon-border-emerald" : ""
+            }`}
           >
             <div className="flex items-center justify-between mb-3 pb-2 border-b border-white/5">
               <div className="flex items-center gap-3">
                 <span className="text-gray-600 font-black tracking-tighter uppercase">
-                  {log.timestamp.toLocaleTimeString(undefined, { hour12: false })}
+                  {log.timestamp.toLocaleTimeString(undefined, {
+                    hour12: false,
+                  })}
                 </span>
                 <span className="text-amber-neon font-black uppercase tracking-widest text-[11px]">
                   {log.toolName.replace("img_", "PIXEL.")}

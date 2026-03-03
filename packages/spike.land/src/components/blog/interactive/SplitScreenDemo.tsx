@@ -53,7 +53,13 @@ const STRUCTURED_ITEMS: readonly StructuredItem[] = [
     progress: 100,
     color: "#00E5FF",
   },
-  { id: 2, label: "Memory State", value: "247 facts indexed", progress: 87, color: "#00E5FF" },
+  {
+    id: 2,
+    label: "Memory State",
+    value: "247 facts indexed",
+    progress: 87,
+    color: "#00E5FF",
+  },
   {
     id: 3,
     label: "Task Context",
@@ -61,8 +67,20 @@ const STRUCTURED_ITEMS: readonly StructuredItem[] = [
     progress: 100,
     color: "#22c55e",
   },
-  { id: 4, label: "Tool Schemas", value: "14 tools registered", progress: 100, color: "#22c55e" },
-  { id: 5, label: "Output Format", value: "TypeScript strict", progress: 94, color: "#00E5FF" },
+  {
+    id: 4,
+    label: "Tool Schemas",
+    value: "14 tools registered",
+    progress: 100,
+    color: "#22c55e",
+  },
+  {
+    id: 5,
+    label: "Output Format",
+    value: "TypeScript strict",
+    progress: 94,
+    color: "#00E5FF",
+  },
   {
     id: 6,
     label: "Constraints",
@@ -251,7 +269,11 @@ function ContextEngineeringPanel({ shouldReduceMotion }: { shouldReduceMotion: b
                   style={{ background: item.color }}
                   initial={{ width: 0 }}
                   animate={{ width: `${item.progress}%` }}
-                  transition={{ delay: 0.3 + i * 0.1, duration: 0.7, ease: "easeOut" }}
+                  transition={{
+                    delay: 0.3 + i * 0.1,
+                    duration: 0.7,
+                    ease: "easeOut",
+                  }}
                 />
               </div>
               <span className="text-slate-300 text-[10px] font-mono flex-shrink-0 truncate max-w-[100px]">

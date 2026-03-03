@@ -11,8 +11,22 @@ afterEach(cleanup);
 
 describe("AudioMixerPanel", () => {
   const mockTracks = [
-    { id: "1", name: "Drums", volume: 80, isMuted: false, isSolo: false, color: "#ff5555" },
-    { id: "2", name: "Bass", volume: 65, isMuted: false, isSolo: false, color: "#55ff55" },
+    {
+      id: "1",
+      name: "Drums",
+      volume: 80,
+      isMuted: false,
+      isSolo: false,
+      color: "#ff5555",
+    },
+    {
+      id: "2",
+      name: "Bass",
+      volume: 65,
+      isMuted: false,
+      isSolo: false,
+      color: "#55ff55",
+    },
   ];
 
   it("renders all tracks", () => {

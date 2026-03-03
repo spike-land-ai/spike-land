@@ -224,7 +224,11 @@ describe("gemini-analysis", () => {
         candidates: [
           {
             content: {
-              parts: [{ text: JSON.stringify(mockAnalysis.structuredAnalysis) }],
+              parts: [
+                {
+                  text: JSON.stringify(mockAnalysis.structuredAnalysis),
+                },
+              ],
             },
           },
         ],

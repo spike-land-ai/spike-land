@@ -45,7 +45,11 @@ export const pipelineSaveTool = imageProcedure
         return errorResult("PIPELINE_CREATE_FAILED", "Failed to create pipeline");
       }
 
-      ctx.notify?.(toolEvent("pipeline:created", result.data.id, { name: result.data.name }));
+      ctx.notify?.(
+        toolEvent("pipeline:created", result.data.id, {
+          name: result.data.name,
+        }),
+      );
 
       return jsonResult({
         id: result.data.id,
@@ -113,9 +117,15 @@ export const pipelineSaveTool = imageProcedure
 
     const data: Record<string, unknown> = { name };
     if (description !== undefined) data.description = description;
-    if (castConfigs?.analysis !== undefined) data.analysisConfig = castConfigs.analysis;
-    if (castConfigs?.autoCrop !== undefined) data.autoCropConfig = castConfigs.autoCrop;
-    if (castConfigs?.prompt !== undefined) data.promptConfig = castConfigs.prompt;
+    if (castConfigs?.analysis !== undefined) {
+      data.analysisConfig = castConfigs.analysis;
+    }
+    if (castConfigs?.autoCrop !== undefined) {
+      data.autoCropConfig = castConfigs.autoCrop;
+    }
+    if (castConfigs?.prompt !== undefined) {
+      data.promptConfig = castConfigs.prompt;
+    }
     if (castConfigs?.generation !== undefined) {
       data.generationConfig = castConfigs.generation;
     }

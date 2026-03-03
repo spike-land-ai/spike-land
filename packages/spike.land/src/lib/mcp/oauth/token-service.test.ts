@@ -721,7 +721,9 @@ describe("token-service", () => {
 
   describe("exchangeAuthorizationCode edge cases", () => {
     it("should handle authCode being deleted between update and findUnique", async () => {
-      mockPrisma.oAuthAuthorizationCode.updateMany.mockResolvedValue({ count: 1 });
+      mockPrisma.oAuthAuthorizationCode.updateMany.mockResolvedValue({
+        count: 1,
+      });
       mockPrisma.oAuthAuthorizationCode.findUnique.mockResolvedValue(null);
 
       const result = await exchangeAuthorizationCode("code", "client", "verifier", "uri");

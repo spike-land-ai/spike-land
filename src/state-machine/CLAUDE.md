@@ -2,7 +2,8 @@
 
 ## Overview
 
-Statechart engine with guard expression parser for spike.land. Includes a CLI for visualization. Published as `@spike-land-ai/state-machine`, runs in Node.js.
+Statechart engine with guard expression parser for spike.land. Includes a CLI
+for visualization. Published as `@spike-land-ai/state-machine`, runs in Node.js.
 
 ## Commands
 
@@ -29,6 +30,7 @@ npm run lint          # ESLint
 ```
 
 **Exports**:
+
 - `@spike-land-ai/state-machine` — engine, parser, types
 - `@spike-land-ai/state-machine/persistence` — persistence utilities
 

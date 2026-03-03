@@ -85,7 +85,9 @@ export async function updatePlayer(
     const updateData: Record<string, string | boolean> = {};
     if (data.name !== undefined) updateData.name = data.name;
     if (data.avatar !== undefined) updateData.avatar = data.avatar;
-    if (data.soundEnabled !== undefined) updateData.soundEnabled = data.soundEnabled;
+    if (data.soundEnabled !== undefined) {
+      updateData.soundEnabled = data.soundEnabled;
+    }
     return await prisma.chessPlayer.update({
       where: { id: playerId, userId },
       data: updateData,

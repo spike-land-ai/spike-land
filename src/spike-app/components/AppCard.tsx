@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { StatusBadge, type AppStatus } from "./StatusBadge";
+import { type AppStatus, StatusBadge } from "./StatusBadge";
 
 interface AppCardProps {
   id: string;
@@ -42,7 +42,9 @@ export function AppCard({
       <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
         {category && (
           <span
-            className={`rounded-full px-2 py-0.5 font-medium ${categoryColors[category] ?? categoryColors.other}`}
+            className={`rounded-full px-2 py-0.5 font-medium ${
+              categoryColors[category] ?? categoryColors.other
+            }`}
           >
             {category}
           </span>

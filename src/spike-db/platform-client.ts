@@ -1,5 +1,5 @@
 import { SpikeDbClient } from "./client/index.js";
-import type { SpikeDbClientOptions, ClientTable } from "./client/index.js";
+import type { ClientTable, SpikeDbClientOptions } from "./client/index.js";
 import { platformDatabase } from "./platform-schema.js";
 
 // ---------------------------------------------------------------------------

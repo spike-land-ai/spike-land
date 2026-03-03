@@ -56,10 +56,13 @@ function buildZeroShotPrompt(bundle: ContextBundle, role: string, format: string
   prompt += `Specification: ${bundle.spec}\n\n`;
   if (bundle.fileContents.length > 0) {
     prompt += `Existing Context Files:\n`;
-    for (const file of bundle.fileContents) prompt += `--- ${file.path} ---\n${file.content}\n\n`;
+    for (const file of bundle.fileContents) {
+      prompt += `--- ${file.path} ---\n${file.content}\n\n`;
+    }
   }
-  if (bundle.constraints.length > 0)
+  if (bundle.constraints.length > 0) {
     prompt += `Constraints:\n- ${bundle.constraints.join("\n- ")}\n\n`;
+  }
   return prompt;
 }
 
@@ -73,7 +76,10 @@ function parseCodeOutput(rawOutput: string): Array<{ path: string; content: stri
   if (files.length === 0 && rawOutput.includes("---")) {
     const segments = rawOutput.split(/--- ([\w/.-]+) ---/);
     for (let i = 1; i < segments.length; i += 2) {
-      files.push({ path: segments[i] ?? "unknown_file", content: (segments[i + 1] ?? "").trim() });
+      files.push({
+        path: segments[i] ?? "unknown_file",
+        content: (segments[i + 1] ?? "").trim(),
+      });
     }
   }
   return files;
@@ -137,7 +143,9 @@ export function registerCodegenTools(registry: ToolRegistry, userId: string, db:
           input.role ?? "Senior React/Next.js Engineer",
           input.output_format ?? "Multi-file fenced blocks",
         );
-        return jsonResult(`Prompt built for bundle ${input.bundle_id}`, { prompt });
+        return jsonResult(`Prompt built for bundle ${input.bundle_id}`, {
+          prompt,
+        });
       }),
   );
 
@@ -229,7 +237,11 @@ export function registerCodegenTools(registry: ToolRegistry, userId: string, db:
           .filter((r): r is CodeGenResult => !!r);
         return jsonResult(
           `Summary of ${list.length} results`,
-          list.map((r) => ({ id: r.id, tokensIn: r.tokensIn, tokensOut: r.tokensOut })),
+          list.map((r) => ({
+            id: r.id,
+            tokensIn: r.tokensIn,
+            tokensOut: r.tokensOut,
+          })),
         );
       }),
   );

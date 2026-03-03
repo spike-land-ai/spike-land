@@ -11,7 +11,12 @@ afterEach(cleanup);
 
 describe("AdminStatsBar", () => {
   const mockStats = [
-    { label: "Total Users", value: "12,450", delta: "+5.2%", deltaType: "up" as const },
+    {
+      label: "Total Users",
+      value: "12,450",
+      delta: "+5.2%",
+      deltaType: "up" as const,
+    },
     { label: "MRR", value: "$8,320", delta: "+12%", deltaType: "up" as const },
     { label: "Errors", value: "3", delta: "-80%", deltaType: "down" as const },
   ];

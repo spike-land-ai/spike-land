@@ -1,4 +1,4 @@
-import { useParams, Link } from "@tanstack/react-router";
+import { Link, useParams } from "@tanstack/react-router";
 
 export function ToolsCategoryPage() {
   const { category } = useParams({ strict: false });

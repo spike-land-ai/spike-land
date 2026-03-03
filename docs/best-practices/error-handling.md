@@ -291,7 +291,7 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 /**
  * Error logging function
  */
-function logError(error: Error, info: { componentStack: string; }) {
+function logError(error: Error, info: { componentStack: string }) {
   console.error("Error caught by boundary:", error);
   console.error("Component stack:", info.componentStack);
   // Send to error tracking service (e.g., errorLogger.logError)
@@ -360,7 +360,7 @@ function MyComponent() {
 function ErrorFallbackWithReset({
   error,
   resetErrorBoundary,
-}: FallbackProps & { resetErrorBoundary: () => void; }) {
+}: FallbackProps & { resetErrorBoundary: () => void }) {
   return (
     <div className="error-container">
       <h2>Application Error</h2>
@@ -398,7 +398,7 @@ export default function Error({
   error,
   reset,
 }: {
-  error: Error & { digest?: string; };
+  error: Error & { digest?: string };
   reset: () => void;
 }) {
   useEffect(() => {
@@ -554,11 +554,11 @@ function createAxiosInstance(): AxiosInstance {
   axiosRetry(instance, {
     retries: 3,
     retryDelay: axiosRetry.exponentialDelay,
-    retryCondition: error => {
+    retryCondition: (error) => {
       // Retry on network errors and 5xx status codes
       return (
-        axiosRetry.isNetworkOrIdempotentRequestError(error)
-        || (error.response?.status === 429) // Rate limit
+        axiosRetry.isNetworkOrIdempotentRequestError(error) ||
+        (error.response?.status === 429) // Rate limit
       );
     },
     shouldResetTimeout: true,
@@ -566,7 +566,7 @@ function createAxiosInstance(): AxiosInstance {
 
   // Response interceptor for error handling
   instance.interceptors.response.use(
-    response => response,
+    (response) => response,
     (error: AxiosError) => {
       const status = error.response?.status;
       const data = error.response?.data as ErrorResponse;
@@ -604,7 +604,7 @@ export async function fetchUserData(id: string) {
   } catch (error) {
     if (error instanceof RateLimitError) {
       // Wait before retrying
-      await new Promise(resolve => setTimeout(resolve, error.retryAfter));
+      await new Promise((resolve) => setTimeout(resolve, error.retryAfter));
       return fetchUserData(id); // Retry
     }
     throw error;
@@ -658,7 +658,7 @@ async function retryAsync<T>(
       console.log(
         `Attempt ${attempt + 1} failed, retrying in ${Math.round(delay)}ms...`,
       );
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 
@@ -674,7 +674,7 @@ async function robustFetch<T>(url: string): Promise<T> {
     {
       maxRetries: 4,
       initialDelayMs: 500,
-      shouldRetry: error => {
+      shouldRetry: (error) => {
         // Don't retry on client errors (4xx) except 429
         if (isAPIError(error)) {
           return error.statusCode === 429 || error.statusCode >= 500;
@@ -860,7 +860,7 @@ errorLogger.logError(error, {
 /**
  * Error boundary usage
  */
-function logError(error: Error, info: { componentStack: string; }) {
+function logError(error: Error, info: { componentStack: string }) {
   errorLogger.logError(error, {
     componentStack: info.componentStack,
   });
@@ -963,7 +963,7 @@ class Logger {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(logEntry),
-    }).catch(err => console.error("Failed to send log:", err));
+    }).catch((err) => console.error("Failed to send log:", err));
   }
 }
 
@@ -1022,7 +1022,8 @@ async function getAnalytics(userId: string) {
   return withGracefulDegradation({
     critical: () => fetchWithErrorHandling(`/api/analytics/${userId}`),
     fallback: () => Promise.resolve(getAnalyticsFromLocalStorage(userId)),
-    onError: error => logger.warn("Failed to fetch analytics", { error: error.message }),
+    onError: (error) =>
+      logger.warn("Failed to fetch analytics", { error: error.message }),
   });
 }
 ```
@@ -1048,8 +1049,8 @@ class CircuitBreaker {
   async execute<T>(fn: () => Promise<T>): Promise<T> {
     if (this.state === "OPEN") {
       if (
-        this.lastFailureTime
-        && Date.now() - this.lastFailureTime > this.resetTimeoutMs
+        this.lastFailureTime &&
+        Date.now() - this.lastFailureTime > this.resetTimeoutMs
       ) {
         this.state = "HALF_OPEN";
         console.log("Circuit breaker: Attempting recovery...");
@@ -1249,7 +1250,7 @@ async function fetchWithTimeout<T>(url: string): Promise<T> {
 6. **Don't forget about memory leaks** - Clean up error handlers
    ```typescript
    useEffect(() => {
-     const handler = e => handleError(e);
+     const handler = (e) => handleError(e);
      window.addEventListener("error", handler);
      return () => window.removeEventListener("error", handler);
    }, []);

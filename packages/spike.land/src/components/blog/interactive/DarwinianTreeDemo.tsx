@@ -612,7 +612,9 @@ export function DarwinianTreeDemo() {
             className={`w-2 h-2 rounded-full ${
               isAutoPlaying ? "bg-emerald-400 animate-pulse" : "bg-slate-600"
             }`}
-            style={{ boxShadow: isAutoPlaying ? "0 0 8px rgba(52,211,153,0.8)" : "none" }}
+            style={{
+              boxShadow: isAutoPlaying ? "0 0 8px rgba(52,211,153,0.8)" : "none",
+            }}
           />
           <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
             {isAutoPlaying ? "Simulating..." : "Natural Selection"}

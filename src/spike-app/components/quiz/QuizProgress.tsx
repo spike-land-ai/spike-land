@@ -28,7 +28,9 @@ export function QuizProgress({ progress, masteryThreshold = 2 }: QuizProgressPro
       <div className="mb-4 h-2 overflow-hidden rounded-full bg-gray-100">
         <div
           className="h-full rounded-full bg-blue-600 transition-all duration-500"
-          style={{ width: `${progress.length > 0 ? (masteredCount / progress.length) * 100 : 0}%` }}
+          style={{
+            width: `${progress.length > 0 ? (masteredCount / progress.length) * 100 : 0}%`,
+          }}
         />
       </div>
 
@@ -59,7 +61,9 @@ export function QuizProgress({ progress, masteryThreshold = 2 }: QuizProgressPro
                   className={`h-full rounded-full transition-all duration-300 ${
                     p.mastered ? "bg-green-500" : "bg-blue-400"
                   }`}
-                  style={{ width: `${Math.min((p.correctCount / masteryThreshold) * 100, 100)}%` }}
+                  style={{
+                    width: `${Math.min((p.correctCount / masteryThreshold) * 100, 100)}%`,
+                  }}
                 />
               </div>
             </div>

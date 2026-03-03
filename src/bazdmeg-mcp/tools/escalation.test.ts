@@ -2,13 +2,13 @@
  * Tests for escalation tools
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { readFile, unlink } from "node:fs/promises";
 import { readdir } from "node:fs/promises";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 import { registerEscalationTools } from "./escalation.js";
-import { resetWorkspaceState, enterWorkspace } from "../workspace-state.js";
+import { enterWorkspace, resetWorkspaceState } from "../workspace-state.js";
 
 describe("escalation tools", () => {
   let server: ReturnType<typeof createMockServer>;

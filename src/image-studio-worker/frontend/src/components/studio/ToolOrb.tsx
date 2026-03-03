@@ -1,5 +1,5 @@
 import React from "react";
-import { Wand2, Monitor, Tag, Trash2, Maximize, Share2 } from "lucide-react";
+import { Maximize, Monitor, Share2, Tag, Trash2, Wand2 } from "lucide-react";
 
 interface ToolOrbProps {
   onAction: (action: string) => void;
@@ -10,11 +10,36 @@ export function ToolOrb({ onAction, isVisible }: ToolOrbProps) {
   if (!isVisible) return null;
 
   const tools = [
-    { id: "enhance", icon: Wand2, label: "Smart Enhance", color: "text-amber-neon" },
-    { id: "mockup", icon: Monitor, label: "Device Mockup", color: "text-blue-400" },
-    { id: "autotag", icon: Tag, label: "Auto-Tag AI", color: "text-emerald-neon" },
-    { id: "social", icon: Share2, label: "Social Pack", color: "text-purple-400" },
-    { id: "upscale", icon: Maximize, label: "4K Upscale", color: "text-orange-400" },
+    {
+      id: "enhance",
+      icon: Wand2,
+      label: "Smart Enhance",
+      color: "text-amber-neon",
+    },
+    {
+      id: "mockup",
+      icon: Monitor,
+      label: "Device Mockup",
+      color: "text-blue-400",
+    },
+    {
+      id: "autotag",
+      icon: Tag,
+      label: "Auto-Tag AI",
+      color: "text-emerald-neon",
+    },
+    {
+      id: "social",
+      icon: Share2,
+      label: "Social Pack",
+      color: "text-purple-400",
+    },
+    {
+      id: "upscale",
+      icon: Maximize,
+      label: "4K Upscale",
+      color: "text-orange-400",
+    },
     { id: "delete", icon: Trash2, label: "Remove", color: "text-red-500" },
   ];
 

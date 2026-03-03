@@ -16,7 +16,11 @@ interface ReviewIssueRowProps {
 
 const severityConfig: Record<
   IssueSeverity,
-  { color: string; badgeClass: string; icon: React.ComponentType<{ className?: string }> }
+  {
+    color: string;
+    badgeClass: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }
 > = {
   error: {
     color: "text-red-400",

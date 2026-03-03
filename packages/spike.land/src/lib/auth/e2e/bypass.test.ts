@@ -17,7 +17,11 @@ vi.mock("@/lib/errors/structured-logger", () => ({
 
 // Helper to set NODE_ENV without TS readonly complaint
 function setNodeEnv(value: string) {
-  Object.defineProperty(process.env, "NODE_ENV", { value, writable: true, configurable: true });
+  Object.defineProperty(process.env, "NODE_ENV", {
+    value,
+    writable: true,
+    configurable: true,
+  });
 }
 
 describe("E2E bypass", () => {

@@ -2,10 +2,10 @@
  * Tests for ship tool (bazdmeg_auto_ship)
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
-import { resetWorkspaceState, enterWorkspace } from "../workspace-state.js";
+import { enterWorkspace, resetWorkspaceState } from "../workspace-state.js";
 import { unlink } from "node:fs/promises";
 
 // Mock the shell module
@@ -14,7 +14,7 @@ vi.mock("../shell.js", () => ({
   hasScript: vi.fn(),
 }));
 
-import { runCommand, hasScript } from "../shell.js";
+import { hasScript, runCommand } from "../shell.js";
 import { registerShipTools } from "./ship.js";
 
 const mockRunCommand = vi.mocked(runCommand);

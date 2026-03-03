@@ -1,10 +1,10 @@
 import {
   createContext,
+  type DragEvent,
+  type ReactNode,
+  useCallback,
   useContext,
   useState,
-  useCallback,
-  type ReactNode,
-  type DragEvent,
 } from "react";
 import { eventBus } from "../services/event-bus";
 
@@ -209,7 +209,10 @@ async function uploadToGallery(file: File) {
     });
 
     if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
-    const data = (await res.json()) as { image: { id: string; name: string }; url: string };
+    const data = (await res.json()) as {
+      image: { id: string; name: string };
+      url: string;
+    };
     eventBus.emit("image:uploaded", {
       imageId: data.image.id,
       url: data.url,

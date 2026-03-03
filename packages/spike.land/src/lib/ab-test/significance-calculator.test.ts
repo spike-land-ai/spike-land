@@ -3,7 +3,13 @@ import { calculateSignificance } from "./significance-calculator";
 
 describe("calculateSignificance", () => {
   it("should return not significant for fewer than 2 variants", () => {
-    const result = calculateSignificance([{ id: "a", impressions: 1000, clicks: 100 }]);
+    const result = calculateSignificance([
+      {
+        id: "a",
+        impressions: 1000,
+        clicks: 100,
+      },
+    ]);
     expect(result.isSignificant).toBe(false);
     expect(result.confidenceLevel).toBe(0);
     expect(result.winnerVariantId).toBeNull();

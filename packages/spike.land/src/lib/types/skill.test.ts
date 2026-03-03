@@ -42,17 +42,26 @@ describe("createSkillSchema", () => {
   });
 
   it("rejects uppercase name", () => {
-    const result = createSkillSchema.safeParse({ ...validInput, name: "MySkill" });
+    const result = createSkillSchema.safeParse({
+      ...validInput,
+      name: "MySkill",
+    });
     expect(result.success).toBe(false);
   });
 
   it("rejects name with spaces", () => {
-    const result = createSkillSchema.safeParse({ ...validInput, name: "my skill" });
+    const result = createSkillSchema.safeParse({
+      ...validInput,
+      name: "my skill",
+    });
     expect(result.success).toBe(false);
   });
 
   it("accepts hyphens in name", () => {
-    const result = createSkillSchema.safeParse({ ...validInput, name: "my-new-skill" });
+    const result = createSkillSchema.safeParse({
+      ...validInput,
+      name: "my-new-skill",
+    });
     expect(result.success).toBe(true);
   });
 
@@ -85,10 +94,16 @@ describe("createSkillSchema", () => {
   });
 
   it("validates hex color format", () => {
-    const valid = createSkillSchema.safeParse({ ...validInput, color: "#FF0000" });
+    const valid = createSkillSchema.safeParse({
+      ...validInput,
+      color: "#FF0000",
+    });
     expect(valid.success).toBe(true);
 
-    const invalid = createSkillSchema.safeParse({ ...validInput, color: "red" });
+    const invalid = createSkillSchema.safeParse({
+      ...validInput,
+      color: "red",
+    });
     expect(invalid.success).toBe(false);
   });
 
@@ -114,13 +129,19 @@ describe("createSkillSchema", () => {
 
   it("accepts valid categories", () => {
     for (const cat of ["QUALITY", "TESTING", "WORKFLOW", "SECURITY", "PERFORMANCE", "OTHER"]) {
-      const result = createSkillSchema.safeParse({ ...validInput, category: cat });
+      const result = createSkillSchema.safeParse({
+        ...validInput,
+        category: cat,
+      });
       expect(result.success).toBe(true);
     }
   });
 
   it("rejects invalid category", () => {
-    const result = createSkillSchema.safeParse({ ...validInput, category: "INVALID" });
+    const result = createSkillSchema.safeParse({
+      ...validInput,
+      category: "INVALID",
+    });
     expect(result.success).toBe(false);
   });
 });

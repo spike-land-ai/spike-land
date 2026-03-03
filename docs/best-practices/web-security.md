@@ -333,7 +333,7 @@ function isAllowedUrl(targetUrl, allowedDomains) {
       /^fe80:/, // IPv6 link-local
     ];
 
-    if (blockedRanges.some(range => range.test(parsed.hostname))) {
+    if (blockedRanges.some((range) => range.test(parsed.hostname))) {
       return false;
     }
 
@@ -1534,7 +1534,7 @@ app.use(session({
      // Verify credentials
 
      // Regenerate session to prevent fixation
-     req.session.regenerate(err => {
+     req.session.regenerate((err) => {
        if (err) return res.status(500).json({ error: "Server error" });
 
        req.session.userId = user.id;

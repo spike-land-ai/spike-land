@@ -2,7 +2,9 @@
 
 ## Overview
 
-Shared types, validations, constants, and utilities for the spike-land-ai ecosystem. Dual-target (Node.js + Browser), bundled with tsup, published as `@spike-land-ai/shared`.
+Shared types, validations, constants, and utilities for the spike-land-ai
+ecosystem. Dual-target (Node.js + Browser), bundled with tsup, published as
+`@spike-land-ai/shared`.
 
 ## Commands
 
@@ -25,6 +27,7 @@ npm run lint         # ESLint
 ```
 
 **Exports**: The package exposes granular subpath exports:
+
 - `@spike-land-ai/shared` — everything
 - `@spike-land-ai/shared/types` — types only
 - `@spike-land-ai/shared/validations` — Zod schemas
@@ -46,4 +49,5 @@ npm run lint         # ESLint
 - Shared workflow: `.github/.github/workflows/ci-publish.yml`
 - Changesets for versioning
 - Publishes to GitHub Packages (`@spike-land-ai/*`)
-- **High-impact package**: version bumps trigger PRs in code, transpile, spike-land-backend, spike.land
+- **High-impact package**: version bumps trigger PRs in code, transpile,
+  spike-land-backend, spike.land

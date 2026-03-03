@@ -101,7 +101,9 @@ describe("ec2-client", () => {
 
         getEC2Client();
 
-        expect(MockEC2Client).toHaveBeenCalledWith({ region: "ap-southeast-1" });
+        expect(MockEC2Client).toHaveBeenCalledWith({
+          region: "ap-southeast-1",
+        });
       });
     });
   });

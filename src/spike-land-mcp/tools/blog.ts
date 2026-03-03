@@ -9,7 +9,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "./types";
 import { freeTool } from "../procedures/index";
-import { textResult, safeToolCall, apiRequest } from "./tool-helpers";
+import { apiRequest, safeToolCall, textResult } from "./tool-helpers";
 import type { DrizzleDB } from "../db/index";
 
 export function registerBlogTools(
@@ -35,8 +35,12 @@ export function registerBlogTools(
           if (input.category) params.set("category", input.category);
           if (input.tag) params.set("tag", input.tag);
           if (input.featured) params.set("featured", "true");
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
-          if (input.offset !== undefined) params.set("offset", String(input.offset));
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
+          if (input.offset !== undefined) {
+            params.set("offset", String(input.offset));
+          }
 
           const posts = await apiRequest<
             Array<{
@@ -60,8 +64,12 @@ export function registerBlogTools(
             text +=
               `- **${post.frontmatter.title}** (${post.slug})\n` +
               `  ${post.frontmatter.description}\n` +
-              `  Category: ${post.frontmatter.category} | Tags: ${post.frontmatter.tags.join(", ")} | ${post.readingTime}\n` +
-              `  Date: ${post.frontmatter.date}${post.frontmatter.featured ? " | Featured" : ""}\n\n`;
+              `  Category: ${post.frontmatter.category} | Tags: ${post.frontmatter.tags.join(
+                ", ",
+              )} | ${post.readingTime}\n` +
+              `  Date: ${post.frontmatter.date}${
+                post.frontmatter.featured ? " | Featured" : ""
+              }\n\n`;
           }
           return textResult(text);
         });

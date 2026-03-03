@@ -2,11 +2,11 @@
  * Tests for workspace tools
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 import { registerWorkspaceTools } from "./workspace.js";
-import { resetWorkspaceState, getWorkspace, enterWorkspace } from "../workspace-state.js";
+import { enterWorkspace, getWorkspace, resetWorkspaceState } from "../workspace-state.js";
 import { createFakeMonorepo } from "../__test-utils__/fixtures.js";
 import { unlink } from "node:fs/promises";
 import * as resolverModule from "../workspace-resolver.js";
@@ -67,7 +67,9 @@ describe("workspace tools", () => {
     process.cwd = () => mono.root;
 
     try {
-      const result = await server.call("bazdmeg_enter_workspace", { packageName: "test-pkg" });
+      const result = await server.call("bazdmeg_enter_workspace", {
+        packageName: "test-pkg",
+      });
       expect(result.isError).toBeUndefined();
       expect(result.content[0].text).toContain("Workspace entered: test-pkg");
 
@@ -103,7 +105,9 @@ describe("workspace tools", () => {
     process.cwd = () => mono.root;
 
     try {
-      await server.call("bazdmeg_enter_workspace", { packageName: "status-pkg" });
+      await server.call("bazdmeg_enter_workspace", {
+        packageName: "status-pkg",
+      });
 
       const result = await server.call("bazdmeg_workspace_status", {});
       const data = JSON.parse(result.content[0].text);
@@ -133,7 +137,9 @@ describe("workspace tools", () => {
     vi.spyOn(resolverModule, "resolveWorkspacePaths").mockRejectedValue(
       new Error("Resolver crash"),
     );
-    const result = await server.call("bazdmeg_enter_workspace", { packageName: "p" });
+    const result = await server.call("bazdmeg_enter_workspace", {
+      packageName: "p",
+    });
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Resolver crash");
   });

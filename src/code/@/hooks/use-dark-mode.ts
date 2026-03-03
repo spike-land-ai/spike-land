@@ -26,8 +26,9 @@ export const useDarkMode = () => {
       typeof window === "undefined" ||
       !window.matchMedia ||
       typeof window.matchMedia !== "function"
-    )
+    ) {
       return;
+    }
 
     try {
       const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");

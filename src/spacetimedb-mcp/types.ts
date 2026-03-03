@@ -48,8 +48,8 @@ export type StdbErrorCode =
 // ─── Result Helpers (re-exported from mcp-server-base) ───
 
 export {
-  tryCatch,
   type CallToolResult,
-  jsonResult,
   errorResult,
+  jsonResult,
+  tryCatch,
 } from "@spike-land-ai/mcp-server-base";

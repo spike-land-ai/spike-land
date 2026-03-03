@@ -9,12 +9,12 @@
  */
 
 import { z } from "zod";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import { freeTool } from "../procedures/index";
 import { textResult } from "./tool-helpers";
 import type { DrizzleDB } from "../db/index";
-import { permissionRequests, claudeCodeAgents } from "../db/schema";
+import { claudeCodeAgents, permissionRequests } from "../db/schema";
 
 export function registerCapabilitiesTools(
   registry: ToolRegistry,

@@ -5,12 +5,12 @@
  * Zero `as unknown as` or `any` casts.
  */
 
-export { createProcedure, baseProcedure } from "./builder.js";
+export { baseProcedure, createProcedure } from "./builder.js";
 export type { Procedure, ToolBuilder } from "./builder.js";
 export { middleware } from "./middleware.js";
 export type {
-  CallToolResult,
   BuiltTool,
+  CallToolResult,
   EmptyContext,
   HandlerParams,
   Middleware,

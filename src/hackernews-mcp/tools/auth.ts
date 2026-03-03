@@ -22,7 +22,9 @@ export function registerAuthTools(
     },
     async ({ username, password }) => {
       const result = await tryCatch(writeClient.login(username, password));
-      if (!result.ok) return errorResult("NETWORK_ERROR", result.error.message, true);
+      if (!result.ok) {
+        return errorResult("NETWORK_ERROR", result.error.message, true);
+      }
       if (result.data.success) {
         return jsonResult({ status: "logged_in", username });
       }

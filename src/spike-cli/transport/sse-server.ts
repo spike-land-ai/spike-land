@@ -9,9 +9,9 @@ import http from "node:http";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import {
-  ListToolsRequestSchema,
   CallToolRequestSchema,
   type CallToolResult,
+  ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { ServerManager } from "../multiplexer/server-manager.js";
 

@@ -1,5 +1,7 @@
 type EventMap = {
-  "gallery:updated": { reason: "upload" | "generate" | "enhance" | "delete" | "refresh" };
+  "gallery:updated": {
+    reason: "upload" | "generate" | "enhance" | "delete" | "refresh";
+  };
   "image:uploaded": { imageId: string; url: string; name: string };
   "image:generated": { imageId: string; url: string; prompt: string };
   "image:enhanced": { imageId: string; url: string; originalId: string };
@@ -51,4 +53,4 @@ class EventBus {
 
 // Singleton instance
 export const eventBus = new EventBus();
-export type { EventMap, EventHandler };
+export type { EventHandler, EventMap };

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createMcpServer } from "./server.js";
 import type { DrizzleDB } from "../db/index.js";
 

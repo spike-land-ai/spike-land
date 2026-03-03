@@ -1,13 +1,13 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
-import type { ImageStudioDeps, ImageId, AlbumHandle } from "@spike-land-ai/mcp-image-studio";
+import type { AlbumHandle, ImageId, ImageStudioDeps } from "@spike-land-ai/mcp-image-studio";
 import { createD1Credits } from "./deps/credits.ts";
 import {
-  createD1Db,
-  getOrCreateDefaultAlbum,
-  galleryRecentImages,
   addImageToDefaultAlbum,
+  createD1Db,
+  galleryRecentImages,
+  getOrCreateDefaultAlbum,
 } from "./deps/db.ts";
 import { createGeminiGeneration } from "./deps/generation.ts";
 import { nanoid } from "./deps/nanoid.ts";
@@ -148,7 +148,12 @@ app.all("/api/auth/*", async (c) => {
 
 // Build standard deps per request
 async function buildDeps(c: {
-  req: { raw: Request; url: string; header: (name: string) => string | undefined; method: string };
+  req: {
+    raw: Request;
+    url: string;
+    header: (name: string) => string | undefined;
+    method: string;
+  };
   env: Env;
 }) {
   let userId = "demo-user"; // Default for MCP/CLI demo access
@@ -180,7 +185,14 @@ async function buildDeps(c: {
 
   return {
     userId,
-    deps: { db, credits, storage, generation, resolvers, nanoid } as ImageStudioDeps,
+    deps: {
+      db,
+      credits,
+      storage,
+      generation,
+      resolvers,
+      nanoid,
+    } as ImageStudioDeps,
   };
 }
 
@@ -220,7 +232,12 @@ app.get("/api/gallery", async (c) => {
   const search = c.req.query("search");
   const tag = c.req.query("tag");
 
-  const result = await galleryRecentImages(c.env.IMAGE_DB, userId, { cursor, limit, search, tag });
+  const result = await galleryRecentImages(c.env.IMAGE_DB, userId, {
+    cursor,
+    limit,
+    search,
+    tag,
+  });
   const album = await getOrCreateDefaultAlbum(c.env.IMAGE_DB, userId);
 
   return c.json({

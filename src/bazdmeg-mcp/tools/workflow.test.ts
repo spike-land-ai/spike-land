@@ -2,11 +2,11 @@
  * Tests for workflow tools
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
-import { registerWorkflowTools, clearInterviewSessions, getInterviewSession } from "./workflow.js";
-import { resetWorkspaceState, enterWorkspace } from "../workspace-state.js";
+import { clearInterviewSessions, getInterviewSession, registerWorkflowTools } from "./workflow.js";
+import { enterWorkspace, resetWorkspaceState } from "../workspace-state.js";
 import { buildDiff } from "../__test-utils__/fixtures.js";
 import { unlink } from "node:fs/promises";
 import * as engine from "../gates/engine.js";
@@ -121,7 +121,12 @@ describe("workflow tools", () => {
   });
 
   it("pre_pr_check blocks on RED gates", async () => {
-    const diff = buildDiff([{ path: "src/index.ts", added: ["const x: any = 'hello';"] }]);
+    const diff = buildDiff([
+      {
+        path: "src/index.ts",
+        added: ["const x: any = 'hello';"],
+      },
+    ]);
 
     const result = await server.call("bazdmeg_pre_pr_check", {
       diff,

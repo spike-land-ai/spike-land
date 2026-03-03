@@ -4,7 +4,7 @@
  */
 
 import type { ResolvedConfig, ServerConfig } from "../config/types.js";
-import { UpstreamClient, type ToolCallResult } from "./upstream-client.js";
+import { type ToolCallResult, UpstreamClient } from "./upstream-client.js";
 import type { ToolsetManager } from "./toolset-manager.js";
 
 const DEFAULT_SEPARATOR = "__";
@@ -74,7 +74,10 @@ export class ServerManager {
   getServerTools(serverName: string): Array<{ name: string; description?: string }> {
     const client = this.clients.get(serverName);
     if (!client) return [];
-    return client.getTools().map((t) => ({ name: t.name, description: t.description }));
+    return client.getTools().map((t) => ({
+      name: t.name,
+      description: t.description,
+    }));
   }
 
   getAllTools(): NamespacedTool[] {

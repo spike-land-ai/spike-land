@@ -2,7 +2,7 @@
  * Tests for build tools (bazdmeg_build, bazdmeg_typecheck)
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 
@@ -17,7 +17,7 @@ vi.mock("../manifest.js", () => ({
   clearManifestCache: vi.fn(),
 }));
 
-import { runCommand, hasScript } from "../shell.js";
+import { hasScript, runCommand } from "../shell.js";
 import { getManifestPackage, readManifest } from "../manifest.js";
 import { registerBuildTools } from "./build.js";
 
@@ -58,7 +58,9 @@ describe("build tools", () => {
       mockHasScript.mockResolvedValue(true);
       mockRunCommand.mockResolvedValue(ok("Build complete"));
 
-      const result = await server.call("bazdmeg_build", { packageName: "chess-engine" });
+      const result = await server.call("bazdmeg_build", {
+        packageName: "chess-engine",
+      });
       const text = result.content[0].text;
       expect(text).toContain("Build Report");
       expect(text).toContain("chess-engine");
@@ -75,7 +77,9 @@ describe("build tools", () => {
       mockHasScript.mockResolvedValue(false);
       mockRunCommand.mockResolvedValue(ok("esbuild done"));
 
-      const result = await server.call("bazdmeg_build", { packageName: "shared" });
+      const result = await server.call("bazdmeg_build", {
+        packageName: "shared",
+      });
       const text = result.content[0].text;
       expect(text).toContain("esbuild config");
       expect(text).toContain("SUCCESS");
@@ -91,7 +95,9 @@ describe("build tools", () => {
       mockHasScript.mockResolvedValue(true);
       mockRunCommand.mockResolvedValue(fail("compilation error"));
 
-      const result = await server.call("bazdmeg_build", { packageName: "broken" });
+      const result = await server.call("bazdmeg_build", {
+        packageName: "broken",
+      });
       const text = result.content[0].text;
       expect(text).toContain("FAILED");
       expect(text).toContain("compilation error");
@@ -119,7 +125,9 @@ describe("build tools", () => {
       mockHasScript.mockResolvedValue(true);
       mockRunCommand.mockResolvedValue(ok());
 
-      const result = await server.call("bazdmeg_build", { packageName: "unknown" });
+      const result = await server.call("bazdmeg_build", {
+        packageName: "unknown",
+      });
       // Should still work with default kind
       expect(result.content[0].text).toContain("library");
     });
@@ -142,7 +150,9 @@ describe("build tools", () => {
       mockHasScript.mockResolvedValue(true);
       mockRunCommand.mockResolvedValue(ok());
 
-      const result = await server.call("bazdmeg_typecheck", { packageName: "chess-engine" });
+      const result = await server.call("bazdmeg_typecheck", {
+        packageName: "chess-engine",
+      });
       const text = result.content[0].text;
       expect(text).toContain("Typecheck Report");
       expect(text).toContain("chess-engine");
@@ -153,7 +163,9 @@ describe("build tools", () => {
       mockHasScript.mockResolvedValue(false);
       mockRunCommand.mockResolvedValue(ok());
 
-      const result = await server.call("bazdmeg_typecheck", { packageName: "pkg" });
+      const result = await server.call("bazdmeg_typecheck", {
+        packageName: "pkg",
+      });
       expect(result.content[0].text).toContain("direct tsc");
     });
 
@@ -161,7 +173,9 @@ describe("build tools", () => {
       mockHasScript.mockResolvedValue(true);
       mockRunCommand.mockResolvedValue(fail("TS2322: Type error"));
 
-      const result = await server.call("bazdmeg_typecheck", { packageName: "bad" });
+      const result = await server.call("bazdmeg_typecheck", {
+        packageName: "bad",
+      });
       expect(result.content[0].text).toContain("FAIL");
       expect(result.content[0].text).toContain("TS2322");
     });
@@ -175,8 +189,18 @@ describe("build tools", () => {
           type: "module",
         },
         packages: {
-          "pkg-a": { kind: "library", version: "1.0.0", description: "a", entry: "src/index.ts" },
-          "pkg-b": { kind: "library", version: "1.0.0", description: "b", entry: "src/index.ts" },
+          "pkg-a": {
+            kind: "library",
+            version: "1.0.0",
+            description: "a",
+            entry: "src/index.ts",
+          },
+          "pkg-b": {
+            kind: "library",
+            version: "1.0.0",
+            description: "b",
+            entry: "src/index.ts",
+          },
         },
       });
       mockHasScript.mockResolvedValue(true);
@@ -199,8 +223,18 @@ describe("build tools", () => {
           type: "module",
         },
         packages: {
-          "pkg-a": { kind: "library", version: "1.0.0", description: "a", entry: "src/index.ts" },
-          "pkg-b": { kind: "library", version: "1.0.0", description: "b", entry: "src/index.ts" },
+          "pkg-a": {
+            kind: "library",
+            version: "1.0.0",
+            description: "a",
+            entry: "src/index.ts",
+          },
+          "pkg-b": {
+            kind: "library",
+            version: "1.0.0",
+            description: "b",
+            entry: "src/index.ts",
+          },
         },
       });
       mockHasScript.mockResolvedValue(true);
@@ -217,7 +251,9 @@ describe("build tools", () => {
     it("handles unexpected errors", async () => {
       mockHasScript.mockRejectedValue(new Error("IO error"));
 
-      const result = await server.call("bazdmeg_typecheck", { packageName: "pkg" });
+      const result = await server.call("bazdmeg_typecheck", {
+        packageName: "pkg",
+      });
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain("IO error");
     });

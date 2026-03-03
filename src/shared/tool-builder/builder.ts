@@ -172,7 +172,12 @@ function createToolBuilderImpl<TInput, TCtx, TOutput>(
         const parsed = inputSchema.safeParse(rawInput);
         if (!parsed.success) {
           return {
-            content: [{ type: "text", text: `**Validation Error**\n${parsed.error.message}` }],
+            content: [
+              {
+                type: "text",
+                text: `**Validation Error**\n${parsed.error.message}`,
+              },
+            ],
             isError: true,
           };
         }
@@ -196,7 +201,11 @@ function createToolBuilderImpl<TInput, TCtx, TOutput>(
           if (error && typeof error === "object") {
             const errorObj = error as Record<string, unknown>;
             if (errorObj.name === "DomainError") {
-              const domainError = errorObj as { code: string; message: string; retryable: boolean };
+              const domainError = errorObj as {
+                code: string;
+                message: string;
+                retryable: boolean;
+              };
               return {
                 content: [
                   {
@@ -209,7 +218,11 @@ function createToolBuilderImpl<TInput, TCtx, TOutput>(
             }
             // Handle McpError (has name === "McpError" and a code property)
             if (errorObj.name === "McpError" && "code" in errorObj) {
-              const mcpError = errorObj as { code: string; message: string; retryable?: boolean };
+              const mcpError = errorObj as {
+                code: string;
+                message: string;
+                retryable?: boolean;
+              };
               return {
                 content: [
                   {

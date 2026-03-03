@@ -38,7 +38,13 @@ describe("requireAuth", () => {
   it("returns 401 when user has no id", async () => {
     mockGetSession.mockResolvedValue({
       expires: "2099-01-01",
-      user: { id: "", name: "Alice", email: "alice@example.com", image: null, role: "USER" },
+      user: {
+        id: "",
+        name: "Alice",
+        email: "alice@example.com",
+        image: null,
+        role: "USER",
+      },
     });
     const result = await requireAuth();
     expect(result).toBeInstanceOf(NextResponse);
@@ -60,7 +66,10 @@ describe("requireAuth", () => {
     mockGetSession.mockResolvedValue(fakeSession);
     const result = await requireAuth();
     expect(result).not.toBeInstanceOf(NextResponse);
-    const { session, userId } = result as { session: typeof fakeSession; userId: string };
+    const { session, userId } = result as {
+      session: typeof fakeSession;
+      userId: string;
+    };
     expect(session).toEqual(fakeSession);
     expect(userId).toBe("user_abc");
   });
@@ -78,7 +87,10 @@ describe("requireAuth", () => {
     };
     mockGetSession.mockResolvedValue(fakeSession);
     const result = await requireAuth();
-    const { userId } = result as { session: typeof fakeSession; userId: string };
+    const { userId } = result as {
+      session: typeof fakeSession;
+      userId: string;
+    };
     expect(userId).toBe("user_xyz789");
   });
 });

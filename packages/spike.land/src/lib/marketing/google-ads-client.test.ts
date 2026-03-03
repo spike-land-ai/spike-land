@@ -390,7 +390,10 @@ describe("GoogleAdsClient – request (auth guard)", () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: false,
       statusText: "Forbidden",
-      json: () => Promise.resolve({ error: { message: "The caller does not have permission" } }),
+      json: () =>
+        Promise.resolve({
+          error: { message: "The caller does not have permission" },
+        }),
     });
     vi.stubGlobal("fetch", mockFetch);
 
@@ -402,13 +405,23 @@ describe("GoogleAdsClient – request (auth guard)", () => {
   });
 
   it("includes login-customer-id header when customerId is set", async () => {
-    const currency = searchStreamResponse([{ customer: { currencyCode: "USD" } }]);
+    const currency = searchStreamResponse([
+      {
+        customer: { currencyCode: "USD" },
+      },
+    ]);
     const campaigns = searchStreamResponse([]);
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currency) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(campaigns) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currency),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(campaigns),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -442,12 +455,22 @@ describe("GoogleAdsClient – ID validation", () => {
 
   it("accepts account ID with dashes", async () => {
     // Valid format: digits and dashes only, starts and ends with digit
-    const searchCurrency = searchStreamResponse([{ customer: { currencyCode: "USD" } }]);
+    const searchCurrency = searchStreamResponse([
+      {
+        customer: { currencyCode: "USD" },
+      },
+    ]);
     const searchCampaigns = searchStreamResponse([]);
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(searchCurrency) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(searchCampaigns) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(searchCurrency),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(searchCampaigns),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -463,22 +486,45 @@ describe("GoogleAdsClient – ID validation", () => {
 
 describe("GoogleAdsClient – getAccounts", () => {
   it("returns list of accessible customer accounts", async () => {
-    const customerListResponse = { resourceNames: ["customers/111", "customers/222"] };
+    const customerListResponse = {
+      resourceNames: ["customers/111", "customers/222"],
+    };
     const customerInfoResponse = searchStreamResponse([
-      { customer: { id: "111", descriptiveName: "Account A", currencyCode: "USD" } },
+      {
+        customer: {
+          id: "111",
+          descriptiveName: "Account A",
+          currencyCode: "USD",
+        },
+      },
     ]);
     const customerInfoResponse2 = searchStreamResponse([
-      { customer: { id: "222", descriptiveName: "Account B", currencyCode: "EUR" } },
+      {
+        customer: {
+          id: "222",
+          descriptiveName: "Account B",
+          currencyCode: "EUR",
+        },
+      },
     ]);
 
     const mockFetch = vi
       .fn()
       // GET /customers:listAccessibleCustomers
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(customerListResponse) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(customerListResponse),
+      })
       // POST searchStream for customer 111
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(customerInfoResponse) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(customerInfoResponse),
+      })
       // POST searchStream for customer 222
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(customerInfoResponse2) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(customerInfoResponse2),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -500,16 +546,30 @@ describe("GoogleAdsClient – getAccounts", () => {
   });
 
   it("skips inaccessible customers (query returns error)", async () => {
-    const customerListResponse = { resourceNames: ["customers/111", "customers/999"] };
+    const customerListResponse = {
+      resourceNames: ["customers/111", "customers/999"],
+    };
     const customerInfoOk = searchStreamResponse([
-      { customer: { id: "111", descriptiveName: "Account A", currencyCode: "USD" } },
+      {
+        customer: {
+          id: "111",
+          descriptiveName: "Account A",
+          currencyCode: "USD",
+        },
+      },
     ]);
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(customerListResponse) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(customerListResponse),
+      })
       // 111 succeeds
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(customerInfoOk) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(customerInfoOk),
+      })
       // 999 fails at HTTP level
       .mockResolvedValueOnce({
         ok: false,
@@ -543,23 +603,43 @@ describe("GoogleAdsClient – getAccounts", () => {
 describe("GoogleAdsClient – listCampaigns", () => {
   it("returns normalized campaign list", async () => {
     const currencyResponse = searchStreamResponse([
-      { customer: { id: "1234567890", descriptiveName: "Acc", currencyCode: "EUR" } },
+      {
+        customer: {
+          id: "1234567890",
+          descriptiveName: "Acc",
+          currencyCode: "EUR",
+        },
+      },
     ]);
     const campaignResults = searchStreamResponse([
       {
-        campaign: makeGoogleAdsCampaign({ id: "111", name: "Camp A", status: "ENABLED" }),
+        campaign: makeGoogleAdsCampaign({
+          id: "111",
+          name: "Camp A",
+          status: "ENABLED",
+        }),
         campaignBudget: { amountMicros: "5000000" }, // 5 USD = 500 cents (5000000 / 10000 = 500)
       },
       {
-        campaign: makeGoogleAdsCampaign({ id: "222", name: "Camp B", status: "PAUSED" }),
+        campaign: makeGoogleAdsCampaign({
+          id: "222",
+          name: "Camp B",
+          status: "PAUSED",
+        }),
         campaignBudget: { amountMicros: "10000000" },
       },
     ]);
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(campaignResults) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(campaignResults),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -586,10 +666,19 @@ describe("GoogleAdsClient – listCampaigns", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(emptyCampaigns) })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(emptyCampaigns),
+      })
       // Second listCampaigns call — currency should be cached
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(emptyCampaigns) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(emptyCampaigns),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -615,8 +704,14 @@ describe("GoogleAdsClient – listCampaigns", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(campaignResults) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(campaignResults),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -639,8 +734,14 @@ describe("GoogleAdsClient – listCampaigns", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(campaignResults) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(campaignResults),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -672,15 +773,23 @@ describe("GoogleAdsClient – listCampaigns", () => {
       ]);
       const campaignResults = searchStreamResponse([
         {
-          campaign: makeGoogleAdsCampaign({ advertisingChannelType: channelType }),
+          campaign: makeGoogleAdsCampaign({
+            advertisingChannelType: channelType,
+          }),
           campaignBudget: { amountMicros: "0" },
         },
       ]);
 
       const mockFetch = vi
         .fn()
-        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-        .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(campaignResults) });
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(currencyResponse),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(campaignResults),
+        });
 
       vi.stubGlobal("fetch", mockFetch);
 
@@ -709,8 +818,14 @@ describe("GoogleAdsClient – getCampaign", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(campaignResults) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(campaignResults),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -730,8 +845,14 @@ describe("GoogleAdsClient – getCampaign", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(emptyResult) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(emptyResult),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -749,7 +870,11 @@ describe("GoogleAdsClient – getCampaign", () => {
         ok: true,
         json: () =>
           Promise.resolve(
-            searchStreamResponse([{ customer: { id: "1234567890", currencyCode: "USD" } }]),
+            searchStreamResponse([
+              {
+                customer: { id: "1234567890", currencyCode: "USD" },
+              },
+            ]),
           ),
       })
       // campaign query fails
@@ -773,15 +898,24 @@ describe("GoogleAdsClient – getCampaign", () => {
     ]);
     const campaignResults = searchStreamResponse([
       {
-        campaign: makeGoogleAdsCampaign({ startDate: "20240115", endDate: "20241231" }),
+        campaign: makeGoogleAdsCampaign({
+          startDate: "20240115",
+          endDate: "20241231",
+        }),
         campaignBudget: { amountMicros: "0" },
       },
     ]);
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(campaignResults) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(campaignResults),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -801,15 +935,24 @@ describe("GoogleAdsClient – getCampaign", () => {
     ]);
     const campaignResults = searchStreamResponse([
       {
-        campaign: makeGoogleAdsCampaign({ startDate: "not-a-date", endDate: "also-bad" }),
+        campaign: makeGoogleAdsCampaign({
+          startDate: "not-a-date",
+          endDate: "also-bad",
+        }),
         campaignBudget: { amountMicros: "0" },
       },
     ]);
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(campaignResults) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(campaignResults),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -839,8 +982,14 @@ describe("GoogleAdsClient – getCampaign", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(campaignResults) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(campaignResults),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -877,8 +1026,14 @@ describe("GoogleAdsClient – getCampaignMetrics", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(metricsResponse) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(metricsResponse),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -912,8 +1067,14 @@ describe("GoogleAdsClient – getCampaignMetrics", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(emptyMetrics) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(emptyMetrics),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -939,8 +1100,14 @@ describe("GoogleAdsClient – getCampaignMetrics", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(emptyMetrics) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(emptyMetrics),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -976,8 +1143,14 @@ describe("GoogleAdsClient – getCampaignMetrics", () => {
 
     const mockFetch = vi
       .fn()
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(currencyResponse) })
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(emptyMetrics) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(currencyResponse),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(emptyMetrics),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 
@@ -991,7 +1164,9 @@ describe("GoogleAdsClient – getCampaignMetrics", () => {
 
     // The second call is the metrics search stream
     const [, metricsCallOptions] = mockFetch.mock.calls[1] as [string, RequestInit];
-    const body = JSON.parse(metricsCallOptions?.body as string) as { query: string };
+    const body = JSON.parse(metricsCallOptions?.body as string) as {
+      query: string;
+    };
     expect(body.query).toContain("20240315");
     expect(body.query).toContain("20240331");
   });
@@ -1021,7 +1196,10 @@ describe("GoogleAdsClient – currency caching", () => {
     const mockFetch = vi
       .fn()
       .mockResolvedValueOnce(failedCurrency)
-      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(campaignResults) });
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(campaignResults),
+      });
 
     vi.stubGlobal("fetch", mockFetch);
 

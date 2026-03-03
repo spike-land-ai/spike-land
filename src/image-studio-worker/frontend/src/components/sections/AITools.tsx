@@ -1,14 +1,14 @@
 import { toast } from "sonner";
 import { useState } from "react";
-import { Eraser, Crop, Paintbrush, Eye, Palette, Stamp, Type } from "lucide-react";
-import { Button, Input, Select, TextArea, CreditBadge, ImagePicker } from "@/components/ui";
+import { Crop, Eraser, Eye, Paintbrush, Palette, Stamp, Type } from "lucide-react";
+import { Button, CreditBadge, ImagePicker, Input, Select, TextArea } from "@/components/ui";
 import { callTool, parseToolResult } from "@/api/client";
 import {
-  STYLE_NAMES,
-  SMART_CROP_PRESETS,
-  WATERMARK_POSITIONS,
-  DETAIL_LEVELS,
   BG_OUTPUT_FORMATS,
+  DETAIL_LEVELS,
+  SMART_CROP_PRESETS,
+  STYLE_NAMES,
+  WATERMARK_POSITIONS,
 } from "@/constants/enums";
 
 type AITab =
@@ -141,7 +141,10 @@ export function AITools() {
             label="Output Format"
             value={bgFormat}
             onChange={(e) => setBgFormat(e.target.value)}
-            options={BG_OUTPUT_FORMATS.map((f) => ({ value: f, label: f.toUpperCase() }))}
+            options={BG_OUTPUT_FORMATS.map((f) => ({
+              value: f,
+              label: f.toUpperCase(),
+            }))}
           />
         )}
         {tab === "smart-crop" && (
@@ -149,7 +152,10 @@ export function AITools() {
             label="Preset"
             value={cropPreset}
             onChange={(e) => setCropPreset(e.target.value)}
-            options={SMART_CROP_PRESETS.map((p) => ({ value: p, label: p.replace(/_/g, " ") }))}
+            options={SMART_CROP_PRESETS.map((p) => ({
+              value: p,
+              label: p.replace(/_/g, " "),
+            }))}
           />
         )}
         {tab === "style-transfer" && (
@@ -158,7 +164,10 @@ export function AITools() {
               label="Style"
               value={styleName}
               onChange={(e) => setStyleName(e.target.value)}
-              options={STYLE_NAMES.map((s) => ({ value: s, label: s.replace(/_/g, " ") }))}
+              options={STYLE_NAMES.map((s) => ({
+                value: s,
+                label: s.replace(/_/g, " "),
+              }))}
             />
             <Input
               label="Strength (0-100)"
@@ -187,7 +196,10 @@ export function AITools() {
               label="Position"
               value={watermarkPos}
               onChange={(e) => setWatermarkPos(e.target.value)}
-              options={WATERMARK_POSITIONS.map((p) => ({ value: p, label: p.replace(/-/g, " ") }))}
+              options={WATERMARK_POSITIONS.map((p) => ({
+                value: p,
+                label: p.replace(/-/g, " "),
+              }))}
             />
             <Input
               label="Opacity (0-100)"

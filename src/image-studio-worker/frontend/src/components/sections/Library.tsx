@@ -1,7 +1,7 @@
 import { toast } from "sonner";
-import { useState, useCallback, useRef, useEffect } from "react";
-import { Search, RefreshCw } from "lucide-react";
-import { Button, Input, ImageCard, ImageGrid, Modal } from "@/components/ui";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { RefreshCw, Search } from "lucide-react";
+import { Button, ImageCard, ImageGrid, Input, Modal } from "@/components/ui";
 import { useLibrary } from "@/hooks/useLibrary";
 import { callTool } from "@/api/client";
 import { useLightbox } from "@/contexts/LightboxContext";
@@ -122,7 +122,10 @@ export function Library() {
               height={img.height}
               tags={img.tags}
               onClick={() => {
-                const slides = images.map((i) => ({ src: i.url, alt: i.name }));
+                const slides = images.map((i) => ({
+                  src: i.url,
+                  alt: i.name,
+                }));
                 openLightbox(index, slides);
               }}
               actions={[

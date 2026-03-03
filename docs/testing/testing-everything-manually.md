@@ -1,7 +1,7 @@
 # Spike Land - Complete Manual Testing Guide
 
-**Last Updated:** 2026-02-26 **Production URL:** https://spike.land
-**Pre-tested by:** Claude Code with Playwright MCP
+**Last Updated:** 2026-02-26 **Production URL:** https://spike.land **Pre-tested
+by:** Claude Code with Playwright MCP
 
 ---
 
@@ -462,8 +462,8 @@ correctly
 
 ## K. Storybook Pages Testing
 
-The platform includes 46 storybook pages that serve as both visual
-documentation and interactive testing resources for UI components.
+The platform includes 46 storybook pages that serve as both visual documentation
+and interactive testing resources for UI components.
 
 ### K.1 Accessing Storybook Pages
 

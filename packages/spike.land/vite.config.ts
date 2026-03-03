@@ -18,14 +18,35 @@ export default defineConfig({
         find: /^@store-apps\/(.+)$/,
         replacement: path.resolve(import.meta.dirname, "./packages/store-apps/$1"),
       },
-      { find: "@/components", replacement: path.resolve(import.meta.dirname, "./src/components") },
-      { find: "@/ui", replacement: path.resolve(import.meta.dirname, "./src/components/ui") },
-      { find: "@/lib", replacement: path.resolve(import.meta.dirname, "./src/lib") },
-      { find: "@/utils", replacement: path.resolve(import.meta.dirname, "./src/lib/utils") },
-      { find: "@/hooks", replacement: path.resolve(import.meta.dirname, "./src/hooks") },
-      { find: "@/auth", replacement: path.resolve(import.meta.dirname, "./src/auth.ts") },
+      {
+        find: "@/components",
+        replacement: path.resolve(import.meta.dirname, "./src/components"),
+      },
+      {
+        find: "@/ui",
+        replacement: path.resolve(import.meta.dirname, "./src/components/ui"),
+      },
+      {
+        find: "@/lib",
+        replacement: path.resolve(import.meta.dirname, "./src/lib"),
+      },
+      {
+        find: "@/utils",
+        replacement: path.resolve(import.meta.dirname, "./src/lib/utils"),
+      },
+      {
+        find: "@/hooks",
+        replacement: path.resolve(import.meta.dirname, "./src/hooks"),
+      },
+      {
+        find: "@/auth",
+        replacement: path.resolve(import.meta.dirname, "./src/auth.ts"),
+      },
       { find: "@", replacement: path.resolve(import.meta.dirname, "./src") },
-      { find: "@apps", replacement: path.resolve(import.meta.dirname, "./apps") },
+      {
+        find: "@apps",
+        replacement: path.resolve(import.meta.dirname, "./apps"),
+      },
       // Map @prisma/client to the generated Prisma client location
       {
         find: "@prisma/client",

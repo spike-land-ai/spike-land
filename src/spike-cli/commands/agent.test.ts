@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { registerAgentCommand } from "./agent";
 
@@ -123,7 +123,12 @@ describe("agent command", () => {
 
     registerAgentCommand(program);
     const agentCmd = program.commands.find((c) => c.name() === "agent")!;
-    await (agentCmd as Record<string, unknown>)._actionHandler([{ port: "3005" }, []]);
+    await (agentCmd as Record<string, unknown>)._actionHandler([
+      {
+        port: "3005",
+      },
+      [],
+    ]);
 
     const postCall = app.post.mock.calls.find((c: Array<unknown>) => c[0] === "/completion");
     expect(postCall).toBeDefined();

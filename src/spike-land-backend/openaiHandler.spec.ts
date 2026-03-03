@@ -48,7 +48,9 @@ describe("handleGPT4Request", () => {
       });
       mockFetch.mockResolvedValue(mockApiResponse);
 
-      const request = new Request("https://example.com/openai/v1/models", { method: "GET" });
+      const request = new Request("https://example.com/openai/v1/models", {
+        method: "GET",
+      });
 
       const response = await handleGPT4Request(request, mockEnv);
 
@@ -66,7 +68,9 @@ describe("handleGPT4Request", () => {
         }),
       );
 
-      const request = new Request("https://example.com/openai/v1/models", { method: "GET" });
+      const request = new Request("https://example.com/openai/v1/models", {
+        method: "GET",
+      });
 
       const response = await handleGPT4Request(request, mockEnv);
 
@@ -137,7 +141,10 @@ describe("handleGPT4Request", () => {
       const response = await handleGPT4Request(request, mockEnv);
 
       expect(response.status).toBe(500);
-      const body = (await response.json()) as { error: string; details: string };
+      const body = (await response.json()) as {
+        error: string;
+        details: string;
+      };
       expect(body.error).toBe("Failed to process request");
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
@@ -146,12 +153,17 @@ describe("handleGPT4Request", () => {
       const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       mockFetch.mockRejectedValue(new Error("Network timeout"));
 
-      const request = new Request("https://example.com/openai/v1/models", { method: "GET" });
+      const request = new Request("https://example.com/openai/v1/models", {
+        method: "GET",
+      });
 
       const response = await handleGPT4Request(request, mockEnv);
 
       expect(response.status).toBe(500);
-      const body = (await response.json()) as { error: string; details: string };
+      const body = (await response.json()) as {
+        error: string;
+        details: string;
+      };
       expect(body.details).toBe("Network timeout");
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
@@ -160,12 +172,17 @@ describe("handleGPT4Request", () => {
       const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       mockFetch.mockRejectedValue("string error");
 
-      const request = new Request("https://example.com/openai/v1/models", { method: "GET" });
+      const request = new Request("https://example.com/openai/v1/models", {
+        method: "GET",
+      });
 
       const response = await handleGPT4Request(request, mockEnv);
 
       expect(response.status).toBe(500);
-      const body = (await response.json()) as { error: string; details: string };
+      const body = (await response.json()) as {
+        error: string;
+        details: string;
+      };
       expect(body.details).toBe("Unknown error");
       expect(consoleErrorSpy).toHaveBeenCalled();
     });

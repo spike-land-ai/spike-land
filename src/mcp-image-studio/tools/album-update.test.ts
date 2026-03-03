@@ -382,9 +382,10 @@ describe("albumUpdate", () => {
 
     // Passing without privacy using type assertion
     const result = await albumUpdate(
-      { album_handle: "h1", name: "Just a name update" } as unknown as Parameters<
-        typeof albumUpdate
-      >[0],
+      {
+        album_handle: "h1",
+        name: "Just a name update",
+      } as unknown as Parameters<typeof albumUpdate>[0],
       ctx,
     );
 

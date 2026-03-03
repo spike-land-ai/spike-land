@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { errorResult, jsonResult, toolEvent } from "../types.js";
 import { processBatch } from "../define-tool.js";
-import { tryCatch, DomainError } from "./try-catch.js";
+import { DomainError, tryCatch } from "./try-catch.js";
 import { imageProcedure, withResolves } from "../tool-builder/image-middleware.js";
 
 export const bulkDeleteTool = imageProcedure
@@ -27,7 +27,9 @@ export const bulkDeleteTool = imageProcedure
       const ids = images.map((img) => img.id);
 
       const storageRes = await tryCatch(deps.storage.deleteMany(r2Keys));
-      if (!storageRes.ok) throw new DomainError("STORAGE_ERROR", storageRes.error.message);
+      if (!storageRes.ok) {
+        throw new DomainError("STORAGE_ERROR", storageRes.error.message);
+      }
 
       const dbRes = await tryCatch(deps.db.imageDeleteMany(ids));
       if (!dbRes.ok) throw new DomainError("DB_ERROR", dbRes.error.message);
@@ -42,7 +44,9 @@ export const bulkDeleteTool = imageProcedure
     // Fallback to parallel processing
     const { successful, failed } = await processBatch(images, async (image) => {
       const storageResult = await tryCatch(deps.storage.delete(image.originalR2Key));
-      if (!storageResult.ok) throw new DomainError("STORAGE_ERROR", "storage deletion failed");
+      if (!storageResult.ok) {
+        throw new DomainError("STORAGE_ERROR", "storage deletion failed");
+      }
 
       const dbResult = await tryCatch(deps.db.imageDelete(image.id));
       if (!dbResult.ok) throw new DomainError("DB_ERROR", "db deletion failed");

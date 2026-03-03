@@ -91,7 +91,12 @@ export async function collectStatus(
       ? config.configSources[config.configSources.length - 1]
       : undefined;
 
-  return { servers, env, configSources: config.configSources, configPath: resolvedConfigPath };
+  return {
+    servers,
+    env,
+    configSources: config.configSources,
+    configPath: resolvedConfigPath,
+  };
 }
 
 export function formatStatus(result: StatusResult): string {

@@ -93,7 +93,10 @@ describe("bundler", () => {
       const result = await resolve(resolveCbs, {
         path: "https://esm.sh/react",
       });
-      expect(result).toEqual({ path: "https://esm.sh/react", namespace: "http-url" });
+      expect(result).toEqual({
+        path: "https://esm.sh/react",
+        namespace: "http-url",
+      });
     });
 
     it("should resolve import map entries", async () => {

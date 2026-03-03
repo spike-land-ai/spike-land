@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Navigate, Link } from "@tanstack/react-router";
+import { Link, Navigate } from "@tanstack/react-router";
 
 function GitHubIcon() {
   return (

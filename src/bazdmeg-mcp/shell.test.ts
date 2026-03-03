@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { runCommand, hasScript } from "./shell.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { hasScript, runCommand } from "./shell.js";
 import { execFile } from "node:child_process";
 import { readFile } from "node:fs/promises";
 

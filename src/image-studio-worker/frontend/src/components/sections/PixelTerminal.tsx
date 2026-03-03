@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, type KeyboardEvent } from "react";
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { useTools } from "@/hooks/useTools";
 import { callTool, parseToolResult, type ToolInfo, type ToolInputSchema } from "@/api/client";
 import { ENHANCEMENT_COSTS } from "@/constants/enums";
@@ -72,7 +72,7 @@ function JsonNode({ value, indent = 0 }: { value: unknown; indent?: number }) {
         {entries.map(([k, v], i) => (
           <div key={k} style={{ paddingLeft: `${(indent + 1) * 1.25}rem` }}>
             <span className="text-sky-400">"{k}"</span>
-            <span className="text-gray-500">: </span>
+            <span className="text-gray-500">:</span>
             <JsonNode value={v} indent={indent + 1} />
             {i < entries.length - 1 && <span className="text-gray-500">,</span>}
           </div>
@@ -159,7 +159,7 @@ function JsonEntry({ data }: { data: unknown }) {
 function ErrorEntry({ message }: { message: string }) {
   return (
     <p className="text-red-400 text-xs">
-      <span className="font-semibold">error: </span>
+      <span className="font-semibold">error:</span>
       {message}
     </p>
   );
@@ -235,7 +235,11 @@ function ToolFormEntry({ tool, onComplete, onResult, onError }: ToolFormEntryPro
 export function PixelTerminal() {
   const { tools, byName, grouped, categories, loading: toolsLoading } = useTools();
 
-  const [entries, setEntries] = useState<TerminalEntry[]>([{ type: "welcome" }]);
+  const [entries, setEntries] = useState<TerminalEntry[]>([
+    {
+      type: "welcome",
+    },
+  ]);
   const [input, setInput] = useState("");
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -301,7 +305,10 @@ export function PixelTerminal() {
       }
 
       if (trimmed === "credits") {
-        pushEntries(commandEntry, { type: "output", content: "Fetching credits..." });
+        pushEntries(commandEntry, {
+          type: "output",
+          content: "Fetching credits...",
+        });
         try {
           const result = await callTool("img_credits", {});
           const parsed = parseToolResult<unknown>(result);
@@ -321,7 +328,10 @@ export function PixelTerminal() {
         const filterArg = trimmed.startsWith("tools ") ? trimmed.slice(6).trim() : "";
 
         if (toolsLoading) {
-          pushEntries(commandEntry, { type: "output", content: "Tools are still loading..." });
+          pushEntries(commandEntry, {
+            type: "output",
+            content: "Tools are still loading...",
+          });
           return;
         }
 
@@ -363,7 +373,10 @@ export function PixelTerminal() {
           lines.push(`\n${tools.length} tools across ${categories.length} categories.`);
         }
 
-        pushEntries(commandEntry, { type: "output", content: lines.join("\n").trimStart() });
+        pushEntries(commandEntry, {
+          type: "output",
+          content: lines.join("\n").trimStart(),
+        });
         return;
       }
 

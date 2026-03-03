@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { optimizeSchema } from "./schema-optimizer";
 
 describe("optimizeSchema", () => {
@@ -84,8 +84,14 @@ describe("optimizeSchema", () => {
     const schema = {
       type: "object",
       properties: {
-        query: { type: "string", description: "The search query to execute against the index" },
-        limit: { type: "number", description: "Maximum number of results to return" },
+        query: {
+          type: "string",
+          description: "The search query to execute against the index",
+        },
+        limit: {
+          type: "number",
+          description: "Maximum number of results to return",
+        },
       },
     };
 

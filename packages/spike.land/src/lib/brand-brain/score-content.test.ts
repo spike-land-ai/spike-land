@@ -80,7 +80,13 @@ function makeValidGeminiResponse() {
   return {
     score: 85,
     violations: [],
-    suggestions: [{ category: "TONE", recommendation: "Use active voice", priority: "LOW" }],
+    suggestions: [
+      {
+        category: "TONE",
+        recommendation: "Use active voice",
+        priority: "LOW",
+      },
+    ],
     toneAnalysis: {
       formalCasual: 45,
       technicalSimple: 55,
@@ -226,7 +232,13 @@ describe("scoreContent", () => {
     const geminiResponse = {
       ...makeValidGeminiResponse(),
       score: 70,
-      violations: [{ type: "TONE_MISMATCH", severity: "MEDIUM", message: "Slightly off tone" }],
+      violations: [
+        {
+          type: "TONE_MISMATCH",
+          severity: "MEDIUM",
+          message: "Slightly off tone",
+        },
+      ],
     };
     mockGenerateStructuredResponse.mockResolvedValue(geminiResponse);
     const result = await scoreContent(makeParams({ strictMode: false }));

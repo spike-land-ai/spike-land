@@ -21,7 +21,11 @@ vi.mock("@/lib/avl-profile/traversal", () => ({
       derivedTags: ["morning-person", "introvert"],
       leafNodeId: "leaf-3-2-1",
       answerPath: [
-        { question: "Do you prefer mornings?", answer: true, questionTags: ["lifestyle"] },
+        {
+          question: "Do you prefer mornings?",
+          answer: true,
+          questionTags: ["lifestyle"],
+        },
       ],
     },
   }),
@@ -32,7 +36,11 @@ vi.mock("@/lib/avl-profile/traversal", () => ({
       derivedTags: ["morning-person"],
       leafNodeId: "leaf-3-2",
       answerPath: [
-        { question: "Do you prefer mornings?", answer: true, questionTags: ["lifestyle"] },
+        {
+          question: "Do you prefer mornings?",
+          answer: true,
+          questionTags: ["lifestyle"],
+        },
       ],
     },
   }),
@@ -42,7 +50,11 @@ vi.mock("@/lib/avl-profile/traversal", () => ({
     treeId: "default",
     profileRound: 1,
     answerPath: [
-      { question: "Do you prefer mornings?", answer: true, questionTags: ["lifestyle"] },
+      {
+        question: "Do you prefer mornings?",
+        answer: true,
+        questionTags: ["lifestyle"],
+      },
     ],
   }),
   resetUserProfile: vi.fn().mockResolvedValue(undefined),
@@ -89,7 +101,11 @@ vi.mock("@/lib/prisma", () => ({
         user: { name: "TestUser", email: null },
         leafNodeId: "leaf-3-2-1",
         answerPath: [
-          { question: "Do you prefer mornings?", answer: true, questionTags: ["lifestyle"] },
+          {
+            question: "Do you prefer mornings?",
+            answer: true,
+            questionTags: ["lifestyle"],
+          },
         ],
         derivedTags: ["morning-person", "introvert"],
         completedAt: new Date("2026-01-10"),
@@ -180,7 +196,13 @@ describe("beUniqTools", () => {
   });
 
   it("profile_share_result returns text format", async () => {
-    const result = await registry.call("profile_share_result", { format: "text" }, ctx);
+    const result = await registry.call(
+      "profile_share_result",
+      {
+        format: "text",
+      },
+      ctx,
+    );
     expect(result.isError).toBeUndefined();
     const text = (result.content[0] as { text: string }).text;
     expect(text).toContain("Share Your Result");

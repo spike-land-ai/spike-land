@@ -86,7 +86,11 @@ describe("duplicate", () => {
 
   it("should duplicate an image with custom name", async () => {
     const ctx: ToolContext = { userId, deps };
-    const image = mockImageRow({ userId, id: asImageId("img-1"), name: "original.png" });
+    const image = mockImageRow({
+      userId,
+      id: asImageId("img-1"),
+      name: "original.png",
+    });
     mocks.resolverMocks.resolveImage.mockResolvedValue(image);
     mocks.storage.download.mockResolvedValue(Buffer.from("data"));
     mocks.storage.upload.mockResolvedValue({

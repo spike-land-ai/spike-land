@@ -100,11 +100,15 @@ vi.mock("@/lib/prisma", () => ({
         message: null,
         enabled: true,
       }),
-      findMany: vi
-        .fn()
-        .mockResolvedValue([
-          { id: "rem-1", time: "09:00", days: ["MON", "WED", "FRI"], message: null, enabled: true },
-        ]),
+      findMany: vi.fn().mockResolvedValue([
+        {
+          id: "rem-1",
+          time: "09:00",
+          days: ["MON", "WED", "FRI"],
+          message: null,
+          enabled: true,
+        },
+      ]),
       findFirst: vi.fn().mockResolvedValue({
         id: "rem-1",
         userId: "test-user-id",
@@ -163,11 +167,13 @@ vi.mock("@/lib/clean/gamification", () => ({
   isConsecutiveDay: vi.fn().mockReturnValue(true),
   isSameDay: vi.fn().mockReturnValue(false),
   pointsToNextLevel: vi.fn().mockReturnValue({ progress: 0.6, next: 300 }),
-  checkNewAchievements: vi
-    .fn()
-    .mockReturnValue([
-      { type: "FIRST_SESSION", name: "First Steps", description: "Complete your first session" },
-    ]),
+  checkNewAchievements: vi.fn().mockReturnValue([
+    {
+      type: "FIRST_SESSION",
+      name: "First Steps",
+      description: "Complete your first session",
+    },
+  ]),
 }));
 
 vi.mock("@/lib/clean/encouragement", () => ({
@@ -229,7 +235,13 @@ describe("cleansweepTools", () => {
   });
 
   it("clean_photo_analyze returns photo analysis", async () => {
-    const result = await registry.call("clean_photo_analyze", { photo_base64: "dGVzdA==" }, ctx);
+    const result = await registry.call(
+      "clean_photo_analyze",
+      {
+        photo_base64: "dGVzdA==",
+      },
+      ctx,
+    );
     expect(result.isError).toBeUndefined();
     const text = (result.content[0] as { text: string }).text;
     expect(text).toContain("Photo Analysis");
@@ -242,21 +254,39 @@ describe("cleansweepTools", () => {
   });
 
   it("clean_tasks_start_session creates a session", async () => {
-    const result = await registry.call("clean_tasks_start_session", { room_label: "kitchen" }, ctx);
+    const result = await registry.call(
+      "clean_tasks_start_session",
+      {
+        room_label: "kitchen",
+      },
+      ctx,
+    );
     expect(result.isError).toBeUndefined();
     const text = (result.content[0] as { text: string }).text;
     expect(text).toContain("Session started");
   });
 
   it("clean_tasks_get_current returns next pending task", async () => {
-    const result = await registry.call("clean_tasks_get_current", { session_id: "session-1" }, ctx);
+    const result = await registry.call(
+      "clean_tasks_get_current",
+      {
+        session_id: "session-1",
+      },
+      ctx,
+    );
     expect(result.isError).toBeUndefined();
     const text = (result.content[0] as { text: string }).text;
     expect(text).toContain("Current Task");
   });
 
   it("clean_tasks_complete marks task as done", async () => {
-    const result = await registry.call("clean_tasks_complete", { task_id: "t2" }, ctx);
+    const result = await registry.call(
+      "clean_tasks_complete",
+      {
+        task_id: "t2",
+      },
+      ctx,
+    );
     expect(result.isError).toBeUndefined();
     const text = (result.content[0] as { text: string }).text;
     expect(text).toContain("Task completed");

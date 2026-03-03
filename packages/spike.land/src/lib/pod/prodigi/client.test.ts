@@ -416,7 +416,13 @@ describe("prodigi/client", () => {
             postalCode: "EC1A",
             countryCode: "GB",
           },
-          items: [{ sku: "test", quantity: 1, imageUrl: "https://example.com/img.png" }],
+          items: [
+            {
+              sku: "test",
+              quantity: 1,
+              imageUrl: "https://example.com/img.png",
+            },
+          ],
         });
 
         expect(result.success).toBe(false);

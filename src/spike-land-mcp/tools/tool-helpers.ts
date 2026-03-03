@@ -8,9 +8,9 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { tryCatch } from "@spike-land-ai/mcp-server-base";
 export { textResult } from "@spike-land-ai/mcp-server-base";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { DrizzleDB } from "../db/index";
-import { workspaces, workspaceMembers, vaultSecrets } from "../db/schema";
+import { vaultSecrets, workspaceMembers, workspaces } from "../db/schema";
 
 // ─── MCP Error Types (inline — not exported from @spike-land-ai/shared) ──────
 

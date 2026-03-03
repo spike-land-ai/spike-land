@@ -204,7 +204,13 @@ export function SimulationPanel({
   // Save recording
   const handleSaveRecording = useCallback(() => {
     if (!scenarioName.trim() || recordingEvents.length === 0) return;
-    setScenarios((prev) => [...prev, { name: scenarioName.trim(), events: [...recordingEvents] }]);
+    setScenarios((prev) => [
+      ...prev,
+      {
+        name: scenarioName.trim(),
+        events: [...recordingEvents],
+      },
+    ]);
     setRecordingEvents([]);
     setIsRecording(false);
     setScenarioName("");

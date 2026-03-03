@@ -2,10 +2,10 @@
  * Tests for context-bundle.ts
  */
 
-import { describe, it, expect, afterEach } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import {
-  extractExportedSymbols,
   buildContextBundle,
+  extractExportedSymbols,
   formatContextBundle,
 } from "./context-bundle.js";
 import { createFakeMonorepo } from "./__test-utils__/fixtures.js";
@@ -125,7 +125,12 @@ describe("formatContextBundle", () => {
         devDependencies: {},
       },
       exportedTypes: [{ file: "types.ts", symbols: ["Config", "Status"] }],
-      dependencyContexts: [{ packageName: "@spike-land-ai/shared", summary: "# Shared\nUtils." }],
+      dependencyContexts: [
+        {
+          packageName: "@spike-land-ai/shared",
+          summary: "# Shared\nUtils.",
+        },
+      ],
     });
 
     expect(text).toContain("# Context Bundle: my-pkg");

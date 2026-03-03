@@ -2,7 +2,8 @@
 
 ## Overview
 
-Shared ESLint flat config for all `@spike-land-ai` packages. Published as `@spike-land-ai/eslint-config`. Configuration-only package (no build step).
+Shared ESLint flat config for all `@spike-land-ai` packages. Published as
+`@spike-land-ai/eslint-config`. Configuration-only package (no build step).
 
 ## Commands
 
@@ -16,10 +17,12 @@ react.mjs    # Extended config with React + React Hooks support
 ```
 
 **Exports**:
+
 - `@spike-land-ai/eslint-config` — base TypeScript config (`createConfig()`)
 - `@spike-land-ai/eslint-config/react` — React config (`createReactConfig()`)
 
-**Dependencies**: `typescript-eslint`. Optional peers: `eslint-plugin-react`, `eslint-plugin-react-hooks`.
+**Dependencies**: `typescript-eslint`. Optional peers: `eslint-plugin-react`,
+`eslint-plugin-react-hooks`.
 
 ## Code Quality Rules
 

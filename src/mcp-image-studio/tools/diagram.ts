@@ -1,11 +1,11 @@
 import { z } from "zod";
 import type { AspectRatio, EnhancementTier } from "../types.js";
 import {
+  DIAGRAM_STYLE_VALUES,
+  DIAGRAM_TYPE_VALUES,
   errorResult,
   jsonResult,
   toolEvent,
-  DIAGRAM_TYPE_VALUES,
-  DIAGRAM_STYLE_VALUES,
 } from "../types.js";
 import { tryCatch } from "./try-catch.js";
 import { imageProcedure, withCredits } from "../tool-builder/image-middleware.js";

@@ -48,7 +48,7 @@ await page.goto(
 );
 
 // Verify E2E_BYPASS_SECRET exists
-const secretExists = await page.locator("code:has-text(\"E2E_BYPASS_SECRET\")")
+const secretExists = await page.locator('code:has-text("E2E_BYPASS_SECRET")')
   .isVisible();
 console.log("E2E_BYPASS_SECRET configured:", secretExists);
 ```

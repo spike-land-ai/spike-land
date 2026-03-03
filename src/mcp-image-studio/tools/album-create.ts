@@ -1,9 +1,9 @@
 import { z } from "zod";
 import {
+  ALBUM_PRIVACY_VALUES,
   asAlbumHandle,
   errorResult,
   jsonResult,
-  ALBUM_PRIVACY_VALUES,
   toolEvent,
 } from "../types.js";
 import { tryCatch } from "./try-catch.js";
@@ -49,7 +49,10 @@ export const albumCreateTool = imageProcedure
     const album = albumResult.data;
 
     ctx.notify?.(
-      toolEvent("album:created", album.handle, { name: album.name, privacy: album.privacy }),
+      toolEvent("album:created", album.handle, {
+        name: album.name,
+        privacy: album.privacy,
+      }),
     );
 
     return jsonResult({

@@ -22,7 +22,9 @@ export function registerSubmitTools(server: McpServer, writeClient: HNWriteClien
       }
 
       const result = await tryCatch(writeClient.submitStory(title, url, text));
-      if (!result.ok) return errorResult("NETWORK_ERROR", result.error.message, true);
+      if (!result.ok) {
+        return errorResult("NETWORK_ERROR", result.error.message, true);
+      }
       if (result.data.success) {
         return jsonResult({ status: "submitted", title });
       }

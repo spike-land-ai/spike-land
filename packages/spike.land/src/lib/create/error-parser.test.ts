@@ -104,13 +104,23 @@ describe("isUnrecoverableError", () => {
 
   it("returns true for 2+ identical consecutive errors", () => {
     const error = parseTranspileError("some error");
-    const previousErrors = [{ error: "same message" }, { error: "same message" }];
+    const previousErrors = [
+      { error: "same message" },
+      {
+        error: "same message",
+      },
+    ];
     expect(isUnrecoverableError(error, previousErrors)).toBe(true);
   });
 
   it("returns false for different consecutive errors", () => {
     const error = parseTranspileError("some error");
-    const previousErrors = [{ error: "first error" }, { error: "second error" }];
+    const previousErrors = [
+      { error: "first error" },
+      {
+        error: "second error",
+      },
+    ];
     expect(isUnrecoverableError(error, previousErrors)).toBe(false);
   });
 

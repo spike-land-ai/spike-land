@@ -5,10 +5,9 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   type CallToolResult,
-  McpError,
+  createMcpServer,
   createMockRegistry,
   createMockServer,
-  createMcpServer,
   createZodTool,
   errorResult,
   fail,
@@ -16,6 +15,7 @@ import {
   getText,
   isErrorResult,
   jsonResult,
+  McpError,
   ok,
   startMcpServer,
   textResult,
@@ -156,7 +156,9 @@ describe("formatError", () => {
 
 describe("getText", () => {
   it("returns the text of the first content item", () => {
-    const result: CallToolResult = { content: [{ type: "text", text: "hello" }] };
+    const result: CallToolResult = {
+      content: [{ type: "text", text: "hello" }],
+    };
     expect(getText(result)).toBe("hello");
   });
 
@@ -340,7 +342,11 @@ describe("createMockRegistry", () => {
 
   it("exposes the handlers Map", () => {
     const registry = createMockRegistry();
-    registry.register({ name: "t", description: "", handler: async () => textResult("ok") });
+    registry.register({
+      name: "t",
+      description: "",
+      handler: async () => textResult("ok"),
+    });
     expect(registry.handlers.has("t")).toBe(true);
   });
 });

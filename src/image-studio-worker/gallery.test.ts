@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ─── EventBus Tests ───
 
@@ -117,7 +117,10 @@ describe("EventBus", () => {
     eventBus.emit("album:created", { albumId: "alb-1", name: "Vacation" });
     eventBus.emit("album:updated", { albumId: "alb-1" });
 
-    expect(createdHandler).toHaveBeenCalledWith({ albumId: "alb-1", name: "Vacation" });
+    expect(createdHandler).toHaveBeenCalledWith({
+      albumId: "alb-1",
+      name: "Vacation",
+    });
     expect(updatedHandler).toHaveBeenCalledWith({ albumId: "alb-1" });
 
     eventBus.clear();
@@ -211,7 +214,10 @@ describe("Gallery DB Helpers", () => {
     it("returns an existing default album when one exists", async () => {
       const { getOrCreateDefaultAlbum } = await import("./deps/db.ts");
 
-      const existing = { id: "album-existing-1", handle: "gallery-user12-abc123" };
+      const existing = {
+        id: "album-existing-1",
+        handle: "gallery-user12-abc123",
+      };
       const mockDb = {
         prepare: vi.fn().mockReturnValue({
           bind: vi.fn().mockReturnValue({
@@ -283,7 +289,9 @@ describe("Gallery DB Helpers", () => {
         }),
       } as unknown as D1Database;
 
-      const result = await galleryRecentImages(mockDb, "user-123", { limit: 10 });
+      const result = await galleryRecentImages(mockDb, "user-123", {
+        limit: 10,
+      });
 
       expect(result.images).toHaveLength(5);
       expect(result.nextCursor).toBeNull();
@@ -407,7 +415,11 @@ describe("Gallery DB Helpers", () => {
           bind: vi.fn().mockReturnValue({
             first: vi.fn().mockImplementation((sql?: string) => {
               void sql;
-              return Promise.resolve({ id: "alb-1", handle: "gallery-u-abc", maxSort: 5 });
+              return Promise.resolve({
+                id: "alb-1",
+                handle: "gallery-u-abc",
+                maxSort: 5,
+              });
             }),
             run: vi.fn().mockRejectedValue(new Error("UNIQUE constraint failed")),
           }),

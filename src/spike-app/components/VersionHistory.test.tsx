@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { VersionHistory, type AppVersion } from "./VersionHistory";
+import { type AppVersion, VersionHistory } from "./VersionHistory";
 
 describe("VersionHistory", () => {
   it("renders empty state when no versions", () => {
@@ -10,9 +10,21 @@ describe("VersionHistory", () => {
 
   it("renders versions sorted descending", () => {
     const versions: AppVersion[] = [
-      { version: 1, changeDescription: "Initial", timestamp: "2025-01-01T00:00:00Z" },
-      { version: 3, changeDescription: "Third", timestamp: "2025-03-01T00:00:00Z" },
-      { version: 2, changeDescription: "Second", timestamp: "2025-02-01T00:00:00Z" },
+      {
+        version: 1,
+        changeDescription: "Initial",
+        timestamp: "2025-01-01T00:00:00Z",
+      },
+      {
+        version: 3,
+        changeDescription: "Third",
+        timestamp: "2025-03-01T00:00:00Z",
+      },
+      {
+        version: 2,
+        changeDescription: "Second",
+        timestamp: "2025-02-01T00:00:00Z",
+      },
     ];
 
     const { container } = render(<VersionHistory versions={versions} />);
@@ -24,8 +36,16 @@ describe("VersionHistory", () => {
 
   it("marks the latest version as Current", () => {
     const versions: AppVersion[] = [
-      { version: 1, changeDescription: "Old", timestamp: "2025-01-01T00:00:00Z" },
-      { version: 2, changeDescription: "New", timestamp: "2025-02-01T00:00:00Z" },
+      {
+        version: 1,
+        changeDescription: "Old",
+        timestamp: "2025-01-01T00:00:00Z",
+      },
+      {
+        version: 2,
+        changeDescription: "New",
+        timestamp: "2025-02-01T00:00:00Z",
+      },
     ];
 
     render(<VersionHistory versions={versions} />);
@@ -34,7 +54,11 @@ describe("VersionHistory", () => {
 
   it("displays change description", () => {
     const versions: AppVersion[] = [
-      { version: 1, changeDescription: "Added auth flow", timestamp: "2025-01-01T00:00:00Z" },
+      {
+        version: 1,
+        changeDescription: "Added auth flow",
+        timestamp: "2025-01-01T00:00:00Z",
+      },
     ];
 
     render(<VersionHistory versions={versions} />);
@@ -57,7 +81,11 @@ describe("VersionHistory", () => {
 
   it("does not show author when not provided", () => {
     const versions: AppVersion[] = [
-      { version: 1, changeDescription: "Fix", timestamp: "2025-01-01T00:00:00Z" },
+      {
+        version: 1,
+        changeDescription: "Fix",
+        timestamp: "2025-01-01T00:00:00Z",
+      },
     ];
 
     render(<VersionHistory versions={versions} />);

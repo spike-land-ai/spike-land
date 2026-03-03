@@ -95,7 +95,11 @@ export function createAuth(env: Env) {
           signInQR: (
             createAuthEndpoint as unknown as (
               path: string,
-              options: { method: string; body: ReturnType<typeof z.object>; use: never[] },
+              options: {
+                method: string;
+                body: ReturnType<typeof z.object>;
+                use: never[];
+              },
               handler: (ctx: QRAuthContext) => Promise<Response>,
             ) => ReturnType<typeof createAuthEndpoint>
           )(
@@ -111,7 +115,12 @@ export function createAuth(env: Env) {
             async (ctx) => {
               const { qrHash, qrOneTimeCode } = ctx.body;
               if (!qrHash || !qrOneTimeCode) {
-                return ctx.json({ error: "Missing required fields" }, { status: 400 });
+                return ctx.json(
+                  { error: "Missing required fields" },
+                  {
+                    status: 400,
+                  },
+                );
               }
 
               // In reality, you'd lookup the QR state from KV/D1 here

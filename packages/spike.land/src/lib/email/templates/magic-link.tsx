@@ -21,11 +21,23 @@ export function MagicLinkEmail({ url, host }: MagicLinkEmailProps) {
         If the button doesn't work, copy and paste this URL into your browser:
       </Text>
       <Text
-        style={{ ...emailStyles.text, fontSize: "12px", wordBreak: "break-all", color: "#6b7280" }}
+        style={{
+          ...emailStyles.text,
+          fontSize: "12px",
+          wordBreak: "break-all",
+          color: "#6b7280",
+        }}
       >
         {url}
       </Text>
-      <Text style={{ ...emailStyles.text, fontSize: "12px", color: "#9ca3af", marginTop: "32px" }}>
+      <Text
+        style={{
+          ...emailStyles.text,
+          fontSize: "12px",
+          color: "#9ca3af",
+          marginTop: "32px",
+        }}
+      >
         If you didn't request this email, you can safely ignore it.
       </Text>
     </BaseEmail>

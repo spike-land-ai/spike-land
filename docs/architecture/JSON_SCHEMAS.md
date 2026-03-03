@@ -153,7 +153,7 @@ interface SocialPostMetadata {
   mentions?: string[];
   location?: {
     name: string;
-    coordinates?: { lat: number; lng: number; };
+    coordinates?: { lat: number; lng: number };
   };
 }
 ```
@@ -194,8 +194,8 @@ interface AnalyticsMetrics {
   uniqueVisitors: number;
   bounceRate: number; // 0-100
   avgSessionDuration: number; // seconds
-  topPages: { path: string; views: number; }[];
-  topReferrers: { source: string; visits: number; }[];
+  topPages: { path: string; views: number }[];
+  topReferrers: { source: string; visits: number }[];
   deviceBreakdown: {
     mobile: number;
     tablet: number;
@@ -230,7 +230,7 @@ interface AuditMetadata {
 
   // Context
   triggeredBy?: "USER" | "SYSTEM" | "AI" | "CRON" | "WEBHOOK";
-  relatedEntities?: { type: string; id: string; }[];
+  relatedEntities?: { type: string; id: string }[];
 }
 ```
 
@@ -252,7 +252,7 @@ interface AnalysisResult {
   }[];
   detectedElements: {
     type: string;
-    boundingBox?: { x: number; y: number; width: number; height: number; };
+    boundingBox?: { x: number; y: number; width: number; height: number };
     confidence: number;
   }[];
 }
@@ -275,10 +275,10 @@ interface CropDimensions {
 
 ```typescript
 interface AiInputContext {
-  conversationHistory?: { role: string; content: string; }[];
+  conversationHistory?: { role: string; content: string }[];
   systemPrompt?: string;
   userPreferences?: Record<string, unknown>;
-  contextDocuments?: { id: string; content: string; }[];
+  contextDocuments?: { id: string; content: string }[];
 }
 ```
 
@@ -294,7 +294,7 @@ interface AiOutputMetadata {
   };
   latencyMs: number;
   confidenceScores?: Record<string, number>;
-  citations?: { source: string; text: string; }[];
+  citations?: { source: string; text: string }[];
 }
 ```
 
@@ -384,7 +384,7 @@ interface BudgetRecommendation {
 ```typescript
 interface CampaignPerformanceAnalysis {
   campaignId: string;
-  period: { start: string; end: string; };
+  period: { start: string; end: string };
   metrics: {
     spend: number;
     impressions: number;

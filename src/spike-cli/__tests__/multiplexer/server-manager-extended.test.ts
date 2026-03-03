@@ -39,7 +39,11 @@ function cfg(servers: Record<string, object> = {}): ResolvedConfig {
 function makeMockTsManager(
   overrides: Partial<{
     isServerVisible: boolean;
-    metaTools: Array<{ name: string; description: string; inputSchema: Record<string, unknown> }>;
+    metaTools: Array<{
+      name: string;
+      description: string;
+      inputSchema: Record<string, unknown>;
+    }>;
     isMetaTool: boolean;
     metaToolResult: { content: Array<{ type: string; text: string }> };
   }> = {},
@@ -61,7 +65,13 @@ describe("ServerManager — toolset visibility in getAllTools", () => {
     vi.clearAllMocks();
     mockConnect.mockResolvedValue(undefined);
     mockClose.mockResolvedValue(undefined);
-    mockGetTools.mockReturnValue([{ name: "run", description: "Run", inputSchema: {} }]);
+    mockGetTools.mockReturnValue([
+      {
+        name: "run",
+        description: "Run",
+        inputSchema: {},
+      },
+    ]);
   });
 
   it("skips tools from servers hidden by toolset manager", async () => {
@@ -90,7 +100,13 @@ describe("ServerManager — toolset visibility in getAllTools", () => {
 
     manager.setToolsetManager(
       makeMockTsManager({
-        metaTools: [{ name: "load_toolset", description: "Load", inputSchema: {} }],
+        metaTools: [
+          {
+            name: "load_toolset",
+            description: "Load",
+            inputSchema: {},
+          },
+        ],
       }),
     );
 
@@ -108,7 +124,13 @@ describe("ServerManager — callTool with toolset manager", () => {
     mockConnect.mockResolvedValue(undefined);
     mockClose.mockResolvedValue(undefined);
     mockConnectedGetter.mockReturnValue(true);
-    mockGetTools.mockReturnValue([{ name: "run", description: "Run", inputSchema: {} }]);
+    mockGetTools.mockReturnValue([
+      {
+        name: "run",
+        description: "Run",
+        inputSchema: {},
+      },
+    ]);
     mockCallTool.mockResolvedValue({ content: [{ type: "text", text: "ok" }] });
   });
 
@@ -324,7 +346,13 @@ describe("ServerManager — isConnected / getServerTools", () => {
   });
 
   it("returns tool list for known server", async () => {
-    mockGetTools.mockReturnValue([{ name: "ping", description: "Ping", inputSchema: {} }]);
+    mockGetTools.mockReturnValue([
+      {
+        name: "ping",
+        description: "Ping",
+        inputSchema: {},
+      },
+    ]);
 
     const manager = new ServerManager();
     await manager.connectAll(cfg({ srv: { command: "s" } }));
@@ -358,8 +386,16 @@ describe("ServerManager — callTool filtered tool check", () => {
   });
 
   it("calls the tool when it exists after filtering", async () => {
-    mockGetTools.mockReturnValue([{ name: "ping", description: "", inputSchema: {} }]);
-    mockCallTool.mockResolvedValue({ content: [{ type: "text", text: "pong" }] });
+    mockGetTools.mockReturnValue([
+      {
+        name: "ping",
+        description: "",
+        inputSchema: {},
+      },
+    ]);
+    mockCallTool.mockResolvedValue({
+      content: [{ type: "text", text: "pong" }],
+    });
 
     const manager = new ServerManager();
     await manager.connectAll(cfg({ srv: { command: "s" } }));

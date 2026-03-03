@@ -220,9 +220,9 @@ export const RecursiveZoomCore: FC<RecursiveZoomCoreProps> = ({
             return (
               <g
                 key={`layer-${layerAbsIndex}`}
-                transform={`translate(${cx}, ${cy}) scale(${scale}) translate(${-cardW / 2}, ${
-                  -cardH / 2
-                })`}
+                transform={`translate(${cx}, ${cy}) scale(${scale}) translate(${
+                  -cardW / 2
+                }, ${-cardH / 2})`}
                 opacity={opacity}
               >
                 {/* The UI Card */}

@@ -60,7 +60,7 @@ Use `generateMetadata` function for dynamic pages (blogs, products, etc.):
 import type { Metadata } from "next";
 
 type Props = {
-  params: Promise<{ id: string; }>;
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -156,7 +156,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     select: { slug: true, updatedAt: true },
   });
 
-  const postEntries: MetadataRoute.Sitemap = posts.map(post => ({
+  const postEntries: MetadataRoute.Sitemap = posts.map((post) => ({
     url: `https://yoursite.com/blog/${post.slug}`,
     lastModified: post.updatedAt,
     changeFrequency: "weekly",
@@ -345,7 +345,7 @@ export default function SearchInput() {
     debounce((query: string) => {
       // Expensive search operation
       fetch(`/api/search?q=${query}`)
-        .then(res => res.json())
+        .then((res) => res.json())
         .then(setResults);
     }, 300),
     [],
@@ -354,7 +354,7 @@ export default function SearchInput() {
   return (
     <input
       type="text"
-      onChange={e => handleSearch(e.target.value)}
+      onChange={(e) => handleSearch(e.target.value)}
       placeholder="Search..."
     />
   );
@@ -964,7 +964,7 @@ import { notFound } from "next/navigation";
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
-  return posts.map(post => ({
+  return posts.map((post) => ({
     slug: post.slug,
   }));
 }

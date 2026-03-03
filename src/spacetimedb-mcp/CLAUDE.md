@@ -2,7 +2,9 @@
 
 ## Overview
 
-MCP server for SpacetimeDB agent coordination — persistent real-time agent state, point-to-point messaging, and task management. Node.js runtime, published as `@spike-land-ai/spacetimedb-mcp`.
+MCP server for SpacetimeDB agent coordination — persistent real-time agent
+state, point-to-point messaging, and task management. Node.js runtime, published
+as `@spike-land-ai/spacetimedb-mcp`.
 
 ## Commands
 
@@ -31,23 +33,24 @@ module/                # SpacetimeDB server module (deployed to Maincloud)
     └── lib.ts         # Tables (Agent, AgentMessage, Task) + reducers
 ```
 
-**Dependencies**: `@modelcontextprotocol/sdk`, `zod` for validation. Live client uses `stdb-http-client` from spacetimedb-platform (native HTTP fetch, no SDK).
+**Dependencies**: `@modelcontextprotocol/sdk`, `zod` for validation. Live client
+uses `stdb-http-client` from spacetimedb-platform (native HTTP fetch, no SDK).
 
 ## MCP Tools
 
-| Tool | Description |
-|------|-------------|
-| `stdb_connect` | Connect to SpacetimeDB Maincloud instance |
-| `stdb_disconnect` | Disconnect from current instance |
+| Tool                  | Description                               |
+| --------------------- | ----------------------------------------- |
+| `stdb_connect`        | Connect to SpacetimeDB Maincloud instance |
+| `stdb_disconnect`     | Disconnect from current instance          |
 | `stdb_register_agent` | Register agent with name and capabilities |
-| `stdb_list_agents` | List all agents with online status |
-| `stdb_send_message` | Send message to another agent |
-| `stdb_get_messages` | Get messages (undelivered by default) |
-| `stdb_mark_delivered` | Mark a message as delivered |
-| `stdb_create_task` | Create a new coordination task |
-| `stdb_list_tasks` | List tasks with optional status filter |
-| `stdb_claim_task` | Claim an unassigned pending task |
-| `stdb_complete_task` | Mark a task as completed |
+| `stdb_list_agents`    | List all agents with online status        |
+| `stdb_send_message`   | Send message to another agent             |
+| `stdb_get_messages`   | Get messages (undelivered by default)     |
+| `stdb_mark_delivered` | Mark a message as delivered               |
+| `stdb_create_task`    | Create a new coordination task            |
+| `stdb_list_tasks`     | List tasks with optional status filter    |
+| `stdb_claim_task`     | Claim an unassigned pending task          |
+| `stdb_complete_task`  | Mark a task as completed                  |
 
 ## Usage with spike-cli
 

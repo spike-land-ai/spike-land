@@ -2,7 +2,9 @@
 
 ## Overview
 
-Standalone MCP bridge for the OpenClaw gateway. Translates OpenClaw tool definitions into MCP-compatible tools. Node.js runtime, published as `@spike-land-ai/openclaw-mcp`.
+Standalone MCP bridge for the OpenClaw gateway. Translates OpenClaw tool
+definitions into MCP-compatible tools. Node.js runtime, published as
+`@spike-land-ai/openclaw-mcp`.
 
 ## Commands
 
@@ -29,7 +31,8 @@ npm start            # Run via CLI entry point
 └── types.ts             # Shared types
 ```
 
-**Key pattern**: Bridge connects to OpenClaw gateway, discovers available tools, and re-exposes them as MCP tools with Zod-validated schemas.
+**Key pattern**: Bridge connects to OpenClaw gateway, discovers available tools,
+and re-exposes them as MCP tools with Zod-validated schemas.
 
 ## Code Quality Rules
 

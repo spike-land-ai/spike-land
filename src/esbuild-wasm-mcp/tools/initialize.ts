@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { initializeWasm } from "../wasm-api.js";
-import { tryCatch, errorResult } from "../errors.js";
+import { errorResult, tryCatch } from "../errors.js";
 
 const InitializeSchema = {
   wasmURL: z.string().optional().describe("URL to fetch the esbuild WASM binary from"),
@@ -19,7 +19,9 @@ export function registerInitializeTool(server: McpServer): void {
     InitializeSchema,
     async (args) => {
       const result = await tryCatch(initializeWasm(args));
-      if (!result.ok) return errorResult("INIT_FAILED", result.error.message, true);
+      if (!result.ok) {
+        return errorResult("INIT_FAILED", result.error.message, true);
+      }
       return {
         content: [
           {

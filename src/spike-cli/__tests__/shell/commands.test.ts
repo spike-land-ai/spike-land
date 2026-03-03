@@ -18,9 +18,13 @@ describe("shell commands", () => {
     mockManager = {
       getServerNames: vi.fn().mockReturnValue(["vitest", "playwright"]),
       isConnected: vi.fn().mockReturnValue(true),
-      getServerTools: vi
-        .fn()
-        .mockReturnValue([{ name: "run_tests", description: "Run tests", inputSchema: {} }]),
+      getServerTools: vi.fn().mockReturnValue([
+        {
+          name: "run_tests",
+          description: "Run tests",
+          inputSchema: {},
+        },
+      ]),
       getAllTools: vi.fn().mockReturnValue([
         {
           namespacedName: "vitest__run_tests",

@@ -1,20 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sidebar, type Workspace } from "./components/layout/Sidebar";
 import { MainContent } from "./components/layout/MainContent";
 import { useCredits } from "./hooks/useCredits";
 import { useAuth } from "./contexts/AuthContext";
 import { ChatWidget } from "./components/ui/ChatWidget";
 import {
-  Sparkles,
-  Github,
   Activity,
-  Zap,
-  Shield,
-  Zap as ZapIcon,
-  Layout,
   Cpu,
+  Github,
   Image as ImageIcon,
+  Layout,
   LogOut,
+  Shield,
+  Sparkles,
+  Zap,
+  Zap as ZapIcon,
 } from "lucide-react";
 import { DragDropProvider } from "./contexts/DragDropContext";
 import { eventBus } from "./services/event-bus";
@@ -42,10 +42,14 @@ export function App() {
         setShowUserMenu(false);
       }
     }
-    if (showUserMenu) document.addEventListener("mousedown", handleClickOutside);
+    if (showUserMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showUserMenu]);
-  const { balance, loading: balanceLoading } = useCredits({ enabled: isLoggedIn || isDemo });
+  const { balance, loading: balanceLoading } = useCredits({
+    enabled: isLoggedIn || isDemo,
+  });
 
   // Update hash when workspace changes
   useEffect(() => {
@@ -424,7 +428,9 @@ export function App() {
           </header>
 
           <div
-            className={`flex-1 flex overflow-hidden relative ${workspace === "studio" ? "" : "pt-14 md:pt-16 md:pl-20"}`}
+            className={`flex-1 flex overflow-hidden relative ${
+              workspace === "studio" ? "" : "pt-14 md:pt-16 md:pl-20"
+            }`}
           >
             <MainContent workspace={workspace} />
           </div>

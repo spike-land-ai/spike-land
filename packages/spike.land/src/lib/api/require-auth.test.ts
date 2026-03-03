@@ -61,9 +61,10 @@ describe("api/require-auth", () => {
   });
 
   it("should pass auth() result to tryCatch", async () => {
-    const authPromise = Promise.resolve({ user: { id: "u1" }, expires: "" }) as ReturnType<
-      typeof auth
-    >;
+    const authPromise = Promise.resolve({
+      user: { id: "u1" },
+      expires: "",
+    }) as ReturnType<typeof auth>;
     mockAuth.mockReturnValue(authPromise);
     mockTryCatch.mockResolvedValue({
       data: { user: { id: "u1" }, expires: "" },

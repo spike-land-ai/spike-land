@@ -28,7 +28,11 @@ export function createMockKV(): KVNamespace {
       list_complete: true,
       cacheStatus: null,
     }),
-    getWithMetadata: async () => ({ value: null, metadata: null, cacheStatus: null }),
+    getWithMetadata: async () => ({
+      value: null,
+      metadata: null,
+      cacheStatus: null,
+    }),
   } as unknown as KVNamespace;
 }
 

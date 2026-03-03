@@ -69,7 +69,12 @@ describe("discoverConfig — auth auto-injection", () => {
     });
 
     const result = await discoverConfig({
-      inlineUrls: [{ name: "spike-land", url: "https://custom.example.com/mcp" }],
+      inlineUrls: [
+        {
+          name: "spike-land",
+          url: "https://custom.example.com/mcp",
+        },
+      ],
     });
 
     expect(result.servers["spike-land"]?.url).toBe("https://custom.example.com/mcp");

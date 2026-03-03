@@ -2,7 +2,7 @@
  * Tests for publish tools (bazdmeg_generate_package_json, bazdmeg_publish_npm)
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 

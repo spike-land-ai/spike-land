@@ -2,8 +2,8 @@
  * Tests for workspace-state.ts
  */
 
-import { describe, it, expect, afterEach, vi, beforeEach } from "vitest";
-import { writeFile, unlink } from "node:fs/promises";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { unlink, writeFile } from "node:fs/promises";
 
 vi.mock("node:fs/promises", () => ({
   writeFile: vi.fn().mockResolvedValue(undefined),
@@ -14,9 +14,9 @@ vi.mock("node:fs/promises", () => ({
 import {
   enterWorkspace,
   exitWorkspace,
+  getConfigPath,
   getWorkspace,
   isWorkspaceActive,
-  getConfigPath,
   resetWorkspaceState,
 } from "./workspace-state.js";
 

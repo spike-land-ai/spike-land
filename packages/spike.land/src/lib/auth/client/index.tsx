@@ -87,5 +87,5 @@ export const signOut = async (options?: { fetchOptions?: Record<string, unknown>
 };
 
 export function SessionProvider({ children }: { children: ReactNode; session?: Session | null }) {
-  return <>{children} </>;
+  return <>{children}</>;
 }

@@ -185,7 +185,7 @@ with fixes)
    - Location: `src/app/api/admin/analytics/users/route.ts` (lines 30-38)
    ```typescript
    dailyRegistrations = await prisma.$queryRaw<
-     Array<{ date: Date; count: bigint; }>
+     Array<{ date: Date; count: bigint }>
    >`
      SELECT DATE(created_at) as date, COUNT(*)::bigint as count
      FROM users
@@ -207,22 +207,24 @@ with fixes)
 5. **CSS Injection Sanitization** (Added 2026-02-26)
    - CSS injection XSS vector identified and patched
    - User-supplied CSS content is now sanitized to prevent injection of
-     malicious CSS properties (e.g., `expression()`, `url()` with
-     `javascript:` protocol, `-moz-binding`)
-   - This closes a previously undocumented attack vector where crafted CSS
-     could execute JavaScript in older browsers or exfiltrate data via
-     CSS-based side channels
+     malicious CSS properties (e.g., `expression()`, `url()` with `javascript:`
+     protocol, `-moz-binding`)
+   - This closes a previously undocumented attack vector where crafted CSS could
+     execute JavaScript in older browsers or exfiltrate data via CSS-based side
+     channels
 
 #### ⚠️ CONCERNS
 
 1. **State-Machine Visualizer Template Injection** (Medium Risk)
-   - `generateVisualizerCode()` in `src/lib/state-machine/visualizer-template.ts`
-     embeds JSON directly into a JS template string
+   - `generateVisualizerCode()` in
+     `src/lib/state-machine/visualizer-template.ts` embeds JSON directly into a
+     JS template string
    - State names containing `};` could break out of the object literal
    - **Status**: Documented in BUGS.md as BUG-007; fix pending
    - **Priority**: Medium
 
-**Risk Rating:** LOW **Compliance:** OWASP ASVS Level 3 Compliant (with CSS fix applied)
+**Risk Rating:** LOW **Compliance:** OWASP ASVS Level 3 Compliant (with CSS fix
+applied)
 
 ---
 

@@ -2,7 +2,7 @@
  * Tests for mirror tool (bazdmeg_sync_mirror)
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 
@@ -75,7 +75,9 @@ describe("mirror tools", () => {
       MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
     );
     mockRunCommand.mockImplementation(async (_cmd, args) => {
-      if (args[0] === "remote" && args[1] === "get-url") return fail("not found");
+      if (args[0] === "remote" && args[1] === "get-url") {
+        return fail("not found");
+      }
       if (args[0] === "remote" && args[1] === "add") return ok();
       if (args[0] === "subtree") return ok("pushed");
       return ok();
@@ -95,7 +97,9 @@ describe("mirror tools", () => {
       MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
     );
     mockRunCommand.mockImplementation(async (_cmd, args) => {
-      if (args[0] === "remote" && args[1] === "get-url") return ok("git@github.com:org/repo.git");
+      if (args[0] === "remote" && args[1] === "get-url") {
+        return ok("git@github.com:org/repo.git");
+      }
       if (args[0] === "subtree") return ok("pushed");
       return ok();
     });
@@ -132,8 +136,12 @@ describe("mirror tools", () => {
       MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
     );
     mockRunCommand.mockImplementation(async (_cmd, args) => {
-      if (args[0] === "remote" && args[1] === "get-url") return fail("no remote");
-      if (args[0] === "remote" && args[1] === "add") return fail("remote add failed");
+      if (args[0] === "remote" && args[1] === "get-url") {
+        return fail("no remote");
+      }
+      if (args[0] === "remote" && args[1] === "add") {
+        return fail("remote add failed");
+      }
       return ok();
     });
 

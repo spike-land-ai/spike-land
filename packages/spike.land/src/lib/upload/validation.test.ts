@@ -256,7 +256,12 @@ describe("getValidationSummary", () => {
       valid: false,
       errors: ["bad.txt: Invalid file type"],
       validFiles: [createFile("a.jpg", 100, "image/jpeg")],
-      invalidFiles: [{ file: createFile("bad.txt", 100, "text/plain"), error: "Invalid" }],
+      invalidFiles: [
+        {
+          file: createFile("bad.txt", 100, "text/plain"),
+          error: "Invalid",
+        },
+      ],
     };
     const summary = getValidationSummary(result);
     expect(summary).toContain("1 valid file(s)");
@@ -268,7 +273,12 @@ describe("getValidationSummary", () => {
       valid: false,
       errors: ["bad"],
       validFiles: [],
-      invalidFiles: [{ file: createFile("bad.txt", 100, "text/plain"), error: "Invalid" }],
+      invalidFiles: [
+        {
+          file: createFile("bad.txt", 100, "text/plain"),
+          error: "Invalid",
+        },
+      ],
     };
     const summary = getValidationSummary(result);
     expect(summary).toContain("1 invalid file(s)");

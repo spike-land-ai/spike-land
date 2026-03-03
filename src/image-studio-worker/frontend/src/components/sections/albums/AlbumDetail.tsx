@@ -1,21 +1,21 @@
 import { useState } from "react";
 import {
-  FolderOpen,
-  Plus,
-  Trash2,
-  GripVertical,
   ArrowLeft,
-  Share2,
-  Images,
-  Star,
-  MoreVertical,
   CheckCircle2,
+  FolderOpen,
+  GripVertical,
+  Images,
+  MoreVertical,
+  Plus,
+  Share2,
+  Star,
+  Trash2,
 } from "lucide-react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Button, Modal, ImagePicker, Badge } from "@/components/ui";
+import { Badge, Button, ImagePicker, Modal } from "@/components/ui";
 import { useLightbox } from "@/contexts/LightboxContext";
 import { callTool } from "@/api/client";
 import type { Album, AlbumImage } from "./albumTypes";
@@ -92,7 +92,9 @@ export function AlbumDetail({ selectedAlbum, albums, onBack }: AlbumDetailProps)
       });
       setShowAddImage(false);
       setAddImageId("");
-      queryClient.invalidateQueries({ queryKey: ["albumDetail", currentAlbum.id] });
+      queryClient.invalidateQueries({
+        queryKey: ["albumDetail", currentAlbum.id],
+      });
       queryClient.invalidateQueries({ queryKey: ["albums"] });
       toast.success("Image added to album");
     } catch (err) {
@@ -108,7 +110,9 @@ export function AlbumDetail({ selectedAlbum, albums, onBack }: AlbumDetailProps)
         method: "DELETE",
         body: JSON.stringify({ imageIds: [imageId] }),
       });
-      queryClient.invalidateQueries({ queryKey: ["albumDetail", currentAlbum.id] });
+      queryClient.invalidateQueries({
+        queryKey: ["albumDetail", currentAlbum.id],
+      });
       queryClient.invalidateQueries({ queryKey: ["albums"] });
       toast.success("Image removed from album");
     } catch (err) {
@@ -314,7 +318,10 @@ export function AlbumDetail({ selectedAlbum, albums, onBack }: AlbumDetailProps)
                                 className="aspect-square cursor-pointer relative overflow-hidden"
                                 onClick={() => {
                                   const slides = albumImages
-                                    .map((i) => ({ src: i.url ?? "", alt: i.name ?? "" }))
+                                    .map((i) => ({
+                                      src: i.url ?? "",
+                                      alt: i.name ?? "",
+                                    }))
                                     .filter((s) => s.src);
                                   openLightbox(index, slides);
                                 }}

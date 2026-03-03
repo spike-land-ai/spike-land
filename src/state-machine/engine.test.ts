@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
-  createMachine,
-  sendEvent,
-  getState,
   addState,
   addTransition,
   clearMachines,
+  createMachine,
+  getState,
   resetMachine,
+  sendEvent,
 } from "./engine.js";
 
 describe("Statechart Engine", () => {

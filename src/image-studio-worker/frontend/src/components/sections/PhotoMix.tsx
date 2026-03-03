@@ -1,20 +1,20 @@
 import { toast } from "sonner";
-import { useState, useCallback } from "react";
-import { Blend, History, GripVertical, Trash2, Plus } from "lucide-react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { useCallback, useState } from "react";
+import { Blend, GripVertical, History, Plus, Trash2 } from "lucide-react";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import {
+  Badge,
   Button,
+  CreditBadge,
+  ImagePicker,
   Input,
+  JobPoller,
   Select,
   TextArea,
-  CreditBadge,
-  JobPoller,
-  Badge,
-  ImagePicker,
 } from "@/components/ui";
 import { callTool, parseToolResult } from "@/api/client";
-import { BLEND_MODES, ENHANCEMENT_TIERS, ENHANCEMENT_COSTS } from "@/constants/enums";
+import { BLEND_MODES, ENHANCEMENT_COSTS, ENHANCEMENT_TIERS } from "@/constants/enums";
 
 export function PhotoMix() {
   const [layers, setLayers] = useState<{ id: string; value: string }[]>([
@@ -78,7 +78,13 @@ export function PhotoMix() {
   };
 
   const addLayer = () => {
-    setLayers([...layers, { id: `layer-${Date.now()}-${Math.random()}`, value: "" }]);
+    setLayers([
+      ...layers,
+      {
+        id: `layer-${Date.now()}-${Math.random()}`,
+        value: "",
+      },
+    ]);
   };
 
   const removeLayer = (id: string) => {

@@ -154,7 +154,13 @@ export function createLiveSpacetimeMcpClient(): SpacetimeMcpClient {
 
     disconnect() {
       httpClient = null;
-      state = { connected: false, uri: null, moduleName: null, identity: null, token: null };
+      state = {
+        connected: false,
+        uri: null,
+        moduleName: null,
+        identity: null,
+        token: null,
+      };
     },
 
     // ─── Provider Operations ───

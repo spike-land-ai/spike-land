@@ -6,17 +6,17 @@
  * by exercising the underlying engine functions that CLI delegates to.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createInterface } from "node:readline";
 import {
-  createMachine,
   addState,
   addTransition,
-  sendEvent,
+  clearMachines,
+  createMachine,
   getState,
   resetMachine,
+  sendEvent,
   validateMachine,
-  clearMachines,
 } from "./engine.js";
 
 // Test the CLI command dispatch logic by simulating the same operations
@@ -104,12 +104,24 @@ describe("CLI command routing (engine integration)", () => {
     }) as ReturnType<typeof createMachine>;
     const id = machine.definition.id;
 
-    dispatchCommand("addState", { machineId: id, state: { id: "a", type: "atomic" } });
-    dispatchCommand("addState", { machineId: id, state: { id: "b", type: "atomic" } });
+    dispatchCommand("addState", {
+      machineId: id,
+      state: { id: "a", type: "atomic" },
+    });
+    dispatchCommand("addState", {
+      machineId: id,
+      state: { id: "b", type: "atomic" },
+    });
 
     const transition = dispatchCommand("addTransition", {
       machineId: id,
-      transition: { source: "a", target: "b", event: "GO", actions: [], internal: false },
+      transition: {
+        source: "a",
+        target: "b",
+        event: "GO",
+        actions: [],
+        internal: false,
+      },
     });
 
     expect((transition as ReturnType<typeof addTransition>).event).toBe("GO");
@@ -123,18 +135,31 @@ describe("CLI command routing (engine integration)", () => {
     }) as ReturnType<typeof createMachine>;
     const id = machine.definition.id;
 
-    dispatchCommand("addState", { machineId: id, state: { id: "a", type: "atomic" } });
-    dispatchCommand("addState", { machineId: id, state: { id: "b", type: "atomic" } });
+    dispatchCommand("addState", {
+      machineId: id,
+      state: { id: "a", type: "atomic" },
+    });
+    dispatchCommand("addState", {
+      machineId: id,
+      state: { id: "b", type: "atomic" },
+    });
     dispatchCommand("addTransition", {
       machineId: id,
-      transition: { source: "a", target: "b", event: "GO", actions: [], internal: false },
+      transition: {
+        source: "a",
+        target: "b",
+        event: "GO",
+        actions: [],
+        internal: false,
+      },
     });
 
     machine.currentStates = ["a"];
 
-    const log = dispatchCommand("sendEvent", { machineId: id, event: "GO" }) as ReturnType<
-      typeof sendEvent
-    >;
+    const log = dispatchCommand("sendEvent", {
+      machineId: id,
+      event: "GO",
+    }) as ReturnType<typeof sendEvent>;
 
     expect(log.toStates).toContain("b");
   });
@@ -148,8 +173,14 @@ describe("CLI command routing (engine integration)", () => {
     }) as ReturnType<typeof createMachine>;
     const id = machine.definition.id;
 
-    dispatchCommand("addState", { machineId: id, state: { id: "a", type: "atomic" } });
-    dispatchCommand("addState", { machineId: id, state: { id: "b", type: "atomic" } });
+    dispatchCommand("addState", {
+      machineId: id,
+      state: { id: "a", type: "atomic" },
+    });
+    dispatchCommand("addState", {
+      machineId: id,
+      state: { id: "b", type: "atomic" },
+    });
     dispatchCommand("addTransition", {
       machineId: id,
       transition: {
@@ -176,7 +207,10 @@ describe("CLI command routing (engine integration)", () => {
     }) as ReturnType<typeof createMachine>;
     const id = machine.definition.id;
 
-    dispatchCommand("addState", { machineId: id, state: { id: "idle", type: "atomic" } });
+    dispatchCommand("addState", {
+      machineId: id,
+      state: { id: "idle", type: "atomic" },
+    });
     machine.currentStates = ["idle"];
 
     const state = dispatchCommand("getState", { machineId: id }) as ReturnType<typeof getState>;
@@ -190,7 +224,9 @@ describe("CLI command routing (engine integration)", () => {
       userId: "u1",
     }) as ReturnType<typeof createMachine>;
 
-    const result = dispatchCommand("reset", { machineId: machine.definition.id });
+    const result = dispatchCommand("reset", {
+      machineId: machine.definition.id,
+    });
     expect((result as { status: string }).status).toBe("reset");
   });
 

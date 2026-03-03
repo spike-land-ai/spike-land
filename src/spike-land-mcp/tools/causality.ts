@@ -199,12 +199,17 @@ export function registerCausalityTools(
         const processes = new Map<string, LogicalClock>();
         const processOrder: string[] = [];
         const processIds: string[] = [];
-        for (let i = 1; i <= input.process_count; i++) processIds.push(`process-${i}`);
+        for (let i = 1; i <= input.process_count; i++) {
+          processIds.push(`process-${i}`);
+        }
         for (const pid of processIds) {
           const clock: LogicalClock =
             input.clock_type === "lamport"
               ? { type: "lamport", time: 0 }
-              : { type: "vector", entries: Object.fromEntries(processIds.map((p) => [p, 0])) };
+              : {
+                  type: "vector",
+                  entries: Object.fromEntries(processIds.map((p) => [p, 0])),
+                };
           processes.set(pid, clock);
           processOrder.push(pid);
         }
@@ -221,7 +226,9 @@ export function registerCausalityTools(
         };
         systems.set(id, system);
         return textResult(
-          `**Causal System Created**\n\n**ID:** ${system.id}\n**Name:** ${system.name}\n**Clock Type:** ${system.clockType}\n**Processes:** ${system.processOrder.join(", ")}\n\nUse \`causality_local_event\` or \`causality_send_event\` to create events.`,
+          `**Causal System Created**\n\n**ID:** ${system.id}\n**Name:** ${system.name}\n**Clock Type:** ${system.clockType}\n**Processes:** ${system.processOrder.join(
+            ", ",
+          )}\n\nUse \`causality_local_event\` or \`causality_send_event\` to create events.`,
         );
       }),
   );
@@ -242,7 +249,9 @@ export function registerCausalityTools(
         const system = getSystem(input.system_id, userId);
         const clock = getProcessClock(system, input.process_id);
         if (clock.type === "lamport") clock.time += 1;
-        else clock.entries[input.process_id] = (clock.entries[input.process_id] ?? 0) + 1;
+        else {
+          clock.entries[input.process_id] = (clock.entries[input.process_id] ?? 0) + 1;
+        }
         const causalParents: string[] = [];
         const latest = getLatestEventForProcess(system, input.process_id);
         if (latest) causalParents.push(latest.id);
@@ -257,7 +266,9 @@ export function registerCausalityTools(
         };
         system.events.push(evt);
         return textResult(
-          `**Local Event Recorded**\n\n**Event ID:** ${evt.id}\n**Process:** ${evt.processId}\n**Label:** ${evt.label}\n**Clock:** ${formatClock(evt.clock)}`,
+          `**Local Event Recorded**\n\n**Event ID:** ${evt.id}\n**Process:** ${evt.processId}\n**Label:** ${evt.label}\n**Clock:** ${formatClock(
+            evt.clock,
+          )}`,
         );
       }),
   );
@@ -273,13 +284,16 @@ export function registerCausalityTools(
       .meta({ category: "causality", tier: "free" })
       .handler(async ({ input }) => {
         const system = getSystem(input.system_id, userId);
-        if (input.from_process === input.to_process) throw new Error("Cannot send to same process");
+        if (input.from_process === input.to_process) {
+          throw new Error("Cannot send to same process");
+        }
         const senderClock = getProcessClock(system, input.from_process);
         getProcessClock(system, input.to_process); // validate exists
         if (senderClock.type === "lamport") senderClock.time += 1;
-        else
+        else {
           senderClock.entries[input.from_process] =
             (senderClock.entries[input.from_process] ?? 0) + 1;
+        }
         const sendParents: string[] = [];
         const latestSender = getLatestEventForProcess(system, input.from_process);
         if (latestSender) sendParents.push(latestSender.id);
@@ -301,11 +315,12 @@ export function registerCausalityTools(
             ...Object.keys(receiverClock.entries),
             ...Object.keys(senderClock.entries),
           ]);
-          for (const key of allKeys)
+          for (const key of allKeys) {
             receiverClock.entries[key] = Math.max(
               receiverClock.entries[key] ?? 0,
               senderClock.entries[key] ?? 0,
             );
+          }
           receiverClock.entries[input.to_process] =
             (receiverClock.entries[input.to_process] ?? 0) + 1;
         }
@@ -323,7 +338,11 @@ export function registerCausalityTools(
         };
         system.events.push(receiveEvt);
         return textResult(
-          `**Message Send Simulated**\n\n| Event | Process | Label | Clock |\n|---|---|---|---|\n| ${sendEvt.id} | ${sendEvt.processId} | ${sendEvt.label} | ${formatClock(sendEvt.clock)} |\n| ${receiveEvt.id} | ${receiveEvt.processId} | ${receiveEvt.label} | ${formatClock(receiveEvt.clock)} |`,
+          `**Message Send Simulated**\n\n| Event | Process | Label | Clock |\n|---|---|---|---|\n| ${sendEvt.id} | ${sendEvt.processId} | ${sendEvt.label} | ${formatClock(
+            sendEvt.clock,
+          )} |\n| ${receiveEvt.id} | ${receiveEvt.processId} | ${receiveEvt.label} | ${formatClock(
+            receiveEvt.clock,
+          )} |`,
         );
       }),
   );
@@ -404,7 +423,9 @@ export function registerCausalityTools(
       .handler(async ({ input }) => {
         const system = getSystem(input.system_id, userId);
         const events = topologicalSort([...system.events]);
-        if (events.length === 0) return textResult("**Timeline**\n\nNo events recorded yet.");
+        if (events.length === 0) {
+          return textResult("**Timeline**\n\nNo events recorded yet.");
+        }
         const rows = events
           .map(
             (e, i) =>

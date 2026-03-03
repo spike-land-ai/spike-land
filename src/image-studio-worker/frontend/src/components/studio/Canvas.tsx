@@ -1,6 +1,6 @@
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useCanvas } from "../../hooks/useCanvas";
-import { Sparkles, MousePointer2, Loader2, Plus, Minus, X, Trash2 } from "lucide-react";
+import { Loader2, Minus, MousePointer2, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { ToolOrb } from "./ToolOrb";
 import { UploadZone } from "./UploadZone";
 import { DetailsPanel } from "./DetailsPanel";
@@ -139,7 +139,9 @@ export function Canvas() {
       setPrompt("");
       toast.success("Vision captured on canvas", { id: toastId });
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : String(err), { id: toastId });
+      toast.error(err instanceof Error ? err.message : String(err), {
+        id: toastId,
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -220,7 +222,9 @@ export function Canvas() {
               }`}
             >
               <div
-                className={`relative aspect-square bg-obsidian-900 ${asset.url === "generating" ? "animate-pulse" : ""}`}
+                className={`relative aspect-square bg-obsidian-900 ${
+                  asset.url === "generating" ? "animate-pulse" : ""
+                }`}
               >
                 {asset.url === "generating" ? (
                   <>
@@ -253,7 +257,11 @@ export function Canvas() {
 
       {/* Floating UI: Global Spark Bar */}
       <div
-        className={`absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] md:top-10 md:bottom-auto left-1/2 -translate-x-1/2 w-full max-w-xl px-4 z-50 transition-all duration-500 ${selectedAssetId ? "scale-95 opacity-0 pointer-events-none translate-y-4 md:-translate-y-4" : "scale-100 opacity-100"}`}
+        className={`absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] md:top-10 md:bottom-auto left-1/2 -translate-x-1/2 w-full max-w-xl px-4 z-50 transition-all duration-500 ${
+          selectedAssetId
+            ? "scale-95 opacity-0 pointer-events-none translate-y-4 md:-translate-y-4"
+            : "scale-100 opacity-100"
+        }`}
       >
         <form
           onSubmit={handleGenerate}

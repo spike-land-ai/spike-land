@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createResolvers } from "./resolvers.ts";
 import { ImageStudioResolverError } from "@spike-land-ai/mcp-image-studio";
 
@@ -32,7 +32,10 @@ describe("resolvers", () => {
     db.albumFindByHandle.mockResolvedValueOnce({ userId: "other" });
     await expect(resolvers.resolveAlbum("alb-1" as any)).rejects.toThrow(ImageStudioResolverError);
 
-    db.albumFindByHandle.mockResolvedValueOnce({ userId: "user-1", handle: "alb-1" });
+    db.albumFindByHandle.mockResolvedValueOnce({
+      userId: "user-1",
+      handle: "alb-1",
+    });
     const alb = await resolvers.resolveAlbum("alb-1" as any);
     expect(alb.handle).toBe("alb-1");
   });
@@ -49,10 +52,15 @@ describe("resolvers", () => {
     );
 
     db.pipelineFindById.mockResolvedValueOnce({ userId: "other" });
-    const p1 = await resolvers.resolvePipeline("pipe-1" as any, { requireOwnership: false });
+    const p1 = await resolvers.resolvePipeline("pipe-1" as any, {
+      requireOwnership: false,
+    });
     expect(p1).toBeDefined();
 
-    db.pipelineFindById.mockResolvedValueOnce({ userId: "user-1", id: "pipe-1" });
+    db.pipelineFindById.mockResolvedValueOnce({
+      userId: "user-1",
+      id: "pipe-1",
+    });
     const p2 = await resolvers.resolvePipeline("pipe-1" as any);
     expect(p2.id).toBe("pipe-1");
   });
@@ -80,7 +88,10 @@ describe("resolvers", () => {
       ImageStudioResolverError,
     );
 
-    db.generationJobFindById.mockResolvedValueOnce({ userId: "user-1", id: "gjob-1" });
+    db.generationJobFindById.mockResolvedValueOnce({
+      userId: "user-1",
+      id: "gjob-1",
+    });
     const job = await resolvers.resolveGenerationJob("gjob-1" as any);
     expect(job.id).toBe("gjob-1");
   });

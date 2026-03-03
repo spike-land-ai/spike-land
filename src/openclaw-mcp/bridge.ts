@@ -25,7 +25,13 @@ type ChatResult = {
 };
 
 type ToolCallResult = {
-  content?: Array<{ type: string; text?: string; mimeType?: string; url?: string; data?: string }>;
+  content?: Array<{
+    type: string;
+    text?: string;
+    mimeType?: string;
+    url?: string;
+    data?: string;
+  }>;
 };
 
 export function createMcpBridge(opts: McpBridgeOptions): McpBridge {
@@ -149,7 +155,10 @@ export function createMcpBridge(opts: McpBridgeOptions): McpBridge {
                 source: { type: "url", url: c.url },
               };
             }
-            return { type: "text", text: `[image: ${c.mimeType ?? "unknown"}]` };
+            return {
+              type: "text",
+              text: `[image: ${c.mimeType ?? "unknown"}]`,
+            };
           }
           return { type: "text", text: JSON.stringify(c) };
         }),

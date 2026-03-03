@@ -50,7 +50,8 @@ processes are verified before launching Spike Land to production.
         *.r2.cloudflarestorage.com)
   - [x] Connect sources include production API endpoints
         (generativelanguage.googleapis.com)
-  - [x] Consider upgrading to nonce-based CSP (remove unsafe-inline) — CSS XSS fix applied, NonceProvider created
+  - [x] Consider upgrading to nonce-based CSP (remove unsafe-inline) — CSS XSS
+        fix applied, NonceProvider created
 
 ### Cryptography & Data Protection
 
@@ -513,7 +514,8 @@ processes are verified before launching Spike Land to production.
 ### Recently Completed (Feb 2026)
 
 - [x] Error boundaries added across application
-- [x] 46 Storybook pages created (12 app storybook pages with components and unit tests)
+- [x] 46 Storybook pages created (12 app storybook pages with components and
+      unit tests)
 - [x] CSS XSS security fix applied
 - [x] Dead code removal (~420 files)
 - [x] Logger refactoring

@@ -190,14 +190,14 @@ function processLargeData(data) {
 // Debounce input events
 function debounce(fn, delay) {
   let timeoutId;
-  return function(...args) {
+  return function (...args) {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn(...args), delay);
   };
 }
 
 // Example: Search input
-const handleSearch = debounce(event => {
+const handleSearch = debounce((event) => {
   // Perform search operation
 }, 300);
 
@@ -206,7 +206,7 @@ document.getElementById("search").addEventListener("input", handleSearch);
 // Throttle scroll events
 function throttle(fn, limit) {
   let lastRun = 0;
-  return function(...args) {
+  return function (...args) {
     const now = Date.now();
     if (now - lastRun >= limit) {
       fn(...args);
@@ -593,7 +593,8 @@ webpack-bundle-analyzer dist/stats.json
 
 ```javascript
 // webpack.config.js
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 module.exports = {
   plugins: [
@@ -678,7 +679,7 @@ async function staleWhileRevalidate(request: Request): Promise<Response> {
   const cache = await caches.open("v1");
   const cached = await cache.match(request);
 
-  const fetchPromise = fetch(request).then(response => {
+  const fetchPromise = fetch(request).then((response) => {
     cache.put(request, response.clone());
     return response;
   });
@@ -775,7 +776,7 @@ const CACHE_VERSION = "v1.0.0";
 
 self.addEventListener("install", (event: ExtendableEvent) => {
   event.waitUntil(
-    caches.open(CACHE_VERSION).then(cache => {
+    caches.open(CACHE_VERSION).then((cache) => {
       return cache.addAll(["/index.html", "/main.js", "/styles.css"]);
     }),
   );
@@ -783,9 +784,9 @@ self.addEventListener("install", (event: ExtendableEvent) => {
 
 self.addEventListener("activate", (event: ExtendableEvent) => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map(cacheName => {
+        cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_VERSION) {
             return caches.delete(cacheName);
           }
@@ -912,8 +913,8 @@ spdy.createServer(options, app).listen(3000);
 // Reduce connection overhead with connection hints
 // Link the font file with preconnect
 fetch("https://fonts.googleapis.com/css2?family=Inter:wght@400;700")
-  .then(res => res.text())
-  .then(css => {
+  .then((res) => res.text())
+  .then((css) => {
     const style = document.createElement("style");
     style.textContent = css;
     document.head.appendChild(style);
@@ -973,7 +974,7 @@ class RUMCollector {
 
   private setupObservers() {
     // Observe all performance entries
-    const observer = new PerformanceObserver(list => {
+    const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         this.recordMetric({
           name: entry.name,

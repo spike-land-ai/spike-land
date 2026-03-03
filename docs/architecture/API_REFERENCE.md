@@ -2015,7 +2015,7 @@ async function retryWithBackoff(fn, maxRetries = 3) {
       if (attempt === maxRetries) throw error;
 
       const delayMs = 1000 * Math.pow(2, attempt - 1);
-      await new Promise(resolve => setTimeout(resolve, delayMs));
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   }
 }
@@ -2081,7 +2081,7 @@ async function fetchWithRateLimit(url, options = {}) {
     );
     console.log(`Rate limited. Retry after ${retryAfter}s`);
 
-    await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+    await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));
 
     return fetchWithRateLimit(url, options); // Retry
   }
@@ -2635,7 +2635,7 @@ async function enhanceImage(imageId, tier = "TIER_2K") {
     let attempts = 0;
 
     while (!completed && attempts < 60) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const statusRes = await fetch(`/api/jobs/${job.jobId}`);
       const status = await statusRes.json();
@@ -2685,7 +2685,7 @@ async function generateImage(prompt) {
 
   // Poll for completion
   while (true) {
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     const statusRes = await fetch(
       `https://spike.land/api/jobs/${result.jobId}`,
@@ -2779,8 +2779,8 @@ Returns a list of the user's recent TikTok videos.
 
 > **Added**: February 2026
 
-Cron endpoints (e.g., `/api/cron/cleanup-jobs`, `/api/cron/sync-box-status`)
-are protected by the `validateCronSecret()` function from `src/lib/cron-auth.ts`.
+Cron endpoints (e.g., `/api/cron/cleanup-jobs`, `/api/cron/sync-box-status`) are
+protected by the `validateCronSecret()` function from `src/lib/cron-auth.ts`.
 
 ### Authentication Methods
 
@@ -2815,7 +2815,8 @@ The function accepts two header formats:
 - **Input Sanitization**: All user inputs are validated and sanitized
 - **CSS XSS Protection**: CSS content is sanitized to prevent injection attacks
 - **API Key Encryption**: API keys are hashed before storage
-- **Timing-Safe Cron Auth**: Cron endpoints use `crypto.timingSafeEqual` via `validateCronSecret()`
+- **Timing-Safe Cron Auth**: Cron endpoints use `crypto.timingSafeEqual` via
+  `validateCronSecret()`
 
 ### Performance Characteristics
 

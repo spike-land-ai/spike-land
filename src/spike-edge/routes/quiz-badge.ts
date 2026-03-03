@@ -111,4 +111,4 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#x27;");
 }
 
-export { quizBadge, escapeHtml };
+export { escapeHtml, quizBadge };

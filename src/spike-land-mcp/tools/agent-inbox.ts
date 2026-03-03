@@ -11,7 +11,7 @@
  */
 
 import { z } from "zod";
-import { eq, and, desc, asc } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import { freeTool, textResult } from "../procedures/index";
 import { agentMessages, claudeCodeAgents } from "../db/schema";
@@ -65,7 +65,12 @@ export function registerAgentInboxTools(
             agentId: string;
             agentName: string;
             messageCount: number;
-            latestMessage: { id: string; content: string; role: string; createdAt: number };
+            latestMessage: {
+              id: string;
+              content: string;
+              role: string;
+              createdAt: number;
+            };
           }
         >();
 
@@ -116,7 +121,9 @@ export function registerAgentInboxTools(
           text += `### ${a.agentName}\n`;
           text += `- **Agent ID:** ${a.agentId}\n`;
           text += `- **Messages:** ${a.messageCount}\n`;
-          text += `- **Latest [${a.latestMessage.role}]:** ${a.latestMessage.content}${a.latestMessage.content.length >= 200 ? "..." : ""}\n`;
+          text += `- **Latest [${a.latestMessage.role}]:** ${a.latestMessage.content}${
+            a.latestMessage.content.length >= 200 ? "..." : ""
+          }\n`;
           text += `- **At:** ${new Date(a.latestMessage.createdAt).toISOString()}\n\n`;
         }
         text += `serverTime: ${serverTime}`;

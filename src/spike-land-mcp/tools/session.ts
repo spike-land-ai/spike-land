@@ -282,8 +282,9 @@ export function registerSessionTools(registry: ToolRegistry, userId: string, db:
         const session = sessions.get(input.session_id);
         if (!session) throw new Error(`Session ${input.session_id} not found`);
         const roleEntry = session.roles.find((r) => r.role === input.role);
-        if (!roleEntry)
+        if (!roleEntry) {
           throw new Error(`Role ${input.role} not assigned in session ${input.session_id}`);
+        }
         const taskId = crypto.randomUUID();
         roleEntry.status = "busy";
         session.events.push({

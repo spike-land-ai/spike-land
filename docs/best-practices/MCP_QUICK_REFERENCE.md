@@ -56,9 +56,9 @@ server.setRequestHandler(ListToolsRequest, async () => ({
   ],
 }));
 
-server.setRequestHandler(CallToolRequest, async req => {
+server.setRequestHandler(CallToolRequest, async (req) => {
   if (req.params.name === "add") {
-    const { a, b } = req.params.arguments as { a: number; b: number; };
+    const { a, b } = req.params.arguments as { a: number; b: number };
     return { content: [{ type: "text", text: String(a + b) }] };
   }
   throw new Error("Unknown tool");

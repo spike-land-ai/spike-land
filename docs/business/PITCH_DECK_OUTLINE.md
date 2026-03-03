@@ -315,8 +315,8 @@ partner to reach product-market fit."
 ### Section 6: Close (10 seconds)
 
 "Visit spike.land to see the live product, or
-`npm install -g @spike-land-ai/spike-cli` to try spike-cli. I'd love to
-connect and discuss how [Accelerator Name] can help Spike Land grow. Thank you."
+`npm install -g @spike-land-ai/spike-cli` to try spike-cli. I'd love to connect
+and discuss how [Accelerator Name] can help Spike Land grow. Thank you."
 
 ---
 

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import type { Env } from "../env";
 import { createDb } from "../db/index";
-import { createDeviceCode, approveDeviceCode, exchangeDeviceCode } from "../auth/oauth-device";
+import { approveDeviceCode, createDeviceCode, exchangeDeviceCode } from "../auth/oauth-device";
 
 export const oauthRoute = new Hono<{ Bindings: Env }>();
 
@@ -12,7 +12,10 @@ oauthRoute.post("/device", async (c) => {
   const scope = typeof body.scope === "string" ? body.scope : "mcp";
 
   const db = createDb(c.env.DB);
-  const { deviceCode, userCode, expiresIn } = await createDeviceCode(db, { clientId, scope });
+  const { deviceCode, userCode, expiresIn } = await createDeviceCode(db, {
+    clientId,
+    scope,
+  });
 
   const baseUrl = c.env.SPIKE_LAND_URL || "https://spike.land";
 
@@ -36,7 +39,13 @@ oauthRoute.post("/token", async (c) => {
 
   const deviceCode = typeof body.device_code === "string" ? body.device_code : null;
   if (!deviceCode) {
-    return c.json({ error: "invalid_request", error_description: "device_code required" }, 400);
+    return c.json(
+      {
+        error: "invalid_request",
+        error_description: "device_code required",
+      },
+      400,
+    );
   }
 
   const db = createDb(c.env.DB);

@@ -2,8 +2,8 @@
  * Tests for telemetry.ts
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { readFile, unlink, appendFile, writeFile } from "node:fs/promises";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { appendFile, readFile, unlink, writeFile } from "node:fs/promises";
 
 vi.mock("node:fs/promises", async (importOriginal) => {
   const actual = await importOriginal<typeof import("node:fs/promises")>();
@@ -17,16 +17,16 @@ vi.mock("node:fs/promises", async (importOriginal) => {
 });
 
 import {
+  getContextLogPath,
+  getTelemetryPath,
+  logContextGap,
+  logContextServed,
   logEvent,
+  logGateCheck,
+  logStuckSignal,
   logToolCall,
   logWorkspaceEnter,
   logWorkspaceExit,
-  logContextServed,
-  logContextGap,
-  logStuckSignal,
-  logGateCheck,
-  getTelemetryPath,
-  getContextLogPath,
 } from "./telemetry.js";
 import { resetWorkspaceState } from "./workspace-state.js";
 

@@ -10,12 +10,12 @@
  */
 
 import { z } from "zod";
-import { eq, and, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import type { ToolRegistryAdapter } from "./types";
 import { freeTool } from "../procedures/index";
-import { textResult, apiRequest, SPIKE_LAND_BASE_URL } from "./tool-helpers";
+import { apiRequest, SPIKE_LAND_BASE_URL, textResult } from "./tool-helpers";
 import type { DrizzleDB } from "../db/index";
-import { workspaces, workspaceMembers, vaultSecrets, registeredTools } from "../db/schema";
+import { registeredTools, vaultSecrets, workspaceMembers, workspaces } from "../db/schema";
 
 export function registerBootstrapTools(
   registry: ToolRegistryAdapter,

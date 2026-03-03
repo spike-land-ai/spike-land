@@ -124,7 +124,9 @@ export function createMockPlatformClient(options: MockClientOptions = {}): MockP
     getState: vi.fn(() => ({ ...state })),
 
     connect: vi.fn(async (uri: string, moduleName: string, token?: string) => {
-      if (state.connected) throw new Error("Already connected. Disconnect first.");
+      if (state.connected) {
+        throw new Error("Already connected. Disconnect first.");
+      }
       if (options.failConnect) throw new Error("Connection refused");
       state.connected = true;
       state.uri = uri;
@@ -179,7 +181,9 @@ export function createMockPlatformClient(options: MockClientOptions = {}): MockP
       requireConnected();
       const user = users.find((u) => u.identity === state.identity);
       if (user) {
-        if (fields.displayName !== undefined) user.displayName = fields.displayName;
+        if (fields.displayName !== undefined) {
+          user.displayName = fields.displayName;
+        }
         if (fields.email !== undefined) user.email = fields.email;
         user.lastSeen = BigInt(Date.now());
       }
@@ -211,8 +215,9 @@ export function createMockPlatformClient(options: MockClientOptions = {}): MockP
         if (category && t.category !== category) return false;
         if (query) {
           const q = query.toLowerCase();
-          if (!t.name.toLowerCase().includes(q) && !t.description.toLowerCase().includes(q))
+          if (!t.name.toLowerCase().includes(q) && !t.description.toLowerCase().includes(q)) {
             return false;
+          }
         }
         return true;
       });
@@ -290,7 +295,9 @@ export function createMockPlatformClient(options: MockClientOptions = {}): MockP
 
     listApps: vi.fn((ownerIdentity?: string) => {
       requireConnected();
-      if (ownerIdentity) return apps.filter((a) => a.ownerIdentity === ownerIdentity);
+      if (ownerIdentity) {
+        return apps.filter((a) => a.ownerIdentity === ownerIdentity);
+      }
       return [...apps];
     }),
 
@@ -378,7 +385,9 @@ export function createMockPlatformClient(options: MockClientOptions = {}): MockP
       const page = pages.find((p) => p.slug === slug);
       if (!page) throw new Error("Page not found");
       if (fields.title !== undefined) page.title = fields.title;
-      if (fields.description !== undefined) page.description = fields.description;
+      if (fields.description !== undefined) {
+        page.description = fields.description;
+      }
       page.updatedAt = BigInt(Date.now());
     }),
 
@@ -418,7 +427,9 @@ export function createMockPlatformClient(options: MockClientOptions = {}): MockP
         requireConnected();
         const block = pageBlocks.find((b) => b.id === blockId);
         if (!block) throw new Error("Block not found");
-        if (fields.contentJson !== undefined) block.contentJson = fields.contentJson;
+        if (fields.contentJson !== undefined) {
+          block.contentJson = fields.contentJson;
+        }
         if (fields.sortOrder !== undefined) block.sortOrder = fields.sortOrder;
         block.updatedAt = BigInt(Date.now());
       },
@@ -586,8 +597,12 @@ export function createMockPlatformClient(options: MockClientOptions = {}): MockP
         requireConnected();
         return platformEvents.filter((e) => {
           if (filters.source && e.source !== filters.source) return false;
-          if (filters.eventType && e.eventType !== filters.eventType) return false;
-          if (filters.userIdentity && e.userIdentity !== filters.userIdentity) return false;
+          if (filters.eventType && e.eventType !== filters.eventType) {
+            return false;
+          }
+          if (filters.userIdentity && e.userIdentity !== filters.userIdentity) {
+            return false;
+          }
           return true;
         });
       },

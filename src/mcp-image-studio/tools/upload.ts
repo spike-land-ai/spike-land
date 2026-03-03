@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { asAlbumHandle, jsonResult, toolEvent } from "../types.js";
-import { tryCatch, DomainError } from "./try-catch.js";
+import { DomainError, tryCatch } from "./try-catch.js";
 import { imageProcedure } from "../tool-builder/image-middleware.js";
 
 export const uploadTool = imageProcedure
@@ -42,8 +42,9 @@ export const uploadTool = imageProcedure
       const handle = asAlbumHandle(album_handle);
       const albumRes = await tryCatch(deps.resolvers.resolveAlbum(handle));
       /* v8 ignore next */
-      if (!albumRes.ok || !albumRes.data)
+      if (!albumRes.ok || !albumRes.data) {
         throw new DomainError("ALBUM_NOT_FOUND", `Album ${album_handle} not found`);
+      }
       album = albumRes.unwrap();
     }
 
@@ -55,9 +56,12 @@ export const uploadTool = imageProcedure
         contentType: content_type,
       }),
     );
-    if (!uploadedRes.ok)
+    if (!uploadedRes.ok) {
       throw new DomainError("UPLOAD_FAILED", uploadedRes.error.message || "Upload failed", true);
-    if (!uploadedRes.data) throw new DomainError("UPLOAD_FAILED", "Upload failed", true);
+    }
+    if (!uploadedRes.data) {
+      throw new DomainError("UPLOAD_FAILED", "Upload failed", true);
+    }
     const uploaded = uploadedRes.unwrap();
 
     const imageRes = await tryCatch(

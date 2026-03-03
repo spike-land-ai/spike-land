@@ -1,4 +1,4 @@
-import { Fragment, type FC } from "react";
+import { type FC, Fragment } from "react";
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { COLORS, SPRING_CONFIGS } from "../../lib/constants";
 

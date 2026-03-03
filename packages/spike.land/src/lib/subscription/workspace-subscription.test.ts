@@ -293,7 +293,10 @@ describe("WorkspaceSubscriptionService.consumeAiCredits", () => {
     mockPrisma.workspace.findUnique.mockResolvedValue(
       makeWorkspaceWithCounts({ monthlyAiCredits: 500, usedAiCredits: 100 }),
     );
-    mockPrisma.workspace.update.mockResolvedValue({ monthlyAiCredits: 500, usedAiCredits: 110 });
+    mockPrisma.workspace.update.mockResolvedValue({
+      monthlyAiCredits: 500,
+      usedAiCredits: 110,
+    });
 
     const result = await WorkspaceSubscriptionService.consumeAiCredits(WORKSPACE_ID, 10);
 
@@ -311,7 +314,10 @@ describe("WorkspaceSubscriptionService.consumeAiCredits", () => {
     mockPrisma.workspace.findUnique.mockResolvedValue(
       makeWorkspaceWithCounts({ monthlyAiCredits: 500, usedAiCredits: 0 }),
     );
-    mockPrisma.workspace.update.mockResolvedValue({ monthlyAiCredits: 500, usedAiCredits: 5 });
+    mockPrisma.workspace.update.mockResolvedValue({
+      monthlyAiCredits: 500,
+      usedAiCredits: 5,
+    });
 
     const source: AiCreditSource = {
       model: "claude-sonnet-4-6",
@@ -379,7 +385,10 @@ describe("WorkspaceSubscriptionService.consumeAiCredits", () => {
     mockPrisma.workspace.findUnique.mockResolvedValue(
       makeWorkspaceWithCounts({ monthlyAiCredits: 200, usedAiCredits: 50 }),
     );
-    mockPrisma.workspace.update.mockResolvedValue({ monthlyAiCredits: 200, usedAiCredits: 60 });
+    mockPrisma.workspace.update.mockResolvedValue({
+      monthlyAiCredits: 200,
+      usedAiCredits: 60,
+    });
     const result = await WorkspaceSubscriptionService.consumeAiCredits(WORKSPACE_ID, 10);
     expect(result.success).toBe(true);
     expect(result.remaining).toBe(140);
@@ -389,7 +398,10 @@ describe("WorkspaceSubscriptionService.consumeAiCredits", () => {
     mockPrisma.workspace.findUnique.mockResolvedValue(
       makeWorkspaceWithCounts({ monthlyAiCredits: 1000, usedAiCredits: 990 }),
     );
-    mockPrisma.workspace.update.mockResolvedValue({ monthlyAiCredits: 1000, usedAiCredits: 995 });
+    mockPrisma.workspace.update.mockResolvedValue({
+      monthlyAiCredits: 1000,
+      usedAiCredits: 995,
+    });
     const result = await WorkspaceSubscriptionService.consumeAiCredits(WORKSPACE_ID, 5);
     expect(result.success).toBe(true);
     expect(result.remaining).toBe(5);
@@ -408,7 +420,10 @@ describe("WorkspaceSubscriptionService.consumeAiCredits — source metadata flow
     mockPrisma.workspace.findUnique.mockResolvedValue(
       makeWorkspaceWithCounts({ monthlyAiCredits: 500, usedAiCredits: 0 }),
     );
-    mockPrisma.workspace.update.mockResolvedValue({ monthlyAiCredits: 500, usedAiCredits: 10 });
+    mockPrisma.workspace.update.mockResolvedValue({
+      monthlyAiCredits: 500,
+      usedAiCredits: 10,
+    });
 
     const source: AiCreditSource = {
       model: "claude-sonnet-4-6",
@@ -436,7 +451,10 @@ describe("WorkspaceSubscriptionService.consumeAiCredits — source metadata flow
     mockPrisma.workspace.findUnique.mockResolvedValue(
       makeWorkspaceWithCounts({ monthlyAiCredits: 500, usedAiCredits: 0 }),
     );
-    mockPrisma.workspace.update.mockResolvedValue({ monthlyAiCredits: 500, usedAiCredits: 3 });
+    mockPrisma.workspace.update.mockResolvedValue({
+      monthlyAiCredits: 500,
+      usedAiCredits: 3,
+    });
 
     const source: AiCreditSource = { model: "gpt-4o" };
     const result = await WorkspaceSubscriptionService.consumeAiCredits(WORKSPACE_ID, 3, source);
@@ -458,7 +476,10 @@ describe("WorkspaceSubscriptionService.consumeAiCredits — source metadata flow
     mockPrisma.workspace.findUnique.mockResolvedValue(
       makeWorkspaceWithCounts({ monthlyAiCredits: 200, usedAiCredits: 50 }),
     );
-    mockPrisma.workspace.update.mockResolvedValue({ monthlyAiCredits: 200, usedAiCredits: 60 });
+    mockPrisma.workspace.update.mockResolvedValue({
+      monthlyAiCredits: 200,
+      usedAiCredits: 60,
+    });
 
     const result = await WorkspaceSubscriptionService.consumeAiCredits(WORKSPACE_ID, 10);
 
@@ -572,7 +593,10 @@ describe("WorkspaceSubscriptionService.resetMonthlyCredits", () => {
     const result = await WorkspaceSubscriptionService.resetMonthlyCredits(WORKSPACE_ID);
     expect(result.success).toBe(true);
     expect(mockPrisma.workspace.update).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: WORKSPACE_ID }, data: { usedAiCredits: 0 } }),
+      expect.objectContaining({
+        where: { id: WORKSPACE_ID },
+        data: { usedAiCredits: 0 },
+      }),
     );
   });
 
@@ -607,7 +631,9 @@ describe("WorkspaceSubscriptionService.upgradeTier", () => {
   });
 
   it("upgrades workspace to BUSINESS tier with correct limits", async () => {
-    mockPrisma.workspace.update.mockResolvedValue({ subscriptionTier: "BUSINESS" });
+    mockPrisma.workspace.update.mockResolvedValue({
+      subscriptionTier: "BUSINESS",
+    });
     const result = await WorkspaceSubscriptionService.upgradeTier(WORKSPACE_ID, "BUSINESS");
     expect(result.success).toBe(true);
     expect(mockPrisma.workspace.update).toHaveBeenCalledWith(
@@ -684,7 +710,12 @@ describe("WorkspaceSubscriptionService.findWorkspacesForCreditReset", () => {
   });
 
   it("returns workspace IDs matching today's billing day", async () => {
-    mockPrisma.$queryRaw.mockResolvedValue([{ id: "ws-aaa" }, { id: "ws-bbb" }]);
+    mockPrisma.$queryRaw.mockResolvedValue([
+      { id: "ws-aaa" },
+      {
+        id: "ws-bbb",
+      },
+    ]);
     const result = await WorkspaceSubscriptionService.findWorkspacesForCreditReset();
     expect(result).toEqual(["ws-aaa", "ws-bbb"]);
   });

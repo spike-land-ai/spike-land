@@ -1,8 +1,8 @@
 import { toast } from "sonner";
-import { useState, useCallback, useRef, useEffect } from "react";
-import { Search, RefreshCw, Upload, Image as ImageIcon, Tag } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Image as ImageIcon, RefreshCw, Search, Tag, Upload } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Button, Input, ImageCard, ImageGrid, Modal } from "@/components/ui";
+import { Button, ImageCard, ImageGrid, Input, Modal } from "@/components/ui";
 import { useGallery } from "@/hooks/useGallery";
 import { useEventBus } from "@/hooks/useEventBus";
 import { deleteGalleryImage, uploadToGallery } from "@/api/client";
@@ -223,7 +223,10 @@ export function Gallery() {
                 window.location.hash = "#/studio";
               }}
               onClick={() => {
-                const slides = images.map((i) => ({ src: i.originalUrl, alt: i.name }));
+                const slides = images.map((i) => ({
+                  src: i.originalUrl,
+                  alt: i.name,
+                }));
                 openLightbox(index, slides);
               }}
               actions={[
@@ -232,7 +235,10 @@ export function Gallery() {
                   onClick: () => {
                     sessionStorage.setItem(
                       "studio_initial_image",
-                      JSON.stringify({ url: img.originalUrl, name: img.name }),
+                      JSON.stringify({
+                        url: img.originalUrl,
+                        name: img.name,
+                      }),
                     );
                     window.location.hash = "#/studio";
                   },

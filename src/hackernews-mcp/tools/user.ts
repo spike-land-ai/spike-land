@@ -14,8 +14,12 @@ export function registerUserTools(server: McpServer, readClient: HNReadClient): 
     { username: z.string().min(1).describe("HN username") },
     async ({ username }) => {
       const result = await tryCatch(readClient.getUser(username));
-      if (!result.ok) return errorResult("NETWORK_ERROR", result.error.message, true);
-      if (!result.data) return errorResult("NOT_FOUND", `User "${username}" does not exist`);
+      if (!result.ok) {
+        return errorResult("NETWORK_ERROR", result.error.message, true);
+      }
+      if (!result.data) {
+        return errorResult("NOT_FOUND", `User "${username}" does not exist`);
+      }
       return jsonResult(result.data);
     },
   );

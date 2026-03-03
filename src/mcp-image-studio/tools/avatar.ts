@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { errorResult, jsonResult, toolEvent, AVATAR_STYLE_VALUES } from "../types.js";
+import { AVATAR_STYLE_VALUES, errorResult, jsonResult, toolEvent } from "../types.js";
 import { tryCatch } from "./try-catch.js";
 import { imageProcedure } from "../tool-builder/image-middleware.js";
 import { consumeCreditsOrError } from "../define-tool.js";

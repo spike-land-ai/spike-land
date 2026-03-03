@@ -121,7 +121,10 @@ const profileAnswer: StandaloneToolDefinition = {
     answer: z.boolean().describe("Yes (true) or No (false) to the current question."),
   },
   handler: async (input: never, ctx: ServerContext): Promise<CallToolResult> => {
-    const { session_id, answer } = input as { session_id: string; answer: boolean };
+    const { session_id, answer } = input as {
+      session_id: string;
+      answer: boolean;
+    };
     return safeToolCall("profile_answer", async () => {
       const { answerQuestion } = await import("@/lib/avl-profile/traversal");
       const result = await answerQuestion(ctx.userId, session_id, answer);

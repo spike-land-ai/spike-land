@@ -40,7 +40,9 @@ describe("agent-chat-service", () => {
   describe("emitStage", () => {
     it("enqueues formatted stage status", () => {
       const enqueue = vi.fn();
-      const controller = { enqueue } as unknown as ReadableStreamDefaultController;
+      const controller = {
+        enqueue,
+      } as unknown as ReadableStreamDefaultController;
       emitStage(controller, "processing", "test-tool");
 
       expect(enqueue).toHaveBeenCalled();

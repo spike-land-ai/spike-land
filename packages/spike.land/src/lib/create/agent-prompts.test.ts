@@ -79,8 +79,18 @@ describe("buildAgentSystemPrompt", () => {
 
   it("sorts notes by confidence (highest first)", () => {
     const notes: LearningNote[] = [
-      { id: "a", trigger: "low", lesson: "Low confidence", confidenceScore: 0.1 },
-      { id: "b", trigger: "high", lesson: "High confidence", confidenceScore: 0.99 },
+      {
+        id: "a",
+        trigger: "low",
+        lesson: "Low confidence",
+        confidenceScore: 0.1,
+      },
+      {
+        id: "b",
+        trigger: "high",
+        lesson: "High confidence",
+        confidenceScore: 0.99,
+      },
     ];
     const result = buildAgentSystemPrompt("chart", notes);
     const highIdx = result.dynamicSuffix.indexOf("high");

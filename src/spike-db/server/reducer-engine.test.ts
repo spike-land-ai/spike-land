@@ -23,7 +23,11 @@ class MockSqlStorage implements SqlStorage {
     if (trimmed.startsWith("SELECT COUNT(")) {
       const tableName = this.getTableName(query);
       const rows = this.tables.get(tableName) ?? [];
-      return { toArray: () => [{ cnt: rows.length }], rowsRead: rows.length, rowsWritten: 0 };
+      return {
+        toArray: () => [{ cnt: rows.length }],
+        rowsRead: rows.length,
+        rowsWritten: 0,
+      };
     }
     if (trimmed.startsWith("SELECT")) {
       return this.handleSelect(query, params);

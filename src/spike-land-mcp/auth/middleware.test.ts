@@ -4,7 +4,7 @@
  * Tests the Hono middleware directly by simulating request contexts.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Hono } from "hono";
 import type { Env } from "../env";
 import { createMockD1, createMockKV } from "../__test-utils__/mock-env";
@@ -72,7 +72,11 @@ describe("authMiddleware", () => {
 
   it("returns 401 for invalid API key (sk_ prefix, not found in DB)", async () => {
     // DB returns no rows for the key hash lookup
-    const app = await createTestApp(() => ({ results: [], success: true, meta: {} }));
+    const app = await createTestApp(() => ({
+      results: [],
+      success: true,
+      meta: {},
+    }));
     const res = await makeRequest(app, "/protected/resource", {
       Authorization: "Bearer sk_invalid_api_key_1234567890",
     });
@@ -83,7 +87,11 @@ describe("authMiddleware", () => {
   });
 
   it("returns 401 for invalid OAuth token (mcp_ prefix, not found in DB)", async () => {
-    const app = await createTestApp(() => ({ results: [], success: true, meta: {} }));
+    const app = await createTestApp(() => ({
+      results: [],
+      success: true,
+      meta: {},
+    }));
     const res = await makeRequest(app, "/protected/resource", {
       Authorization: "Bearer mcp_invalid_token_abc",
     });
@@ -92,7 +100,11 @@ describe("authMiddleware", () => {
   });
 
   it("returns 401 for arbitrary non-prefixed token", async () => {
-    const app = await createTestApp(() => ({ results: [], success: true, meta: {} }));
+    const app = await createTestApp(() => ({
+      results: [],
+      success: true,
+      meta: {},
+    }));
     const res = await makeRequest(app, "/protected/resource", {
       Authorization: "Bearer some_random_token_that_has_no_prefix",
     });

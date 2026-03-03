@@ -10,7 +10,7 @@ import { randomUUID } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ServerManager, NamespacedTool } from "../multiplexer/server-manager.js";
+import type { NamespacedTool, ServerManager } from "../multiplexer/server-manager.js";
 
 export interface HttpServerOptions {
   port: number;

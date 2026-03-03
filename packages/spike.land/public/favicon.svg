@@ -6,47 +6,48 @@
 >
   <defs>
     <style>
-      @keyframes pulse-glow {
-        0%, 100% {
-          filter: drop-shadow(0 0 3px #F59E0B) drop-shadow(0 0 6px #FBBF24);
-          opacity: 1;
-        }
-        50% {
-          filter: drop-shadow(0 0 6px #F59E0B) drop-shadow(0 0 14px #FCD34D) drop-shadow(0 0 20px #FBBF24);
-          opacity: 0.92;
-        }
+    @keyframes pulse-glow {
+      0%, 100% {
+        filter: drop-shadow(0 0 3px #f59e0b) drop-shadow(0 0 6px #fbbf24);
+        opacity: 1;
       }
-      @keyframes bolt-charge {
-        0%, 85%, 100% {
-          transform: scaleY(1) translateY(0);
-        }
-        90% {
-          transform: scaleY(1.04) translateY(-0.5px);
-        }
-        95% {
-          transform: scaleY(0.97) translateY(0.3px);
-        }
+      50% {
+        filter: drop-shadow(0 0 6px #f59e0b) drop-shadow(0 0 14px #fcd34d)
+          drop-shadow(0 0 20px #fbbf24);
+        opacity: 0.92;
       }
-      .bolt {
-        transform-origin: 16px 16px;
-        animation:
-          pulse-glow 2.4s ease-in-out infinite,
-          bolt-charge 2.4s ease-in-out infinite;
+    }
+    @keyframes bolt-charge {
+      0%, 85%, 100% {
+        transform: scaleY(1) translateY(0);
       }
+      90% {
+        transform: scaleY(1.04) translateY(-0.5px);
+      }
+      95% {
+        transform: scaleY(0.97) translateY(0.3px);
+      }
+    }
+    .bolt {
+      transform-origin: 16px 16px;
+      animation:
+        pulse-glow 2.4s ease-in-out infinite,
+        bolt-charge 2.4s ease-in-out infinite;
+    }
     </style>
     <linearGradient id="boltGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#FCD34D"/>
-      <stop offset="60%" stop-color="#F59E0B"/>
-      <stop offset="100%" stop-color="#D97706"/>
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="60%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
     </linearGradient>
     <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1a1f2e"/>
-      <stop offset="100%" stop-color="#0b0e14"/>
+      <stop offset="0%" stop-color="#1a1f2e" />
+      <stop offset="100%" stop-color="#0b0e14" />
     </linearGradient>
   </defs>
 
   <!-- Background rounded square -->
-  <rect width="32" height="32" rx="7" fill="url(#bgGrad)"/>
+  <rect width="32" height="32" rx="7" fill="url(#bgGrad)" />
 
   <!-- Animated lightning bolt spike -->
   <path

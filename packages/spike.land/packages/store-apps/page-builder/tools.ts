@@ -113,8 +113,12 @@ const UpdatePageSchema = z.object({
   ogImageUrl: z.string().url().optional().describe("Open Graph image URL."),
 });
 
-const DeletePageSchema = z.object({ pageId: z.string().describe("ID of the page to archive.") });
-const PublishPageSchema = z.object({ pageId: z.string().describe("ID of the page to publish.") });
+const DeletePageSchema = z.object({
+  pageId: z.string().describe("ID of the page to archive."),
+});
+const PublishPageSchema = z.object({
+  pageId: z.string().describe("ID of the page to publish."),
+});
 const ClonePageSchema = z.object({
   pageId: z.string().describe("ID of the source page to clone."),
   newSlug: z.string().min(1).describe("URL slug for the cloned page."),
@@ -288,7 +292,9 @@ function extractBlockContent(blocks: Array<{ type: string; content: unknown }>):
   return blocks
     .map((b) => {
       if (typeof b.content === "string") return b.content;
-      if (b.content && typeof b.content === "object") return JSON.stringify(b.content);
+      if (b.content && typeof b.content === "object") {
+        return JSON.stringify(b.content);
+      }
       return "";
     })
     .join(" ");
@@ -406,7 +412,9 @@ function buildPerformanceReview(page: DynamicPageRecord): string {
   if (page.blocks.length > 20) {
     suggestions.push("- Many blocks -- consider paginating or lazy-loading below-fold content");
   }
-  if (suggestions.length === 0) suggestions.push("- No major performance concerns detected");
+  if (suggestions.length === 0) {
+    suggestions.push("- No major performance concerns detected");
+  }
   return [
     `## Performance Review: /${page.slug}`,
     "",
@@ -708,7 +716,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
           where,
           include: { blocks: { orderBy: { sortOrder: "asc" as const } } },
         });
-        if (!page) return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
+        if (!page) {
+          return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
+        }
         return textResult(
           `**${page.title}**\n\n**ID:** ${page.id}\n**Slug:** ${page.slug}\n**Layout:** ${page.layout}\n**Status:** ${page.status}\n` +
             `**Description:** ${page.description ?? "(none)"}\n**Tags:** ${
@@ -722,9 +732,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
               ? page.blocks
                   .map(
                     (b) =>
-                      `  - [${b.sortOrder}] ${b.blockType}${b.variant ? ` (${b.variant})` : ""}${
-                        b.isVisible ? "" : " [hidden]"
-                      }`,
+                      `  - [${b.sortOrder}] ${b.blockType}${
+                        b.variant ? ` (${b.variant})` : ""
+                      }${b.isVisible ? "" : " [hidden]"}`,
                   )
                   .join("\n")
               : "  (no blocks)"),
@@ -779,7 +789,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
           }),
           prisma.dynamicPage.count({ where }),
         ]);
-        if (pages.length === 0) return textResult("No pages found matching the given filters.");
+        if (pages.length === 0) {
+          return textResult("No pages found matching the given filters.");
+        }
         let text = `**Pages (${pages.length} of ${total}):**\n\n`;
         for (const p of pages) {
           text += `- **${p.title}** (${p.slug})\n  ID: ${p.id} | Layout: ${p.layout} | Status: ${p.status}\n  Views: ${p.viewCount} | Updated: ${p.updatedAt.toISOString()}${
@@ -813,7 +825,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
       } = input as z.infer<typeof UpdatePageSchema>;
       return safeToolCall("pages_update", async () => {
         const prisma = (await import("@/lib/prisma")).default;
-        const current = await prisma.dynamicPage.findUnique({ where: { id: pageId } });
+        const current = await prisma.dynamicPage.findUnique({
+          where: { id: pageId },
+        });
         if (!current) {
           return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
         }
@@ -845,11 +859,17 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
         if (title !== undefined) updateData.title = title;
         if (description !== undefined) updateData.description = description;
         if (layout !== undefined) updateData.layout = layout;
-        if (themeData !== undefined) updateData.themeData = themeData as Prisma.InputJsonValue;
+        if (themeData !== undefined) {
+          updateData.themeData = themeData as Prisma.InputJsonValue;
+        }
         if (tags !== undefined) updateData.tags = tags;
-        if (customCss !== undefined) updateData.customCss = sanitizeCss(customCss);
+        if (customCss !== undefined) {
+          updateData.customCss = sanitizeCss(customCss);
+        }
         if (seoTitle !== undefined) updateData.seoTitle = seoTitle;
-        if (seoDescription !== undefined) updateData.seoDescription = seoDescription;
+        if (seoDescription !== undefined) {
+          updateData.seoDescription = seoDescription;
+        }
         if (ogImageUrl !== undefined) updateData.ogImageUrl = ogImageUrl;
         const updated = await prisma.dynamicPage.update({
           where: { id: pageId },
@@ -884,8 +904,13 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
           where: { id: pageId },
           select: { id: true, slug: true, title: true },
         });
-        if (!page) return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
-        await prisma.dynamicPage.update({ where: { id: pageId }, data: { status: "ARCHIVED" } });
+        if (!page) {
+          return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
+        }
+        await prisma.dynamicPage.update({
+          where: { id: pageId },
+          data: { status: "ARCHIVED" },
+        });
         return textResult(
           `**Page Archived**\n\n**ID:** ${page.id}\n**Slug:** ${page.slug}\n**Title:** ${page.title}\nStatus set to ARCHIVED.`,
         );
@@ -907,11 +932,19 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
           where: { id: pageId },
           select: { id: true, slug: true, title: true, status: true },
         });
-        if (!page) return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
+        if (!page) {
+          return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
+        }
         const updated = await prisma.dynamicPage.update({
           where: { id: pageId },
           data: { status: "PUBLISHED", publishedAt: new Date() },
-          select: { id: true, slug: true, title: true, status: true, publishedAt: true },
+          select: {
+            id: true,
+            slug: true,
+            title: true,
+            status: true,
+            publishedAt: true,
+          },
         });
         return textResult(
           `**Page Published**\n\n**ID:** ${updated.id}\n**Title:** ${updated.title}\n**Status:** ${updated.status}\n**Published:** ${updated.publishedAt?.toISOString()}\n**URL:** /p/${updated.slug}`,
@@ -1052,7 +1085,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
       const { blockId, content, variant, isVisible } = input as z.infer<typeof UpdateBlockSchema>;
       return safeToolCall("blocks_update", async () => {
         const prisma = (await import("@/lib/prisma")).default;
-        const existing = await prisma.pageBlock.findUnique({ where: { id: blockId } });
+        const existing = await prisma.pageBlock.findUnique({
+          where: { id: blockId },
+        });
         if (!existing) {
           return textResult(
             `**Error: NOT_FOUND**\nBlock with ID "${blockId}" not found.\n**Retryable:** false`,
@@ -1068,10 +1103,15 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
           }
         }
         const updateData: Prisma.PageBlockUpdateInput = {};
-        if (content !== undefined) updateData.content = content as Prisma.InputJsonValue;
+        if (content !== undefined) {
+          updateData.content = content as Prisma.InputJsonValue;
+        }
         if (variant !== undefined) updateData.variant = variant;
         if (isVisible !== undefined) updateData.isVisible = isVisible;
-        const updated = await prisma.pageBlock.update({ where: { id: blockId }, data: updateData });
+        const updated = await prisma.pageBlock.update({
+          where: { id: blockId },
+          data: updateData,
+        });
         return textResult(
           `**Block Updated**\n\n**ID:** ${updated.id}\n**Page ID:** ${updated.pageId}\n**Type:** ${updated.blockType}\n**Variant:** ${
             updated.variant ?? "none"
@@ -1111,7 +1151,10 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
         const prisma = (await import("@/lib/prisma")).default;
         await prisma.$transaction(
           blockIds.map((id, index) =>
-            prisma.pageBlock.update({ where: { id }, data: { sortOrder: index } }),
+            prisma.pageBlock.update({
+              where: { id },
+              data: { sortOrder: index },
+            }),
           ),
         );
         return textResult(
@@ -1134,7 +1177,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
         const { getBlockTypeDescriptions } = await import("@/lib/dynamic-pages/block-schemas");
         const descriptions = getBlockTypeDescriptions();
         let text = "**Available Block Types:**\n\n";
-        for (const [type, desc] of Object.entries(descriptions)) text += `- **${type}**: ${desc}\n`;
+        for (const [type, desc] of Object.entries(descriptions)) {
+          text += `- **${type}**: ${desc}\n`;
+        }
         return textResult(text);
       }),
   },
@@ -1149,7 +1194,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
       const { blockId } = input as z.infer<typeof GetBlockSchema>;
       return safeToolCall("blocks_get", async () => {
         const prisma = (await import("@/lib/prisma")).default;
-        const block = await prisma.pageBlock.findUnique({ where: { id: blockId } });
+        const block = await prisma.pageBlock.findUnique({
+          where: { id: blockId },
+        });
         if (!block) {
           return textResult(
             `**Error: NOT_FOUND**\nBlock with ID "${blockId}" not found.\n**Retryable:** false`,
@@ -1235,7 +1282,11 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
           headline: "Ready to get started?",
           description: `Start building with ${keywords[0] || "this"} today.`,
           buttons: [
-            { text: "Get Started", url: "/signup", variant: "primary" as const },
+            {
+              text: "Get Started",
+              url: "/signup",
+              variant: "primary" as const,
+            },
             {
               text: "Learn More",
               url: "#features",
@@ -1275,7 +1326,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
               ],
             },
           },
-          include: { blocks: { select: { id: true, blockType: true, sortOrder: true } } },
+          include: {
+            blocks: { select: { id: true, blockType: true, sortOrder: true } },
+          },
         });
         let text = `**Page Generated**\n\n**Title:** ${page.title}\n**Slug:** ${page.slug}\n**Layout:** ${page.layout}\n**Status:** ${page.status}\n**Blocks (${page.blocks.length}):**\n`;
         for (const block of page.blocks) {
@@ -1298,7 +1351,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
       const { blockId, instruction } = input as z.infer<typeof EnhanceBlockSchema>;
       return safeToolCall("page_ai_enhance_block", async () => {
         const prisma = (await import("@/lib/prisma")).default;
-        const block = await prisma.pageBlock.findUnique({ where: { id: blockId } });
+        const block = await prisma.pageBlock.findUnique({
+          where: { id: blockId },
+        });
         if (!block) {
           return textResult(
             `**Error: NOT_FOUND**\nBlock with ID "${blockId}" not found.\n**Retryable:** false`,
@@ -1593,7 +1648,11 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
             features: ["ETL pipelines", "Data cleaning", "Scheduling"],
           },
         ];
-        const appGridContent = { sectionTitle: "App Store", apps: sampleApps, categories };
+        const appGridContent = {
+          sectionTitle: "App Store",
+          apps: sampleApps,
+          categories,
+        };
         const maxBlock = await prisma.pageBlock.findFirst({
           where: { pageId: page.id },
           orderBy: { sortOrder: "desc" },
@@ -1637,7 +1696,10 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
         const page = await prisma.dynamicPage.findFirst({
           where: { slug },
           include: {
-            blocks: { select: { blockType: true, content: true }, orderBy: { sortOrder: "asc" } },
+            blocks: {
+              select: { blockType: true, content: true },
+              orderBy: { sortOrder: "asc" },
+            },
           },
         });
         if (!page) return textResult(buildStaticRouteAnalysis(route));
@@ -1725,7 +1787,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
           where: { id: page_id },
           select: { id: true, title: true, slug: true, userId: true },
         });
-        if (!page) return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
+        if (!page) {
+          return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
+        }
         if (page.userId !== ctx.userId) {
           return textResult(
             "**Error: PERMISSION_DENIED**\nYou do not own this page.\n**Retryable:** false",
@@ -1778,7 +1842,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
             description: true,
           },
         });
-        if (!page) return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
+        if (!page) {
+          return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
+        }
         if (page.userId !== ctx.userId) {
           return textResult(
             "**Error: PERMISSION_DENIED**\nYou do not own this page.\n**Retryable:** false",
@@ -1832,7 +1898,9 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
           where: { id: page_id },
           select: { id: true, title: true, slug: true, userId: true },
         });
-        if (!page) return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
+        if (!page) {
+          return textResult("**Error: NOT_FOUND**\nPage not found.\n**Retryable:** false");
+        }
         if (page.userId !== ctx.userId) {
           return textResult(
             "**Error: PERMISSION_DENIED**\nYou do not own this page.\n**Retryable:** false",
@@ -1843,11 +1911,18 @@ export const pageBuilderTools: StandaloneToolDefinition[] = [
         if (description !== undefined) updateData.seoDescription = description;
         if (og_image !== undefined) updateData.ogImageUrl = og_image;
         if (keywords !== undefined) updateData.tags = keywords;
-        await prisma.dynamicPage.update({ where: { id: page_id }, data: updateData });
+        await prisma.dynamicPage.update({
+          where: { id: page_id },
+          data: updateData,
+        });
         const updated: string[] = [];
         if (title !== undefined) updated.push(`**SEO Title:** ${title}`);
-        if (description !== undefined) updated.push(`**SEO Description:** ${description}`);
-        if (keywords !== undefined) updated.push(`**Keywords:** ${keywords.join(", ")}`);
+        if (description !== undefined) {
+          updated.push(`**SEO Description:** ${description}`);
+        }
+        if (keywords !== undefined) {
+          updated.push(`**Keywords:** ${keywords.join(", ")}`);
+        }
         if (og_image !== undefined) updated.push(`**OG Image:** ${og_image}`);
         return textResult(
           `**SEO Metadata Updated**\n\n**Page:** ${page.title} (${page.slug})\n**Page ID:** ${page.id}\n\n**Changes Applied:**\n${updated

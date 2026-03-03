@@ -21,7 +21,9 @@ export function TextArea({ label, error, className = "", id, ...props }: TextAre
         id={textareaId}
         className={`w-full px-4 py-2.5 rounded-xl bg-obsidian-950/50 border border-white/10 text-white
           placeholder:text-gray-700 focus:outline-none focus:ring-1 ring-amber-neon/30 focus:border-white/20
-          disabled:opacity-20 text-xs font-medium transition-all resize-y min-h-20 ${error ? "border-red-500/50" : ""} ${className}`}
+          disabled:opacity-20 text-xs font-medium transition-all resize-y min-h-20 ${
+            error ? "border-red-500/50" : ""
+          } ${className}`}
         {...props}
       />
       {error && (

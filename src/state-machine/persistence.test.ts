@@ -5,7 +5,7 @@
  * via vi.mock so no real DB connection is needed.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Mock the Prisma module that persistence.ts loads via dynamic import
@@ -25,7 +25,7 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-import { shareMachine, getSharedMachine } from "./persistence.js";
+import { getSharedMachine, shareMachine } from "./persistence.js";
 import type { MachineExport } from "./types.js";
 
 // ---------------------------------------------------------------------------
@@ -256,7 +256,15 @@ describe("getSharedMachine", () => {
       id: "m1",
       name: "Deep Clone Test",
       initial: "s1",
-      states: { s1: { id: "s1", type: "atomic", children: [], entryActions: [], exitActions: [] } },
+      states: {
+        s1: {
+          id: "s1",
+          type: "atomic",
+          children: [],
+          entryActions: [],
+          exitActions: [],
+        },
+      },
       transitions: [],
       context: {},
       userId: "u1",

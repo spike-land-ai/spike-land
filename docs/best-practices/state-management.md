@@ -111,7 +111,7 @@ export function App() {
 ```typescript
 import { useQuery } from "@tanstack/react-query";
 
-function UserProfile({ userId }: { userId: string; }) {
+function UserProfile({ userId }: { userId: string }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["users", userId],
     queryFn: async () => {
@@ -146,7 +146,7 @@ function UpdateUser() {
       });
       return res.json();
     },
-    onSuccess: data => {
+    onSuccess: (data) => {
       // Invalidate and refetch
       queryClient.invalidateQueries({
         queryKey: ["users", data.id],
@@ -271,16 +271,16 @@ interface CountStore {
   decrement: () => void;
 }
 
-const useCountStore = create<CountStore>(set => ({
+const useCountStore = create<CountStore>((set) => ({
   count: 0,
-  increment: () => set(state => ({ count: state.count + 1 })),
-  decrement: () => set(state => ({ count: state.count - 1 })),
+  increment: () => set((state) => ({ count: state.count + 1 })),
+  decrement: () => set((state) => ({ count: state.count - 1 })),
 }));
 
 // Usage in components
 function Counter() {
-  const count = useCountStore(state => state.count);
-  const increment = useCountStore(state => state.increment);
+  const count = useCountStore((state) => state.count);
+  const increment = useCountStore((state) => state.increment);
 
   return (
     <div>
@@ -296,18 +296,18 @@ function Counter() {
 Organize complex stores into slices for better maintainability:
 
 ```typescript
-const useAppStore = create<AppStore>(set => ({
+const useAppStore = create<AppStore>((set) => ({
   // User slice
   user: null,
-  setUser: user => set({ user }),
+  setUser: (user) => set({ user }),
 
   // UI slice
   sidebarOpen: true,
-  toggleSidebar: () => set(state => ({ sidebarOpen: !state.sidebarOpen })),
+  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
 
   // Theme slice
   theme: "light",
-  setTheme: theme => set({ theme }),
+  setTheme: (theme) => set({ theme }),
 }));
 ```
 
@@ -317,14 +317,14 @@ const useAppStore = create<AppStore>(set => ({
 // With persistence
 const useStore = create<Store>(
   persist(
-    set => ({
+    (set) => ({
       count: 0,
-      increment: () => set(state => ({ count: state.count + 1 })),
+      increment: () => set((state) => ({ count: state.count + 1 })),
     }),
     {
       name: "app-store", // localStorage key
       storage: localStorage,
-      partialize: state => ({ count: state.count }), // Optional: persist only specific fields
+      partialize: (state) => ({ count: state.count }), // Optional: persist only specific fields
     },
   ),
 );
@@ -332,9 +332,9 @@ const useStore = create<Store>(
 // With devtools
 const useStore = create<Store>(
   devtools(
-    set => ({
+    (set) => ({
       count: 0,
-      increment: () => set(state => ({ count: state.count + 1 })),
+      increment: () => set((state) => ({ count: state.count + 1 })),
     }),
     { name: "app-store" },
   ),
@@ -367,7 +367,7 @@ import { atom, useAtom } from "jotai";
 
 // Define atoms
 const countAtom = atom(0);
-const doubledAtom = atom(get => get(countAtom) * 2);
+const doubledAtom = atom((get) => get(countAtom) * 2);
 
 function Counter() {
   const [count, setCount] = useAtom(countAtom);
@@ -387,7 +387,7 @@ function Counter() {
 
 ```typescript
 const userAtom = atom(
-  async get => {
+  async (get) => {
     const userId = get(userIdAtom);
     const res = await fetch(`/api/users/${userId}`);
     return res.json();
@@ -435,10 +435,10 @@ const counterSlice = createSlice({
   name: "counter",
   initialState: { value: 0 },
   reducers: {
-    increment: state => {
+    increment: (state) => {
       state.value += 1;
     },
-    decrement: state => {
+    decrement: (state) => {
       state.value -= 1;
     },
   },
@@ -452,7 +452,7 @@ const store = configureStore({
 
 function Counter() {
   const dispatch = useDispatch();
-  const count = useSelector(state => state.counter.value);
+  const count = useSelector((state) => state.counter.value);
 
   return (
     <div>
@@ -534,7 +534,7 @@ function SearchProducts() {
     <div>
       <input
         value={search}
-        onChange={e => setSearch(e.target.value)}
+        onChange={(e) => setSearch(e.target.value)}
         placeholder="Search..."
       />
       <p>Page: {page}</p>
@@ -561,7 +561,8 @@ function Filters() {
     <div>
       <input
         value={state.search}
-        onChange={e => setState(prev => ({ ...prev, search: e.target.value }))}
+        onChange={(e) =>
+          setState((prev) => ({ ...prev, search: e.target.value }))}
       />
       {/* More filters */}
     </div>
@@ -575,18 +576,18 @@ function Filters() {
 import { createSearchParamsCache, parseAsArrayOf, parseAsString } from "nuqs";
 
 // For complex types
-const parseDate = parseAsString.pipe(val => new Date(val));
+const parseDate = parseAsString.pipe((val) => new Date(val));
 
 function DateFilter() {
   const [date, setDate] = useQueryState("date", {
     parse: parseDate,
-    serialize: date => date.toISOString(),
+    serialize: (date) => date.toISOString(),
   });
 
   return (
     <input
       type="date"
-      onChange={e => setDate(new Date(e.target.value))}
+      onChange={(e) => setDate(new Date(e.target.value))}
     />
   );
 }
@@ -630,7 +631,7 @@ const userSchema = z.object({
   age: z.number().min(18, "Must be 18+"),
   password: z.string().min(8, "Password must be 8+ characters"),
   confirmPassword: z.string(),
-}).refine(data => data.password === data.confirmPassword, {
+}).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
 });
@@ -695,7 +696,7 @@ const eventSchema = z.object({
   location: z.string().optional(),
   url: z.string().url().optional(),
 }).refine(
-  data => {
+  (data) => {
     if (data.eventType === "physical" && !data.location) return false;
     if (data.eventType === "online" && !data.url) return false;
     return true;
@@ -844,9 +845,9 @@ function Parent() {
 }
 
 // ✅ Zustand (larger apps)
-const useThemeStore = create(set => ({
+const useThemeStore = create((set) => ({
   theme: "light",
-  setTheme: theme => set({ theme }),
+  setTheme: (theme) => set({ theme }),
 }));
 
 function Parent() {
@@ -870,14 +871,14 @@ import { persist } from "zustand/middleware";
 
 const useUserStore = create(
   persist(
-    set => ({
+    (set) => ({
       user: null,
-      setUser: user => set({ user }),
+      setUser: (user) => set({ user }),
     }),
     {
       name: "user-storage", // localStorage key
       storage: localStorage,
-      partialize: state => ({ user: state.user }), // Persist only user
+      partialize: (state) => ({ user: state.user }), // Persist only user
     },
   ),
 );
@@ -963,9 +964,9 @@ For temporary data lasting only the current browser session:
 ```typescript
 const useSessionStore = create(
   persist(
-    set => ({
+    (set) => ({
       tempData: null,
-      setTempData: data => set({ tempData: data }),
+      setTempData: (data) => set({ tempData: data }),
     }),
     {
       name: "session-store",
@@ -1014,13 +1015,13 @@ const encryptData = (data: string, key: string) => {
 ```typescript
 const useStore = create(
   persist(
-    set => ({
+    (set) => ({
       data: null,
       timestamp: null,
     }),
     {
       name: "app-store",
-      partialize: state => state,
+      partialize: (state) => state,
       merge: (persistedState, currentState) => {
         const now = Date.now();
         const age = now - (persistedState.timestamp || 0);
@@ -1112,9 +1113,9 @@ const [search, setSearch] = useQueryState("q");
 const [page, setPage] = useQueryState("page", { defaultValue: "1" });
 
 // Client State: Sidebar toggle, theme
-const useSidebarStore = create(set => ({
+const useSidebarStore = create((set) => ({
   open: true,
-  toggle: () => set(state => ({ open: !state.open })),
+  toggle: () => set((state) => ({ open: !state.open })),
 }));
 
 // Form State: Checkout form
@@ -1140,7 +1141,7 @@ function CheckoutForm() {
 
 ```typescript
 // ❌ BAD: Everything in global state
-const useAppStore = create(set => ({
+const useAppStore = create((set) => ({
   // 50+ properties...
   hoveredItemId: null,
   userPreferences: {},
@@ -1154,13 +1155,13 @@ const useAppStore = create(set => ({
 
 ```typescript
 // ✅ GOOD: Separate concerns
-const useUIStore = create(set => ({
+const useUIStore = create((set) => ({
   sidebarOpen: true,
   theme: "light",
   // ...
 }));
 
-const useAuthStore = create(set => ({
+const useAuthStore = create((set) => ({
   user: null,
   isAuthenticated: false,
   // ...
@@ -1206,7 +1207,7 @@ const { data: products } = useQuery({
 const store = useThemeStore();
 
 // With selectors: Only re-render on theme change
-const theme = useThemeStore(state => state.theme);
+const theme = useThemeStore((state) => state.theme);
 ```
 
 ### Query Optimization (TanStack Query)
@@ -1229,9 +1230,9 @@ useQuery({
 
 ```typescript
 // Atoms automatically track dependencies
-const namesAtom = atom(get => {
+const namesAtom = atom((get) => {
   const users = get(usersAtom);
-  return users.map(u => u.name); // Only re-computed when usersAtom changes
+  return users.map((u) => u.name); // Only re-computed when usersAtom changes
 });
 ```
 

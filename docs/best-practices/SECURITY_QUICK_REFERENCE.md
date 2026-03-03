@@ -442,7 +442,7 @@ describe("SQL Injection Prevention", () => {
 describe("XSS Prevention", () => {
   test("should escape HTML in output", async () => {
     const html = await renderUserProfile({
-      name: "<script>alert(\"XSS\")</script>",
+      name: '<script>alert("XSS")</script>',
     });
     expect(html).not.toContain("<script>");
   });

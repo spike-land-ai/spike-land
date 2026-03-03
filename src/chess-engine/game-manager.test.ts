@@ -548,7 +548,12 @@ describe("game-manager", () => {
       expect(mockPrisma.chessGame.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
-            OR: [{ whitePlayerId: "white-player" }, { blackPlayerId: "white-player" }],
+            OR: [
+              { whitePlayerId: "white-player" },
+              {
+                blackPlayerId: "white-player",
+              },
+            ],
           },
         }),
       );
@@ -562,7 +567,12 @@ describe("game-manager", () => {
       expect(mockPrisma.chessGame.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {
-            OR: [{ whitePlayerId: "white-player" }, { blackPlayerId: "white-player" }],
+            OR: [
+              { whitePlayerId: "white-player" },
+              {
+                blackPlayerId: "white-player",
+              },
+            ],
             status: "ACTIVE",
           },
         }),

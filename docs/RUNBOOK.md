@@ -189,7 +189,7 @@ When mocking `node:fs`, `node:child_process`, etc., the mock must include a
 `default` key pointing to the mocked object itself:
 
 ```ts
-vi.mock("node:fs", async importOriginal => {
+vi.mock("node:fs", async (importOriginal) => {
   const actual = await importOriginal<typeof import("node:fs")>();
   const mocked = { ...actual, existsSync: vi.fn() };
   return { ...mocked, default: mocked };

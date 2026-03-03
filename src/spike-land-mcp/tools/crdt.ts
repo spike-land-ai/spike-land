@@ -96,9 +96,13 @@ function resolveValue(state: ReplicaState): string {
     }
     case "pn_counter": {
       let pos = 0;
-      for (const key of Object.keys(state.positive)) pos += state.positive[key]!;
+      for (const key of Object.keys(state.positive)) {
+        pos += state.positive[key]!;
+      }
       let neg = 0;
-      for (const key of Object.keys(state.negative)) neg += state.negative[key]!;
+      for (const key of Object.keys(state.negative)) {
+        neg += state.negative[key]!;
+      }
       return String(pos - neg);
     }
     case "lww_register":
@@ -140,10 +144,16 @@ function cloneState(state: ReplicaState): ReplicaState {
         negative: { ...state.negative },
       };
     case "lww_register":
-      return { type: "lww_register", value: state.value, timestamp: state.timestamp };
+      return {
+        type: "lww_register",
+        value: state.value,
+        timestamp: state.timestamp,
+      };
     case "or_set": {
       const elements: Record<string, string[]> = {};
-      for (const [val, tags] of Object.entries(state.elements)) elements[val] = [...tags];
+      for (const [val, tags] of Object.entries(state.elements)) {
+        elements[val] = [...tags];
+      }
       return { type: "or_set", elements };
     }
   }
@@ -160,37 +170,50 @@ function applyOperation(
 ): void {
   switch (state.type) {
     case "g_counter": {
-      if (operation !== "increment")
+      if (operation !== "increment") {
         throw new Error(`Invalid operation "${operation}" for G-Counter. Use "increment".`);
+      }
       const amount = value ? parseInt(value, 10) : 1;
-      if (isNaN(amount) || amount < 1)
+      if (isNaN(amount) || amount < 1) {
         throw new Error("Increment value must be a positive integer");
+      }
       state.counts[replicaId] = (state.counts[replicaId] ?? 0) + amount;
       break;
     }
     case "pn_counter": {
-      if (operation !== "increment" && operation !== "decrement")
+      if (operation !== "increment" && operation !== "decrement") {
         throw new Error(`Invalid operation "${operation}" for PN-Counter.`);
+      }
       const amount = value ? parseInt(value, 10) : 1;
-      if (isNaN(amount) || amount < 1) throw new Error("Value must be a positive integer");
-      if (operation === "increment")
+      if (isNaN(amount) || amount < 1) {
+        throw new Error("Value must be a positive integer");
+      }
+      if (operation === "increment") {
         state.positive[replicaId] = (state.positive[replicaId] ?? 0) + amount;
-      else state.negative[replicaId] = (state.negative[replicaId] ?? 0) + amount;
+      } else {
+        state.negative[replicaId] = (state.negative[replicaId] ?? 0) + amount;
+      }
       break;
     }
     case "lww_register": {
-      if (operation !== "set")
+      if (operation !== "set") {
         throw new Error(`Invalid operation "${operation}" for LWW-Register. Use "set".`);
-      if (value === undefined) throw new Error('LWW-Register "set" operation requires a value');
+      }
+      if (value === undefined) {
+        throw new Error('LWW-Register "set" operation requires a value');
+      }
       set.timestampCounter++;
       state.value = value;
       state.timestamp = set.timestampCounter;
       break;
     }
     case "or_set": {
-      if (operation !== "add" && operation !== "remove")
+      if (operation !== "add" && operation !== "remove") {
         throw new Error(`Invalid operation "${operation}" for OR-Set.`);
-      if (value === undefined) throw new Error(`OR-Set "${operation}" operation requires a value`);
+      }
+      if (value === undefined) {
+        throw new Error(`OR-Set "${operation}" operation requires a value`);
+      }
       if (operation === "add") {
         if (!state.elements[value]) state.elements[value] = [];
         set.tagCounter++;
@@ -206,13 +229,16 @@ function applyOperation(
 // ─── CRDT merge ──────────────────────────────────────────────────────────────
 
 function mergeStates(target: ReplicaState, source: ReplicaState): void {
-  if (target.type !== source.type) throw new Error("Cannot merge different CRDT types");
+  if (target.type !== source.type) {
+    throw new Error("Cannot merge different CRDT types");
+  }
   switch (target.type) {
     case "g_counter": {
       const s = source as GCounterState;
       const allKeys = new Set([...Object.keys(target.counts), ...Object.keys(s.counts)]);
-      for (const key of allKeys)
+      for (const key of allKeys) {
         target.counts[key] = Math.max(target.counts[key] ?? 0, s.counts[key] ?? 0);
+      }
       break;
     }
     case "pn_counter": {
@@ -323,7 +349,10 @@ export function registerCrdtTools(registry: ToolRegistry, userId: string, db: Dr
         const replicaOrder: string[] = [];
         for (let i = 1; i <= input.replica_count; i++) {
           const replicaId = `replica-${i}`;
-          replicas.set(replicaId, { id: replicaId, state: createInitialState(input.type) });
+          replicas.set(replicaId, {
+            id: replicaId,
+            state: createInitialState(input.type),
+          });
           replicaOrder.push(replicaId);
         }
         const set: CrdtSet = {
@@ -340,7 +369,9 @@ export function registerCrdtTools(registry: ToolRegistry, userId: string, db: Dr
         };
         sets.set(id, set);
         return textResult(
-          `**CRDT Set Created**\n\n**ID:** ${set.id}\n**Name:** ${set.name}\n**Type:** ${set.crdtType}\n**Replicas:** ${set.replicaOrder.join(", ")}\n\nUse \`crdt_update\` to apply operations to individual replicas, then \`crdt_sync_pair\` or \`crdt_sync_all\` to merge state.`,
+          `**CRDT Set Created**\n\n**ID:** ${set.id}\n**Name:** ${set.name}\n**Type:** ${set.crdtType}\n**Replicas:** ${set.replicaOrder.join(
+            ", ",
+          )}\n\nUse \`crdt_update\` to apply operations to individual replicas, then \`crdt_sync_pair\` or \`crdt_sync_all\` to merge state.`,
         );
       }),
   );
@@ -368,7 +399,11 @@ export function registerCrdtTools(registry: ToolRegistry, userId: string, db: Dr
         set.operationLog.push(opLog);
         const stateRow = formatReplicaState(replica.id, replica.state, resolveValue(replica.state));
         return textResult(
-          `**Operation Applied**\n\n**Replica:** ${input.replica_id}\n**Operation:** ${input.operation}${input.value ? ` (value: "${input.value}")` : ""}\n**Resolved Value:** ${resolveValue(replica.state)}\n\n| Replica | Value | Internal State |\n|---|---|---|\n${stateRow}`,
+          `**Operation Applied**\n\n**Replica:** ${input.replica_id}\n**Operation:** ${input.operation}${
+            input.value ? ` (value: "${input.value}")` : ""
+          }\n**Resolved Value:** ${resolveValue(
+            replica.state,
+          )}\n\n| Replica | Value | Internal State |\n|---|---|---|\n${stateRow}`,
         );
       }),
   );
@@ -412,9 +447,12 @@ export function registerCrdtTools(registry: ToolRegistry, userId: string, db: Dr
         const set = getSet(input.set_id, userId);
         const allStates = set.replicaOrder.map((rid) => set.replicas.get(rid)!.state);
         const merged = cloneState(allStates[0]!);
-        for (let i = 1; i < allStates.length; i++) mergeStates(merged, cloneState(allStates[i]!));
-        for (const replicaId of set.replicaOrder)
+        for (let i = 1; i < allStates.length; i++) {
+          mergeStates(merged, cloneState(allStates[i]!));
+        }
+        for (const replicaId of set.replicaOrder) {
           set.replicas.get(replicaId)!.state = cloneState(merged);
+        }
         const rows = set.replicaOrder
           .map((rid) => {
             const r = set.replicas.get(rid)!;
@@ -471,14 +509,21 @@ export function registerCrdtTools(registry: ToolRegistry, userId: string, db: Dr
           for (let j = i + 1; j < replicaValues.length; j++) {
             const a = replicaValues[i]!,
               b = replicaValues[j]!;
-            if (a.value !== b.value)
-              diffs.push({ replicaA: a.id, replicaB: b.id, valueA: a.value, valueB: b.value });
+            if (a.value !== b.value) {
+              diffs.push({
+                replicaA: a.id,
+                replicaB: b.id,
+                valueA: a.value,
+                valueB: b.value,
+              });
+            }
           }
         }
-        if (diffs.length === 0)
+        if (diffs.length === 0) {
           return textResult(
             `**Convergence Check: CONVERGED**\n\nAll replicas agree on the same value.`,
           );
+        }
         const diffRows = diffs
           .map((d) => `| ${d.replicaA} | ${d.replicaB} | ${d.valueA} | ${d.valueB} |`)
           .join("\n");
@@ -520,7 +565,9 @@ export function registerCrdtTools(registry: ToolRegistry, userId: string, db: Dr
             "OR-Set uses unique tags per add operation. Concurrent add/remove results in add-wins. AP.",
         };
         return textResult(
-          `## AP (CRDT) vs CP (Raft/Paxos) Comparison\n\n**CRDT Type:** ${set.crdtType}\n**Scenario:** ${input.scenario_description}\n**Current State:** ${currentState}\n\n### How this CRDT works\n\n${typeDesc[set.crdtType]}\n\n### Tradeoffs\n\n**AP (this CRDT):**\n- Every replica can accept writes independently\n- Replicas may temporarily disagree\n- Merge function guarantees convergence\n\n**CP (Raft consensus):**\n- All reads return the latest committed value\n- Writes require a leader and majority quorum\n- Unavailable during network partitions`,
+          `## AP (CRDT) vs CP (Raft/Paxos) Comparison\n\n**CRDT Type:** ${set.crdtType}\n**Scenario:** ${input.scenario_description}\n**Current State:** ${currentState}\n\n### How this CRDT works\n\n${
+            typeDesc[set.crdtType]
+          }\n\n### Tradeoffs\n\n**AP (this CRDT):**\n- Every replica can accept writes independently\n- Replicas may temporarily disagree\n- Merge function guarantees convergence\n\n**CP (Raft consensus):**\n- All reads return the latest committed value\n- Writes require a leader and majority quorum\n- Unavailable during network partitions`,
         );
       }),
   );

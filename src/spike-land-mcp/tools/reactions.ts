@@ -11,7 +11,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "./types";
 import { freeTool } from "../procedures/index";
-import { textResult, safeToolCall, apiRequest } from "./tool-helpers";
+import { apiRequest, safeToolCall, textResult } from "./tool-helpers";
 import type { DrizzleDB } from "../db/index";
 
 export function registerReactionsTools(
@@ -85,8 +85,12 @@ export function registerReactionsTools(
         return safeToolCall("list_reactions", async () => {
           const params = new URLSearchParams();
           if (input.sourceTool) params.set("sourceTool", input.sourceTool);
-          if (input.enabled !== undefined) params.set("enabled", String(input.enabled));
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.enabled !== undefined) {
+            params.set("enabled", String(input.enabled));
+          }
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const reactions = await apiRequest<
             Array<{
@@ -105,8 +109,9 @@ export function registerReactionsTools(
 
           const lines = reactions.map(
             (r) =>
-              `- ${r.id}: ${r.sourceTool}:${r.sourceEvent} → ${r.targetTool} [${r.enabled ? "ON" : "OFF"}]` +
-              (r.description ? ` — ${r.description}` : ""),
+              `- ${r.id}: ${r.sourceTool}:${r.sourceEvent} → ${r.targetTool} [${
+                r.enabled ? "ON" : "OFF"
+              }]` + (r.description ? ` — ${r.description}` : ""),
           );
 
           return textResult(`**Reactions (${reactions.length})**\n${lines.join("\n")}`);
@@ -151,8 +156,12 @@ export function registerReactionsTools(
           const params = new URLSearchParams();
           if (input.reactionId) params.set("reactionId", input.reactionId);
           if (input.sourceTool) params.set("sourceTool", input.sourceTool);
-          if (input.isError !== undefined) params.set("isError", String(input.isError));
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.isError !== undefined) {
+            params.set("isError", String(input.isError));
+          }
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const logs = await apiRequest<
             Array<{

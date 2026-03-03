@@ -1,11 +1,11 @@
 import { z } from "zod";
 import type { BlendMode, EnhancementTier } from "../types.js";
-import { IMG_DEFAULTS, jsonResult, BLEND_MODE_VALUES } from "../types.js";
+import { BLEND_MODE_VALUES, IMG_DEFAULTS, jsonResult } from "../types.js";
 import {
   imageProcedure,
-  withResolves,
   withCredits,
   withJob,
+  withResolves,
 } from "../tool-builder/image-middleware.js";
 
 export const blendTool = imageProcedure

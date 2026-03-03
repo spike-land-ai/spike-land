@@ -151,7 +151,13 @@ describe("computeOverallStatus", () => {
 
 describe("formatGateResults", () => {
   it("includes markdown table", () => {
-    const gates: GateResult[] = [{ name: "Test", status: "GREEN", detail: "All good" }];
+    const gates: GateResult[] = [
+      {
+        name: "Test",
+        status: "GREEN",
+        detail: "All good",
+      },
+    ];
     const output = formatGateResults(gates);
     expect(output).toContain("| Test |");
     expect(output).toContain("All good");
@@ -159,7 +165,13 @@ describe("formatGateResults", () => {
   });
 
   it("includes warning for RED status", () => {
-    const gates: GateResult[] = [{ name: "Fail", status: "RED", detail: "Bad" }];
+    const gates: GateResult[] = [
+      {
+        name: "Fail",
+        status: "RED",
+        detail: "Bad",
+      },
+    ];
     const output = formatGateResults(gates);
     expect(output).toContain("must be addressed");
   });

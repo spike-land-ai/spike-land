@@ -38,8 +38,8 @@ stability:
 - Positive user feedback (NPS > 40)
 - Publish spike-cli (`@spike-land-ai/spike-cli`) to npm registry
 - Submit spike-cli to MCP registry listings (Smithery, mcp.run, Glama)
-- Validate that all 455+ MCP tools (147 tool files, 150 test files) are accessible via both web dashboard and
-  spike-cli CLI
+- Validate that all 455+ MCP tools (147 tool files, 150 test files) are
+  accessible via both web dashboard and spike-cli CLI
 
 ---
 

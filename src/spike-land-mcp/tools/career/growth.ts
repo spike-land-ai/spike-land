@@ -8,7 +8,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "../types";
 import { freeTool } from "../../procedures/index";
-import { textResult, safeToolCall } from "../tool-helpers";
+import { safeToolCall, textResult } from "../tool-helpers";
 import type { DrizzleDB } from "../../db/index";
 
 // ─── Schemas ────────────────────────────────────────────────────────────────
@@ -195,15 +195,36 @@ const SKILL_METADATA: Record<string, { hours: number; resources: string[] }> = {
     hours: 40,
     resources: ["TypeScript Handbook (typescriptlang.org)", "Execute Program"],
   },
-  react: { hours: 60, resources: ["react.dev official docs", "Scrimba React course"] },
+  react: {
+    hours: 60,
+    resources: ["react.dev official docs", "Scrimba React course"],
+  },
   python: { hours: 50, resources: ["Python.org tutorial", "Real Python"] },
-  docker: { hours: 20, resources: ["Docker Getting Started guide", "KodeKloud Docker course"] },
-  kubernetes: { hours: 35, resources: ["Kubernetes.io tutorials", "KodeKloud CKA prep"] },
-  postgresql: { hours: 25, resources: ["PostgreSQL official tutorial", "pgexercises.com"] },
+  docker: {
+    hours: 20,
+    resources: ["Docker Getting Started guide", "KodeKloud Docker course"],
+  },
+  kubernetes: {
+    hours: 35,
+    resources: ["Kubernetes.io tutorials", "KodeKloud CKA prep"],
+  },
+  postgresql: {
+    hours: 25,
+    resources: ["PostgreSQL official tutorial", "pgexercises.com"],
+  },
   aws: { hours: 60, resources: ["AWS Skill Builder", "A Cloud Guru"] },
-  redis: { hours: 15, resources: ["Redis University", "redis.io documentation"] },
-  terraform: { hours: 30, resources: ["HashiCorp Learn", "Gruntwork Terraform tutorial"] },
-  "node.js": { hours: 35, resources: ["nodejs.dev docs", "The Odin Project Node path"] },
+  redis: {
+    hours: 15,
+    resources: ["Redis University", "redis.io documentation"],
+  },
+  terraform: {
+    hours: 30,
+    resources: ["HashiCorp Learn", "Gruntwork Terraform tutorial"],
+  },
+  "node.js": {
+    hours: 35,
+    resources: ["nodejs.dev docs", "The Odin Project Node path"],
+  },
 };
 
 const DEFAULT_SKILL_META = {
@@ -245,7 +266,12 @@ function buildLearningPath(
     const meta = SKILL_METADATA[skill.toLowerCase()] ?? DEFAULT_SKILL_META;
     const priority: LearningItem["priority"] =
       index === 0 ? "critical" : index === 1 ? "high" : index <= 3 ? "medium" : "low";
-    return { skill, estimatedHours: meta.hours, priority, resources: meta.resources };
+    return {
+      skill,
+      estimatedHours: meta.hours,
+      priority,
+      resources: meta.resources,
+    };
   });
 
   if (timeBudget !== undefined) {
@@ -594,7 +620,11 @@ export function registerCareerGrowthTools(
           text += `| # | Skill | Hours | Priority | Resources |\n`;
           text += `|---|-------|-------|----------|-----------|\n`;
           for (const [index, item] of path.entries()) {
-            text += `| ${index + 1} | ${item.skill} | ${item.estimatedHours}h | ${item.priority} | ${item.resources.join("; ")} |\n`;
+            text += `| ${
+              index + 1
+            } | ${item.skill} | ${item.estimatedHours}h | ${item.priority} | ${item.resources.join(
+              "; ",
+            )} |\n`;
           }
           return textResult(text);
         });

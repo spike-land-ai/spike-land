@@ -24,7 +24,9 @@ export function registerAnalyticsTools(server: McpServer, client: SpacetimePlatf
         return jsonResult({ recorded: true, source, eventType });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("REDUCER_FAILED", message, true);
       }
     },
@@ -59,7 +61,9 @@ export function registerAnalyticsTools(server: McpServer, client: SpacetimePlatf
         });
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
-        if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+        if (message.includes("Not connected")) {
+          return errorResult("NOT_CONNECTED", message, false);
+        }
         return errorResult("QUERY_FAILED", message, false);
       }
     },
@@ -83,7 +87,9 @@ export function registerAnalyticsTools(server: McpServer, client: SpacetimePlatf
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+      if (message.includes("Not connected")) {
+        return errorResult("NOT_CONNECTED", message, false);
+      }
       return errorResult("QUERY_FAILED", message, false);
     }
   });
@@ -105,7 +111,9 @@ export function registerAnalyticsTools(server: McpServer, client: SpacetimePlatf
       });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      if (message.includes("Not connected")) return errorResult("NOT_CONNECTED", message, false);
+      if (message.includes("Not connected")) {
+        return errorResult("NOT_CONNECTED", message, false);
+      }
       return errorResult("QUERY_FAILED", message, false);
     }
   });

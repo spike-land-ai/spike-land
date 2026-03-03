@@ -2,7 +2,10 @@
 
 ## Overview
 
-Main backend for spike.land — real-time collaboration, API services, AI integrations, and static asset hosting. Runs on Cloudflare Workers with Durable Objects and Hono framework. Published as `@spike-land-ai/spike-land-backend` (private).
+Main backend for spike.land — real-time collaboration, API services, AI
+integrations, and static asset hosting. Runs on Cloudflare Workers with Durable
+Objects and Hono framework. Published as `@spike-land-ai/spike-land-backend`
+(private).
 
 ## Commands
 
@@ -43,7 +46,9 @@ npm run lint         # ESLint
 
 **Runtime**: Cloudflare Workers + Durable Objects + R2 + Hono framework.
 
-**Dependencies**: `@spike-land-ai/esbuild-wasm-mcp`, `@spike-land-ai/shared`, `@spike-land-ai/esbuild-wasm`, `@spike-land-ai/code` (dev), AI SDKs (Anthropic, Google, Vercel AI)
+**Dependencies**: `@spike-land-ai/esbuild-wasm-mcp`, `@spike-land-ai/shared`,
+`@spike-land-ai/esbuild-wasm`, `@spike-land-ai/code` (dev), AI SDKs (Anthropic,
+Google, Vercel AI)
 
 ## Code Quality Rules
 

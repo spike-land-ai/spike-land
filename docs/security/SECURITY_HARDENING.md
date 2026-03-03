@@ -70,7 +70,8 @@ CSS injection can be exploited in several ways:
 - `expression()` in older IE browsers executes JavaScript
 - `url()` with `javascript:` protocol executes code
 - `-moz-binding` can load XBL bindings containing JavaScript
-- CSS-based data exfiltration via `background-image: url()` to attacker-controlled servers
+- CSS-based data exfiltration via `background-image: url()` to
+  attacker-controlled servers
 
 ### Implementation
 
@@ -124,5 +125,5 @@ authentication entirely when `CRON_SECRET` was not set:
 if (cronSecret && authHeader !== `Bearer ${cronSecret}`) return 401;
 ```
 
-This has been replaced across all cron routes with the new `validateCronSecret()`
-function.
+This has been replaced across all cron routes with the new
+`validateCronSecret()` function.

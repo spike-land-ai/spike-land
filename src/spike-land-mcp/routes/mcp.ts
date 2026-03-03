@@ -52,7 +52,10 @@ mcpRoute.post("/", async (c) => {
   const enabledCategories = await loadEnabledCategories(userId, c.env.KV);
 
   // Create MCP server for this user
-  const mcpServer = await createMcpServer(userId, db, { enabledCategories, kv: c.env.KV });
+  const mcpServer = await createMcpServer(userId, db, {
+    enabledCategories,
+    kv: c.env.KV,
+  });
 
   // Normalize Accept header for MCP spec compliance
   const headers = new Headers(c.req.raw.headers);

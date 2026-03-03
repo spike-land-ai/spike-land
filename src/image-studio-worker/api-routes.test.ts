@@ -5,7 +5,7 @@
  * All D1 and R2 interactions are mocked — no real Cloudflare bindings needed.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ImageStudioDeps } from "@spike-land-ai/mcp-image-studio";
 
 // ─── Shared mock factories ────────────────────────────────────────────────────
@@ -289,7 +289,10 @@ describe("createR2Storage", () => {
     const [, , opts] = mockPut.mock.calls[0] as [
       string,
       Uint8Array,
-      { httpMetadata: Record<string, string>; customMetadata: Record<string, string> },
+      {
+        httpMetadata: Record<string, string>;
+        customMetadata: Record<string, string>;
+      },
     ];
     expect(opts.httpMetadata.cacheControl).toBe("public, max-age=31536000, immutable");
     expect(opts.httpMetadata.contentType).toBe("image/jpeg");
@@ -557,7 +560,9 @@ describe("Upload flow logic", () => {
     const { createR2Storage } = await import("./deps/storage.ts");
 
     const mockPut = vi.fn().mockResolvedValue(undefined);
-    const env = { IMAGE_R2: { put: mockPut } } as unknown as import("./env.d.ts").Env;
+    const env = {
+      IMAGE_R2: { put: mockPut },
+    } as unknown as import("./env.d.ts").Env;
     const storage = createR2Storage(env, "https://studio.example.com");
 
     const fakePng = new Uint8Array(100).fill(0xff);

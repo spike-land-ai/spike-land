@@ -12,8 +12,8 @@
  *   NODE_AUTH_TOKEN — npm auth token for publishing
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { resolve, join } from "node:path";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { execSync } from "node:child_process";
 import YAML from "yaml";
 

@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { BuildOptions } from "@spike-land-ai/esbuild-wasm";
 
 import { getEsbuildWasm } from "../wasm-api.js";
-import { tryCatch, formatEsbuildError } from "../errors.js";
+import { formatEsbuildError, tryCatch } from "../errors.js";
 import { BuildOnlySchema, CommonSchema, prepareBuildOptions } from "./schemas.js";
 
 const ContextSchema = { ...BuildOnlySchema, ...CommonSchema };
@@ -37,7 +37,9 @@ export function registerContextTool(server: McpServer): void {
           warnings: rebuildResult.data.warnings,
           errors: rebuildResult.data.errors,
         };
-        if (rebuildResult.data.mangleCache) output.mangleCache = rebuildResult.data.mangleCache;
+        if (rebuildResult.data.mangleCache) {
+          output.mangleCache = rebuildResult.data.mangleCache;
+        }
 
         return {
           content: [

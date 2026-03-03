@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { useState } from "react";
 import { Download, History, Link, Unlink } from "lucide-react";
-import { Button, Input, Select, Badge, ImagePicker } from "@/components/ui";
+import { Badge, Button, ImagePicker, Input, Select } from "@/components/ui";
 import { callTool, parseToolResult } from "@/api/client";
 import { EXPORT_FORMATS } from "@/constants/enums";
 
@@ -129,7 +129,10 @@ export function ShareExport() {
               label="Format"
               value={exportFormat}
               onChange={(e) => setExportFormat(e.target.value)}
-              options={EXPORT_FORMATS.map((f) => ({ value: f, label: f.toUpperCase() }))}
+              options={EXPORT_FORMATS.map((f) => ({
+                value: f,
+                label: f.toUpperCase(),
+              }))}
             />
             <Input
               label="Quality (1-100)"

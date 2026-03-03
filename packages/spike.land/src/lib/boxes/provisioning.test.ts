@@ -182,7 +182,11 @@ describe("triggerBoxProvisioning", () => {
       const box = makeBox({ tier: { name: "starter" } });
       mockPrisma.box.findUnique.mockResolvedValue(box);
 
-      const mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200, statusText: "OK" });
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+      });
       vi.stubGlobal("fetch", mockFetch);
 
       await triggerBoxProvisioning("box-1");
@@ -211,7 +215,11 @@ describe("triggerBoxProvisioning", () => {
       const box = makeBox();
       mockPrisma.box.findUnique.mockResolvedValue(box);
 
-      const mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200, statusText: "OK" });
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+      });
       vi.stubGlobal("fetch", mockFetch);
 
       await triggerBoxProvisioning("box-1");
@@ -226,7 +234,11 @@ describe("triggerBoxProvisioning", () => {
       const box = makeBox();
       mockPrisma.box.findUnique.mockResolvedValue(box);
 
-      const mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200, statusText: "OK" });
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+      });
       vi.stubGlobal("fetch", mockFetch);
 
       await triggerBoxProvisioning("box-1");
@@ -244,7 +256,11 @@ describe("triggerBoxProvisioning", () => {
       const box = makeBox();
       mockPrisma.box.findUnique.mockResolvedValue(box);
 
-      const mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200, statusText: "OK" });
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+      });
       vi.stubGlobal("fetch", mockFetch);
 
       await triggerBoxProvisioning("box-1");
@@ -301,7 +317,11 @@ describe("triggerBoxProvisioning", () => {
       const box = makeBox();
       mockPrisma.box.findUnique.mockResolvedValue(box);
 
-      const mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200, statusText: "OK" });
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+      });
       vi.stubGlobal("fetch", mockFetch);
 
       await triggerBoxProvisioning("box-1");
@@ -320,7 +340,12 @@ describe("triggerBoxProvisioning", () => {
         const box = makeBox({
           user: {
             workspaceMembers: [
-              { workspace: makeWorkspace({ id: "ws-personal", isPersonal: true }) },
+              {
+                workspace: makeWorkspace({
+                  id: "ws-personal",
+                  isPersonal: true,
+                }),
+              },
             ],
           },
         });
@@ -356,7 +381,11 @@ describe("triggerBoxProvisioning", () => {
       it("uses the first workspace member when no personal workspace exists", async () => {
         const box = makeBox({
           user: {
-            workspaceMembers: [{ workspace: makeWorkspace({ id: "ws-team", isPersonal: false }) }],
+            workspaceMembers: [
+              {
+                workspace: makeWorkspace({ id: "ws-team", isPersonal: false }),
+              },
+            ],
           },
         });
         const workflow = makeWorkflow({ workspaceId: "ws-team" });
@@ -367,7 +396,9 @@ describe("triggerBoxProvisioning", () => {
         await triggerBoxProvisioning("box-1");
 
         expect(mockPrisma.workflow.findFirst).toHaveBeenCalledWith(
-          expect.objectContaining({ where: expect.objectContaining({ workspaceId: "ws-team" }) }),
+          expect.objectContaining({
+            where: expect.objectContaining({ workspaceId: "ws-team" }),
+          }),
         );
         expect(mockTriggerWorkflowManually).toHaveBeenCalledOnce();
       });
@@ -417,7 +448,11 @@ describe("triggerBoxProvisioning", () => {
       it("calls failBox with 'No provisioning mechanism' message", async () => {
         const box = makeBox({
           user: {
-            workspaceMembers: [{ workspace: makeWorkspace({ id: "ws-1", isPersonal: true }) }],
+            workspaceMembers: [
+              {
+                workspace: makeWorkspace({ id: "ws-1", isPersonal: true }),
+              },
+            ],
           },
         });
         mockPrisma.box.findUnique.mockResolvedValue(box);

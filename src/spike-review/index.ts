@@ -80,7 +80,12 @@ export function createServer(githubToken: string): McpServer {
       const { owner, repo, prNumber } = params;
       const details = await github.getPRDetails(owner, repo, prNumber);
       return {
-        content: [{ type: "text" as const, text: JSON.stringify(details, null, 2) }],
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(details, null, 2),
+          },
+        ],
       };
     },
   );
@@ -94,7 +99,12 @@ export function createServer(githubToken: string): McpServer {
       const { owner, repo, prNumber } = params;
       const files = await github.getPRFiles(owner, repo, prNumber);
       return {
-        content: [{ type: "text" as const, text: JSON.stringify(files, null, 2) }],
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(files, null, 2),
+          },
+        ],
       };
     },
   );
@@ -152,7 +162,12 @@ export function createServer(githubToken: string): McpServer {
         side as DiffSide | undefined,
       );
       return {
-        content: [{ type: "text" as const, text: JSON.stringify(validation, null, 2) }],
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(validation, null, 2),
+          },
+        ],
       };
     },
   );

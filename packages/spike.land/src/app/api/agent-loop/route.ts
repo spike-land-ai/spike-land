@@ -75,7 +75,12 @@ export async function POST(request: NextRequest) {
   }
 
   if (question.length > 4000) {
-    return NextResponse.json({ error: "Question too long (max 4000 characters)" }, { status: 400 });
+    return NextResponse.json(
+      {
+        error: "Question too long (max 4000 characters)",
+      },
+      { status: 400 },
+    );
   }
 
   // Get or create the user's ServerManager (pooled)

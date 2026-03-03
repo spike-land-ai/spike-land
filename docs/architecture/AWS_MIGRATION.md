@@ -45,8 +45,8 @@ legacy
 All three services are containerized with production-ready multi-stage
 Dockerfiles:
 
-| Image                 | Dockerfile                                                                    | Base    | Port |
-| --------------------- | ----------------------------------------------------------------------------- | ------- | ---- |
+| Image                 | Dockerfile                                                                           | Base    | Port |
+| --------------------- | ------------------------------------------------------------------------------------ | ------- | ---- |
 | `spike-land-nextjs`   | [Dockerfile](file:///Users/z/Developer/spike-land-ai/spike.land/Dockerfile)          | Node 24 | 3000 |
 | `spike-land-workerd`  | [Dockerfile](file:///Users/z/Developer/spike-land-ai/spike.land/workers/Dockerfile)  | Node 22 | 8080 |
 | `spike-land-hono-api` | [Dockerfile](file:///Users/z/Developer/spike-land-ai/spike.land/hono-api/Dockerfile) | Node 24 | 3000 |
@@ -98,8 +98,8 @@ infra/terraform/
 
 ### 3. GitHub Actions CI/CD Pipelines
 
-| Workflow                                                                                                 | Trigger                     | Function                                                                                           |
-| -------------------------------------------------------------------------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------- |
+| Workflow                                                                                                        | Trigger                     | Function                                                                                           |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------- |
 | [deploy.yml](file:///Users/z/Developer/spike-land-ai/spike.land/.github/workflows/deploy.yml)                   | push main / PR / manual     | **Main deploy**: build → ECS deploy → smoke tests (staging for PRs, production+secondary for main) |
 | [deploy-aws.yml](file:///Users/z/Developer/spike-land-ai/spike.land/.github/workflows/deploy-aws.yml)           | push main (workers/src)     | Earlier version of multi-region ECS deploy                                                         |
 | [deploy-hono-api.yml](file:///Users/z/Developer/spike-land-ai/spike.land/.github/workflows/deploy-hono-api.yml) | push main (hono-api)        | Hono MCP API: test → build → staging → production                                                  |
@@ -183,15 +183,15 @@ browser instances). This runs alongside the ECS Fargate deployment.
 - **EC2 Provisioner** (`src/lib/boxes/ec2-provisioner.ts`): Manages the full
   lifecycle of EC2 instances per box, including creation, Cloudflare Tunnel
   setup, and polling for instance readiness
-- **User Data Template** (`src/lib/boxes/user-data-template.ts`): Generates
-  EC2 user data scripts for instance bootstrap
+- **User Data Template** (`src/lib/boxes/user-data-template.ts`): Generates EC2
+  user data scripts for instance bootstrap
 - **VNC Sessions** (`src/app/api/boxes/[id]/vnc-session/route.ts`): Issues
   short-lived JWTs (5-minute expiry) for VNC access via HTTPS tunnels
-- **Sync Cron** (`src/app/api/cron/sync-box-status/route.ts`): Periodic cron
-  job that synchronizes Box records with actual EC2 instance state. Protected
-  by `validateCronSecret()` (timing-safe comparison)
-- **Box Actions** (`src/app/api/boxes/[id]/action/route.ts`): REST endpoint
-  for box lifecycle actions (start, stop, terminate)
+- **Sync Cron** (`src/app/api/cron/sync-box-status/route.ts`): Periodic cron job
+  that synchronizes Box records with actual EC2 instance state. Protected by
+  `validateCronSecret()` (timing-safe comparison)
+- **Box Actions** (`src/app/api/boxes/[id]/action/route.ts`): REST endpoint for
+  box lifecycle actions (start, stop, terminate)
 
 **AWS Requirements**:
 

@@ -248,7 +248,9 @@ export function AuthDialog({ open, onOpenChange, callbackUrl }: AuthDialogProps)
           const pollData = (await pollRes.json()) as QrPollResponse;
           if (pollData.status === "APPROVED") {
             if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-            if (expiryIntervalRef.current) clearInterval(expiryIntervalRef.current);
+            if (expiryIntervalRef.current) {
+              clearInterval(expiryIntervalRef.current);
+            }
             setQrStatus("authenticated");
 
             const authResult = await signIn("qr-auth", {
@@ -282,7 +284,9 @@ export function AuthDialog({ open, onOpenChange, callbackUrl }: AuthDialogProps)
           if (prev <= 1) {
             setQrStatus("expired");
             if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
-            if (expiryIntervalRef.current) clearInterval(expiryIntervalRef.current);
+            if (expiryIntervalRef.current) {
+              clearInterval(expiryIntervalRef.current);
+            }
             return 0;
           }
           return prev - 1;

@@ -7,7 +7,7 @@
  */
 
 import { z } from "zod";
-import { eq, desc, and, or, like } from "drizzle-orm";
+import { and, desc, eq, like, or } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import type { DrizzleDB } from "../db/index";
 import { registeredTools, users } from "../db/schema";

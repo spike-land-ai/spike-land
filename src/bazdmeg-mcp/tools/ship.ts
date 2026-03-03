@@ -6,11 +6,11 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
+import { createZodTool, textResult } from "@spike-land-ai/mcp-server-base";
 import { AutoShipSchema } from "../types.js";
 import { getWorkspace } from "../workspace-state.js";
-import { getBuiltinRules, runGates, getChangedFiles, countChanges } from "../gates/engine.js";
-import { runCommand, hasScript } from "../shell.js";
+import { countChanges, getBuiltinRules, getChangedFiles, runGates } from "../gates/engine.js";
+import { hasScript, runCommand } from "../shell.js";
 
 interface StepResult {
   step: string;
@@ -92,13 +92,23 @@ export function registerShipTools(server: McpServer): void {
         const durationMs = Date.now() - start;
 
         if (result.ok) {
-          steps.push({ step: stepName, status: "pass", durationMs, detail: "OK" });
+          steps.push({
+            step: stepName,
+            status: "pass",
+            durationMs,
+            detail: "OK",
+          });
           return true;
         }
 
         const output = (result.stderr || result.stdout).trim();
         const truncated = output.length > 200 ? output.slice(0, 200) + "…" : output;
-        steps.push({ step: stepName, status: "fail", durationMs, detail: truncated });
+        steps.push({
+          step: stepName,
+          status: "fail",
+          durationMs,
+          detail: truncated,
+        });
         return false;
       }
 
@@ -177,8 +187,18 @@ export function registerShipTools(server: McpServer): void {
 
       // 5. commit
       if (dryRun) {
-        steps.push({ step: "commit", status: "skip", durationMs: 0, detail: "Dry run" });
-        steps.push({ step: "push", status: "skip", durationMs: 0, detail: "Dry run" });
+        steps.push({
+          step: "commit",
+          status: "skip",
+          durationMs: 0,
+          detail: "Dry run",
+        });
+        steps.push({
+          step: "push",
+          status: "skip",
+          durationMs: 0,
+          detail: "Dry run",
+        });
         return textResult(formatReport(steps, pkgName));
       }
 
@@ -209,11 +229,21 @@ export function registerShipTools(server: McpServer): void {
         return textResult(formatReport(steps, pkgName));
       }
 
-      steps.push({ step: "commit", status: "pass", durationMs: commitDuration, detail: commitMsg });
+      steps.push({
+        step: "commit",
+        status: "pass",
+        durationMs: commitDuration,
+        detail: commitMsg,
+      });
 
       // 6. push
       if (!push) {
-        steps.push({ step: "push", status: "skip", durationMs: 0, detail: "Push disabled" });
+        steps.push({
+          step: "push",
+          status: "skip",
+          durationMs: 0,
+          detail: "Push disabled",
+        });
         return textResult(formatReport(steps, pkgName));
       }
 
@@ -231,7 +261,12 @@ export function registerShipTools(server: McpServer): void {
         return textResult(formatReport(steps, pkgName));
       }
 
-      steps.push({ step: "push", status: "pass", durationMs: pushDuration, detail: "OK" });
+      steps.push({
+        step: "push",
+        status: "pass",
+        durationMs: pushDuration,
+        detail: "OK",
+      });
       return textResult(formatReport(steps, pkgName));
     },
   });

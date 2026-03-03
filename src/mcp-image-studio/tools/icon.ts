@@ -2,18 +2,18 @@ import { z } from "zod";
 import type { EnhancementTier } from "../types.js";
 import {
   errorResult,
+  ICON_STYLE_VALUES,
+  ICON_TARGET_VALUES,
   IMG_DEFAULTS,
   jsonResult,
   toolEvent,
-  ICON_TARGET_VALUES,
-  ICON_STYLE_VALUES,
 } from "../types.js";
 import { tryCatch } from "./try-catch.js";
 import {
   imageProcedure,
-  withResolves,
-  withOwnership,
   withCredits,
+  withOwnership,
+  withResolves,
 } from "../tool-builder/image-middleware.js";
 
 const PLATFORM_SIZES = {
@@ -74,7 +74,12 @@ export const iconTool = imageProcedure
           userId,
           prompt: fullPrompt,
           tier,
-          referenceImages: [{ imageId: input.source_image_id, role: "subject" }],
+          referenceImages: [
+            {
+              imageId: input.source_image_id,
+              role: "subject",
+            },
+          ],
         }),
       );
 
@@ -91,7 +96,11 @@ export const iconTool = imageProcedure
       }
 
       ctx.notify?.(
-        toolEvent("job:created", jobRes.data.jobId!, { tier, target, status: "PENDING" }),
+        toolEvent("job:created", jobRes.data.jobId!, {
+          tier,
+          target,
+          status: "PENDING",
+        }),
       );
       return jsonResult({
         jobId: jobRes.data.jobId,
@@ -123,7 +132,13 @@ export const iconTool = imageProcedure
       );
     }
 
-    ctx.notify?.(toolEvent("job:created", jobRes.data.jobId!, { tier, target, status: "PENDING" }));
+    ctx.notify?.(
+      toolEvent("job:created", jobRes.data.jobId!, {
+        tier,
+        target,
+        status: "PENDING",
+      }),
+    );
     return jsonResult({
       jobId: jobRes.data.jobId,
       creditsCost: jobRes.data.creditsCost ?? ctx.billing.creditsCost,

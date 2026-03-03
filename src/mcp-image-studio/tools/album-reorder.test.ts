@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createMockImageStudioDeps, mockAlbumRow } from "../__test-utils__/index.js";
 import { albumReorderTool } from "./album-reorder.js";
 import type { CallToolResult, ToolContext } from "../types.js";
-import { asImageId, asAlbumHandle } from "../types.js";
+import { asAlbumHandle, asImageId } from "../types.js";
 import { standardScenarios } from "../__test-utils__/standard-scenarios.js";
 
 describe("albumReorder", () => {
@@ -38,7 +38,10 @@ describe("albumReorder", () => {
   it("should reorder images in an album", async () => {
     const notify = vi.fn();
     const ctx: ToolContext = { userId, deps, notify };
-    const albumRow = mockAlbumRow({ userId, handle: asAlbumHandle("vacation") });
+    const albumRow = mockAlbumRow({
+      userId,
+      handle: asAlbumHandle("vacation"),
+    });
     mocks.resolverMocks.resolveAlbum.mockResolvedValue(albumRow);
     mocks.db.albumImageReorder.mockResolvedValue(undefined);
 

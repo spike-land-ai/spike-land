@@ -188,7 +188,10 @@ describe("auto-tag tool", () => {
 
   it("handles image with null tags when merging (uses empty array fallback)", async () => {
     mocks.resolverMocks.resolveImage.mockResolvedValue(
-      mockImageRow({ userId: "test-user-123", tags: null as unknown as string[] }),
+      mockImageRow({
+        userId: "test-user-123",
+        tags: null as unknown as string[],
+      }),
     );
 
     const res = await autoTag({ image_id: "img-1" }, ctx);

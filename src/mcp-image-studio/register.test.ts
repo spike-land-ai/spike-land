@@ -217,7 +217,9 @@ describe("createToolFromFunction error handling within registerImageStudioTools"
     expect(result).toMatchObject({
       isError: true,
       content: expect.arrayContaining([
-        expect.objectContaining({ text: expect.stringContaining("Validation Error") }),
+        expect.objectContaining({
+          text: expect.stringContaining("Validation Error"),
+        }),
       ]),
     });
   });
@@ -228,7 +230,10 @@ describe("createToolFromFunction error handling within registerImageStudioTools"
     const onNotify = vi.fn();
     const onProgress = vi.fn();
 
-    registerImageStudioTools(registry, "test-user", deps, { onNotify, onProgress });
+    registerImageStudioTools(registry, "test-user", deps, {
+      onNotify,
+      onProgress,
+    });
 
     // Verify tools were registered (the callbacks don't error)
     expect((registry.register as Mock).mock.calls.length).toBeGreaterThan(0);

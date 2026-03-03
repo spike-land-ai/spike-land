@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 
 export function LoginButton() {

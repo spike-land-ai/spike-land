@@ -328,14 +328,18 @@ describe("classifyError", () => {
     });
 
     it("should handle error with statusCode property", () => {
-      const error = new Error("StatusCode only") as Error & { statusCode: number };
+      const error = new Error("StatusCode only") as Error & {
+        statusCode: number;
+      };
       error.statusCode = 401;
       const result = classifyError(error);
       expect(result.code).toBe(McpErrorCode.AUTH_ERROR);
     });
 
     it("should handle error with response object status", () => {
-      const error = new Error("Response status") as Error & { response: { status: number } };
+      const error = new Error("Response status") as Error & {
+        response: { status: number };
+      };
       error.response = { status: 503 };
       const result = classifyError(error);
       expect(result.code).toBe(McpErrorCode.RATE_LIMITED);

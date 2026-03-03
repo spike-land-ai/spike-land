@@ -79,10 +79,10 @@ export function asPercentage(n: number): Percentage {
 // ─── Enums (mirror Prisma enums without importing Prisma) ───
 
 import {
-  textResult,
-  jsonResult,
-  errorResult as baseErrorResult,
   type CallToolResult,
+  errorResult as baseErrorResult,
+  jsonResult,
+  textResult,
 } from "@spike-land-ai/mcp-server-base";
 
 export const ENHANCEMENT_TIER_VALUES = [
@@ -480,7 +480,9 @@ export async function resolve<T>(
   try {
     return { ok: true, value: await fn() };
   } catch (e) {
-    if (e instanceof ImageStudioResolverError) return { ok: false, result: e.result };
+    if (e instanceof ImageStudioResolverError) {
+      return { ok: false, result: e.result };
+    }
     throw e;
   }
 }
@@ -806,7 +808,7 @@ export interface ImageStudioToolRegistry {
 
 // ─── Helper Functions ───
 
-export { textResult, jsonResult };
+export { jsonResult, textResult };
 
 export function batchResult<T extends Record<string, unknown>>(data: T): CallToolResult {
   return {

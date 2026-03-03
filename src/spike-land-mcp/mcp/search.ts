@@ -9,7 +9,7 @@
 
 import type { RegisteredTool } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { suggestParameters, ToolEmbeddingIndex } from "./embeddings";
-import type { ToolComplexity, ToolDefinition, SearchResult } from "./registry";
+import type { SearchResult, ToolComplexity, ToolDefinition } from "./registry";
 
 interface TrackedToolRef {
   definition: ToolDefinition;

@@ -4,8 +4,8 @@
  * Covers: createDeviceCode, approveDeviceCode, exchangeDeviceCode.
  */
 
-import { describe, it, expect } from "vitest";
-import { createDeviceCode, approveDeviceCode, exchangeDeviceCode } from "./oauth-device";
+import { describe, expect, it } from "vitest";
+import { approveDeviceCode, createDeviceCode, exchangeDeviceCode } from "./oauth-device";
 import { createMockD1 } from "../__test-utils__/mock-env";
 import { createDb } from "../db/index";
 
@@ -26,7 +26,10 @@ describe("createDeviceCode", () => {
       }),
     );
 
-    const result = await createDeviceCode(db, { clientId: "client-1", scope: "mcp" });
+    const result = await createDeviceCode(db, {
+      clientId: "client-1",
+      scope: "mcp",
+    });
 
     expect(result.deviceCode).toMatch(/^dc_[a-f0-9]+$/);
     expect(result.userCode).toMatch(/^[A-Z2-9]{4}-[A-Z2-9]{4}$/);

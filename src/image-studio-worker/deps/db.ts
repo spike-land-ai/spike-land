@@ -6,10 +6,10 @@ import type {
   GenerationJobRow,
   ImageId,
   ImageRow,
+  ImageStudioDeps,
   JobId,
   PipelineId,
   PipelineRow,
-  ImageStudioDeps,
   SubjectRow,
 } from "@spike-land-ai/mcp-image-studio";
 import type { Env } from "../env.d.ts";
@@ -427,7 +427,11 @@ export function createD1Db(env: Env): ImageStudioDeps["db"] {
       return {
         ...job,
         image: img
-          ? { id: img.id as ImageId, name: img.name, originalUrl: img.originalUrl }
+          ? {
+              id: img.id as ImageId,
+              name: img.name,
+              originalUrl: img.originalUrl,
+            }
           : undefined,
       };
     },

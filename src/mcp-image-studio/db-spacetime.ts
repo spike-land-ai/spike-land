@@ -1,37 +1,37 @@
 import {
-  typedTables as tables,
   typedReducers as reducers,
+  typedTables as tables,
 } from "@spike-land-ai/spacetimedb-platform";
 import type {
-  Image as SpacetimeImage,
-  EnhancementJob as SpacetimeEnhancementJob,
   Album as SpacetimeAlbum,
   AlbumImage as SpacetimeAlbumImage,
-  Pipeline as SpacetimePipeline,
+  EnhancementJob as SpacetimeEnhancementJob,
   GenerationJob as SpacetimeGenerationJob,
+  Image as SpacetimeImage,
+  Pipeline as SpacetimePipeline,
   Subject as SpacetimeSubject,
 } from "@spike-land-ai/spacetimedb-platform";
 import {
-  type ImageStudioDeps,
-  type ImageRow,
-  type EnhancementJobRow,
-  type AlbumRow,
-  type AlbumImageRow,
-  type PipelineRow,
-  type GenerationJobRow,
-  type SubjectRow,
-  type ImageId,
-  type JobId,
-  type PipelineId,
   type AlbumHandle,
-  type EnhancementTier,
-  type JobStatus,
+  type AlbumImageRow,
   type AlbumPrivacy,
-  type PipelineVisibility,
-  type SubjectType,
-  ImageStudioResolverError,
+  type AlbumRow,
+  type EnhancementJobRow,
+  type EnhancementTier,
   errorResult,
+  type GenerationJobRow,
+  type ImageId,
+  type ImageRow,
+  type ImageStudioDeps,
+  ImageStudioResolverError,
   type ImageStudioResolvers,
+  type JobId,
+  type JobStatus,
+  type PipelineId,
+  type PipelineRow,
+  type PipelineVisibility,
+  type SubjectRow,
+  type SubjectType,
 } from "./types.js";
 
 function fromMicros(micros: bigint): Date {
@@ -276,7 +276,11 @@ export function createSpacetimeDb(_conn: unknown): ImageStudioDeps["db"] {
       return {
         ...row,
         image: img
-          ? { id: img.id as ImageId, name: img.name, originalUrl: img.originalUrl }
+          ? {
+              id: img.id as ImageId,
+              name: img.name,
+              originalUrl: img.originalUrl,
+            }
           : undefined,
       };
     },
@@ -285,8 +289,12 @@ export function createSpacetimeDb(_conn: unknown): ImageStudioDeps["db"] {
       let results = Array.from(tables.enhancement_job.iter()).filter(
         (j) => j.userIdentity === opts.userId,
       );
-      if (opts.imageId) results = results.filter((j) => j.imageId === opts.imageId);
-      if (opts.status) results = results.filter((j) => j.status === opts.status);
+      if (opts.imageId) {
+        results = results.filter((j) => j.imageId === opts.imageId);
+      }
+      if (opts.status) {
+        results = results.filter((j) => j.status === opts.status);
+      }
 
       let rows = results.map((j) => toJobRow(j));
       rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());

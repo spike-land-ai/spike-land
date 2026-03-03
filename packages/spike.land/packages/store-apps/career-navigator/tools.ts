@@ -149,7 +149,11 @@ const careerAssessSkills: StandaloneToolDefinition = {
           return textResult("No matching occupations found. Try different skill terms.");
         }
 
-        const typedSkills = skills.map((s) => ({ ...s, uri: "", proficiency: s.proficiency ?? 3 }));
+        const typedSkills = skills.map((s) => ({
+          ...s,
+          uri: "",
+          proficiency: s.proficiency ?? 3,
+        }));
         const results = assessSkills(typedSkills, occupations).slice(0, limit);
 
         let text = `**Skills Assessment Results (${results.length} matches):**\n\n`;
@@ -295,7 +299,11 @@ const careerCompareSkills: StandaloneToolDefinition = {
           return textResult("**Error: NOT_FOUND**\nOccupation not found.\n**Retryable:** false");
         }
 
-        const typedSkills = skills.map((s) => ({ ...s, uri: "", proficiency: s.proficiency ?? 3 }));
+        const typedSkills = skills.map((s) => ({
+          ...s,
+          uri: "",
+          proficiency: s.proficiency ?? 3,
+        }));
         const result = compareSkills(typedSkills, occupation);
 
         let text = `**Skill Comparison: ${occupation.title}**\n`;
@@ -541,15 +549,36 @@ const SKILL_METADATA: Record<string, { hours: number; resources: string[] }> = {
     hours: 40,
     resources: ["TypeScript Handbook (typescriptlang.org)", "Execute Program — TypeScript"],
   },
-  react: { hours: 60, resources: ["react.dev official docs", "Scrimba React course"] },
+  react: {
+    hours: 60,
+    resources: ["react.dev official docs", "Scrimba React course"],
+  },
   python: { hours: 50, resources: ["Python.org tutorial", "Real Python"] },
-  docker: { hours: 20, resources: ["Docker Getting Started guide", "KodeKloud Docker course"] },
-  kubernetes: { hours: 35, resources: ["Kubernetes.io tutorials", "KodeKloud CKA prep"] },
-  postgresql: { hours: 25, resources: ["PostgreSQL official tutorial", "pgexercises.com"] },
+  docker: {
+    hours: 20,
+    resources: ["Docker Getting Started guide", "KodeKloud Docker course"],
+  },
+  kubernetes: {
+    hours: 35,
+    resources: ["Kubernetes.io tutorials", "KodeKloud CKA prep"],
+  },
+  postgresql: {
+    hours: 25,
+    resources: ["PostgreSQL official tutorial", "pgexercises.com"],
+  },
   aws: { hours: 60, resources: ["AWS Skill Builder", "A Cloud Guru"] },
-  redis: { hours: 15, resources: ["Redis University", "redis.io documentation"] },
-  terraform: { hours: 30, resources: ["HashiCorp Learn", "Gruntwork Terraform tutorial"] },
-  "node.js": { hours: 35, resources: ["nodejs.dev docs", "The Odin Project Node path"] },
+  redis: {
+    hours: 15,
+    resources: ["Redis University", "redis.io documentation"],
+  },
+  terraform: {
+    hours: 30,
+    resources: ["HashiCorp Learn", "Gruntwork Terraform tutorial"],
+  },
+  "node.js": {
+    hours: 35,
+    resources: ["nodejs.dev docs", "The Odin Project Node path"],
+  },
 };
 
 const DEFAULT_SKILL_META = {
@@ -591,7 +620,12 @@ function buildLearningPath(
     const meta = SKILL_METADATA[skill.toLowerCase()] ?? DEFAULT_SKILL_META;
     const priority: LearningItem["priority"] =
       index === 0 ? "critical" : index === 1 ? "high" : index <= 3 ? "medium" : "low";
-    return { skill, estimatedHours: meta.hours, priority, resources: meta.resources };
+    return {
+      skill,
+      estimatedHours: meta.hours,
+      priority,
+      resources: meta.resources,
+    };
   });
 
   if (timeBudget !== undefined) {
@@ -832,7 +866,12 @@ const careerCreateResume: StandaloneToolDefinition = {
       email: string;
       summary: string;
       skills: string[];
-      experience: Array<{ title: string; company: string; duration: string; highlights: string[] }>;
+      experience: Array<{
+        title: string;
+        company: string;
+        duration: string;
+        highlights: string[];
+      }>;
     };
     return safeToolCall("career_create_resume", async () => {
       const id = generateResumeId();
@@ -961,7 +1000,9 @@ const careerGetLearningPath: StandaloneToolDefinition = {
       text += `| # | Skill | Hours | Priority | Resources |\n`;
       text += `|---|-------|-------|----------|-----------|\n`;
       for (const [index, item] of path.entries()) {
-        text += `| ${index + 1} | ${item.skill} | ${item.estimatedHours}h | ${item.priority} | ${item.resources.join(
+        text += `| ${
+          index + 1
+        } | ${item.skill} | ${item.estimatedHours}h | ${item.priority} | ${item.resources.join(
           "; ",
         )} |\n`;
       }

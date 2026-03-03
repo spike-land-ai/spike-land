@@ -2,7 +2,7 @@
  * Tests for manifest tools (bazdmeg_manifest_query, bazdmeg_manifest_validate)
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 

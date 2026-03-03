@@ -159,7 +159,14 @@ function LayerRow({ layer, index, isVisible, layerProgress }: LayerRowProps) {
 
       {/* Text content */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            gap: 8,
+            flexWrap: "wrap",
+          }}
+        >
           <span
             style={{
               color: layer.color,

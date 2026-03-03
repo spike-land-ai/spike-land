@@ -1,9 +1,9 @@
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
-import { Zap, TrendingUp, Image } from "lucide-react";
+import { Image, TrendingUp, Zap } from "lucide-react";
 import { CreditBadge } from "@/components/ui";
 import { callTool, parseToolResult } from "@/api/client";
-import { ENHANCEMENT_COSTS, ENHANCEMENT_TIERS, ADVANCED_FEATURE_COSTS } from "@/constants/enums";
+import { ADVANCED_FEATURE_COSTS, ENHANCEMENT_COSTS, ENHANCEMENT_TIERS } from "@/constants/enums";
 
 interface Stats {
   imageCount: number;

@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import {
-  createMachine,
   addState,
   addTransition,
-  sendEvent,
+  clearMachines,
+  createMachine,
   getState,
   resetMachine,
-  clearMachines,
+  sendEvent,
 } from "./engine.js";
 
 describe("Advanced Traffic Light machine", () => {
@@ -41,7 +41,12 @@ describe("Advanced Traffic Light machine", () => {
       parent: "system",
     });
 
-    addState(mId, { id: "diagnostics", type: "compound", parent: "maintenance", initial: "idle" });
+    addState(mId, {
+      id: "diagnostics",
+      type: "compound",
+      parent: "maintenance",
+      initial: "idle",
+    });
     addState(mId, { id: "idle", type: "atomic", parent: "diagnostics" });
     addState(mId, { id: "running", type: "atomic", parent: "diagnostics" });
 

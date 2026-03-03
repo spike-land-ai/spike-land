@@ -20,9 +20,9 @@ export function parseGithubUrl(url: string, defaultRef = "main") {
     repo,
     ref: ref || defaultRef,
     basePath: path || "",
-    rawBaseUrl: `https://raw.githubusercontent.com/${owner}/${repo}/${ref || defaultRef}/${
-      path ? path + "/" : ""
-    }`,
+    rawBaseUrl: `https://raw.githubusercontent.com/${owner}/${repo}/${
+      ref || defaultRef
+    }/${path ? path + "/" : ""}`,
   };
 }
 
@@ -106,7 +106,10 @@ export function githubResolverPlugin(options: GithubResolverOptions): Plugin {
         for (const ext of extensions) {
           const tryUrl = fetchPath + ext;
           if (cache.has(tryUrl)) {
-            return { contents: cache.get(tryUrl)!, loader: guessLoader(tryUrl) };
+            return {
+              contents: cache.get(tryUrl)!,
+              loader: guessLoader(tryUrl),
+            };
           }
           const { data, error } = await tryCatch(fetch(tryUrl));
           if (!error && data && data.ok) {

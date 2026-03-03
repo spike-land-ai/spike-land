@@ -14,8 +14,8 @@
  *   GITHUB_TOKEN — GitHub token with repo write access to mirror repos
  */
 
-import { readFileSync, readdirSync, statSync } from "node:fs";
-import { resolve, join, relative } from "node:path";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
 import YAML from "yaml";
 
 const ROOT = resolve(import.meta.dirname, "..");

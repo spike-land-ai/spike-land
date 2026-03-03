@@ -5,7 +5,7 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
+import { createZodTool, textResult } from "@spike-land-ai/mcp-server-base";
 import { SyncMirrorSchema } from "../types.js";
 import { getManifestPackage } from "../manifest.js";
 import { runCommand } from "../shell.js";
@@ -86,7 +86,9 @@ export function registerMirrorTools(server: McpServer): void {
         }
       } else {
         report += `**FAILED** (${pushDur}s)\n`;
-        report += `\`\`\`\n${(pushResult.stderr || pushResult.stdout).trim().slice(0, 1000)}\n\`\`\``;
+        report += `\`\`\`\n${(pushResult.stderr || pushResult.stdout)
+          .trim()
+          .slice(0, 1000)}\n\`\`\``;
       }
 
       return textResult(report);

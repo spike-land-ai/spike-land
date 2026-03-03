@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import type { StudioAsset } from "../services/studio-engine";
 
 export function useCanvas() {
@@ -9,7 +9,14 @@ export function useCanvas() {
 
   const addAsset = useCallback(
     (asset: Omit<StudioAsset, "x" | "y">) => {
-      setAssets((prev) => [...prev, { ...asset, x: -pan.x / zoom + 100, y: -pan.y / zoom + 100 }]);
+      setAssets((prev) => [
+        ...prev,
+        {
+          ...asset,
+          x: -pan.x / zoom + 100,
+          y: -pan.y / zoom + 100,
+        },
+      ]);
     },
     [pan, zoom],
   );

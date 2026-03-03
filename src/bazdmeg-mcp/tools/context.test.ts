@@ -2,11 +2,11 @@
  * Tests for context tools
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 import { registerContextTools } from "./context.js";
-import { resetWorkspaceState, enterWorkspace } from "../workspace-state.js";
+import { enterWorkspace, resetWorkspaceState } from "../workspace-state.js";
 import { createFakeMonorepo } from "../__test-utils__/fixtures.js";
 import { unlink } from "node:fs/promises";
 import * as bundleModule from "../context-bundle.js";

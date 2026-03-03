@@ -23,8 +23,18 @@ vi.mock("@/lib/qa-studio/browser-session", () => ({
     index: 0,
     entry: {
       consoleMessages: [
-        { type: "error", text: "test error", url: "https://example.com", line: 1 },
-        { type: "info", text: "test info", url: "https://example.com", line: 2 },
+        {
+          type: "error",
+          text: "test error",
+          url: "https://example.com",
+          line: 1,
+        },
+        {
+          type: "info",
+          text: "test info",
+          url: "https://example.com",
+          line: 2,
+        },
       ],
       networkRequests: [
         {
@@ -57,8 +67,18 @@ vi.mock("@/lib/qa-studio/browser-session", () => ({
     index: 0,
     entry: {
       consoleMessages: [
-        { type: "error", text: "test error", url: "https://example.com", line: 1 },
-        { type: "info", text: "test info", url: "https://example.com", line: 2 },
+        {
+          type: "error",
+          text: "test error",
+          url: "https://example.com",
+          line: 1,
+        },
+        {
+          type: "info",
+          text: "test info",
+          url: "https://example.com",
+          line: 2,
+        },
       ],
       networkRequests: [
         {
@@ -78,7 +98,13 @@ vi.mock("@/lib/qa-studio/browser-session", () => ({
       ],
     },
   }),
-  listTabs: vi.fn().mockResolvedValue([{ index: 0, title: "Tab 1", url: "https://example.com" }]),
+  listTabs: vi.fn().mockResolvedValue([
+    {
+      index: 0,
+      title: "Tab 1",
+      url: "https://example.com",
+    },
+  ]),
   closeTab: vi.fn().mockResolvedValue(true),
 }));
 
@@ -103,7 +129,13 @@ describe("qa-studio standalone tools", () => {
 
   describe("qa_navigate", () => {
     it("navigates to a URL", async () => {
-      const result = await registry.call("qa_navigate", { url: "https://example.com" }, ctx);
+      const result = await registry.call(
+        "qa_navigate",
+        {
+          url: "https://example.com",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("Navigation Complete");
@@ -121,7 +153,13 @@ describe("qa-studio standalone tools", () => {
 
   describe("qa_accessibility", () => {
     it("runs an audit", async () => {
-      const result = await registry.call("qa_accessibility", { standard: "wcag2aa" }, ctx);
+      const result = await registry.call(
+        "qa_accessibility",
+        {
+          standard: "wcag2aa",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("Accessibility Audit");
@@ -160,7 +198,13 @@ describe("qa-studio standalone tools", () => {
 
   describe("qa_evaluate", () => {
     it("evaluates JavaScript", async () => {
-      const result = await registry.call("qa_evaluate", { expression: "document.title" }, ctx);
+      const result = await registry.call(
+        "qa_evaluate",
+        {
+          expression: "document.title",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("Evaluate Result");
@@ -178,14 +222,26 @@ describe("qa-studio standalone tools", () => {
 
   describe("qa_test_run", () => {
     it("rejects invalid paths", async () => {
-      const result = await registry.call("qa_test_run", { target: "../../../etc/passwd" }, ctx);
+      const result = await registry.call(
+        "qa_test_run",
+        {
+          target: "../../../etc/passwd",
+        },
+        ctx,
+      );
       expect(result.isError).toBe(true);
     });
   });
 
   describe("qa_lighthouse", () => {
     it("returns audit scores for a URL", async () => {
-      const result = await registry.call("qa_lighthouse", { url: "https://example.com" }, ctx);
+      const result = await registry.call(
+        "qa_lighthouse",
+        {
+          url: "https://example.com",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("Lighthouse Audit");
@@ -195,7 +251,13 @@ describe("qa-studio standalone tools", () => {
 
   describe("qa_visual_diff", () => {
     it("creates a new baseline when no baseline_id provided", async () => {
-      const result = await registry.call("qa_visual_diff", { url: "https://example.com" }, ctx);
+      const result = await registry.call(
+        "qa_visual_diff",
+        {
+          url: "https://example.com",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("Visual Baseline Created");
@@ -229,7 +291,11 @@ describe("qa-studio standalone tools", () => {
       try {
         const result = await registry.call(
           "qa_api_test",
-          { url: "https://example.com/api", method: "GET", expected_status: 200 },
+          {
+            url: "https://example.com/api",
+            method: "GET",
+            expected_status: 200,
+          },
           ctx,
         );
         expect(result.isError).toBeFalsy();

@@ -68,7 +68,9 @@ export async function setCacheRaw(key: string, value: unknown, ttlSeconds: numbe
 export async function invalidateCache(key: string): Promise<void> {
   const { error } = await tryCatch(redis.del(key));
   if (error) {
-    logger.warn(`[Cache] Failed to invalidate key "${key}" in Redis`, { error });
+    logger.warn(`[Cache] Failed to invalidate key "${key}" in Redis`, {
+      error,
+    });
   }
 }
 

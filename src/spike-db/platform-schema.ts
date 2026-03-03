@@ -1,4 +1,4 @@
-import { defineTable, defineReducer, defineDatabase, t } from "./schema/index.js";
+import { defineDatabase, defineReducer, defineTable, t } from "./schema/index.js";
 import type { ReducerContext } from "./server/reducer-engine.js";
 
 // ---------------------------------------------------------------------------
@@ -532,7 +532,10 @@ export const updateAppStatusReducer = defineReducer(
   "update_app_status",
   (ctx: unknown, appId: unknown, status: unknown) => {
     const c = ctx as ReducerContext;
-    c.db.app!.update(appId, { status: status as string, updatedAt: c.timestamp });
+    c.db.app!.update(appId, {
+      status: status as string,
+      updatedAt: c.timestamp,
+    });
   },
 );
 

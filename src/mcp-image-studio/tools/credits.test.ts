@@ -158,7 +158,12 @@ describe("credits", () => {
     mocks.credits.getBalance.mockResolvedValue({ remaining: 200 });
 
     // cast to bypass types for testing invalid input
-    const result = await credits({ tier: "FAKE_TIER" as unknown as EnhancementTier }, ctx);
+    const result = await credits(
+      {
+        tier: "FAKE_TIER" as unknown as EnhancementTier,
+      },
+      ctx,
+    );
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Validation Error");

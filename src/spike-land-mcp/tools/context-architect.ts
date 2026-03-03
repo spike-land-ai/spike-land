@@ -84,8 +84,9 @@ function detectTechStack(files: FileEntry[]): string[] {
   if (paths.some((p) => p === "package.json")) stack.add("Node.js");
   if (
     paths.some((p) => p === "next.config.js" || p === "next.config.ts" || p === "next.config.mjs")
-  )
+  ) {
     stack.add("Next.js");
+  }
   if (paths.some((p) => p === "vite.config.ts" || p === "vite.config.js")) {
     stack.add("Vite");
   }
@@ -95,8 +96,9 @@ function detectTechStack(files: FileEntry[]): string[] {
   if (paths.some((p) => p === "Dockerfile" || p === "docker-compose.yml")) {
     stack.add("Docker");
   }
-  if (paths.some((p) => p === "tailwind.config.ts" || p === "tailwind.config.js"))
+  if (paths.some((p) => p === "tailwind.config.ts" || p === "tailwind.config.js")) {
     stack.add("Tailwind CSS");
+  }
 
   return Array.from(stack);
 }

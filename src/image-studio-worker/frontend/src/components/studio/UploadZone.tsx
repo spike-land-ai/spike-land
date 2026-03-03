@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Upload, FolderPlus } from "lucide-react";
+import { FolderPlus, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { eventBus } from "../../services/event-bus";
 
@@ -35,7 +35,10 @@ export function UploadZone({ onUploadComplete }: UploadZoneProps) {
 
           if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
 
-          const data = (await res.json()) as { image: { id: string; name: string }; url: string };
+          const data = (await res.json()) as {
+            image: { id: string; name: string };
+            url: string;
+          };
 
           onUploadComplete({
             id: data.image.id,

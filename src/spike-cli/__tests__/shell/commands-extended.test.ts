@@ -38,7 +38,9 @@ function makeManager(overrides: Partial<ServerManager> = {}): ServerManager {
     isConnected: vi.fn().mockReturnValue(true),
     getServerTools: vi.fn().mockReturnValue([]),
     getAllTools: vi.fn().mockReturnValue([]),
-    callTool: vi.fn().mockResolvedValue({ content: [{ type: "text", text: "ok" }] }),
+    callTool: vi.fn().mockResolvedValue({
+      content: [{ type: "text", text: "ok" }],
+    }),
     reconnect: vi.fn().mockResolvedValue(undefined),
     toolsetManager: undefined,
     ...overrides,
@@ -69,7 +71,10 @@ describe("handleCall — alias resolution", () => {
     const manager = makeManager({ callTool: mockCallTool });
 
     const resolver = {
-      resolveTool: vi.fn().mockReturnValue({ type: "tool", toolName: "chess__move" }),
+      resolveTool: vi.fn().mockReturnValue({
+        type: "tool",
+        toolName: "chess__move",
+      }),
       isReserved: vi.fn().mockReturnValue(false),
     } as unknown as AliasResolver;
 
@@ -165,7 +170,9 @@ describe("handleReconnect — error path", () => {
     const ctx = makeCtx({
       manager,
       config: {
-        servers: { srv: { command: "srv" } as ResolvedConfig["servers"][string] },
+        servers: {
+          srv: { command: "srv" } as ResolvedConfig["servers"][string],
+        },
       } as ResolvedConfig,
     });
 
@@ -393,7 +400,10 @@ describe("handleAlias", () => {
 
   it("shows JSON representation for composite alias values in list", async () => {
     const { addAlias } = await import("../../alias/store.js");
-    await addAlias("composite", "qm", { tool: "chess__move", args: { from: "e2" } });
+    await addAlias("composite", "qm", {
+      tool: "chess__move",
+      args: { from: "e2" },
+    });
 
     const ctx = makeCtx();
     const output = await handleAlias(ctx, ["list"]);

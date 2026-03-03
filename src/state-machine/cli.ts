@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { createInterface } from "node:readline";
 import {
-  createMachine,
-  sendEvent,
-  getState,
   addState,
   addTransition,
+  createMachine,
+  getState,
   resetMachine,
+  sendEvent,
   validateMachine,
 } from "./engine.js";
 

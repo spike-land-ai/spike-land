@@ -193,4 +193,8 @@ export type StdbErrorCode =
 
 // ─── Result Helpers (re-exported from mcp-server-base) ───
 
-export { type CallToolResult, jsonResult, errorResult } from "@spike-land-ai/mcp-server-base";
+export {
+  type CallToolResult,
+  errorResult,
+  jsonResult,
+} from "@spike-land-ai/mcp-server-base";

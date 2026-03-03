@@ -16,7 +16,10 @@ const localStorageMock = (() => {
     }),
   };
 })();
-Object.defineProperty(globalThis, "localStorage", { value: localStorageMock, writable: true });
+Object.defineProperty(globalThis, "localStorage", {
+  value: localStorageMock,
+  writable: true,
+});
 
 // Mock tryCatch to pass through
 vi.mock("@/lib/try-catch", () => ({
@@ -88,7 +91,9 @@ describe("CopilotService", () => {
 
     const mockResponse = {
       ok: true,
-      json: vi.fn().mockResolvedValue({ content: [{ text: "completion result" }] }),
+      json: vi.fn().mockResolvedValue({
+        content: [{ text: "completion result" }],
+      }),
     };
     vi.mocked(fetch).mockResolvedValue(mockResponse as unknown as Response);
 

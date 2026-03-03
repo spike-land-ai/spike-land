@@ -38,7 +38,9 @@ export function createStdbHttpClient(config: StdbHttpClientConfig): StdbHttpClie
 
   return {
     async callReducer(name: string, args: unknown[]): Promise<void> {
-      const url = `${baseUrl}/v1/database/${encodeURIComponent(database)}/call/${encodeURIComponent(name)}`;
+      const url = `${baseUrl}/v1/database/${encodeURIComponent(
+        database,
+      )}/call/${encodeURIComponent(name)}`;
       const res = await fetch(url, {
         method: "POST",
         headers: headers(),

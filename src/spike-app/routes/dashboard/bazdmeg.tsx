@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTable } from "@/hooks/useTable";
 
 type TimeRange = "24h" | "7d" | "30d";
@@ -87,7 +87,9 @@ function GateStatusBadge({ status }: { status: string }) {
   };
   return (
     <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${colors[status] ?? "bg-gray-100 text-gray-600"}`}
+      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+        colors[status] ?? "bg-gray-100 text-gray-600"
+      }`}
     >
       {status}
     </span>
@@ -108,7 +110,9 @@ function EventTypeBadge({ eventType }: { eventType: string }) {
   };
   return (
     <span
-      className={`inline-block rounded px-1.5 py-0.5 text-xs font-medium ${colors[eventType] ?? "bg-gray-100 text-gray-600"}`}
+      className={`inline-block rounded px-1.5 py-0.5 text-xs font-medium ${
+        colors[eventType] ?? "bg-gray-100 text-gray-600"
+      }`}
     >
       {eventType}
     </span>
@@ -429,7 +433,10 @@ export function BazdmegDashboardPage() {
         });
       }
     }
-    return Array.from(results.entries()).map(([name, data]) => ({ name, ...data }));
+    return Array.from(results.entries()).map(([name, data]) => ({
+      name,
+      ...data,
+    }));
   }, [gateEvents]);
 
   return (

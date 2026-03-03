@@ -26,7 +26,12 @@ describe("renderMessage with tool calls", () => {
     };
 
     const result = renderMessage(message);
-    expect(result).toEqual([{ type: "text", text: "Hello, this is a simple message" }]);
+    expect(result).toEqual([
+      {
+        type: "text",
+        text: "Hello, this is a simple message",
+      },
+    ]);
   });
 
   it("should handle messages with single tool call", () => {
@@ -272,7 +277,12 @@ describe("renderMessage with tool calls", () => {
     };
 
     const result = renderMessage(message);
-    expect(result).toEqual([{ type: "text", text: "You are a helpful assistant." }]);
+    expect(result).toEqual([
+      {
+        type: "text",
+        text: "You are a helpful assistant.",
+      },
+    ]);
   });
 
   it("should handle tool messages (for completeness)", () => {
@@ -284,7 +294,12 @@ describe("renderMessage with tool calls", () => {
     };
 
     const result = renderMessage(message);
-    expect(result).toEqual([{ type: "text", text: JSON.stringify({ result: "success" }) }]);
+    expect(result).toEqual([
+      {
+        type: "text",
+        text: JSON.stringify({ result: "success" }),
+      },
+    ]);
   });
 
   it("should handle mixed content with text before and after tool calls", () => {

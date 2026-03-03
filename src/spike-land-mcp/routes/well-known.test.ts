@@ -5,7 +5,7 @@
  * /.well-known/oauth-protected-resource/mcp endpoints.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Hono } from "hono";
 import { wellKnownRoute } from "./well-known";
 import type { Env } from "../env";
@@ -86,7 +86,9 @@ describe("GET /.well-known/oauth-authorization-server", () => {
       mockEnvObj,
     );
 
-    const body = (await res.json()) as { code_challenge_methods_supported: string[] };
+    const body = (await res.json()) as {
+      code_challenge_methods_supported: string[];
+    };
     expect(body.code_challenge_methods_supported).toContain("S256");
   });
 });

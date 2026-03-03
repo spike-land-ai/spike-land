@@ -41,7 +41,13 @@ describe("formatGuardrails", () => {
 
   it("formats guardrails with text severity in rewrite style", () => {
     const result = formatGuardrails(
-      [makeGuardrail({ severity: "HIGH", type: "TONE" as GuardrailType, name: "No slang" })],
+      [
+        makeGuardrail({
+          severity: "HIGH",
+          type: "TONE" as GuardrailType,
+          name: "No slang",
+        }),
+      ],
       "rewrite",
     );
     expect(result).toContain("!");
@@ -122,7 +128,13 @@ describe("formatVocabulary", () => {
 
   it("formats replacement terms with arrow", () => {
     const result = formatVocabulary(
-      [makeVocab({ type: "REPLACEMENT", term: "cheap", replacement: "affordable" })],
+      [
+        makeVocab({
+          type: "REPLACEMENT",
+          term: "cheap",
+          replacement: "affordable",
+        }),
+      ],
       "rewrite",
     );
     expect(result).toContain("Required Replacements");

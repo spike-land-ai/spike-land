@@ -166,7 +166,9 @@ export function BazdmegHero() {
               whileTap={{ scale: 0.97 }}
               className="group relative px-8 py-4 bg-white text-zinc-950 font-bold rounded-xl overflow-hidden transition-shadow duration-300 shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_40px_rgba(255,255,255,0.25)]"
               onClick={() =>
-                document.getElementById("principles")?.scrollIntoView({ behavior: "smooth" })
+                document.getElementById("principles")?.scrollIntoView({
+                  behavior: "smooth",
+                })
               }
             >
               <span className="relative z-10">Learn the Principles</span>

@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text, index } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 
 // ─── Users ───────────────────────────────────────────────────────────────────
@@ -54,7 +54,9 @@ export const oauthAccessTokens = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    clientId: text("client_id").references(() => oauthClients.id, { onDelete: "cascade" }),
+    clientId: text("client_id").references(() => oauthClients.id, {
+      onDelete: "cascade",
+    }),
     tokenHash: text("token_hash").notNull().unique(), // SHA-256 hex of "mcp_..." token
     scope: text("scope").notNull().default("mcp"),
     expiresAt: integer("expires_at", { mode: "number" }).notNull(),
@@ -162,7 +164,9 @@ export const claudeCodeAgents = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    workspaceId: text("workspace_id").references(() => workspaces.id, { onDelete: "set null" }),
+    workspaceId: text("workspace_id").references(() => workspaces.id, {
+      onDelete: "set null",
+    }),
     name: text("name").notNull(),
     status: text("status").notNull().default("idle"), // "idle" | "running" | "stopped"
     lastActiveAt: integer("last_active_at", { mode: "number" }),
@@ -201,7 +205,9 @@ export const permissionRequests = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    agentId: text("agent_id").references(() => claudeCodeAgents.id, { onDelete: "cascade" }),
+    agentId: text("agent_id").references(() => claudeCodeAgents.id, {
+      onDelete: "cascade",
+    }),
     permissionType: text("permission_type").notNull(),
     resource: text("resource"),
     status: text("status").notNull().default("pending"), // "pending" | "approved" | "denied"
@@ -222,7 +228,9 @@ export const vaultSecrets = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    workspaceId: text("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }),
+    workspaceId: text("workspace_id").references(() => workspaces.id, {
+      onDelete: "cascade",
+    }),
     key: text("key").notNull(),
     encryptedValue: text("encrypted_value").notNull(),
     createdAt: integer("created_at", { mode: "number" }).notNull(),
@@ -239,7 +247,9 @@ export const auditLogs = sqliteTable(
   "audit_logs",
   {
     id: text("id").primaryKey(),
-    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+    userId: text("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     action: text("action").notNull(),
     resourceType: text("resource_type"),
     resourceId: text("resource_id"),
@@ -258,7 +268,9 @@ export const skillUsageEvents = sqliteTable(
   "skill_usage_events",
   {
     id: text("id").primaryKey(),
-    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+    userId: text("user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
     skillName: text("skill_name").notNull(),
     category: text("category"),
     outcome: text("outcome").notNull().default("success"), // "success" | "error"
@@ -373,11 +385,17 @@ export const workspaceMembersRelations = relations(workspaceMembers, ({ one }) =
     fields: [workspaceMembers.workspaceId],
     references: [workspaces.id],
   }),
-  user: one(users, { fields: [workspaceMembers.userId], references: [users.id] }),
+  user: one(users, {
+    fields: [workspaceMembers.userId],
+    references: [users.id],
+  }),
 }));
 
 export const claudeCodeAgentsRelations = relations(claudeCodeAgents, ({ one, many }) => ({
-  user: one(users, { fields: [claudeCodeAgents.userId], references: [users.id] }),
+  user: one(users, {
+    fields: [claudeCodeAgents.userId],
+    references: [users.id],
+  }),
   workspace: one(workspaces, {
     fields: [claudeCodeAgents.workspaceId],
     references: [workspaces.id],
@@ -408,11 +426,17 @@ export const directMessagesRelations = relations(directMessages, ({ one }) => ({
 
 export const vaultSecretsRelations = relations(vaultSecrets, ({ one }) => ({
   user: one(users, { fields: [vaultSecrets.userId], references: [users.id] }),
-  workspace: one(workspaces, { fields: [vaultSecrets.workspaceId], references: [workspaces.id] }),
+  workspace: one(workspaces, {
+    fields: [vaultSecrets.workspaceId],
+    references: [workspaces.id],
+  }),
 }));
 
 export const registeredToolsRelations = relations(registeredTools, ({ one }) => ({
-  user: one(users, { fields: [registeredTools.userId], references: [users.id] }),
+  user: one(users, {
+    fields: [registeredTools.userId],
+    references: [users.id],
+  }),
 }));
 
 export const remindersRelations = relations(reminders, ({ one }) => ({
@@ -424,5 +448,8 @@ export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
 }));
 
 export const skillUsageEventsRelations = relations(skillUsageEvents, ({ one }) => ({
-  user: one(users, { fields: [skillUsageEvents.userId], references: [users.id] }),
+  user: one(users, {
+    fields: [skillUsageEvents.userId],
+    references: [users.id],
+  }),
 }));

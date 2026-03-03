@@ -2,7 +2,9 @@
 
 ## Overview
 
-Educational video compositions built with Remotion (React-based video framework). Currently includes "The Vibe Coding Paradox" and "No More 404s". Private package, not published.
+Educational video compositions built with Remotion (React-based video
+framework). Currently includes "The Vibe Coding Paradox" and "No More 404s".
+Private package, not published.
 
 ## Commands
 

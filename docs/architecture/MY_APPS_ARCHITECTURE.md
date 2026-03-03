@@ -22,9 +22,9 @@ feature in spike.land.
 **My-Apps** (`/my-apps`) is a dashboard where users can create, manage, and
 interact with AI-powered React applications. The platform also includes an **App
 Store** (`/store`) with 18 store app listings (19 first-party app directories),
-a **Chess Arena**, **State Machine Engine**, **QA Studio**, and other specialized
-apps. 46 Storybook pages document app components, and 16 error.tsx / 23
-loading.tsx boundaries provide resilience. It provides:
+a **Chess Arena**, **State Machine Engine**, **QA Studio**, and other
+specialized apps. 46 Storybook pages document app components, and 16 error.tsx /
+23 loading.tsx boundaries provide resilience. It provides:
 
 - **App Creation**: Users describe what they want to build, and an AI agent
   writes the code
@@ -429,7 +429,8 @@ POST /mcp               → MCP protocol handler
 
 ### Durable Object: Code Class
 
-**Location**: `@spike-land-ai/testing.spike.land` (external repo, `src/chatRoom.ts`)
+**Location**: `@spike-land-ai/testing.spike.land` (external repo,
+`src/chatRoom.ts`)
 
 Each codespace has its own Durable Object instance that maintains:
 
@@ -518,14 +519,14 @@ export function createCodespaceServer(codespaceId: string) {
       tool("read_code", "Read the current code...", {}, async () => {
         const code = await fetch(
           `https://testing.spike.land/live/${codespaceId}/session.json`,
-        ).then(r => r.json()).then(d => d.code);
+        ).then((r) => r.json()).then((d) => d.code);
         return { content: [{ type: "text", text: code }] };
       }),
       tool(
         "update_code",
         "Replace the entire code...",
         { code: z.string() },
-        async args => {
+        async (args) => {
           await fetch(
             `https://testing.spike.land/live/${codespaceId}/api/code`,
             {
@@ -699,15 +700,16 @@ yarn dev
 ### Running testing.spike.land Locally
 
 The `testing.spike.land` Cloudflare Worker is now in an external repository
-(`@spike-land-ai/testing.spike.land`). Clone that repo separately to run locally.
+(`@spike-land-ai/testing.spike.land`). Clone that repo separately to run
+locally.
 
 The Next.js app can be configured to point to a local worker via environment
 variable:
 
 ```typescript
 // In src/lib/claude-agent/tools/codespace-tools.ts
-const TESTING_SPIKE_LAND = process.env.TESTING_SPIKE_LAND_URL
-  || "https://testing.spike.land";
+const TESTING_SPIKE_LAND = process.env.TESTING_SPIKE_LAND_URL ||
+  "https://testing.spike.land";
 ```
 
 ### Testing

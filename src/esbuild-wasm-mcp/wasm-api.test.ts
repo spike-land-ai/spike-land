@@ -79,7 +79,9 @@ describe("wasm-api", () => {
 
     it("reads and compiles a wasmModule file path", async () => {
       const fakeBytes = Buffer.from([0x00, 0x61, 0x73, 0x6d]);
-      const fakeModule = { fakeWasmModule: true } as unknown as WebAssembly.Module;
+      const fakeModule = {
+        fakeWasmModule: true,
+      } as unknown as WebAssembly.Module;
       mockReadFile.mockResolvedValue(fakeBytes);
       const compileSpy = vi.spyOn(WebAssembly, "compile").mockResolvedValue(fakeModule);
       mockInitialize.mockResolvedValue(undefined);

@@ -5,11 +5,11 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, errorResult, createZodTool } from "@spike-land-ai/mcp-server-base";
+import { createZodTool, errorResult, textResult } from "@spike-land-ai/mcp-server-base";
 import { ReportContextGapSchema } from "../types.js";
 import { getWorkspace } from "../workspace-state.js";
 import { buildContextBundle, formatContextBundle } from "../context-bundle.js";
-import { logContextServed, logContextGap } from "../telemetry.js";
+import { logContextGap, logContextServed } from "../telemetry.js";
 
 export function registerContextTools(server: McpServer): void {
   // ── bazdmeg_get_context ──────────────────────────────────────────────────
@@ -40,7 +40,9 @@ export function registerContextTools(server: McpServer): void {
       if (bundle.claudeMd) items.push("CLAUDE.md");
       if (bundle.packageJson) items.push("package.json");
       for (const exp of bundle.exportedTypes) items.push(`types:${exp.file}`);
-      for (const dep of bundle.dependencyContexts) items.push(`dep:${dep.packageName}`);
+      for (const dep of bundle.dependencyContexts) {
+        items.push(`dep:${dep.packageName}`);
+      }
       await logContextServed(workspace.packageName, items);
 
       return textResult(text);

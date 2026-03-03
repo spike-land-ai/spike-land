@@ -3,10 +3,10 @@ import { asImageId, errorResult, jsonResult } from "../types.js";
 import type { ImageRow } from "../types.js";
 import {
   imageProcedure,
-  withResolves,
-  withOwnership,
   withCredits,
   withJob,
+  withOwnership,
+  withResolves,
 } from "../tool-builder/image-middleware.js";
 import { middleware } from "@spike-land-ai/shared/tool-builder";
 

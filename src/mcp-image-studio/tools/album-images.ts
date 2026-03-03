@@ -1,13 +1,13 @@
 import { z } from "zod";
 import {
+  ALBUM_IMAGE_ACTION_VALUES,
   asImageId,
   errorResult,
   jsonResult,
-  ALBUM_IMAGE_ACTION_VALUES,
   toolEvent,
 } from "../types.js";
 import { tryCatch } from "./try-catch.js";
-import { imageProcedure, withResolves, withOwnership } from "../tool-builder/image-middleware.js";
+import { imageProcedure, withOwnership, withResolves } from "../tool-builder/image-middleware.js";
 
 export const albumImagesTool = imageProcedure
   .use(withResolves({ album_handle: "album" }))
@@ -55,7 +55,10 @@ export const albumImagesTool = imageProcedure
       }
 
       ctx.notify?.(
-        toolEvent("album:images_changed", album.handle, { action: "add", count: added }),
+        toolEvent("album:images_changed", album.handle, {
+          action: "add",
+          count: added,
+        }),
       );
 
       return jsonResult({
@@ -77,7 +80,10 @@ export const albumImagesTool = imageProcedure
     }
 
     ctx.notify?.(
-      toolEvent("album:images_changed", album.handle, { action: "remove", count: removed }),
+      toolEvent("album:images_changed", album.handle, {
+        action: "remove",
+        count: removed,
+      }),
     );
 
     return jsonResult({

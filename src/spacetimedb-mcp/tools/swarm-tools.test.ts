@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerSwarmTools } from "./swarm-tools.js";
 import { createMockClient } from "../__test-utils__/index.js";
 
@@ -76,7 +76,9 @@ describe("swarm tools", () => {
     // @ts-expect-error - testing mock client internal method
     if (client.createMcpTask) {
       await (
-        client as unknown as { createMcpTask: (tool: string, args: string) => Promise<void> }
+        client as unknown as {
+          createMcpTask: (tool: string, args: string) => Promise<void>;
+        }
       ).createMcpTask("tool", "{}");
     }
     const handler = server.tools.get("stdb_list_tasks")!.handler;

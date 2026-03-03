@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 interface Message {
   id: string;
@@ -104,4 +104,4 @@ export function ChatThread({ messages, onSendMessage, isLoading }: ChatThreadPro
   );
 }
 
-export type { Message, ChatThreadProps };
+export type { ChatThreadProps, Message };

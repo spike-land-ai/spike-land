@@ -6,10 +6,10 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
+import { createZodTool, textResult } from "@spike-land-ai/mcp-server-base";
 import { BuildSchema, TypecheckSchema } from "../types.js";
 import { getManifestPackage, readManifest } from "../manifest.js";
-import { runCommand, hasScript } from "../shell.js";
+import { hasScript, runCommand } from "../shell.js";
 
 export function registerBuildTools(server: McpServer): void {
   // ── bazdmeg_build ─────────────────────────────────────────────────────────

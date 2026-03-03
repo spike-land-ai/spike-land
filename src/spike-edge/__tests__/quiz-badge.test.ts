@@ -1,7 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Hono } from "hono";
 import type { Env } from "../env.js";
-import { quizBadge, escapeHtml } from "../routes/quiz-badge.js";
+import { escapeHtml, quizBadge } from "../routes/quiz-badge.js";
 
 const TEST_SECRET = "test-badge-secret";
 

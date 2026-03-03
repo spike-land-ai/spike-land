@@ -2,7 +2,10 @@
 
 ## Overview
 
-BAZDMEG MCP server for workspace isolation, quality gates, and context engineering. Provides hard boundaries on which files Claude Code agents can access within the spike-land-ai monorepo. Published as `@spike-land-ai/bazdmeg-mcp`, runs in Node.js.
+BAZDMEG MCP server for workspace isolation, quality gates, and context
+engineering. Provides hard boundaries on which files Claude Code agents can
+access within the spike-land-ai monorepo. Published as
+`@spike-land-ai/bazdmeg-mcp`, runs in Node.js.
 
 ## Commands
 
@@ -39,12 +42,13 @@ npm start             # Run the MCP server (stdio)
 
 ## MCP Tools (14)
 
-**Workspace**: `bazdmeg_enter_workspace`, `bazdmeg_workspace_status`, `bazdmeg_exit_workspace`
-**Context**: `bazdmeg_get_context`, `bazdmeg_report_context_gap`, `bazdmeg_review_session`
-**Gates**: `bazdmeg_run_gates`, `bazdmeg_check_gate`, `bazdmeg_list_gates`
-**Workflow**: `bazdmeg_session_bootstrap`, `bazdmeg_planning_interview`, `bazdmeg_pre_pr_check`
-**Ship**: `bazdmeg_auto_ship` — lint → typecheck → test → gates → commit → push (fail-fast)
-**Escalation**: `bazdmeg_signal_stuck`
+**Workspace**: `bazdmeg_enter_workspace`, `bazdmeg_workspace_status`,
+`bazdmeg_exit_workspace` **Context**: `bazdmeg_get_context`,
+`bazdmeg_report_context_gap`, `bazdmeg_review_session` **Gates**:
+`bazdmeg_run_gates`, `bazdmeg_check_gate`, `bazdmeg_list_gates` **Workflow**:
+`bazdmeg_session_bootstrap`, `bazdmeg_planning_interview`,
+`bazdmeg_pre_pr_check` **Ship**: `bazdmeg_auto_ship` — lint → typecheck → test →
+gates → commit → push (fail-fast) **Escalation**: `bazdmeg_signal_stuck`
 
 ## Code Quality Rules
 

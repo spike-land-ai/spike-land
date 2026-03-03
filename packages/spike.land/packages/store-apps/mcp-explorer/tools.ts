@@ -129,8 +129,9 @@ export const mcpExplorerTools: StandaloneToolDefinition[] = [
           );
 
           let results;
-          if (source === "smithery") results = await searchSmithery(serverId, 1);
-          else if (source === "official") {
+          if (source === "smithery") {
+            results = await searchSmithery(serverId, 1);
+          } else if (source === "official") {
             results = await searchOfficialRegistry(serverId, 1);
           } else results = await searchGlama(serverId, 1);
 
@@ -171,8 +172,9 @@ export const mcpExplorerTools: StandaloneToolDefinition[] = [
           );
 
           let results;
-          if (source === "smithery") results = await searchSmithery(serverId, 1);
-          else if (source === "official") {
+          if (source === "smithery") {
+            results = await searchSmithery(serverId, 1);
+          } else if (source === "official") {
             results = await searchOfficialRegistry(serverId, 1);
           } else results = await searchGlama(serverId, 1);
 
@@ -358,7 +360,10 @@ export const mcpExplorerTools: StandaloneToolDefinition[] = [
           const params = tool.inputSchema
             ? Object.entries(tool.inputSchema)
                 .map(([key, schema]) => {
-                  const s = schema as { description?: string; _def?: { typeName?: string } };
+                  const s = schema as {
+                    description?: string;
+                    _def?: { typeName?: string };
+                  };
                   const typeHint = s._def?.typeName?.replace("Zod", "").toLowerCase() ?? "unknown";
                   const desc = s.description ?? "No description";
                   return `  - \`${key}\` (${typeHint}): ${desc}`;

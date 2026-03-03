@@ -3,9 +3,9 @@ import { errorResult, jsonResult, toolEvent } from "../types.js";
 import { tryCatch } from "./try-catch.js";
 import {
   imageProcedure,
-  withResolves,
-  withOwnership,
   withCredits,
+  withOwnership,
+  withResolves,
 } from "../tool-builder/image-middleware.js";
 
 export const autoTagTool = imageProcedure

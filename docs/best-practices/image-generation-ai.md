@@ -50,7 +50,7 @@ interface StreamingImageGenerationOptions {
 
 async function generateImageStreaming(
   options: StreamingImageGenerationOptions,
-): Promise<{ imageUrl: string; metadata: Record<string, unknown>; }> {
+): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(
     () => controller.abort(),
@@ -86,7 +86,7 @@ async function generateImageStreaming(
 async function pollForCompletion(
   pollingUrl: string,
   onProgress?: (status: string) => void,
-): Promise<{ imageUrl: string; metadata: Record<string, unknown>; }> {
+): Promise<{ imageUrl: string; metadata: Record<string, unknown> }> {
   const maxAttempts = 60;
   const baseDelay = 1000; // 1 second
 
@@ -110,7 +110,7 @@ async function pollForCompletion(
 
       // Exponential backoff: base * 1.5^attempt
       const delay = Math.min(baseDelay * Math.pow(1.5, attempt), 10000);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         // Job not found yet, continue polling
@@ -261,8 +261,8 @@ class ImageGenerationClient {
 
         // Don't retry on client errors (4xx)
         if (
-          axios.isAxiosError(error)
-          && error.response?.status?.toString().startsWith("4")
+          axios.isAxiosError(error) &&
+          error.response?.status?.toString().startsWith("4")
         ) {
           // Except rate limiting (429)
           if (error.response.status !== 429) {
@@ -277,7 +277,9 @@ class ImageGenerationClient {
           const delay = this.calculateBackoffDelay(attempt, retryConfig);
           const retryAfter = this.getRetryAfterHeader(error);
 
-          await new Promise(resolve => setTimeout(resolve, retryAfter || delay));
+          await new Promise((resolve) =>
+            setTimeout(resolve, retryAfter || delay)
+          );
         }
       }
     }
@@ -321,8 +323,8 @@ class ImageGenerationClient {
   }
 
   private calculateBackoffDelay(attempt: number, config: RetryConfig): number {
-    const delay = config.initialDelayMs
-      * Math.pow(config.backoffMultiplier, attempt);
+    const delay = config.initialDelayMs *
+      Math.pow(config.backoffMultiplier, attempt);
     return Math.min(delay, config.maxDelayMs);
   }
 
@@ -371,7 +373,7 @@ class RateLimiter {
   async acquireToken(): Promise<void> {
     while (!this.tryAcquire()) {
       const waitTime = this.getWaitTime();
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
   }
 
@@ -461,7 +463,8 @@ function buildEnhancementPrompt(template: PromptTemplate): string {
 const enhancementPrompt = buildEnhancementPrompt({
   scene: "A modern smart home living room with minimalist furniture",
   style: "Photorealistic, contemporary architecture photography",
-  lighting: "Soft natural sunlight from large floor-to-ceiling windows, warm color temperature",
+  lighting:
+    "Soft natural sunlight from large floor-to-ceiling windows, warm color temperature",
   details:
     "Sharp focus on interior details, professional product photography quality, 8K resolution equivalent",
   mood: "Bright, airy, premium, sophisticated",
@@ -521,8 +524,8 @@ const geminiPrompt = `
 ```typescript
 // Stable Diffusion with prompt weighting
 interface SDWeightedPrompt {
-  primary: { text: string; weight: number; };
-  secondary: { text: string; weight: number; }[];
+  primary: { text: string; weight: number };
+  secondary: { text: string; weight: number }[];
   negative: string[];
 }
 
@@ -553,9 +556,9 @@ function buildSDPrompt(weighted: SDWeightedPrompt): string {
   const parts = [
     `(${weighted.primary.text}:${weighted.primary.weight})`,
     ...weighted.secondary.map(
-      s => `(${s.text}:${s.weight})`,
+      (s) => `(${s.text}:${s.weight})`,
     ),
-    ...weighted.negative.map(n => `(${n}:-0.5)`),
+    ...weighted.negative.map((n) => `(${n}:-0.5)`),
   ];
   return parts.join(", ");
 }
@@ -585,7 +588,7 @@ interface ImageQualityConfig {
   aspectRatio: string;
 }
 
-type ResolutionMap = Record<string, { width: number; height: number; }>;
+type ResolutionMap = Record<string, { width: number; height: number }>;
 
 const resolutionMap: ResolutionMap = {
   "1K": { width: 1024, height: 1024 },
@@ -684,7 +687,7 @@ function createImageGenerationClient(
     httpsAgent: new https.Agent({ keepAlive: true }),
   });
 
-  client.interceptors.request.use(config => {
+  client.interceptors.request.use((config) => {
     config.timeout = config.timeout || timeoutPresets[timeoutPreset].request;
     return config;
   });
@@ -708,8 +711,8 @@ interface CacheEntry {
 }
 
 interface CacheConfig {
-  memory: { maxSize: number; ttl: number; };
-  redis?: { host: string; port: number; ttl: number; };
+  memory: { maxSize: number; ttl: number };
+  redis?: { host: string; port: number; ttl: number };
 }
 
 class ImageGenerationCache {
@@ -916,10 +919,10 @@ class ImageGenerationQueue {
 
   private async processQueue(): Promise<void> {
     while (
-      this.processing.size < this.maxConcurrent
-      && this.queue.some(t => t.status === "pending")
+      this.processing.size < this.maxConcurrent &&
+      this.queue.some((t) => t.status === "pending")
     ) {
-      const task = this.queue.find(t => t.status === "pending");
+      const task = this.queue.find((t) => t.status === "pending");
       if (!task) break;
 
       task.status = "processing";
@@ -954,7 +957,7 @@ class ImageGenerationQueue {
   }
 
   getStatus(taskId: string): QueuedTask | undefined {
-    return this.queue.find(t => t.id === taskId);
+    return this.queue.find((t) => t.id === taskId);
   }
 
   getStats(): {
@@ -965,19 +968,19 @@ class ImageGenerationQueue {
     avgProcessingTime: number;
   } {
     const tasks = this.queue;
-    const completedTasks = tasks.filter(t => t.completedAt && t.startedAt);
+    const completedTasks = tasks.filter((t) => t.completedAt && t.startedAt);
 
     return {
-      pending: tasks.filter(t => t.status === "pending").length,
-      processing: tasks.filter(t => t.status === "processing").length,
-      completed: tasks.filter(t => t.status === "completed").length,
-      failed: tasks.filter(t => t.status === "failed").length,
+      pending: tasks.filter((t) => t.status === "pending").length,
+      processing: tasks.filter((t) => t.status === "processing").length,
+      completed: tasks.filter((t) => t.status === "completed").length,
+      failed: tasks.filter((t) => t.status === "failed").length,
       avgProcessingTime: completedTasks.length > 0
         ? completedTasks.reduce(
           (sum, t) => sum + (t.completedAt! - t.startedAt!),
           0,
-        )
-          / completedTasks.length
+        ) /
+          completedTasks.length
         : 0,
     };
   }
@@ -1163,7 +1166,7 @@ class UsageMonitor {
   private checkAlerts(): void {
     const today = new Date().toDateString();
     const todayMetrics = this.metrics.filter(
-      m => new Date(m.timestamp).toDateString() === today,
+      (m) => new Date(m.timestamp).toDateString() === today,
     );
     const dailyCost = todayMetrics.reduce((sum, m) => sum + m.costAmount, 0);
 
@@ -1177,7 +1180,7 @@ class UsageMonitor {
   getDailyReport(date: Date): Record<string, unknown> {
     const dateStr = date.toDateString();
     const dayMetrics = this.metrics.filter(
-      m => new Date(m.timestamp).toDateString() === dateStr,
+      (m) => new Date(m.timestamp).toDateString() === dateStr,
     );
 
     const providerCosts: Record<string, number> = {};
@@ -1186,13 +1189,13 @@ class UsageMonitor {
     let failureCount = 0;
     let totalDuration = 0;
 
-    dayMetrics.forEach(m => {
+    dayMetrics.forEach((m) => {
       totalCost += m.costAmount;
       totalDuration += m.duration;
       if (m.success) successCount++;
       else failureCount++;
-      providerCosts[m.provider] = (providerCosts[m.provider] || 0)
-        + m.costAmount;
+      providerCosts[m.provider] = (providerCosts[m.provider] || 0) +
+        m.costAmount;
     });
 
     return {
@@ -1228,7 +1231,7 @@ interface ImageValidationConfig {
 async function validateImage(
   imageUrl: string,
   config: ImageValidationConfig,
-): Promise<{ valid: boolean; errors: string[]; }> {
+): Promise<{ valid: boolean; errors: string[] }> {
   const errors: string[] = [];
 
   try {

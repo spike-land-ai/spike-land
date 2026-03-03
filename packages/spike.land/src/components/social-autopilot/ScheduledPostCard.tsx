@@ -17,10 +17,26 @@ interface ScheduledPostCardProps {
 }
 
 const platformConfig: Record<Platform, { abbr: string; color: string; bg: string }> = {
-  twitter: { abbr: "TW", color: "text-sky-400", bg: "bg-sky-500/10 border-sky-500/20" },
-  linkedin: { abbr: "LI", color: "text-blue-400", bg: "bg-blue-700/10 border-blue-700/20" },
-  instagram: { abbr: "IG", color: "text-pink-400", bg: "bg-pink-500/10 border-pink-500/20" },
-  facebook: { abbr: "FB", color: "text-blue-500", bg: "bg-blue-500/10 border-blue-500/20" },
+  twitter: {
+    abbr: "TW",
+    color: "text-sky-400",
+    bg: "bg-sky-500/10 border-sky-500/20",
+  },
+  linkedin: {
+    abbr: "LI",
+    color: "text-blue-400",
+    bg: "bg-blue-700/10 border-blue-700/20",
+  },
+  instagram: {
+    abbr: "IG",
+    color: "text-pink-400",
+    bg: "bg-pink-500/10 border-pink-500/20",
+  },
+  facebook: {
+    abbr: "FB",
+    color: "text-blue-500",
+    bg: "bg-blue-500/10 border-blue-500/20",
+  },
 };
 
 const statusConfig: Record<PostStatus, { label: string; className: string }> = {

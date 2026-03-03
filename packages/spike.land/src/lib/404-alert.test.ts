@@ -55,7 +55,12 @@ describe("triggerGitHubAlert", () => {
     mockRedis.get.mockResolvedValue(null);
     mockRedis.set.mockResolvedValue("OK");
     mockGithubIssues.listIssues.mockResolvedValue({
-      data: [{ title: "[404 Alert] Repeated 404 hits on /admin/foo", state: "open" }],
+      data: [
+        {
+          title: "[404 Alert] Repeated 404 hits on /admin/foo",
+          state: "open",
+        },
+      ],
       error: null,
     });
 

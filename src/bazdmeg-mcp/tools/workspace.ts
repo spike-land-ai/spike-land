@@ -5,7 +5,7 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, jsonResult, createZodTool } from "@spike-land-ai/mcp-server-base";
+import { createZodTool, jsonResult, textResult } from "@spike-land-ai/mcp-server-base";
 import { EnterWorkspaceSchema } from "../types.js";
 import { resolveWorkspacePaths } from "../workspace-resolver.js";
 import { enterWorkspace, exitWorkspace, getWorkspace } from "../workspace-state.js";

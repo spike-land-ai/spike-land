@@ -2,7 +2,8 @@
 
 ## Overview
 
-Shared TypeScript config presets for all `@spike-land-ai` packages. Published as `@spike-land-ai/tsconfig`. Configuration-only package (no build step).
+Shared TypeScript config presets for all `@spike-land-ai` packages. Published as
+`@spike-land-ai/tsconfig`. Configuration-only package (no build step).
 
 ## Commands
 
@@ -17,7 +18,8 @@ tsconfig.bundler.json   # Preset for bundler-based packages (Vite, esbuild)
 tsconfig.worker.json    # Preset for Cloudflare Worker packages
 ```
 
-**Usage**: Packages extend a preset via `"extends": "@spike-land-ai/tsconfig/tsconfig.mcp.json"`.
+**Usage**: Packages extend a preset via
+`"extends": "@spike-land-ai/tsconfig/tsconfig.mcp.json"`.
 
 ## Code Quality Rules
 

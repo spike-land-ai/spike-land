@@ -1,4 +1,4 @@
-import { Fragment, type FC } from "react";
+import { type FC, Fragment } from "react";
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { COLORS, SPRING_CONFIGS, VERITASIUM_COLORS } from "../../lib/constants";
 
@@ -133,9 +133,9 @@ export const NoteLifecycle: FC<NoteLifecycleProps> = ({
                   style={{
                     width: 60,
                     height: 2,
-                    background: `linear-gradient(90deg, ${STAGES[i]!.color}60, ${
-                      STAGES[i + 1]!.color
-                    }60)`,
+                    background: `linear-gradient(90deg, ${
+                      STAGES[i]!.color
+                    }60, ${STAGES[i + 1]!.color}60)`,
                   }}
                 />
                 <div

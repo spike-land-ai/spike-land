@@ -271,7 +271,9 @@ export function SiteChat() {
                         };
                         reader.readAsDataURL(file);
                       });
-                      if (fileInputRef.current) fileInputRef.current.value = "";
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = "";
+                      }
                     }}
                   />
                   <Button

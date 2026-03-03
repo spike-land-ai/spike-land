@@ -2,7 +2,9 @@
 
 ## Overview
 
-MCP registry and platform server for spike.land, providing 80+ tools covering auth, storage, AI gateway, marketplace, and more. Runs as a Cloudflare Worker with D1 database. Private package (`@spike-land-ai/spike-land-mcp`).
+MCP registry and platform server for spike.land, providing 80+ tools covering
+auth, storage, AI gateway, marketplace, and more. Runs as a Cloudflare Worker
+with D1 database. Private package (`@spike-land-ai/spike-land-mcp`).
 
 ## Commands
 

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { errorResult, jsonResult, SHARE_ACTION_VALUES, toolEvent } from "../types.js";
 import { tryCatch } from "./try-catch.js";
-import { imageProcedure, withResolves, withOwnership } from "../tool-builder/image-middleware.js";
+import { imageProcedure, withOwnership, withResolves } from "../tool-builder/image-middleware.js";
 
 export const shareTool = imageProcedure
   .use(withResolves({ image_id: "image" }))
@@ -26,7 +26,12 @@ export const shareTool = imageProcedure
         return errorResult("UPDATE_FAILED", "Failed to update image sharing status");
       }
 
-      ctx.notify?.(toolEvent("image:updated", image.id, { action: "share", isPublic: true }));
+      ctx.notify?.(
+        toolEvent("image:updated", image.id, {
+          action: "share",
+          isPublic: true,
+        }),
+      );
 
       return jsonResult({
         image_id: image.id,
@@ -43,7 +48,12 @@ export const shareTool = imageProcedure
       return errorResult("UPDATE_FAILED", "Failed to update image sharing status");
     }
 
-    ctx.notify?.(toolEvent("image:updated", image.id, { action: "unshare", isPublic: false }));
+    ctx.notify?.(
+      toolEvent("image:updated", image.id, {
+        action: "unshare",
+        isPublic: false,
+      }),
+    );
 
     return jsonResult({
       image_id: image.id,

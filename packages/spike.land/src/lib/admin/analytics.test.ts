@@ -56,7 +56,12 @@ describe("getUserAnalytics", () => {
 
     const result = await getUserAnalytics();
 
-    expect(result.dailyRegistrations).toEqual([{ date: "2025-06-15", count: 7 }]);
+    expect(result.dailyRegistrations).toEqual([
+      {
+        date: "2025-06-15",
+        count: 7,
+      },
+    ]);
   });
 
   it("handles individual query failures gracefully", async () => {

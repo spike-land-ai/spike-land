@@ -5,7 +5,7 @@
  * React+D3 component string for state machine visualization.
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { generateVisualizerCode } from "./visualizer-template.js";
 import type { MachineExport } from "./types.js";
 
@@ -154,7 +154,13 @@ describe("generateVisualizerCode", () => {
         name: "Static",
         initial: "s1",
         states: {
-          s1: { id: "s1", type: "atomic", children: [], entryActions: [], exitActions: [] },
+          s1: {
+            id: "s1",
+            type: "atomic",
+            children: [],
+            entryActions: [],
+            exitActions: [],
+          },
         },
         transitions: [],
         context: {},

@@ -11,7 +11,7 @@
  */
 
 import { readFileSync } from "node:fs";
-import { resolve, join } from "node:path";
+import { join, resolve } from "node:path";
 import * as esbuild from "esbuild";
 import YAML from "yaml";
 

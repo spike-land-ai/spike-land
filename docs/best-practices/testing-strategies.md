@@ -146,7 +146,7 @@ afterEach(() => {
 // Mock window.matchMedia
 Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -871,11 +871,11 @@ import { createTestContext, TestContext } from "../support/context";
 
 let context: TestContext;
 
-Before(async function() {
+Before(async function () {
   context = await createTestContext();
 });
 
-After(async function() {
+After(async function () {
   await context.close();
 });
 
@@ -885,20 +885,20 @@ Given("I am on the login page", async () => {
 
 When("I enter email {string}", async (email: string) => {
   await context.page.fill(
-    "input[type=\"email\"]",
+    'input[type="email"]',
     email,
   );
 });
 
 When("I enter password {string}", async (password: string) => {
   await context.page.fill(
-    "input[type=\"password\"]",
+    'input[type="password"]',
     password,
   );
 });
 
 When("I click the login button", async () => {
-  await context.page.click("button[type=\"submit\"]");
+  await context.page.click('button[type="submit"]');
 });
 
 Then("I should be redirected to the dashboard", async () => {
@@ -925,12 +925,12 @@ Then("I should remain on the login page", async () => {
 });
 
 Then("I should see validation errors", async () => {
-  const errors = context.page.locator("[data-testid=\"error\"]");
+  const errors = context.page.locator('[data-testid="error"]');
   expect(await errors.count()).toBeGreaterThan(0);
 });
 
 Then("the login button should be disabled", async () => {
-  const button = context.page.locator("button[type=\"submit\"]");
+  const button = context.page.locator('button[type="submit"]');
   await expect(button).toBeDisabled();
 });
 ```
@@ -951,17 +951,17 @@ Given("I am logged in as {string}", async (email: string) => {
   await page.goto("http://localhost:3000/login");
 
   // Enter credentials
-  await page.fill("input[type=\"email\"]", email);
-  await page.fill("input[type=\"password\"]", "TestPassword123");
+  await page.fill('input[type="email"]', email);
+  await page.fill('input[type="password"]', "TestPassword123");
 
   // Submit and wait for navigation
-  await page.click("button[type=\"submit\"]");
+  await page.click('button[type="submit"]');
   await page.waitForURL("**/dashboard");
 });
 
 Given("I am on the {string} page", async (pageName: string) => {
   const { page } = testContext;
-  const routes: { [key: string]: string; } = {
+  const routes: { [key: string]: string } = {
     "My Apps": "/my-apps",
     "Marketplace": "/marketplace",
     "Settings": "/settings",
@@ -977,17 +977,17 @@ When("I click the {string} button", async (buttonName: string) => {
 
 When("I enter app name {string}", async (name: string) => {
   const { page } = testContext;
-  await page.fill("input[placeholder*=\"App name\"]", name);
+  await page.fill('input[placeholder*="App name"]', name);
 });
 
 When("I enter description {string}", async (description: string) => {
   const { page } = testContext;
-  await page.fill("textarea[placeholder*=\"description\"]", description);
+  await page.fill('textarea[placeholder*="description"]', description);
 });
 
 Then("I should see the new app in my apps list", async () => {
   const { page } = testContext;
-  const appCard = page.locator("[data-testid=\"app-card\"]").first();
+  const appCard = page.locator('[data-testid="app-card"]').first();
   await expect(appCard).toBeVisible();
 });
 

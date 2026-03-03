@@ -545,7 +545,11 @@ describe("useCleanSweep", () => {
         await result.current.startSession("photo");
       });
 
-      const completedSession = { ...session, status: "COMPLETED" as const, totalPoints: 30 };
+      const completedSession = {
+        ...session,
+        status: "COMPLETED" as const,
+        totalPoints: 30,
+      };
       mockFetchSuccess(completedSession);
 
       // endSession calls refreshStreak, fetchRecentSessions, fetchAchievements

@@ -2,7 +2,10 @@
 
 ## Overview
 
-MCP multiplexer CLI with lazy toolset loading. Aggregates multiple MCP servers, loads tool definitions on demand, and provides an interactive Claude chat interface. Node.js runtime, bundled with tsup, published as `@spike-land-ai/spike-cli`.
+MCP multiplexer CLI with lazy toolset loading. Aggregates multiple MCP servers,
+loads tool definitions on demand, and provides an interactive Claude chat
+interface. Node.js runtime, bundled with tsup, published as
+`@spike-land-ai/spike-cli`.
 
 ## Commands
 
@@ -33,7 +36,8 @@ npm run lint         # ESLint
 └── util/             # Shared utilities
 ```
 
-**Key pattern**: The multiplexer discovers MCP servers from a registry, lazily loads their tool schemas, and presents a unified tool surface to AI clients.
+**Key pattern**: The multiplexer discovers MCP servers from a registry, lazily
+loads their tool schemas, and presents a unified tool surface to AI clients.
 
 ## Code Quality Rules
 

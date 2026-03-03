@@ -155,7 +155,9 @@ export function registerSandboxTools(registry: ToolRegistry, userId: string, db:
         const startTime = Date.now();
 
         // Simulated execution — CF Workers cannot spawn processes
-        const stdout = `[${execLanguage}] Executed ${code.split("\n").length} line(s) successfully. (simulated — use spike.land for real execution)`;
+        const stdout = `[${execLanguage}] Executed ${
+          code.split("\n").length
+        } line(s) successfully. (simulated — use spike.land for real execution)`;
         const stderr = "";
         const exitCode = 0;
         const durationMs = Date.now() - startTime;

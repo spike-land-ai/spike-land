@@ -259,7 +259,7 @@ const searchTool: Tool = {
 };
 
 // Register tool handler
-server.setRequestHandler(CallToolRequest, async request => {
+server.setRequestHandler(CallToolRequest, async (request) => {
   if (request.params.name === "search") {
     const { query, limit } = request.params.arguments as {
       query: string;
@@ -553,7 +553,7 @@ function validateAndProcessSearch(args: unknown) {
 // Error handling for Zod
 function handleValidationError(error: z.ZodError) {
   return {
-    errors: error.errors.map(e => ({
+    errors: error.errors.map((e) => ({
       path: e.path.join("."),
       message: e.message,
       code: e.code,
@@ -681,13 +681,13 @@ const rateLimit = require("express-rate-limit");
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // 100 requests per window
-  keyGenerator: req => req.user?.id || req.ip,
+  keyGenerator: (req) => req.user?.id || req.ip,
 });
 
 app.use(limiter);
 
 // Tool implementation with security checks
-server.setRequestHandler(CallToolRequest, async request => {
+server.setRequestHandler(CallToolRequest, async (request) => {
   const { name, arguments: args } = request.params;
 
   // 1. Permission check
@@ -798,7 +798,7 @@ describe("MCP Server - Tools", () => {
     const server = new Server({ name: "test-server" });
 
     // Set up tool handler
-    server.setRequestHandler(CallToolRequest, async request => {
+    server.setRequestHandler(CallToolRequest, async (request) => {
       if (request.params.name === "add_numbers") {
         const { a, b } = request.params.arguments;
         return {
@@ -1360,7 +1360,9 @@ server.setRequestHandler(
         content: [
           {
             type: "text",
-            text: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+            text: `Error: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
             isError: true,
           },
         ],
@@ -1407,9 +1409,9 @@ server.setRequestHandler(ListResourcesRequest, async () => {
     .prepare(
       "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name",
     )
-    .all() as Array<{ name: string; }>;
+    .all() as Array<{ name: string }>;
 
-  const resources: Resource[] = tables.map(table => ({
+  const resources: Resource[] = tables.map((table) => ({
     uri: `database://schema/${table.name}`,
     name: `${table.name}_schema`,
     description: `Schema for ${table.name} table`,
@@ -1465,9 +1467,9 @@ const queryTool: Tool = {
   },
 };
 
-server.setRequestHandler(CallToolRequest, async request => {
+server.setRequestHandler(CallToolRequest, async (request) => {
   if (request.params.name === "query") {
-    const { sql } = request.params.arguments as { sql: string; };
+    const { sql } = request.params.arguments as { sql: string };
 
     // Security: Validate query (simple check - expand in production)
     if (sql.toLowerCase().includes("drop")) {
@@ -1492,7 +1494,9 @@ server.setRequestHandler(CallToolRequest, async request => {
         content: [
           {
             type: "text",
-            text: `Query error: ${error instanceof Error ? error.message : "Unknown"}`,
+            text: `Query error: ${
+              error instanceof Error ? error.message : "Unknown"
+            }`,
             isError: true,
           },
         ],

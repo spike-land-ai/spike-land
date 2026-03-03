@@ -146,7 +146,9 @@ describe("message-tools", () => {
           timestamp: 2000n,
         },
       );
-      const result = await server.call("stdb_list_dms", { withIdentity: "user-2" });
+      const result = await server.call("stdb_list_dms", {
+        withIdentity: "user-2",
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.count).toBe(1);
       expect(parsed.messages[0].content).toBe("A");
@@ -173,7 +175,9 @@ describe("message-tools", () => {
         read: false,
         timestamp: 1000n,
       });
-      const result = await server.call("stdb_mark_dm_read", { messageId: "42" });
+      const result = await server.call("stdb_mark_dm_read", {
+        messageId: "42",
+      });
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.marked).toBe(true);
       expect(parsed.messageId).toBe("42");
@@ -184,7 +188,9 @@ describe("message-tools", () => {
       const dcClient = createMockPlatformClient({ connected: false });
       const dcServer = createMockServer();
       registerMessageTools(dcServer as unknown as McpServer, dcClient);
-      const result = await dcServer.call("stdb_mark_dm_read", { messageId: "1" });
+      const result = await dcServer.call("stdb_mark_dm_read", {
+        messageId: "1",
+      });
       expect(result.isError).toBe(true);
     });
 

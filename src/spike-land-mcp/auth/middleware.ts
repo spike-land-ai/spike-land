@@ -3,7 +3,7 @@ import type { Env } from "../env";
 import { createDb } from "../db/index";
 import { lookupApiKey } from "./api-key";
 import { oauthAccessTokens } from "../db/schema";
-import { eq, and, gt } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 
 async function hashToken(token: string): Promise<string> {
   const encoded = new TextEncoder().encode(token);
@@ -66,7 +66,13 @@ export const authMiddleware = createMiddleware<{
   }
 
   if (!userId) {
-    return c.json({ error: "Unauthorized", message: "Invalid or expired token" }, 401);
+    return c.json(
+      {
+        error: "Unauthorized",
+        message: "Invalid or expired token",
+      },
+      401,
+    );
   }
 
   c.set("userId", userId);

@@ -56,7 +56,11 @@ describe("removeBg", () => {
   it("should return error when image name contains _nobg (already processed)", async () => {
     const ctx: ToolContext = { userId, deps };
     mocks.resolverMocks.resolveImage.mockResolvedValue(
-      mockImageRow({ id: asImageId("img-2"), userId, name: "portrait_nobg.png" }),
+      mockImageRow({
+        id: asImageId("img-2"),
+        userId,
+        name: "portrait_nobg.png",
+      }),
     );
 
     const result = await removeBg({ image_id: "img-2" }, ctx);

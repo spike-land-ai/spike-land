@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Wrench, AlertCircle, Copy, Check } from "lucide-react";
+import { AlertCircle, Check, ChevronDown, ChevronRight, Copy, Wrench } from "lucide-react";
 import type { ChatMessage as ChatMessageType } from "../../hooks/useChat";
 
 interface ChatMessageProps {
@@ -134,7 +134,9 @@ function SimpleMarkdown({ text, isUser }: { text: string; isUser: boolean }) {
               href={linkMatch[2]}
               target="_blank"
               rel="noopener noreferrer"
-              className={`${isUser ? "text-obsidian-900" : "text-amber-neon"} underline hover:opacity-80 transition-opacity`}
+              className={`${
+                isUser ? "text-obsidian-900" : "text-amber-neon"
+              } underline hover:opacity-80 transition-opacity`}
             >
               {linkMatch[1]}
             </a>

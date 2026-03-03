@@ -8,7 +8,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "../types";
 import { freeTool } from "../../procedures/index";
-import { textResult, safeToolCall, apiRequest } from "../tool-helpers";
+import { apiRequest, safeToolCall, textResult } from "../tool-helpers";
 import type { DrizzleDB } from "../../db/index";
 
 export function registerStoreSearchTools(
@@ -70,7 +70,9 @@ export function registerStoreSearchTools(
         return safeToolCall("store_search", async () => {
           const params = new URLSearchParams({ query: input.query });
           if (input.category) params.set("category", input.category);
-          if (input.limit !== undefined) params.set("limit", String(input.limit));
+          if (input.limit !== undefined) {
+            params.set("limit", String(input.limit));
+          }
 
           const results = await apiRequest<
             Array<{

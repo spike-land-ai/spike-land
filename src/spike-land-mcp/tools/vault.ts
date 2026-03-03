@@ -13,11 +13,11 @@
  */
 
 import { z } from "zod";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import { freeTool } from "../procedures/index";
 import type { DrizzleDB } from "../db/index";
-import { vaultSecrets, subscriptions } from "../db/schema";
+import { subscriptions, vaultSecrets } from "../db/schema";
 
 const FREE_SECRET_LIMIT = 25;
 const PREMIUM_SECRET_LIMIT = 500;
@@ -210,7 +210,9 @@ export function registerVaultTools(registry: ToolRegistry, userId: string, db: D
 
           let text = `**Vault (${count}/${limit} secrets)**\n\n`;
           for (const s of secrets) {
-            text += `- **${s.key}** — ID: ${s.id}\n  Created: ${new Date(s.createdAt).toISOString()}\n`;
+            text += `- **${s.key}** — ID: ${s.id}\n  Created: ${new Date(
+              s.createdAt,
+            ).toISOString()}\n`;
           }
 
           return { content: [{ type: "text", text }] };
@@ -256,7 +258,9 @@ export function registerVaultTools(registry: ToolRegistry, userId: string, db: D
             content: [
               {
                 type: "text",
-                text: `**Secret Deleted!**\n\n**Name:** ${secret[0].key}\n\nThe secret has been permanently removed.`,
+                text: `**Secret Deleted!**\n\n**Name:** ${
+                  secret[0].key
+                }\n\nThe secret has been permanently removed.`,
               },
             ],
           };

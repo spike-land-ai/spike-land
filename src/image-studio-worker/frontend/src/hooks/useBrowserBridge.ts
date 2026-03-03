@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { ChatMessage } from "./useChat";
 
 interface BrowserBridgeOptions {
@@ -36,14 +36,24 @@ export function useBrowserBridge({ messages, onResult }: BrowserBridgeOptions) {
 
         case "browser_click": {
           const el = document.querySelector(args.selector as string) as HTMLElement;
-          if (!el) return { success: false, error: `Element not found: ${args.selector}` };
+          if (!el) {
+            return {
+              success: false,
+              error: `Element not found: ${args.selector}`,
+            };
+          }
           el.click();
           return { success: true, clicked: args.selector };
         }
 
         case "browser_fill": {
           const input = document.querySelector(args.selector as string) as HTMLInputElement;
-          if (!input) return { success: false, error: `Input not found: ${args.selector}` };
+          if (!input) {
+            return {
+              success: false,
+              error: `Input not found: ${args.selector}`,
+            };
+          }
           const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
             window.HTMLInputElement.prototype,
             "value",
@@ -65,7 +75,9 @@ export function useBrowserBridge({ messages, onResult }: BrowserBridgeOptions) {
         case "browser_read_text": {
           const selector = (args.selector as string) || "body";
           const el = document.querySelector(selector);
-          if (!el) return { success: false, error: `Element not found: ${selector}` };
+          if (!el) {
+            return { success: false, error: `Element not found: ${selector}` };
+          }
           const text = el.textContent?.slice(0, 2000) || "";
           return { success: true, text };
         }
@@ -76,7 +88,10 @@ export function useBrowserBridge({ messages, onResult }: BrowserBridgeOptions) {
             const result = fn();
             return { success: true, result: String(result).slice(0, 1000) };
           } catch (err) {
-            return { success: false, error: err instanceof Error ? err.message : "Eval failed" };
+            return {
+              success: false,
+              error: err instanceof Error ? err.message : "Eval failed",
+            };
           }
         }
 
@@ -87,7 +102,10 @@ export function useBrowserBridge({ messages, onResult }: BrowserBridgeOptions) {
               el.scrollIntoView({ behavior: "smooth", block: "center" });
               return { success: true, scrolledTo: args.selector };
             }
-            return { success: false, error: `Element not found: ${args.selector}` };
+            return {
+              success: false,
+              error: `Element not found: ${args.selector}`,
+            };
           }
           window.scrollTo({ top: Number(args.y) || 0, behavior: "smooth" });
           return { success: true, scrolledTo: args.y };

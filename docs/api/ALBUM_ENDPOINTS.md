@@ -64,9 +64,9 @@ const response = await fetch("/api/albums");
 const { albums } = await response.json();
 
 // Response contains array of albums with preview images
-albums.forEach(album => {
+albums.forEach((album) => {
   console.log(`${album.name}: ${album.imageCount} images`);
-  album.previewImages.forEach(img => {
+  album.previewImages.forEach((img) => {
     console.log(`  - ${img.name}`);
   });
 });
@@ -225,7 +225,7 @@ console.log(`Album: ${album.name}`);
 console.log(`Owner: ${album.isOwner ? "yes" : "no"}`);
 console.log(`Images: ${album.imageCount}`);
 
-album.images.forEach(img => {
+album.images.forEach((img) => {
   console.log(`  - ${img.name}: ${img.width}x${img.height}`);
   if (img.enhancedUrl) {
     console.log(`    Enhanced at ${img.enhancementTier}`);
@@ -627,7 +627,8 @@ const res = await fetch(`/api/albums/${albumId}`, {
 });
 
 const { album } = await res.json();
-const shareUrl = `https://spike.land/apps/pixel/albums/${albumId}?token=${album.shareToken}`;
+const shareUrl =
+  `https://spike.land/apps/pixel/albums/${albumId}?token=${album.shareToken}`;
 console.log(`Share this link: ${shareUrl}`);
 ```
 

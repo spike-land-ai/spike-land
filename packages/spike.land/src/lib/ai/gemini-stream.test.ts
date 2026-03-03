@@ -51,7 +51,9 @@ describe("gemini-stream", () => {
             content: {
               parts: [
                 {
-                  inlineData: { data: Buffer.from("chunk1").toString("base64") },
+                  inlineData: {
+                    data: Buffer.from("chunk1").toString("base64"),
+                  },
                 },
               ],
             },
@@ -64,7 +66,9 @@ describe("gemini-stream", () => {
             content: {
               parts: [
                 {
-                  inlineData: { data: Buffer.from("chunk2").toString("base64") },
+                  inlineData: {
+                    data: Buffer.from("chunk2").toString("base64"),
+                  },
                 },
               ],
             },

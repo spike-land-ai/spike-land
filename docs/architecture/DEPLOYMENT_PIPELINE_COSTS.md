@@ -19,15 +19,15 @@
 
 ### CI/CD Pipeline Breakdown (successful run #22174827154)
 
-| Job                              | Duration         | Notes                       |
-| -------------------------------- | ---------------- | --------------------------- |
-| Detect changed paths             | 7 sec            | Path filtering              |
-| Quality Checks (Lint + Security) | 2 min 2 sec      | ESLint + tsc + audit        |
-| unit-tests-1 (shard 1/4)         | 2 min 8 sec      | `--changed HEAD^1` on main  |
-| unit-tests-2 (shard 2/4)         | **5 min 21 sec** | Slowest shard (bottleneck)  |
-| unit-tests-3 (shard 3/4)         | 2 min 10 sec     |                             |
-| unit-tests-4 (shard 4/4)         | 4 min 26 sec     |                             |
-| Package Tests                    | skipped          | Only when src/ changed |
+| Job                              | Duration         | Notes                      |
+| -------------------------------- | ---------------- | -------------------------- |
+| Detect changed paths             | 7 sec            | Path filtering             |
+| Quality Checks (Lint + Security) | 2 min 2 sec      | ESLint + tsc + audit       |
+| unit-tests-1 (shard 1/4)         | 2 min 8 sec      | `--changed HEAD^1` on main |
+| unit-tests-2 (shard 2/4)         | **5 min 21 sec** | Slowest shard (bottleneck) |
+| unit-tests-3 (shard 3/4)         | 2 min 10 sec     |                            |
+| unit-tests-4 (shard 4/4)         | 4 min 26 sec     |                            |
+| Package Tests                    | skipped          | Only when src/ changed     |
 
 **CI total: ~5.5 min** (wall clock, parallel jobs)
 

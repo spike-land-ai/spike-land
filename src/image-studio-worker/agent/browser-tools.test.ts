@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { BROWSER_TOOLS, isBrowserTool } from "./browser-tools.ts";
 
 describe("browser-tools", () => {

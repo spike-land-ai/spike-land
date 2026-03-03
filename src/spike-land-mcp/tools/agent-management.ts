@@ -6,10 +6,10 @@
  */
 
 import { z } from "zod";
-import { eq, desc, asc } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import { freeTool, textResult } from "../procedures/index";
-import { claudeCodeAgents, agentMessages } from "../db/schema";
+import { agentMessages, claudeCodeAgents } from "../db/schema";
 import type { DrizzleDB } from "../db/index";
 
 export function registerAgentManagementTools(
@@ -78,7 +78,9 @@ export function registerAgentManagementTools(
             `**Status:** ${agent.status}\n` +
             `**Workspace:** ${agent.workspaceId || "(none)"}\n` +
             `**Metadata:** ${JSON.stringify(meta)}\n` +
-            `**Last Active:** ${agent.lastActiveAt ? new Date(agent.lastActiveAt).toISOString() : "never"}\n` +
+            `**Last Active:** ${
+              agent.lastActiveAt ? new Date(agent.lastActiveAt).toISOString() : "never"
+            }\n` +
             `**Created:** ${new Date(agent.createdAt).toISOString()}`,
         );
       }),
@@ -95,7 +97,10 @@ export function registerAgentManagementTools(
 
         // Verify ownership
         const agentRows = await ctx.db
-          .select({ userId: claudeCodeAgents.userId, name: claudeCodeAgents.name })
+          .select({
+            userId: claudeCodeAgents.userId,
+            name: claudeCodeAgents.name,
+          })
           .from(claudeCodeAgents)
           .where(eq(claudeCodeAgents.id, agent_id))
           .limit(1);
@@ -152,7 +157,10 @@ export function registerAgentManagementTools(
 
         // Verify ownership
         const agentRows = await ctx.db
-          .select({ userId: claudeCodeAgents.userId, name: claudeCodeAgents.name })
+          .select({
+            userId: claudeCodeAgents.userId,
+            name: claudeCodeAgents.name,
+          })
           .from(claudeCodeAgents)
           .where(eq(claudeCodeAgents.id, agent_id))
           .limit(1);

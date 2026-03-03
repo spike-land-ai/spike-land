@@ -2,7 +2,7 @@ import type { ICodeSession } from "@/lib/interfaces";
 import { computeSessionHash, sanitizeSession } from "@/lib/make-sess";
 import { tryCatch } from "@/lib/try-catch";
 import type { ISessionSynchronizer } from "./types";
-import { getStdbClient, connectToSpacetimeDB } from "@/lib/stdb";
+import { connectToSpacetimeDB, getStdbClient } from "@/lib/stdb";
 
 /**
  * SessionSynchronizer enables communication for code sessions

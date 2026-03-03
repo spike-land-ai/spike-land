@@ -78,7 +78,12 @@ const NETWORK_ARROWS: NetworkArrow[] = [
 const NEW_TABLES: NewTable[] = [
   { id: "msg", label: "AgentMessage", sublabel: "messaging", color: "#06b6d4" },
   { id: "task", label: "McpTask", sublabel: "task queue", color: "#22d3ee" },
-  { id: "tool", label: "RegisteredTool", sublabel: "tool registry", color: "#67e8f9" },
+  {
+    id: "tool",
+    label: "RegisteredTool",
+    sublabel: "tool registry",
+    color: "#67e8f9",
+  },
   { id: "agent", label: "Agent", sublabel: "presence", color: "#a5f3fc" },
 ];
 
@@ -368,7 +373,9 @@ function SpacetimePanel({ opacity, glowLevel }: SpacetimePanelProps) {
             top: 18,
             bottom: 18,
             width: 1,
-            background: `linear-gradient(to bottom, transparent, rgba(6,182,212,${0.3 * glowLevel}), transparent)`,
+            background: `linear-gradient(to bottom, transparent, rgba(6,182,212,${
+              0.3 * glowLevel
+            }), transparent)`,
           }}
         />
 

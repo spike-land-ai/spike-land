@@ -12,12 +12,36 @@ const categories = [
 ];
 
 const placeholderTools = [
-  { name: "ai_chat", category: "AI Gateway", description: "Send a prompt to an AI model" },
-  { name: "list_files", category: "Filesystem", description: "List files in a directory" },
-  { name: "create_app", category: "Apps", description: "Create a new application" },
-  { name: "get_metrics", category: "Analytics", description: "Retrieve usage metrics" },
-  { name: "update_config", category: "Configuration", description: "Update system configuration" },
-  { name: "arena_match", category: "Arena", description: "Compare model outputs side-by-side" },
+  {
+    name: "ai_chat",
+    category: "AI Gateway",
+    description: "Send a prompt to an AI model",
+  },
+  {
+    name: "list_files",
+    category: "Filesystem",
+    description: "List files in a directory",
+  },
+  {
+    name: "create_app",
+    category: "Apps",
+    description: "Create a new application",
+  },
+  {
+    name: "get_metrics",
+    category: "Analytics",
+    description: "Retrieve usage metrics",
+  },
+  {
+    name: "update_config",
+    category: "Configuration",
+    description: "Update system configuration",
+  },
+  {
+    name: "arena_match",
+    category: "Arena",
+    description: "Compare model outputs side-by-side",
+  },
 ];
 
 export function ToolsIndexPage() {
@@ -62,7 +86,9 @@ export function ToolsIndexPage() {
           <Link
             key={tool.name}
             to="/tools/$category"
-            params={{ category: tool.category.toLowerCase().replace(/\s+/g, "-") }}
+            params={{
+              category: tool.category.toLowerCase().replace(/\s+/g, "-"),
+            }}
             className="rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
           >
             <h3 className="font-mono text-sm font-semibold">{tool.name}</h3>

@@ -71,9 +71,9 @@ export function LiveStream({ challengeId, submissionId }: LiveStreamProps) {
               eloChange?: number;
             };
             addLog(
-              `Scored! ${((scoreData.reviewScore || 0) * 100).toFixed(0)}% (ELO ${
-                (scoreData.eloChange || 0) > 0 ? "+" : ""
-              }${scoreData.eloChange || 0})`,
+              `Scored! ${((scoreData.reviewScore || 0) * 100).toFixed(
+                0,
+              )}% (ELO ${(scoreData.eloChange || 0) > 0 ? "+" : ""}${scoreData.eloChange || 0})`,
               "success",
             );
             setPhase("SCORED");

@@ -9,7 +9,7 @@
 import { z } from "zod";
 import type { ToolRegistry } from "../mcp/registry";
 import { freeTool, textResult } from "../procedures/index";
-import { safeToolCall, McpError, McpErrorCode } from "./tool-helpers";
+import { McpError, McpErrorCode, safeToolCall } from "./tool-helpers";
 import type { DrizzleDB } from "../db/index";
 import type { Env } from "../env";
 
@@ -92,7 +92,9 @@ function resolveProvider(
   modelInput?: string,
   providerOverride?: string,
 ): "anthropic" | "openai" | "google" {
-  if (providerOverride) return providerOverride as "anthropic" | "openai" | "google";
+  if (providerOverride) {
+    return providerOverride as "anthropic" | "openai" | "google";
+  }
   if (modelInput) {
     const model = resolveModel(modelInput);
     if (model) return model.provider;
@@ -419,7 +421,10 @@ export function registerAiGatewayTools(
           const resolvedProvider = resolveProvider(model, provider);
           const resolvedModelInfo = model ? resolveModel(model) : undefined;
 
-          let result: { text: string; usage: { input_tokens: number; output_tokens: number } };
+          let result: {
+            text: string;
+            usage: { input_tokens: number; output_tokens: number };
+          };
           let modelId: string;
 
           if (resolvedProvider === "anthropic") {

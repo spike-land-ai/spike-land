@@ -184,11 +184,16 @@ export function registerDiffTools(registry: ToolRegistry, userId: string, db: Dr
       .meta({ category: "diff", tier: "free" })
       .handler(async ({ input }) => {
         const changeset = changesets.get(input.changeset_id);
-        if (!changeset) throw new Error(`Changeset ${input.changeset_id} not found`);
+        if (!changeset) {
+          throw new Error(`Changeset ${input.changeset_id} not found`);
+        }
         const applied = input.target_files.map((target) => {
           const diff = changeset.files.find((f) => f.path === target.path);
           if (!diff) return target;
-          return { path: target.path, content: applyPatch(target.content, diff.hunks) };
+          return {
+            path: target.path,
+            content: applyPatch(target.content, diff.hunks),
+          };
         });
         return jsonResult(`Changeset ${input.changeset_id} applied`, applied);
       }),
@@ -202,7 +207,9 @@ export function registerDiffTools(registry: ToolRegistry, userId: string, db: Dr
       .meta({ category: "diff", tier: "free" })
       .handler(async ({ input }) => {
         const changeset = changesets.get(input.changeset_id);
-        if (!changeset) throw new Error(`Changeset ${input.changeset_id} not found`);
+        if (!changeset) {
+          throw new Error(`Changeset ${input.changeset_id} not found`);
+        }
         return jsonResult(`Changeset ${input.changeset_id} is valid`, {
           fileCount: changeset.files.length,
         });
@@ -253,7 +260,9 @@ export function registerDiffTools(registry: ToolRegistry, userId: string, db: Dr
       .meta({ category: "diff", tier: "free" })
       .handler(async ({ input }) => {
         const changeset = changesets.get(input.changeset_id);
-        if (!changeset) throw new Error(`Changeset ${input.changeset_id} not found`);
+        if (!changeset) {
+          throw new Error(`Changeset ${input.changeset_id} not found`);
+        }
         return jsonResult(`Changeset ${input.changeset_id}`, changeset);
       }),
   );

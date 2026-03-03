@@ -80,7 +80,11 @@ const TIER_CONFIG: Record<ModelTier, TierConfig> = {
   },
 };
 
-const TASK_POOL: { label: string; complexity: TaskComplexity; tier: ModelTier }[] = [
+const TASK_POOL: {
+  label: string;
+  complexity: TaskComplexity;
+  tier: ModelTier;
+}[] = [
   { label: "Arch design", complexity: "complex", tier: "opus" },
   { label: "Security audit", complexity: "complex", tier: "opus" },
   { label: "Edge case plan", complexity: "complex", tier: "opus" },

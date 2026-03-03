@@ -30,7 +30,9 @@ describe("update", () => {
     );
     const data = JSON.parse(result.content[0].text);
     expect(data.name).toBe("new-name");
-    expect(mocks.db.imageUpdate).toHaveBeenCalledWith("img-1", { name: "new-name" });
+    expect(mocks.db.imageUpdate).toHaveBeenCalledWith("img-1", {
+      name: "new-name",
+    });
   });
 
   it("should update image description", async () => {
@@ -53,7 +55,9 @@ describe("update", () => {
     expect(result.isError).toBeUndefined();
     const data = JSON.parse(result.content[0].text);
     expect(data.description).toBe("A sunset photo");
-    expect(mocks.db.imageUpdate).toHaveBeenCalledWith("img-1", { description: "A sunset photo" });
+    expect(mocks.db.imageUpdate).toHaveBeenCalledWith("img-1", {
+      description: "A sunset photo",
+    });
   });
 
   it("should update image tags", async () => {
@@ -76,7 +80,9 @@ describe("update", () => {
     expect(result.isError).toBeUndefined();
     const data = JSON.parse(result.content[0].text);
     expect(data.tags).toEqual(["sunset", "beach"]);
-    expect(mocks.db.imageUpdate).toHaveBeenCalledWith("img-1", { tags: ["sunset", "beach"] });
+    expect(mocks.db.imageUpdate).toHaveBeenCalledWith("img-1", {
+      tags: ["sunset", "beach"],
+    });
   });
 
   it("should update all fields at once", async () => {

@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { user, session, account, verification } from "./schema";
+import { describe, expect, it } from "vitest";
+import { account, session, user, verification } from "./schema";
 import { getTableConfig } from "drizzle-orm/sqlite-core";
 
 describe("mcp-auth Drizzle schema", () => {

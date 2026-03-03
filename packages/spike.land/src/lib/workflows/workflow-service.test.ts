@@ -281,7 +281,11 @@ describe("getWorkflow", () => {
 describe("createWorkflow", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockValidateWorkflow.mockReturnValue({ valid: true, errors: [], warnings: [] });
+    mockValidateWorkflow.mockReturnValue({
+      valid: true,
+      errors: [],
+      warnings: [],
+    });
   });
 
   it("creates workflow without steps", async () => {
@@ -401,7 +405,10 @@ describe("updateWorkflow", () => {
 
   it("updates workflow status", async () => {
     const existing = makePrismaWorkflow("wf-1", "My WF");
-    const updated = { ...makePrismaWorkflow("wf-1", "My WF"), status: "ACTIVE" };
+    const updated = {
+      ...makePrismaWorkflow("wf-1", "My WF"),
+      status: "ACTIVE",
+    };
     mockPrisma.workflow.findFirst.mockResolvedValue(existing);
     mockPrisma.workflow.update.mockResolvedValue(updated);
 
@@ -412,7 +419,10 @@ describe("updateWorkflow", () => {
 
   it("updates description (including null to clear it)", async () => {
     const existing = makePrismaWorkflow("wf-1", "My WF");
-    const updated = { ...makePrismaWorkflow("wf-1", "My WF"), description: null };
+    const updated = {
+      ...makePrismaWorkflow("wf-1", "My WF"),
+      description: null,
+    };
     mockPrisma.workflow.findFirst.mockResolvedValue(existing);
     mockPrisma.workflow.update.mockResolvedValue(updated);
 
@@ -480,7 +490,11 @@ describe("deleteWorkflow", () => {
 describe("createWorkflowVersion", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockValidateWorkflow.mockReturnValue({ valid: true, errors: [], warnings: [] });
+    mockValidateWorkflow.mockReturnValue({
+      valid: true,
+      errors: [],
+      warnings: [],
+    });
   });
 
   it("throws when workflow is not found", async () => {
@@ -590,7 +604,11 @@ describe("createWorkflowVersion", () => {
 describe("publishWorkflowVersion", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockValidateForPublish.mockReturnValue({ valid: true, errors: [], warnings: [] });
+    mockValidateForPublish.mockReturnValue({
+      valid: true,
+      errors: [],
+      warnings: [],
+    });
   });
 
   it("throws when workflow is not found", async () => {

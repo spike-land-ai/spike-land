@@ -892,7 +892,9 @@ export const chessArenaTools: StandaloneToolDefinition[] = [
         const raw = (await prisma.chessTournament.findUnique({
           where: { id: args.tournament_id },
           include: {
-            participants: { include: { player: { select: { id: true, name: true } } } },
+            participants: {
+              include: { player: { select: { id: true, name: true } } },
+            },
             pairings: true,
           },
         })) as TournamentWithRelations | null;

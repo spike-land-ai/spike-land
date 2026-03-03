@@ -8,12 +8,12 @@
  */
 
 import { z } from "zod";
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { ToolRegistry } from "../mcp/registry";
 import { workspaceTool } from "../procedures/index";
 import { textResult } from "./tool-helpers";
 import type { DrizzleDB } from "../db/index";
-import { permissionRequests, claudeCodeAgents } from "../db/schema";
+import { claudeCodeAgents, permissionRequests } from "../db/schema";
 
 export function registerPermissionsTools(
   registry: ToolRegistry,
@@ -101,7 +101,9 @@ export function registerPermissionsTools(
           .where(eq(permissionRequests.id, input.requestId));
 
         return textResult(
-          `**Request ${input.action === "APPROVE" ? "Approved" : "Denied"}**\n\nID: \`${input.requestId}\``,
+          `**Request ${
+            input.action === "APPROVE" ? "Approved" : "Denied"
+          }**\n\nID: \`${input.requestId}\``,
         );
       }),
   );

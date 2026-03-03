@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { eventBus } from "../services/event-bus";
 
 export interface ChatMessage {
@@ -209,7 +209,11 @@ export function useChat(): UseChatReturn {
                           ...m,
                           toolCalls: (m.toolCalls || []).map((tc) =>
                             tc.name === event.name && tc.status === "pending"
-                              ? { ...tc, result: event.result, status: "done" as const }
+                              ? {
+                                  ...tc,
+                                  result: event.result,
+                                  status: "done" as const,
+                                }
                               : tc,
                           ),
                         }
@@ -267,7 +271,10 @@ export function useChat(): UseChatReturn {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantMsg.id && !m.content
-              ? { ...m, content: "Sorry, something went wrong. Please try again." }
+              ? {
+                  ...m,
+                  content: "Sorry, something went wrong. Please try again.",
+                }
               : m,
           ),
         );

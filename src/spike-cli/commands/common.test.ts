@@ -8,7 +8,12 @@ describe("common command helpers", () => {
   });
 
   it("parseInlineServers parses name=command", () => {
-    expect(parseInlineServers(["s1=cmd1"])).toEqual([{ name: "s1", command: "cmd1" }]);
+    expect(parseInlineServers(["s1=cmd1"])).toEqual([
+      {
+        name: "s1",
+        command: "cmd1",
+      },
+    ]);
   });
 
   it("parseInlineServers throws on invalid format", () => {

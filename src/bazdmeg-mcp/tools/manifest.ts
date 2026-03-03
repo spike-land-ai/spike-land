@@ -5,7 +5,7 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
+import { createZodTool, textResult } from "@spike-land-ai/mcp-server-base";
 import { ManifestQuerySchema, ManifestValidateSchema } from "../types.js";
 import { readManifest } from "../manifest.js";
 
@@ -107,7 +107,9 @@ export function registerManifestTools(server: McpServer): void {
         // Required fields
         if (!pkg.kind) errors.push(`\`${name}\`: missing \`kind\``);
         if (!pkg.version) errors.push(`\`${name}\`: missing \`version\``);
-        if (!pkg.description) errors.push(`\`${name}\`: missing \`description\``);
+        if (!pkg.description) {
+          errors.push(`\`${name}\`: missing \`description\``);
+        }
         if (!pkg.entry) errors.push(`\`${name}\`: missing \`entry\``);
 
         // Deps reference existing packages
@@ -166,8 +168,12 @@ export function registerManifestTools(server: McpServer): void {
 
       // Check defaults
       if (!manifest.defaults.scope) errors.push("defaults: missing `scope`");
-      if (!manifest.defaults.registry) errors.push("defaults: missing `registry`");
-      if (!manifest.defaults.license) errors.push("defaults: missing `license`");
+      if (!manifest.defaults.registry) {
+        errors.push("defaults: missing `registry`");
+      }
+      if (!manifest.defaults.license) {
+        errors.push("defaults: missing `license`");
+      }
 
       let report = `## Manifest Validation\n\n`;
       report += `**Packages**: ${allNames.size}\n\n`;

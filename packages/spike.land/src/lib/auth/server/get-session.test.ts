@@ -159,7 +159,9 @@ describe("getSession", () => {
 
     it("returns null when session token is not mock-session-token", async () => {
       mockCookiesGet.mockImplementation((name: string) => {
-        if (name === "better-auth.session_token") return { value: "some-other-token" };
+        if (name === "better-auth.session_token") {
+          return { value: "some-other-token" };
+        }
         return undefined;
       });
       const session = await getSession();
@@ -208,7 +210,13 @@ describe("getSession", () => {
       mockHeadersGet.mockReturnValue(null);
       mockAuth.mockResolvedValue({
         session: { expiresAt: "2099-01-01T00:00:00.000Z" },
-        user: { id: "user_xyz", name: "Bob", email: "bob@example.com", image: null, role: "USER" },
+        user: {
+          id: "user_xyz",
+          name: "Bob",
+          email: "bob@example.com",
+          image: null,
+          role: "USER",
+        },
       });
       const session = await getSession();
       expect(session?.user.id).toBe("user_xyz");

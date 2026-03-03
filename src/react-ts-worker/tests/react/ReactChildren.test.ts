@@ -1,10 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  mapChildren,
-  forEachChildren,
   countChildren,
-  toArray,
+  forEachChildren,
+  mapChildren,
   onlyChild,
+  toArray,
 } from "../../react/ReactChildren.js";
 import { createElement, isValidElement } from "../../react/ReactElement.js";
 

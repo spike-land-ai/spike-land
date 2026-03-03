@@ -2,7 +2,7 @@ name: Security Audit
 
 permissions:
   contents: read
-  packages: read  # Read @spike-land-ai/* packages from GitHub Packages
+  packages: read # Read @spike-land-ai/* packages from GitHub Packages
 
 on:
   # Run on every pull request

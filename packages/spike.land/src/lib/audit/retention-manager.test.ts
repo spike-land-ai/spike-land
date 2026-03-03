@@ -134,7 +134,9 @@ describe("AuditRetentionManager.createPolicy", () => {
   });
 
   it("maps actionTypes from array to string array", async () => {
-    const dbRecord = makePolicy({ actionTypes: ["ROLE_CHANGE", "USER_DELETE"] });
+    const dbRecord = makePolicy({
+      actionTypes: ["ROLE_CHANGE", "USER_DELETE"],
+    });
     mockAuditRetentionPolicyCreate.mockResolvedValue(dbRecord);
 
     await AuditRetentionManager.createPolicy("ws-1", {
@@ -334,7 +336,10 @@ describe("AuditRetentionManager.listPolicies", () => {
 // ---------------------------------------------------------------------------
 describe("AuditRetentionManager.getEffectivePolicy", () => {
   it("returns workspace-specific active policy when one exists", async () => {
-    const workspacePolicy = makePolicy({ id: "ws-policy", workspaceId: "ws-1" });
+    const workspacePolicy = makePolicy({
+      id: "ws-policy",
+      workspaceId: "ws-1",
+    });
     mockAuditRetentionPolicyFindFirst.mockResolvedValueOnce(workspacePolicy);
 
     const result = await AuditRetentionManager.getEffectivePolicy("ws-1");
@@ -600,10 +605,18 @@ describe("AuditRetentionManager.executeAllRetentionJobs", () => {
     // Both policies will be fetched individually
     mockAuditRetentionPolicyFindUnique
       .mockResolvedValueOnce(
-        makePolicy({ id: "p-active-1", archiveAfterDays: null, deleteAfterDays: null }),
+        makePolicy({
+          id: "p-active-1",
+          archiveAfterDays: null,
+          deleteAfterDays: null,
+        }),
       )
       .mockResolvedValueOnce(
-        makePolicy({ id: "p-active-2", archiveAfterDays: null, deleteAfterDays: null }),
+        makePolicy({
+          id: "p-active-2",
+          archiveAfterDays: null,
+          deleteAfterDays: null,
+        }),
       );
 
     const results = await AuditRetentionManager.executeAllRetentionJobs();
@@ -713,7 +726,11 @@ describe("AuditRetentionManager.ensureDefaultPolicy", () => {
 
   it("creates new default policy when none exists", async () => {
     mockAuditRetentionPolicyFindFirst.mockResolvedValue(null);
-    const created = makePolicy({ workspaceId: null, name: "System Default", id: "new-default" });
+    const created = makePolicy({
+      workspaceId: null,
+      name: "System Default",
+      id: "new-default",
+    });
     mockAuditRetentionPolicyCreate.mockResolvedValue(created);
 
     const result = await AuditRetentionManager.ensureDefaultPolicy();

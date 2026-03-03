@@ -537,7 +537,8 @@ type Entity = "users" | "products" | "orders";
 type ApiEndpoint = `/${Method}:${Entity}`;
 
 // Extract parts from a formatted string
-type ParsePath<T> = T extends `/${infer M}:${infer E}` ? { method: M; entity: E; }
+type ParsePath<T> = T extends `/${infer M}:${infer E}`
+  ? { method: M; entity: E }
   : never;
 
 type UserPath = ParsePath<"/POST:users">; // { method: "POST"; entity: "users" }
@@ -567,9 +568,9 @@ type Str = Flatten<string[]>; // string
 type Num = Flatten<number>; // number
 
 // Complex conditional - return type based on input
-type ProcessResult<T> = T extends { error: true; } ? null : T;
+type ProcessResult<T> = T extends { error: true } ? null : T;
 
-function process<T extends { error?: boolean; }>(input: T): ProcessResult<T> {
+function process<T extends { error?: boolean }>(input: T): ProcessResult<T> {
   if (input.error) {
     return null as ProcessResult<T>;
   }
@@ -583,9 +584,9 @@ Ensure all union variants are handled:
 
 ```typescript
 type Shape =
-  | { kind: "circle"; radius: number; }
-  | { kind: "square"; side: number; }
-  | { kind: "triangle"; base: number; height: number; };
+  | { kind: "circle"; radius: number }
+  | { kind: "square"; side: number }
+  | { kind: "triangle"; base: number; height: number };
 
 function getArea(shape: Shape): number {
   switch (shape.kind) {
@@ -615,11 +616,11 @@ Use a `Result` type instead of throwing exceptions for expected errors:
 
 ```typescript
 type Result<T, E> =
-  | { kind: "ok"; value: T; }
-  | { kind: "error"; error: E; };
+  | { kind: "ok"; value: T }
+  | { kind: "error"; error: E };
 
 // More concise syntax
-type Result<T, E> = { ok: true; value: T; } | { ok: false; error: E; };
+type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 
 interface ValidationError {
   field: string;
@@ -651,7 +652,7 @@ if (result.ok) {
 Use the Either monad for functional error handling:
 
 ```typescript
-type Either<L, R> = { kind: "left"; value: L; } | { kind: "right"; value: R; };
+type Either<L, R> = { kind: "left"; value: L } | { kind: "right"; value: R };
 
 const Either = {
   right: <R>(value: R): Either<never, R> => ({
@@ -700,10 +701,10 @@ function parseJSON(text: string): Either<ParseError, unknown> {
   }
 }
 
-const data = parseJSON("{\"name\":\"Alice\"}");
+const data = parseJSON('{"name":"Alice"}');
 const result = Either.match(
-  error => `Parse failed: ${error.message}`,
-  value => `Parsed: ${JSON.stringify(value)}`,
+  (error) => `Parse failed: ${error.message}`,
+  (value) => `Parsed: ${JSON.stringify(value)}`,
   data,
 );
 ```
@@ -828,14 +829,15 @@ type ImgElement = HTMLElement & { specific: "img" };
 
 ```typescript
 // ✗ Inline conditional types
-type MapResult<T, U> = T extends { data: infer D; }
-  ? U extends { transform: infer F extends (x: any) => any; } ? ReturnType<F>
+type MapResult<T, U> = T extends { data: infer D }
+  ? U extends { transform: infer F extends (x: any) => any } ? ReturnType<F>
   : never
   : never;
 
 // ✓ Extract to named types for caching
-type ExtractData<T> = T extends { data: infer D; } ? D : never;
-type ExtractTransform<U> = U extends { transform: infer F extends (x: any) => any; } ? ReturnType<F>
+type ExtractData<T> = T extends { data: infer D } ? D : never;
+type ExtractTransform<U> = U extends
+  { transform: infer F extends (x: any) => any } ? ReturnType<F>
   : never;
 
 type MapResult<T, U> = ExtractTransform<U> extends never ? never
@@ -926,14 +928,14 @@ import { expectAssignable, expectError, expectType } from "tsd";
 import { getUserById, parseJSON } from "./utils";
 
 // Test that function returns correct type
-expectType<{ name: string; }>(parseJSON("{\"name\":\"Alice\"}"));
+expectType<{ name: string }>(parseJSON('{"name":"Alice"}'));
 
 // Test that expression causes a type error
 expectError(parseJSON(123)); // ✓ Error: number is not assignable to string
 
 // Test assignability (looser than expectType)
-const user: { id: string; name: string; } = getUserById("123");
-expectAssignable<{ id: string; }>(user); // ✓ Valid: user has id property
+const user: { id: string; name: string } = getUserById("123");
+expectAssignable<{ id: string }>(user); // ✓ Valid: user has id property
 ```
 
 **Configuration (package.json):**
@@ -958,7 +960,7 @@ import { expectTypeOf } from "vitest";
 
 describe("Type checks", () => {
   it("should infer correct return type", () => {
-    const result = parseJSON("{\"name\":\"Alice\"}");
+    const result = parseJSON('{"name":"Alice"}');
     expectTypeOf(result).toMatchTypeOf<Record<string, any>>();
   });
 
@@ -1034,7 +1036,7 @@ result.unknown(); // No error, but crashes at runtime
 // ✓ Use `unknown` and narrow types
 function process(data: unknown): unknown {
   if (typeof data === "object" && data !== null && "transform" in data) {
-    return (data as { transform(): unknown; }).transform();
+    return (data as { transform(): unknown }).transform();
   }
   throw new Error("Invalid data");
 }
@@ -1097,8 +1099,8 @@ const upper = value?.toUpperCase();
 
 ```typescript
 // ✗ Difficult to understand and maintain
-type Complex<T, U, V> = T extends { a: infer A; }
-  ? U extends { b: infer B; } ? V extends Array<infer E> ? { result: A | B | E; }
+type Complex<T, U, V> = T extends { a: infer A }
+  ? U extends { b: infer B } ? V extends Array<infer E> ? { result: A | B | E }
     : never
   : never
   : never;
@@ -1108,8 +1110,8 @@ type Complex<T, U, V> = T extends { a: infer A; }
 
 ```typescript
 // ✓ Break into smaller, named types
-type ExtractA<T> = T extends { a: infer A; } ? A : never;
-type ExtractB<U> = U extends { b: infer B; } ? B : never;
+type ExtractA<T> = T extends { a: infer A } ? A : never;
+type ExtractB<U> = U extends { b: infer B } ? B : never;
 type ExtractElement<V> = V extends Array<infer E> ? E : never;
 
 type Complex<T, U, V> =
@@ -1238,7 +1240,7 @@ Extract and infer parts from template literals:
 
 ```typescript
 type ParseRoute<T extends string> = T extends `/${infer Path}/:${infer Id}`
-  ? { path: Path; id: Id; }
+  ? { path: Path; id: Id }
   : never;
 
 type UserRoute = ParseRoute<"/users/:userId">;

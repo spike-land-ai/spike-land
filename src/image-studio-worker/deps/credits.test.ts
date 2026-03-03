@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createD1Credits } from "./credits.ts";
 import { nanoid } from "./nanoid.ts";
 
@@ -33,7 +33,11 @@ describe("credits", () => {
     } as any;
 
     const credits = createD1Credits({ IMAGE_DB: db } as any);
-    const res = await credits.consume({ userId: "user1", amount: 10, source: "test" });
+    const res = await credits.consume({
+      userId: "user1",
+      amount: 10,
+      source: "test",
+    });
     expect(res.success).toBe(true);
     expect(res.remaining).toBe(90);
   });
@@ -47,7 +51,11 @@ describe("credits", () => {
     } as any;
 
     const credits = createD1Credits({ IMAGE_DB: db } as any);
-    const res = await credits.consume({ userId: "user1", amount: 10, source: "test" });
+    const res = await credits.consume({
+      userId: "user1",
+      amount: 10,
+      source: "test",
+    });
     expect(res.success).toBe(false);
     expect(res.error).toBe("Insufficient credits");
   });

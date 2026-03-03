@@ -251,7 +251,9 @@ const bazdmegRules: ReviewRule[] = [
       return {
         name: "Workspace Scope Compliance",
         status: "RED",
-        detail: `${outOfScope.length} file(s) outside workspace: ${outOfScope.slice(0, 3).join(", ")}${outOfScope.length > 3 ? "..." : ""}`,
+        detail: `${outOfScope.length} file(s) outside workspace: ${outOfScope
+          .slice(0, 3)
+          .join(", ")}${outOfScope.length > 3 ? "..." : ""}`,
       };
     },
   },

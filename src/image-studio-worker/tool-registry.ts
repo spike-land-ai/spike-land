@@ -46,7 +46,10 @@ export function createToolRegistry(userId: string, deps: ImageStudioDeps) {
     async call(name: string, args: Record<string, unknown>): Promise<CallToolResult> {
       const tool = tools.get(name);
       if (!tool) {
-        return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
+        return {
+          content: [{ type: "text", text: `Unknown tool: ${name}` }],
+          isError: true,
+        };
       }
 
       const startTime = Date.now();
@@ -77,7 +80,10 @@ export function createToolRegistry(userId: string, deps: ImageStudioDeps) {
         isError = !!result.isError;
       } catch (err) {
         isError = true;
-        result = { content: [{ type: "text", text: String(err) }], isError: true };
+        result = {
+          content: [{ type: "text", text: String(err) }],
+          isError: true,
+        };
       }
       const durationMs = Date.now() - startTime;
 

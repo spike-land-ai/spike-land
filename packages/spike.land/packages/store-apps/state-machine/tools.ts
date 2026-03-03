@@ -53,7 +53,11 @@ const TEMPLATES: StateMachineTemplate[] = [
     ],
     transitions: [
       { source: "idle", target: "authenticating", event: "LOGIN" },
-      { source: "authenticating", target: "mfa_required", event: "MFA_REQUIRED" },
+      {
+        source: "authenticating",
+        target: "mfa_required",
+        event: "MFA_REQUIRED",
+      },
       { source: "authenticating", target: "authenticated", event: "SUCCESS" },
       { source: "authenticating", target: "error", event: "FAILURE" },
       { source: "mfa_required", target: "authenticated", event: "MFA_SUCCESS" },
@@ -168,7 +172,12 @@ const TEMPLATES: StateMachineTemplate[] = [
       { source: "attempting", target: "succeeded", event: "SUCCESS" },
       { source: "attempting", target: "waiting", event: "FAILURE" },
       { source: "waiting", target: "attempting", event: "RETRY" },
-      { source: "waiting", target: "failed", event: "GIVE_UP", guard: "context.attempts >= 3" },
+      {
+        source: "waiting",
+        target: "failed",
+        event: "GIVE_UP",
+        guard: "context.attempts >= 3",
+      },
     ],
   },
   {
@@ -374,14 +383,18 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
         text += `- **ID:** \`${stateNode.id}\`\n`;
         text += `- **Type:** ${stateNode.type}\n`;
         if (stateNode.parent) text += `- **Parent:** \`${stateNode.parent}\`\n`;
-        if (stateNode.initial) text += `- **Initial Child:** \`${stateNode.initial}\`\n`;
+        if (stateNode.initial) {
+          text += `- **Initial Child:** \`${stateNode.initial}\`\n`;
+        }
         if (stateNode.entryActions.length > 0) {
           text += `- **Entry Actions:** ${stateNode.entryActions.length}\n`;
         }
         if (stateNode.exitActions.length > 0) {
           text += `- **Exit Actions:** ${stateNode.exitActions.length}\n`;
         }
-        if (stateNode.historyType) text += `- **History Type:** ${stateNode.historyType}\n`;
+        if (stateNode.historyType) {
+          text += `- **History Type:** ${stateNode.historyType}\n`;
+        }
 
         return textResult(text);
       });
@@ -400,7 +413,10 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
     },
     handler: async (input: never): Promise<CallToolResult> => {
       return safeToolCall("sm_remove_state", async () => {
-        const { machine_id, state_id } = input as { machine_id: string; state_id: string };
+        const { machine_id, state_id } = input as {
+          machine_id: string;
+          state_id: string;
+        };
         const { removeState } = await import("@/lib/state-machine/engine");
         removeState(machine_id, state_id);
         return textResult(`**State Removed:** \`${state_id}\` from machine \`${machine_id}\``);
@@ -467,8 +483,12 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
         text += `- **ID:** \`${transition.id}\`\n`;
         text += `- **Event:** ${transition.event}\n`;
         text += `- **Source:** \`${transition.source}\` -> **Target:** \`${transition.target}\`\n`;
-        if (transition.guard) text += `- **Guard:** ${transition.guard.expression}\n`;
-        if (transition.actions.length > 0) text += `- **Actions:** ${transition.actions.length}\n`;
+        if (transition.guard) {
+          text += `- **Guard:** ${transition.guard.expression}\n`;
+        }
+        if (transition.actions.length > 0) {
+          text += `- **Actions:** ${transition.actions.length}\n`;
+        }
         if (transition.internal) text += `- **Internal:** true\n`;
 
         return textResult(text);
@@ -554,7 +574,9 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
         let text = `**Event Processed: ${event}**\n\n`;
         text += `- **From:** ${logEntry.fromStates.join(", ")}\n`;
         text += `- **To:** ${logEntry.toStates.join(", ")}\n`;
-        if (logEntry.guardEvaluated) text += `- **Guard Evaluated:** ${logEntry.guardEvaluated}\n`;
+        if (logEntry.guardEvaluated) {
+          text += `- **Guard Evaluated:** ${logEntry.guardEvaluated}\n`;
+        }
         if (logEntry.actionsExecuted.length > 0) {
           text += `- **Actions Executed:** ${logEntry.actionsExecuted
             .map((a) => a.type)
@@ -609,7 +631,10 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
     },
     handler: async (input: never): Promise<CallToolResult> => {
       return safeToolCall("sm_get_history", async () => {
-        const { machine_id, limit } = input as { machine_id: string; limit?: number };
+        const { machine_id, limit } = input as {
+          machine_id: string;
+          limit?: number;
+        };
         const { getHistory } = await import("@/lib/state-machine/engine");
         const history = getHistory(machine_id);
         const maxEntries = limit ?? 20;
@@ -687,7 +712,9 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
           const prefix = issue.level === "error" ? "ERROR" : "WARNING";
           let line = `- **[${prefix}]** ${issue.message}`;
           if (issue.stateId) line += ` (state: \`${issue.stateId}\`)`;
-          if (issue.transitionId) line += ` (transition: \`${issue.transitionId}\`)`;
+          if (issue.transitionId) {
+            line += ` (transition: \`${issue.transitionId}\`)`;
+          }
           text += `${line}\n`;
         }
 
@@ -752,7 +779,9 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
         if (deployFailed) {
           const { definition } = machineExport;
           const lines: string[] = ["stateDiagram-v2"];
-          if (definition.initial) lines.push(`    [*] --> ${definition.initial}`);
+          if (definition.initial) {
+            lines.push(`    [*] --> ${definition.initial}`);
+          }
           for (const [id, state] of Object.entries(definition.states)) {
             if (state.type === "final") lines.push(`    ${id} --> [*]`);
           }
@@ -826,7 +855,9 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
         let text = `**Your Machines** (${machines.length})\n\n`;
         for (const m of machines) {
           text += `- \`${m.id}\` **${m.name}** -- ${m.stateCount} states, ${m.transitionCount} transitions`;
-          if (m.currentStates.length > 0) text += ` (active: ${m.currentStates.join(", ")})`;
+          if (m.currentStates.length > 0) {
+            text += ` (active: ${m.currentStates.join(", ")})`;
+          }
           text += `\n`;
         }
 
@@ -944,7 +975,10 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
     },
     handler: async (input: never, ctx: ServerContext): Promise<CallToolResult> => {
       return safeToolCall("sm_create_from_template", async () => {
-        const { template_id, name } = input as { template_id: string; name?: string };
+        const { template_id, name } = input as {
+          template_id: string;
+          name?: string;
+        };
         const tmpl = TEMPLATES.find((t) => t.id === template_id);
         if (!tmpl) {
           throw new Error(
@@ -1025,7 +1059,10 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
     },
     handler: async (input: never): Promise<CallToolResult> => {
       return safeToolCall("sm_generate_code", async () => {
-        const { machine_id, framework } = input as { machine_id: string; framework?: string };
+        const { machine_id, framework } = input as {
+          machine_id: string;
+          framework?: string;
+        };
         const { exportMachine } = await import("@/lib/state-machine/engine");
         const exported = exportMachine(machine_id);
         const { definition } = exported;
@@ -1096,7 +1133,10 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
     },
     handler: async (input: never): Promise<CallToolResult> => {
       return safeToolCall("sm_simulate_sequence", async () => {
-        const { machine_id, events } = input as { machine_id: string; events: string[] };
+        const { machine_id, events } = input as {
+          machine_id: string;
+          events: string[];
+        };
         const { exportMachine, sendEvent } = await import("@/lib/state-machine/engine");
 
         const snapshot = exportMachine(machine_id);
@@ -1121,10 +1161,22 @@ export const stateMachineTools: StandaloneToolDefinition[] = [
           try {
             const logEntry = sendEvent(machine_id, event);
             const toState = logEntry.toStates.join(", ") || "(none)";
-            steps.push({ step: i + 1, event, fromState, toState, rejected: false });
+            steps.push({
+              step: i + 1,
+              event,
+              fromState,
+              toState,
+              rejected: false,
+            });
           } catch {
             rejected.push(event);
-            steps.push({ step: i + 1, event, fromState, toState: fromState, rejected: true });
+            steps.push({
+              step: i + 1,
+              event,
+              fromState,
+              toState: fromState,
+              rejected: true,
+            });
           }
         }
 

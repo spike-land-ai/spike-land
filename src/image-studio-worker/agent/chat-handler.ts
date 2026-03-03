@@ -14,7 +14,11 @@ export async function handleChatStream(
   request: ChatRequest,
   toolRegistry: ToolRegistry,
   env: Env,
-  options: { userGeminiKey?: string; modelName?: string; thinkingBudget?: string } = {},
+  options: {
+    userGeminiKey?: string;
+    modelName?: string;
+    thinkingBudget?: string;
+  } = {},
 ): Promise<ReadableStream> {
   const { userGeminiKey, modelName, thinkingBudget } = options;
   const encoder = new TextEncoder();
@@ -57,7 +61,10 @@ export async function handleChatStream(
 
   // Current message
   const contents: Array<{ role: string; parts: Record<string, unknown>[] }> = [
-    ...history.map((h) => ({ ...h, parts: h.parts as unknown as Record<string, unknown>[] })),
+    ...history.map((h) => ({
+      ...h,
+      parts: h.parts as unknown as Record<string, unknown>[],
+    })),
     { role: "user", parts: [{ text: request.message }] },
   ];
 
@@ -165,7 +172,10 @@ export async function handleChatStream(
                         requestId,
                       }),
                     );
-                    resultText = JSON.stringify({ status: "sent_to_browser", requestId });
+                    resultText = JSON.stringify({
+                      status: "sent_to_browser",
+                      requestId,
+                    });
                   } else {
                     const callResult = await toolRegistry.call(
                       fnName,
@@ -178,7 +188,9 @@ export async function handleChatStream(
                         .join("\n") || JSON.stringify(callResult);
                   }
                 } catch (toolErr) {
-                  resultText = `Error calling tool ${fnName}: ${toolErr instanceof Error ? toolErr.message : String(toolErr)}`;
+                  resultText = `Error calling tool ${fnName}: ${
+                    toolErr instanceof Error ? toolErr.message : String(toolErr)
+                  }`;
                 }
 
                 controller.enqueue(
@@ -249,7 +261,10 @@ export async function handleChatStream(
           currentContents.push({ role: "model", parts: modelPartsInThisTurn });
 
           // Append tool results to history
-          currentContents.push({ role: "user", parts: toolResponsesInThisTurn });
+          currentContents.push({
+            role: "user",
+            parts: toolResponsesInThisTurn,
+          });
         }
 
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));

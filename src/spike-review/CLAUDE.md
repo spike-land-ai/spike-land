@@ -2,7 +2,9 @@
 
 ## Overview
 
-AI code review bot with BAZDMEG quality gates and GitHub integration. Can run as a Node.js CLI or a Cloudflare Worker. Published as `@spike-land-ai/spike-review`.
+AI code review bot with BAZDMEG quality gates and GitHub integration. Can run as
+a Node.js CLI or a Cloudflare Worker. Published as
+`@spike-land-ai/spike-review`.
 
 ## Commands
 
@@ -27,7 +29,8 @@ npm run lint         # ESLint
 └── worker/          # Cloudflare Worker entry point
 ```
 
-**Key pattern**: Receives GitHub webhook events, fetches PR diff, runs AI review with quality gate rules, posts review comments.
+**Key pattern**: Receives GitHub webhook events, fetches PR diff, runs AI review
+with quality gate rules, posts review comments.
 
 ## Code Quality Rules
 

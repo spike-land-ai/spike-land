@@ -1,12 +1,12 @@
 import { z } from "zod";
 import type { DetailLevel, ImageRow } from "../types.js";
-import { errorResult, IMG_DEFAULTS, jsonResult, DETAIL_LEVEL_VALUES } from "../types.js";
+import { DETAIL_LEVEL_VALUES, errorResult, IMG_DEFAULTS, jsonResult } from "../types.js";
 import { tryCatch } from "./try-catch.js";
 import {
   imageProcedure,
-  withResolves,
-  withOwnership,
   withCredits,
+  withOwnership,
+  withResolves,
 } from "../tool-builder/image-middleware.js";
 
 export const analyzeTool = imageProcedure

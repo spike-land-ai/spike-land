@@ -82,7 +82,13 @@ describe("codespace standalone tools", () => {
 
   describe("codespace_run", () => {
     it("transpiles without updating code", async () => {
-      const result = await registry.call("codespace_run", { codespace_id: "test-cs" }, ctx);
+      const result = await registry.call(
+        "codespace_run",
+        {
+          codespace_id: "test-cs",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("Transpiled");
@@ -91,7 +97,13 @@ describe("codespace standalone tools", () => {
 
   describe("codespace_get", () => {
     it("returns session data", async () => {
-      const result = await registry.call("codespace_get", { codespace_id: "test-cs" }, ctx);
+      const result = await registry.call(
+        "codespace_get",
+        {
+          codespace_id: "test-cs",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("CodeSpace Details");
@@ -103,14 +115,26 @@ describe("codespace standalone tools", () => {
       const fs = getFilesystem("test-cs");
       fs.set("/src/app.test.ts", "test('works', () => {});");
 
-      const result = await registry.call("codespace_run_tests", { codespace_id: "test-cs" }, ctx);
+      const result = await registry.call(
+        "codespace_run_tests",
+        {
+          codespace_id: "test-cs",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("Test files (1)");
     });
 
     it("returns error when no files exist", async () => {
-      const result = await registry.call("codespace_run_tests", { codespace_id: "empty-cs" }, ctx);
+      const result = await registry.call(
+        "codespace_run_tests",
+        {
+          codespace_id: "empty-cs",
+        },
+        ctx,
+      );
       expect(result.isError).toBe(true);
     });
   });
@@ -131,7 +155,13 @@ describe("codespace standalone tools", () => {
 
   describe("codespace_regenerate", () => {
     it("returns error when no test files exist", async () => {
-      const result = await registry.call("codespace_regenerate", { codespace_id: "regen-cs" }, ctx);
+      const result = await registry.call(
+        "codespace_regenerate",
+        {
+          codespace_id: "regen-cs",
+        },
+        ctx,
+      );
       expect(result.isError).toBe(true);
     });
 
@@ -215,7 +245,14 @@ describe("codespace standalone tools", () => {
       fs.set("/src/app.ts", "");
       fs.set("/src/utils.ts", "");
 
-      const result = await registry.call("fs_ls", { codespace_id: "ls-cs", path: "/" }, ctx);
+      const result = await registry.call(
+        "fs_ls",
+        {
+          codespace_id: "ls-cs",
+          path: "/",
+        },
+        ctx,
+      );
       expect(result.isError).toBeFalsy();
       const text = (result.content[0] as { text: string }).text;
       expect(text).toContain("src/");

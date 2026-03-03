@@ -34,8 +34,9 @@ Main functions:
 **Endpoint**: `POST /api/admin/jobs/cleanup`
 
 > **Note** (2026-02-26): This admin endpoint is documented but the route file
-> does not currently exist. The cleanup can be triggered programmatically via the
-> `cleanupStuckJobs()` function or automatically via the cron endpoint below.
+> does not currently exist. The cleanup can be triggered programmatically via
+> the `cleanupStuckJobs()` function or automatically via the cron endpoint
+> below.
 
 Allows admins to manually trigger cleanup.
 
@@ -75,9 +76,9 @@ Allows admins to manually trigger cleanup.
 **Schedule**: Runs every 15 minutes (configured via GitHub Actions cron or AWS
 scheduled tasks)
 
-**Authentication**: Protected by `validateCronSecret()` from `src/lib/cron-auth.ts`
-(accepts `Authorization: Bearer <secret>` or `x-cron-secret` headers, uses
-timing-safe comparison)
+**Authentication**: Protected by `validateCronSecret()` from
+`src/lib/cron-auth.ts` (accepts `Authorization: Bearer <secret>` or
+`x-cron-secret` headers, uses timing-safe comparison)
 
 **Configuration** (GitHub Actions or AWS EventBridge):
 

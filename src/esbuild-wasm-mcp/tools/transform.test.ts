@@ -193,7 +193,11 @@ describe("registerTransformTool", () => {
 
   it("passes minify options through to transform", async () => {
     const { handler } = makeServer();
-    mockEsbuild.transform.mockResolvedValue({ code: "const x=1;", warnings: [], map: "" });
+    mockEsbuild.transform.mockResolvedValue({
+      code: "const x=1;",
+      warnings: [],
+      map: "",
+    });
 
     await handler({ code: "const x = 1;", minify: true });
 

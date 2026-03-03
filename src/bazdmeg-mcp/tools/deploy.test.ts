@@ -2,7 +2,7 @@
  * Tests for deploy tools (bazdmeg_generate_wrangler_toml, bazdmeg_deploy_worker)
  */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 
@@ -52,7 +52,13 @@ const WORKER_PKG = {
     compatibility_date: "2024-01-01",
     compatibility_flags: ["nodejs_compat"],
     kv_namespaces: [{ binding: "KV", id: "abc123" }],
-    d1_databases: [{ binding: "DB", database_name: "mydb", database_id: "db123" }],
+    d1_databases: [
+      {
+        binding: "DB",
+        database_name: "mydb",
+        database_id: "db123",
+      },
+    ],
     r2_buckets: [{ binding: "BUCKET", bucket_name: "files" }],
     durable_objects: [{ name: "ROOM", class_name: "ChatRoom", sqlite: true }],
     routes: [{ pattern: "api.example.com/*", zone_name: "example.com" }],

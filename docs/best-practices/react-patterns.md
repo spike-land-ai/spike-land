@@ -34,7 +34,7 @@ replacing class components for practically all use cases.
 
 ```typescript
 // ✅ Modern Function Component
-export function UserProfile({ userId }: { userId: string; }) {
+export function UserProfile({ userId }: { userId: string }) {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -63,7 +63,7 @@ is the HTML `<select>` and `<option>` elements.
 
 ```typescript
 // Parent component with Context
-export function Menu({ children }: { children: React.ReactNode; }) {
+export function Menu({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -82,7 +82,7 @@ export function Menu({ children }: { children: React.ReactNode; }) {
 }
 
 // Child components
-export function MenuTrigger({ children }: { children: React.ReactNode; }) {
+export function MenuTrigger({ children }: { children: React.ReactNode }) {
   const { isOpen, setIsOpen } = useContext(MenuContext);
 
   return (
@@ -92,7 +92,7 @@ export function MenuTrigger({ children }: { children: React.ReactNode; }) {
   );
 }
 
-export function MenuList({ children }: { children: React.ReactNode; }) {
+export function MenuList({ children }: { children: React.ReactNode }) {
   const { isOpen } = useContext(MenuContext);
 
   if (!isOpen) return null;
@@ -157,7 +157,7 @@ function withTheme(Component: React.ComponentType<any>) {
       <Component
         {...props}
         theme={theme}
-        toggleTheme={() => setTheme(t => t === "light" ? "dark" : "light")}
+        toggleTheme={() => setTheme((t) => t === "light" ? "dark" : "light")}
       />
     );
   };
@@ -169,7 +169,7 @@ function useTheme() {
 
   return {
     theme,
-    toggleTheme: () => setTheme(t => t === "light" ? "dark" : "light"),
+    toggleTheme: () => setTheme((t) => t === "light" ? "dark" : "light"),
   };
 }
 ```
@@ -192,7 +192,7 @@ whose value is a function.
 ```typescript
 // ❌ Legacy pattern - avoid
 <RenderPropsExample
-  render={data => (
+  render={(data) => (
     <AnotherComponent>
       {data}
     </AnotherComponent>
@@ -264,7 +264,7 @@ function UsersList() {
 
   return (
     <ul>
-      {users?.map(user => <li key={user.id}>{user.name}</li>)}
+      {users?.map((user) => <li key={user.id}>{user.name}</li>)}
     </ul>
   );
 }
@@ -272,7 +272,7 @@ function UsersList() {
 // Mutating data
 function CreateUserForm() {
   const { mutate: createUser, isPending } = useMutation({
-    mutationFn: async (newUser: { name: string; email: string; }) => {
+    mutationFn: async (newUser: { name: string; email: string }) => {
       const response = await fetch("/api/users", {
         method: "POST",
         body: JSON.stringify(newUser),
@@ -287,7 +287,7 @@ function CreateUserForm() {
 
   return (
     <form
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
         createUser({ name: "John", email: "john@example.com" });
       }}
@@ -330,10 +330,10 @@ interface ThemeStore {
   toggleTheme: () => void;
 }
 
-export const useThemeStore = create<ThemeStore>(set => ({
+export const useThemeStore = create<ThemeStore>((set) => ({
   theme: "light",
   toggleTheme: () =>
-    set(state => ({
+    set((state) => ({
       theme: state.theme === "light" ? "dark" : "light",
     })),
 }));
@@ -354,7 +354,7 @@ function Header() {
 // Persist store to localStorage
 const usePersistedStore = create<AppStore>(
   persist(
-    set => ({
+    (set) => ({
       // state and actions
     }),
     {
@@ -390,8 +390,8 @@ For simple global state without external dependencies, React Context with
 
 ```typescript
 type ThemeAction =
-  | { type: "TOGGLE_THEME"; }
-  | { type: "SET_THEME"; payload: "light" | "dark"; };
+  | { type: "TOGGLE_THEME" }
+  | { type: "SET_THEME"; payload: "light" | "dark" };
 
 interface ThemeState {
   theme: "light" | "dark";
@@ -420,7 +420,7 @@ const ThemeContext = createContext<
   } | null
 >(null);
 
-export function ThemeProvider({ children }: { children: React.ReactNode; }) {
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(themeReducer, initialState);
 
   return (
@@ -471,9 +471,9 @@ const usersSlice = createSlice({
     loading: false,
     error: null as string | null,
   },
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     builder
-      .addCase(fetchUsers.pending, state => {
+      .addCase(fetchUsers.pending, (state) => {
         state.loading = true;
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
@@ -517,13 +517,13 @@ for optimization.
 
 ```typescript
 // ❌ Without memoization (re-renders every time parent renders)
-function UserCard({ user }: { user: User; }) {
+function UserCard({ user }: { user: User }) {
   console.log("UserCard rendered");
   return <div>{user.name}</div>;
 }
 
 // ✅ With memoization
-const UserCard = memo(function UserCard({ user }: { user: User; }) {
+const UserCard = memo(function UserCard({ user }: { user: User }) {
   console.log("UserCard rendered only when user changes");
   return <div>{user.name}</div>;
 });
@@ -554,13 +554,13 @@ function ParentComponent() {
 
 ```typescript
 // ❌ Without memoization (recalculates every render)
-function DataAnalysis({ data }: { data: number[]; }) {
+function DataAnalysis({ data }: { data: number[] }) {
   const expensiveResult = computeComplexAnalysis(data);
   return <div>{expensiveResult}</div>;
 }
 
 // ✅ With memoization
-function DataAnalysis({ data }: { data: number[]; }) {
+function DataAnalysis({ data }: { data: number[] }) {
   const expensiveResult = useMemo(
     () => computeComplexAnalysis(data),
     [data], // Only recalculate when data changes
@@ -575,12 +575,14 @@ function FilteredUsersList({ users, searchTerm }: {
 }) {
   const filteredUsers = useMemo(() => {
     console.log("Filtering users...");
-    return users.filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase()));
+    return users.filter((user) =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   }, [users, searchTerm]);
 
   return (
     <ul>
-      {filteredUsers.map(user => <li key={user.id}>{user.name}</li>)}
+      {filteredUsers.map((user) => <li key={user.id}>{user.name}</li>)}
     </ul>
   );
 }
@@ -627,7 +629,7 @@ function Parent() {
 }
 
 const MemoizedChild = memo(
-  function Child({ onClick }: { onClick: () => void; }) {
+  function Child({ onClick }: { onClick: () => void }) {
     console.log("Child rendered");
     return <button onClick={onClick}>Child Button</button>;
   },
@@ -646,7 +648,7 @@ const UserList = memo(function UserList({
 }) {
   return (
     <ul>
-      {users.map(user => (
+      {users.map((user) => (
         <UserItem
           key={user.id}
           user={user}
@@ -709,9 +711,9 @@ function App() {
 ```typescript
 import { FixedSizeList as List } from "react-window";
 
-function VirtualizedUsersList({ users }: { users: User[]; }) {
+function VirtualizedUsersList({ users }: { users: User[] }) {
   const Row = (
-    { index, style }: { index: number; style: React.CSSProperties; },
+    { index, style }: { index: number; style: React.CSSProperties },
   ) => (
     <div style={style}>
       {users[index].name}
@@ -789,7 +791,7 @@ function useFetch<T>(url: string) {
 }
 
 // Usage
-function UserProfile({ userId }: { userId: string; }) {
+function UserProfile({ userId }: { userId: string }) {
   const { data: user, loading, error } = useFetch<User>(
     `/api/users/${userId}`,
   );
@@ -820,7 +822,7 @@ function useUserData(userId: string) {
 }
 
 // Use composed hook
-function Dashboard({ userId }: { userId: string; }) {
+function Dashboard({ userId }: { userId: string }) {
   const { user, theme, notifications } = useUserData(userId);
 
   return (
@@ -843,10 +845,10 @@ interface FormState {
 }
 
 type FormAction =
-  | { type: "SET_FIELD"; field: string; value: string; }
-  | { type: "SET_ERROR"; field: string; error: string; }
-  | { type: "TOUCH_FIELD"; field: string; }
-  | { type: "RESET"; };
+  | { type: "SET_FIELD"; field: string; value: string }
+  | { type: "SET_ERROR"; field: string; error: string }
+  | { type: "TOUCH_FIELD"; field: string }
+  | { type: "RESET" };
 
 function useForm(initialValues: Record<string, string>) {
   const [state, dispatch] = useReducer(formReducer, {
@@ -857,8 +859,10 @@ function useForm(initialValues: Record<string, string>) {
 
   return {
     ...state,
-    setFieldValue: (field: string, value: string) => dispatch({ type: "SET_FIELD", field, value }),
-    setFieldError: (field: string, error: string) => dispatch({ type: "SET_ERROR", field, error }),
+    setFieldValue: (field: string, value: string) =>
+      dispatch({ type: "SET_FIELD", field, value }),
+    setFieldError: (field: string, error: string) =>
+      dispatch({ type: "SET_ERROR", field, error }),
     touchField: (field: string) => dispatch({ type: "TOUCH_FIELD", field }),
     reset: () => dispatch({ type: "RESET" }),
   };
@@ -877,7 +881,7 @@ function LoginForm() {
     <form onSubmit={handleSubmit}>
       <input
         value={form.values.email}
-        onChange={e => form.setFieldValue("email", e.target.value)}
+        onChange={(e) => form.setFieldValue("email", e.target.value)}
       />
       {form.errors.email && <span>{form.errors.email}</span>}
     </form>
@@ -962,10 +966,10 @@ interface ErrorBoundaryState {
 }
 
 export class ErrorBoundary extends Component<
-  { children: ReactNode; },
+  { children: ReactNode },
   ErrorBoundaryState
 > {
-  constructor(props: { children: ReactNode; }) {
+  constructor(props: { children: ReactNode }) {
     super(props);
     this.state = { hasError: false, error: null };
   }
@@ -1037,7 +1041,7 @@ Relay, SWR, Server Components).
 ```typescript
 import { Suspense } from "react";
 
-function UserProfile({ userId }: { userId: string; }) {
+function UserProfile({ userId }: { userId: string }) {
   return (
     <Suspense fallback={<div>Loading user...</div>}>
       <UserContent userId={userId} />
@@ -1046,7 +1050,7 @@ function UserProfile({ userId }: { userId: string; }) {
 }
 
 // Must use Suspense-enabled data source
-function UserContent({ userId }: { userId: string; }) {
+function UserContent({ userId }: { userId: string }) {
   // This throws a promise while loading
   const user = use(fetchUser(userId));
 
@@ -1062,7 +1066,7 @@ function UserContent({ userId }: { userId: string; }) {
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-function UserPage({ userId }: { userId: string; }) {
+function UserPage({ userId }: { userId: string }) {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <Suspense fallback={<LoadingSpinner />}>
@@ -1180,7 +1184,7 @@ function CustomButton({
       aria-pressed={isPressed}
       tabIndex={0}
       onClick={onClick}
-      onKeyDown={e => {
+      onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           onClick();
         }
@@ -1193,7 +1197,7 @@ function CustomButton({
 }
 
 // Modal with ARIA
-function Modal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void; }) {
+function Modal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   if (!isOpen) return null;
 
   return (
@@ -1212,7 +1216,7 @@ function Modal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void; }) {
 }
 
 // Alert with ARIA Live Region
-function Notification({ message }: { message: string; }) {
+function Notification({ message }: { message: string }) {
   return (
     <div
       role="alert"
@@ -1242,7 +1246,7 @@ Ensure all functionality is accessible via keyboard alone.
 
 ```typescript
 // Trap focus in modal
-function FocusTrappedModal({ onClose }: { onClose: () => void; }) {
+function FocusTrappedModal({ onClose }: { onClose: () => void }) {
   const modalRef = useRef<HTMLDivElement>(null);
   const firstFocusableRef = useRef<HTMLButtonElement>(null);
   const lastFocusableRef = useRef<HTMLButtonElement>(null);
@@ -1310,7 +1314,7 @@ function SkipLink() {
 
 ```typescript
 // Announce loading states
-function LoadingIndicator({ isLoading }: { isLoading: boolean; }) {
+function LoadingIndicator({ isLoading }: { isLoading: boolean }) {
   return (
     <div
       role="status"
@@ -1338,12 +1342,12 @@ function LoginForm() {
 }
 
 // List with proper heading structure
-function ProductsList({ products }: { products: Product[]; }) {
+function ProductsList({ products }: { products: Product[] }) {
   return (
     <section>
       <h2>Available Products</h2>
       <ul>
-        {products.map(product => (
+        {products.map((product) => (
           <li key={product.id}>
             <h3>{product.name}</h3>
             <p>{product.description}</p>
@@ -1382,7 +1386,7 @@ function AccessibleMenu() {
 
   return (
     <ul {...menuProps}>
-      {menuItems.map(item => <li key={item.key}>{item.name}</li>)}
+      {menuItems.map((item) => <li key={item.key}>{item.name}</li>)}
     </ul>
   );
 }
@@ -1569,7 +1573,7 @@ import { useQuery } from "@tanstack/react-query";
 import { create } from "zustand";
 
 // 3. Components - Compound Pattern with Context
-export function AppSelect({ children }: { children: React.ReactNode; }) {
+export function AppSelect({ children }: { children: React.ReactNode }) {
   const [value, setValue] = useState("");
   return (
     <SelectContext.Provider value={{ value, setValue }}>

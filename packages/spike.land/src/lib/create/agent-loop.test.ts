@@ -57,7 +57,11 @@ vi.mock("@/lib/create/error-parser", () => ({
 }));
 
 vi.mock("@/lib/create/auto-reviewer", () => ({
-  runAutoReview: vi.fn().mockResolvedValue({ passed: true, score: 1.0, checks: {} }),
+  runAutoReview: vi.fn().mockResolvedValue({
+    passed: true,
+    score: 1.0,
+    checks: {},
+  }),
 }));
 
 vi.mock("@/lib/create/ai-reviewer", () => ({

@@ -703,7 +703,13 @@ describe("dual-read helpers", () => {
     });
 
     it("should fall back to JSON when typed array is empty", () => {
-      const jsonObjectives = [{ type: "ENGAGEMENT", metric: "likes", targetValue: 10000 }];
+      const jsonObjectives = [
+        {
+          type: "ENGAGEMENT",
+          metric: "likes",
+          targetValue: 10000,
+        },
+      ];
 
       const result = getCampaignObjectivesWithFallback([], jsonObjectives);
 

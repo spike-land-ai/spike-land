@@ -2,7 +2,8 @@
 
 ## Overview
 
-MCP server for HackerNews with full read + write support. Node.js runtime, published as `@spike-land-ai/hackernews-mcp`.
+MCP server for HackerNews with full read + write support. Node.js runtime,
+published as `@spike-land-ai/hackernews-mcp`.
 
 ## Commands
 

@@ -15,22 +15,34 @@
 **Decision Date**: March 2, 2026 **Decision Maker**: Zoltan Erdos (CEO)
 **Status**: ACTIVE
 
-**Decision**: Agents and CLI tools shall NOT use the Anthropic API via standard `ANTHROPIC_API_KEY` for background or automated tasks due to high metered costs. Instead, agents must use either the Gemini API (e.g., `gemini-2.5-flash`, `gemini-2.5-pro`) via `GEMINI_API_KEY` or rely on local Claude Code OAuth sessions (`CLAUDE_CODE_OAUTH_TOKEN`).
+**Decision**: Agents and CLI tools shall NOT use the Anthropic API via standard
+`ANTHROPIC_API_KEY` for background or automated tasks due to high metered costs.
+Instead, agents must use either the Gemini API (e.g., `gemini-2.5-flash`,
+`gemini-2.5-pro`) via `GEMINI_API_KEY` or rely on local Claude Code OAuth
+sessions (`CLAUDE_CODE_OAUTH_TOKEN`).
 
 **Rationale**:
 
-- Using `ANTHROPIC_API_KEY` for automated agents like inline completion and chat quickly becomes prohibitively expensive.
-- Gemini models (like Flash) are extremely fast and often have a generous free tier or lower cost basis for high-volume automated tasks like inline autocomplete.
-- Where Claude is absolutely required, it must run through the `CLAUDE_CODE_OAUTH_TOKEN` mechanism established in DEC-004 to utilize the flat-rate subscription.
+- Using `ANTHROPIC_API_KEY` for automated agents like inline completion and chat
+  quickly becomes prohibitively expensive.
+- Gemini models (like Flash) are extremely fast and often have a generous free
+  tier or lower cost basis for high-volume automated tasks like inline
+  autocomplete.
+- Where Claude is absolutely required, it must run through the
+  `CLAUDE_CODE_OAUTH_TOKEN` mechanism established in DEC-004 to utilize the
+  flat-rate subscription.
 
 **Impact**:
 
-- `spike agent` and inline completions in the Monaco editor now use the Gemini API (Google Generative AI).
-- Environment variable requirements for `spike agent` updated to prefer `GEMINI_API_KEY`.
+- `spike agent` and inline completions in the Monaco editor now use the Gemini
+  API (Google Generative AI).
+- Environment variable requirements for `spike agent` updated to prefer
+  `GEMINI_API_KEY`.
 
 **Related Files Updated**:
 
-- `src/spike-cli/commands/agent.ts` - Refactored to use `@google/genai` instead of `@anthropic-ai/sdk`.
+- `src/spike-cli/commands/agent.ts` - Refactored to use `@google/genai` instead
+  of `@anthropic-ai/sdk`.
 
 ---
 
@@ -41,24 +53,32 @@
 **Decision Date**: February 27, 2026 **Decision Maker**: Zoltan Erdos (CEO)
 **Status**: ACTIVE
 
-**Decision**: The site shall not include infinite background animations or CPU-heavy particle effects just for decoration.
+**Decision**: The site shall not include infinite background animations or
+CPU-heavy particle effects just for decoration.
 
 **Rationale**:
 
-- Infinite background animations (like ts-particles swarms or large animated blurred gradients) continuously burn visitor CPU resources.
-- They degrade the development experience by keeping local CPU usage artificially high.
-- Animations should be reserved for meaningful interactions: state transitions, scrolling effects, hover feedback, and deliberate user actions.
-- Performance and battery life for visitors prioritize above decorative "wow" factors.
+- Infinite background animations (like ts-particles swarms or large animated
+  blurred gradients) continuously burn visitor CPU resources.
+- They degrade the development experience by keeping local CPU usage
+  artificially high.
+- Animations should be reserved for meaningful interactions: state transitions,
+  scrolling effects, hover feedback, and deliberate user actions.
+- Performance and battery life for visitors prioritize above decorative "wow"
+  factors.
 
 **Impact**:
 
 - Removed the `HeroDataStream` (ts-particles swarm) from the homepage hero.
-- Removed infinite `animate-pulse`, `animate-gradient-x`, and `animate-shimmer` from the header backgrounds.
-- All future decorative UI features must be static, or stop animating after a short entry transition.
+- Removed infinite `animate-pulse`, `animate-gradient-x`, and `animate-shimmer`
+  from the header backgrounds.
+- All future decorative UI features must be static, or stop animating after a
+  short entry transition.
 
 **Related Files Updated**:
 
-- `src/components/landing/LandingHero.tsx` - Swarm and infinite animations removed.
+- `src/components/landing/LandingHero.tsx` - Swarm and infinite animations
+  removed.
 
 ---
 
@@ -67,8 +87,8 @@
 **Decision Date**: February 26, 2026 **Decision Maker**: Zoltan Erdos (CEO)
 **Status**: ACTIVE
 
-**Decision**: CI scripts shall use plain `yarn` for dependency installation, never
-`yarn install --immutable`.
+**Decision**: CI scripts shall use plain `yarn` for dependency installation,
+never `yarn install --immutable`.
 
 **Rationale**:
 
@@ -76,18 +96,21 @@
 - A simple `yarn` is self-healing: it installs what's needed without failing on
   lockfile mismatches
 - Reduces CI debugging time and false-negative pipeline failures
-- Simplicity over strictness — the lockfile is committed and reviewed in PRs anyway
+- Simplicity over strictness — the lockfile is committed and reviewed in PRs
+  anyway
 
 **Impact**:
 
-- All CI workflows use plain `yarn` (already the case in `.github/actions/setup/action.yml`)
+- All CI workflows use plain `yarn` (already the case in
+  `.github/actions/setup/action.yml`)
 - `silent:install` script removed from `package.json` (no longer needed)
 - Agents must not introduce `--immutable` flags in any install commands
 
 **Related Files Updated**:
 
 - `package.json` — `silent:install` script removed
-- `.github/actions/setup/action.yml` — already uses plain `yarn` (no change needed)
+- `.github/actions/setup/action.yml` — already uses plain `yarn` (no change
+  needed)
 
 ---
 

@@ -2,9 +2,9 @@ import { z } from "zod";
 import { IMG_DEFAULTS, jsonResult } from "../types.js";
 import {
   imageProcedure,
-  withResolves,
   withCredits,
   withJob,
+  withResolves,
 } from "../tool-builder/image-middleware.js";
 
 const PRESET_DIMENSIONS: Record<string, { width: number; height: number; label: string }> = {

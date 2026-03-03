@@ -24,13 +24,13 @@ feat/mcp-architecture-phase-a
 | Type tests (`src/types/`)                     | 1        | 1       | 0         | Done                                                      |
 | Root-level src tests                          | 4        | 4       | 0         | Done                                                      |
 | Workflow tests (`src/workflows/`)             | 5        | 5       | 0         | Done                                                      |
-| `src/code` tests                         | 37       | 37      | 0         | Done (pkg extracted to @spike-land-ai/code)               |
-| `src/testing.spike.land` tests           | 23       | 23      | 0         | Done (pkg extracted to @spike-land-ai/testing.spike.land) |
-| `src/shared` tests                       | 4        | 4       | 0         | Done (pkg extracted to @spike-land-ai/shared)             |
-| `src/opfs-node-adapter` tests            | 40       | 40      | 0         | Done (pkg removed)                                        |
-| `src/js.spike.land` tests                | 1        | 1       | 0         | Done (pkg extracted to @spike-land-ai/js.spike.land)      |
-| `src/video` tests                        | 1        | 1       | 0         | Done (pkg removed)                                        |
-| `src/vibe-dev` tests                     | 4        | 4       | 0         | Done (pkg extracted to @spike-land-ai/vibe-dev)           |
+| `src/code` tests                              | 37       | 37      | 0         | Done (pkg extracted to @spike-land-ai/code)               |
+| `src/testing.spike.land` tests                | 23       | 23      | 0         | Done (pkg extracted to @spike-land-ai/testing.spike.land) |
+| `src/shared` tests                            | 4        | 4       | 0         | Done (pkg extracted to @spike-land-ai/shared)             |
+| `src/opfs-node-adapter` tests                 | 40       | 40      | 0         | Done (pkg removed)                                        |
+| `src/js.spike.land` tests                     | 1        | 1       | 0         | Done (pkg extracted to @spike-land-ai/js.spike.land)      |
+| `src/video` tests                             | 1        | 1       | 0         | Done (pkg removed)                                        |
+| `src/vibe-dev` tests                          | 4        | 4       | 0         | Done (pkg extracted to @spike-land-ai/vibe-dev)           |
 | `apps/audio-mixer` tests                      | 11       | 0       | 0         | Relocated                                                 |
 | `apps/display` tests                          | 10       | 0       | 0         | Relocated                                                 |
 | `apps/tabletop-simulator` tests               | 21       | 0       | 0         | Relocated                                                 |

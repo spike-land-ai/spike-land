@@ -440,7 +440,9 @@ describe("updateScheduleTrigger", () => {
     mockWorkflowScheduleFindFirst.mockResolvedValue(makeSchedule());
 
     await expect(
-      updateScheduleTrigger("sched-1", "wf-1", "ws-1", { cronExpression: "bad" }),
+      updateScheduleTrigger("sched-1", "wf-1", "ws-1", {
+        cronExpression: "bad",
+      }),
     ).rejects.toThrow("Invalid cron expression");
   });
 

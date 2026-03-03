@@ -11,7 +11,7 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "./types";
 import { freeTool } from "../procedures/index";
-import { textResult, apiRequest } from "./tool-helpers";
+import { apiRequest, textResult } from "./tool-helpers";
 import type { DrizzleDB } from "../db/index";
 
 export function registerAppsTools(
@@ -347,7 +347,9 @@ export function registerAppsTools(
       .handler(async ({ input }) => {
         const { app_id } = input;
 
-        await apiRequest(`/api/apps/${encodeURIComponent(app_id)}/bin`, { method: "POST" });
+        await apiRequest(`/api/apps/${encodeURIComponent(app_id)}/bin`, {
+          method: "POST",
+        });
 
         return textResult(
           `**Moved to Bin!**\n\n` +
@@ -398,7 +400,9 @@ export function registerAppsTools(
           );
         }
 
-        await apiRequest(`/api/apps/${encodeURIComponent(app_id)}/permanent`, { method: "DELETE" });
+        await apiRequest(`/api/apps/${encodeURIComponent(app_id)}/permanent`, {
+          method: "DELETE",
+        });
 
         return textResult(
           `**Permanently Deleted!**\n\nApp \`${app_id}\` has been permanently deleted. This cannot be undone.`,
@@ -509,7 +513,9 @@ export function registerAppsTools(
       .handler(async ({ input }) => {
         const { app_id } = input;
 
-        await apiRequest(`/api/apps/${encodeURIComponent(app_id)}/messages`, { method: "DELETE" });
+        await apiRequest(`/api/apps/${encodeURIComponent(app_id)}/messages`, {
+          method: "DELETE",
+        });
 
         return textResult(
           `**Chat Cleared!**\n\nAll messages for app \`${app_id}\` have been deleted.`,

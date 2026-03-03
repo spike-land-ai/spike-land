@@ -5,7 +5,7 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
+import { createZodTool, textResult } from "@spike-land-ai/mcp-server-base";
 import { GeneratePackageJsonSchema, PublishNpmSchema } from "../types.js";
 import { readManifest } from "../manifest.js";
 import { runCommand } from "../shell.js";
@@ -183,7 +183,9 @@ export function registerPublishTools(server: McpServer): void {
 
       if (!buildResult.ok) {
         report += `**FAILED** (${buildDur}s)\n`;
-        report += `\`\`\`\n${(buildResult.stderr || buildResult.stdout).trim().slice(0, 1000)}\n\`\`\`\n`;
+        report += `\`\`\`\n${(buildResult.stderr || buildResult.stdout)
+          .trim()
+          .slice(0, 1000)}\n\`\`\`\n`;
         report += `\n**BLOCKED** at build step.`;
         return textResult(report);
       }
@@ -197,7 +199,9 @@ export function registerPublishTools(server: McpServer): void {
 
       if (dryRun) {
         report += `### 3. Publish (skipped — dry run)\n`;
-        report += `Would run: \`npm publish --registry https://${registry === "github" ? "npm.pkg.github.com" : "registry.npmjs.org"}\`\n`;
+        report += `Would run: \`npm publish --registry https://${
+          registry === "github" ? "npm.pkg.github.com" : "registry.npmjs.org"
+        }\`\n`;
         return textResult(report);
       }
 
@@ -217,7 +221,9 @@ export function registerPublishTools(server: McpServer): void {
         report += `**PUBLISHED** (${publishDur}s)\n`;
       } else {
         report += `**FAILED** (${publishDur}s)\n`;
-        report += `\`\`\`\n${(publishResult.stderr || publishResult.stdout).trim().slice(0, 1000)}\n\`\`\``;
+        report += `\`\`\`\n${(publishResult.stderr || publishResult.stdout)
+          .trim()
+          .slice(0, 1000)}\n\`\`\``;
       }
 
       return textResult(report);

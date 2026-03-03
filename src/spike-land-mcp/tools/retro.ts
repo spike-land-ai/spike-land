@@ -78,7 +78,9 @@ export function registerRetroTools(registry: ToolRegistry, userId: string, db: D
       .meta({ category: "retro", tier: "free" })
       .handler(async ({ input }) => {
         const retro = retros.get(input.retro_id);
-        if (!retro) throw new Error(`Retrospective ${input.retro_id} not found`);
+        if (!retro) {
+          throw new Error(`Retrospective ${input.retro_id} not found`);
+        }
         return jsonResult(`Retro ${input.retro_id}`, retro);
       }),
   );
@@ -118,7 +120,9 @@ export function registerRetroTools(registry: ToolRegistry, userId: string, db: D
       .handler(async ({ input }) => {
         const limit = input.limit ?? 5;
         let results = Array.from(knowledgeBase.values());
-        if (input.category) results = results.filter((i) => i.category === input.category);
+        if (input.category) {
+          results = results.filter((i) => i.category === input.category);
+        }
         results = results
           .filter(
             (i) =>

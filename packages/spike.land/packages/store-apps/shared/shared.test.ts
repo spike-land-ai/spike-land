@@ -123,7 +123,10 @@ describe("checkRequires", () => {
 
   it("fails when required tools were not called", () => {
     const tool = makeTool("b", { requires: ["a"] });
-    expect(checkRequires(tool, new Set())).toEqual({ ok: false, missing: ["a"] });
+    expect(checkRequires(tool, new Set())).toEqual({
+      ok: false,
+      missing: ["a"],
+    });
   });
 });
 

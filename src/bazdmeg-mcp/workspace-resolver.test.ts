@@ -2,12 +2,12 @@
  * Tests for workspace-resolver.ts
  */
 
-import { describe, it, expect, afterEach } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import {
   extractInternalDeps,
-  packageNameToPath,
-  isPathAllowed,
   getAlwaysAllowedPaths,
+  isPathAllowed,
+  packageNameToPath,
   resolveWorkspacePaths,
 } from "./workspace-resolver.js";
 import { createFakeMonorepo } from "./__test-utils__/fixtures.js";

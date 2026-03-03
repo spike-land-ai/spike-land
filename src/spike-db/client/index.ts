@@ -2,7 +2,7 @@ import type { DatabaseSchema } from "../schema/types.js";
 import type { ServerMessage } from "../protocol/messages.js";
 import { serialize } from "../protocol/messages.js";
 import { Connection } from "./connection.js";
-import { TableCache, ClientTable } from "./cache.js";
+import { ClientTable, TableCache } from "./cache.js";
 import { SubscriptionBuilder } from "./subscription.js";
 
 type ClientEvent = "connected" | "disconnected" | "error";
@@ -167,7 +167,7 @@ export class SpikeDbClient {
   }
 }
 
-export { TableCache, ClientTable } from "./cache.js";
+export { ClientTable, TableCache } from "./cache.js";
 export { Connection } from "./connection.js";
 export type { ConnectionOptions } from "./connection.js";
 export { SubscriptionBuilder } from "./subscription.js";

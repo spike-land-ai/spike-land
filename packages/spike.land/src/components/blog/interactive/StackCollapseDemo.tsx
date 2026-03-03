@@ -409,7 +409,15 @@ function PhaseLabel({ progress }: PhaseLabel) {
   const showAfter = progress >= 0.5;
 
   return (
-    <div style={{ position: "absolute", top: 10, left: 0, right: 0, textAlign: "center" }}>
+    <div
+      style={{
+        position: "absolute",
+        top: 10,
+        left: 0,
+        right: 0,
+        textAlign: "center",
+      }}
+    >
       <AnimatePresence mode="wait">
         {showBefore && (
           <motion.div

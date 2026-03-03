@@ -2,7 +2,8 @@
 
 ## Overview
 
-QA Studio browser automation utilities for spike.land, built on Playwright. Published as `@spike-land-ai/qa-studio`, runs in Node.js.
+QA Studio browser automation utilities for spike.land, built on Playwright.
+Published as `@spike-land-ai/qa-studio`, runs in Node.js.
 
 ## Commands
 
