@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import type { Env } from "../env.js";
+import { getClientId, sendGA4Events } from "../lib/ga4.js";
 
 const proxy = new Hono<{ Bindings: Env }>();
 
@@ -53,6 +54,7 @@ proxy.post("/proxy/stripe", async (c) => {
     return c.json({ error: "Invalid Stripe API URL" }, 400);
   }
 
+  const start = Date.now();
   const response = await fetch(body.url, {
     method: body.method ?? "POST",
     headers: {
@@ -62,6 +64,15 @@ proxy.post("/proxy/stripe", async (c) => {
     },
     body: body.body ? JSON.stringify(body.body) : undefined,
   });
+
+  c.executionCtx.waitUntil(
+    getClientId(c.req.raw).then((clientId) =>
+      sendGA4Events(c.env, clientId, [{
+        name: "proxy_api_call",
+        params: { provider: "stripe", status: response.status, duration_ms: Date.now() - start },
+      }])
+    ),
+  );
 
   return new Response(response.body, {
     status: response.status,
@@ -93,6 +104,8 @@ proxy.post("/proxy/ai", async (c) => {
       ? { "x-api-key": apiKey }
       : { Authorization: `Bearer ${apiKey}` };
 
+  const providerName = provider.prefix.includes("anthropic") ? "anthropic" : "gemini";
+  const start = Date.now();
   const response = await fetch(body.url, {
     method: body.method ?? "POST",
     headers: {
@@ -102,6 +115,15 @@ proxy.post("/proxy/ai", async (c) => {
     },
     body: body.body ? JSON.stringify(body.body) : undefined,
   });
+
+  c.executionCtx.waitUntil(
+    getClientId(c.req.raw).then((clientId) =>
+      sendGA4Events(c.env, clientId, [{
+        name: "proxy_api_call",
+        params: { provider: providerName, status: response.status, duration_ms: Date.now() - start },
+      }])
+    ),
+  );
 
   return new Response(response.body, {
     status: response.status,
@@ -121,6 +143,7 @@ proxy.post("/proxy/github", async (c) => {
     return c.json({ error: "Invalid GitHub API URL" }, 400);
   }
 
+  const start = Date.now();
   const response = await fetch(body.url, {
     method: body.method ?? "GET",
     headers: {
@@ -131,6 +154,15 @@ proxy.post("/proxy/github", async (c) => {
     },
     body: body.body ? JSON.stringify(body.body) : undefined,
   });
+
+  c.executionCtx.waitUntil(
+    getClientId(c.req.raw).then((clientId) =>
+      sendGA4Events(c.env, clientId, [{
+        name: "proxy_api_call",
+        params: { provider: "github", status: response.status, duration_ms: Date.now() - start },
+      }])
+    ),
+  );
 
   return new Response(response.body, {
     status: response.status,

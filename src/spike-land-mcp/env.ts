@@ -19,6 +19,10 @@ export interface Env {
   // Vault
   VAULT_SECRET: string; // Server-side pepper for vault encryption (PBKDF2 input)
 
+  // Analytics
+  GA_MEASUREMENT_ID: string;
+  GA_API_SECRET: string;
+
   // App config
   APP_ENV: string;
   SPIKE_LAND_URL: string; // https://spike.land

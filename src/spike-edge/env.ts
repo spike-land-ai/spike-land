@@ -11,4 +11,6 @@ export interface Env {
   GITHUB_TOKEN: string;
   ALLOWED_ORIGINS: string;
   QUIZ_BADGE_SECRET: string;
+  GA_MEASUREMENT_ID: string;
+  GA_API_SECRET: string;
 }

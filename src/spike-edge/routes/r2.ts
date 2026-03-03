@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import type { Env } from "../env.js";
+import { getClientId, sendGA4Events } from "../lib/ga4.js";
 
 const r2 = new Hono<{ Bindings: Env }>();
 
@@ -10,6 +11,15 @@ r2.get("/r2/:key{.+}", async (c) => {
   if (!object) {
     return c.json({ error: "Not found" }, 404);
   }
+
+  c.executionCtx.waitUntil(
+    getClientId(c.req.raw).then((clientId) =>
+      sendGA4Events(c.env, clientId, [{
+        name: "r2_operation",
+        params: { operation: "read", key },
+      }])
+    ),
+  );
 
   const headers = new Headers();
   object.writeHttpMetadata(headers);
@@ -29,6 +39,16 @@ r2.post("/r2/upload", async (c) => {
   if (!body.key) {
     return c.json({ error: "Missing required field: key" }, 400);
   }
+  const uploadKey = body.key;
+
+  c.executionCtx.waitUntil(
+    getClientId(c.req.raw).then((clientId) =>
+      sendGA4Events(c.env, clientId, [{
+        name: "r2_operation",
+        params: { operation: "upload", key: uploadKey },
+      }])
+    ),
+  );
 
   // Direct upload: read the body from a subsequent PUT, or accept inline data
   // For now, create a placeholder and return the key for a follow-up PUT
@@ -38,6 +58,16 @@ r2.post("/r2/upload", async (c) => {
 r2.delete("/r2/:key{.+}", async (c) => {
   const key = c.req.param("key");
   await c.env.R2.delete(key);
+
+  c.executionCtx.waitUntil(
+    getClientId(c.req.raw).then((clientId) =>
+      sendGA4Events(c.env, clientId, [{
+        name: "r2_operation",
+        params: { operation: "delete", key },
+      }])
+    ),
+  );
+
   return c.json({ deleted: key });
 });
 

@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import type { Env } from "../env.js";
+import { getClientId, sendGA4Events } from "../lib/ga4.js";
 
 const live = new Hono<{ Bindings: Env }>();
 
@@ -11,6 +12,15 @@ live.get("/live/:appId", async (c) => {
   if (!object) {
     return c.json({ error: "App not found" }, 404);
   }
+
+  c.executionCtx.waitUntil(
+    getClientId(c.req.raw).then((clientId) =>
+      sendGA4Events(c.env, clientId, [{
+        name: "live_app_view",
+        params: { app_id: appId },
+      }])
+    ),
+  );
 
   return new Response(object.body, {
     headers: {

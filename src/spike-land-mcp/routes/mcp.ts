@@ -12,6 +12,8 @@ import type { AuthVariables } from "../auth/middleware";
 import { createMcpServer } from "../mcp/server";
 import { loadEnabledCategories } from "../kv/categories";
 import { checkRateLimit } from "../kv/rate-limit";
+import { hashClientId, sendGA4Events } from "../lib/ga4";
+import type { GA4Event } from "../lib/ga4";
 
 export const mcpRoute = new Hono<{ Bindings: Env; Variables: AuthVariables }>();
 
@@ -48,6 +50,8 @@ mcpRoute.post("/", async (c) => {
     );
   }
 
+  const startTime = Date.now();
+
   // Load persisted categories from KV
   const enabledCategories = await loadEnabledCategories(userId, c.env.KV);
 
@@ -83,6 +87,23 @@ mcpRoute.post("/", async (c) => {
     const response = await transport.handleRequest(mcpRequest, {
       parsedBody: body,
     });
+
+    // Track MCP request via GA4
+    const durationMs = Date.now() - startTime;
+    const method = (body as { method?: string })?.method ?? "unknown";
+    const events: GA4Event[] = [
+      { name: "mcp_request", params: { method, user_id: userId, duration_ms: durationMs } },
+    ];
+    if (method === "tools/call") {
+      const toolName = (body as { params?: { name?: string } })?.params?.name ?? "unknown";
+      events.push({
+        name: "mcp_tool_call",
+        params: { tool_name: toolName, user_id: userId, duration_ms: durationMs },
+      });
+    }
+    c.executionCtx.waitUntil(
+      hashClientId(userId).then((clientId) => sendGA4Events(c.env, clientId, events)),
+    );
 
     return new Response(response.body, {
       status: response.status,

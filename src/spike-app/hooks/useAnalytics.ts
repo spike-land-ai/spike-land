@@ -6,51 +6,106 @@ interface QueuedEvent {
   data: Record<string, unknown>;
 }
 
-const FLUSH_INTERVAL_MS = 5000;
-const FLUSH_BATCH_SIZE = 10;
+const FLUSH_INTERVAL_MS = 30_000;
+const MAX_QUEUE_SIZE = 20;
+const BACKOFF_INTERVAL_MS = 120_000;
 
 const eventQueue: QueuedEvent[] = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
+let currentFlushInterval = FLUSH_INTERVAL_MS;
+let lastPageViewPath: string | null = null;
 
 function flushEvents() {
   if (eventQueue.length === 0) return;
 
-  // TODO: wire up to edge API for event tracking
-  eventQueue.splice(0, eventQueue.length);
+  const batch = eventQueue.splice(0, eventQueue.length);
+
+  const payload = batch.map((item) => ({
+    source: "spike-app",
+    eventType: item.event,
+    metadata: item.data,
+  }));
+
+  const body = JSON.stringify(payload);
+
+  try {
+    if (typeof document !== "undefined" && document.visibilityState === "hidden" && navigator.sendBeacon) {
+      navigator.sendBeacon("/api/analytics/ingest", new Blob([body], { type: "application/json" }));
+    } else {
+      fetch("/api/analytics/ingest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+        keepalive: true,
+      }).then((res) => {
+        if (res.status === 429) {
+          currentFlushInterval = BACKOFF_INTERVAL_MS;
+          setTimeout(() => { currentFlushInterval = FLUSH_INTERVAL_MS; }, BACKOFF_INTERVAL_MS);
+        }
+      }).catch(() => {
+        // Silently drop — analytics should never disrupt the app
+      });
+    }
+  } catch {
+    // Silently drop
+  }
 }
 
-function enqueueEvent(event: string, data: Record<string, unknown>) {
-  eventQueue.push({ event, data });
-
-  if (eventQueue.length >= FLUSH_BATCH_SIZE) {
-    flushEvents();
-    return;
-  }
-
+function scheduleFlush() {
   if (!flushTimer) {
     flushTimer = setTimeout(() => {
       flushTimer = null;
       flushEvents();
-    }, FLUSH_INTERVAL_MS);
+    }, currentFlushInterval);
   }
+}
+
+function enqueueEvent(event: string, data: Record<string, unknown>) {
+  // Deduplicate consecutive page_view for the same path
+  if (event === "page_view") {
+    const path = data.path as string | undefined;
+    if (path && path === lastPageViewPath) return;
+    lastPageViewPath = path ?? null;
+  }
+
+  eventQueue.push({ event, data });
+
+  if (eventQueue.length >= MAX_QUEUE_SIZE) {
+    flushEvents();
+    return;
+  }
+
+  scheduleFlush();
 }
 
 export function useAnalytics() {
   const router = useRouter();
   const sessionStart = useRef(Date.now());
+  const lastNavPath = useRef<string | null>(null);
 
   useEffect(() => {
+    // Only track actual navigations (path changes), not re-renders
     const unsubscribe = router.subscribe("onResolved", (match) => {
+      const path = match.toLocation.pathname;
+      if (path === lastNavPath.current) return;
+      lastNavPath.current = path;
+
       enqueueEvent("page_view", {
-        path: match.toLocation.pathname,
-        timestamp: Date.now(),
+        path,
         sessionDuration: Date.now() - sessionStart.current,
       });
     });
 
-    // Flush remaining events on unmount
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        flushEvents();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     return () => {
       unsubscribe();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       flushEvents();
       if (flushTimer) {
         clearTimeout(flushTimer);
@@ -62,24 +117,16 @@ export function useAnalytics() {
   const trackPageView = useCallback((route: string) => {
     enqueueEvent("page_view", {
       path: route,
-      timestamp: Date.now(),
       sessionDuration: Date.now() - sessionStart.current,
     });
   }, []);
 
   const trackToolInvocation = useCallback((toolName: string, durationMs?: number) => {
-    enqueueEvent("tool_use", {
-      toolName,
-      durationMs,
-      timestamp: Date.now(),
-    });
+    enqueueEvent("tool_use", { toolName, durationMs });
   }, []);
 
   const trackCustomEvent = useCallback((eventType: string, metadata?: Record<string, unknown>) => {
-    enqueueEvent(eventType, {
-      ...metadata,
-      timestamp: Date.now(),
-    });
+    enqueueEvent(eventType, { ...metadata });
   }, []);
 
   return {
@@ -87,7 +134,7 @@ export function useAnalytics() {
     trackToolInvocation,
     trackCustomEvent,
     trackEvent(event: string, data?: Record<string, unknown>) {
-      enqueueEvent(event, { ...data, timestamp: Date.now() });
+      enqueueEvent(event, { ...data });
     },
   };
 }

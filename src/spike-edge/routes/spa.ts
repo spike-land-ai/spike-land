@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import type { Env } from "../env.js";
+import { getClientId, sendGA4Events } from "../lib/ga4.js";
 
 const spa = new Hono<{ Bindings: Env }>();
 
@@ -30,12 +31,27 @@ spa.get("/*", async (c) => {
       return c.text("Not Found", 404);
     }
 
-    return new Response(fallback.body, {
+    const response = new Response(fallback.body, {
       headers: {
         "content-type": "text/html; charset=utf-8",
         "cache-control": "no-cache",
       },
     });
+
+    c.executionCtx.waitUntil(
+      getClientId(c.req.raw).then((clientId) =>
+        sendGA4Events(c.env, clientId, [{
+          name: "page_view",
+          params: {
+            page_path: path,
+            referrer: (c.req.header("referer") ?? "").slice(0, 500),
+            user_agent: (c.req.header("user-agent") ?? "").slice(0, 200),
+          },
+        }])
+      ),
+    );
+
+    return response;
   }
 
   const headers = new Headers();

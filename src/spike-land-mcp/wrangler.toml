@@ -18,6 +18,8 @@ migrations_dir = "db/migrations"
 
 [vars]
 APP_ENV = "development"
+GA_MEASUREMENT_ID = "G-9WNEM9ZHE7"
+# GA_API_SECRET must be set as a secret: wrangler secret put GA_API_SECRET
 
 [[routes]]
 pattern = "mcp.spike.land/*"
