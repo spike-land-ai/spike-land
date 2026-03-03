@@ -46,7 +46,9 @@ function createTestSchema(): DatabaseSchema {
       add_user: {
         name: "add_user",
         handler: (ctx: unknown, id: unknown, name: unknown) => {
-          const context = ctx as { db: Record<string, { insert: (row: Record<string, unknown>) => void }> };
+          const context = ctx as {
+            db: Record<string, { insert: (row: Record<string, unknown>) => void }>;
+          };
           context.db.users.insert({ id, name });
         },
       },
@@ -97,7 +99,9 @@ describe("scheduler", () => {
         if (callCount === 1) {
           // SELECT scheduled reducers
           return {
-            toArray: () => [{ id: 1, reducer: "test_reducer", args_json: '["hello"]', run_at: Date.now() - 1000 }],
+            toArray: () => [
+              { id: 1, reducer: "test_reducer", args_json: '["hello"]', run_at: Date.now() - 1000 },
+            ],
             rowsRead: 1,
             rowsWritten: 0,
           };
@@ -117,12 +121,21 @@ describe("scheduler", () => {
     const schema = createTestSchema();
     const setAlarm = vi.fn();
     const scheduleFn = vi.fn();
-    const executor = vi.fn().mockReturnValue({ mutations: [{ table: "users", op: "insert", newRow: { id: "1" } }] });
+    const executor = vi
+      .fn()
+      .mockReturnValue({ mutations: [{ table: "users", op: "insert", newRow: { id: "1" } }] });
 
     const mutations = processAlarm(sql, schema, executor, setAlarm, scheduleFn);
 
     expect(executor).toHaveBeenCalledOnce();
-    expect(executor).toHaveBeenCalledWith(sql, schema, "test_reducer", ["hello"], "__scheduler__", scheduleFn);
+    expect(executor).toHaveBeenCalledWith(
+      sql,
+      schema,
+      "test_reducer",
+      ["hello"],
+      "__scheduler__",
+      scheduleFn,
+    );
     expect(mutations).toHaveLength(1);
     expect(mutations[0].table).toBe("users");
     // Should have tried to delete the completed row
@@ -295,7 +308,12 @@ describe("executeReducer", () => {
         },
       },
       reducers: {
-        noop: { name: "noop", handler: () => { /* no-op */ } },
+        noop: {
+          name: "noop",
+          handler: () => {
+            /* no-op */
+          },
+        },
       },
     };
 

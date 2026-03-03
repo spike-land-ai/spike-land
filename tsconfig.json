@@ -34,7 +34,9 @@
       "@spike-land-ai/react-ts-worker": ["./src/react-ts-worker/react/index.ts"],
       "@spike-land-ai/react-ts-worker/*": ["./src/react-ts-worker/*"],
       "@spike-land-ai/spacetimedb-platform": ["./src/spacetimedb-platform/index.ts"],
-      "@spike-land-ai/spacetimedb-platform/stdb-http-client": ["./src/spacetimedb-platform/stdb-http-client.ts"],
+      "@spike-land-ai/spacetimedb-platform/stdb-http-client": [
+        "./src/spacetimedb-platform/stdb-http-client.ts"
+      ],
       "@spike-land-ai/spacetimedb-mcp": ["./src/spacetimedb-mcp/index.ts"],
       "@spike-land-ai/spacetimedb-mcp/client": ["./src/spacetimedb-mcp/client.ts"],
       "@spike-land-ai/spacetimedb-mcp/transport": ["./src/spacetimedb-mcp/transport.ts"],
@@ -73,5 +75,5 @@
     "src/code/**",
     "src/chess-engine/**",
     "src/image-studio-worker/frontend/**"
-  ],
+  ]
 }

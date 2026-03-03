@@ -144,12 +144,7 @@ function HourglassSvg({ progress }: HourglassSvgProps) {
           />
         </clipPath>
         <clipPath id="hg-clip-mid">
-          <rect
-            x={cx - midHalf}
-            y={midY0}
-            width={midHalf * 2}
-            height={midY1 - midY0}
-          />
+          <rect x={cx - midHalf} y={midY0} width={midHalf * 2} height={midY1 - midY0} />
         </clipPath>
         <clipPath id="hg-clip-bot">
           <polygon

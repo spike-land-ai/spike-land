@@ -29,10 +29,7 @@ describe("ClientMessage round-trip", () => {
       msg: {
         type: "subscribe",
         id: "s1",
-        queries: [
-          { table: "users" },
-          { table: "posts", filter: { authorId: "u1" } },
-        ],
+        queries: [{ table: "users" }, { table: "posts", filter: { authorId: "u1" } }],
       },
     },
     {
@@ -86,9 +83,7 @@ describe("ServerMessage round-trip", () => {
         reducerName: "addUser",
         callerIdentity: "caller-1",
         status: "committed",
-        deltas: [
-          { table: "users", op: "insert", newRow: { id: 1, name: "bob" } },
-        ],
+        deltas: [{ table: "users", op: "insert", newRow: { id: 1, name: "bob" } }],
       },
     },
     {
@@ -136,15 +131,13 @@ describe("ServerMessage round-trip", () => {
 
 describe("parseClientMessage rejects malformed input", () => {
   it("rejects unknown type", () => {
-    expect(() => parseClientMessage({ type: "unknown_type" })).toThrow(
-      ZodError,
-    );
+    expect(() => parseClientMessage({ type: "unknown_type" })).toThrow(ZodError);
   });
 
   it("rejects reducer_call missing reducer field", () => {
-    expect(() =>
-      parseClientMessage({ type: "reducer_call", id: "r1", args: [] }),
-    ).toThrow(ZodError);
+    expect(() => parseClientMessage({ type: "reducer_call", id: "r1", args: [] })).toThrow(
+      ZodError,
+    );
   });
 
   it("rejects reducer_call with non-array args", () => {
@@ -159,15 +152,11 @@ describe("parseClientMessage rejects malformed input", () => {
   });
 
   it("rejects subscribe missing queries", () => {
-    expect(() =>
-      parseClientMessage({ type: "subscribe", id: "s1" }),
-    ).toThrow(ZodError);
+    expect(() => parseClientMessage({ type: "subscribe", id: "s1" })).toThrow(ZodError);
   });
 
   it("rejects unsubscribe missing subscriptionId", () => {
-    expect(() => parseClientMessage({ type: "unsubscribe" })).toThrow(
-      ZodError,
-    );
+    expect(() => parseClientMessage({ type: "unsubscribe" })).toThrow(ZodError);
   });
 
   it("rejects null input", () => {
@@ -189,9 +178,7 @@ describe("parseServerMessage rejects malformed input", () => {
   });
 
   it("rejects connected missing identity", () => {
-    expect(() =>
-      parseServerMessage({ type: "connected", dbIdentity: "db" }),
-    ).toThrow(ZodError);
+    expect(() => parseServerMessage({ type: "connected", dbIdentity: "db" })).toThrow(ZodError);
   });
 
   it("rejects initial_snapshot missing tables", () => {
@@ -216,9 +203,7 @@ describe("parseServerMessage rejects malformed input", () => {
   });
 
   it("rejects reducer_result missing ok field", () => {
-    expect(() =>
-      parseServerMessage({ type: "reducer_result", id: "r1" }),
-    ).toThrow(ZodError);
+    expect(() => parseServerMessage({ type: "reducer_result", id: "r1" })).toThrow(ZodError);
   });
 });
 
@@ -258,9 +243,7 @@ describe("DeltaSchema", () => {
   });
 
   it("rejects invalid op", () => {
-    expect(() =>
-      DeltaSchema.parse({ table: "users", op: "upsert" }),
-    ).toThrow(ZodError);
+    expect(() => DeltaSchema.parse({ table: "users", op: "upsert" })).toThrow(ZodError);
   });
 
   it("rejects missing table", () => {

@@ -134,15 +134,15 @@ describe("wasm-api", () => {
 
       // Start first init
       const firstCall = initializeWasm();
-      
+
       // Start second init while first is pending
       const secondCall = initializeWasm();
 
       // Complete init
       resolveInit!(undefined);
-      
+
       const [res1, res2] = await Promise.all([firstCall, secondCall]);
-      
+
       expect(res1.status).toBe("ready");
       expect(res2.status).toBe("ready");
       // initialize should only be called ONCE (the second call reuses the promise)

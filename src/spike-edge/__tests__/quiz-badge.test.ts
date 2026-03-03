@@ -64,10 +64,10 @@ describe("quiz badge route", () => {
     expect(res.status).toBe(200);
     const html = await res.text();
     expect(res.headers.get("content-type")).toContain("text/html");
-    expect(html).toContain('og:title');
-    expect(html).toContain('og:description');
-    expect(html).toContain('og:url');
-    expect(html).toContain('twitter:card');
+    expect(html).toContain("og:title");
+    expect(html).toContain("og:description");
+    expect(html).toContain("og:url");
+    expect(html).toContain("twitter:card");
   });
 
   it("HTML contains the topic, score, and date", async () => {

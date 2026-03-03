@@ -9,11 +9,11 @@ vi.mock("../auth/device-flow", () => ({ deviceCodeLogin: vi.fn() }));
 vi.mock("../auth/token-store", () => ({
   deleteTokens: vi.fn(),
   loadTokens: vi.fn(),
-  isTokenExpired: vi.fn()
+  isTokenExpired: vi.fn(),
 }));
 vi.mock("../onboarding/wizard", () => ({
   runOnboardingWizard: vi.fn().mockRejectedValue(new Error("skip")),
-  submitOnboarding: vi.fn()
+  submitOnboarding: vi.fn(),
 }));
 
 describe("auth command", () => {
@@ -27,21 +27,21 @@ describe("auth command", () => {
 
   it("registers auth commands", () => {
     registerAuthCommand(program);
-    const auth = program.commands.find(c => c.name() === "auth")!;
+    const auth = program.commands.find((c) => c.name() === "auth")!;
     expect(auth).toBeDefined();
-    expect(auth.commands.find(c => c.name() === "login")).toBeDefined();
-    expect(auth.commands.find(c => c.name() === "logout")).toBeDefined();
-    expect(auth.commands.find(c => c.name() === "status")).toBeDefined();
+    expect(auth.commands.find((c) => c.name() === "login")).toBeDefined();
+    expect(auth.commands.find((c) => c.name() === "logout")).toBeDefined();
+    expect(auth.commands.find((c) => c.name() === "status")).toBeDefined();
   });
 
   it("login handles successful device flow", async () => {
     vi.mocked(flow.deviceCodeLogin).mockResolvedValue({
       accessToken: "abc",
-      baseUrl: "https://test"
+      baseUrl: "https://test",
     } as unknown as AuthTokens);
 
     registerAuthCommand(program);
-    const login = program.commands[0].commands.find(c => c.name() === "login")!;
+    const login = program.commands[0].commands.find((c) => c.name() === "login")!;
     // @ts-expect-error - accessing private commander handler
     await login._actionHandler([{ baseUrl: "https://test" }, []]);
 
@@ -51,43 +51,50 @@ describe("auth command", () => {
 
   it("logout deletes tokens", async () => {
     registerAuthCommand(program);
-    const logout = program.commands[0].commands.find(c => c.name() === "logout")!;
+    const logout = program.commands[0].commands.find((c) => c.name() === "logout")!;
     // @ts-expect-error - accessing private commander handler
     await logout._actionHandler([{}, []]);
     expect(store.deleteTokens).toHaveBeenCalled();
   });
 
   it("status shows login info", async () => {
-    vi.mocked(store.loadTokens).mockResolvedValue({ baseUrl: "https://test" } as unknown as AuthTokens);
+    vi.mocked(store.loadTokens).mockResolvedValue({
+      baseUrl: "https://test",
+    } as unknown as AuthTokens);
     vi.mocked(store.isTokenExpired).mockReturnValue(false);
 
     registerAuthCommand(program);
-    const status = program.commands[0].commands.find(c => c.name() === "status")!;
+    const status = program.commands[0].commands.find((c) => c.name() === "status")!;
     // @ts-expect-error - accessing private commander handler
     await status._actionHandler([{}, []]);
 
-    expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Logged in to: https://test"));
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining("Logged in to: https://test"),
+    );
   });
 
   it("status handles not logged in", async () => {
     vi.mocked(store.loadTokens).mockResolvedValue(null);
     registerAuthCommand(program);
-    const status = program.commands[0].commands.find(c => c.name() === "status")!;
+    const status = program.commands[0].commands.find((c) => c.name() === "status")!;
     // @ts-expect-error - accessing private commander handler
     await status._actionHandler([{}, []]);
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Not logged in"));
   });
 
   it("login handles onboarding skip", async () => {
-    vi.mocked(flow.deviceCodeLogin).mockResolvedValue({ accessToken: "abc", baseUrl: "https://test" } as unknown as AuthTokens);
+    vi.mocked(flow.deviceCodeLogin).mockResolvedValue({
+      accessToken: "abc",
+      baseUrl: "https://test",
+    } as unknown as AuthTokens);
     const wizard = await import("../onboarding/wizard");
     vi.mocked(wizard.runOnboardingWizard).mockRejectedValue(new Error("skip"));
 
     registerAuthCommand(program);
-    const login = program.commands[0].commands.find(c => c.name() === "login")!;
+    const login = program.commands[0].commands.find((c) => c.name() === "login")!;
     // @ts-expect-error - accessing private commander handler
     await login._actionHandler([{ baseUrl: "https://test" }, []]);
-    
+
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Logged in successfully"));
   });
 });

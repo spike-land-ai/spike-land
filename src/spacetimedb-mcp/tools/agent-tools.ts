@@ -42,9 +42,7 @@ export function registerAgentTools(server: McpServer, client: SpacetimeClient): 
     "Disconnect from the current SpacetimeDB instance",
     {},
     async () => {
-      const result = await tryCatch(
-        (async () => client.disconnect())(),
-      );
+      const result = await tryCatch((async () => client.disconnect())());
       if (!result.ok) return errorResult("NOT_CONNECTED", result.error.message, false);
       return jsonResult({ disconnected: true });
     },
@@ -83,9 +81,7 @@ export function registerAgentTools(server: McpServer, client: SpacetimeClient): 
       if (!state.connected) {
         return errorResult("NOT_CONNECTED", "Not connected to SpacetimeDB", false);
       }
-      const result = await tryCatch(
-        (async () => client.listAgents())(),
-      );
+      const result = await tryCatch((async () => client.listAgents())());
       if (!result.ok) return errorResult("QUERY_FAILED", result.error.message, false);
       const agents = onlineOnly ? result.data.filter((a) => a.online) : result.data;
       return jsonResult({
@@ -135,9 +131,7 @@ export function registerAgentTools(server: McpServer, client: SpacetimeClient): 
         return errorResult("NOT_CONNECTED", "Not connected to SpacetimeDB", false);
       }
       const onlyUndelivered = !includeDelivered;
-      const result = await tryCatch(
-        (async () => client.getMessages(onlyUndelivered))(),
-      );
+      const result = await tryCatch((async () => client.getMessages(onlyUndelivered))());
       if (!result.ok) return errorResult("QUERY_FAILED", result.error.message, false);
       return jsonResult({
         count: result.data.length,

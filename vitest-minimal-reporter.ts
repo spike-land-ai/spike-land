@@ -26,7 +26,10 @@ export default class MinimalReporter {
       errors = r.errors as { message: string }[];
     }
 
-    const fullName = (typeof test.fullName === "string" ? test.fullName : (test as Record<string, unknown>).name as string) ?? "unknown";
+    const fullName =
+      (typeof test.fullName === "string"
+        ? test.fullName
+        : ((test as Record<string, unknown>).name as string)) ?? "unknown";
 
     if (state === "pass" || state === "passed") {
       this.passed++;
@@ -47,7 +50,11 @@ export default class MinimalReporter {
     const task = module.task as Record<string, unknown> | undefined;
     const file = task?.file as Record<string, unknown> | undefined;
     if (!this.name) {
-      this.name = (file?.projectName as string) ?? (task?.projectName as string) ?? (module as Record<string, unknown>).projectName as string ?? "";
+      this.name =
+        (file?.projectName as string) ??
+        (task?.projectName as string) ??
+        ((module as Record<string, unknown>).projectName as string) ??
+        "";
     }
   }
 

@@ -90,11 +90,7 @@ export class SubscriptionManager {
     }
   }
 
-  broadcastDeltas(
-    mutations: Delta[],
-    callerIdentity: string,
-    reducerName: string,
-  ): void {
+  broadcastDeltas(mutations: Delta[], callerIdentity: string, reducerName: string): void {
     const toRemove: string[] = [];
 
     for (const [id, sub] of this.subscriptions) {

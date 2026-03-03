@@ -10,9 +10,9 @@ describe("credits", () => {
       prepare: vi.fn().mockReturnValue({
         bind: vi.fn().mockReturnValue({
           run: mockRun,
-          first: mockFirst
-        })
-      })
+          first: mockFirst,
+        }),
+      }),
     } as any;
 
     const credits = createD1Credits({ IMAGE_DB: db } as any);
@@ -27,9 +27,9 @@ describe("credits", () => {
       prepare: vi.fn().mockReturnValue({
         bind: vi.fn().mockReturnValue({
           run: mockRun,
-          first: mockFirst
-        })
-      })
+          first: mockFirst,
+        }),
+      }),
     } as any;
 
     const credits = createD1Credits({ IMAGE_DB: db } as any);
@@ -42,8 +42,8 @@ describe("credits", () => {
     const mockRun = vi.fn().mockResolvedValue({ meta: { changes: 0 } });
     const db = {
       prepare: vi.fn().mockReturnValue({
-        bind: vi.fn().mockReturnValue({ run: mockRun })
-      })
+        bind: vi.fn().mockReturnValue({ run: mockRun }),
+      }),
     } as any;
 
     const credits = createD1Credits({ IMAGE_DB: db } as any);
@@ -56,8 +56,8 @@ describe("credits", () => {
     const mockRun = vi.fn().mockResolvedValue({});
     const db = {
       prepare: vi.fn().mockReturnValue({
-        bind: vi.fn().mockReturnValue({ run: mockRun })
-      })
+        bind: vi.fn().mockReturnValue({ run: mockRun }),
+      }),
     } as any;
 
     const credits = createD1Credits({ IMAGE_DB: db } as any);
@@ -71,9 +71,9 @@ describe("credits", () => {
       prepare: vi.fn().mockReturnValue({
         bind: vi.fn().mockReturnValue({
           run: vi.fn().mockResolvedValue({}),
-          first: mockFirst
-        })
-      })
+          first: mockFirst,
+        }),
+      }),
     } as any;
 
     const credits = createD1Credits({ IMAGE_DB: db } as any);
@@ -87,9 +87,9 @@ describe("credits", () => {
       prepare: vi.fn().mockReturnValue({
         bind: vi.fn().mockReturnValue({
           run: vi.fn().mockResolvedValue({}),
-          first: mockFirst
-        })
-      })
+          first: mockFirst,
+        }),
+      }),
     } as any;
 
     const credits = createD1Credits({ IMAGE_DB: db } as any);
@@ -101,13 +101,13 @@ describe("credits", () => {
     const credits = createD1Credits({ IMAGE_DB: {} as any } as any);
     expect(credits.estimate("TIER_1K")).toBe(2);
   });
-  
+
   it("calculateGenerationCost with defaults", () => {
     const credits = createD1Credits({ IMAGE_DB: {} as any } as any);
     expect(credits.calculateGenerationCost({ tier: "TIER_2K" })).toBe(5);
     expect(credits.calculateGenerationCost({ tier: "UNKNOWN" as any })).toBe(1);
   });
-  
+
   it("estimate", () => {
     const credits = createD1Credits({ IMAGE_DB: {} as any } as any);
     expect(credits.estimate("TIER_1K", 2)).toBe(4);

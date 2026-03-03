@@ -41,7 +41,7 @@ export const avatarTool = imageProcedure
       return errorResult("GENERATION_FAILED", jobRes.error.message, true);
     }
     /* v8 ignore next */
-if (!jobRes.data?.success) {
+    if (!jobRes.data?.success) {
       return errorResult(
         "GENERATION_FAILED",
         jobRes.data?.error ?? "Failed to create avatar job",

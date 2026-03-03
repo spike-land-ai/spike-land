@@ -42,9 +42,7 @@ export function registerTaskTools(server: McpServer, client: SpacetimeClient): v
       if (!state.connected) {
         return errorResult("NOT_CONNECTED", "Not connected to SpacetimeDB", false);
       }
-      const result = await tryCatch(
-        (async () => client.listTasks(status))(),
-      );
+      const result = await tryCatch((async () => client.listTasks(status))());
       if (!result.ok) return errorResult("QUERY_FAILED", result.error.message, false);
       return jsonResult({
         count: result.data.length,

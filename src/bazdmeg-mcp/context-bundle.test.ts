@@ -3,7 +3,11 @@
  */
 
 import { describe, it, expect, afterEach } from "vitest";
-import { extractExportedSymbols, buildContextBundle, formatContextBundle } from "./context-bundle.js";
+import {
+  extractExportedSymbols,
+  buildContextBundle,
+  formatContextBundle,
+} from "./context-bundle.js";
 import { createFakeMonorepo } from "./__test-utils__/fixtures.js";
 
 describe("extractExportedSymbols", () => {
@@ -74,7 +78,8 @@ describe("buildContextBundle", () => {
         claudeMd: "# Test Package\nA test package.\n",
         dependencies: { "@spike-land-ai/shared": "1.0.0" },
         srcFiles: {
-          "types.ts": "export interface Config {\n  name: string;\n}\n\nexport type Status = 'on' | 'off';\n",
+          "types.ts":
+            "export interface Config {\n  name: string;\n}\n\nexport type Status = 'on' | 'off';\n",
         },
       },
       {
@@ -116,7 +121,7 @@ describe("formatContextBundle", () => {
         name: "@spike-land-ai/my-pkg",
         version: "1.0.0",
         scripts: { build: "tsc", test: "vitest" },
-        dependencies: { "@spike-land-ai/shared": "1.0.0", "zod": "4.0.0" },
+        dependencies: { "@spike-land-ai/shared": "1.0.0", zod: "4.0.0" },
         devDependencies: {},
       },
       exportedTypes: [{ file: "types.ts", symbols: ["Config", "Status"] }],

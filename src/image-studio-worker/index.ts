@@ -3,7 +3,12 @@ import { cors } from "hono/cors";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import type { ImageStudioDeps, ImageId, AlbumHandle } from "@spike-land-ai/mcp-image-studio";
 import { createD1Credits } from "./deps/credits.ts";
-import { createD1Db, getOrCreateDefaultAlbum, galleryRecentImages, addImageToDefaultAlbum } from "./deps/db.ts";
+import {
+  createD1Db,
+  getOrCreateDefaultAlbum,
+  galleryRecentImages,
+  addImageToDefaultAlbum,
+} from "./deps/db.ts";
 import { createGeminiGeneration } from "./deps/generation.ts";
 import { nanoid } from "./deps/nanoid.ts";
 import { createResolvers } from "./deps/resolvers.ts";
@@ -19,16 +24,23 @@ declare const __BUILD_TIME__: string;
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.get("/version", (c) =>
-  c.json({ sha: __BUILD_SHA__, built: __BUILD_TIME__ }),
-);
+app.get("/version", (c) => c.json({ sha: __BUILD_SHA__, built: __BUILD_TIME__ }));
 
 app.use(
   "*",
   cors({
     origin: (origin) => origin || "*",
     allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization", "Mcp-Session-Id", "Mcp-Protocol-Version", "X-Gemini-Key", "X-Text-Model", "X-Image-Model", "X-Thinking-Budget"],
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Mcp-Session-Id",
+      "Mcp-Protocol-Version",
+      "X-Gemini-Key",
+      "X-Text-Model",
+      "X-Image-Model",
+      "X-Thinking-Budget",
+    ],
     exposeHeaders: ["Mcp-Session-Id"],
     credentials: true,
   }),
@@ -43,7 +55,7 @@ app.on("HEAD", "/r2/:key", async (c) => {
     headers: {
       "Content-Type": obj.httpMetadata?.contentType ?? "application/octet-stream",
       "Content-Length": String(obj.size),
-      "ETag": obj.etag,
+      ETag: obj.etag,
       ...(obj.customMetadata?.width ? { "X-Image-Width": obj.customMetadata.width } : {}),
       ...(obj.customMetadata?.height ? { "X-Image-Height": obj.customMetadata.height } : {}),
     },
@@ -59,7 +71,7 @@ app.get("/r2/:key", async (c) => {
       "Content-Type": obj.httpMetadata?.contentType ?? "application/octet-stream",
       "Cache-Control": "public, max-age=31536000, immutable",
       "Access-Control-Allow-Origin": "*",
-      "ETag": obj.etag,
+      ETag: obj.etag,
     },
   });
 });
@@ -74,7 +86,7 @@ app.get("/:userId/:filename{.+\\.\\w+$}", async (c) => {
       "Content-Type": obj.httpMetadata?.contentType ?? "application/octet-stream",
       "Cache-Control": "public, max-age=31536000, immutable",
       "Access-Control-Allow-Origin": "*",
-      "ETag": obj.etag,
+      ETag: obj.etag,
     },
   });
 });
@@ -105,7 +117,9 @@ app.all("/api/auth/*", async (c) => {
       if (isGetSession) {
         return c.json(null, 200);
       }
-      console.error(`[auth-proxy] Upstream HTML error on ${url.pathname}: ${res.status} ${res.statusText}`);
+      console.error(
+        `[auth-proxy] Upstream HTML error on ${url.pathname}: ${res.status} ${res.statusText}`,
+      );
       return c.json({ error: `Auth service error: ${res.status}` }, res.status as 400);
     }
 
@@ -133,7 +147,10 @@ app.all("/api/auth/*", async (c) => {
 });
 
 // Build standard deps per request
-async function buildDeps(c: { req: { raw: Request; url: string; header: (name: string) => string | undefined; method: string }; env: Env }) {
+async function buildDeps(c: {
+  req: { raw: Request; url: string; header: (name: string) => string | undefined; method: string };
+  env: Env;
+}) {
   let userId = "demo-user"; // Default for MCP/CLI demo access
 
   // Validate session via auth-mcp.spike.land
@@ -157,7 +174,7 @@ async function buildDeps(c: { req: { raw: Request; url: string; header: (name: s
   const storage = createR2Storage(c.env, baseUrl);
   const generation = createGeminiGeneration(c.env, db, credits, storage, {
     userApiKey: userGeminiKey,
-    modelName: imageModel
+    modelName: imageModel,
   });
   const resolvers = createResolvers(db, userId);
 
@@ -327,7 +344,10 @@ app.post("/api/gallery/album", async (c) => {
   if (!body.name) return c.json({ error: "Missing album name" }, 400);
 
   const maxSort = await deps.db.albumMaxSortOrder(userId);
-  const handle = `${body.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30)}-${nanoid().slice(0, 6)}`;
+  const handle = `${body.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .slice(0, 30)}-${nanoid().slice(0, 6)}`;
 
   const album = await deps.db.albumCreate({
     handle: handle as AlbumHandle,
@@ -400,7 +420,7 @@ app.patch("/api/gallery/album/:id", async (c) => {
     name: body.name,
     description: body.description,
     privacy: body.privacy as "PUBLIC" | "PRIVATE" | "UNLISTED" | undefined,
-    coverImageId: (body.coverImageId as ImageId | null | undefined),
+    coverImageId: body.coverImageId as ImageId | null | undefined,
   });
 
   return c.json({ album: updated });
@@ -409,7 +429,10 @@ app.patch("/api/gallery/album/:id", async (c) => {
 // Chat agent endpoint
 app.post("/api/chat", async (c) => {
   try {
-    const body = await c.req.json<{ message: string; history?: Array<{ role: string; content: string }> }>();
+    const body = await c.req.json<{
+      message: string;
+      history?: Array<{ role: string; content: string }>;
+    }>();
     if (!body.message) return c.json({ error: "Missing message" }, 400);
 
     const userGeminiKey = c.req.header("X-Gemini-Key");
@@ -422,7 +445,7 @@ app.post("/api/chat", async (c) => {
     const stream = await handleChatStream(body, toolRegistry, c.env, {
       userGeminiKey,
       modelName: textModel,
-      thinkingBudget
+      thinkingBudget,
     });
 
     return new Response(stream, {

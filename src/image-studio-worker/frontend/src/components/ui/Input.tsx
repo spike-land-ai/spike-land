@@ -10,7 +10,10 @@ export function Input({ label, error, className = "", id, ...props }: InputProps
   return (
     <div className="space-y-1">
       {label && (
-        <label htmlFor={inputId} className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
+        <label
+          htmlFor={inputId}
+          className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1"
+        >
           {label}
         </label>
       )}
@@ -21,7 +24,11 @@ export function Input({ label, error, className = "", id, ...props }: InputProps
           disabled:opacity-20 text-xs font-medium transition-all ${error ? "border-red-500/50" : ""} ${className}`}
         {...props}
       />
-      {error && <p className="text-[9px] font-bold text-red-400 mt-1 ml-1 uppercase tracking-tighter">{error}</p>}
+      {error && (
+        <p className="text-[9px] font-bold text-red-400 mt-1 ml-1 uppercase tracking-tighter">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

@@ -7,8 +7,8 @@ export function TermsPage() {
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Acceptance of Terms</h2>
         <p className="leading-relaxed text-gray-700">
-          By accessing or using spike.land, you agree to be bound by these Terms of
-          Service. If you do not agree, do not use the platform.
+          By accessing or using spike.land, you agree to be bound by these Terms of Service. If you
+          do not agree, do not use the platform.
         </p>
       </section>
 
@@ -25,26 +25,26 @@ export function TermsPage() {
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Content and Applications</h2>
         <p className="leading-relaxed text-gray-700">
-          You retain ownership of applications and content you create on spike.land. By
-          publishing an application to the store, you grant spike.land a non-exclusive
-          license to display and distribute it within the platform.
+          You retain ownership of applications and content you create on spike.land. By publishing
+          an application to the store, you grant spike.land a non-exclusive license to display and
+          distribute it within the platform.
         </p>
       </section>
 
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Limitation of Liability</h2>
         <p className="leading-relaxed text-gray-700">
-          spike.land is provided &ldquo;as is&rdquo; without warranties of any kind. We
-          are not liable for any damages arising from your use of the platform, including
-          data loss or service interruptions.
+          spike.land is provided &ldquo;as is&rdquo; without warranties of any kind. We are not
+          liable for any damages arising from your use of the platform, including data loss or
+          service interruptions.
         </p>
       </section>
 
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Changes to Terms</h2>
         <p className="leading-relaxed text-gray-700">
-          We may update these terms from time to time. Continued use of the platform after
-          changes constitutes acceptance of the new terms.
+          We may update these terms from time to time. Continued use of the platform after changes
+          constitutes acceptance of the new terms.
         </p>
       </section>
     </div>

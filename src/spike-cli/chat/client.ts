@@ -31,8 +31,8 @@ export class ChatClient {
       authToken: options.authToken,
       defaultHeaders: options.authToken
         ? {
-          "anthropic-beta": "oauth-2025-04-20",
-        }
+            "anthropic-beta": "oauth-2025-04-20",
+          }
         : undefined,
     });
     this.model = options.model ?? "claude-sonnet-4-6";

@@ -9,12 +9,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
 import { AutoShipSchema } from "../types.js";
 import { getWorkspace } from "../workspace-state.js";
-import {
-  getBuiltinRules,
-  runGates,
-  getChangedFiles,
-  countChanges,
-} from "../gates/engine.js";
+import { getBuiltinRules, runGates, getChangedFiles, countChanges } from "../gates/engine.js";
 import { runCommand, hasScript } from "../shell.js";
 
 interface StepResult {
@@ -38,7 +33,9 @@ function formatReport(steps: StepResult[], packageName: string): string {
     text += `\n**BLOCKED** at \`${failed.step}\`: ${failed.detail}`;
   } else {
     const shipped = steps.some((s) => s.step === "commit" && s.status === "pass");
-    text += shipped ? `\n**SHIPPED** — all checks passed, committed and pushed.` : `\n**DRY RUN** — all checks passed, no commit made.`;
+    text += shipped
+      ? `\n**SHIPPED** — all checks passed, committed and pushed.`
+      : `\n**DRY RUN** — all checks passed, no commit made.`;
   }
 
   return text;
@@ -47,7 +44,8 @@ function formatReport(steps: StepResult[], packageName: string): string {
 export function registerShipTools(server: McpServer): void {
   createZodTool(server, {
     name: "bazdmeg_auto_ship",
-    description: "Auto-ship: lint → typecheck → test → quality gates → commit → push. Fail-fast on first failure.",
+    description:
+      "Auto-ship: lint → typecheck → test → quality gates → commit → push. Fail-fast on first failure.",
     schema: AutoShipSchema.shape,
     handler: async (args) => {
       const {
@@ -68,7 +66,7 @@ export function registerShipTools(server: McpServer): void {
       if (!pkgName) {
         return textResult(
           "**ERROR**: No active workspace and no `packageName` provided. " +
-          "Enter a workspace first with `bazdmeg_enter_workspace` or pass `packageName`.",
+            "Enter a workspace first with `bazdmeg_enter_workspace` or pass `packageName`.",
         );
       }
 
@@ -80,7 +78,12 @@ export function registerShipTools(server: McpServer): void {
       async function runScriptStep(stepName: string, scriptName: string): Promise<boolean> {
         const exists = await hasScript(pkgDir, scriptName);
         if (!exists) {
-          steps.push({ step: stepName, status: "skip", durationMs: 0, detail: `No \`${scriptName}\` script` });
+          steps.push({
+            step: stepName,
+            status: "skip",
+            durationMs: 0,
+            detail: `No \`${scriptName}\` script`,
+          });
           return true;
         }
 
@@ -116,11 +119,20 @@ export function registerShipTools(server: McpServer): void {
 
       // 4. quality gates
       const gatesStart = Date.now();
-      const diffResult = await runCommand("git", ["diff", "HEAD", "--", `packages/${pkgName}/`], repoRoot);
+      const diffResult = await runCommand(
+        "git",
+        ["diff", "HEAD", "--", `packages/${pkgName}/`],
+        repoRoot,
+      );
       const diff = diffResult.stdout;
 
       if (!diff.trim()) {
-        steps.push({ step: "gates", status: "skip", durationMs: Date.now() - gatesStart, detail: "No changes to check" });
+        steps.push({
+          step: "gates",
+          status: "skip",
+          durationMs: Date.now() - gatesStart,
+          detail: "No changes to check",
+        });
         return textResult(
           `## Auto-Ship Report — ${pkgName}\n\n**No changes to ship.** The working tree is clean for \`packages/${pkgName}/\`.`,
         );
@@ -144,12 +156,24 @@ export function registerShipTools(server: McpServer): void {
       const gatesDuration = Date.now() - gatesStart;
 
       if (hasRed) {
-        const redGates = gateResults.filter((r) => r.status === "RED").map((r) => `${r.name}: ${r.detail}`);
-        steps.push({ step: "gates", status: "fail", durationMs: gatesDuration, detail: redGates.join("; ") });
+        const redGates = gateResults
+          .filter((r) => r.status === "RED")
+          .map((r) => `${r.name}: ${r.detail}`);
+        steps.push({
+          step: "gates",
+          status: "fail",
+          durationMs: gatesDuration,
+          detail: redGates.join("; "),
+        });
         return textResult(formatReport(steps, pkgName));
       }
 
-      steps.push({ step: "gates", status: "pass", durationMs: gatesDuration, detail: `${gateResults.length} gates passed` });
+      steps.push({
+        step: "gates",
+        status: "pass",
+        durationMs: gatesDuration,
+        detail: `${gateResults.length} gates passed`,
+      });
 
       // 5. commit
       if (dryRun) {
@@ -163,7 +187,12 @@ export function registerShipTools(server: McpServer): void {
 
       const addResult = await runCommand("git", ["add", `packages/${pkgName}/`], repoRoot);
       if (!addResult.ok) {
-        steps.push({ step: "commit", status: "fail", durationMs: Date.now() - commitStart, detail: `git add failed: ${addResult.stderr.trim()}` });
+        steps.push({
+          step: "commit",
+          status: "fail",
+          durationMs: Date.now() - commitStart,
+          detail: `git add failed: ${addResult.stderr.trim()}`,
+        });
         return textResult(formatReport(steps, pkgName));
       }
 
@@ -171,7 +200,12 @@ export function registerShipTools(server: McpServer): void {
       const commitDuration = Date.now() - commitStart;
 
       if (!commitResult.ok) {
-        steps.push({ step: "commit", status: "fail", durationMs: commitDuration, detail: commitResult.stderr.trim() || commitResult.stdout.trim() });
+        steps.push({
+          step: "commit",
+          status: "fail",
+          durationMs: commitDuration,
+          detail: commitResult.stderr.trim() || commitResult.stdout.trim(),
+        });
         return textResult(formatReport(steps, pkgName));
       }
 
@@ -188,7 +222,12 @@ export function registerShipTools(server: McpServer): void {
       const pushDuration = Date.now() - pushStart;
 
       if (!pushResult.ok) {
-        steps.push({ step: "push", status: "fail", durationMs: pushDuration, detail: pushResult.stderr.trim() });
+        steps.push({
+          step: "push",
+          status: "fail",
+          durationMs: pushDuration,
+          detail: pushResult.stderr.trim(),
+        });
         return textResult(formatReport(steps, pkgName));
       }
 

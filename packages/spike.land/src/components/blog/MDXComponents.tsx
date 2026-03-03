@@ -534,28 +534,18 @@ export const mdxComponents: MDXComponents = {
     ssr: false,
     loading: () => <div className="w-full aspect-video bg-muted animate-pulse rounded-xl my-16" />,
   }),
-  PyramidReshapeDemo: dynamic(
-    () => import("./interactive").then((mod) => mod.PyramidReshapeDemo),
-    {
-      ssr: false,
-      loading: () => (
-        <div className="w-full aspect-video bg-muted animate-pulse rounded-xl my-16" />
-      ),
-    },
-  ),
+  PyramidReshapeDemo: dynamic(() => import("./interactive").then((mod) => mod.PyramidReshapeDemo), {
+    ssr: false,
+    loading: () => <div className="w-full aspect-video bg-muted animate-pulse rounded-xl my-16" />,
+  }),
   TestCodeNameVenn: dynamic(() => import("./interactive").then((mod) => mod.TestCodeNameVenn), {
     ssr: false,
     loading: () => <div className="w-full aspect-video bg-muted animate-pulse rounded-xl my-16" />,
   }),
-  HourglassModelDemo: dynamic(
-    () => import("./interactive").then((mod) => mod.HourglassModelDemo),
-    {
-      ssr: false,
-      loading: () => (
-        <div className="w-full aspect-video bg-muted animate-pulse rounded-xl my-16" />
-      ),
-    },
-  ),
+  HourglassModelDemo: dynamic(() => import("./interactive").then((mod) => mod.HourglassModelDemo), {
+    ssr: false,
+    loading: () => <div className="w-full aspect-video bg-muted animate-pulse rounded-xl my-16" />,
+  }),
   ParadigmGuiltTimeline: dynamic(
     () => import("./interactive").then((mod) => mod.ParadigmGuiltTimeline),
     {
@@ -583,15 +573,10 @@ export const mdxComponents: MDXComponents = {
       ),
     },
   ),
-  StackCollapseDemo: dynamic(
-    () => import("./interactive").then((mod) => mod.StackCollapseDemo),
-    {
-      ssr: false,
-      loading: () => (
-        <div className="w-full aspect-video bg-muted animate-pulse rounded-xl my-16" />
-      ),
-    },
-  ),
+  StackCollapseDemo: dynamic(() => import("./interactive").then((mod) => mod.StackCollapseDemo), {
+    ssr: false,
+    loading: () => <div className="w-full aspect-video bg-muted animate-pulse rounded-xl my-16" />,
+  }),
   AgentCoordinationDemo: dynamic(
     () => import("./interactive").then((mod) => mod.AgentCoordinationDemo),
     {

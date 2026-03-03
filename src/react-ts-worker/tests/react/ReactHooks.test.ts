@@ -17,7 +17,10 @@ import { createContext } from "../../react/ReactContext.js";
 
 function makeDispatcher(overrides: Partial<Dispatcher> = {}): Dispatcher {
   return {
-    useState: vi.fn((init) => [typeof init === "function" ? (init as () => unknown)() : init, vi.fn()]),
+    useState: vi.fn((init) => [
+      typeof init === "function" ? (init as () => unknown)() : init,
+      vi.fn(),
+    ]),
     useReducer: vi.fn((reducer, init, initFn) => [
       initFn ? initFn(init) : init,
       vi.fn(),
@@ -92,8 +95,7 @@ describe("React Hooks (via mock dispatcher)", () => {
     it("calls dispatcher.useReducer with reducer and initialArg", () => {
       const dispatcher = makeDispatcher();
       ReactSharedInternals.H = dispatcher;
-      const reducer = (state: number, action: string) =>
-        action === "inc" ? state + 1 : state;
+      const reducer = (state: number, action: string) => (action === "inc" ? state + 1 : state);
       const [state, dispatch] = useReducer(reducer, 0);
       expect(state).toBe(0);
       expect(typeof dispatch).toBe("function");

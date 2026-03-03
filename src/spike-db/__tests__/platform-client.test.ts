@@ -6,7 +6,7 @@ class MockWebSocket {
   static OPEN = 1;
   readyState = MockWebSocket.OPEN;
   addEventListener = vi.fn((event, cb) => {
-    if (event === 'open') setTimeout(() => cb({}), 0);
+    if (event === "open") setTimeout(() => cb({}), 0);
   });
   send = vi.fn();
   close = vi.fn();
@@ -33,11 +33,31 @@ describe("PlatformClient", () => {
 
   it("provides access to all tables", () => {
     const tables = [
-      "user", "agent", "agentMessage", "album", "albumImage", "app",
-      "appMessage", "appVersion", "codeSession", "credits", "directMessage",
-      "enhancementJob", "generationJob", "healthCheck", "image", "mcpTask",
-      "oauthLink", "page", "pageBlock", "pipeline", "platformEvent",
-      "registeredTool", "subject", "toolUsage", "userToolPreference"
+      "user",
+      "agent",
+      "agentMessage",
+      "album",
+      "albumImage",
+      "app",
+      "appMessage",
+      "appVersion",
+      "codeSession",
+      "credits",
+      "directMessage",
+      "enhancementJob",
+      "generationJob",
+      "healthCheck",
+      "image",
+      "mcpTask",
+      "oauthLink",
+      "page",
+      "pageBlock",
+      "pipeline",
+      "platformEvent",
+      "registeredTool",
+      "subject",
+      "toolUsage",
+      "userToolPreference",
     ];
     for (const t of tables) {
       expect((client as unknown as Record<string, unknown>)[t]).toBeDefined();
@@ -46,7 +66,7 @@ describe("PlatformClient", () => {
 
   it("calls all reducer methods correctly", async () => {
     const spy = vi.spyOn(client, "callReducer").mockResolvedValue(undefined);
-    
+
     await client.registerUser("h", "d", "e");
     expect(spy).toHaveBeenCalledWith("register_user", "h", "d", "e");
 

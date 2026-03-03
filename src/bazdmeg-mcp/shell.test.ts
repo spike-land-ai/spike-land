@@ -57,18 +57,22 @@ describe("shell helper", () => {
 
   describe("hasScript", () => {
     it("returns true if script exists", async () => {
-      vi.mocked(readFile).mockResolvedValue(JSON.stringify({
-        scripts: { test: "vitest" }
-      }));
+      vi.mocked(readFile).mockResolvedValue(
+        JSON.stringify({
+          scripts: { test: "vitest" },
+        }),
+      );
 
       const result = await hasScript("/pkg", "test");
       expect(result).toBe(true);
     });
 
     it("returns false if script missing", async () => {
-      vi.mocked(readFile).mockResolvedValue(JSON.stringify({
-        scripts: { build: "tsc" }
-      }));
+      vi.mocked(readFile).mockResolvedValue(
+        JSON.stringify({
+          scripts: { build: "tsc" },
+        }),
+      );
 
       const result = await hasScript("/pkg", "test");
       expect(result).toBe(false);

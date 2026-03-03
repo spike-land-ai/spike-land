@@ -197,8 +197,14 @@ export class WebSocketHandler {
 
     if (data.type === "swarm_register") {
       session.swarmAgent = {
-        agentId: (typeof data.agent_id === "string" ? data.agent_id : "") || session.name || `agent-${Date.now()}`,
-        displayName: (typeof data.display_name === "string" ? data.display_name : "") || session.name || "anonymous",
+        agentId:
+          (typeof data.agent_id === "string" ? data.agent_id : "") ||
+          session.name ||
+          `agent-${Date.now()}`,
+        displayName:
+          (typeof data.display_name === "string" ? data.display_name : "") ||
+          session.name ||
+          "anonymous",
         capabilities: Array.isArray(data.capabilities) ? (data.capabilities as string[]) : [],
         registeredAt: Date.now(),
       };

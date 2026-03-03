@@ -34,14 +34,12 @@ export function red(text: string): string {
   return `${RED}${text}${RESET}`;
 }
 
-export function formatToolList(
-  tools: Array<{ name: string; description?: string; }>,
-): string {
+export function formatToolList(tools: Array<{ name: string; description?: string }>): string {
   if (tools.length === 0) return dim("  (no tools)");
 
-  const maxNameLen = Math.max(...tools.map(t => t.name.length));
+  const maxNameLen = Math.max(...tools.map((t) => t.name.length));
   return tools
-    .map(t => {
+    .map((t) => {
       const padded = t.name.padEnd(maxNameLen + 2);
       return `  ${cyan(padded)}${dim(t.description ?? "")}`;
     })

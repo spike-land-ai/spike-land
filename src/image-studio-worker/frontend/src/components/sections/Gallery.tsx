@@ -57,20 +57,23 @@ export function Gallery() {
     }
   }, [deleteTarget, refetch]);
 
-  const handleUpload = useCallback(async (files: FileList) => {
-    setUploading(true);
-    try {
-      for (const file of Array.from(files)) {
-        await uploadToGallery(file);
+  const handleUpload = useCallback(
+    async (files: FileList) => {
+      setUploading(true);
+      try {
+        for (const file of Array.from(files)) {
+          await uploadToGallery(file);
+        }
+        toast.success(`Uploaded ${files.length} image${files.length > 1 ? "s" : ""}`);
+        refetch();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Upload failed");
+      } finally {
+        setUploading(false);
       }
-      toast.success(`Uploaded ${files.length} image${files.length > 1 ? "s" : ""}`);
-      refetch();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setUploading(false);
-    }
-  }, [refetch]);
+    },
+    [refetch],
+  );
 
   // Infinite scroll observer
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -92,9 +95,7 @@ export function Gallery() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-100">
-            {album?.name ?? "Gallery"}
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-100">{album?.name ?? "Gallery"}</h2>
           <p className="text-gray-400 mt-1">
             {images.length} image{images.length !== 1 ? "s" : ""}
           </p>
@@ -104,11 +105,7 @@ export function Gallery() {
             <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-          <Button
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-            loading={uploading}
-          >
+          <Button size="sm" onClick={() => fileInputRef.current?.click()} loading={uploading}>
             <Upload className="w-4 h-4" />
             Upload
           </Button>
@@ -180,7 +177,10 @@ export function Gallery() {
         <div className="animate-delayed-show">
           <ImageGrid columns={6}>
             {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="aspect-square bg-obsidian-900 border border-white/5 rounded-[1.5rem] animate-pulse" />
+              <div
+                key={i}
+                className="aspect-square bg-obsidian-900 border border-white/5 rounded-[1.5rem] animate-pulse"
+              />
             ))}
           </ImageGrid>
         </div>
@@ -216,7 +216,10 @@ export function Gallery() {
                 ) : undefined
               }
               onEdit={() => {
-                sessionStorage.setItem("studio_initial_image", JSON.stringify({ url: img.originalUrl, name: img.name }));
+                sessionStorage.setItem(
+                  "studio_initial_image",
+                  JSON.stringify({ url: img.originalUrl, name: img.name }),
+                );
                 window.location.hash = "#/studio";
               }}
               onClick={() => {
@@ -227,9 +230,12 @@ export function Gallery() {
                 {
                   label: "Edit in Studio",
                   onClick: () => {
-                    sessionStorage.setItem("studio_initial_image", JSON.stringify({ url: img.originalUrl, name: img.name }));
+                    sessionStorage.setItem(
+                      "studio_initial_image",
+                      JSON.stringify({ url: img.originalUrl, name: img.name }),
+                    );
                     window.location.hash = "#/studio";
-                  }
+                  },
                 },
                 {
                   label: "Delete",

@@ -397,10 +397,14 @@ export function registerWorkflowTools(server: McpServer): void {
         if (workspace.packageName === packageName) {
           checks.push(`[PASS] Workspace active: ${packageName}`);
         } else {
-          checks.push(`[WARN] Different workspace active: ${workspace.packageName} (expected ${packageName})`);
+          checks.push(
+            `[WARN] Different workspace active: ${workspace.packageName} (expected ${packageName})`,
+          );
         }
       } else {
-        checks.push(`[INFO] No workspace active — call bazdmeg_enter_workspace("${packageName}") to set up isolation`);
+        checks.push(
+          `[INFO] No workspace active — call bazdmeg_enter_workspace("${packageName}") to set up isolation`,
+        );
       }
 
       // Branch info
@@ -413,13 +417,13 @@ export function registerWorkflowTools(server: McpServer): void {
 
       return textResult(
         `## Session Bootstrap — ${packageName}\n\n` +
-        checks.join("\n") +
-        `\n\n### Next Steps\n` +
-        `1. Enter workspace: bazdmeg_enter_workspace\n` +
-        `2. Get context: bazdmeg_get_context\n` +
-        `3. Plan: bazdmeg_planning_interview\n` +
-        `4. Code, test, iterate\n` +
-        `5. Pre-PR check: bazdmeg_pre_pr_check`,
+          checks.join("\n") +
+          `\n\n### Next Steps\n` +
+          `1. Enter workspace: bazdmeg_enter_workspace\n` +
+          `2. Get context: bazdmeg_get_context\n` +
+          `3. Plan: bazdmeg_planning_interview\n` +
+          `4. Code, test, iterate\n` +
+          `5. Pre-PR check: bazdmeg_pre_pr_check`,
       );
     },
   });
@@ -441,7 +445,9 @@ export function registerWorkflowTools(server: McpServer): void {
       if (sessionId) {
         const session = interviewSessions.get(sessionId);
         if (!session) {
-          return textResult(`**ERROR**: Session \`${sessionId}\` not found. Start a new interview with taskDescription.`);
+          return textResult(
+            `**ERROR**: Session \`${sessionId}\` not found. Start a new interview with taskDescription.`,
+          );
         }
 
         if (session.completed) {
@@ -449,7 +455,9 @@ export function registerWorkflowTools(server: McpServer): void {
         }
 
         if (!answers) {
-          return textResult(`**ERROR**: answers are required for follow-up calls. Provide \`answers: [a, b, c]\` (0-3).`);
+          return textResult(
+            `**ERROR**: answers are required for follow-up calls. Provide \`answers: [a, b, c]\` (0-3).`,
+          );
         }
 
         // Evaluate answers
@@ -499,7 +507,9 @@ export function registerWorkflowTools(server: McpServer): void {
 
             conceptState.answerHistory.set(q.variantIndex, givenAnswer);
             const correctOption = q.options[q.correctIndex] ?? "unknown";
-            roundResults.push(`  Q${i + 1} [${conceptName}]: WRONG (correct: ${q.correctIndex} — "${correctOption}")`);
+            roundResults.push(
+              `  Q${i + 1} [${conceptName}]: WRONG (correct: ${q.correctIndex} — "${correctOption}")`,
+            );
           }
         }
 
@@ -516,9 +526,9 @@ export function registerWorkflowTools(server: McpServer): void {
 
           return textResult(
             `## INTERVIEW FAILED — Too Many Contradictions\n\n` +
-            `**${session.conflicts.length} contradictions detected.** Review the codebase before continuing.\n\n` +
-            `### Conflicts:\n${conflictDetails}\n\n` +
-            `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join("\n")}`,
+              `**${session.conflicts.length} contradictions detected.** Review the codebase before continuing.\n\n` +
+              `### Conflicts:\n${conflictDetails}\n\n` +
+              `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join("\n")}`,
           );
         }
 
@@ -529,9 +539,9 @@ export function registerWorkflowTools(server: McpServer): void {
 
           return textResult(
             `## INTERVIEW FAILED — Research Before Continuing\n\n` +
-            `**Score: ${roundCorrect}/3 (${Math.round((roundCorrect / 3) * 100)}%).** Score too low.\n\n` +
-            `### Round ${session.roundNumber} Results:\n${roundResults.join("\n")}\n\n` +
-            `Research the codebase and start a new interview.`,
+              `**Score: ${roundCorrect}/3 (${Math.round((roundCorrect / 3) * 100)}%).** Score too low.\n\n` +
+              `### Round ${session.roundNumber} Results:\n${roundResults.join("\n")}\n\n` +
+              `Research the codebase and start a new interview.`,
           );
         }
 
@@ -547,10 +557,10 @@ export function registerWorkflowTools(server: McpServer): void {
 
           return textResult(
             `## INTERVIEW PASSED — Proceed to Implementation\n\n` +
-            `All 6 concepts mastered.\n\n` +
-            `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join("\n")}\n\n` +
-            `### Mastery Report:\n${masteryReport}\n\n` +
-            `### Conflicts: ${session.conflicts.length}`,
+              `All 6 concepts mastered.\n\n` +
+              `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join("\n")}\n\n` +
+              `### Mastery Report:\n${masteryReport}\n\n` +
+              `### Conflicts: ${session.conflicts.length}`,
           );
         }
 
@@ -562,16 +572,18 @@ export function registerWorkflowTools(server: McpServer): void {
 
         return textResult(
           `## Round ${session.roundNumber} Results (${roundCorrect}/3)\n\n` +
-          roundResults.join("\n") +
-          `\n\n**Progress**: ${masteredCount}/6 concepts mastered | Conflicts: ${session.conflicts.length}/3\n\n` +
-          `---\n\n` +
-          formatMCQsForResponse(nextRound, session),
+            roundResults.join("\n") +
+            `\n\n**Progress**: ${masteredCount}/6 concepts mastered | Conflicts: ${session.conflicts.length}/3\n\n` +
+            `---\n\n` +
+            formatMCQsForResponse(nextRound, session),
         );
       }
 
       // ── First call: create session ─────────────────────────────────
       if (!taskDescription) {
-        return textResult(`**ERROR**: taskDescription is required for the first call. Provide a description of the task.`);
+        return textResult(
+          `**ERROR**: taskDescription is required for the first call. Provide a description of the task.`,
+        );
       }
 
       const workspace = getWorkspace();
@@ -593,7 +605,10 @@ export function registerWorkflowTools(server: McpServer): void {
         taskDescription,
         concepts,
         conceptStates,
-        currentRound: { roundNumber: 0, questions: [] as unknown as [InterviewQuestion, InterviewQuestion, InterviewQuestion] },
+        currentRound: {
+          roundNumber: 0,
+          questions: [] as unknown as [InterviewQuestion, InterviewQuestion, InterviewQuestion],
+        },
         roundNumber: 0,
         conflicts: [],
         completed: false,
@@ -644,10 +659,10 @@ export function registerWorkflowTools(server: McpServer): void {
 
       return textResult(
         formatted +
-        `\n\n---\n\n` +
-        (hasRed
-          ? `**BLOCKED**: Fix RED gates before creating PR.`
-          : `**READY**: All critical gates passing. Proceed with PR creation.`),
+          `\n\n---\n\n` +
+          (hasRed
+            ? `**BLOCKED**: Fix RED gates before creating PR.`
+            : `**READY**: All critical gates passing. Proceed with PR creation.`),
       );
     },
   });

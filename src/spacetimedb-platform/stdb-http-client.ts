@@ -61,7 +61,7 @@ export function createStdbHttpClient(config: StdbHttpClientConfig): StdbHttpClie
         const body = await res.text().catch(() => "");
         throw new Error(`sql query failed (${res.status}): ${body}`);
       }
-      const json = await res.json() as T[];
+      const json = (await res.json()) as T[];
       return json;
     },
   };

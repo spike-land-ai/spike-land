@@ -37,13 +37,13 @@ describe("Redis Client", () => {
       delete process.env.UPSTASH_REDIS_REST_TOKEN;
       process.env.KV_REST_API_URL = "https://kv.example.com";
       process.env.KV_REST_API_TOKEN = "kv-token";
-      
+
       const config = redis.getRedisConfig();
       expect(config).toEqual({
         url: "https://kv.example.com",
         token: "kv-token",
       });
-      
+
       delete process.env.KV_REST_API_URL;
       delete process.env.KV_REST_API_TOKEN;
     });

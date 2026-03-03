@@ -1,7 +1,7 @@
-const fs = require('fs');
+const fs = require("fs");
 
-let creditsTestPath = 'src/image-studio-worker/deps/credits.test.ts';
-let creditsContent = fs.readFileSync(creditsTestPath, 'utf8');
+let creditsTestPath = "src/image-studio-worker/deps/credits.test.ts";
+let creditsContent = fs.readFileSync(creditsTestPath, "utf8");
 
 creditsContent = creditsContent.replace(
   'it("estimate", () => {',
@@ -16,6 +16,6 @@ creditsContent = creditsContent.replace(
     expect(credits.calculateGenerationCost({ tier: "UNKNOWN" as any })).toBe(1);
   });
   
-  it("estimate", () => {`
+  it("estimate", () => {`,
 );
 fs.writeFileSync(creditsTestPath, creditsContent);

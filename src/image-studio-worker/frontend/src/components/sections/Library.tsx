@@ -98,7 +98,10 @@ export function Library() {
         <div className="animate-delayed-show">
           <ImageGrid columns={6}>
             {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="aspect-square bg-obsidian-900 border border-white/5 rounded-[1.5rem] animate-pulse" />
+              <div
+                key={i}
+                className="aspect-square bg-obsidian-900 border border-white/5 rounded-[1.5rem] animate-pulse"
+              />
             ))}
           </ImageGrid>
         </div>

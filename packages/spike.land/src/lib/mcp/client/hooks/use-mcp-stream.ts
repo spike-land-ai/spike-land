@@ -7,6 +7,6 @@ export const useMcpStream = <T = any>(_toolName?: string, _opts?: any) => {
     chunks: [] as string[],
     fullText: "",
     isDone: false,
-    error: null as Error | null
+    error: null as Error | null,
   };
 };

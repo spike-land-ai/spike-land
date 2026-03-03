@@ -74,9 +74,7 @@ describe("TableCache", () => {
       oldRow: { id: "1", name: "Alice" },
       newRow: { id: "1", name: "Alice Updated" },
     });
-    expect(cache.getRows("users")).toEqual([
-      { id: "1", name: "Alice Updated" },
-    ]);
+    expect(cache.getRows("users")).toEqual([{ id: "1", name: "Alice Updated" }]);
   });
 
   it("applyDelta delete removes a row", () => {
@@ -157,9 +155,7 @@ describe("TableCache", () => {
     ]);
     const admins = cache.filterBy("users", "role", "admin");
     expect(admins).toHaveLength(2);
-    expect(admins.map((r) => r["name"])).toEqual(
-      expect.arrayContaining(["Alice", "Charlie"]),
-    );
+    expect(admins.map((r) => r["name"])).toEqual(expect.arrayContaining(["Alice", "Charlie"]));
   });
 
   it("count returns number of rows", () => {
@@ -272,11 +268,7 @@ describe("ClientTable", () => {
 describe("SubscriptionBuilder", () => {
   it("onApplied callback fires when _notifyApplied is called", () => {
     const conn = new MockConnection() as unknown as import("./connection.js").Connection;
-    const builder = new SubscriptionBuilder(
-      [{ table: "users" }],
-      "sub-1",
-      conn,
-    );
+    const builder = new SubscriptionBuilder([{ table: "users" }], "sub-1", conn);
 
     const handler = vi.fn();
     builder.onApplied(handler);
@@ -288,11 +280,7 @@ describe("SubscriptionBuilder", () => {
 
   it("onError callback fires when _notifyError is called", () => {
     const conn = new MockConnection() as unknown as import("./connection.js").Connection;
-    const builder = new SubscriptionBuilder(
-      [{ table: "users" }],
-      "sub-1",
-      conn,
-    );
+    const builder = new SubscriptionBuilder([{ table: "users" }], "sub-1", conn);
 
     const handler = vi.fn();
     builder.onError(handler);

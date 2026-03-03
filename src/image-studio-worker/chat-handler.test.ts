@@ -21,10 +21,18 @@ describe("Chat Handler SSE Events", () => {
 
   it("should define image tool set for gallery updates", () => {
     const imageTools = new Set([
-      "img_generate", "img_edit", "img_enhance", "img_upload",
-      "img_delete", "img_auto_crop", "img_smart_enhance",
-      "img_background_remove", "img_upscale", "img_style_transfer",
-      "img_color_grade", "img_restore",
+      "img_generate",
+      "img_edit",
+      "img_enhance",
+      "img_upload",
+      "img_delete",
+      "img_auto_crop",
+      "img_smart_enhance",
+      "img_background_remove",
+      "img_upscale",
+      "img_style_transfer",
+      "img_color_grade",
+      "img_restore",
     ]);
 
     expect(imageTools.has("img_generate")).toBe(true);
@@ -43,7 +51,7 @@ describe("Chat Handler SSE Events", () => {
   });
 
   it("should construct a valid GalleryUpdateEvent object", async () => {
-    const { } = await import("./shared-types.ts");
+    const {} = await import("./shared-types.ts");
 
     const event = {
       type: "gallery_update" as const,
@@ -57,7 +65,7 @@ describe("Chat Handler SSE Events", () => {
   });
 
   it("should construct a valid TextDeltaEvent object", async () => {
-    const { } = await import("./shared-types.ts");
+    const {} = await import("./shared-types.ts");
 
     const event = {
       type: "text_delta" as const,
@@ -69,7 +77,7 @@ describe("Chat Handler SSE Events", () => {
   });
 
   it("should construct a valid ToolCallStartEvent object", async () => {
-    const { } = await import("./shared-types.ts");
+    const {} = await import("./shared-types.ts");
 
     const event = {
       type: "tool_call_start" as const,
@@ -83,7 +91,7 @@ describe("Chat Handler SSE Events", () => {
   });
 
   it("should construct a valid BrowserCommandEvent object", async () => {
-    const { } = await import("./shared-types.ts");
+    const {} = await import("./shared-types.ts");
 
     const requestId = `br-${Date.now()}-abc123`;
     const event = {
@@ -98,7 +106,7 @@ describe("Chat Handler SSE Events", () => {
   });
 
   it("should construct a valid ErrorEvent object", async () => {
-    const { } = await import("./shared-types.ts");
+    const {} = await import("./shared-types.ts");
 
     const event = {
       type: "error" as const,
@@ -141,9 +149,7 @@ describe("SSE encoding format", () => {
       imageId: "img-123",
     };
 
-    const raw = decoder.decode(
-      encoder.encode(`data: ${JSON.stringify(eventData)}\n\n`),
-    );
+    const raw = decoder.decode(encoder.encode(`data: ${JSON.stringify(eventData)}\n\n`));
 
     const parsed = JSON.parse(raw.replace(/^data: /, "").trim());
     expect(parsed.type).toBe("gallery_update");
@@ -168,7 +174,15 @@ describe("SSE encoding format", () => {
 // ─── Model fallback logic ───
 
 describe("Model fallback logic", () => {
-  const RECOVERABLE_ERRORS = ["503", "404", "UNAVAILABLE", "not found", "region", "not supported", "429"];
+  const RECOVERABLE_ERRORS = [
+    "503",
+    "404",
+    "UNAVAILABLE",
+    "not found",
+    "region",
+    "not supported",
+    "429",
+  ];
 
   it("detects recoverable error codes", () => {
     for (const code of RECOVERABLE_ERRORS) {

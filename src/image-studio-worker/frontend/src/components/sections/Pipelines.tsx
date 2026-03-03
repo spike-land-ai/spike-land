@@ -136,7 +136,10 @@ export function Pipelines() {
           {loading ? (
             <div className="animate-delayed-show space-y-2 w-full">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-16 bg-obsidian-900 border border-white/5 rounded-lg animate-pulse" />
+                <div
+                  key={i}
+                  className="h-16 bg-obsidian-900 border border-white/5 rounded-lg animate-pulse"
+                />
               ))}
             </div>
           ) : pipelines.length === 0 ? (
@@ -146,10 +149,11 @@ export function Pipelines() {
               <button
                 key={p.id}
                 onClick={() => viewDetail(p)}
-                className={`w-full text-left p-3 rounded-lg border transition-colors ${selected?.id === p.id
-                  ? "bg-accent-600/10 border-accent-500/30"
-                  : "bg-gray-900 border-gray-800 hover:border-gray-700"
-                  }`}
+                className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                  selected?.id === p.id
+                    ? "bg-accent-600/10 border-accent-500/30"
+                    : "bg-gray-900 border-gray-800 hover:border-gray-700"
+                }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-200 truncate">{p.name}</span>

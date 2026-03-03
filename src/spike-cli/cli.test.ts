@@ -33,7 +33,7 @@ describe("cli", () => {
   it("registers all commands", async () => {
     process.argv = ["node", "spike"];
     await main();
-    
+
     expect(auth.registerAuthCommand).toHaveBeenCalled();
     expect(alias.registerAliasCommand).toHaveBeenCalled();
   });
@@ -41,7 +41,7 @@ describe("cli", () => {
   it("handles --generate-completions", async () => {
     process.argv = ["node", "spike", "--generate-completions"];
     await main();
-    
+
     expect(console.log).toHaveBeenCalledWith("auth");
     expect(console.log).toHaveBeenCalledWith("--verbose");
     // Should NOT have called parse because it exits early
@@ -51,12 +51,12 @@ describe("cli", () => {
   it("rewrites command aliases", async () => {
     const store = await import("./alias/store");
     vi.mocked(store.loadAliases).mockResolvedValue({
-      commands: { "st": "status" }
+      commands: { st: "status" },
     } as unknown as { commands: Record<string, string> });
 
     process.argv = ["node", "spike", "st"];
     await main();
-    
+
     expect(process.argv[2]).toBe("status");
   });
 });

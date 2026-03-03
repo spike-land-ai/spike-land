@@ -51,7 +51,7 @@ export function createCompleter(
         return [allCommands, ""];
       }
 
-      const matches = fuzzyFilter(command, allCommands, c => c);
+      const matches = fuzzyFilter(command, allCommands, (c) => c);
       return [matches.length > 0 ? matches : allCommands, command];
     }
 
@@ -62,9 +62,9 @@ export function createCompleter(
       case "call": {
         // Complete tool names
         if (parts.length === 2) {
-          const toolNames = manager.getAllTools().map(t => t.namespacedName);
+          const toolNames = manager.getAllTools().map((t) => t.namespacedName);
           if (!partial) return [toolNames, ""];
-          const matches = fuzzyFilter(partial, toolNames, n => n);
+          const matches = fuzzyFilter(partial, toolNames, (n) => n);
           return [matches.length > 0 ? matches : toolNames, partial];
         }
         return [[], partial];
@@ -76,7 +76,7 @@ export function createCompleter(
         if (parts.length === 2) {
           const serverNames = manager.getServerNames();
           if (!partial) return [serverNames, ""];
-          const matches = fuzzyFilter(partial, serverNames, n => n);
+          const matches = fuzzyFilter(partial, serverNames, (n) => n);
           return [matches.length > 0 ? matches : serverNames, partial];
         }
         return [[], partial];
@@ -86,7 +86,7 @@ export function createCompleter(
         // Complete alias subcommands
         if (parts.length === 2) {
           if (!partial) return [ALIAS_SUBCOMMANDS, ""];
-          const matches = fuzzyFilter(partial, ALIAS_SUBCOMMANDS, s => s);
+          const matches = fuzzyFilter(partial, ALIAS_SUBCOMMANDS, (s) => s);
           return [matches.length > 0 ? matches : ALIAS_SUBCOMMANDS, partial];
         }
         return [[], partial];

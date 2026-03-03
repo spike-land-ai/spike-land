@@ -3,11 +3,7 @@
  */
 
 import { vi } from "vitest";
-import type {
-  CallToolResult,
-  ImageStudioToolRegistry,
-  ToolDefinition,
-} from "../types.js";
+import type { CallToolResult, ImageStudioToolRegistry, ToolDefinition } from "../types.js";
 
 export type MockRegistry = ImageStudioToolRegistry & {
   handlers: Map<

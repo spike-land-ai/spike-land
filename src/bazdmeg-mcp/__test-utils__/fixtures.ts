@@ -89,7 +89,9 @@ export async function createFakeMonorepo(
 /**
  * Build a simple unified diff for testing gates.
  */
-export function buildDiff(files: Array<{ path: string; added: string[]; removed?: string[] }>): string {
+export function buildDiff(
+  files: Array<{ path: string; added: string[]; removed?: string[] }>,
+): string {
   const parts: string[] = [];
   for (const file of files) {
     parts.push(`diff --git a/${file.path} b/${file.path}`);

@@ -25,8 +25,16 @@ describe("workflow tools", () => {
   afterEach(async () => {
     resetWorkspaceState();
     clearInterviewSessions();
-    try { await unlink("/tmp/bazdmeg-workspace.json"); } catch { /* ok */ }
-    try { await unlink("/tmp/bazdmeg-telemetry.jsonl"); } catch { /* ok */ }
+    try {
+      await unlink("/tmp/bazdmeg-workspace.json");
+    } catch {
+      /* ok */
+    }
+    try {
+      await unlink("/tmp/bazdmeg-telemetry.jsonl");
+    } catch {
+      /* ok */
+    }
   });
 
   it("registers 3 workflow tools", () => {
@@ -104,7 +112,8 @@ describe("workflow tools", () => {
     const result = await server.call("bazdmeg_pre_pr_check", {
       diff,
       prTitle: "Add feature",
-      prBody: "This PR adds a new feature with comprehensive testing and documentation for the chess engine module.",
+      prBody:
+        "This PR adds a new feature with comprehensive testing and documentation for the chess engine module.",
     });
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain("BAZDMEG Quality Gates");
@@ -112,9 +121,7 @@ describe("workflow tools", () => {
   });
 
   it("pre_pr_check blocks on RED gates", async () => {
-    const diff = buildDiff([
-      { path: "src/index.ts", added: ["const x: any = 'hello';"] },
-    ]);
+    const diff = buildDiff([{ path: "src/index.ts", added: ["const x: any = 'hello';"] }]);
 
     const result = await server.call("bazdmeg_pre_pr_check", {
       diff,
@@ -206,9 +213,11 @@ describe("workflow tools", () => {
     // Get the session to find correct answers
     const session = getInterviewSession(sessionId);
     expect(session).toBeDefined();
-    const correctAnswers = session!.currentRound.questions.map(
-      (q) => q.correctIndex,
-    ) as [number, number, number];
+    const correctAnswers = session!.currentRound.questions.map((q) => q.correctIndex) as [
+      number,
+      number,
+      number,
+    ];
 
     // Submit correct answers
     const followUp = await server.call("bazdmeg_planning_interview", {
@@ -236,9 +245,11 @@ describe("workflow tools", () => {
     // Get session and compute wrong answers
     const session = getInterviewSession(sessionId);
     expect(session).toBeDefined();
-    const wrongAnswers = session!.currentRound.questions.map(
-      (q) => (q.correctIndex + 1) % 4,
-    ) as [number, number, number];
+    const wrongAnswers = session!.currentRound.questions.map((q) => (q.correctIndex + 1) % 4) as [
+      number,
+      number,
+      number,
+    ];
 
     // Submit all wrong answers (0/3 = 0%)
     const followUp = await server.call("bazdmeg_planning_interview", {
@@ -347,9 +358,11 @@ describe("workflow tools", () => {
       const session = getInterviewSession(sessionId);
       if (!session || session.completed) break;
 
-      const correctAnswers = session.currentRound.questions.map(
-        (q) => q.correctIndex,
-      ) as [number, number, number];
+      const correctAnswers = session.currentRound.questions.map((q) => q.correctIndex) as [
+        number,
+        number,
+        number,
+      ];
 
       const result = await server.call("bazdmeg_planning_interview", {
         sessionId,
@@ -378,7 +391,11 @@ describe("workflow tools", () => {
     const sessionId = sessionIdMatch![1];
 
     // Record which concept+variant combos we answered correctly
-    const correctlyAnswered: Array<{ conceptIndex: number; variantIndex: number; correctIndex: number }> = [];
+    const correctlyAnswered: Array<{
+      conceptIndex: number;
+      variantIndex: number;
+      correctIndex: number;
+    }> = [];
 
     // Now keep going, and whenever we see a question we previously answered correctly,
     // deliberately answer it wrong to generate conflicts
@@ -414,12 +431,14 @@ describe("workflow tools", () => {
         answers,
       });
 
-      if (result.content[0].text.includes("FAILED_CONTRADICTIONS") ||
-          result.content[0].text.includes("Too Many Contradictions")) {
+      if (
+        result.content[0].text.includes("FAILED_CONTRADICTIONS") ||
+        result.content[0].text.includes("Too Many Contradictions")
+      ) {
         expect(result.content[0].text).toContain("contradictions");
         return; // Test passes
       }
-      
+
       // If we failed for low score first, that's fine, we still tested error branches
       if (result.content[0].text.includes("FAILED")) break;
     }
@@ -434,9 +453,11 @@ describe("workflow tools", () => {
 
     // Fail with all wrong answers
     const session = getInterviewSession(sessionId);
-    const wrongAnswers = session!.currentRound.questions.map(
-      (q) => (q.correctIndex + 1) % 4,
-    ) as [number, number, number];
+    const wrongAnswers = session!.currentRound.questions.map((q) => (q.correctIndex + 1) % 4) as [
+      number,
+      number,
+      number,
+    ];
 
     await server.call("bazdmeg_planning_interview", {
       sessionId,

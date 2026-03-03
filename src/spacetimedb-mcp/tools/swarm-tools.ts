@@ -37,16 +37,11 @@ export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient
 
   // ─── stdb_disconnect ───
 
-  server.tool(
-    "stdb_disconnect",
-    "Disconnect from the current SpacetimeDB Swarm",
-    {},
-    async () => {
-      const result = await tryCatch(Promise.resolve().then(() => client.disconnect()));
-      if (!result.ok) return errorResult("NOT_CONNECTED", result.error.message, false);
-      return jsonResult({ disconnected: true });
-    },
-  );
+  server.tool("stdb_disconnect", "Disconnect from the current SpacetimeDB Swarm", {}, async () => {
+    const result = await tryCatch(Promise.resolve().then(() => client.disconnect()));
+    if (!result.ok) return errorResult("NOT_CONNECTED", result.error.message, false);
+    return jsonResult({ disconnected: true });
+  });
 
   // ─── stdb_list_tools ───
 
@@ -57,7 +52,9 @@ export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient
       category: z.string().optional().describe("Category filter (e.g. 'code', 'image')"),
     },
     async ({ category }) => {
-      const result = await tryCatch(Promise.resolve().then(() => client.listRegisteredTools(category)));
+      const result = await tryCatch(
+        Promise.resolve().then(() => client.listRegisteredTools(category)),
+      );
       if (!result.ok) {
         if (result.error.message.includes("Not connected")) {
           return errorResult("NOT_CONNECTED", result.error.message, false);
@@ -107,10 +104,15 @@ export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient
     "stdb_list_tasks",
     "List tasks in the swarm, to check status of invoked tools",
     {
-      statusFilter: z.string().optional().describe("Filter by 'pending', 'claimed', 'completed', 'failed'"),
+      statusFilter: z
+        .string()
+        .optional()
+        .describe("Filter by 'pending', 'claimed', 'completed', 'failed'"),
     },
     async ({ statusFilter }) => {
-      const result = await tryCatch(Promise.resolve().then(() => client.listMcpTasks(statusFilter)));
+      const result = await tryCatch(
+        Promise.resolve().then(() => client.listMcpTasks(statusFilter)),
+      );
       if (!result.ok) {
         if (result.error.message.includes("Not connected")) {
           return errorResult("NOT_CONNECTED", result.error.message, false);

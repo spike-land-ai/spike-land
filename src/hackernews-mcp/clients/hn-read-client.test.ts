@@ -325,7 +325,9 @@ describe("HNReadClient", () => {
       const fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: async () => { throw new Error("Invalid JSON"); }
+        json: async () => {
+          throw new Error("Invalid JSON");
+        },
       });
       const client = new HNReadClient(fetch as unknown as FetchFn);
       const item = await client.getItem(12345);
@@ -336,7 +338,9 @@ describe("HNReadClient", () => {
       const fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: async () => { throw new Error("Invalid JSON"); }
+        json: async () => {
+          throw new Error("Invalid JSON");
+        },
       });
       const client = new HNReadClient(fetch as unknown as FetchFn);
       const user = await client.getUser("pg");
@@ -347,7 +351,9 @@ describe("HNReadClient", () => {
       const fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: async () => { throw new Error("Invalid JSON"); }
+        json: async () => {
+          throw new Error("Invalid JSON");
+        },
       });
       const client = new HNReadClient(fetch as unknown as FetchFn);
       const ids = await client.getStoryIds("top");
@@ -358,7 +364,9 @@ describe("HNReadClient", () => {
       const fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: async () => { throw new Error("Invalid JSON"); }
+        json: async () => {
+          throw new Error("Invalid JSON");
+        },
       });
       const client = new HNReadClient(fetch as unknown as FetchFn);
       const updates = await client.getUpdates();
@@ -369,7 +377,9 @@ describe("HNReadClient", () => {
       const fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: async () => { throw new Error("Invalid JSON"); }
+        json: async () => {
+          throw new Error("Invalid JSON");
+        },
       });
       const client = new HNReadClient(fetch as unknown as FetchFn);
       const result = await client.search({ query: "test" });

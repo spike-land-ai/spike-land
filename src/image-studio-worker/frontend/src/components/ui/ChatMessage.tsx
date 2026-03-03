@@ -29,14 +29,12 @@ function CopyButton({ text, isUser }: { text: string; isUser: boolean }) {
   );
 }
 
-function ToolCallCard({
-  tc,
-}: {
-  tc: NonNullable<ChatMessageType["toolCalls"]>[number];
-}) {
+function ToolCallCard({ tc }: { tc: NonNullable<ChatMessageType["toolCalls"]>[number] }) {
   const [expanded, setExpanded] = useState(false);
   const isImage = tc.result && /https?:\/\/.*\.(png|jpg|jpeg|webp|gif)/i.test(tc.result);
-  const imageUrl = isImage ? tc.result!.match(/https?:\/\/[^\s"]+\.(png|jpg|jpeg|webp|gif)/i)?.[0] : null;
+  const imageUrl = isImage
+    ? tc.result!.match(/https?:\/\/[^\s"]+\.(png|jpg|jpeg|webp|gif)/i)?.[0]
+    : null;
 
   return (
     <div className="mt-3 rounded-2xl border border-white/5 bg-obsidian-950/50 text-[11px] overflow-hidden transition-all">
@@ -47,16 +45,16 @@ function ToolCallCard({
         <div className="w-6 h-6 rounded-lg bg-emerald-neon/10 flex items-center justify-center shrink-0">
           <Wrench className="w-3 h-3 text-emerald-neon" />
         </div>
-        <span className="font-bold text-gray-400 uppercase tracking-widest truncate">{tc.name.replace("img_", "PIXEL.")}</span>
+        <span className="font-bold text-gray-400 uppercase tracking-widest truncate">
+          {tc.name.replace("img_", "PIXEL.")}
+        </span>
         {tc.status === "pending" && (
           <span className="ml-auto flex items-center gap-1.5 text-amber-neon font-black uppercase tracking-tighter">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-neon animate-pulse" />
             Active
           </span>
         )}
-        {tc.status === "error" && (
-          <AlertCircle className="ml-auto w-3.5 h-3.5 text-red-500" />
-        )}
+        {tc.status === "error" && <AlertCircle className="ml-auto w-3.5 h-3.5 text-red-500" />}
         {tc.status === "done" && (
           <div className="ml-auto">
             {expanded ? (
@@ -90,9 +88,18 @@ function ToolCallCard({
 function LoadingDots() {
   return (
     <span className="inline-flex gap-1.5 items-center px-2 py-1">
-      <span className="w-1 h-1 bg-amber-neon rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-      <span className="w-1 h-1 bg-amber-neon rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-      <span className="w-1 h-1 bg-amber-neon rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+      <span
+        className="w-1 h-1 bg-amber-neon rounded-full animate-bounce"
+        style={{ animationDelay: "0ms" }}
+      />
+      <span
+        className="w-1 h-1 bg-amber-neon rounded-full animate-bounce"
+        style={{ animationDelay: "150ms" }}
+      />
+      <span
+        className="w-1 h-1 bg-amber-neon rounded-full animate-bounce"
+        style={{ animationDelay: "300ms" }}
+      />
     </span>
   );
 }
@@ -113,7 +120,11 @@ function SimpleMarkdown({ text, isUser }: { text: string; isUser: boolean }) {
           );
         }
         if (part.startsWith("_") && part.endsWith("_")) {
-          return <em key={i} className="italic">{part.slice(1, -1)}</em>;
+          return (
+            <em key={i} className="italic">
+              {part.slice(1, -1)}
+            </em>
+          );
         }
         const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
         if (linkMatch) {
@@ -135,7 +146,10 @@ function SimpleMarkdown({ text, isUser }: { text: string; isUser: boolean }) {
   );
 }
 
-export function ChatMessage({ message, isStreaming }: ChatMessageProps & { isStreaming?: boolean }) {
+export function ChatMessage({
+  message,
+  isStreaming,
+}: ChatMessageProps & { isStreaming?: boolean }) {
   const isUser = message.role === "user";
   const hasContent = !!message.content;
   const hasToolCalls = !!(message.toolCalls && message.toolCalls.length > 0);
@@ -158,7 +172,9 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps & { isStr
               {hasContent && (
                 <div className={`text-xs ${isUser ? "font-bold" : "font-medium leading-relaxed"}`}>
                   <SimpleMarkdown text={message.content} isUser={isUser} />
-                  {isStreaming && <span className="inline-block w-0.5 h-3 bg-amber-neon ml-0.5 animate-pulse align-text-bottom" />}
+                  {isStreaming && (
+                    <span className="inline-block w-0.5 h-3 bg-amber-neon ml-0.5 animate-pulse align-text-bottom" />
+                  )}
                 </div>
               )}
               {hasToolCalls && (

@@ -55,10 +55,7 @@ export function processAlarm(
   scheduleFn: (name: string, delay: number, args: unknown[]) => void,
 ): Delta[] {
   const now = Date.now();
-  const result = sql.exec(
-    "SELECT * FROM __scheduled_reducers WHERE run_at <= ?",
-    now,
-  );
+  const result = sql.exec("SELECT * FROM __scheduled_reducers WHERE run_at <= ?", now);
   const rows = result.toArray() as unknown as ScheduledRow[];
   const allMutations: Delta[] = [];
 
@@ -70,9 +67,7 @@ export function processAlarm(
   }
 
   // Check for remaining scheduled items and set next alarm
-  const nextResult = sql.exec(
-    "SELECT MIN(run_at) as next_run FROM __scheduled_reducers",
-  );
+  const nextResult = sql.exec("SELECT MIN(run_at) as next_run FROM __scheduled_reducers");
   const nextRows = nextResult.toArray();
   const nextRun = nextRows[0]?.next_run as number | null;
   if (nextRun !== null && nextRun !== undefined) {

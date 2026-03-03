@@ -31,18 +31,12 @@ export const CopilotStatus: React.FC = () => {
       title={`Copilot: ${status} (Ctrl+Shift+A to toggle)`}
       className="absolute bottom-3 right-3 z-50 flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-xs text-white backdrop-blur-sm transition-opacity hover:bg-black/60"
     >
-      {status === "active" && (
-        <span className="h-2 w-2 rounded-full bg-green-400 shrink-0" />
-      )}
+      {status === "active" && <span className="h-2 w-2 rounded-full bg-green-400 shrink-0" />}
       {status === "loading" && (
         <span className="h-2 w-2 rounded-full bg-amber-400 shrink-0 animate-pulse" />
       )}
-      {status === "offline" && (
-        <span className="h-2 w-2 rounded-full bg-gray-400 shrink-0" />
-      )}
-      <span className={status === "disabled" ? "line-through opacity-50" : ""}>
-        Copilot
-      </span>
+      {status === "offline" && <span className="h-2 w-2 rounded-full bg-gray-400 shrink-0" />}
+      <span className={status === "disabled" ? "line-through opacity-50" : ""}>Copilot</span>
     </button>
   );
 };

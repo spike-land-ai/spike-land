@@ -14,29 +14,15 @@
         "privacy": {
           "type": "string",
           "description": "Privacy setting: PRIVATE, UNLISTED, or PUBLIC",
-          "enum": [
-            "PRIVATE",
-            "UNLISTED",
-            "PUBLIC"
-          ]
+          "enum": ["PRIVATE", "UNLISTED", "PUBLIC"]
         },
         "default_tier": {
           "type": "string",
           "description": "Default enhancement tier for images in this album",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         }
       },
-      "required": [
-        "name",
-        "privacy",
-        "default_tier"
-      ]
+      "required": ["name", "privacy", "default_tier"]
     }
   },
   "img_album_delete": {
@@ -52,10 +38,7 @@
           "description": "Must be true to confirm permanent deletion"
         }
       },
-      "required": [
-        "album_handle",
-        "confirm"
-      ]
+      "required": ["album_handle", "confirm"]
     }
   },
   "img_album_images": {
@@ -69,10 +52,7 @@
         "action": {
           "type": "string",
           "description": "Action to perform: add or remove images",
-          "enum": [
-            "add",
-            "remove"
-          ]
+          "enum": ["add", "remove"]
         },
         "image_ids": {
           "type": "array",
@@ -83,11 +63,7 @@
           }
         }
       },
-      "required": [
-        "album_handle",
-        "action",
-        "image_ids"
-      ]
+      "required": ["album_handle", "action", "image_ids"]
     }
   },
   "img_album_list": {
@@ -119,10 +95,7 @@
           }
         }
       },
-      "required": [
-        "album_handle",
-        "image_ids"
-      ]
+      "required": ["album_handle", "image_ids"]
     }
   },
   "img_album_update": {
@@ -144,11 +117,7 @@
         "privacy": {
           "type": "string",
           "description": "New privacy setting: PRIVATE, UNLISTED, or PUBLIC",
-          "enum": [
-            "PRIVATE",
-            "UNLISTED",
-            "PUBLIC"
-          ]
+          "enum": ["PRIVATE", "UNLISTED", "PUBLIC"]
         },
         "cover_image_id": {
           "type": "string",
@@ -161,18 +130,10 @@
         "default_tier": {
           "type": "string",
           "description": "Default enhancement tier for images in this album",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         }
       },
-      "required": [
-        "album_handle"
-      ]
+      "required": ["album_handle"]
     }
   },
   "img_album": {
@@ -188,9 +149,7 @@
           "description": "If true, include all images in the album"
         }
       },
-      "required": [
-        "album_handle"
-      ]
+      "required": ["album_handle"]
     }
   },
   "img_analyze": {
@@ -204,20 +163,14 @@
         "detail_level": {
           "type": "string",
           "description": "Level of detail: brief, detailed, or alt_text",
-          "enum": [
-            "brief",
-            "detailed",
-            "alt_text"
-          ]
+          "enum": ["brief", "detailed", "alt_text"]
         },
         "include_palette": {
           "type": "boolean",
           "description": "If true, extract dominant color palette"
         }
       },
-      "required": [
-        "image_id"
-      ]
+      "required": ["image_id"]
     }
   },
   "img_auto_tag": {
@@ -233,9 +186,7 @@
           "description": "If true, replace existing tags/description. If false (default), merge with existing"
         }
       },
-      "required": [
-        "image_id"
-      ]
+      "required": ["image_id"]
     }
   },
   "img_avatar": {
@@ -249,28 +200,15 @@
         "style": {
           "type": "string",
           "description": "Avatar style: photo, cartoon, abstract, or pixel",
-          "enum": [
-            "photo",
-            "cartoon",
-            "abstract",
-            "pixel"
-          ]
+          "enum": ["photo", "cartoon", "abstract", "pixel"]
         },
         "tier": {
           "type": "string",
           "description": "Enhancement tier for generation quality",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         }
       },
-      "required": [
-        "prompt"
-      ]
+      "required": ["prompt"]
     }
   },
   "img_banner": {
@@ -300,13 +238,7 @@
         "tier": {
           "type": "string",
           "description": "Enhancement tier for generation quality",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         },
         "title": {
           "type": "string",
@@ -317,10 +249,7 @@
           "description": "Subtitle text to overlay on the banner"
         }
       },
-      "required": [
-        "prompt",
-        "preset"
-      ]
+      "required": ["prompt", "preset"]
     }
   },
   "img_blend": {
@@ -338,12 +267,7 @@
         "blend_mode": {
           "type": "string",
           "description": "Blend mode: overlay, multiply, screen, or dissolve",
-          "enum": [
-            "overlay",
-            "multiply",
-            "screen",
-            "dissolve"
-          ]
+          "enum": ["overlay", "multiply", "screen", "dissolve"]
         },
         "blend_strength": {
           "type": "number",
@@ -352,19 +276,10 @@
         "tier": {
           "type": "string",
           "description": "Enhancement tier for output quality",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         }
       },
-      "required": [
-        "source_image_id",
-        "target_image_id"
-      ]
+      "required": ["source_image_id", "target_image_id"]
     }
   },
   "img_bulk_delete": {
@@ -384,10 +299,7 @@
           "description": "Must be true to confirm permanent deletion"
         }
       },
-      "required": [
-        "image_ids",
-        "confirm"
-      ]
+      "required": ["image_ids", "confirm"]
     }
   },
   "img_compare": {
@@ -420,13 +332,7 @@
         "tier": {
           "type": "string",
           "description": "Tier to estimate cost for",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         },
         "count": {
           "type": "number",
@@ -465,9 +371,7 @@
           "description": "Custom height in pixels (only with preset=custom)"
         }
       },
-      "required": [
-        "image_id"
-      ]
+      "required": ["image_id"]
     }
   },
   "img_delete": {
@@ -483,10 +387,7 @@
           "description": "Must be true to confirm permanent deletion"
         }
       },
-      "required": [
-        "image_id",
-        "confirm"
-      ]
+      "required": ["image_id", "confirm"]
     }
   },
   "img_diagram": {
@@ -500,38 +401,20 @@
         "type": {
           "type": "string",
           "description": "Diagram type: architecture, flowchart, sequence, er, or network",
-          "enum": [
-            "architecture",
-            "flowchart",
-            "sequence",
-            "er",
-            "network"
-          ]
+          "enum": ["architecture", "flowchart", "sequence", "er", "network"]
         },
         "style": {
           "type": "string",
           "description": "Visual style: technical, hand_drawn, or minimal",
-          "enum": [
-            "technical",
-            "hand_drawn",
-            "minimal"
-          ]
+          "enum": ["technical", "hand_drawn", "minimal"]
         },
         "tier": {
           "type": "string",
           "description": "Enhancement tier for output quality",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         }
       },
-      "required": [
-        "prompt"
-      ]
+      "required": ["prompt"]
     }
   },
   "img_duplicate": {
@@ -547,9 +430,7 @@
           "description": "Name for the copy (defaults to \"Copy of {original name}\")"
         }
       },
-      "required": [
-        "image_id"
-      ]
+      "required": ["image_id"]
     }
   },
   "img_edit": {
@@ -579,23 +460,12 @@
         "tier": {
           "type": "string",
           "description": "Enhancement tier — higher tiers produce better quality",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         },
         "model_preference": {
           "type": "string",
           "description": "Model preference: default, quality, speed, or latest",
-          "enum": [
-            "default",
-            "quality",
-            "speed",
-            "latest"
-          ]
+          "enum": ["default", "quality", "speed", "latest"]
         }
       }
     }
@@ -619,13 +489,7 @@
         "tier": {
           "type": "string",
           "description": "Enhancement tier — higher tiers produce better quality. Defaults to TIER_1K",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         },
         "preview": {
           "type": "boolean",
@@ -645,20 +509,14 @@
         "format": {
           "type": "string",
           "description": "Output format: jpeg, png, webp, or pdf",
-          "enum": [
-            "png",
-            "jpg",
-            "webp"
-          ]
+          "enum": ["png", "jpg", "webp"]
         },
         "quality": {
           "type": "number",
           "description": "Quality level 1-100 (for lossy formats)"
         }
       },
-      "required": [
-        "image_id"
-      ]
+      "required": ["image_id"]
     }
   },
   "img_generate": {
@@ -696,34 +554,17 @@
         "tier": {
           "type": "string",
           "description": "Quality tier — higher tiers cost more credits",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         },
         "model_preference": {
           "type": "string",
           "description": "Model routing hint: default, quality, speed, latest",
-          "enum": [
-            "default",
-            "quality",
-            "speed",
-            "latest"
-          ]
+          "enum": ["default", "quality", "speed", "latest"]
         },
         "resolution": {
           "type": "string",
           "description": "Output resolution (advanced)",
-          "enum": [
-            "0.5K",
-            "512",
-            "1K",
-            "2K",
-            "4K"
-          ]
+          "enum": ["0.5K", "512", "1K", "2K", "4K"]
         },
         "thinking_mode": {
           "type": "boolean",
@@ -763,11 +604,7 @@
               "role": {
                 "type": "string",
                 "description": "Role: style, subject, composition, color",
-                "enum": [
-                  "style",
-                  "subject",
-                  "composition"
-                ]
+                "enum": ["style", "subject", "composition"]
               }
             }
           }
@@ -779,11 +616,7 @@
         "output_format": {
           "type": "string",
           "description": "Output format: png, jpeg, webp",
-          "enum": [
-            "png",
-            "jpeg",
-            "webp"
-          ]
+          "enum": ["png", "jpeg", "webp"]
         },
         "num_images": {
           "type": "number",
@@ -801,11 +634,7 @@
         "type": {
           "type": "string",
           "description": "Type of history entries to return",
-          "enum": [
-            "generation",
-            "enhancement",
-            "all"
-          ]
+          "enum": ["generation", "enhancement", "all"]
         },
         "limit": {
           "type": "number",
@@ -815,14 +644,7 @@
         "status": {
           "type": "string",
           "description": "Filter by job status",
-          "enum": [
-            "PENDING",
-            "PROCESSING",
-            "COMPLETED",
-            "FAILED",
-            "CANCELLED",
-            "REFUNDED"
-          ]
+          "enum": ["PENDING", "PROCESSING", "COMPLETED", "FAILED", "CANCELLED", "REFUNDED"]
         }
       }
     }
@@ -842,34 +664,17 @@
         "target": {
           "type": "string",
           "description": "Target platform: favicon, ios, android, or both",
-          "enum": [
-            "favicon",
-            "ios",
-            "android",
-            "both"
-          ]
+          "enum": ["favicon", "ios", "android", "both"]
         },
         "tier": {
           "type": "string",
           "description": "Enhancement tier for generation quality",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         },
         "style": {
           "type": "string",
           "description": "Icon style: flat, gradient, outlined, 3d, or pixel",
-          "enum": [
-            "flat",
-            "3d",
-            "gradient",
-            "outlined",
-            "filled"
-          ]
+          "enum": ["flat", "3d", "gradient", "outlined", "filled"]
         }
       }
     }
@@ -893,10 +698,7 @@
         "job_type": {
           "type": "string",
           "description": "Job type (generation, enhancement, etc.)",
-          "enum": [
-            "generation",
-            "enhancement"
-          ]
+          "enum": ["generation", "enhancement"]
         }
       }
     }
@@ -930,9 +732,7 @@
           "description": "ID of the pipeline to delete"
         }
       },
-      "required": [
-        "pipeline_id"
-      ]
+      "required": ["pipeline_id"]
     }
   },
   "img_pipeline_list": {
@@ -972,9 +772,7 @@
           "description": "Pipeline configuration: analysis, autoCrop, prompt, and generation settings"
         }
       },
-      "required": [
-        "name"
-      ]
+      "required": ["name"]
     }
   },
   "img_pipeline": {
@@ -986,9 +784,7 @@
           "description": "ID of the pipeline to retrieve"
         }
       },
-      "required": [
-        "pipeline_id"
-      ]
+      "required": ["pipeline_id"]
     }
   },
   "img_remove_bg": {
@@ -1000,9 +796,7 @@
           "description": "ID of the image to remove background from"
         }
       },
-      "required": [
-        "image_id"
-      ]
+      "required": ["image_id"]
     }
   },
   "img_resize": {
@@ -1026,31 +820,15 @@
         "fit": {
           "type": "string",
           "description": "Fit mode",
-          "enum": [
-            "cover",
-            "contain",
-            "fill",
-            "inside",
-            "outside"
-          ]
+          "enum": ["cover", "contain", "fill", "inside", "outside"]
         },
         "tier": {
           "type": "string",
           "description": "Enhancement tier for output quality",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         }
       },
-      "required": [
-        "image_id",
-        "width",
-        "height"
-      ]
+      "required": ["image_id", "width", "height"]
     }
   },
   "img_screenshot": {
@@ -1064,39 +842,20 @@
         "device": {
           "type": "string",
           "description": "Device mockup type",
-          "enum": [
-            "iphone",
-            "android",
-            "macbook",
-            "ipad",
-            "browser"
-          ]
+          "enum": ["iphone", "android", "macbook", "ipad", "browser"]
         },
         "background": {
           "type": "string",
           "description": "Background type",
-          "enum": [
-            "gradient",
-            "solid",
-            "transparent",
-            "blurred"
-          ]
+          "enum": ["gradient", "solid", "transparent", "blurred"]
         },
         "tier": {
           "type": "string",
           "description": "Enhancement tier for output quality",
-          "enum": [
-            "FREE",
-            "TIER_0_5K",
-            "TIER_1K",
-            "TIER_2K",
-            "TIER_4K"
-          ]
+          "enum": ["FREE", "TIER_0_5K", "TIER_1K", "TIER_2K", "TIER_4K"]
         }
       },
-      "required": [
-        "source_image_id"
-      ]
+      "required": ["source_image_id"]
     }
   },
   "img_share": {
@@ -1110,16 +869,10 @@
         "action": {
           "type": "string",
           "description": "Action to perform: share (make public) or unshare (make private)",
-          "enum": [
-            "share",
-            "unshare"
-          ]
+          "enum": ["share", "unshare"]
         }
       },
-      "required": [
-        "image_id",
-        "action"
-      ]
+      "required": ["image_id", "action"]
     }
   },
   "img_subject_delete": {
@@ -1135,10 +888,7 @@
           "description": "Must be true to confirm deletion"
         }
       },
-      "required": [
-        "subject_id",
-        "confirm"
-      ]
+      "required": ["subject_id", "confirm"]
     }
   },
   "img_subject_list": {
@@ -1168,20 +918,14 @@
         "type": {
           "type": "string",
           "description": "Subject type: character or object",
-          "enum": [
-            "character",
-            "object"
-          ]
+          "enum": ["character", "object"]
         },
         "description": {
           "type": "string",
           "description": "Optional description for more accurate references"
         }
       },
-      "required": [
-        "image_id",
-        "label"
-      ]
+      "required": ["image_id", "label"]
     }
   },
   "img_update": {
@@ -1209,9 +953,7 @@
           }
         }
       },
-      "required": [
-        "image_id"
-      ]
+      "required": ["image_id"]
     }
   },
   "img_upload": {
@@ -1255,13 +997,7 @@
           "description": "Handle of the album to upload to"
         }
       },
-      "required": [
-        "name",
-        "data_base64",
-        "content_type",
-        "width",
-        "height"
-      ]
+      "required": ["name", "data_base64", "content_type", "width", "height"]
     }
   },
   "img_versions": {
@@ -1273,9 +1009,7 @@
           "description": "ID of the image to get versions for"
         }
       },
-      "required": [
-        "image_id"
-      ]
+      "required": ["image_id"]
     }
   },
   "img_watermark": {
@@ -1303,9 +1037,7 @@
           "description": "Watermark opacity from 0-100. Defaults to 50"
         }
       },
-      "required": [
-        "image_id"
-      ]
+      "required": ["image_id"]
     }
   }
 }

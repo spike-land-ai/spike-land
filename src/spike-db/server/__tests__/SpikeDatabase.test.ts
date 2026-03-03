@@ -10,7 +10,7 @@ vi.mock("cloudflare:workers", () => {
         this.ctx = ctx;
         this.env = env;
       }
-    }
+    },
   };
 });
 
@@ -37,8 +37,8 @@ global.Response = class extends OriginalResponse {
     if (init && init.status === 101) {
       // Create a dummy 200 response but override status
       super(body, { ...init, status: 200 });
-      Object.defineProperty(this, 'status', { value: 101 });
-      Object.defineProperty(this, 'webSocket', { value: init.webSocket });
+      Object.defineProperty(this, "status", { value: 101 });
+      Object.defineProperty(this, "webSocket", { value: init.webSocket });
     } else {
       super(body, init);
     }
@@ -139,16 +139,19 @@ describe("SpikeDatabase", () => {
       name: "test",
       tables: {},
       reducers: {
-        my_reducer: { name: "my_reducer", handler: vi.fn() }
-      }
+        my_reducer: { name: "my_reducer", handler: vi.fn() },
+      },
     });
 
-    await db.webSocketMessage(ws as unknown as WebSocket, JSON.stringify({
-      type: "reducer_call",
-      id: "req-1",
-      reducer: "my_reducer",
-      args: [1, 2]
-    }));
+    await db.webSocketMessage(
+      ws as unknown as WebSocket,
+      JSON.stringify({
+        type: "reducer_call",
+        id: "req-1",
+        reducer: "my_reducer",
+        args: [1, 2],
+      }),
+    );
 
     expect(ws.send).toHaveBeenCalledWith(expect.stringContaining('"type":"reducer_result"'));
     expect(ws.send).toHaveBeenCalledWith(expect.stringContaining('"ok":true'));
@@ -156,11 +159,13 @@ describe("SpikeDatabase", () => {
 
   it("alarm executes scheduled reducers", async () => {
     db.initSchema({ name: "test", tables: {}, reducers: { r: { name: "r", handler: vi.fn() } } });
-    
+
     // Mock SQL to return a scheduled task
-    ctx.storage.sql.exec.mockReturnValueOnce({
-      toArray: () => [{ id: 1, reducer: "r", args_json: "[]", run_at: Date.now() }]
-    }).mockReturnValue({ toArray: () => [] });
+    ctx.storage.sql.exec
+      .mockReturnValueOnce({
+        toArray: () => [{ id: 1, reducer: "r", args_json: "[]", run_at: Date.now() }],
+      })
+      .mockReturnValue({ toArray: () => [] });
 
     await db.alarm();
     // Should have checked for tasks, executed one, and checked for next
@@ -172,15 +177,15 @@ describe("SpikeDatabase", () => {
       name: "test",
       tables: {},
       reducers: {
-        my_reducer: { name: "my_reducer", handler: vi.fn() }
-      }
+        my_reducer: { name: "my_reducer", handler: vi.fn() },
+      },
     });
 
     const req = new Request("http://localhost/reducer/my_reducer", {
       method: "POST",
-      body: JSON.stringify({ args: [1, 2], sender: "test-sender" })
+      body: JSON.stringify({ args: [1, 2], sender: "test-sender" }),
     });
-    
+
     const res = await db.fetch(req);
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -188,9 +193,11 @@ describe("SpikeDatabase", () => {
   });
 
   it("handleWebSocketUpgrade handles valid token", async () => {
-    const { token, identity } = await import("../identity.js").then(m => m.generateIdentity("test-secret"));
+    const { token, identity } = await import("../identity.js").then((m) =>
+      m.generateIdentity("test-secret"),
+    );
     const req = new Request(`http://localhost/ws?token=${token}`, {
-      headers: { Upgrade: "websocket" }
+      headers: { Upgrade: "websocket" },
     });
     const res = await db.fetch(req);
     expect(res.status).toBe(101);
@@ -199,7 +206,7 @@ describe("SpikeDatabase", () => {
 
   it("handleWebSocketUpgrade rejects invalid token", async () => {
     const req = new Request("http://localhost/ws?token=invalid", {
-      headers: { Upgrade: "websocket" }
+      headers: { Upgrade: "websocket" },
     });
     const res = await db.fetch(req);
     expect(res.status).toBe(401);
@@ -230,7 +237,11 @@ describe("SpikeDatabase", () => {
   });
 
   it("fetch handles /health with schema", async () => {
-    db.initSchema({ name: "t", tables: { t1: {} as DatabaseSchema["tables"][string] }, reducers: {} });
+    db.initSchema({
+      name: "t",
+      tables: { t1: {} as DatabaseSchema["tables"][string] },
+      reducers: {},
+    });
     const req = new Request("http://localhost/health");
     const res = await db.fetch(req);
     const body = await res.json();
@@ -247,7 +258,16 @@ describe("SpikeDatabase", () => {
   it("handleReducerCall errors when schema missing", async () => {
     const ws = new MockWebSocket();
     // No initSchema
-    await (db as unknown as { handleReducerCall: (ws: unknown, id: string, reducer: string, args: unknown[]) => Promise<void> }).handleReducerCall(ws, "id", "r", []);
+    await (
+      db as unknown as {
+        handleReducerCall: (
+          ws: unknown,
+          id: string,
+          reducer: string,
+          args: unknown[],
+        ) => Promise<void>;
+      }
+    ).handleReducerCall(ws, "id", "r", []);
     expect(ws.send).toHaveBeenCalledWith(expect.stringContaining('"ok":false'));
     expect(ws.send).toHaveBeenCalledWith(expect.stringContaining("Schema not initialized"));
   });

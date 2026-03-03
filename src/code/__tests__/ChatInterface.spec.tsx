@@ -40,9 +40,7 @@ describe("ChatInterface", () => {
     );
 
     expect(screen.getByText("Assistant")).toBeInTheDocument();
-    expect(
-      screen.getByText("How can I help you code?"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("How can I help you code?")).toBeInTheDocument();
   });
 
   it("should call onClose when close button is clicked", () => {

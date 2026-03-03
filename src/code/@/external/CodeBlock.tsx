@@ -17,7 +17,11 @@ export interface CodeBlockProps {
 export const CodeBlock: FC<CodeBlockProps> = memo(({ language, value, title }) => {
   const [copied, setCopied] = useState(false);
   const [iconIndex, setIconIndex] = useState(0);
-  const icons: React.ComponentType<{ className?: string }>[] = [ClipboardIcon, DocumentDuplicateIcon, ClipboardDocumentIcon];
+  const icons: React.ComponentType<{ className?: string }>[] = [
+    ClipboardIcon,
+    DocumentDuplicateIcon,
+    ClipboardDocumentIcon,
+  ];
   const Icon = icons[iconIndex]!;
   return (
     <div className="w-full font-mono text-sm rounded-lg overflow-hidden shadow-lg bg-gray-900 p-4">

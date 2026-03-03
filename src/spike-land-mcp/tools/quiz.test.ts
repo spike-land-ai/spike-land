@@ -22,25 +22,61 @@ function createTestSession(overrides?: Partial<QuizSession>): QuizSession {
     {
       name: "Concept A",
       variants: [
-        { question: "Q1 about A?", options: ["correct", "wrong1", "wrong2", "wrong3"], correctIndex: 0 },
-        { question: "Q2 about A?", options: ["wrong1", "correct", "wrong2", "wrong3"], correctIndex: 1 },
-        { question: "Q3 about A?", options: ["wrong1", "wrong2", "correct", "wrong3"], correctIndex: 2 },
+        {
+          question: "Q1 about A?",
+          options: ["correct", "wrong1", "wrong2", "wrong3"],
+          correctIndex: 0,
+        },
+        {
+          question: "Q2 about A?",
+          options: ["wrong1", "correct", "wrong2", "wrong3"],
+          correctIndex: 1,
+        },
+        {
+          question: "Q3 about A?",
+          options: ["wrong1", "wrong2", "correct", "wrong3"],
+          correctIndex: 2,
+        },
       ],
     },
     {
       name: "Concept B",
       variants: [
-        { question: "Q1 about B?", options: ["wrong1", "wrong2", "wrong3", "correct"], correctIndex: 3 },
-        { question: "Q2 about B?", options: ["correct", "wrong1", "wrong2", "wrong3"], correctIndex: 0 },
-        { question: "Q3 about B?", options: ["wrong1", "correct", "wrong2", "wrong3"], correctIndex: 1 },
+        {
+          question: "Q1 about B?",
+          options: ["wrong1", "wrong2", "wrong3", "correct"],
+          correctIndex: 3,
+        },
+        {
+          question: "Q2 about B?",
+          options: ["correct", "wrong1", "wrong2", "wrong3"],
+          correctIndex: 0,
+        },
+        {
+          question: "Q3 about B?",
+          options: ["wrong1", "correct", "wrong2", "wrong3"],
+          correctIndex: 1,
+        },
       ],
     },
     {
       name: "Concept C",
       variants: [
-        { question: "Q1 about C?", options: ["wrong1", "correct", "wrong2", "wrong3"], correctIndex: 1 },
-        { question: "Q2 about C?", options: ["wrong1", "wrong2", "correct", "wrong3"], correctIndex: 2 },
-        { question: "Q3 about C?", options: ["wrong1", "wrong2", "wrong3", "correct"], correctIndex: 3 },
+        {
+          question: "Q1 about C?",
+          options: ["wrong1", "correct", "wrong2", "wrong3"],
+          correctIndex: 1,
+        },
+        {
+          question: "Q2 about C?",
+          options: ["wrong1", "wrong2", "correct", "wrong3"],
+          correctIndex: 2,
+        },
+        {
+          question: "Q3 about C?",
+          options: ["wrong1", "wrong2", "wrong3", "correct"],
+          correctIndex: 3,
+        },
       ],
     },
   ];
@@ -110,7 +146,9 @@ describe("Quiz Engine", () => {
     });
 
     it("each variant has exactly 4 options", () => {
-      const concepts = generateConceptsFromContent("Some interesting content about machine learning algorithms and neural networks.");
+      const concepts = generateConceptsFromContent(
+        "Some interesting content about machine learning algorithms and neural networks.",
+      );
       for (const concept of concepts) {
         for (const variant of concept.variants) {
           expect(variant.options).toHaveLength(4);
@@ -248,9 +286,27 @@ describe("Quiz Engine", () => {
       const fakeRound: QuizRound = {
         roundNumber: 2,
         questions: [
-          { conceptIndex: 0, variantIndex: 1, question: "Q2 about A?", options: ["wrong1", "correct", "wrong2", "wrong3"], correctIndex: 1 },
-          { conceptIndex: 1, variantIndex: 0, question: "Q1 about B?", options: ["w", "w", "w", "correct"], correctIndex: 3 },
-          { conceptIndex: 2, variantIndex: 0, question: "Q1 about C?", options: ["w", "correct", "w", "w"], correctIndex: 1 },
+          {
+            conceptIndex: 0,
+            variantIndex: 1,
+            question: "Q2 about A?",
+            options: ["wrong1", "correct", "wrong2", "wrong3"],
+            correctIndex: 1,
+          },
+          {
+            conceptIndex: 1,
+            variantIndex: 0,
+            question: "Q1 about B?",
+            options: ["w", "w", "w", "correct"],
+            correctIndex: 3,
+          },
+          {
+            conceptIndex: 2,
+            variantIndex: 0,
+            question: "Q1 about C?",
+            options: ["w", "correct", "w", "w"],
+            correctIndex: 1,
+          },
         ],
       };
       session.currentRound = fakeRound;

@@ -460,13 +460,10 @@ export const registerAgentReducer = defineReducer(
   },
 );
 
-export const unregisterAgentReducer = defineReducer(
-  "unregister_agent",
-  (ctx: unknown) => {
-    const c = ctx as ReducerContext;
-    c.db.agent!.delete(c.sender);
-  },
-);
+export const unregisterAgentReducer = defineReducer("unregister_agent", (ctx: unknown) => {
+  const c = ctx as ReducerContext;
+  c.db.agent!.delete(c.sender);
+});
 
 export const sendAgentMessageReducer = defineReducer(
   "send_agent_message",
@@ -521,21 +518,15 @@ export const updateAppReducer = defineReducer(
   },
 );
 
-export const deleteAppReducer = defineReducer(
-  "delete_app",
-  (ctx: unknown, appId: unknown) => {
-    const c = ctx as ReducerContext;
-    c.db.app!.update(appId, { status: "deleted", updatedAt: c.timestamp });
-  },
-);
+export const deleteAppReducer = defineReducer("delete_app", (ctx: unknown, appId: unknown) => {
+  const c = ctx as ReducerContext;
+  c.db.app!.update(appId, { status: "deleted", updatedAt: c.timestamp });
+});
 
-export const restoreAppReducer = defineReducer(
-  "restore_app",
-  (ctx: unknown, appId: unknown) => {
-    const c = ctx as ReducerContext;
-    c.db.app!.update(appId, { status: "active", updatedAt: c.timestamp });
-  },
-);
+export const restoreAppReducer = defineReducer("restore_app", (ctx: unknown, appId: unknown) => {
+  const c = ctx as ReducerContext;
+  c.db.app!.update(appId, { status: "active", updatedAt: c.timestamp });
+});
 
 export const updateAppStatusReducer = defineReducer(
   "update_app_status",
@@ -573,13 +564,10 @@ export const updatePageReducer = defineReducer(
   },
 );
 
-export const deletePageReducer = defineReducer(
-  "delete_page",
-  (ctx: unknown, pageId: unknown) => {
-    const c = ctx as ReducerContext;
-    c.db.page!.delete(pageId);
-  },
-);
+export const deletePageReducer = defineReducer("delete_page", (ctx: unknown, pageId: unknown) => {
+  const c = ctx as ReducerContext;
+  c.db.page!.delete(pageId);
+});
 
 export const sendAppMessageReducer = defineReducer(
   "send_app_message",

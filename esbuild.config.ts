@@ -144,11 +144,7 @@ export function createBuildConfig(opts: BuildOptions): esbuild.BuildOptions {
   const outDir = resolve("dist", packageName);
   const entryPoint = join(srcDir, entry);
 
-  const external = resolveExternals(
-    allPackages[packageName]!,
-    allPackages,
-    profile.external,
-  );
+  const external = resolveExternals(allPackages[packageName]!, allPackages, profile.external);
 
   return {
     entryPoints: [entryPoint],
@@ -177,9 +173,7 @@ export async function buildPackage(opts: BuildOptions): Promise<esbuild.BuildRes
 
 // ─── Topological Sort ────────────────────────────────────────────────────────
 
-export function topologicalSort(
-  packages: Record<string, PackageManifestEntry>,
-): string[] {
+export function topologicalSort(packages: Record<string, PackageManifestEntry>): string[] {
   const visited = new Set<string>();
   const sorted: string[] = [];
 

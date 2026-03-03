@@ -148,7 +148,8 @@ export async function ata({
 
   // Wrap fetch with IDB cache for type definition responses
   const cachedFetch: typeof fetch = async (input, init?) => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+    const url =
+      typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
     const cached = await getAtaCache(url);
     if (cached !== null) {
       return new Response(cached, { status: 200, headers: { "x-idb-cache": "hit" } });

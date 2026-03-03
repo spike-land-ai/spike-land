@@ -6,10 +6,9 @@ export function AboutPage() {
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">What is spike.land?</h2>
         <p className="leading-relaxed text-gray-700">
-          spike.land is an AI development platform for building, deploying, and managing
-          AI-powered applications with real-time collaboration. It combines a powerful MCP
-          tool registry, live code editing, and SpacetimeDB-backed real-time state into a
-          single cohesive platform.
+          spike.land is an AI development platform for building, deploying, and managing AI-powered
+          applications with real-time collaboration. It combines a powerful MCP tool registry, live
+          code editing, and SpacetimeDB-backed real-time state into a single cohesive platform.
         </p>
       </section>
 

@@ -22,7 +22,13 @@ interface QuizRoundProps {
   submitting?: boolean;
 }
 
-export function QuizRound({ roundNumber, questions, onSubmit, results, submitting }: QuizRoundProps) {
+export function QuizRound({
+  roundNumber,
+  questions,
+  onSubmit,
+  results,
+  submitting,
+}: QuizRoundProps) {
   const [answers, setAnswers] = useState<(number | null)[]>([null, null, null]);
 
   const handleSelect = (questionIndex: number, optionIndex: number) => {

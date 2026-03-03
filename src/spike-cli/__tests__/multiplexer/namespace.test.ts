@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  namespaceTool,
-  parseNamespacedTool,
-  stripNamespace,
-} from "../../multiplexer/namespace.js";
+import { namespaceTool, parseNamespacedTool, stripNamespace } from "../../multiplexer/namespace.js";
 
 describe("namespaceTool", () => {
   it("prefixes tool name with server name and default separator", () => {

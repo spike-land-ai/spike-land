@@ -10,12 +10,7 @@ export default mergeConfig(
       coverage: {
         reporter: ["text-summary"],
         include: ["src/constants/**/*.ts", "src/validations/**/*.ts", "src/utils/**/*.ts"],
-        exclude: [
-          "src/**/*.d.ts",
-          "src/**/*.test.ts",
-          "src/index.ts",
-          "src/types/**/*.ts",
-        ],
+        exclude: ["src/**/*.d.ts", "src/**/*.test.ts", "src/index.ts", "src/types/**/*.ts"],
       },
     },
   }),

@@ -88,9 +88,7 @@ export const DraggableWindow: FC<DraggableWindowProps> = ({
 
   return (
     <MotionConfig transition={transition}>
-      <MotionContainer
-        bgColor={bgColor}
-      >
+      <MotionContainer bgColor={bgColor}>
         <DraggableWindowContent
           scaleRange={scaleRange}
           rgba={rgba}

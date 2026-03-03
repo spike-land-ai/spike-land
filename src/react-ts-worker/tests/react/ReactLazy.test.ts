@@ -21,9 +21,10 @@ describe("lazy", () => {
 
   it("calling _init triggers the loader and throws (pending promise)", () => {
     let resolveFn: (val: { default: () => null }) => void;
-    const loader = () => new Promise<{ default: () => null }>((resolve) => {
-      resolveFn = resolve;
-    });
+    const loader = () =>
+      new Promise<{ default: () => null }>((resolve) => {
+        resolveFn = resolve;
+      });
     const lazyComp = lazy(loader);
     // First call should throw (the promise) since it's pending
     expect(() => lazyComp._init(lazyComp._payload)).toThrow();

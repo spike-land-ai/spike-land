@@ -289,7 +289,10 @@ import { useState } from "react";
         originToUse: origin,
       });
 
-      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining("@/lib/utils.d.ts"), undefined);
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining("@/lib/utils.d.ts"),
+        undefined,
+      );
       // The fetched content should appear in results
       const utilsLib = result.find((lib) => lib.filePath.includes("lib/utils"));
       expect(utilsLib).toBeDefined();

@@ -47,7 +47,7 @@ export const editTool = imageProcedure
 
       const downloadResult = await tryCatch(deps.storage.download(image.originalR2Key));
       /* v8 ignore next */
-if (!downloadResult.ok || !downloadResult.data) {
+      if (!downloadResult.ok || !downloadResult.data) {
         return errorResult("DOWNLOAD_FAILED", "Failed to download source image data", true);
       }
       imageData = Buffer.from(downloadResult.data).toString("base64");

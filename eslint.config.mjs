@@ -12,10 +12,7 @@ import reactHooksPlugin from "eslint-plugin-react-hooks";
 // ─── Shared Rules ────────────────────────────────────────────────────────────
 
 const sharedRules = {
-  ...tseslint.configs.recommended.reduce(
-    (acc, config) => ({ ...acc, ...config.rules }),
-    {},
-  ),
+  ...tseslint.configs.recommended.reduce((acc, config) => ({ ...acc, ...config.rules }), {}),
   "@typescript-eslint/no-unused-vars": [
     "error",
     {

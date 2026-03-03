@@ -25,10 +25,7 @@ describe("mapChildren", () => {
   });
 
   it("maps an array of elements", () => {
-    const children = [
-      createElement("div", null),
-      createElement("span", null),
-    ];
+    const children = [createElement("div", null), createElement("span", null)];
     const result = mapChildren(children, (child) => child);
     expect(result).toHaveLength(2);
   });
@@ -67,13 +64,8 @@ describe("mapChildren", () => {
   });
 
   it("skips null returns from callback", () => {
-    const children = [
-      createElement("div", null),
-      createElement("span", null),
-    ];
-    const result = mapChildren(children, (_child, index) =>
-      index === 0 ? null : _child,
-    );
+    const children = [createElement("div", null), createElement("span", null)];
+    const result = mapChildren(children, (_child, index) => (index === 0 ? null : _child));
     // null returns are skipped
     expect(result).toHaveLength(1);
   });
@@ -94,10 +86,7 @@ describe("mapChildren", () => {
 
 describe("forEachChildren", () => {
   it("calls callback for each child", () => {
-    const children = [
-      createElement("div", null),
-      createElement("span", null),
-    ];
+    const children = [createElement("div", null), createElement("span", null)];
     const visited: unknown[] = [];
     forEachChildren(children, (child) => visited.push(child));
     expect(visited).toHaveLength(2);
@@ -114,9 +103,8 @@ describe("forEachChildren", () => {
 
   it("provides index to callback", () => {
     const indices: number[] = [];
-    forEachChildren(
-      [createElement("a", null), createElement("b", null)],
-      (_child, index) => indices.push(index),
+    forEachChildren([createElement("a", null), createElement("b", null)], (_child, index) =>
+      indices.push(index),
     );
     expect(indices).toEqual([0, 1]);
   });
@@ -174,10 +162,7 @@ describe("toArray", () => {
   });
 
   it("flattens array children", () => {
-    const children = [
-      createElement("div", null),
-      createElement("span", null),
-    ];
+    const children = [createElement("div", null), createElement("span", null)];
     const result = toArray(children);
     expect(result).toHaveLength(2);
   });

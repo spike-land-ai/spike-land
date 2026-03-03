@@ -6,9 +6,7 @@
  * Known valid Gemini models for image generation.
  * This allowlist prevents runtime errors from invalid model names.
  */
-export const VALID_GEMINI_MODELS = [
-  "gemini-3.1-flash-image-preview",
-] as const;
+export const VALID_GEMINI_MODELS = ["gemini-3.1-flash-image-preview"] as const;
 
 /**
  * Model mapping by enhancement tier.

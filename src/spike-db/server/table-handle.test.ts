@@ -224,7 +224,14 @@ describe("TableHandle", () => {
 
   it("update() modifies row and records update mutation with old+new", () => {
     const { handle } = setup();
-    const original: UserRow = { id: "u1", name: "Alice", age: 30, active: true, tags: [], bio: null };
+    const original: UserRow = {
+      id: "u1",
+      name: "Alice",
+      age: 30,
+      active: true,
+      tags: [],
+      bio: null,
+    };
     handle.insert(original);
 
     // Clear insert mutation

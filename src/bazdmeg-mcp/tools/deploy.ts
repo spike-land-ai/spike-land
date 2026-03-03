@@ -14,11 +14,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { ManifestWorkerConfig } from "../manifest.js";
 
-function generateToml(
-  _packageName: string,
-  worker: ManifestWorkerConfig,
-  entry?: string,
-): string {
+function generateToml(_packageName: string, worker: ManifestWorkerConfig, entry?: string): string {
   const lines: string[] = [];
 
   lines.push(`name = "${worker.name}"`);
@@ -133,9 +129,7 @@ export function registerDeployTools(server: McpServer): void {
       const pkg = await getManifestPackage(packageName, repoRoot);
 
       if (!pkg) {
-        return textResult(
-          `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
-        );
+        return textResult(`**ERROR**: Package \`${packageName}\` not found in packages.yaml.`);
       }
 
       if (!pkg.worker) {
@@ -166,7 +160,8 @@ export function registerDeployTools(server: McpServer): void {
   // ── bazdmeg_deploy_worker ─────────────────────────────────────────────────
   createZodTool(server, {
     name: "bazdmeg_deploy_worker",
-    description: "Build + generate wrangler.toml + wrangler deploy. Full deploy pipeline for workers.",
+    description:
+      "Build + generate wrangler.toml + wrangler deploy. Full deploy pipeline for workers.",
     schema: DeployWorkerSchema.shape,
     handler: async (args) => {
       const {
@@ -183,9 +178,7 @@ export function registerDeployTools(server: McpServer): void {
       const pkg = await getManifestPackage(packageName, repoRoot);
 
       if (!pkg) {
-        return textResult(
-          `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
-        );
+        return textResult(`**ERROR**: Package \`${packageName}\` not found in packages.yaml.`);
       }
 
       if (!pkg.worker) {

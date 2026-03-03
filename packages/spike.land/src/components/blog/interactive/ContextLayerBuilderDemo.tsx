@@ -428,17 +428,14 @@ export function ContextLayerBuilderDemo() {
         The 5-Layer Context Stack
       </h3>
       <p className="text-center text-slate-500 text-xs font-mono mb-10 leading-relaxed max-w-sm mx-auto">
-        Every zero-shot prompt is a layered architecture. Stack all five layers to maximise
-        response quality while minimising cost via KV cache reuse.
+        Every zero-shot prompt is a layered architecture. Stack all five layers to maximise response
+        quality while minimising cost via KV cache reuse.
       </p>
 
       {/* Main layout: stack on left, quality meter on right */}
       <div className="flex gap-6 items-start justify-center">
         {/* Layer stack */}
-        <div
-          className="flex flex-col gap-2.5 w-full"
-          style={{ maxWidth: 520 }}
-        >
+        <div className="flex flex-col gap-2.5 w-full" style={{ maxWidth: 520 }}>
           {LAYERS.map((layer, index) => {
             const threshold = LAYER_THRESHOLDS[index] ?? 0;
             const nextThreshold = LAYER_THRESHOLDS[index + 1] ?? 1;
@@ -503,9 +500,7 @@ export function ContextLayerBuilderDemo() {
                   ? "linear-gradient(90deg, #16a34a, #22c55e)"
                   : "linear-gradient(90deg, #2563eb, #06b6d4)",
               boxShadow:
-                qualityPct >= 99
-                  ? "0 0 10px rgba(34,197,94,0.5)"
-                  : "0 0 10px rgba(6,182,212,0.4)",
+                qualityPct >= 99 ? "0 0 10px rgba(34,197,94,0.5)" : "0 0 10px rgba(6,182,212,0.4)",
             }}
             animate={{ width: `${qualityPct}%` }}
             transition={{ type: "spring", stiffness: 80, damping: 20 }}

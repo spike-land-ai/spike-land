@@ -7,7 +7,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 
 vi.mock("../manifest.js", async (importOriginal) => {
-  const actual = await importOriginal() as Record<string, unknown>;
+  const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,
     readManifest: vi.fn(),
@@ -21,7 +21,12 @@ import { registerDepGraphTools } from "./deps.js";
 const mockReadManifest = vi.mocked(readManifest);
 
 const MOCK_MANIFEST = {
-  defaults: { scope: "@spike-land-ai", registry: "npm.pkg.github.com", license: "MIT", type: "module" },
+  defaults: {
+    scope: "@spike-land-ai",
+    registry: "npm.pkg.github.com",
+    license: "MIT",
+    type: "module",
+  },
   packages: {
     "chess-engine": {
       kind: "library",
@@ -59,7 +64,9 @@ describe("dep graph tools", () => {
     server = createMockServer();
     registerDepGraphTools(server as unknown as McpServer);
     vi.clearAllMocks();
-    mockReadManifest.mockResolvedValue(MOCK_MANIFEST as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+    mockReadManifest.mockResolvedValue(
+      MOCK_MANIFEST as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never,
+    );
   });
 
   it("registers the dep_graph tool", () => {

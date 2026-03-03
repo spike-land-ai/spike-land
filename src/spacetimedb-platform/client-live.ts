@@ -89,11 +89,15 @@ export function createLivePlatformClient(): SpacetimePlatformClient {
     },
 
     getUser(_identity: string): User | undefined {
-      throw new Error("Use getUserAsync() — HTTP client requires async. Sync getUser not supported.");
+      throw new Error(
+        "Use getUserAsync() — HTTP client requires async. Sync getUser not supported.",
+      );
     },
 
     listUsers(_onlineOnly = false): User[] {
-      throw new Error("Use listUsersAsync() — HTTP client requires async. Sync listUsers not supported.");
+      throw new Error(
+        "Use listUsersAsync() — HTTP client requires async. Sync listUsers not supported.",
+      );
     },
 
     async updateProfile(fields: { displayName?: string; email?: string }) {
@@ -176,7 +180,12 @@ export function createLivePlatformClient(): SpacetimePlatformClient {
       codeHash: string,
       changeDescription: string,
     ) {
-      await requireClient().callReducer("create_app_version", [appId, version, codeHash, changeDescription]);
+      await requireClient().callReducer("create_app_version", [
+        appId,
+        version,
+        codeHash,
+        changeDescription,
+      ]);
     },
 
     listAppVersions(_appId: bigint): AppVersion[] {
@@ -210,11 +219,20 @@ export function createLivePlatformClient(): SpacetimePlatformClient {
     },
 
     async createBlock(pageId: bigint, blockType: string, contentJson: string, sortOrder: number) {
-      await requireClient().callReducer("create_page_block", [pageId, blockType, contentJson, sortOrder]);
+      await requireClient().callReducer("create_page_block", [
+        pageId,
+        blockType,
+        contentJson,
+        sortOrder,
+      ]);
     },
 
     async updateBlock(blockId: bigint, fields: { contentJson?: string; sortOrder?: number }) {
-      await requireClient().callReducer("update_page_block", [blockId, fields.contentJson, fields.sortOrder]);
+      await requireClient().callReducer("update_page_block", [
+        blockId,
+        fields.contentJson,
+        fields.sortOrder,
+      ]);
     },
 
     async deleteBlock(blockId: bigint) {
@@ -287,7 +305,12 @@ export function createLivePlatformClient(): SpacetimePlatformClient {
       metadataJson: string,
       userIdentity?: string,
     ) {
-      await requireClient().callReducer("record_platform_event", [source, eventType, metadataJson, userIdentity]);
+      await requireClient().callReducer("record_platform_event", [
+        source,
+        eventType,
+        metadataJson,
+        userIdentity,
+      ]);
     },
 
     queryEvents(_filters: {

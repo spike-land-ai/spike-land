@@ -118,7 +118,12 @@ function EventTypeBadge({ eventType }: { eventType: string }) {
 interface ReconstructedState {
   activeWorkspaces: Map<string, { enteredAt: number; allowedPaths: string[] }>;
   latestGates: Map<string, { status: string; detail: string }>;
-  unresolvedStuck: Array<{ reason: string; attemptedAction: string; workspace: string; time: number }>;
+  unresolvedStuck: Array<{
+    reason: string;
+    attemptedAction: string;
+    workspace: string;
+    time: number;
+  }>;
 }
 
 function reconstructState(events: PlatformEvent[], upTo: number): ReconstructedState {
@@ -138,9 +143,7 @@ function reconstructState(events: PlatformEvent[], upTo: number): ReconstructedS
       case "workspace_enter":
         activeWorkspaces.set(workspace, {
           enteredAt: e.created_at,
-          allowedPaths: Array.isArray(meta.allowedPaths)
-            ? (meta.allowedPaths as string[])
-            : [],
+          allowedPaths: Array.isArray(meta.allowedPaths) ? (meta.allowedPaths as string[]) : [],
         });
         break;
       case "workspace_exit":
@@ -226,9 +229,7 @@ function ReplaySlider({
           Workspace Replay
         </h3>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500">
-            {new Date(current).toLocaleString()}
-          </span>
+          <span className="text-xs text-gray-500">{new Date(current).toLocaleString()}</span>
           <button
             onClick={onGoLive}
             className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
@@ -372,10 +373,7 @@ export function BazdmegDashboardPage() {
   );
 
   // Metric computations
-  const toolCalls = useMemo(
-    () => events.filter((e) => e.event_type === "tool_call"),
-    [events],
-  );
+  const toolCalls = useMemo(() => events.filter((e) => e.event_type === "tool_call"), [events]);
 
   const activeWorkspaces = useMemo(() => {
     const workspaces = new Set<string>();
@@ -388,10 +386,7 @@ export function BazdmegDashboardPage() {
     return workspaces;
   }, [events]);
 
-  const gateEvents = useMemo(
-    () => events.filter((e) => e.event_type === "gate_check"),
-    [events],
-  );
+  const gateEvents = useMemo(() => events.filter((e) => e.event_type === "gate_check"), [events]);
 
   const gatePassRate = useMemo(() => {
     if (gateEvents.length === 0) return null;
@@ -415,9 +410,7 @@ export function BazdmegDashboardPage() {
 
   const filteredEvents = useMemo(
     () =>
-      eventTypeFilter === "all"
-        ? events
-        : events.filter((e) => e.event_type === eventTypeFilter),
+      eventTypeFilter === "all" ? events : events.filter((e) => e.event_type === eventTypeFilter),
     [events, eventTypeFilter],
   );
 
@@ -461,11 +454,7 @@ export function BazdmegDashboardPage() {
           value={String(activeWorkspaces.size)}
           subtitle={activeWorkspaces.size > 0 ? Array.from(activeWorkspaces).join(", ") : undefined}
         />
-        <MetricCard
-          label="Tool Calls"
-          value={String(toolCalls.length)}
-          subtitle={timeRange}
-        />
+        <MetricCard label="Tool Calls" value={String(toolCalls.length)} subtitle={timeRange} />
         <MetricCard
           label="Gate Pass Rate"
           value={gatePassRate !== null ? `${gatePassRate}%` : "N/A"}
@@ -530,10 +519,7 @@ export function BazdmegDashboardPage() {
               {stuckSignals.map((signal) => {
                 const meta = parseMeta(signal.metadata);
                 return (
-                  <div
-                    key={signal.id}
-                    className="rounded-lg border border-red-100 bg-red-50 p-3"
-                  >
+                  <div key={signal.id} className="rounded-lg border border-red-100 bg-red-50 p-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-red-800">
                         {String(meta.workspace ?? "unknown")}
@@ -544,9 +530,7 @@ export function BazdmegDashboardPage() {
                     </div>
                     <p className="mt-1 text-sm text-red-700">{String(meta.reason ?? "")}</p>
                     {typeof meta.attemptedAction === "string" && (
-                      <p className="mt-1 text-xs text-red-500">
-                        Attempted: {meta.attemptedAction}
-                      </p>
+                      <p className="mt-1 text-xs text-red-500">Attempted: {meta.attemptedAction}</p>
                     )}
                   </div>
                 );
@@ -559,9 +543,7 @@ export function BazdmegDashboardPage() {
       {/* Event Log */}
       <div className="rounded-xl border bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Event Log
-          </h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Event Log</h3>
           <select
             value={eventTypeFilter}
             onChange={(e) => setEventTypeFilter(e.target.value)}
@@ -592,14 +574,10 @@ export function BazdmegDashboardPage() {
                     <div className="flex items-center gap-2">
                       <EventTypeBadge eventType={event.event_type} />
                       {typeof meta.workspace === "string" && (
-                        <span className="text-xs text-gray-500">
-                          {meta.workspace}
-                        </span>
+                        <span className="text-xs text-gray-500">{meta.workspace}</span>
                       )}
                       {typeof meta.tool === "string" && (
-                        <span className="text-xs text-gray-400">
-                          {meta.tool}
-                        </span>
+                        <span className="text-xs text-gray-400">{meta.tool}</span>
                       )}
                     </div>
                     <span className="text-xs text-gray-400">

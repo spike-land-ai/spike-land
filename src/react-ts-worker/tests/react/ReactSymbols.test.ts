@@ -114,7 +114,10 @@ describe("getIteratorFn", () => {
         let done = false;
         return {
           next() {
-            if (!done) { done = true; return { value: 1, done: false }; }
+            if (!done) {
+              done = true;
+              return { value: 1, done: false };
+            }
             return { value: undefined, done: true };
           },
         };

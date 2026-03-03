@@ -174,9 +174,11 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         data: { appId: id, status: app.status },
         timestamp: Date.now(),
       };
-      controller.enqueue(encoder.encode(`data: ${JSON.stringify(connectedEvent)}
+      controller.enqueue(
+        encoder.encode(`data: ${JSON.stringify(connectedEvent)}
 
-`));
+`),
+      );
 
       // Check and send agent working status
       isAgentWorking(id).then((working) => {
@@ -187,9 +189,11 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
             timestamp: Date.now(),
           };
           try {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(workingEvent)}
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(workingEvent)}
 
-`));
+`),
+            );
           } catch {
             // Intentionally silent: Client disconnected between agent status check and enqueue.
           }
@@ -204,9 +208,11 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
             data: null,
             timestamp: Date.now(),
           };
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(heartbeat)}
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(heartbeat)}
 
-`));
+`),
+          );
         } catch {
           // Intentionally silent: Client disconnected - clean up heartbeat interval.
           clearInterval(heartbeatInterval);

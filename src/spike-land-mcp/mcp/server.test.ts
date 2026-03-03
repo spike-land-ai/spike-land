@@ -10,7 +10,7 @@ describe("createMcpServer", () => {
   it("creates an MCP server and registers tools", async () => {
     const mockDb = {} as DrizzleDB;
     const server = await createMcpServer("user-123", mockDb);
-    
+
     console.log("Server keys:", Object.keys(server));
     expect(server).toBeDefined();
   });
@@ -20,7 +20,7 @@ describe("createMcpServer", () => {
     const server = await createMcpServer("user-123", mockDb, {
       enabledCategories: ["core"],
     });
-    
+
     expect(server).toBeDefined();
   });
 });

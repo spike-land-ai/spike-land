@@ -34,7 +34,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
     promise,
     new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error(`Connection timed out after ${ms}ms`)), ms)
+      setTimeout(() => reject(new Error(`Connection timed out after ${ms}ms`)), ms),
     ),
   ]);
 }
@@ -75,7 +75,9 @@ export async function collectStatus(
       // Best-effort close
       try {
         await client.close();
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
   }
 
@@ -84,9 +86,10 @@ export async function collectStatus(
     env[key] = !!process.env[key];
   }
 
-  const resolvedConfigPath = config.configSources && config.configSources.length > 0
-    ? config.configSources[config.configSources.length - 1]
-    : undefined;
+  const resolvedConfigPath =
+    config.configSources && config.configSources.length > 0
+      ? config.configSources[config.configSources.length - 1]
+      : undefined;
 
   return { servers, env, configSources: config.configSources, configPath: resolvedConfigPath };
 }
@@ -116,11 +119,9 @@ export function formatStatus(result: StatusResult): string {
   }
   for (const s of result.servers) {
     const icon = s.connected ? "✅" : "❌";
-    const tools = s.connected ? `${s.toolCount} tools` : s.error ?? "failed";
+    const tools = s.connected ? `${s.toolCount} tools` : (s.error ?? "failed");
     const latency = `${s.latencyMs}ms`;
-    lines.push(
-      `    ${icon} ${s.name.padEnd(20)} ${tools.padEnd(24)} ${latency}`,
-    );
+    lines.push(`    ${icon} ${s.name.padEnd(20)} ${tools.padEnd(24)} ${latency}`);
   }
   lines.push("");
 
@@ -132,12 +133,10 @@ export function formatStatus(result: StatusResult): string {
   }
   lines.push("");
 
-  const connectedCount = result.servers.filter(s => s.connected).length;
+  const connectedCount = result.servers.filter((s) => s.connected).length;
   const totalCount = result.servers.length;
   const totalTools = result.servers.reduce((sum, s) => sum + s.toolCount, 0);
-  lines.push(
-    `  Summary: ${connectedCount}/${totalCount} servers, ${totalTools} tools`,
-  );
+  lines.push(`  Summary: ${connectedCount}/${totalCount} servers, ${totalTools} tools`);
   lines.push("");
   lines.push("╰──────────────────────────────╯");
 
@@ -151,7 +150,7 @@ export function registerStatusCommand(program: Command): void {
     .option("--config <path>", "Path to .mcp.json config file")
     .option("--json", "Output as JSON")
     .option("--timeout <ms>", "Connection timeout per server in ms", String(DEFAULT_TIMEOUT_MS))
-    .action(async options => {
+    .action(async (options) => {
       log("Running health check...");
 
       const timeoutMs = parseInt(options.timeout, 10) || DEFAULT_TIMEOUT_MS;
@@ -165,7 +164,7 @@ export function registerStatusCommand(program: Command): void {
 
       // Exit 1 if no servers configured or any server failed
       const hasServers = result.servers.length > 0;
-      const allConnected = result.servers.every(s => s.connected);
+      const allConnected = result.servers.every((s) => s.connected);
       process.exit(hasServers && allConnected ? 0 : 1);
     });
 }

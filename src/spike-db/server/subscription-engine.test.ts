@@ -37,7 +37,10 @@ describe("SubscriptionManager", () => {
   it("subscribe sends initial_snapshot with existing rows", () => {
     const mgr = new SubscriptionManager();
     const ws = new MockWebSocket() as unknown as WebSocket;
-    const rows = [{ id: 1, name: "Alice" }, { id: 2, name: "Bob" }];
+    const rows = [
+      { id: 1, name: "Alice" },
+      { id: 2, name: "Bob" },
+    ];
 
     mgr.subscribe(ws, "sub-1", [{ table: "users" }], mockSqlExec({ users: rows }));
 
@@ -72,9 +75,7 @@ describe("SubscriptionManager", () => {
 
     mgr.subscribe(ws, "sub-1", [{ table: "users" }], mockSqlExec({ users: [] }));
 
-    const deltas: Delta[] = [
-      { table: "users", op: "insert", newRow: { id: 3, name: "Charlie" } },
-    ];
+    const deltas: Delta[] = [{ table: "users", op: "insert", newRow: { id: 3, name: "Charlie" } }];
     mgr.broadcastDeltas(deltas, "caller-1", "createUser");
 
     expect((ws as unknown as MockWebSocket).sent).toHaveLength(2); // snapshot + update
@@ -82,7 +83,7 @@ describe("SubscriptionManager", () => {
     expect(msg.type).toBe("transaction_update");
     expect(msg.reducerName).toBe("createUser");
     expect(msg.callerIdentity).toBe("caller-1");
-    expect((msg.deltas as Delta[])).toHaveLength(1);
+    expect(msg.deltas as Delta[]).toHaveLength(1);
     expect((msg.deltas as Delta[])[0].table).toBe("users");
   });
 
@@ -97,9 +98,7 @@ describe("SubscriptionManager", () => {
       mockSqlExec({ users: [] }),
     );
 
-    const deltas: Delta[] = [
-      { table: "users", op: "insert", newRow: { id: 1, role: "viewer" } },
-    ];
+    const deltas: Delta[] = [{ table: "users", op: "insert", newRow: { id: 1, role: "viewer" } }];
     mgr.broadcastDeltas(deltas, "caller-1", "createUser");
 
     // Only initial snapshot, no transaction_update
@@ -115,9 +114,7 @@ describe("SubscriptionManager", () => {
     mgr.subscribe(ws1, "sub-users", [{ table: "users" }], exec);
     mgr.subscribe(ws2, "sub-posts", [{ table: "posts" }], exec);
 
-    const deltas: Delta[] = [
-      { table: "users", op: "insert", newRow: { id: 1 } },
-    ];
+    const deltas: Delta[] = [{ table: "users", op: "insert", newRow: { id: 1 } }];
     mgr.broadcastDeltas(deltas, "caller-1", "createUser");
 
     // ws1 gets snapshot + update, ws2 gets snapshot only
@@ -132,9 +129,7 @@ describe("SubscriptionManager", () => {
     mgr.subscribe(ws, "sub-1", [{ table: "users" }], mockSqlExec({ users: [] }));
     mgr.unsubscribe("sub-1");
 
-    const deltas: Delta[] = [
-      { table: "users", op: "insert", newRow: { id: 1 } },
-    ];
+    const deltas: Delta[] = [{ table: "users", op: "insert", newRow: { id: 1 } }];
     mgr.broadcastDeltas(deltas, "caller-1", "createUser");
 
     // Only initial snapshot, no update after unsubscribe
@@ -155,9 +150,7 @@ describe("SubscriptionManager", () => {
     expect(mgr.getSubscriptionCount()).toBe(0);
 
     // No deltas delivered
-    const deltas: Delta[] = [
-      { table: "users", op: "insert", newRow: { id: 1 } },
-    ];
+    const deltas: Delta[] = [{ table: "users", op: "insert", newRow: { id: 1 } }];
     mgr.broadcastDeltas(deltas, "caller-1", "createUser");
 
     // Only the 2 initial snapshots, nothing more
@@ -174,9 +167,7 @@ describe("SubscriptionManager", () => {
     // Close the WebSocket
     (ws as unknown as MockWebSocket).close();
 
-    const deltas: Delta[] = [
-      { table: "users", op: "insert", newRow: { id: 1 } },
-    ];
+    const deltas: Delta[] = [{ table: "users", op: "insert", newRow: { id: 1 } }];
     mgr.broadcastDeltas(deltas, "caller-1", "createUser");
 
     // Subscription should be cleaned up after failed send
@@ -194,9 +185,7 @@ describe("SubscriptionManager", () => {
       mockSqlExec({ users: [] }),
     );
 
-    const deltas: Delta[] = [
-      { table: "users", op: "delete", oldRow: { id: 1, role: "admin" } },
-    ];
+    const deltas: Delta[] = [{ table: "users", op: "delete", oldRow: { id: 1, role: "admin" } }];
     mgr.broadcastDeltas(deltas, "caller-1", "deleteUser");
 
     // snapshot + transaction_update (matched via oldRow)

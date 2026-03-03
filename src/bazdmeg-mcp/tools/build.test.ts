@@ -168,7 +168,12 @@ describe("build tools", () => {
 
     it("typechecks all packages when no packageName", async () => {
       mockReadManifest.mockResolvedValue({
-        defaults: { scope: "@spike-land-ai", registry: "npm.pkg.github.com", license: "MIT", type: "module" },
+        defaults: {
+          scope: "@spike-land-ai",
+          registry: "npm.pkg.github.com",
+          license: "MIT",
+          type: "module",
+        },
         packages: {
           "pkg-a": { kind: "library", version: "1.0.0", description: "a", entry: "src/index.ts" },
           "pkg-b": { kind: "library", version: "1.0.0", description: "b", entry: "src/index.ts" },
@@ -187,7 +192,12 @@ describe("build tools", () => {
 
     it("reports partial failure in all-packages mode", async () => {
       mockReadManifest.mockResolvedValue({
-        defaults: { scope: "@spike-land-ai", registry: "npm.pkg.github.com", license: "MIT", type: "module" },
+        defaults: {
+          scope: "@spike-land-ai",
+          registry: "npm.pkg.github.com",
+          license: "MIT",
+          type: "module",
+        },
         packages: {
           "pkg-a": { kind: "library", version: "1.0.0", description: "a", entry: "src/index.ts" },
           "pkg-b": { kind: "library", version: "1.0.0", description: "b", entry: "src/index.ts" },

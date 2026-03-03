@@ -16,21 +16,23 @@ vi.mock("@spike-land-ai/spacetimedb-platform/stdb-http-client", () => ({
 vi.mock("@google/genai", () => ({
   GoogleGenAI: class {
     models = {
-      generateContent: vi.fn().mockResolvedValue({ text: "mock response" })
+      generateContent: vi.fn().mockResolvedValue({ text: "mock response" }),
     };
-  }
+  },
 }));
 
 vi.mock("express", () => {
   const mockApp = {
     use: vi.fn(),
     post: vi.fn(),
-    listen: vi.fn((port: number, cb: () => void) => cb?.())
+    listen: vi.fn((port: number, cb: () => void) => cb?.()),
   };
   const express: unknown = () => mockApp;
-  (express as Record<string, unknown>).json = vi.fn(() => (req: unknown, res: unknown, next: () => void) => next());
+  (express as Record<string, unknown>).json = vi.fn(
+    () => (req: unknown, res: unknown, next: () => void) => next(),
+  );
   return {
-    default: express
+    default: express,
   };
 });
 
@@ -51,7 +53,7 @@ describe("agent command", () => {
 
   it("registers the agent command", () => {
     registerAgentCommand(program);
-    expect(program.commands.find(c => c.name() === "agent")).toBeDefined();
+    expect(program.commands.find((c) => c.name() === "agent")).toBeDefined();
   });
 
   it("errors and exits if no API key set", async () => {
@@ -60,7 +62,7 @@ describe("agent command", () => {
     delete process.env.CLAUDE_CODE_OAUTH_TOKEN;
 
     registerAgentCommand(program);
-    const agentCmd = program.commands.find(c => c.name() === "agent")!;
+    const agentCmd = program.commands.find((c) => c.name() === "agent")!;
 
     vi.spyOn(console, "error").mockImplementation(() => {});
     await (agentCmd as Record<string, unknown>)._actionHandler([{}, []]);
@@ -83,7 +85,7 @@ describe("agent command", () => {
 
     await handleSessionUpdate({
       codeSpace: "s1",
-      messagesJson: JSON.stringify([{ role: "user", content: "hi" }])
+      messagesJson: JSON.stringify([{ role: "user", content: "hi" }]),
     });
     expect(generateSpy).toHaveBeenCalled();
   });
@@ -95,7 +97,7 @@ describe("agent command", () => {
 
     await handleSessionUpdate({
       codeSpace: "s2",
-      messagesJson: JSON.stringify([{ role: "assistant", content: "hi" }])
+      messagesJson: JSON.stringify([{ role: "assistant", content: "hi" }]),
     });
     expect(generateSpy).not.toHaveBeenCalled();
   });
@@ -107,7 +109,7 @@ describe("agent command", () => {
 
     await handleSessionUpdate({
       codeSpace: "s3",
-      messagesJson: "[]"
+      messagesJson: "[]",
     });
     expect(generateSpy).not.toHaveBeenCalled();
   });
@@ -115,10 +117,12 @@ describe("agent command", () => {
   it("handles completion POST request", async () => {
     process.env.GEMINI_API_KEY = "test-key";
     const express = await import("express");
-    const app = (express.default as unknown as () => Record<string, { mock: { calls: Array<Array<unknown>> } }>)();
+    const app = (
+      express.default as unknown as () => Record<string, { mock: { calls: Array<Array<unknown>> } }>
+    )();
 
     registerAgentCommand(program);
-    const agentCmd = program.commands.find(c => c.name() === "agent")!;
+    const agentCmd = program.commands.find((c) => c.name() === "agent")!;
     await (agentCmd as Record<string, unknown>)._actionHandler([{ port: "3005" }, []]);
 
     const postCall = app.post.mock.calls.find((c: Array<unknown>) => c[0] === "/completion");

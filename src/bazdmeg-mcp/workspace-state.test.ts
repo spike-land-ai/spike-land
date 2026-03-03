@@ -50,7 +50,7 @@ describe("workspace-state", () => {
 
     expect(writeFile).toHaveBeenCalledWith(
       getConfigPath(),
-      expect.stringContaining('"packageName": "test-pkg"')
+      expect.stringContaining('"packageName": "test-pkg"'),
     );
   });
 

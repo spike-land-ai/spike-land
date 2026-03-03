@@ -8,7 +8,7 @@ describe("resolvers", () => {
     albumFindByHandle: vi.fn(),
     pipelineFindById: vi.fn(),
     jobFindById: vi.fn(),
-    generationJobFindById: vi.fn()
+    generationJobFindById: vi.fn(),
   } as any;
 
   const resolvers = createResolvers(db, "user-1");
@@ -39,10 +39,14 @@ describe("resolvers", () => {
 
   it("resolvePipeline", async () => {
     db.pipelineFindById.mockResolvedValueOnce(null);
-    await expect(resolvers.resolvePipeline("pipe-1" as any)).rejects.toThrow(ImageStudioResolverError);
+    await expect(resolvers.resolvePipeline("pipe-1" as any)).rejects.toThrow(
+      ImageStudioResolverError,
+    );
 
     db.pipelineFindById.mockResolvedValueOnce({ userId: "other" });
-    await expect(resolvers.resolvePipeline("pipe-1" as any)).rejects.toThrow(ImageStudioResolverError);
+    await expect(resolvers.resolvePipeline("pipe-1" as any)).rejects.toThrow(
+      ImageStudioResolverError,
+    );
 
     db.pipelineFindById.mockResolvedValueOnce({ userId: "other" });
     const p1 = await resolvers.resolvePipeline("pipe-1" as any, { requireOwnership: false });
@@ -67,10 +71,14 @@ describe("resolvers", () => {
 
   it("resolveGenerationJob", async () => {
     db.generationJobFindById.mockResolvedValueOnce(null);
-    await expect(resolvers.resolveGenerationJob("gjob-1" as any)).rejects.toThrow(ImageStudioResolverError);
+    await expect(resolvers.resolveGenerationJob("gjob-1" as any)).rejects.toThrow(
+      ImageStudioResolverError,
+    );
 
     db.generationJobFindById.mockResolvedValueOnce({ userId: "other" });
-    await expect(resolvers.resolveGenerationJob("gjob-1" as any)).rejects.toThrow(ImageStudioResolverError);
+    await expect(resolvers.resolveGenerationJob("gjob-1" as any)).rejects.toThrow(
+      ImageStudioResolverError,
+    );
 
     db.generationJobFindById.mockResolvedValueOnce({ userId: "user-1", id: "gjob-1" });
     const job = await resolvers.resolveGenerationJob("gjob-1" as any);
@@ -79,10 +87,14 @@ describe("resolvers", () => {
 
   it("resolveImages", async () => {
     db.imageFindById.mockResolvedValueOnce(null);
-    await expect(resolvers.resolveImages(["img-1" as any])).rejects.toThrow(ImageStudioResolverError);
+    await expect(resolvers.resolveImages(["img-1" as any])).rejects.toThrow(
+      ImageStudioResolverError,
+    );
 
     db.imageFindById.mockResolvedValueOnce({ userId: "other" });
-    await expect(resolvers.resolveImages(["img-1" as any])).rejects.toThrow(ImageStudioResolverError);
+    await expect(resolvers.resolveImages(["img-1" as any])).rejects.toThrow(
+      ImageStudioResolverError,
+    );
 
     db.imageFindById.mockResolvedValueOnce({ userId: "user-1", id: "img-1" });
     const imgs = await resolvers.resolveImages(["img-1" as any]);

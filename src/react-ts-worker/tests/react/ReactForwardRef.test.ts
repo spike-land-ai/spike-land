@@ -36,7 +36,9 @@ describe("forwardRef", () => {
   });
 
   it("works with typed props and ref", () => {
-    interface InputProps { placeholder: string }
+    interface InputProps {
+      placeholder: string;
+    }
     const render = (props: InputProps, _ref: Ref<HTMLInputElement>) => {
       return props.placeholder;
     };

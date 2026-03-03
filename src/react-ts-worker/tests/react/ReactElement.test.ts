@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  createElement,
-  cloneElement,
-  isValidElement,
-} from "../../react/ReactElement.js";
+import { createElement, cloneElement, isValidElement } from "../../react/ReactElement.js";
 import { REACT_ELEMENT_TYPE } from "../../react/ReactSymbols.js";
 
 describe("createElement", () => {

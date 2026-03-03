@@ -123,17 +123,19 @@ export const AppToRender: FC<AppComponentProps> = memo(
       <div className="h-[100dvh] h-[100svh] flex flex-col relative overflow-hidden">
         <main className="flex-1 relative overflow-hidden">
           {/* Live preview window & Chat UI */}
-          <DraggableWindow 
-            isChatOpen={isOpen} 
+          <DraggableWindow
+            isChatOpen={isOpen}
             codeSpace={codeSpace}
-            chatNode={isOpen ? (
-              <ChatInterface
-                codeSession={codeSession}
-                codeSpace={codeSpace}
-                isOpen={isOpen}
-                onClose={handleToggleChat}
-              />
-            ) : undefined}
+            chatNode={
+              isOpen ? (
+                <ChatInterface
+                  codeSession={codeSession}
+                  codeSpace={codeSpace}
+                  isOpen={isOpen}
+                  onClose={handleToggleChat}
+                />
+              ) : undefined
+            }
           >
             {/* Attach a ref to the iframe so it can be replaced in the DOM */}
             <iframe

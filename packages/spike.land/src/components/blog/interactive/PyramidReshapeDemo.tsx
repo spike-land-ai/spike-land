@@ -326,27 +326,13 @@ function PyramidReshapeSvg({ progress, reducedMotion }: PyramidReshapeSvgProps) 
       ))}
 
       {/* Separator lines between layers, fade during morph */}
-      <line
-        x1={40}
-        y1={255}
-        x2={360}
-        y2={255}
-        stroke="rgba(30,41,59,0.6)"
-        strokeWidth={1}
-      />
+      <line x1={40} y1={255} x2={360} y2={255} stroke="rgba(30,41,59,0.6)" strokeWidth={1} />
 
       <StageLabel progress={progress} />
 
       {/* Progress bar at the very bottom */}
       <rect x={20} y={295} width={360} height={2} rx={1} fill="rgba(30,41,59,0.5)" />
-      <rect
-        x={20}
-        y={295}
-        width={360 * progress}
-        height={2}
-        rx={1}
-        fill="rgba(6,182,212,0.6)"
-      />
+      <rect x={20} y={295} width={360 * progress} height={2} rx={1} fill="rgba(6,182,212,0.6)" />
     </svg>
   );
 }

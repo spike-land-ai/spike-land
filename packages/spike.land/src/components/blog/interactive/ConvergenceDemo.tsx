@@ -175,7 +175,7 @@ function PatternCard({
 }) {
   // Stagger card entrance
   const entryDelay = index * 0.12;
-  const cardProgress = Math.max(0, Math.min(1, (1 - entryDelay) > 0 ? 1 : 0));
+  const cardProgress = Math.max(0, Math.min(1, 1 - entryDelay > 0 ? 1 : 0));
   void cardProgress;
 
   // During merge: cards compress toward center
@@ -192,9 +192,7 @@ function PatternCard({
         : pattern.accentBorder;
 
   const bgColor =
-    mergePhase > 0.5
-      ? `rgba(245,158,11,${0.03 + mergePhase * 0.07})`
-      : pattern.accentBg;
+    mergePhase > 0.5 ? `rgba(245,158,11,${0.03 + mergePhase * 0.07})` : pattern.accentBg;
 
   return (
     <motion.div
@@ -293,7 +291,9 @@ function PatternCard({
                 kw === "ctx"
                   ? true
                   : kw === "input"
-                    ? pattern.tokens.some((t) => t.text.includes("input") || t.text.includes("request"))
+                    ? pattern.tokens.some(
+                        (t) => t.text.includes("input") || t.text.includes("request"),
+                      )
                     : true;
               return present ? (
                 <span
@@ -356,7 +356,9 @@ function GoldenCard({ mergePhase }: { mergePhase: number }) {
         </div>
         <div
           className="h-px w-24"
-          style={{ background: "linear-gradient(90deg, transparent, rgba(245,158,11,0.4), transparent)" }}
+          style={{
+            background: "linear-gradient(90deg, transparent, rgba(245,158,11,0.4), transparent)",
+          }}
         />
         <p
           className="text-[10px] font-mono text-center leading-relaxed"
@@ -380,12 +382,28 @@ function ConvergeArrows({ highlightPhase }: { highlightPhase: number }) {
     >
       {/* Left arrow → center */}
       <svg width="48" height="12" className="text-cyan-500" style={{ marginRight: -12 }}>
-        <line x1="0" y1="6" x2="44" y2="6" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
+        <line
+          x1="0"
+          y1="6"
+          x2="44"
+          y2="6"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeDasharray="3 3"
+        />
         <polyline points="38,2 44,6 38,10" stroke="currentColor" strokeWidth="1.5" fill="none" />
       </svg>
       {/* Right arrow → center */}
       <svg width="48" height="12" className="text-cyan-500" style={{ marginLeft: -12 }}>
-        <line x1="48" y1="6" x2="4" y2="6" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
+        <line
+          x1="48"
+          y1="6"
+          x2="4"
+          y2="6"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeDasharray="3 3"
+        />
         <polyline points="10,2 4,6 10,10" stroke="currentColor" strokeWidth="1.5" fill="none" />
       </svg>
     </div>
@@ -430,7 +448,11 @@ export function ConvergenceDemo() {
                   ? "rgba(34,211,238,0.3)"
                   : "rgba(51,65,85,0.8)",
             color:
-              mergePhase > 0.3 ? "rgba(245,158,11,0.9)" : highlightPhase > 0 ? "#22d3ee" : "rgba(100,116,139,0.8)",
+              mergePhase > 0.3
+                ? "rgba(245,158,11,0.9)"
+                : highlightPhase > 0
+                  ? "#22d3ee"
+                  : "rgba(100,116,139,0.8)",
             transition: "all 0.5s ease",
           }}
         >
@@ -438,7 +460,11 @@ export function ConvergenceDemo() {
             className="w-1.5 h-1.5 rounded-full animate-pulse"
             style={{
               background:
-                mergePhase > 0.3 ? "#f59e0b" : highlightPhase > 0 ? "#22d3ee" : "rgba(100,116,139,0.5)",
+                mergePhase > 0.3
+                  ? "#f59e0b"
+                  : highlightPhase > 0
+                    ? "#22d3ee"
+                    : "rgba(100,116,139,0.5)",
             }}
           />
           {mergePhase > 0.3
@@ -488,9 +514,7 @@ export function ConvergenceDemo() {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-px bg-slate-700" />
-            <span className="text-[10px] font-mono text-slate-600">
-              implementation detail
-            </span>
+            <span className="text-[10px] font-mono text-slate-600">implementation detail</span>
           </div>
         </motion.div>
       )}

@@ -15,7 +15,10 @@ export const BROWSER_TOOLS: BrowserToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
-        url: { type: "string", description: "URL or section name (e.g. 'generate', 'library', 'albums')" },
+        url: {
+          type: "string",
+          description: "URL or section name (e.g. 'generate', 'library', 'albums')",
+        },
       },
       required: ["url"],
     },
@@ -92,7 +95,11 @@ export const BROWSER_TOOLS: BrowserToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
-        selector: { type: "string", description: "CSS selector filter (optional, defaults to 'button, a, input, select, textarea')" },
+        selector: {
+          type: "string",
+          description:
+            "CSS selector filter (optional, defaults to 'button, a, input, select, textarea')",
+        },
       },
       required: [],
     },

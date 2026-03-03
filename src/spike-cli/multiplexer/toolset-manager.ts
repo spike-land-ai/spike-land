@@ -109,9 +109,11 @@ export class ToolsetManager {
   }
 
   isMetaTool(name: string): boolean {
-    return name === "spike__list_toolsets" ||
+    return (
+      name === "spike__list_toolsets" ||
       name === "spike__load_toolset" ||
-      name === "spike__unload_toolset";
+      name === "spike__unload_toolset"
+    );
   }
 
   handleMetaTool(name: string, args: Record<string, unknown>): ToolCallResult {

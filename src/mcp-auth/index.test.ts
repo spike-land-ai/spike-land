@@ -107,14 +107,18 @@ describe("worker fetch handler", () => {
         headers: { Origin: "https://image-studio-mcp.spike.land" },
       });
       const res = await worker.fetch(req, makeEnv());
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://image-studio-mcp.spike.land");
+      expect(res.headers.get("Access-Control-Allow-Origin")).toBe(
+        "https://image-studio-mcp.spike.land",
+      );
     });
 
     it("sets Access-Control-Allow-Origin to fallback when Origin header is missing", async () => {
       const req = makeRequest("OPTIONS", "/anything");
       const res = await worker.fetch(req, makeEnv());
       // No Origin header → falls back to first allowed origin
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://image-studio-mcp.spike.land");
+      expect(res.headers.get("Access-Control-Allow-Origin")).toBe(
+        "https://image-studio-mcp.spike.land",
+      );
     });
 
     it("sets Access-Control-Allow-Methods with GET, POST, DELETE, OPTIONS", async () => {
@@ -177,7 +181,9 @@ describe("worker fetch handler", () => {
     it("returns 404 with CORS headers", async () => {
       const req = makeRequest("GET", "/unknown");
       const res = await worker.fetch(req, makeEnv());
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://image-studio-mcp.spike.land");
+      expect(res.headers.get("Access-Control-Allow-Origin")).toBe(
+        "https://image-studio-mcp.spike.land",
+      );
     });
 
     it("returns 'Not found' body for unknown path", async () => {
@@ -199,7 +205,9 @@ describe("worker fetch handler", () => {
       const req = makeRequest("POST", "/mcp");
       const res = await worker.fetch(req, makeEnv());
       // No Origin header → falls back to first allowed origin
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://image-studio-mcp.spike.land");
+      expect(res.headers.get("Access-Control-Allow-Origin")).toBe(
+        "https://image-studio-mcp.spike.land",
+      );
     });
 
     it("connects McpServer to transport before handling request", async () => {

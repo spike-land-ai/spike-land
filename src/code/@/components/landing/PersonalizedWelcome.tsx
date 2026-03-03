@@ -33,7 +33,8 @@ export function PersonalizedWelcome() {
     );
   }
 
-  const apps: Array<{ id: string; slug: string; name: string; tagline: string; appUrl?: string }> = [];
+  const apps: Array<{ id: string; slug: string; name: string; tagline: string; appUrl?: string }> =
+    [];
 
   function getAppEmoji(_slug: string): string {
     return "⚡";

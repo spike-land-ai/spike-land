@@ -42,7 +42,7 @@ export const uploadTool = imageProcedure
       const handle = asAlbumHandle(album_handle);
       const albumRes = await tryCatch(deps.resolvers.resolveAlbum(handle));
       /* v8 ignore next */
-if (!albumRes.ok || !albumRes.data)
+      if (!albumRes.ok || !albumRes.data)
         throw new DomainError("ALBUM_NOT_FOUND", `Album ${album_handle} not found`);
       album = albumRes.unwrap();
     }

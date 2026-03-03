@@ -13,8 +13,8 @@ type TimelineNode = {
   label: string;
   emoji: string;
   quote: string;
-  guiltAt: number;   // progress threshold to enter guilt phase
-  acceptAt: number;  // progress threshold to enter acceptance phase
+  guiltAt: number; // progress threshold to enter guilt phase
+  acceptAt: number; // progress threshold to enter acceptance phase
   guiltColor: string;
   acceptColor: string;
 };
@@ -62,7 +62,7 @@ const NODES: TimelineNode[] = [
     emoji: "🤖",
     quote: "I didn't write the code",
     guiltAt: 0.65,
-    acceptAt: 0.80,
+    acceptAt: 0.8,
     guiltColor: "#ef4444",
     acceptColor: "#06b6d4",
   },
@@ -94,12 +94,7 @@ function NodeDot({ node, phase, phaseProgress, isLast }: NodeDotProps) {
   const isGuilt = phase === "guilt";
   const isAcceptance = phase === "acceptance";
 
-  const dotColor =
-    isAcceptance
-      ? node.acceptColor
-      : isGuilt
-        ? node.guiltColor
-        : "rgba(51,65,85,1)";
+  const dotColor = isAcceptance ? node.acceptColor : isGuilt ? node.guiltColor : "rgba(51,65,85,1)";
 
   const glowShadow =
     isAcceptance && isLast
@@ -279,8 +274,8 @@ export function ParadigmGuiltTimeline() {
           PARADIGM SHIFT TIMELINE
         </div>
         <p className="text-sm font-light text-slate-300 max-w-lg mx-auto leading-relaxed">
-          Every generation of programmers faced a tool that felt like cheating.
-          Every generation was wrong.
+          Every generation of programmers faced a tool that felt like cheating. Every generation was
+          wrong.
         </p>
       </div>
 
@@ -304,8 +299,7 @@ export function ParadigmGuiltTimeline() {
             // Connector draw progress between this node and next
             const connectorProgress = nextNode
               ? clamp(
-                  (progress - node.acceptAt) /
-                    Math.max(0.01, nextNode.guiltAt - node.acceptAt),
+                  (progress - node.acceptAt) / Math.max(0.01, nextNode.guiltAt - node.acceptAt),
                   0,
                   1,
                 )
@@ -350,8 +344,7 @@ export function ParadigmGuiltTimeline() {
 
           const connectorProgress = nextNode
             ? clamp(
-                (progress - node.acceptAt) /
-                  Math.max(0.01, nextNode.guiltAt - node.acceptAt),
+                (progress - node.acceptAt) / Math.max(0.01, nextNode.guiltAt - node.acceptAt),
                 0,
                 1,
               )

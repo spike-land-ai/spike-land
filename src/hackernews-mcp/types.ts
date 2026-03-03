@@ -124,7 +124,12 @@ export type HNErrorCode =
 
 // ─── Result Helpers (re-exported from mcp-server-base) ───
 
-export { tryCatch, type CallToolResult, jsonResult, errorResult } from "@spike-land-ai/mcp-server-base";
+export {
+  tryCatch,
+  type CallToolResult,
+  jsonResult,
+  errorResult,
+} from "@spike-land-ai/mcp-server-base";
 
 // ─── Fetch Type (for DI) ───
 

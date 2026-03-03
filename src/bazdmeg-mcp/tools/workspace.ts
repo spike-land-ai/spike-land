@@ -16,7 +16,8 @@ export function registerWorkspaceTools(server: McpServer): void {
   // ── bazdmeg_enter_workspace ──────────────────────────────────────────────
   createZodTool(server, {
     name: "bazdmeg_enter_workspace",
-    description: "Declare active workspace, compute allowed paths from deps, write config, serve context bundle",
+    description:
+      "Declare active workspace, compute allowed paths from deps, write config, serve context bundle",
     schema: EnterWorkspaceSchema.shape,
     handler: async (args) => {
       const { packageName } = args as { packageName: string };
@@ -44,11 +45,11 @@ export function registerWorkspaceTools(server: McpServer): void {
 
       return textResult(
         `Workspace entered: ${packageName}\n\n` +
-        `Allowed paths (${resolved.paths.length}):\n` +
-        resolved.paths.map((p) => `  - ${p}`).join("\n") +
-        `\n\nDependencies (${resolved.direct.length}):\n` +
-        resolved.direct.map((d) => `  - ${d}`).join("\n") +
-        `\n\n---\n\n${contextText}`,
+          `Allowed paths (${resolved.paths.length}):\n` +
+          resolved.paths.map((p) => `  - ${p}`).join("\n") +
+          `\n\nDependencies (${resolved.direct.length}):\n` +
+          resolved.direct.map((d) => `  - ${d}`).join("\n") +
+          `\n\n---\n\n${contextText}`,
       );
     },
   });

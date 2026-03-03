@@ -15,7 +15,8 @@ export function registerBuildTools(server: McpServer): void {
   // ── bazdmeg_build ─────────────────────────────────────────────────────────
   createZodTool(server, {
     name: "bazdmeg_build",
-    description: "Run esbuild bundling for a package. Reads packages.yaml to determine build profile.",
+    description:
+      "Run esbuild bundling for a package. Reads packages.yaml to determine build profile.",
     schema: BuildSchema.shape,
     handler: async (args) => {
       const { packageName, kind: kindOverride } = args as {
@@ -45,11 +46,7 @@ export function registerBuildTools(server: McpServer): void {
         result = await runCommand("npm", ["run", "build"], pkgDir);
       } else {
         report += "Using esbuild config: `npx tsx esbuild.config.ts`\n\n";
-        result = await runCommand(
-          "npx",
-          ["tsx", "esbuild.config.ts", packageName],
-          repoRoot,
-        );
+        result = await runCommand("npx", ["tsx", "esbuild.config.ts", packageName], repoRoot);
       }
 
       const durationMs = Date.now() - start;
@@ -73,7 +70,8 @@ export function registerBuildTools(server: McpServer): void {
   // ── bazdmeg_typecheck ─────────────────────────────────────────────────────
   createZodTool(server, {
     name: "bazdmeg_typecheck",
-    description: "Run tsc --noEmit with per-package filtering. Omit packageName to typecheck all packages.",
+    description:
+      "Run tsc --noEmit with per-package filtering. Omit packageName to typecheck all packages.",
     schema: TypecheckSchema.shape,
     handler: async (args) => {
       const { packageName } = args as { packageName?: string };
@@ -134,11 +132,7 @@ export function registerBuildTools(server: McpServer): void {
       } else {
         // Fallback: run tsc directly
         const start = Date.now();
-        const result = await runCommand(
-          "npx",
-          ["tsc", "--noEmit", "-p", "tsconfig.json"],
-          pkgDir,
-        );
+        const result = await runCommand("npx", ["tsc", "--noEmit", "-p", "tsconfig.json"], pkgDir);
         const dur = ((Date.now() - start) / 1000).toFixed(1);
 
         report += `**Duration**: ${dur}s\n`;

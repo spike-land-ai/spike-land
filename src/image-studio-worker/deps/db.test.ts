@@ -14,7 +14,19 @@ describe("db", () => {
   it("imageCreate", async () => {
     const d1 = createMockDb();
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    const res = await db.imageCreate({ userId: "u", name: "n", originalUrl: "url", originalR2Key: "k", originalWidth: 1, originalHeight: 1, originalSizeBytes: 1, originalFormat: "png", isPublic: false, tags: [], shareToken: null });
+    const res = await db.imageCreate({
+      userId: "u",
+      name: "n",
+      originalUrl: "url",
+      originalR2Key: "k",
+      originalWidth: 1,
+      originalHeight: 1,
+      originalSizeBytes: 1,
+      originalFormat: "png",
+      isPublic: false,
+      tags: [],
+      shareToken: null,
+    });
     expect(res.name).toBe("n");
   });
 
@@ -24,7 +36,7 @@ describe("db", () => {
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
     const res = await db.imageFindById("img-1" as any);
     expect(res?.id).toBe("img-1");
-    
+
     d1.mockFirst.mockResolvedValueOnce(null);
     expect(await db.imageFindById("img-2" as any)).toBeNull();
   });
@@ -48,7 +60,13 @@ describe("db", () => {
     const d1 = createMockDb();
     d1.mockFirst.mockResolvedValueOnce({ id: "img-1", tags: "[]" });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.imageUpdate("img-1" as any, { name: "n", description: "d", tags: [], isPublic: true, shareToken: "t" });
+    await db.imageUpdate("img-1" as any, {
+      name: "n",
+      description: "d",
+      tags: [],
+      isPublic: true,
+      shareToken: "t",
+    });
     expect(d1.prepare).toHaveBeenCalled();
   });
 
@@ -63,18 +81,28 @@ describe("db", () => {
     const d1 = createMockDb();
     d1.mockFirst.mockResolvedValueOnce({ id: "job-1" });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.jobCreate({ imageId: "img", userId: "u", tier: "FREE", creditsCost: 0, status: "PENDING", processingStartedAt: new Date(), metadata: null } as any);
+    await db.jobCreate({
+      imageId: "img",
+      userId: "u",
+      tier: "FREE",
+      creditsCost: 0,
+      status: "PENDING",
+      processingStartedAt: new Date(),
+      metadata: null,
+    } as any);
     expect(d1.prepare).toHaveBeenCalled();
   });
 
   it("jobFindById", async () => {
     const d1 = createMockDb();
-    d1.mockFirst.mockResolvedValueOnce({ id: "job-1", imageId: "img-1" }).mockResolvedValueOnce({ id: "img-1", name: "n", originalUrl: "url" });
+    d1.mockFirst
+      .mockResolvedValueOnce({ id: "job-1", imageId: "img-1" })
+      .mockResolvedValueOnce({ id: "img-1", name: "n", originalUrl: "url" });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
     const res = await db.jobFindById("job-1" as any);
     expect(res?.id).toBe("job-1");
     expect(res?.image?.id).toBe("img-1");
-    
+
     d1.mockFirst.mockResolvedValueOnce(null);
     expect(await db.jobFindById("job-2" as any)).toBeNull();
   });
@@ -91,7 +119,16 @@ describe("db", () => {
     const d1 = createMockDb();
     d1.mockFirst.mockResolvedValueOnce({ id: "job-1" });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.jobUpdate("job-1" as any, { status: "COMPLETED", enhancedUrl: "u", enhancedR2Key: "k", enhancedWidth: 1, enhancedHeight: 1, enhancedSizeBytes: 1, errorMessage: "e", processingCompletedAt: new Date() });
+    await db.jobUpdate("job-1" as any, {
+      status: "COMPLETED",
+      enhancedUrl: "u",
+      enhancedR2Key: "k",
+      enhancedWidth: 1,
+      enhancedHeight: 1,
+      enhancedSizeBytes: 1,
+      errorMessage: "e",
+      processingCompletedAt: new Date(),
+    });
     expect(d1.prepare).toHaveBeenCalled();
   });
 
@@ -99,7 +136,18 @@ describe("db", () => {
     const d1 = createMockDb();
     d1.mockFirst.mockResolvedValueOnce({ id: "alb-1" });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.albumCreate({ handle: "h", userId: "u", name: "n", description: "d", coverImageId: "img-1", privacy: "PUBLIC", defaultTier: "FREE", shareToken: "t", sortOrder: 0, pipelineId: "p" } as any);
+    await db.albumCreate({
+      handle: "h",
+      userId: "u",
+      name: "n",
+      description: "d",
+      coverImageId: "img-1",
+      privacy: "PUBLIC",
+      defaultTier: "FREE",
+      shareToken: "t",
+      sortOrder: 0,
+      pipelineId: "p",
+    } as any);
     expect(d1.prepare).toHaveBeenCalled();
   });
 
@@ -109,7 +157,7 @@ describe("db", () => {
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
     const res = await db.albumFindByHandle("h" as any);
     expect(res?.id).toBe("alb-1");
-    
+
     d1.mockFirst.mockResolvedValueOnce(null);
     expect(await db.albumFindByHandle("h" as any)).toBeNull();
   });
@@ -120,7 +168,7 @@ describe("db", () => {
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
     const res = await db.albumFindById("alb-1");
     expect(res?.id).toBe("alb-1");
-    
+
     d1.mockFirst.mockResolvedValueOnce(null);
     expect(await db.albumFindById("alb-2")).toBeNull();
   });
@@ -138,7 +186,18 @@ describe("db", () => {
     const d1 = createMockDb();
     d1.mockFirst.mockResolvedValueOnce({ id: "alb-1" });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.albumUpdate("h" as any, { name: "n", description: "d", coverImageId: "img-1", privacy: "PRIVATE", defaultTier: "FREE", shareToken: "t", pipelineId: "p" } as any);
+    await db.albumUpdate(
+      "h" as any,
+      {
+        name: "n",
+        description: "d",
+        coverImageId: "img-1",
+        privacy: "PRIVATE",
+        defaultTier: "FREE",
+        shareToken: "t",
+        pipelineId: "p",
+      } as any,
+    );
     expect(d1.prepare).toHaveBeenCalled();
   });
 
@@ -200,7 +259,17 @@ describe("db", () => {
     const d1 = createMockDb();
     d1.mockFirst.mockResolvedValueOnce({ id: "p-1" });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.pipelineCreate({ name: "n", description: "d", userId: "u", visibility: "PRIVATE", tier: "FREE", analysisConfig: {}, autoCropConfig: {}, promptConfig: {}, generationConfig: {} } as any);
+    await db.pipelineCreate({
+      name: "n",
+      description: "d",
+      userId: "u",
+      visibility: "PRIVATE",
+      tier: "FREE",
+      analysisConfig: {},
+      autoCropConfig: {},
+      promptConfig: {},
+      generationConfig: {},
+    } as any);
     expect(d1.prepare).toHaveBeenCalled();
   });
 
@@ -210,7 +279,7 @@ describe("db", () => {
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
     const res = await db.pipelineFindById("p-1" as any);
     expect(res?.id).toBe("p-1");
-    
+
     d1.mockFirst.mockResolvedValueOnce(null);
     expect(await db.pipelineFindById("p-2" as any)).toBeNull();
   });
@@ -227,7 +296,19 @@ describe("db", () => {
     const d1 = createMockDb();
     d1.mockFirst.mockResolvedValueOnce({ id: "p-1" });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.pipelineUpdate("p-1" as any, { name: "n", description: "d", visibility: "PUBLIC", tier: "FREE", analysisConfig: {}, autoCropConfig: {}, promptConfig: {}, generationConfig: {} } as any);
+    await db.pipelineUpdate(
+      "p-1" as any,
+      {
+        name: "n",
+        description: "d",
+        visibility: "PUBLIC",
+        tier: "FREE",
+        analysisConfig: {},
+        autoCropConfig: {},
+        promptConfig: {},
+        generationConfig: {},
+      } as any,
+    );
     expect(d1.prepare).toHaveBeenCalled();
   });
 
@@ -242,7 +323,14 @@ describe("db", () => {
     const d1 = createMockDb();
     d1.mockFirst.mockResolvedValueOnce({ id: "gj-1" });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.generationJobCreate({ userId: "u", type: "GENERATE", tier: "FREE", creditsCost: 0, status: "PENDING", prompt: "p" });
+    await db.generationJobCreate({
+      userId: "u",
+      type: "GENERATE",
+      tier: "FREE",
+      creditsCost: 0,
+      status: "PENDING",
+      prompt: "p",
+    });
     expect(d1.prepare).toHaveBeenCalled();
   });
 
@@ -257,9 +345,25 @@ describe("db", () => {
   it("toolCallCreate and Update and List", async () => {
     const d1 = createMockDb();
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.toolCallCreate!({ id: "tc-1", userId: "u", toolName: "t", args: "{}", durationMs: 0, isError: false, status: "COMPLETED", result: null });
-    await db.toolCallUpdate!("tc-1", { durationMs: 1, isError: true, status: "ERROR", result: "err" });
-    d1.mockAll.mockResolvedValueOnce({ results: [{ id: "tc-1", isError: 1, status: "ERROR", createdAt: new Date().toISOString() }] });
+    await db.toolCallCreate!({
+      id: "tc-1",
+      userId: "u",
+      toolName: "t",
+      args: "{}",
+      durationMs: 0,
+      isError: false,
+      status: "COMPLETED",
+      result: null,
+    });
+    await db.toolCallUpdate!("tc-1", {
+      durationMs: 1,
+      isError: true,
+      status: "ERROR",
+      result: "err",
+    });
+    d1.mockAll.mockResolvedValueOnce({
+      results: [{ id: "tc-1", isError: 1, status: "ERROR", createdAt: new Date().toISOString() }],
+    });
     const calls = await db.toolCallList!({ limit: 10 });
     expect(calls[0].id).toBe("tc-1");
   });
@@ -268,7 +372,15 @@ describe("db", () => {
     const d1 = createMockDb();
     d1.mockFirst.mockResolvedValueOnce({ id: "gj-1" });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.generationJobUpdate("gj-1" as any, { status: "COMPLETED", outputImageUrl: "u", outputWidth: 1, outputHeight: 1, outputSizeBytes: 1, errorMessage: "e", inputImageUrl: "i" });
+    await db.generationJobUpdate("gj-1" as any, {
+      status: "COMPLETED",
+      outputImageUrl: "u",
+      outputWidth: 1,
+      outputHeight: 1,
+      outputSizeBytes: 1,
+      errorMessage: "e",
+      inputImageUrl: "i",
+    });
     expect(d1.prepare).toHaveBeenCalled();
   });
 
@@ -276,7 +388,13 @@ describe("db", () => {
     const d1 = createMockDb();
     d1.mockFirst.mockResolvedValueOnce({ id: "sub-1" });
     const db = createD1Db({ IMAGE_DB: d1 as any } as any);
-    await db.subjectCreate!({ userId: "u", imageId: "img", label: "l", type: "character", description: "d" } as any);
+    await db.subjectCreate!({
+      userId: "u",
+      imageId: "img",
+      label: "l",
+      type: "character",
+      description: "d",
+    } as any);
     expect(d1.prepare).toHaveBeenCalled();
   });
 

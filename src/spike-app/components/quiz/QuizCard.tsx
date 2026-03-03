@@ -1,5 +1,3 @@
-
-
 interface QuizCardProps {
   questionIndex: number;
   question: string;

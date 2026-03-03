@@ -54,7 +54,9 @@ describe("mirror tools", () => {
   });
 
   it("dry run shows plan without syncing", async () => {
-    mockGetManifestPackage.mockResolvedValue(MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+    mockGetManifestPackage.mockResolvedValue(
+      MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+    );
 
     const result = await server.call("bazdmeg_sync_mirror", {
       packageName: "chess-engine",
@@ -69,7 +71,9 @@ describe("mirror tools", () => {
   });
 
   it("syncs to mirror when dryRun=false (new remote)", async () => {
-    mockGetManifestPackage.mockResolvedValue(MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+    mockGetManifestPackage.mockResolvedValue(
+      MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+    );
     mockRunCommand.mockImplementation(async (_cmd, args) => {
       if (args[0] === "remote" && args[1] === "get-url") return fail("not found");
       if (args[0] === "remote" && args[1] === "add") return ok();
@@ -87,7 +91,9 @@ describe("mirror tools", () => {
   });
 
   it("syncs to mirror when remote already exists", async () => {
-    mockGetManifestPackage.mockResolvedValue(MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+    mockGetManifestPackage.mockResolvedValue(
+      MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+    );
     mockRunCommand.mockImplementation(async (_cmd, args) => {
       if (args[0] === "remote" && args[1] === "get-url") return ok("git@github.com:org/repo.git");
       if (args[0] === "subtree") return ok("pushed");
@@ -104,7 +110,9 @@ describe("mirror tools", () => {
   });
 
   it("reports push failure", async () => {
-    mockGetManifestPackage.mockResolvedValue(MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+    mockGetManifestPackage.mockResolvedValue(
+      MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+    );
     mockRunCommand.mockImplementation(async (_cmd, args) => {
       if (args[0] === "remote") return ok("url");
       if (args[0] === "subtree") return fail("push rejected");
@@ -120,7 +128,9 @@ describe("mirror tools", () => {
   });
 
   it("reports add-remote failure", async () => {
-    mockGetManifestPackage.mockResolvedValue(MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+    mockGetManifestPackage.mockResolvedValue(
+      MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+    );
     mockRunCommand.mockImplementation(async (_cmd, args) => {
       if (args[0] === "remote" && args[1] === "get-url") return fail("no remote");
       if (args[0] === "remote" && args[1] === "add") return fail("remote add failed");

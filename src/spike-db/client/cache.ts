@@ -1,8 +1,7 @@
 import type { Delta } from "../protocol/messages.js";
 
 export class TableCache {
-  private tables: Map<string, Map<string, Record<string, unknown>>> =
-    new Map();
+  private tables: Map<string, Map<string, Record<string, unknown>>> = new Map();
   private primaryKeys: Map<string, string> = new Map();
   private listeners: Map<string, Set<(delta: Delta) => void>> = new Map();
 
@@ -65,11 +64,7 @@ export class TableCache {
     return Array.from(tableMap.values());
   }
 
-  findBy(
-    table: string,
-    column: string,
-    value: unknown,
-  ): Record<string, unknown> | undefined {
+  findBy(table: string, column: string, value: unknown): Record<string, unknown> | undefined {
     const tableMap = this.tables.get(table);
     if (!tableMap) return undefined;
     for (const row of tableMap.values()) {
@@ -78,11 +73,7 @@ export class TableCache {
     return undefined;
   }
 
-  filterBy(
-    table: string,
-    column: string,
-    value: unknown,
-  ): Record<string, unknown>[] {
+  filterBy(table: string, column: string, value: unknown): Record<string, unknown>[] {
     const tableMap = this.tables.get(table);
     if (!tableMap) return [];
     const results: Record<string, unknown>[] = [];

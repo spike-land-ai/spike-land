@@ -49,7 +49,11 @@ describe("ship tool", () => {
 
   afterEach(async () => {
     resetWorkspaceState();
-    try { await unlink("/tmp/bazdmeg-workspace.json"); } catch { /* ok */ }
+    try {
+      await unlink("/tmp/bazdmeg-workspace.json");
+    } catch {
+      /* ok */
+    }
   });
 
   it("registers the auto_ship tool", () => {
@@ -67,7 +71,9 @@ describe("ship tool", () => {
     mockHasScript.mockResolvedValue(true);
     mockRunCommand.mockImplementation(async (_cmd, args) => {
       if (args[0] === "diff") {
-        return ok("diff --git a/packages/chess-engine/src/index.ts b/packages/chess-engine/src/index.ts\n+++ b/packages/chess-engine/src/index.ts\n+const x: string = 'hello';\ndiff --git a/packages/chess-engine/src/index.test.ts b/packages/chess-engine/src/index.test.ts\n+++ b/packages/chess-engine/src/index.test.ts\n+it('works', () => {});");
+        return ok(
+          "diff --git a/packages/chess-engine/src/index.ts b/packages/chess-engine/src/index.ts\n+++ b/packages/chess-engine/src/index.ts\n+const x: string = 'hello';\ndiff --git a/packages/chess-engine/src/index.test.ts b/packages/chess-engine/src/index.test.ts\n+++ b/packages/chess-engine/src/index.test.ts\n+it('works', () => {});",
+        );
       }
       return ok();
     });
@@ -126,7 +132,9 @@ describe("ship tool", () => {
     mockRunCommand.mockImplementation(async (_cmd, args) => {
       if (args[0] === "diff") {
         // Diff with `any` type — will trigger TypeScript Strict gate
-        return ok("diff --git a/packages/chess-engine/src/bad.ts b/packages/chess-engine/src/bad.ts\n+++ b/packages/chess-engine/src/bad.ts\n+const x: any = 'bad';");
+        return ok(
+          "diff --git a/packages/chess-engine/src/bad.ts b/packages/chess-engine/src/bad.ts\n+++ b/packages/chess-engine/src/bad.ts\n+const x: any = 'bad';",
+        );
       }
       return ok();
     });
@@ -143,7 +151,9 @@ describe("ship tool", () => {
     });
     mockRunCommand.mockImplementation(async (_cmd, args) => {
       if (args[0] === "diff") {
-        return ok("diff --git a/packages/chess-engine/src/index.ts b/packages/chess-engine/src/index.ts\n+++ b/packages/chess-engine/src/index.ts\n+const x: string = 'hello';\ndiff --git a/packages/chess-engine/src/index.test.ts b/packages/chess-engine/src/index.test.ts\n+++ b/packages/chess-engine/src/index.test.ts\n+it('works', () => {});");
+        return ok(
+          "diff --git a/packages/chess-engine/src/index.ts b/packages/chess-engine/src/index.ts\n+++ b/packages/chess-engine/src/index.ts\n+const x: string = 'hello';\ndiff --git a/packages/chess-engine/src/index.test.ts b/packages/chess-engine/src/index.test.ts\n+++ b/packages/chess-engine/src/index.test.ts\n+it('works', () => {});",
+        );
       }
       return ok();
     });
@@ -171,7 +181,9 @@ describe("ship tool", () => {
     mockHasScript.mockResolvedValue(true);
     mockRunCommand.mockImplementation(async (_cmd, args) => {
       if (args[0] === "diff") {
-        return ok("diff --git a/packages/state-machine/src/index.ts b/packages/state-machine/src/index.ts\n+++ b/packages/state-machine/src/index.ts\n+export {};\ndiff --git a/packages/state-machine/src/index.test.ts b/packages/state-machine/src/index.test.ts\n+++ b/packages/state-machine/src/index.test.ts\n+it('ok', () => {});");
+        return ok(
+          "diff --git a/packages/state-machine/src/index.ts b/packages/state-machine/src/index.ts\n+++ b/packages/state-machine/src/index.ts\n+export {};\ndiff --git a/packages/state-machine/src/index.test.ts b/packages/state-machine/src/index.test.ts\n+++ b/packages/state-machine/src/index.test.ts\n+it('ok', () => {});",
+        );
       }
       return ok();
     });
@@ -188,7 +200,9 @@ describe("ship tool", () => {
     mockHasScript.mockResolvedValue(true);
     mockRunCommand.mockImplementation(async (_cmd, args) => {
       if (args[0] === "diff") {
-        return ok("diff --git a/packages/chess-engine/src/index.ts b/packages/chess-engine/src/index.ts\n+++ b/packages/chess-engine/src/index.ts\n+const x: string = 'hello';\ndiff --git a/packages/chess-engine/src/index.test.ts b/packages/chess-engine/src/index.test.ts\n+++ b/packages/chess-engine/src/index.test.ts\n+it('works', () => {});");
+        return ok(
+          "diff --git a/packages/chess-engine/src/index.ts b/packages/chess-engine/src/index.ts\n+++ b/packages/chess-engine/src/index.ts\n+const x: string = 'hello';\ndiff --git a/packages/chess-engine/src/index.test.ts b/packages/chess-engine/src/index.test.ts\n+++ b/packages/chess-engine/src/index.test.ts\n+it('works', () => {});",
+        );
       }
       return ok();
     });
@@ -205,7 +219,9 @@ describe("ship tool", () => {
     mockRunCommand.mockImplementation(async (_cmd, args) => {
       if (args[0] === "diff") {
         diffCalled = true;
-        return ok("diff --git a/packages/chess-engine/src/index.ts b/packages/chess-engine/src/index.ts\n+++ b/packages/chess-engine/src/index.ts\n+const x: string = 'hello';\ndiff --git a/packages/chess-engine/src/index.test.ts b/packages/chess-engine/src/index.test.ts\n+++ b/packages/chess-engine/src/index.test.ts\n+it('works', () => {});");
+        return ok(
+          "diff --git a/packages/chess-engine/src/index.ts b/packages/chess-engine/src/index.ts\n+++ b/packages/chess-engine/src/index.ts\n+const x: string = 'hello';\ndiff --git a/packages/chess-engine/src/index.test.ts b/packages/chess-engine/src/index.test.ts\n+++ b/packages/chess-engine/src/index.test.ts\n+it('works', () => {});",
+        );
       }
       if (diffCalled && args[0] === "commit") {
         return fail("nothing to commit");
@@ -224,7 +240,9 @@ describe("ship tool", () => {
     const commitArgs: string[][] = [];
     mockRunCommand.mockImplementation(async (_cmd, args) => {
       if (args[0] === "diff") {
-        return ok("diff --git a/packages/chess-engine/src/index.ts b/packages/chess-engine/src/index.ts\n+++ b/packages/chess-engine/src/index.ts\n+const x: string = 'hello';\ndiff --git a/packages/chess-engine/src/index.test.ts b/packages/chess-engine/src/index.test.ts\n+++ b/packages/chess-engine/src/index.test.ts\n+it('works', () => {});");
+        return ok(
+          "diff --git a/packages/chess-engine/src/index.ts b/packages/chess-engine/src/index.ts\n+++ b/packages/chess-engine/src/index.ts\n+const x: string = 'hello';\ndiff --git a/packages/chess-engine/src/index.test.ts b/packages/chess-engine/src/index.test.ts\n+++ b/packages/chess-engine/src/index.test.ts\n+it('works', () => {});",
+        );
       }
       if (args[0] === "commit") commitArgs.push([...args]);
       return ok();
@@ -263,7 +281,7 @@ describe("ship tool", () => {
 
   it("handles unexpected exceptions", async () => {
     mockHasScript.mockRejectedValue(new Error("Unexpected crash"));
-    
+
     const result = await server.call("bazdmeg_auto_ship", { packageName: "p" });
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Unexpected crash");

@@ -72,7 +72,15 @@ function makeDb(overrides: Partial<ImageStudioDeps["db"]> = {}): ImageStudioDeps
     albumUpdate: vi.fn().mockResolvedValue(makeAlbumRow()),
     albumDelete: vi.fn().mockResolvedValue(undefined),
     albumMaxSortOrder: vi.fn().mockResolvedValue(0),
-    albumImageAdd: vi.fn().mockResolvedValue({ id: "ai-1", albumId: "alb-1", imageId: "img-1", sortOrder: 0, addedAt: new Date() }),
+    albumImageAdd: vi
+      .fn()
+      .mockResolvedValue({
+        id: "ai-1",
+        albumId: "alb-1",
+        imageId: "img-1",
+        sortOrder: 0,
+        addedAt: new Date(),
+      }),
     albumImageRemove: vi.fn().mockResolvedValue(1),
     albumImageReorder: vi.fn().mockResolvedValue(undefined),
     albumImageList: vi.fn().mockResolvedValue([]),
@@ -95,7 +103,9 @@ function makeDb(overrides: Partial<ImageStudioDeps["db"]> = {}): ImageStudioDeps
   } as unknown as ImageStudioDeps["db"];
 }
 
-function makeStorage(overrides: Partial<ImageStudioDeps["storage"]> = {}): ImageStudioDeps["storage"] {
+function makeStorage(
+  overrides: Partial<ImageStudioDeps["storage"]> = {},
+): ImageStudioDeps["storage"] {
   return {
     upload: vi.fn().mockResolvedValue({
       url: "https://example.com/user-123/new-file.png",
@@ -125,8 +135,22 @@ function makeDeps(overrides: Partial<ImageStudioDeps> = {}): ImageStudioDeps {
     storage: makeStorage(),
     credits: makeCredits(),
     generation: {
-      generate: vi.fn().mockResolvedValue({ url: "https://example.com/gen.png", width: 512, height: 512, sizeBytes: 5000 }),
-      edit: vi.fn().mockResolvedValue({ url: "https://example.com/edited.png", width: 512, height: 512, sizeBytes: 5000 }),
+      generate: vi
+        .fn()
+        .mockResolvedValue({
+          url: "https://example.com/gen.png",
+          width: 512,
+          height: 512,
+          sizeBytes: 5000,
+        }),
+      edit: vi
+        .fn()
+        .mockResolvedValue({
+          url: "https://example.com/edited.png",
+          width: 512,
+          height: 512,
+          sizeBytes: 5000,
+        }),
     } as unknown as ImageStudioDeps["generation"],
     resolvers: {} as ImageStudioDeps["resolvers"],
     nanoid: () => "test-nanoid-id",
@@ -268,7 +292,11 @@ describe("createR2Storage", () => {
       contentType: "image/jpeg",
     });
 
-    const [, , opts] = mockPut.mock.calls[0] as [string, Uint8Array, { httpMetadata: Record<string, string>; customMetadata: Record<string, string> }];
+    const [, , opts] = mockPut.mock.calls[0] as [
+      string,
+      Uint8Array,
+      { httpMetadata: Record<string, string>; customMetadata: Record<string, string> },
+    ];
     expect(opts.httpMetadata.cacheControl).toBe("public, max-age=31536000, immutable");
     expect(opts.httpMetadata.contentType).toBe("image/jpeg");
     expect(opts.customMetadata.userId).toBe("user-xyz");
@@ -338,17 +366,17 @@ describe("createR2Storage", () => {
   });
 });
 
-  it("uploads bytes with fallback bin extension", async () => {
-    const { createR2Storage } = await import("./deps/storage.ts");
-    const mockPut = vi.fn().mockResolvedValue(undefined);
-    const mockEnv = { IMAGE_R2: { put: mockPut } } as any;
-    const storage = createR2Storage(mockEnv, "https://cdn.example.com");
-    const result = await storage.upload("user-xyz", new Uint8Array([0xff]), {
-      filename: "noextension",
-      contentType: "image/jpeg",
-    });
-    expect(result.r2Key.endsWith(".bin")).toBe(true);
+it("uploads bytes with fallback bin extension", async () => {
+  const { createR2Storage } = await import("./deps/storage.ts");
+  const mockPut = vi.fn().mockResolvedValue(undefined);
+  const mockEnv = { IMAGE_R2: { put: mockPut } } as any;
+  const storage = createR2Storage(mockEnv, "https://cdn.example.com");
+  const result = await storage.upload("user-xyz", new Uint8Array([0xff]), {
+    filename: "noextension",
+    contentType: "image/jpeg",
   });
+  expect(result.r2Key.endsWith(".bin")).toBe(true);
+});
 
 // ─── Auth helper Tests ────────────────────────────────────────────────────────
 
@@ -365,13 +393,18 @@ describe("validateSession", () => {
       session: { id: "sess-1", expiresAt: "2026-12-31T00:00:00Z" },
     };
 
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue(fakeSession),
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue(fakeSession),
+      }),
+    );
 
     const headers = new Headers({ Cookie: "better-auth.session_token=abc123" });
-    const env = { AUTH_SERVICE_URL: "https://auth.example.com" } as unknown as import("./env.d.ts").Env;
+    const env = {
+      AUTH_SERVICE_URL: "https://auth.example.com",
+    } as unknown as import("./env.d.ts").Env;
 
     const result = await validateSession(headers, env);
     expect(result).not.toBeNull();
@@ -394,10 +427,13 @@ describe("validateSession", () => {
   it("returns null when session has no user.id", async () => {
     const { validateSession } = await import("./auth.ts");
 
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue({ session: { id: "sess-2" } }), // no user
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue({ session: { id: "sess-2" } }), // no user
+      }),
+    );
 
     const headers = new Headers();
     const env = {} as import("./env.d.ts").Env;
@@ -421,10 +457,13 @@ describe("validateSession", () => {
   it("returns null when auth service returns null body", async () => {
     const { validateSession } = await import("./auth.ts");
 
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
-      ok: true,
-      json: vi.fn().mockResolvedValue(null),
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: vi.fn().mockResolvedValue(null),
+      }),
+    );
 
     const headers = new Headers();
     const env = {} as import("./env.d.ts").Env;
@@ -449,7 +488,9 @@ describe("validateSession", () => {
       Cookie: "session=tok",
       Authorization: "Bearer mytoken",
     });
-    const env = { AUTH_SERVICE_URL: "https://auth.test.com" } as unknown as import("./env.d.ts").Env;
+    const env = {
+      AUTH_SERVICE_URL: "https://auth.test.com",
+    } as unknown as import("./env.d.ts").Env;
 
     await validateSession(headers, env);
 
@@ -594,7 +635,9 @@ describe("Upload flow logic", () => {
     const sqlCalls = (mockDb.prepare as ReturnType<typeof vi.fn>).mock.calls.map(
       (c: unknown[]) => c[0] as string,
     );
-    const hasInsert = sqlCalls.some((sql) => sql.toLowerCase().includes("insert into album_images"));
+    const hasInsert = sqlCalls.some((sql) =>
+      sql.toLowerCase().includes("insert into album_images"),
+    );
     expect(hasInsert).toBe(true);
   });
 });
@@ -623,19 +666,28 @@ describe("Gallery API route logic (unit-level)", () => {
   describe("Album creation handle generation", () => {
     it("generates a slug from the album name", () => {
       const name = "My Summer Vacation";
-      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
+      const slug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 30);
       expect(slug).toBe("my-summer-vacation");
     });
 
     it("truncates long names to 30 chars in the slug", () => {
       const name = "A Very Long Album Name That Exceeds The Limit";
-      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
+      const slug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 30);
       expect(slug.length).toBeLessThanOrEqual(30);
     });
 
     it("replaces special characters with hyphens", () => {
       const name = "Hello! World & More @ 2026";
-      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
+      const slug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 30);
       expect(slug).not.toMatch(/[^a-z0-9-]/);
     });
   });
@@ -643,10 +695,23 @@ describe("Gallery API route logic (unit-level)", () => {
   describe("Album image add (de-duplication)", () => {
     it("tracks only successfully added images", async () => {
       const db = makeDb({
-        albumImageAdd: vi.fn()
-          .mockResolvedValueOnce({ id: "ai-1", albumId: "alb-1", imageId: "img-1", sortOrder: 1, addedAt: new Date() })
+        albumImageAdd: vi
+          .fn()
+          .mockResolvedValueOnce({
+            id: "ai-1",
+            albumId: "alb-1",
+            imageId: "img-1",
+            sortOrder: 1,
+            addedAt: new Date(),
+          })
           .mockResolvedValueOnce(null) // duplicate — not added
-          .mockResolvedValueOnce({ id: "ai-3", albumId: "alb-1", imageId: "img-3", sortOrder: 3, addedAt: new Date() }),
+          .mockResolvedValueOnce({
+            id: "ai-3",
+            albumId: "alb-1",
+            imageId: "img-3",
+            sortOrder: 3,
+            addedAt: new Date(),
+          }),
         albumImageMaxSortOrder: vi.fn().mockResolvedValue(0),
         albumFindById: vi.fn().mockResolvedValue(makeAlbumRow()),
       });
@@ -751,7 +816,12 @@ describe("Credits system (D1-backed)", () => {
 
   it("consume returns success and remaining balance", async () => {
     const credits = makeCredits();
-    const result = await credits.consume({ userId: "user-123", amount: 10, source: "img_enhance", sourceId: "job-1" });
+    const result = await credits.consume({
+      userId: "user-123",
+      amount: 10,
+      source: "img_enhance",
+      sourceId: "job-1",
+    });
     expect(result.success).toBe(true);
     expect(typeof result.remaining).toBe("number");
   });
@@ -803,7 +873,10 @@ describe("D1 row mapping (createD1Db internals via galleryRecentImages)", () => 
       updatedAt: new Date().toISOString(),
     });
 
-    for (const [rawVal, expected] of [[1, true], [0, false]] as const) {
+    for (const [rawVal, expected] of [
+      [1, true],
+      [0, false],
+    ] as const) {
       const mockDb = {
         prepare: vi.fn().mockReturnValue({
           bind: vi.fn().mockReturnValue({
@@ -824,24 +897,26 @@ describe("D1 row mapping (createD1Db internals via galleryRecentImages)", () => 
       prepare: vi.fn().mockReturnValue({
         bind: vi.fn().mockReturnValue({
           all: vi.fn().mockResolvedValue({
-            results: [{
-              id: "img-tags",
-              userId: "u",
-              name: "Tagged",
-              description: null,
-              originalUrl: "http://x.com/t.png",
-              originalR2Key: "u/t.png",
-              originalWidth: 100,
-              originalHeight: 100,
-              originalSizeBytes: 100,
-              originalFormat: "png",
-              isPublic: 0,
-              viewCount: 0,
-              tags: '["landscape","travel","2026"]',
-              shareToken: null,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            }],
+            results: [
+              {
+                id: "img-tags",
+                userId: "u",
+                name: "Tagged",
+                description: null,
+                originalUrl: "http://x.com/t.png",
+                originalR2Key: "u/t.png",
+                originalWidth: 100,
+                originalHeight: 100,
+                originalSizeBytes: 100,
+                originalFormat: "png",
+                isPublic: 0,
+                viewCount: 0,
+                tags: '["landscape","travel","2026"]',
+                shareToken: null,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+            ],
           }),
         }),
       }),
@@ -859,24 +934,26 @@ describe("D1 row mapping (createD1Db internals via galleryRecentImages)", () => 
         prepare: vi.fn().mockReturnValue({
           bind: vi.fn().mockReturnValue({
             all: vi.fn().mockResolvedValue({
-              results: [{
-                id: "img-bad-tags",
-                userId: "u",
-                name: "No Tags",
-                description: null,
-                originalUrl: "http://x.com/n.png",
-                originalR2Key: "u/n.png",
-                originalWidth: 100,
-                originalHeight: 100,
-                originalSizeBytes: 100,
-                originalFormat: "png",
-                isPublic: 0,
-                viewCount: 0,
-                tags: badTags,
-                shareToken: null,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              }],
+              results: [
+                {
+                  id: "img-bad-tags",
+                  userId: "u",
+                  name: "No Tags",
+                  description: null,
+                  originalUrl: "http://x.com/n.png",
+                  originalR2Key: "u/n.png",
+                  originalWidth: 100,
+                  originalHeight: 100,
+                  originalSizeBytes: 100,
+                  originalFormat: "png",
+                  isPublic: 0,
+                  viewCount: 0,
+                  tags: badTags,
+                  shareToken: null,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
+                },
+              ],
             }),
           }),
         }),
@@ -895,24 +972,26 @@ describe("D1 row mapping (createD1Db internals via galleryRecentImages)", () => 
       prepare: vi.fn().mockReturnValue({
         bind: vi.fn().mockReturnValue({
           all: vi.fn().mockResolvedValue({
-            results: [{
-              id: "img-dates",
-              userId: "u",
-              name: "Dated",
-              description: null,
-              originalUrl: "http://x.com/d.png",
-              originalR2Key: "u/d.png",
-              originalWidth: 100,
-              originalHeight: 100,
-              originalSizeBytes: 100,
-              originalFormat: "png",
-              isPublic: 0,
-              viewCount: 0,
-              tags: "[]",
-              shareToken: null,
-              createdAt: isoDate,
-              updatedAt: isoDate,
-            }],
+            results: [
+              {
+                id: "img-dates",
+                userId: "u",
+                name: "Dated",
+                description: null,
+                originalUrl: "http://x.com/d.png",
+                originalR2Key: "u/d.png",
+                originalWidth: 100,
+                originalHeight: 100,
+                originalSizeBytes: 100,
+                originalFormat: "png",
+                isPublic: 0,
+                viewCount: 0,
+                tags: "[]",
+                shareToken: null,
+                createdAt: isoDate,
+                updatedAt: isoDate,
+              },
+            ],
           }),
         }),
       }),

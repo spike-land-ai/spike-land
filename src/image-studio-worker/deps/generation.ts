@@ -15,9 +15,7 @@ export function createGeminiGeneration(
   const gatewayHeaders = () => ({ "cf-aig-authorization": `Bearer ${env.CF_AIG_TOKEN}` });
   const useGateway = !userApiKey && env.CF_AIG_TOKEN;
 
-  const IMAGE_MODELS = [
-    preferredImageModel || "gemini-3.1-flash-image-preview",
-  ];
+  const IMAGE_MODELS = [preferredImageModel || "gemini-3.1-flash-image-preview"];
 
   async function callGeminiOnce(
     model: string,
@@ -28,7 +26,9 @@ export function createGeminiGeneration(
     const { GoogleGenAI } = await import("@google/genai");
     const ai = new GoogleGenAI({
       apiKey: userApiKey || env.GEMINI_API_KEY,
-      ...(useGateway ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } } : {}),
+      ...(useGateway
+        ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } }
+        : {}),
     });
 
     const contents: Array<Record<string, unknown>> = [];
@@ -76,9 +76,14 @@ export function createGeminiGeneration(
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err));
         const msg = lastError.message.toLowerCase();
-        const isRetryable = msg.includes("region") || msg.includes("unavailable") ||
-          msg.includes("not found") || msg.includes("not supported") ||
-          msg.includes("503") || msg.includes("404") || msg.includes("429");
+        const isRetryable =
+          msg.includes("region") ||
+          msg.includes("unavailable") ||
+          msg.includes("not found") ||
+          msg.includes("not supported") ||
+          msg.includes("503") ||
+          msg.includes("404") ||
+          msg.includes("429");
         if (!isRetryable) throw lastError;
         console.warn(`Image model ${model} failed (${lastError.message}), trying next...`);
       }
@@ -260,7 +265,9 @@ export function createGeminiGeneration(
         const { GoogleGenAI } = await import("@google/genai");
         const ai = new GoogleGenAI({
           apiKey: userApiKey || env.GEMINI_API_KEY,
-          ...(useGateway ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } } : {}),
+          ...(useGateway
+            ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } }
+            : {}),
         });
 
         const response = await ai.models.generateContent({
@@ -305,7 +312,9 @@ export function createGeminiGeneration(
         const { GoogleGenAI } = await import("@google/genai");
         const ai = new GoogleGenAI({
           apiKey: userApiKey || env.GEMINI_API_KEY,
-          ...(useGateway ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } } : {}),
+          ...(useGateway
+            ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } }
+            : {}),
         });
 
         const response = await ai.models.generateContent({
@@ -343,7 +352,9 @@ export function createGeminiGeneration(
         const { GoogleGenAI } = await import("@google/genai");
         const ai = new GoogleGenAI({
           apiKey: userApiKey || env.GEMINI_API_KEY,
-          ...(useGateway ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } } : {}),
+          ...(useGateway
+            ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } }
+            : {}),
         });
 
         const parts: Array<Record<string, unknown>> = [];

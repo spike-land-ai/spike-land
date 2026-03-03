@@ -4,6 +4,6 @@ export const useMcpTool = <T = any>(_toolName?: string, _args?: any, _options?: 
     isLoading: false,
     error: undefined as Error | undefined,
     refetch: () => {},
-    mutate: () => {}
+    mutate: () => {},
   };
 };

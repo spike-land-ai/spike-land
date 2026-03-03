@@ -6,7 +6,7 @@ import * as installer from "../completions/installer";
 vi.mock("../completions/installer", () => ({
   detectShell: vi.fn().mockReturnValue("zsh"),
   installCompletions: vi.fn().mockReturnValue({ instructions: "done" }),
-  uninstallCompletions: vi.fn().mockReturnValue(true)
+  uninstallCompletions: vi.fn().mockReturnValue(true),
 }));
 
 describe("completions command", () => {
@@ -21,15 +21,15 @@ describe("completions command", () => {
 
   it("registers completions commands", () => {
     registerCompletionsCommand(program);
-    const completions = program.commands.find(c => c.name() === "completions")!;
+    const completions = program.commands.find((c) => c.name() === "completions")!;
     expect(completions).toBeDefined();
-    expect(completions.commands.find(c => c.name() === "install")).toBeDefined();
-    expect(completions.commands.find(c => c.name() === "uninstall")).toBeDefined();
+    expect(completions.commands.find((c) => c.name() === "install")).toBeDefined();
+    expect(completions.commands.find((c) => c.name() === "uninstall")).toBeDefined();
   });
 
   it("install handles zsh", async () => {
     registerCompletionsCommand(program);
-    const install = program.commands[0].commands.find(c => c.name() === "install")!;
+    const install = program.commands[0].commands.find((c) => c.name() === "install")!;
     // @ts-expect-error - accessing private commander handler
     await install._actionHandler([{ shell: "zsh" }, []]);
     expect(installer.installCompletions).toHaveBeenCalledWith("zsh");
@@ -38,7 +38,7 @@ describe("completions command", () => {
 
   it("uninstall handles zsh", async () => {
     registerCompletionsCommand(program);
-    const uninstall = program.commands[0].commands.find(c => c.name() === "uninstall")!;
+    const uninstall = program.commands[0].commands.find((c) => c.name() === "uninstall")!;
     // @ts-expect-error - accessing private commander handler
     await uninstall._actionHandler([{ shell: "zsh" }, []]);
     expect(installer.uninstallCompletions).toHaveBeenCalledWith("zsh");
@@ -48,16 +48,18 @@ describe("completions command", () => {
   it("install handles unknown shell", async () => {
     vi.mocked(installer.detectShell).mockReturnValue("unknown" as unknown as string);
     registerCompletionsCommand(program);
-    const install = program.commands[0].commands.find(c => c.name() === "install")!;
+    const install = program.commands[0].commands.find((c) => c.name() === "install")!;
     // @ts-expect-error - accessing private commander handler
     await install._actionHandler([{}, []]);
     expect(process.exit).toHaveBeenCalledWith(1);
   });
 
   it("install handles error", async () => {
-    vi.mocked(installer.installCompletions).mockImplementation(() => { throw new Error("fail"); });
+    vi.mocked(installer.installCompletions).mockImplementation(() => {
+      throw new Error("fail");
+    });
     registerCompletionsCommand(program);
-    const install = program.commands[0].commands.find(c => c.name() === "install")!;
+    const install = program.commands[0].commands.find((c) => c.name() === "install")!;
     // @ts-expect-error - accessing private commander handler
     await install._actionHandler([{ shell: "zsh" }, []]);
     expect(process.exit).toHaveBeenCalledWith(1);

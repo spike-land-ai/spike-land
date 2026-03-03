@@ -133,9 +133,12 @@ describe("PR Description Quality gate", () => {
   const rule = getRuleByName("PR Description Quality")!;
 
   it("GREEN for substantive description", () => {
-    const result = rule.check(makeContext({
-      prBody: "This PR implements the new authentication flow using OAuth2. It replaces the legacy session-based auth with JWT tokens.",
-    }));
+    const result = rule.check(
+      makeContext({
+        prBody:
+          "This PR implements the new authentication flow using OAuth2. It replaces the legacy session-based auth with JWT tokens.",
+      }),
+    );
     expect(result.status).toBe("GREEN");
   });
 
@@ -205,18 +208,22 @@ describe("Workspace Scope Compliance gate", () => {
   });
 
   it("GREEN when all files in scope", () => {
-    const result = rule.check(makeContext({
-      files: ["packages/chess-engine/src/index.ts"],
-      allowedPaths: ["packages/chess-engine/"],
-    }));
+    const result = rule.check(
+      makeContext({
+        files: ["packages/chess-engine/src/index.ts"],
+        allowedPaths: ["packages/chess-engine/"],
+      }),
+    );
     expect(result.status).toBe("GREEN");
   });
 
   it("RED when files outside scope", () => {
-    const result = rule.check(makeContext({
-      files: ["packages/chess-engine/src/index.ts", "packages/spike-review/src/types.ts"],
-      allowedPaths: ["packages/chess-engine/"],
-    }));
+    const result = rule.check(
+      makeContext({
+        files: ["packages/chess-engine/src/index.ts", "packages/spike-review/src/types.ts"],
+        allowedPaths: ["packages/chess-engine/"],
+      }),
+    );
     expect(result.status).toBe("RED");
   });
 });
@@ -262,9 +269,7 @@ describe("computeOverallStatus", () => {
 
 describe("formatGateResults", () => {
   it("produces markdown table", () => {
-    const gates: GateResult[] = [
-      { name: "Test Gate", status: "GREEN", detail: "All good" },
-    ];
+    const gates: GateResult[] = [{ name: "Test Gate", status: "GREEN", detail: "All good" }];
     const text = formatGateResults(gates);
     expect(text).toContain("BAZDMEG Quality Gates");
     expect(text).toContain("Test Gate");

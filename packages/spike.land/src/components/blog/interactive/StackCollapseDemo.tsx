@@ -131,14 +131,7 @@ function ConnectionLines({ progress, width, height }: ConnectionLinesProps) {
       }}
     >
       <defs>
-        <marker
-          id="arrowhead"
-          markerWidth="6"
-          markerHeight="4"
-          refX="6"
-          refY="2"
-          orient="auto"
-        >
+        <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
           <polygon points="0 0, 6 2, 0 4" fill="rgba(148,163,184,0.4)" />
         </marker>
       </defs>
@@ -243,9 +236,7 @@ function ServiceBoxCard({
           boxShadow: `0 4px 16px ${service.color}20`,
         }}
       >
-        <span style={{ fontSize: 18, color: service.color, lineHeight: 1 }}>
-          {service.icon}
-        </span>
+        <span style={{ fontSize: 18, color: service.color, lineHeight: 1 }}>{service.icon}</span>
         <span
           style={{
             fontSize: 11,
@@ -332,9 +323,7 @@ function SpacetimeBox({ progress }: SpacetimeBoxProps) {
                   .filter(([k]) => k.startsWith("border"))
                   .map(([k, v]) => [k + "Width", `${v}px`]),
               ),
-              ...Object.fromEntries(
-                Object.entries(pos).filter(([k]) => !k.startsWith("border")),
-              ),
+              ...Object.fromEntries(Object.entries(pos).filter(([k]) => !k.startsWith("border"))),
             }}
           />
         ))}
@@ -524,9 +513,7 @@ export function StackCollapseDemo() {
         <h3 className="text-slate-100 text-xl font-semibold tracking-tight">
           Five services collapse into one
         </h3>
-        <p className="text-slate-500 text-sm font-mono mt-1">
-          Scroll to watch complexity dissolve
-        </p>
+        <p className="text-slate-500 text-sm font-mono mt-1">Scroll to watch complexity dissolve</p>
       </div>
 
       {/* Canvas */}
@@ -539,11 +526,7 @@ export function StackCollapseDemo() {
           }}
         >
           <div style={{ position: "absolute", inset: 0 }}>
-            <ConnectionLines
-              progress={progress}
-              width={CANVAS_W}
-              height={CANVAS_H}
-            />
+            <ConnectionLines progress={progress} width={CANVAS_W} height={CANVAS_H} />
             {SERVICES.map((service) => (
               <ServiceBoxCard
                 key={service.id}

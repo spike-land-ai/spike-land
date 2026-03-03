@@ -287,8 +287,14 @@ describe("ToolRegistry", () => {
   it("hasCategory returns true for registered category", () => {
     const server = createMockMcpServer();
     const registry = new ToolRegistry(server, "user-1");
-    registry.register({ name: "t", description: "d", category: "my-cat", tier: "free", handler: () => ({ content: [] }) });
-    
+    registry.register({
+      name: "t",
+      description: "d",
+      category: "my-cat",
+      tier: "free",
+      handler: () => ({ content: [] }),
+    });
+
     expect(registry.hasCategory("my-cat")).toBe(true);
     expect(registry.hasCategory("unknown")).toBe(false);
   });
@@ -296,8 +302,14 @@ describe("ToolRegistry", () => {
   it("getToolDefinitions returns all tool info", () => {
     const server = createMockMcpServer();
     const registry = new ToolRegistry(server, "user-1");
-    registry.register({ name: "t", description: "d", category: "c", tier: "free", handler: () => ({ content: [] }) });
-    
+    registry.register({
+      name: "t",
+      description: "d",
+      category: "c",
+      tier: "free",
+      handler: () => ({ content: [] }),
+    });
+
     const defs = registry.getToolDefinitions();
     expect(defs).toHaveLength(1);
     expect(defs[0].name).toBe("t");

@@ -58,7 +58,13 @@ export default defineConfig({
       "src/middleware.{test,spec}.{ts,tsx}",
       "apps/**/*.{test,spec}.{ts,tsx}",
     ],
-    exclude: ["**/node_modules/**", "**/dist/**", "**/.git/**", "**/.next/**", "**/mcp-explorer.spec.ts"],
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.git/**",
+      "**/.next/**",
+      "**/mcp-explorer.spec.ts",
+    ],
     // Use forks pool for better memory isolation in CI
     // Each test file runs in separate process with fresh memory
     pool: "forks",

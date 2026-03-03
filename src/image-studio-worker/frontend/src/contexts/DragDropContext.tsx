@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useCallback, type ReactNode, type DragEvent } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  type ReactNode,
+  type DragEvent,
+} from "react";
 import { eventBus } from "../services/event-bus";
 
 type DropZoneType = "chat" | "gallery" | "canvas" | null;
@@ -35,23 +42,32 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
   const [zones] = useState(() => new Map<string, ZoneInfo>());
   const [dragCounter, setDragCounter] = useState(0);
 
-  const registerZone = useCallback((id: string, type: DropZoneType, element: HTMLElement) => {
-    zones.set(id, { type, element });
-  }, [zones]);
+  const registerZone = useCallback(
+    (id: string, type: DropZoneType, element: HTMLElement) => {
+      zones.set(id, { type, element });
+    },
+    [zones],
+  );
 
-  const unregisterZone = useCallback((id: string) => {
-    zones.delete(id);
-  }, [zones]);
+  const unregisterZone = useCallback(
+    (id: string) => {
+      zones.delete(id);
+    },
+    [zones],
+  );
 
-  const detectZone = useCallback((e: DragEvent): DropZoneType => {
-    const target = e.target as HTMLElement;
-    for (const [, zone] of zones) {
-      if (zone.element.contains(target)) {
-        return zone.type;
+  const detectZone = useCallback(
+    (e: DragEvent): DropZoneType => {
+      const target = e.target as HTMLElement;
+      for (const [, zone] of zones) {
+        if (zone.element.contains(target)) {
+          return zone.type;
+        }
       }
-    }
-    return "gallery";
-  }, [zones]);
+      return "gallery";
+    },
+    [zones],
+  );
 
   const validateFiles = (files: FileList): File[] => {
     return Array.from(files).filter((file) => {
@@ -80,40 +96,50 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const handleDragOver = useCallback((e: DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
-    const zone = detectZone(e);
-    setActiveZone(zone);
-  }, [detectZone]);
+  const handleDragOver = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+      const zone = detectZone(e);
+      setActiveZone(zone);
+    },
+    [detectZone],
+  );
 
-  const handleDrop = useCallback((e: DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    setActiveZone(null);
-    setDragCounter(0);
+  const handleDrop = useCallback(
+    (e: DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      setActiveZone(null);
+      setDragCounter(0);
 
-    const files = validateFiles(e.dataTransfer.files);
-    if (files.length === 0) return;
+      const files = validateFiles(e.dataTransfer.files);
+      if (files.length === 0) return;
 
-    const zone = detectZone(e);
+      const zone = detectZone(e);
 
-    for (const file of files) {
-      switch (zone) {
-        case "chat":
-          eventBus.emit("chat:image-attached", { file });
-          break;
-        case "gallery":
-          uploadToGallery(file);
-          break;
-        case "canvas":
-          eventBus.emit("image:uploaded", { imageId: "", url: URL.createObjectURL(file), name: file.name });
-          break;
-        default:
-          uploadToGallery(file);
+      for (const file of files) {
+        switch (zone) {
+          case "chat":
+            eventBus.emit("chat:image-attached", { file });
+            break;
+          case "gallery":
+            uploadToGallery(file);
+            break;
+          case "canvas":
+            eventBus.emit("image:uploaded", {
+              imageId: "",
+              url: URL.createObjectURL(file),
+              name: file.name,
+            });
+            break;
+          default:
+            uploadToGallery(file);
+        }
       }
-    }
-  }, [detectZone]);
+    },
+    [detectZone],
+  );
 
   // Suppress unused variable warning — dragCounter is used internally via setDragCounter
   void dragCounter;
@@ -134,8 +160,18 @@ export function DragDropProvider({ children }: { children: ReactNode }) {
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="flex flex-col items-center gap-4 p-8 rounded-3xl bg-obsidian-900/90 border-2 border-dashed border-amber-neon/50 shadow-2xl">
                 <div className="w-16 h-16 rounded-2xl bg-amber-neon/10 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-amber-neon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  <svg
+                    className="w-8 h-8 text-amber-neon"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
                   </svg>
                 </div>
                 <div className="text-center">
@@ -173,8 +209,12 @@ async function uploadToGallery(file: File) {
     });
 
     if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
-    const data = await res.json() as { image: { id: string; name: string }; url: string };
-    eventBus.emit("image:uploaded", { imageId: data.image.id, url: data.url, name: data.image.name });
+    const data = (await res.json()) as { image: { id: string; name: string }; url: string };
+    eventBus.emit("image:uploaded", {
+      imageId: data.image.id,
+      url: data.url,
+      name: data.image.name,
+    });
     eventBus.emit("gallery:updated", { reason: "upload" });
   } catch (err) {
     console.error("Gallery upload failed:", err);

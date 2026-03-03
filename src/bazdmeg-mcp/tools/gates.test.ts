@@ -21,7 +21,11 @@ describe("gates tools", () => {
 
   afterEach(async () => {
     resetWorkspaceState();
-    try { await unlink("/tmp/bazdmeg-telemetry.jsonl"); } catch { /* ok */ }
+    try {
+      await unlink("/tmp/bazdmeg-telemetry.jsonl");
+    } catch {
+      /* ok */
+    }
   });
 
   it("registers 3 gates tools", () => {
@@ -39,7 +43,8 @@ describe("gates tools", () => {
     const result = await server.call("bazdmeg_run_gates", {
       diff,
       prTitle: "Test PR",
-      prBody: "This is a test PR with a detailed description of the changes made and why they were necessary.",
+      prBody:
+        "This is a test PR with a detailed description of the changes made and why they were necessary.",
     });
 
     expect(result.isError).toBeUndefined();
@@ -85,9 +90,7 @@ describe("gates tools", () => {
   });
 
   it("run_gates without prTitle/prBody uses defaults", async () => {
-    const diff = buildDiff([
-      { path: "src/index.test.ts", added: ["it('works', () => {});"] },
-    ]);
+    const diff = buildDiff([{ path: "src/index.test.ts", added: ["it('works', () => {});"] }]);
     const result = await server.call("bazdmeg_run_gates", { diff });
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain("BAZDMEG Quality Gates");

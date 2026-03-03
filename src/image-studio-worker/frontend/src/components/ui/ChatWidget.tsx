@@ -27,10 +27,13 @@ export function ChatWidget() {
   }, [open]);
 
   // Listen for attached images from DnD
-  useEventBus("chat:image-attached", useCallback((data: { file: File }) => {
-    setOpen(true);
-    setInput((prev) => prev + (prev ? " " : "") + `[Attached: ${data.file.name}]`);
-  }, []));
+  useEventBus(
+    "chat:image-attached",
+    useCallback((data: { file: File }) => {
+      setOpen(true);
+      setInput((prev) => prev + (prev ? " " : "") + `[Attached: ${data.file.name}]`);
+    }, []),
+  );
 
   const handleSend = () => {
     if (!input.trim() || isStreaming) return;
@@ -96,8 +99,12 @@ export function ChatWidget() {
               <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-emerald-neon animate-ping opacity-20" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[8px] font-black uppercase tracking-widest text-gray-500 leading-none mb-1">Neural Partner</span>
-              <h3 className="text-xs font-bold text-white tracking-tight leading-none uppercase">Studio Intelligence</h3>
+              <span className="text-[8px] font-black uppercase tracking-widest text-gray-500 leading-none mb-1">
+                Neural Partner
+              </span>
+              <h3 className="text-xs font-bold text-white tracking-tight leading-none uppercase">
+                Studio Intelligence
+              </h3>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -115,10 +122,17 @@ export function ChatWidget() {
               className="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-all active:scale-90"
               title={expanded ? "Collapse" : "Expand"}
             >
-              {expanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+              {expanded ? (
+                <Minimize2 className="w-3.5 h-3.5" />
+              ) : (
+                <Maximize2 className="w-3.5 h-3.5" />
+              )}
             </button>
             <button
-              onClick={() => { setOpen(false); setExpanded(false); }}
+              onClick={() => {
+                setOpen(false);
+                setExpanded(false);
+              }}
               className="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-all active:scale-90"
             >
               <X className="w-4 h-4" />
@@ -134,9 +148,12 @@ export function ChatWidget() {
                 <Sparkles className="w-6 h-6 text-amber-neon" />
               </div>
               <div className="space-y-1">
-                <p className="text-xs font-bold text-white tracking-tight uppercase">How shall we create?</p>
+                <p className="text-xs font-bold text-white tracking-tight uppercase">
+                  How shall we create?
+                </p>
                 <p className="text-[10px] font-medium text-gray-500 leading-relaxed max-w-[200px]">
-                  Generate images, enhance photos, or manage your gallery. Results appear automatically.
+                  Generate images, enhance photos, or manage your gallery. Results appear
+                  automatically.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 justify-center mt-4">
@@ -205,9 +222,7 @@ export function ChatWidget() {
             <span className="text-[8px] text-gray-600 font-medium">
               {isStreaming ? "Generating..." : "Press Enter to send, Shift+Enter for new line"}
             </span>
-            <span className="text-[8px] text-gray-700 font-mono">
-              {expanded ? "Esc" : "Cmd+K"}
-            </span>
+            <span className="text-[8px] text-gray-700 font-mono">{expanded ? "Esc" : "Cmd+K"}</span>
           </div>
         </div>
       </div>

@@ -51,7 +51,10 @@ export async function logToolCall(
 /**
  * Log a workspace enter event.
  */
-export async function logWorkspaceEnter(packageName: string, allowedPaths: string[]): Promise<void> {
+export async function logWorkspaceEnter(
+  packageName: string,
+  allowedPaths: string[],
+): Promise<void> {
   await logEvent({
     eventType: "workspace_enter",
     tool: "bazdmeg_enter_workspace",

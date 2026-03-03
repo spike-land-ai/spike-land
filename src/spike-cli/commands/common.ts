@@ -70,12 +70,12 @@ export function parseInlineUrls(items: string[]): Array<{ name: string; url: str
       // If it's a generic "Invalid URL" and it looks like a port issue, we might want to catch it too,
       // but let's stick to the test expectation for now.
       if (err instanceof Error && err.message === "Invalid URL" && url.includes(":")) {
-         const parts = url.split(":");
-         const lastPart = parts[parts.length - 1] ?? "";
-         const port = parseInt(lastPart, 10);
-         if (!isNaN(port) && (port < 1 || port > 65535)) {
-            throw new Error(`Invalid port ${port} in --server-url "${item}". Port must be 1–65535`);
-         }
+        const parts = url.split(":");
+        const lastPart = parts[parts.length - 1] ?? "";
+        const port = parseInt(lastPart, 10);
+        if (!isNaN(port) && (port < 1 || port > 65535)) {
+          throw new Error(`Invalid port ${port} in --server-url "${item}". Port must be 1–65535`);
+        }
       }
     }
 

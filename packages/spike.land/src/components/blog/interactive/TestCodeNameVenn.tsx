@@ -245,14 +245,7 @@ function VennSvg({ progress, reducedMotion }: VennSvgProps) {
 
       {/* Progress bar */}
       <rect x={20} y={290} width={360} height={2} rx={1} fill="rgba(30,41,59,0.5)" />
-      <rect
-        x={20}
-        y={290}
-        width={360 * progress}
-        height={2}
-        rx={1}
-        fill="rgba(6,182,212,0.6)"
-      />
+      <rect x={20} y={290} width={360 * progress} height={2} rx={1} fill="rgba(6,182,212,0.6)" />
     </svg>
   );
 }

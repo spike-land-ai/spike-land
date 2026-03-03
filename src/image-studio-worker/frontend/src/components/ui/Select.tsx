@@ -10,7 +10,10 @@ export function Select({ label, options, className = "", id, ...props }: SelectP
   return (
     <div className="space-y-1">
       {label && (
-        <label htmlFor={selectId} className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
+        <label
+          htmlFor={selectId}
+          className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1"
+        >
           {label}
         </label>
       )}

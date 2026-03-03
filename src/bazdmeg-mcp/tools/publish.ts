@@ -28,7 +28,18 @@ interface GeneratedPackageJson {
 
 function buildPackageJson(
   packageName: string,
-  pkg: { kind: string; version: string; description: string; entry: string; deps?: string[]; bin?: string; binName?: string; exports?: Record<string, string>; type?: string; private?: boolean },
+  pkg: {
+    kind: string;
+    version: string;
+    description: string;
+    entry: string;
+    deps?: string[];
+    bin?: string;
+    binName?: string;
+    exports?: Record<string, string>;
+    type?: string;
+    private?: boolean;
+  },
   defaults: { scope: string; registry: string; license: string; type: string },
 ): GeneratedPackageJson {
   const fullName = `${defaults.scope}/${packageName}`;
@@ -113,9 +124,7 @@ export function registerPublishTools(server: McpServer): void {
       const pkg = manifest.packages[packageName];
 
       if (!pkg) {
-        return textResult(
-          `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
-        );
+        return textResult(`**ERROR**: Package \`${packageName}\` not found in packages.yaml.`);
       }
 
       const generated = buildPackageJson(packageName, pkg, manifest.defaults);
@@ -156,9 +165,7 @@ export function registerPublishTools(server: McpServer): void {
       const pkg = manifest.packages[packageName];
 
       if (!pkg) {
-        return textResult(
-          `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
-        );
+        return textResult(`**ERROR**: Package \`${packageName}\` not found in packages.yaml.`);
       }
 
       let report = `## Publish Pipeline — ${packageName}\n\n`;
@@ -200,13 +207,10 @@ export function registerPublishTools(server: McpServer): void {
 
       // Step 3: Publish
       report += `### 3. Publish\n`;
-      const registryUrl = registry === "github" ? "https://npm.pkg.github.com" : "https://registry.npmjs.org";
+      const registryUrl =
+        registry === "github" ? "https://npm.pkg.github.com" : "https://registry.npmjs.org";
       const publishStart = Date.now();
-      const publishResult = await runCommand(
-        "npm",
-        ["publish", "--registry", registryUrl],
-        pkgDir,
-      );
+      const publishResult = await runCommand("npm", ["publish", "--registry", registryUrl], pkgDir);
       const publishDur = ((Date.now() - publishStart) / 1000).toFixed(1);
 
       if (publishResult.ok) {

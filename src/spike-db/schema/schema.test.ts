@@ -257,7 +257,7 @@ describe("SQL generation", () => {
     expect(indexes).toHaveLength(2);
     expect(indexes[0]).toBe("CREATE INDEX IF NOT EXISTS idx_source ON events (source);");
     expect(indexes[1]).toBe(
-      "CREATE UNIQUE INDEX IF NOT EXISTS idx_type_unique ON events (eventType);"
+      "CREATE UNIQUE INDEX IF NOT EXISTS idx_type_unique ON events (eventType);",
     );
   });
 

@@ -41,7 +41,9 @@ export function LiveActivity() {
             }))
             .filter((c: ToolCallLog) => !c.isError);
 
-          setLogs(fetchedLogs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 50));
+          setLogs(
+            fetchedLogs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 50),
+          );
         }
       } catch (err) {
         console.error("Failed to load monitoring tool calls", err);
@@ -63,7 +65,9 @@ export function LiveActivity() {
     <div className="h-full w-full bg-obsidian-950/50 font-mono text-[10px] overflow-hidden flex flex-col rounded-3xl border border-white/5">
       <div className="flex items-center gap-3 p-4 bg-white/5 border-b border-white/5">
         <Activity className="w-4 h-4 text-emerald-neon animate-pulse" />
-        <span className="font-black uppercase tracking-[0.2em] text-gray-400">Live Orchestration Stream</span>
+        <span className="font-black uppercase tracking-[0.2em] text-gray-400">
+          Live Orchestration Stream
+        </span>
         <div className="ml-auto flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-neon animate-ping" />
           <span className="text-emerald-neon/70 font-black">SYNCED</span>
@@ -104,11 +108,13 @@ export function LiveActivity() {
             </pre>
           </div>
         ))}
-        
+
         {logs.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center gap-4 py-20 opacity-20">
             <Terminal className="w-12 h-12 text-gray-500" />
-            <span className="font-black uppercase tracking-[0.3em] animate-pulse">Awaiting Signal...</span>
+            <span className="font-black uppercase tracking-[0.3em] animate-pulse">
+              Awaiting Signal...
+            </span>
           </div>
         )}
       </div>

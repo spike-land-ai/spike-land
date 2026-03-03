@@ -14,7 +14,10 @@ export class StudioEngine {
   /**
    * Generates a new asset and places it on the canvas
    */
-  static async generateAsset(prompt: string, options: Record<string, unknown> = {}): Promise<unknown> {
+  static async generateAsset(
+    prompt: string,
+    options: Record<string, unknown> = {},
+  ): Promise<unknown> {
     const result = await callTool("img_generate", { prompt, ...options });
     return parseToolResult(result);
   }
@@ -42,7 +45,7 @@ export class StudioEngine {
     // For now, let's keep it simple and just use reference generation
     const result = await callTool("img_generate", {
       prompt: targetPrompt,
-      reference_images: [{ image_id: sourceImageId, role: "style" }]
+      reference_images: [{ image_id: sourceImageId, role: "style" }],
     });
     return parseToolResult(result);
   }
@@ -53,10 +56,8 @@ export class StudioEngine {
    */
   static async createSocialPack(imageId: string): Promise<unknown[]> {
     const platforms = ["instagram_square", "twitter_header", "linkedin_banner"];
-    const jobs = platforms.map(preset => 
-      callTool("img_crop", { image_id: imageId, preset })
-    );
+    const jobs = platforms.map((preset) => callTool("img_crop", { image_id: imageId, preset }));
     const results = await Promise.all(jobs);
-    return results.map(r => parseToolResult(r));
+    return results.map((r) => parseToolResult(r));
   }
 }

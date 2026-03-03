@@ -26,9 +26,7 @@ export function registerMirrorTools(server: McpServer): void {
       const pkg = await getManifestPackage(packageName, repoRoot);
 
       if (!pkg) {
-        return textResult(
-          `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
-        );
+        return textResult(`**ERROR**: Package \`${packageName}\` not found in packages.yaml.`);
       }
 
       if (!pkg.mirror) {
@@ -58,20 +56,12 @@ export function registerMirrorTools(server: McpServer): void {
       report += `### Syncing...\n\n`;
 
       // Check if mirror remote exists
-      const remoteCheck = await runCommand(
-        "git",
-        ["remote", "get-url", "mirror"],
-        pkgDir,
-      );
+      const remoteCheck = await runCommand("git", ["remote", "get-url", "mirror"], pkgDir);
 
       if (!remoteCheck.ok) {
         // Add mirror remote
         report += `Adding remote \`mirror\` -> \`${mirrorRepo}\`\n`;
-        const addRemote = await runCommand(
-          "git",
-          ["remote", "add", "mirror", mirrorRepo],
-          pkgDir,
-        );
+        const addRemote = await runCommand("git", ["remote", "add", "mirror", mirrorRepo], pkgDir);
         if (!addRemote.ok) {
           report += `**FAILED** to add remote: ${addRemote.stderr.trim()}\n`;
           return textResult(report);

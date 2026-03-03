@@ -106,7 +106,10 @@ export async function pruneExpiredEntries(): Promise<void> {
     const db = await openDB();
     const now = Date.now();
 
-    for (const [storeName, ttl] of [[ATA_STORE, ATA_TTL_MS], [WASM_STORE, WASM_TTL_MS]] as const) {
+    for (const [storeName, ttl] of [
+      [ATA_STORE, ATA_TTL_MS],
+      [WASM_STORE, WASM_TTL_MS],
+    ] as const) {
       const tx = db.transaction(storeName, "readwrite");
       const store = tx.objectStore(storeName);
       const request = store.openCursor();

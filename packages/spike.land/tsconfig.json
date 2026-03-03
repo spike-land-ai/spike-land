@@ -40,17 +40,6 @@
     },
     "types": ["@testing-library/jest-dom/vitest", "vitest/globals"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules",
-    "packages",
-    "hono-api",
-    "shell",
-    "scripts",
-    "live",
-    "codespaces"
-  ]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "packages", "hono-api", "shell", "scripts", "live", "codespaces"]
 }

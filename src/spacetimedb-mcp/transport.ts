@@ -8,7 +8,10 @@ export class SpacetimeServerTransport implements Transport {
   onmessage?: (message: JSONRPCMessage) => void;
 
   private client: SpacetimeMcpClient;
-  private supportedTools: Map<string, { name: string; description?: string; inputSchema?: unknown }> = new Map();
+  private supportedTools: Map<
+    string,
+    { name: string; description?: string; inputSchema?: unknown }
+  > = new Map();
   private pendingTasks: Map<string | number, bigint> = new Map();
   private category: string;
 
@@ -44,15 +47,22 @@ export class SpacetimeServerTransport implements Transport {
   async send(message: JSONRPCMessage): Promise<void> {
     if ("id" in message && message.id === "stdb-init-list") {
       // Intercept the tools/list response
-      if ("result" in message && message.result && typeof message.result === "object" && "tools" in message.result) {
-        const result = message.result as { tools: Array<{ name: string; description?: string; inputSchema?: unknown }> };
+      if (
+        "result" in message &&
+        message.result &&
+        typeof message.result === "object" &&
+        "tools" in message.result
+      ) {
+        const result = message.result as {
+          tools: Array<{ name: string; description?: string; inputSchema?: unknown }>;
+        };
         for (const t of result.tools) {
           this.supportedTools.set(t.name, t);
           await this.client.registerTool(
             t.name,
             t.description || "",
             JSON.stringify(t.inputSchema || {}),
-            this.category
+            this.category,
           );
         }
       }

@@ -21,8 +21,16 @@ describe("escalation tools", () => {
 
   afterEach(async () => {
     resetWorkspaceState();
-    try { await unlink("/tmp/bazdmeg-workspace.json"); } catch { /* ok */ }
-    try { await unlink("/tmp/bazdmeg-telemetry.jsonl"); } catch { /* ok */ }
+    try {
+      await unlink("/tmp/bazdmeg-workspace.json");
+    } catch {
+      /* ok */
+    }
+    try {
+      await unlink("/tmp/bazdmeg-telemetry.jsonl");
+    } catch {
+      /* ok */
+    }
     // Clean up stuck signal files
     try {
       const tmpFiles = await readdir("/tmp");
@@ -31,7 +39,9 @@ describe("escalation tools", () => {
           await unlink(`/tmp/${f}`);
         }
       }
-    } catch { /* ok */ }
+    } catch {
+      /* ok */
+    }
   });
 
   it("registers signal_stuck tool", () => {

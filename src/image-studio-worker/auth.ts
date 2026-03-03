@@ -9,10 +9,7 @@ interface AuthSession {
  * Validate a session by forwarding cookies/headers to the central auth service
  * at auth-mcp.spike.land. Returns { user, session } if valid, null otherwise.
  */
-export async function validateSession(
-  headers: Headers,
-  env: Env,
-): Promise<AuthSession | null> {
+export async function validateSession(headers: Headers, env: Env): Promise<AuthSession | null> {
   const authUrl = env.AUTH_SERVICE_URL || "https://auth-mcp.spike.land";
 
   // Forward cookies and authorization header to the auth service

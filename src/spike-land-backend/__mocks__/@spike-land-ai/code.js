@@ -5,7 +5,7 @@ export function computeSessionHash(session) {
   if (session) {
     return JSON.stringify(session).length.toString(36) + "-" + JSON.stringify(session).slice(0, 20);
   }
-  return "hash-" + (++counter);
+  return "hash-" + ++counter;
 }
 export function generateSessionPatch(oldSession, newSession) {
   return { type: "patch", changes: {} };
@@ -18,4 +18,6 @@ export function md5(s) {
   }
   return Math.abs(hash).toString(16);
 }
-export function sanitizeSession(s) { return s; }
+export function sanitizeSession(s) {
+  return s;
+}

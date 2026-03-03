@@ -11,12 +11,27 @@ import { z } from "zod";
 function createRegistryAdapter(server: McpServer): ImageStudioToolRegistry {
   return {
     register(rawDef) {
-      const def = rawDef as unknown as { name: string; description: string; fields?: Record<string, unknown>; inputSchema?: Record<string, unknown>; handler: (params: unknown, ctx: unknown) => Promise<CallToolResult> };
+      const def = rawDef as unknown as {
+        name: string;
+        description: string;
+        fields?: Record<string, unknown>;
+        inputSchema?: Record<string, unknown>;
+        handler: (params: unknown, ctx: unknown) => Promise<CallToolResult>;
+      };
       const shape: Record<string, z.ZodTypeAny> = {};
 
       // Support new defineTool format
       if (def.fields) {
-        for (const [key, field] of Object.entries(def.fields) as [string, { type?: string; enum?: string[]; description?: string; optional?: boolean; default?: unknown }][]) {
+        for (const [key, field] of Object.entries(def.fields) as [
+          string,
+          {
+            type?: string;
+            enum?: string[];
+            description?: string;
+            optional?: boolean;
+            default?: unknown;
+          },
+        ][]) {
           let zField: z.ZodTypeAny = z.unknown();
           if (field.type === "string") {
             zField = field.enum ? z.enum(field.enum as [string, ...string[]]) : z.string();
@@ -34,7 +49,10 @@ function createRegistryAdapter(server: McpServer): ImageStudioToolRegistry {
       // Support old ToolDefinition format
       else if (def.inputSchema?.properties) {
         const required = new Set<string>((def.inputSchema.required as string[]) ?? []);
-        for (const [key, prop] of Object.entries(def.inputSchema.properties) as [string, Record<string, unknown>][]) {
+        for (const [key, prop] of Object.entries(def.inputSchema.properties) as [
+          string,
+          Record<string, unknown>,
+        ][]) {
           let zField = buildZodField(prop);
           if (!required.has(key)) zField = zField.optional();
           shape[key] = zField;
@@ -47,7 +65,7 @@ function createRegistryAdapter(server: McpServer): ImageStudioToolRegistry {
         shape,
         async (params, extra): Promise<SdkCallToolResult> => {
           const ctx = {
-            userId: (extra as Record<string, unknown>)?.userId as string || "demo-user",
+            userId: ((extra as Record<string, unknown>)?.userId as string) || "demo-user",
             deps: {} as ImageStudioDeps, // The real deps are passed via the closure when registerImageStudioTools is called
           };
           // The handler is already bound to the deps inside `registerImageStudioTools`

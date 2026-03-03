@@ -39,7 +39,12 @@ function fail(stderr = "error"): { ok: false; stdout: string; stderr: string; co
 }
 
 const MOCK_MANIFEST = {
-  defaults: { scope: "@spike-land-ai", registry: "npm.pkg.github.com", license: "MIT", type: "module" },
+  defaults: {
+    scope: "@spike-land-ai",
+    registry: "npm.pkg.github.com",
+    license: "MIT",
+    type: "module",
+  },
   packages: {
     "chess-engine": {
       kind: "library",
@@ -82,7 +87,9 @@ describe("publish tools", () => {
     server = createMockServer();
     registerPublishTools(server as unknown as McpServer);
     vi.clearAllMocks();
-    mockReadManifest.mockResolvedValue(MOCK_MANIFEST as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+    mockReadManifest.mockResolvedValue(
+      MOCK_MANIFEST as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never,
+    );
   });
 
   describe("bazdmeg_generate_package_json", () => {

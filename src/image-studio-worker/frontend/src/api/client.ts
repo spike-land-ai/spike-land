@@ -122,7 +122,10 @@ export async function fetchGallery(opts: {
   return apiFetch<GalleryResponse>(`/api/gallery${qs ? `?${qs}` : ""}`);
 }
 
-export async function uploadToGallery(file: File, opts?: { name?: string; tags?: string[]; albumId?: string }): Promise<{ image: GalleryImage; url: string }> {
+export async function uploadToGallery(
+  file: File,
+  opts?: { name?: string; tags?: string[]; albumId?: string },
+): Promise<{ image: GalleryImage; url: string }> {
   const formData = new FormData();
   formData.append("file", file);
   if (opts?.name) formData.append("name", opts.name);

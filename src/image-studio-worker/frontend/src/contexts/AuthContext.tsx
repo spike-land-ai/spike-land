@@ -33,7 +33,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isLoggedIn = !!session && !sessionError;
   const authError = loginError || (sessionError ? String(sessionError) : null);
   const user: AuthUser | null = session?.user
-    ? { name: session.user.name ?? null, email: session.user.email ?? null, image: session.user.image ?? null }
+    ? {
+        name: session.user.name ?? null,
+        email: session.user.email ?? null,
+        image: session.user.image ?? null,
+      }
     : null;
 
   if (sessionError) {

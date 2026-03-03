@@ -5,7 +5,14 @@
 
 import { vi } from "vitest";
 import type { SpacetimeClient, SpacetimeMcpClient } from "../client.js";
-import type { Agent, AgentMessage, ConnectionState, Task, RegisteredTool, McpTask } from "../types.js";
+import type {
+  Agent,
+  AgentMessage,
+  ConnectionState,
+  Task,
+  RegisteredTool,
+  McpTask,
+} from "../types.js";
 
 export interface MockClientOptions {
   /** Start in connected state */
@@ -24,17 +31,18 @@ export interface MockClientOptions {
   failConnect?: boolean;
 }
 
-export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpClient & SpacetimeClient & {
-  _agents: Agent[];
-  _messages: AgentMessage[];
-  _tasks: Task[];
-  _mcpTasks: McpTask[];
-  _tools: RegisteredTool[];
-  _nextMessageId: bigint;
-  _nextTaskId: bigint;
-  _nextMcpTaskId: bigint;
-  _nextToolId: bigint;
-} {
+export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpClient &
+  SpacetimeClient & {
+    _agents: Agent[];
+    _messages: AgentMessage[];
+    _tasks: Task[];
+    _mcpTasks: McpTask[];
+    _tools: RegisteredTool[];
+    _nextMessageId: bigint;
+    _nextTaskId: bigint;
+    _nextMcpTaskId: bigint;
+    _nextToolId: bigint;
+  } {
   const state: ConnectionState = {
     connected: options.connected ?? false,
     uri: options.connected ? "wss://mock.spacetimedb.com" : null,
@@ -48,7 +56,7 @@ export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpC
   const tasks: Task[] = options.tasks ? [...options.tasks] : [];
   const mcpTasks: McpTask[] = options.mcpTasks ? [...options.mcpTasks] : [];
   const tools: RegisteredTool[] = options.tools ? [...options.tools] : [];
-  
+
   let nextMessageId = BigInt(messages.length + 1);
   let nextTaskId = BigInt(tasks.length + 1);
   let nextMcpTaskId = BigInt(mcpTasks.length + 1);
@@ -75,10 +83,18 @@ export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpC
     _tasks: tasks,
     _mcpTasks: mcpTasks,
     _tools: tools,
-    get _nextMessageId() { return nextMessageId; },
-    get _nextTaskId() { return nextTaskId; },
-    get _nextMcpTaskId() { return nextMcpTaskId; },
-    get _nextToolId() { return nextToolId; },
+    get _nextMessageId() {
+      return nextMessageId;
+    },
+    get _nextTaskId() {
+      return nextTaskId;
+    },
+    get _nextMcpTaskId() {
+      return nextMcpTaskId;
+    },
+    get _nextToolId() {
+      return nextToolId;
+    },
 
     getState: vi.fn(() => ({ ...state })),
 
@@ -108,30 +124,32 @@ export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpC
 
     // ─── Swarm Tools ───
 
-    registerTool: vi.fn(async (name: string, description: string, inputSchema: string, category: string) => {
-      await requireConnectedAsync();
-      tools.push({
-        id: nextToolId++,
-        name,
-        description,
-        inputSchema,
-        providerIdentity: state.identity!,
-        category,
-        createdAt: BigInt(Date.now()),
-      });
-      notifyListeners();
-    }),
+    registerTool: vi.fn(
+      async (name: string, description: string, inputSchema: string, category: string) => {
+        await requireConnectedAsync();
+        tools.push({
+          id: nextToolId++,
+          name,
+          description,
+          inputSchema,
+          providerIdentity: state.identity!,
+          category,
+          createdAt: BigInt(Date.now()),
+        });
+        notifyListeners();
+      },
+    ),
 
     unregisterTool: vi.fn(async (name: string) => {
       await requireConnectedAsync();
-      const idx = tools.findIndex(t => t.name === name && t.providerIdentity === state.identity);
+      const idx = tools.findIndex((t) => t.name === name && t.providerIdentity === state.identity);
       if (idx !== -1) tools.splice(idx, 1);
       notifyListeners();
     }),
 
     listRegisteredTools: vi.fn((categoryFilter?: string) => {
       requireConnectedSync();
-      if (categoryFilter) return tools.filter(t => t.category === categoryFilter);
+      if (categoryFilter) return tools.filter((t) => t.category === categoryFilter);
       return [...tools];
     }),
 
@@ -150,7 +168,7 @@ export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpC
 
     claimMcpTask: vi.fn(async (taskId: bigint) => {
       await requireConnectedAsync();
-      const task = mcpTasks.find(t => t.id === taskId);
+      const task = mcpTasks.find((t) => t.id === taskId);
       if (!task) throw new Error("Task not found");
       task.status = "claimed";
       task.providerIdentity = state.identity!;
@@ -159,7 +177,7 @@ export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpC
 
     completeMcpTask: vi.fn(async (taskId: bigint, resultJson?: string, error?: string) => {
       await requireConnectedAsync();
-      const task = mcpTasks.find(t => t.id === taskId);
+      const task = mcpTasks.find((t) => t.id === taskId);
       if (!task) throw new Error("Task not found");
       task.status = error ? "failed" : "completed";
       task.resultJson = resultJson;
@@ -170,7 +188,7 @@ export function createMockClient(options: MockClientOptions = {}): SpacetimeMcpC
 
     listMcpTasks: vi.fn((statusFilter?: string) => {
       requireConnectedSync();
-      if (statusFilter) return mcpTasks.filter(t => t.status === statusFilter);
+      if (statusFilter) return mcpTasks.filter((t) => t.status === statusFilter);
       return [...mcpTasks];
     }),
 

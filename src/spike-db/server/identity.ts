@@ -47,7 +47,9 @@ async function hmacVerify(secret: string, data: string, signatureB64: string): P
 }
 
 /** Generate a new identity (64 hex chars) and signed token. */
-export async function generateIdentity(secret: string): Promise<{ identity: string; token: string }> {
+export async function generateIdentity(
+  secret: string,
+): Promise<{ identity: string; token: string }> {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   const identity = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
   const token = await signToken(identity, secret);

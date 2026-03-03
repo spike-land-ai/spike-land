@@ -31,15 +31,13 @@ function loadManifest() {
 
 function getRegistryVersion(packageName, registry) {
   const registryUrl =
-    registry === "npm"
-      ? "https://registry.npmjs.org"
-      : "https://npm.pkg.github.com";
+    registry === "npm" ? "https://registry.npmjs.org" : "https://npm.pkg.github.com";
 
   try {
-    const result = execSync(
-      `npm view ${packageName} version --registry=${registryUrl}`,
-      { encoding: "utf-8", timeout: 10_000 },
-    ).trim();
+    const result = execSync(`npm view ${packageName} version --registry=${registryUrl}`, {
+      encoding: "utf-8",
+      timeout: 10_000,
+    }).trim();
     return result;
   } catch {
     return null; // Not published yet
@@ -120,9 +118,7 @@ async function main() {
   console.log(`${toPublish.length} package(s) to publish:\n`);
 
   for (const { name, fullName, pkg, remoteVersion } of toPublish) {
-    console.log(
-      `  ${fullName}: ${remoteVersion ?? "(new)"} → ${pkg.version}`,
-    );
+    console.log(`  ${fullName}: ${remoteVersion ?? "(new)"} → ${pkg.version}`);
 
     if (dryRun) continue;
 
@@ -131,16 +127,11 @@ async function main() {
 
     // Write generated package.json
     const packageJson = generatePackageJson(name, pkg, defaults);
-    writeFileSync(
-      join(pkgDist, "package.json"),
-      JSON.stringify(packageJson, null, 2),
-    );
+    writeFileSync(join(pkgDist, "package.json"), JSON.stringify(packageJson, null, 2));
 
     // Publish
     const registryUrl =
-      targetRegistry === "npm"
-        ? "https://registry.npmjs.org"
-        : "https://npm.pkg.github.com";
+      targetRegistry === "npm" ? "https://registry.npmjs.org" : "https://npm.pkg.github.com";
 
     try {
       execSync(`npm publish --access public --registry=${registryUrl}`, {

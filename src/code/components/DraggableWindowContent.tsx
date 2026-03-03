@@ -91,7 +91,7 @@ export const DraggableWindowContent: FC<DraggableWindowContentProps> = ({
 
         <BreakpointButtons width={width} setWidth={setWidth} breakPoints={breakPoints} />
       </div>
-      
+
       {chatNode && (
         <div className="w-[400px] h-[calc(100%-4rem)] mt-8 flex flex-col bg-background/90 rounded-xl overflow-hidden border border-white/10 relative z-20">
           {chatNode}

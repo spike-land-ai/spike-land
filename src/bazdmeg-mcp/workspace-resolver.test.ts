@@ -18,7 +18,7 @@ describe("extractInternalDeps", () => {
       dependencies: {
         "@spike-land-ai/shared": "1.0.0",
         "@spike-land-ai/mcp-server-base": "*",
-        "zod": "4.0.0",
+        zod: "4.0.0",
       },
     };
     const result = extractInternalDeps(pkg);
@@ -45,7 +45,7 @@ describe("extractInternalDeps", () => {
   });
 
   it("returns empty for no internal deps", () => {
-    const pkg = { dependencies: { "zod": "4.0.0", "lodash": "4.17.21" } };
+    const pkg = { dependencies: { zod: "4.0.0", lodash: "4.17.21" } };
     expect(extractInternalDeps(pkg)).toEqual([]);
   });
 

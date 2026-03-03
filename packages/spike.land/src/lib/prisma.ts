@@ -11,7 +11,9 @@ function getConnectionString(): string | undefined {
   try {
     // Dynamic import to avoid errors in non-Workers environments
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { env } = require("cloudflare:workers") as { env: { HYPERDRIVE?: { connectionString: string } } };
+    const { env } = require("cloudflare:workers") as {
+      env: { HYPERDRIVE?: { connectionString: string } };
+    };
     if (env.HYPERDRIVE?.connectionString) {
       return env.HYPERDRIVE.connectionString;
     }

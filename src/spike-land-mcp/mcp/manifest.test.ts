@@ -21,7 +21,7 @@ describe("manifest", () => {
     }));
 
     await registerAllTools(mockRegistry, "user-1", mockDb, mockKv);
-    
+
     // We can't easily check all because they are dynamic and might fail
     // but the function should complete without error.
     expect(true).toBe(true);

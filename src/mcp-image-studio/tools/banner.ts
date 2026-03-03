@@ -55,7 +55,10 @@ export const bannerTool = imageProcedure
   )
   .handler(async ({ input: input, ctx: ctx }) => {
     if (input.preset === "custom" && !input.custom_aspect_ratio) {
-      return errorResult("INVALID_INPUT", "custom_aspect_ratio is required when preset is 'custom'");
+      return errorResult(
+        "INVALID_INPUT",
+        "custom_aspect_ratio is required when preset is 'custom'",
+      );
     }
     const { userId, deps } = ctx;
     const tier = input.tier ?? "TIER_1K";
@@ -93,7 +96,7 @@ export const bannerTool = imageProcedure
         return errorResult("GENERATION_FAILED", jobRes.error.message, true);
       }
       /* v8 ignore next */
-if (!jobRes.data?.success) {
+      if (!jobRes.data?.success) {
         return errorResult(
           "GENERATION_FAILED",
           jobRes.data?.error ?? "Failed to create banner job",

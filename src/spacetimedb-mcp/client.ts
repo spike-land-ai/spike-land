@@ -5,8 +5,18 @@
  * Exposes methods for Leaf Servers (Providers) and Agents (Consumers).
  */
 
-import type { Agent, AgentMessage, ConnectionState, McpTask, RegisteredTool, Task } from "./types.js";
-import { createStdbHttpClient, type StdbHttpClient } from "../spacetimedb-platform/stdb-http-client.js";
+import type {
+  Agent,
+  AgentMessage,
+  ConnectionState,
+  McpTask,
+  RegisteredTool,
+  Task,
+} from "./types.js";
+import {
+  createStdbHttpClient,
+  type StdbHttpClient,
+} from "../spacetimedb-platform/stdb-http-client.js";
 
 // ─── Agent-Coordination Client Interface ───
 // Used by agent-tools.ts and task-tools.ts (and their tests).
@@ -150,7 +160,12 @@ export function createLiveSpacetimeMcpClient(): SpacetimeMcpClient {
     // ─── Provider Operations ───
 
     async registerTool(name: string, description: string, inputSchema: string, category: string) {
-      await requireClient().callReducer("register_tool", [name, description, inputSchema, category]);
+      await requireClient().callReducer("register_tool", [
+        name,
+        description,
+        inputSchema,
+        category,
+      ]);
     },
 
     async unregisterTool(name: string) {

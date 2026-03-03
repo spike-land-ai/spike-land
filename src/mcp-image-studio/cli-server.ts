@@ -3,11 +3,7 @@ import { createLiveSpacetimeMcpClient } from "@spike-land-ai/spacetimedb-mcp/cli
 import { SpacetimeServerTransport } from "@spike-land-ai/spacetimedb-mcp/transport";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { registerImageStudioTools } from "./register.js";
-import type {
-  ImageStudioDeps,
-  ImageStudioToolRegistry,
-  ToolDefinition,
-} from "./types.js";
+import type { ImageStudioDeps, ImageStudioToolRegistry, ToolDefinition } from "./types.js";
 import { asAlbumHandle, asImageId, asJobId, asPipelineId } from "./types.js";
 import {
   createSpacetimeDb,
@@ -290,9 +286,12 @@ const client = createLiveSpacetimeMcpClient();
 await client.connect(SPACETIMEDB_URI, SPACETIMEDB_MODULE);
 
 const transport = new SpacetimeServerTransport(client, "image");
-server.connect(transport).then(() => {
-  console.log("Image Studio MCP Swarm Node Connected to SpacetimeDB.");
-}).catch((err: unknown) => {
-  console.error("Fatal error:", err);
-  process.exit(1);
-});
+server
+  .connect(transport)
+  .then(() => {
+    console.log("Image Studio MCP Swarm Node Connected to SpacetimeDB.");
+  })
+  .catch((err: unknown) => {
+    console.error("Fatal error:", err);
+    process.exit(1);
+  });

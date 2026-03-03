@@ -23,82 +23,76 @@ describe("Component", () => {
 
   it("setState throws for non-object non-function partialState", () => {
     const updater = { enqueueSetState: vi.fn(), enqueueForceUpdate: vi.fn() };
-    const comp = new (Component as unknown as new (
-      props: unknown,
-      context: unknown,
-      updater: unknown,
-    ) => { setState: (state: unknown) => void })(
-      {},
-      {},
-      updater,
-    );
+    const comp = new (
+      Component as unknown as new (
+        props: unknown,
+        context: unknown,
+        updater: unknown,
+      ) => { setState: (state: unknown) => void }
+    )({}, {}, updater);
     expect(() => comp.setState(42)).toThrow();
     expect(() => comp.setState("invalid" as unknown as null)).toThrow();
   });
 
   it("setState does not throw for object partialState", () => {
     const updater = { enqueueSetState: vi.fn(), enqueueForceUpdate: vi.fn() };
-    const comp = new (Component as unknown as new (
-      props: unknown,
-      context: unknown,
-      updater: unknown,
-    ) => { setState: (state: unknown, cb?: unknown) => void })(
-      {},
-      {},
-      updater,
-    );
+    const comp = new (
+      Component as unknown as new (
+        props: unknown,
+        context: unknown,
+        updater: unknown,
+      ) => { setState: (state: unknown, cb?: unknown) => void }
+    )({}, {}, updater);
     expect(() => comp.setState({ count: 1 })).not.toThrow();
     expect(updater.enqueueSetState).toHaveBeenCalled();
   });
 
   it("setState does not throw for function partialState", () => {
     const updater = { enqueueSetState: vi.fn(), enqueueForceUpdate: vi.fn() };
-    const comp = new (Component as unknown as new (
-      props: unknown,
-      context: unknown,
-      updater: unknown,
-    ) => { setState: (state: unknown) => void })(
-      {},
-      {},
-      updater,
-    );
+    const comp = new (
+      Component as unknown as new (
+        props: unknown,
+        context: unknown,
+        updater: unknown,
+      ) => { setState: (state: unknown) => void }
+    )({}, {}, updater);
     expect(() => comp.setState(() => ({ count: 1 }))).not.toThrow();
   });
 
   it("setState with null does not throw", () => {
     const updater = { enqueueSetState: vi.fn(), enqueueForceUpdate: vi.fn() };
-    const comp = new (Component as unknown as new (
-      props: unknown,
-      context: unknown,
-      updater: unknown,
-    ) => { setState: (state: unknown) => void })(
-      {},
-      {},
-      updater,
-    );
+    const comp = new (
+      Component as unknown as new (
+        props: unknown,
+        context: unknown,
+        updater: unknown,
+      ) => { setState: (state: unknown) => void }
+    )({}, {}, updater);
     expect(() => comp.setState(null)).not.toThrow();
   });
 
   it("forceUpdate calls enqueueForceUpdate", () => {
     const updater = { enqueueSetState: vi.fn(), enqueueForceUpdate: vi.fn() };
-    const comp = new (Component as unknown as new (
-      props: unknown,
-      context: unknown,
-      updater: unknown,
-    ) => { forceUpdate: (cb?: unknown) => void })(
-      {},
-      {},
-      updater,
-    );
+    const comp = new (
+      Component as unknown as new (
+        props: unknown,
+        context: unknown,
+        updater: unknown,
+      ) => { forceUpdate: (cb?: unknown) => void }
+    )({}, {}, updater);
     const cb = vi.fn();
     comp.forceUpdate(cb);
     expect(updater.enqueueForceUpdate).toHaveBeenCalledWith(comp, cb, "forceUpdate");
   });
 
   it("sets refs to empty object on construction", () => {
-    const comp = new (Component as unknown as new (props: unknown) => {
-      refs: Record<string, unknown>;
-    })({});
+    const comp = new (
+      Component as unknown as new (
+        props: unknown,
+      ) => {
+        refs: Record<string, unknown>;
+      }
+    )({});
     expect(comp.refs).toEqual({});
   });
 });
@@ -115,7 +109,9 @@ describe("PureComponent", () => {
 
   it("sets props on construction", () => {
     const props = { value: 10 };
-    const comp = new (PureComponent as unknown as new (props: unknown) => { props: unknown })(props);
+    const comp = new (PureComponent as unknown as new (props: unknown) => { props: unknown })(
+      props,
+    );
     expect(comp.props).toBe(props);
   });
 

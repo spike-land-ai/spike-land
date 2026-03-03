@@ -5,10 +5,14 @@
  * Real-time WebSocket subscription replaced with HTTP polling stub.
  */
 
-import { createStdbHttpClient, type StdbHttpClient } from "@spike-land-ai/spacetimedb-platform/stdb-http-client";
+import {
+  createStdbHttpClient,
+  type StdbHttpClient,
+} from "@spike-land-ai/spacetimedb-platform/stdb-http-client";
 
-const isDev = typeof window !== "undefined"
-  && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+const isDev =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
 export const STDB_URL = isDev ? "http://localhost:3000" : "https://api.spike.land/spacetimedb";
 export const STDB_MODULE = "rightful-dirt-5033";
 
@@ -34,7 +38,10 @@ export function connectToSpacetimeDB() {
   }
   isConnecting = true;
 
-  const token = typeof localStorage !== "undefined" ? localStorage.getItem("stdb_token") || undefined : undefined;
+  const token =
+    typeof localStorage !== "undefined"
+      ? localStorage.getItem("stdb_token") || undefined
+      : undefined;
 
   const client = createStdbHttpClient({
     host: STDB_URL,
@@ -43,13 +50,16 @@ export function connectToSpacetimeDB() {
   });
 
   // Verify connectivity
-  client.sql("SELECT 1").then(() => {
-    console.debug("Connected to SpacetimeDB via HTTP");
-    stdbClient = client;
-    isConnecting = false;
-    connectionListeners.forEach((cb) => cb(client));
-  }).catch((err: unknown) => {
-    console.error("SpacetimeDB connection error:", err);
-    isConnecting = false;
-  });
+  client
+    .sql("SELECT 1")
+    .then(() => {
+      console.debug("Connected to SpacetimeDB via HTTP");
+      stdbClient = client;
+      isConnecting = false;
+      connectionListeners.forEach((cb) => cb(client));
+    })
+    .catch((err: unknown) => {
+      console.error("SpacetimeDB connection error:", err);
+      isConnecting = false;
+    });
 }

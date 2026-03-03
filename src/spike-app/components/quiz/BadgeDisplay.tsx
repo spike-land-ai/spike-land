@@ -11,7 +11,8 @@ export function BadgeDisplay({ token, topic, score, completedAt }: BadgeDisplayP
   const [copied, setCopied] = useState(false);
 
   const badgeUrl = `${window.location.origin}/learn/badge/${token}`;
-  const scoreColor = score >= 80 ? "text-green-600" : score >= 60 ? "text-yellow-600" : "text-red-600";
+  const scoreColor =
+    score >= 80 ? "text-green-600" : score >= 60 ? "text-yellow-600" : "text-red-600";
   const scoreLabel = score >= 80 ? "Excellent" : score >= 60 ? "Good" : "Passing";
 
   const handleCopy = async () => {
@@ -42,7 +43,8 @@ export function BadgeDisplay({ token, topic, score, completedAt }: BadgeDisplayP
           {scoreLabel}
         </div>
         <p className="mt-3 text-sm text-gray-500">
-          Completed {new Date(completedAt).toLocaleDateString("en-US", {
+          Completed{" "}
+          {new Date(completedAt).toLocaleDateString("en-US", {
             year: "numeric",
             month: "long",
             day: "numeric",

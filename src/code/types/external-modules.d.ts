@@ -1,6 +1,8 @@
 declare module "@react-three/fiber" {
   import type { FC, ReactNode } from "react";
-  export function useFrame(callback: (state: { clock: { getElapsedTime(): number } }) => void): void;
+  export function useFrame(
+    callback: (state: { clock: { getElapsedTime(): number } }) => void,
+  ): void;
   export const Canvas: FC<{
     dpr?: [number, number];
     camera?: { position: [number, number, number]; fov: number };

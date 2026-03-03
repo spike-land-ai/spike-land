@@ -35,7 +35,7 @@ function deserializeValue(value: unknown, col: ColumnType): unknown {
     return null;
   }
   if (col.kind === "array") {
-    return typeof value === "string" ? JSON.parse(value) as unknown : value;
+    return typeof value === "string" ? (JSON.parse(value) as unknown) : value;
   }
   if (col.kind === "bool") {
     return value === 1 || value === true;
@@ -73,9 +73,7 @@ export class TableHandle<T extends Record<string, unknown>> {
   /** Insert a row, record mutation, return the row. */
   insert(row: T): T {
     const colNames = Object.keys(this.tableDef.columns);
-    const values = colNames.map((name) =>
-      serializeValue(row[name], this.tableDef.columns[name]!),
-    );
+    const values = colNames.map((name) => serializeValue(row[name], this.tableDef.columns[name]!));
     const placeholders = colNames.map(() => "?").join(", ");
 
     this.sql.exec(
@@ -124,9 +122,7 @@ export class TableHandle<T extends Record<string, unknown>> {
     const oldRow = this.findBy(pk, primaryKeyValue);
     if (!oldRow) return undefined;
 
-    const updateEntries = Object.entries(updates).filter(
-      ([key]) => key in this.tableDef.columns,
-    );
+    const updateEntries = Object.entries(updates).filter(([key]) => key in this.tableDef.columns);
     if (updateEntries.length === 0) return oldRow;
 
     const setClauses = updateEntries.map(([key]) => `${key} = ?`).join(", ");
@@ -164,10 +160,7 @@ export class TableHandle<T extends Record<string, unknown>> {
     const pkCol = this.tableDef.columns[pk];
     const serializedPk = pkCol ? serializeValue(primaryKeyValue, pkCol) : primaryKeyValue;
 
-    this.sql.exec(
-      `DELETE FROM ${this.tableDef.name} WHERE ${pk} = ?`,
-      serializedPk,
-    );
+    this.sql.exec(`DELETE FROM ${this.tableDef.name} WHERE ${pk} = ?`, serializedPk);
 
     this.mutations.push({
       table: this.tableDef.name,

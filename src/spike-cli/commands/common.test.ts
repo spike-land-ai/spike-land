@@ -18,7 +18,9 @@ describe("common command helpers", () => {
   });
 
   it("parseInlineUrls parses name=url", () => {
-    expect(parseInlineUrls(["s1=http://localhost:8080"])).toEqual([{ name: "s1", url: "http://localhost:8080" }]);
+    expect(parseInlineUrls(["s1=http://localhost:8080"])).toEqual([
+      { name: "s1", url: "http://localhost:8080" },
+    ]);
   });
 
   it("parseInlineUrls validates ports", () => {

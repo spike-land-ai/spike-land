@@ -72,7 +72,8 @@ export async function handleChatStream(
         while (iterations < maxIterations) {
           iterations++;
 
-          const budget = thinkingBudget && thinkingBudget !== "off" ? parseInt(thinkingBudget, 10) : undefined;
+          const budget =
+            thinkingBudget && thinkingBudget !== "off" ? parseInt(thinkingBudget, 10) : undefined;
 
           let streamResult;
           try {
@@ -82,24 +83,32 @@ export async function handleChatStream(
               config: {
                 systemInstruction: SYSTEM_PROMPT,
                 tools,
-                thinkingConfig: budget 
-                  ? { includeThoughts: true, thinkingBudget: budget } 
-                  : (thinkingBudget && thinkingBudget !== "off" ? { includeThoughts: true } : undefined),
+                thinkingConfig: budget
+                  ? { includeThoughts: true, thinkingBudget: budget }
+                  : thinkingBudget && thinkingBudget !== "off"
+                    ? { includeThoughts: true }
+                    : undefined,
               },
             });
           } catch (err: unknown) {
             // Check if we can fallback (503, 429, 404)
             const errorText = err instanceof Error ? err.message : String(err);
-            const isRecoverable = errorText.includes("503") || errorText.includes("404") ||
-              errorText.includes("UNAVAILABLE") || errorText.includes("not found") ||
-              errorText.includes("region") || errorText.includes("not supported") ||
+            const isRecoverable =
+              errorText.includes("503") ||
+              errorText.includes("404") ||
+              errorText.includes("UNAVAILABLE") ||
+              errorText.includes("not found") ||
+              errorText.includes("region") ||
+              errorText.includes("not supported") ||
               errorText.includes("429");
-            
+
             if (isRecoverable && selectedModel !== fallbackModel) {
-              controller.enqueue(sseEvent({ 
-                type: "system_notice", 
-                text: `Primary model (${selectedModel}) unavailable. Falling back to ${fallbackModel}...` 
-              }));
+              controller.enqueue(
+                sseEvent({
+                  type: "system_notice",
+                  text: `Primary model (${selectedModel}) unavailable. Falling back to ${fallbackModel}...`,
+                }),
+              );
               selectedModel = fallbackModel;
               iterations--; // Retry this iteration
               continue;
@@ -158,7 +167,10 @@ export async function handleChatStream(
                     );
                     resultText = JSON.stringify({ status: "sent_to_browser", requestId });
                   } else {
-                    const callResult = await toolRegistry.call(fnName, (part.functionCall.args ?? {}) as Record<string, unknown>);
+                    const callResult = await toolRegistry.call(
+                      fnName,
+                      (part.functionCall.args ?? {}) as Record<string, unknown>,
+                    );
                     resultText =
                       callResult.content
                         .filter((c): c is { type: "text"; text: string } => c.type === "text")
@@ -179,21 +191,36 @@ export async function handleChatStream(
 
                 // Emit gallery_update for image-mutating tools
                 const imageTools = new Set([
-                  "img_generate", "img_edit", "img_enhance", "img_upload",
-                  "img_delete", "img_auto_crop", "img_smart_enhance",
-                  "img_background_remove", "img_upscale", "img_style_transfer",
-                  "img_color_grade", "img_restore",
+                  "img_generate",
+                  "img_edit",
+                  "img_enhance",
+                  "img_upload",
+                  "img_delete",
+                  "img_auto_crop",
+                  "img_smart_enhance",
+                  "img_background_remove",
+                  "img_upscale",
+                  "img_style_transfer",
+                  "img_color_grade",
+                  "img_restore",
                 ]);
                 if (imageTools.has(fnName) && !resultText.includes("Error")) {
                   let imageId: string | undefined;
                   try {
                     const parsed = JSON.parse(resultText);
                     imageId = parsed.imageId || parsed.id;
-                  } catch { /* ignore parse failures */ }
+                  } catch {
+                    /* ignore parse failures */
+                  }
 
-                  const action = fnName === "img_delete" ? "image_deleted"
-                    : fnName.includes("enhance") || fnName.includes("upscale") || fnName.includes("restore") ? "image_enhanced"
-                    : "image_created";
+                  const action =
+                    fnName === "img_delete"
+                      ? "image_deleted"
+                      : fnName.includes("enhance") ||
+                          fnName.includes("upscale") ||
+                          fnName.includes("restore")
+                        ? "image_enhanced"
+                        : "image_created";
 
                   controller.enqueue(
                     sseEvent({
@@ -237,4 +264,3 @@ export async function handleChatStream(
     },
   });
 }
-

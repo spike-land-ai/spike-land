@@ -28,7 +28,9 @@ export function BadgePage() {
       <div className="flex h-64 items-center justify-center">
         <div className="text-center">
           <p className="text-lg font-medium text-gray-700">Invalid Badge</p>
-          <p className="mt-2 text-sm text-gray-500">This badge link is invalid or has been tampered with.</p>
+          <p className="mt-2 text-sm text-gray-500">
+            This badge link is invalid or has been tampered with.
+          </p>
         </div>
       </div>
     );

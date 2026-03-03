@@ -54,13 +54,13 @@ export function registerLanguages(): void {
           startLineNumber: 1,
           startColumn: 1,
           endLineNumber: position.lineNumber,
-          endColumn: position.column
+          endColumn: position.column,
         });
         const textAfterPosition = model.getValueInRange({
           startLineNumber: position.lineNumber,
           startColumn: position.column,
           endLineNumber: model.getLineCount(),
-          endColumn: model.getLineMaxColumn(model.getLineCount())
+          endColumn: model.getLineMaxColumn(model.getLineCount()),
         });
 
         return new Promise((resolve) => {
@@ -100,15 +100,17 @@ export function registerLanguages(): void {
               }
 
               resolve({
-                items: [{
-                  insertText: completion,
-                  range: {
-                    startLineNumber: position.lineNumber,
-                    startColumn: position.column,
-                    endLineNumber: position.lineNumber,
-                    endColumn: position.column
-                  }
-                }]
+                items: [
+                  {
+                    insertText: completion,
+                    range: {
+                      startLineNumber: position.lineNumber,
+                      startColumn: position.column,
+                      endLineNumber: position.lineNumber,
+                      endColumn: position.column,
+                    },
+                  },
+                ],
               });
               return;
             } catch (err: unknown) {

@@ -27,18 +27,18 @@
     "lint": "eslint --quiet src/"
   },
   "dependencies": {
-    "@remotion/bundler": "4.0.431",
-    "@remotion/cli": "4.0.431",
-    "@remotion/transitions": "4.0.431",
+    "@remotion/bundler": "4.0.432",
+    "@remotion/cli": "4.0.432",
+    "@remotion/transitions": "4.0.432",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "remotion": "4.0.431",
+    "remotion": "4.0.432",
     "zod": "4.3.6"
   },
   "devDependencies": {
     "@changesets/cli": "2.30.0",
-    "@remotion/eslint-config": "4.0.431",
-    "@remotion/tailwind": "4.0.431",
+    "@remotion/eslint-config": "4.0.432",
+    "@remotion/tailwind": "4.0.432",
     "@spike-land-ai/eslint-config": "*",
     "@spike-land-ai/tsconfig": "*",
     "@testing-library/jest-dom": "6.9.1",

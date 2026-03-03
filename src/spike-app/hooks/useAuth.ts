@@ -30,19 +30,16 @@ export function useAuth() {
     }
   }, [isAuthenticated, token]);
 
-  const login = useCallback(
-    (provider?: string) => {
-      if (!provider) {
-        // Default to github if no provider specified
-        provider = "github";
-      }
-      return authClient.signIn.social({
-        provider: provider as "github" | "google",
-        callbackURL: "/",
-      });
-    },
-    [],
-  );
+  const login = useCallback((provider?: string) => {
+    if (!provider) {
+      // Default to github if no provider specified
+      provider = "github";
+    }
+    return authClient.signIn.social({
+      provider: provider as "github" | "google",
+      callbackURL: "/",
+    });
+  }, []);
 
   const logout = useCallback(async () => {
     stdbClient.disconnect();

@@ -83,7 +83,9 @@ describe("Service Worker", () => {
       });
 
       let resolveWait: (() => void) | undefined;
-      const waitPromise = new Promise<void>((r) => { resolveWait = r; });
+      const waitPromise = new Promise<void>((r) => {
+        resolveWait = r;
+      });
       installHandler({
         waitUntil: (p: Promise<unknown>) => {
           waitUntilSpy(p);
@@ -114,7 +116,9 @@ describe("Service Worker", () => {
       });
 
       let resolveWait: (() => void) | undefined;
-      const waitPromise = new Promise<void>((r) => { resolveWait = r; });
+      const waitPromise = new Promise<void>((r) => {
+        resolveWait = r;
+      });
       installHandler({
         waitUntil: (p: Promise<unknown>) => {
           p.then(() => resolveWait?.()).catch(() => resolveWait?.());
@@ -130,10 +134,14 @@ describe("Service Worker", () => {
     it("falls back to caching base assets when manifest fetch fails", async () => {
       const installHandler = registeredHandlers["install"];
 
-      (globalThis.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("Network fail"));
+      (globalThis.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        new Error("Network fail"),
+      );
 
       let resolveWait: (() => void) | undefined;
-      const waitPromise = new Promise<void>((r) => { resolveWait = r; });
+      const waitPromise = new Promise<void>((r) => {
+        resolveWait = r;
+      });
       installHandler({
         waitUntil: (p: Promise<unknown>) => {
           p.then(() => resolveWait?.()).catch(() => resolveWait?.());

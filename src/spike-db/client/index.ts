@@ -18,14 +18,10 @@ export class SpikeDbClient {
   identity = "";
   private connection: Connection;
   private cache: TableCache;
-  private pendingReducers: Map<
-    string,
-    { resolve: () => void; reject: (err: Error) => void }
-  > = new Map();
-  private pendingSubscriptions: Map<
-    string,
-    { builder: SubscriptionBuilder; resolve: () => void }
-  > = new Map();
+  private pendingReducers: Map<string, { resolve: () => void; reject: (err: Error) => void }> =
+    new Map();
+  private pendingSubscriptions: Map<string, { builder: SubscriptionBuilder; resolve: () => void }> =
+    new Map();
   private eventHandlers: Map<ClientEvent, Set<EventHandler>> = new Map();
   private connectPromise: {
     resolve: () => void;
@@ -123,10 +119,7 @@ export class SpikeDbClient {
       case "initial_snapshot": {
         const tables = msg.tables as Record<string, unknown[]>;
         for (const [table, rows] of Object.entries(tables)) {
-          this.cache.applySnapshot(
-            table,
-            rows as Record<string, unknown>[],
-          );
+          this.cache.applySnapshot(table, rows as Record<string, unknown>[]);
         }
         const pending = this.pendingSubscriptions.get(msg.subscriptionId);
         if (pending) {

@@ -89,11 +89,7 @@ export async function resolveWorkspacePaths(
   const depPaths = internalDeps.map(packageNameToPath);
 
   // Build the full allowed paths list
-  const paths = [
-    packageDir,
-    ...depPaths,
-    ...ALWAYS_ALLOWED,
-  ];
+  const paths = [packageDir, ...depPaths, ...ALWAYS_ALLOWED];
 
   return {
     direct: internalDeps,

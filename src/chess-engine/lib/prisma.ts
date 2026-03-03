@@ -251,14 +251,12 @@ export interface PrismaClientLike {
 // Throws at runtime making misconfiguration explicit rather than silently
 // returning empty data.
 
-const notConfigured =
-  (model: string, method: string) =>
-  (): never => {
-    throw new Error(
-      `prisma.${model}.${method}() called but no PrismaClient is configured. ` +
-        "Inject a real client via the host application.",
-    );
-  };
+const notConfigured = (model: string, method: string) => (): never => {
+  throw new Error(
+    `prisma.${model}.${method}() called but no PrismaClient is configured. ` +
+      "Inject a real client via the host application.",
+  );
+};
 
 const makeGameStub = (): ChessGameDelegate => ({
   create: notConfigured("chessGame", "create"),

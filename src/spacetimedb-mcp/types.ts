@@ -27,7 +27,12 @@ export interface McpTask {
 
 // ─── Shared types from spacetimedb-platform (canonical source) ───
 
-export type { Agent, AgentMessage, ConnectionState, Task } from "@spike-land-ai/spacetimedb-platform";
+export type {
+  Agent,
+  AgentMessage,
+  ConnectionState,
+  Task,
+} from "@spike-land-ai/spacetimedb-platform";
 
 // ─── Error Codes ───
 
@@ -42,4 +47,9 @@ export type StdbErrorCode =
 
 // ─── Result Helpers (re-exported from mcp-server-base) ───
 
-export { tryCatch, type CallToolResult, jsonResult, errorResult } from "@spike-land-ai/mcp-server-base";
+export {
+  tryCatch,
+  type CallToolResult,
+  jsonResult,
+  errorResult,
+} from "@spike-land-ai/mcp-server-base";

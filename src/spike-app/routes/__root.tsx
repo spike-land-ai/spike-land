@@ -65,10 +65,11 @@ export function RootLayout() {
 
   useEffect(() => {
     // Match exact path first, then strip dynamic segments for a best-effort match
-    const meta =
-      ROUTE_META[pathname] ??
-      ROUTE_META[pathname.replace(/\/[^/]+$/, "")] ??
-      { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION };
+    const meta = ROUTE_META[pathname] ??
+      ROUTE_META[pathname.replace(/\/[^/]+$/, "")] ?? {
+        title: DEFAULT_TITLE,
+        description: DEFAULT_DESCRIPTION,
+      };
 
     document.title = meta.title;
 

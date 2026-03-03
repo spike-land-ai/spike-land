@@ -34,7 +34,11 @@ describe("EventBus", () => {
     eventBus.on("image:uploaded", handler1);
     eventBus.on("image:uploaded", handler2);
 
-    eventBus.emit("image:uploaded", { imageId: "123", url: "http://test.com/img.png", name: "test" });
+    eventBus.emit("image:uploaded", {
+      imageId: "123",
+      url: "http://test.com/img.png",
+      name: "test",
+    });
 
     expect(handler1).toHaveBeenCalledTimes(1);
     expect(handler2).toHaveBeenCalledTimes(1);
@@ -166,7 +170,7 @@ describe("Shared Types", () => {
   });
 
   it("should have ChatSSEEvent types with gallery_update", async () => {
-    const { } = await import("./shared-types.ts");
+    const {} = await import("./shared-types.ts");
     // Verify that gallery_update is a valid event type by constructing a conforming object
     const event = {
       type: "gallery_update" as const,
@@ -225,14 +229,15 @@ describe("Gallery DB Helpers", () => {
     it("generates unique handle per user", async () => {
       const { getOrCreateDefaultAlbum } = await import("./deps/db.ts");
 
-      const makeDb = () => ({
-        prepare: vi.fn().mockReturnValue({
-          bind: vi.fn().mockReturnValue({
-            first: vi.fn().mockResolvedValue(null),
-            run: vi.fn().mockResolvedValue({ meta: { changes: 1 } }),
+      const makeDb = () =>
+        ({
+          prepare: vi.fn().mockReturnValue({
+            bind: vi.fn().mockReturnValue({
+              first: vi.fn().mockResolvedValue(null),
+              run: vi.fn().mockResolvedValue({ meta: { changes: 1 } }),
+            }),
           }),
-        }),
-      }) as unknown as D1Database;
+        }) as unknown as D1Database;
 
       const result1 = await getOrCreateDefaultAlbum(makeDb(), "user-aaaa");
       const result2 = await getOrCreateDefaultAlbum(makeDb(), "user-bbbb");
@@ -391,9 +396,7 @@ describe("Gallery DB Helpers", () => {
         })),
       } as unknown as D1Database;
 
-      await expect(
-        addImageToDefaultAlbum(mockDb, "user-123", "img-xyz"),
-      ).resolves.toBeUndefined();
+      await expect(addImageToDefaultAlbum(mockDb, "user-123", "img-xyz")).resolves.toBeUndefined();
     });
 
     it("silently ignores duplicate image insertion (UNIQUE constraint)", async () => {

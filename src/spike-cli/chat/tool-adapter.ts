@@ -3,10 +3,7 @@
  * Converts between MCP NamespacedTool format and Claude API tool definitions.
  */
 
-import type {
-  NamespacedTool,
-  ServerManager,
-} from "../multiplexer/server-manager";
+import type { NamespacedTool, ServerManager } from "../multiplexer/server-manager";
 import type { Tool } from "./client";
 import { log } from "../util/logger";
 
@@ -14,9 +11,7 @@ import { log } from "../util/logger";
  * Ensure input schema has `type: "object"` at top level,
  * as required by Claude's tool_use format.
  */
-function normalizeInputSchema(
-  schema: Record<string, unknown>,
-): Record<string, unknown> {
+function normalizeInputSchema(schema: Record<string, unknown>): Record<string, unknown> {
   const normalized = { ...schema };
   if (!normalized.type) {
     normalized.type = "object";
@@ -28,12 +23,10 @@ function normalizeInputSchema(
  * Convert MCP NamespacedTools to Claude API tool definitions.
  */
 export function mcpToolsToClaude(tools: NamespacedTool[]): Tool[] {
-  return tools.map(tool => ({
+  return tools.map((tool) => ({
     name: tool.namespacedName,
     description: tool.description ?? "",
-    input_schema: normalizeInputSchema(
-      tool.inputSchema,
-    ) as Tool["input_schema"],
+    input_schema: normalizeInputSchema(tool.inputSchema) as Tool["input_schema"],
   }));
 }
 
@@ -48,12 +41,8 @@ export interface ParamInfo {
  * Extract default values from a JSON Schema `inputSchema`.
  * Returns `{ key: defaultValue }` for every property that declares a `"default"`.
  */
-export function extractDefaults(
-  inputSchema: Record<string, unknown>,
-): Record<string, unknown> {
-  const props = inputSchema.properties as
-    | Record<string, Record<string, unknown>>
-    | undefined;
+export function extractDefaults(inputSchema: Record<string, unknown>): Record<string, unknown> {
+  const props = inputSchema.properties as Record<string, Record<string, unknown>> | undefined;
   if (!props) return {};
 
   const defaults: Record<string, unknown> = {};
@@ -69,20 +58,16 @@ export function extractDefaults(
  * Return metadata for required params that have no default value.
  * These are the params the user must supply.
  */
-export function getRequiredParams(
-  inputSchema: Record<string, unknown>,
-): ParamInfo[] {
+export function getRequiredParams(inputSchema: Record<string, unknown>): ParamInfo[] {
   const required = (inputSchema.required as string[] | undefined) ?? [];
-  const props = inputSchema.properties as
-    | Record<string, Record<string, unknown>>
-    | undefined;
+  const props = inputSchema.properties as Record<string, Record<string, unknown>> | undefined;
   if (!props) return [];
 
   const defaults = extractDefaults(inputSchema);
 
   return required
-    .filter(name => !(name in defaults))
-    .map(name => {
+    .filter((name) => !(name in defaults))
+    .map((name) => {
       const prop = props[name] ?? {};
       return {
         name,
@@ -100,13 +85,11 @@ export async function executeToolCall(
   manager: ServerManager,
   name: string,
   input: Record<string, unknown>,
-): Promise<{ result: string; isError: boolean; }> {
+): Promise<{ result: string; isError: boolean }> {
   log(`Executing tool: ${name}`);
   try {
     const callResult = await manager.callTool(name, input);
-    const text = callResult.content
-      .map(c => c.text ?? JSON.stringify(c))
-      .join("\n");
+    const text = callResult.content.map((c) => c.text ?? JSON.stringify(c)).join("\n");
     return { result: text, isError: callResult.isError ?? false };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

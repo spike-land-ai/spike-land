@@ -170,14 +170,17 @@ describe("define-tool framework", () => {
         .resolves({ image_id: "image" })
         .requireOwnership(["image_id"])
         .handler(async () => jsonResult({}));
-      
+
       const mockDeps = {
         resolvers: {
           resolveImage: vi.fn().mockResolvedValue({ id: "img-1", userId: "other-user" }),
-        }
+        },
       };
 
-      const res = await tool.handler({ image_id: "img-1" }, { userId: "u1", deps: mockDeps as any });
+      const res = await tool.handler(
+        { image_id: "img-1" },
+        { userId: "u1", deps: mockDeps as any },
+      );
       expect(res.isError).toBe(true);
       expect(res.content[0].text).toContain("UNAUTHORIZED");
     });
@@ -187,17 +190,20 @@ describe("define-tool framework", () => {
         .resolves({ image_ids: "images" })
         .requireOwnership(["image_ids"])
         .handler(async () => jsonResult({}));
-      
+
       const mockDeps = {
         resolvers: {
           resolveImages: vi.fn().mockResolvedValue([
             { id: "img-1", userId: "u1" },
-            { id: "img-2", userId: "other-user" }
+            { id: "img-2", userId: "other-user" },
           ]),
-        }
+        },
       };
 
-      const res = await tool.handler({ image_ids: ["img-1", "img-2"] }, { userId: "u1", deps: mockDeps as any });
+      const res = await tool.handler(
+        { image_ids: ["img-1", "img-2"] },
+        { userId: "u1", deps: mockDeps as any },
+      );
       expect(res.isError).toBe(true);
       expect(res.content[0].text).toContain("UNAUTHORIZED");
     });
@@ -207,14 +213,17 @@ describe("define-tool framework", () => {
         .resolves({ album_handle: "album" })
         .requireOwnership(["album_handle"])
         .handler(async () => jsonResult({}));
-      
+
       const mockDeps = {
         resolvers: {
           resolveAlbum: vi.fn().mockResolvedValue({ handle: "alb", userId: "other-user" }),
-        }
+        },
       };
 
-      const res = await tool.handler({ album_handle: "alb" }, { userId: "u1", deps: mockDeps as any });
+      const res = await tool.handler(
+        { album_handle: "alb" },
+        { userId: "u1", deps: mockDeps as any },
+      );
       expect(res.isError).toBe(true);
       expect(res.content[0].text).toContain("UNAUTHORIZED");
     });
@@ -224,10 +233,11 @@ describe("define-tool framework", () => {
     it("should run custom validates before resolution", async () => {
       const tool = defineTool("val_test", "desc", { val: z.string() })
         .validate((input) => {
-          if (input.val === "bad") return { isError: true, content: [{ type: "text", text: "BAD_VAL" }] };
+          if (input.val === "bad")
+            return { isError: true, content: [{ type: "text", text: "BAD_VAL" }] };
         })
         .handler(async () => jsonResult({}));
-      
+
       const res = await tool.handler({ val: "bad" }, { userId: "u1", deps: {} as any });
       expect(res.isError).toBe(true);
       expect(res.content[0].text).toContain("BAD_VAL");
@@ -237,14 +247,15 @@ describe("define-tool framework", () => {
       const tool = defineTool("cval_test", "desc", { val: z.string() })
         .resolves({ val: "image" })
         .validateContext((input, ctx) => {
-          if (ctx.entities.val.name === "bad-name") return { isError: true, content: [{ type: "text", text: "BAD_NAME" }] };
+          if (ctx.entities.val.name === "bad-name")
+            return { isError: true, content: [{ type: "text", text: "BAD_NAME" }] };
         })
         .handler(async () => jsonResult({}));
-      
+
       const mockDeps = {
         resolvers: {
           resolveImage: vi.fn().mockResolvedValue({ id: "img-1", name: "bad-name", userId: "u1" }),
-        }
+        },
       };
 
       const res = await tool.handler({ val: "img-1" }, { userId: "u1", deps: mockDeps as any });
@@ -258,21 +269,22 @@ describe("define-tool framework", () => {
       const tool = defineTool("agent_test", "desc", { val: z.string() })
         .agentInstructions("Tell the user hi")
         .handler(async () => jsonResult({ ok: true }));
-      
+
       const res = await tool.handler({ val: "v" }, { userId: "u1", deps: {} as any });
       expect(res.isError).toBeFalsy();
-      expect(res.content.some(c => c.type === "text" && c.text.includes("Tell the user hi"))).toBe(true);
+      expect(
+        res.content.some((c) => c.type === "text" && c.text.includes("Tell the user hi")),
+      ).toBe(true);
     });
   });
 
   describe("DomainError catching", () => {
     it("should catch DomainError and convert to errorResult", async () => {
       const { DomainError } = await import("./tools/try-catch.js");
-      const tool = defineTool("domain_err_test", "desc", {})
-        .handler(async () => {
-          throw new DomainError("UNKNOWN_ERROR", "A specific domain error", true);
-        });
-      
+      const tool = defineTool("domain_err_test", "desc", {}).handler(async () => {
+        throw new DomainError("UNKNOWN_ERROR", "A specific domain error", true);
+      });
+
       const res = await tool.handler({}, { userId: "u1", deps: {} as any });
       expect(res.isError).toBe(true);
       expect(res.content[0].text).toContain("UNKNOWN_ERROR");
@@ -281,12 +293,13 @@ describe("define-tool framework", () => {
     });
 
     it("should rethrow non-DomainErrors", async () => {
-      const tool = defineTool("throw_test", "desc", {})
-        .handler(async () => {
-          throw new Error("Normal error");
-        });
-      
-      await expect(tool.handler({}, { userId: "u1", deps: {} as any })).rejects.toThrow("Normal error");
+      const tool = defineTool("throw_test", "desc", {}).handler(async () => {
+        throw new Error("Normal error");
+      });
+
+      await expect(tool.handler({}, { userId: "u1", deps: {} as any })).rejects.toThrow(
+        "Normal error",
+      );
     });
   });
 
@@ -295,14 +308,17 @@ describe("define-tool framework", () => {
       const tool = defineTool("job_fail_test", "desc", { image_id: z.string() })
         .job({ imageIdField: "image_id" })
         .handler(async () => jsonResult({}));
-      
+
       const mockDeps = {
         db: {
-          jobCreate: vi.fn().mockResolvedValue(null) // fails
-        }
+          jobCreate: vi.fn().mockResolvedValue(null), // fails
+        },
       };
 
-      const res = await tool.handler({ image_id: "img-1" }, { userId: "u1", deps: mockDeps as any });
+      const res = await tool.handler(
+        { image_id: "img-1" },
+        { userId: "u1", deps: mockDeps as any },
+      );
       expect(res.isError).toBe(true);
       expect(res.content[0].text).toContain("JOB_CREATE_FAILED");
     });

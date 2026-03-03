@@ -54,10 +54,7 @@ function buildTree(
   return output;
 }
 
-function buildMermaid(
-  packages: Record<string, ManifestPackage>,
-  rootPackage?: string,
-): string {
+function buildMermaid(packages: Record<string, ManifestPackage>, rootPackage?: string): string {
   const lines: string[] = ["graph TD"];
   const seen = new Set<string>();
 
@@ -106,10 +103,7 @@ function buildMermaid(
   return lines.join("\n");
 }
 
-function buildList(
-  packages: Record<string, ManifestPackage>,
-  rootPackage?: string,
-): string {
+function buildList(packages: Record<string, ManifestPackage>, rootPackage?: string): string {
   try {
     const order = topologicalSort(packages);
     const filtered = rootPackage
@@ -146,7 +140,8 @@ export function registerDepGraphTools(server: McpServer): void {
   // ── bazdmeg_dep_graph ─────────────────────────────────────────────────────
   createZodTool(server, {
     name: "bazdmeg_dep_graph",
-    description: "Show dependency graph and topological sort. Supports tree, list, and mermaid formats.",
+    description:
+      "Show dependency graph and topological sort. Supports tree, list, and mermaid formats.",
     schema: DepGraphSchema.shape,
     handler: async (args) => {
       const { packageName, format = "tree" } = args as {
@@ -158,9 +153,7 @@ export function registerDepGraphTools(server: McpServer): void {
       const manifest = await readManifest(repoRoot);
 
       if (packageName && !manifest.packages[packageName]) {
-        return textResult(
-          `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
-        );
+        return textResult(`**ERROR**: Package \`${packageName}\` not found in packages.yaml.`);
       }
 
       let report: string;
@@ -189,9 +182,7 @@ export function registerDepGraphTools(server: McpServer): void {
               }
             }
 
-            const roots = Object.keys(manifest.packages).filter(
-              (n) => !allDeps.has(n),
-            );
+            const roots = Object.keys(manifest.packages).filter((n) => !allDeps.has(n));
 
             let tree = "";
             for (const root of roots) {

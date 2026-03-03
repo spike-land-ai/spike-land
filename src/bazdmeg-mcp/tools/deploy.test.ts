@@ -74,7 +74,9 @@ describe("deploy tools", () => {
     });
 
     it("generates wrangler.toml (dry run)", async () => {
-      mockGetManifestPackage.mockResolvedValue(WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+      mockGetManifestPackage.mockResolvedValue(
+        WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+      );
 
       const result = await server.call("bazdmeg_generate_wrangler_toml", {
         packageName: "spike-edge",
@@ -93,7 +95,9 @@ describe("deploy tools", () => {
     });
 
     it("writes to disk when dryRun=false", async () => {
-      mockGetManifestPackage.mockResolvedValue(WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+      mockGetManifestPackage.mockResolvedValue(
+        WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+      );
       mockWriteFile.mockResolvedValue(undefined);
 
       const result = await server.call("bazdmeg_generate_wrangler_toml", {
@@ -145,7 +149,9 @@ describe("deploy tools", () => {
     });
 
     it("dry run shows pipeline without deploying", async () => {
-      mockGetManifestPackage.mockResolvedValue(WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+      mockGetManifestPackage.mockResolvedValue(
+        WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+      );
       mockRunCommand.mockResolvedValue(ok());
       mockWriteFile.mockResolvedValue(undefined);
 
@@ -160,7 +166,9 @@ describe("deploy tools", () => {
     });
 
     it("blocks on build failure", async () => {
-      mockGetManifestPackage.mockResolvedValue(WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+      mockGetManifestPackage.mockResolvedValue(
+        WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+      );
       mockRunCommand.mockResolvedValue(fail("build error"));
 
       const result = await server.call("bazdmeg_deploy_worker", {
@@ -171,7 +179,9 @@ describe("deploy tools", () => {
     });
 
     it("deploys when dryRun=false", async () => {
-      mockGetManifestPackage.mockResolvedValue(WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+      mockGetManifestPackage.mockResolvedValue(
+        WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+      );
       mockRunCommand.mockResolvedValue(ok("deploy success"));
       mockWriteFile.mockResolvedValue(undefined);
 
@@ -183,7 +193,9 @@ describe("deploy tools", () => {
     });
 
     it("reports deploy failure", async () => {
-      mockGetManifestPackage.mockResolvedValue(WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+      mockGetManifestPackage.mockResolvedValue(
+        WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+      );
       let callCount = 0;
       mockRunCommand.mockImplementation(async () => {
         callCount++;
@@ -200,7 +212,9 @@ describe("deploy tools", () => {
     });
 
     it("passes env flag when specified", async () => {
-      mockGetManifestPackage.mockResolvedValue(WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never);
+      mockGetManifestPackage.mockResolvedValue(
+        WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+      );
       mockRunCommand.mockResolvedValue(ok());
       mockWriteFile.mockResolvedValue(undefined);
 

@@ -133,7 +133,7 @@ describe("bulkDelete", () => {
       mockImageRow({ id: asImageId("img-2"), userId, originalR2Key: "key-2" }),
     ];
     mocks.resolverMocks.resolveImages.mockResolvedValue(images);
-    
+
     deps.db.imageDeleteMany = vi.fn().mockResolvedValue(2);
     deps.storage.deleteMany = vi.fn().mockResolvedValue(2);
 
@@ -151,7 +151,7 @@ describe("bulkDelete", () => {
     const ctx = { userId, deps };
     const images = [mockImageRow({ id: asImageId("img-1"), userId, originalR2Key: "key-1" })];
     mocks.resolverMocks.resolveImages.mockResolvedValue(images);
-    
+
     deps.db.imageDeleteMany = vi.fn();
     deps.storage.deleteMany = vi.fn().mockRejectedValue(new Error("Bulk storage err"));
 
@@ -165,7 +165,7 @@ describe("bulkDelete", () => {
     const ctx = { userId, deps };
     const images = [mockImageRow({ id: asImageId("img-1"), userId, originalR2Key: "key-1" })];
     mocks.resolverMocks.resolveImages.mockResolvedValue(images);
-    
+
     deps.db.imageDeleteMany = vi.fn().mockRejectedValue(new Error("Bulk DB err"));
     deps.storage.deleteMany = vi.fn().mockResolvedValue(1);
 

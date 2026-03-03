@@ -70,7 +70,10 @@ function extractExports(sourceCode: string): string[] {
 
 /** Detect whether source uses async patterns so stubs can match. */
 function hasAsyncExports(sourceCode: string): boolean {
-  return /export\s+async\s+function/.test(sourceCode) || /export\s+const\s+\w+\s*=\s*async/.test(sourceCode);
+  return (
+    /export\s+async\s+function/.test(sourceCode) ||
+    /export\s+const\s+\w+\s*=\s*async/.test(sourceCode)
+  );
 }
 
 function generateTestCode(spec: string, framework: string): string {
@@ -149,9 +152,10 @@ function generateTestCodeFromSource(sourceCode: string, targetPath: string): str
   const isAsync = hasAsyncExports(sourceCode);
   const moduleName = targetPath.replace(/^.*\//, "").replace(/\.[^.]+$/, "");
 
-  const importLine = exports.length > 0
-    ? `import { ${exports.join(", ")} } from "./${moduleName}";`
-    : `// import { myFunction } from "./${moduleName}";`;
+  const importLine =
+    exports.length > 0
+      ? `import { ${exports.join(", ")} } from "./${moduleName}";`
+      : `// import { myFunction } from "./${moduleName}";`;
 
   const lines: string[] = [
     `import { describe, it, expect, beforeEach, vi } from "vitest";`,
@@ -192,10 +196,16 @@ function generateTestCodeFromSource(sourceCode: string, targetPath: string): str
     lines.push(`      expect(result).toEqual(expected);`);
     lines.push(`    });`);
     lines.push("");
-    lines.push(`    it("should handle invalid input gracefully", ${isAsync ? "async " : ""}() => {`);
-    lines.push(`      ${isAsync ? "await " : ""}expect(${isAsync ? "async " : ""}() => ${awaitKw}${name}(null as never)).rejects // or .toThrow()`);
+    lines.push(
+      `    it("should handle invalid input gracefully", ${isAsync ? "async " : ""}() => {`,
+    );
+    lines.push(
+      `      ${isAsync ? "await " : ""}expect(${isAsync ? "async " : ""}() => ${awaitKw}${name}(null as never)).rejects // or .toThrow()`,
+    );
     lines.push(`        // .toThrow("expected error message");`);
-    lines.push(`      expect(true).toBe(true); // placeholder — remove once real assertion is in place`);
+    lines.push(
+      `      expect(true).toBe(true); // placeholder — remove once real assertion is in place`,
+    );
     lines.push(`    });`);
     lines.push(`  });`);
     lines.push("");

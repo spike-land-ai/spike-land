@@ -29,9 +29,21 @@ describe("workspace tools", () => {
       await cleanup();
       cleanup = undefined;
     }
-    try { await unlink("/tmp/bazdmeg-workspace.json"); } catch { /* ok */ }
-    try { await unlink("/tmp/bazdmeg-telemetry.jsonl"); } catch { /* ok */ }
-    try { await unlink("/tmp/bazdmeg-context-log.jsonl"); } catch { /* ok */ }
+    try {
+      await unlink("/tmp/bazdmeg-workspace.json");
+    } catch {
+      /* ok */
+    }
+    try {
+      await unlink("/tmp/bazdmeg-telemetry.jsonl");
+    } catch {
+      /* ok */
+    }
+    try {
+      await unlink("/tmp/bazdmeg-context-log.jsonl");
+    } catch {
+      /* ok */
+    }
   });
 
   it("registers 3 workspace tools", () => {
@@ -118,7 +130,9 @@ describe("workspace tools", () => {
   });
 
   it("enter_workspace handles unexpected errors", async () => {
-    vi.spyOn(resolverModule, "resolveWorkspacePaths").mockRejectedValue(new Error("Resolver crash"));
+    vi.spyOn(resolverModule, "resolveWorkspacePaths").mockRejectedValue(
+      new Error("Resolver crash"),
+    );
     const result = await server.call("bazdmeg_enter_workspace", { packageName: "p" });
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Resolver crash");

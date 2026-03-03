@@ -159,10 +159,26 @@ export const SessionBootstrapSchema = z.object({
 });
 
 export const PlanningInterviewSchema = z.object({
-  taskDescription: z.string().optional().describe("What task is being planned (required for first call)"),
-  packageName: z.string().optional().describe("Target package (uses current workspace if not provided)"),
-  sessionId: z.string().optional().describe("Session ID for follow-up rounds (omit for first call)"),
-  answers: z.tuple([z.number().int().min(0).max(3), z.number().int().min(0).max(3), z.number().int().min(0).max(3)]).optional().describe("Answers for 3 questions (0-3 index, required for follow-up calls)"),
+  taskDescription: z
+    .string()
+    .optional()
+    .describe("What task is being planned (required for first call)"),
+  packageName: z
+    .string()
+    .optional()
+    .describe("Target package (uses current workspace if not provided)"),
+  sessionId: z
+    .string()
+    .optional()
+    .describe("Session ID for follow-up rounds (omit for first call)"),
+  answers: z
+    .tuple([
+      z.number().int().min(0).max(3),
+      z.number().int().min(0).max(3),
+      z.number().int().min(0).max(3),
+    ])
+    .optional()
+    .describe("Answers for 3 questions (0-3 index, required for follow-up calls)"),
 });
 
 export const PrePRCheckSchema = z.object({
@@ -172,7 +188,10 @@ export const PrePRCheckSchema = z.object({
 });
 
 export const AutoShipSchema = z.object({
-  commitMessage: z.string().optional().describe("Commit message (default: chore(<pkg>): auto-ship changes)"),
+  commitMessage: z
+    .string()
+    .optional()
+    .describe("Commit message (default: chore(<pkg>): auto-ship changes)"),
   packageName: z.string().optional().describe("Which package to ship (default: active workspace)"),
   push: z.boolean().optional().default(true).describe("Whether to push after commit"),
   dryRun: z.boolean().optional().default(false).describe("Run checks only, skip commit/push"),
@@ -196,7 +215,11 @@ export const TypecheckSchema = z.object({
 
 export const GeneratePackageJsonSchema = z.object({
   packageName: z.string().describe("Name of the package"),
-  dryRun: z.boolean().optional().default(true).describe("If true, only output JSON without writing to disk"),
+  dryRun: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe("If true, only output JSON without writing to disk"),
 });
 
 export const PublishNpmSchema = z.object({
@@ -206,34 +229,53 @@ export const PublishNpmSchema = z.object({
     .optional()
     .default("github")
     .describe("Target registry (default: github)"),
-  dryRun: z.boolean().optional().default(true).describe("If true, show what would happen without publishing"),
+  dryRun: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe("If true, show what would happen without publishing"),
 });
 
 // ── Deploy Schemas ──────────────────────────────────────────────────────────
 
 export const GenerateWranglerTomlSchema = z.object({
   packageName: z.string().describe("Name of the worker package"),
-  dryRun: z.boolean().optional().default(true).describe("If true, only output TOML without writing to disk"),
+  dryRun: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe("If true, only output TOML without writing to disk"),
 });
 
 export const DeployWorkerSchema = z.object({
   packageName: z.string().describe("Name of the worker package to deploy"),
   env: z.string().optional().describe("Wrangler environment (e.g., staging, production)"),
-  dryRun: z.boolean().optional().default(true).describe("If true, show what would happen without deploying"),
+  dryRun: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe("If true, show what would happen without deploying"),
 });
 
 // ── Mirror Schema ───────────────────────────────────────────────────────────
 
 export const SyncMirrorSchema = z.object({
   packageName: z.string().describe("Name of the package to sync to its mirror repo"),
-  dryRun: z.boolean().optional().default(true).describe("If true, show what would happen without syncing"),
+  dryRun: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe("If true, show what would happen without syncing"),
 });
 
 // ── Manifest Schemas ────────────────────────────────────────────────────────
 
 export const ManifestQuerySchema = z.object({
   packageName: z.string().optional().describe("Filter by package name"),
-  kind: z.string().optional().describe("Filter by package kind (e.g., library, worker, mcp-server)"),
+  kind: z
+    .string()
+    .optional()
+    .describe("Filter by package kind (e.g., library, worker, mcp-server)"),
   field: z.string().optional().describe("Return only this field from matching packages"),
 });
 

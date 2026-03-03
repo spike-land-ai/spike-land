@@ -44,7 +44,8 @@ Object.keys(routes).forEach((path) => {
   const landingRoute = createRoute({
     getParentRoute: () => rootRoute,
     path,
-    component: () => path === "/" ? <LandingPage /> : <Wrapper codeSpace={routes[path as keyof typeof routes]} />,
+    component: () =>
+      path === "/" ? <LandingPage /> : <Wrapper codeSpace={routes[path as keyof typeof routes]} />,
   });
 
   dynamicRoutes.push(landingRoute);

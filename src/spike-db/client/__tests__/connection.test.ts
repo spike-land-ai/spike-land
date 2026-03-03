@@ -6,7 +6,7 @@ class MockWebSocket {
   static CLOSED = 3;
   readyState = 0;
   listeners: Record<string, ((...args: unknown[]) => void)[]> = {};
-  
+
   constructor(public url: string) {
     // Connect synchronously for tests to avoid timer races
     this.readyState = MockWebSocket.OPEN;
@@ -21,7 +21,7 @@ class MockWebSocket {
   }
 
   trigger(event: string, data: unknown) {
-    this.listeners[event]?.forEach(cb => cb(data));
+    this.listeners[event]?.forEach((cb) => cb(data));
   }
 
   send = vi.fn();
@@ -36,7 +36,13 @@ global.WebSocket = MockWebSocket;
 
 describe("Connection", () => {
   let conn: Connection;
-  let options: { url: string; onMessage: ReturnType<typeof vi.fn>; onOpen: ReturnType<typeof vi.fn>; onClose: ReturnType<typeof vi.fn>; onError: ReturnType<typeof vi.fn> };
+  let options: {
+    url: string;
+    onMessage: ReturnType<typeof vi.fn>;
+    onOpen: ReturnType<typeof vi.fn>;
+    onClose: ReturnType<typeof vi.fn>;
+    onError: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     vi.useFakeTimers();
@@ -71,10 +77,10 @@ describe("Connection", () => {
   it("queues and flushes pending messages", async () => {
     conn.send("msg1");
     expect(conn.isConnected).toBe(false);
-    
+
     conn.connect();
     await vi.advanceTimersByTimeAsync(10);
-    
+
     expect(conn.isConnected).toBe(true);
     const ws = (conn as unknown as { ws: MockWebSocket }).ws;
     expect(ws.send).toHaveBeenCalledWith("msg1");
@@ -83,12 +89,12 @@ describe("Connection", () => {
   it("schedules reconnect on close", async () => {
     conn.connect();
     await vi.advanceTimersByTimeAsync(10);
-    
+
     const ws = (conn as unknown as { ws: MockWebSocket }).ws;
     ws.trigger("close", {});
-    
+
     expect(options.onClose).toHaveBeenCalled();
-    
+
     // Fast forward to reconnect delay
     await vi.advanceTimersByTimeAsync(1000); // Initial delay is 1000ms
     expect(options.onOpen).toHaveBeenCalledTimes(2);
@@ -97,10 +103,10 @@ describe("Connection", () => {
   it("disconnects cleanly without reconnecting", async () => {
     conn.connect();
     await vi.advanceTimersByTimeAsync(10);
-    
+
     conn.disconnect();
     expect(options.onClose).not.toHaveBeenCalled(); // disconnecting flag true
-    
+
     await vi.advanceTimersByTimeAsync(5000);
     expect(options.onOpen).toHaveBeenCalledTimes(1); // No new connection
   });

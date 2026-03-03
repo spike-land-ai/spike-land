@@ -29,9 +29,21 @@ describe("context tools", () => {
       await cleanup();
       cleanup = undefined;
     }
-    try { await unlink("/tmp/bazdmeg-workspace.json"); } catch { /* ok */ }
-    try { await unlink("/tmp/bazdmeg-telemetry.jsonl"); } catch { /* ok */ }
-    try { await unlink("/tmp/bazdmeg-context-log.jsonl"); } catch { /* ok */ }
+    try {
+      await unlink("/tmp/bazdmeg-workspace.json");
+    } catch {
+      /* ok */
+    }
+    try {
+      await unlink("/tmp/bazdmeg-telemetry.jsonl");
+    } catch {
+      /* ok */
+    }
+    try {
+      await unlink("/tmp/bazdmeg-context-log.jsonl");
+    } catch {
+      /* ok */
+    }
   });
 
   it("registers 3 context tools", () => {

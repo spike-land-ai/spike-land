@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Wand2,
-  Monitor,
-  Tag,
-  Trash2,
-  Maximize,
-  Share2
-} from "lucide-react";
+import { Wand2, Monitor, Tag, Trash2, Maximize, Share2 } from "lucide-react";
 
 interface ToolOrbProps {
   onAction: (action: string) => void;
@@ -34,7 +27,9 @@ export function ToolOrb({ onAction, isVisible }: ToolOrbProps) {
             onClick={() => onAction(tool.id)}
             className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 group transition-all"
           >
-            <tool.icon className={`w-4 h-4 ${tool.color} group-hover:scale-110 transition-transform`} />
+            <tool.icon
+              className={`w-4 h-4 ${tool.color} group-hover:scale-110 transition-transform`}
+            />
             <span className="text-xs font-bold text-gray-400 group-hover:text-gray-100 whitespace-nowrap">
               {tool.label}
             </span>

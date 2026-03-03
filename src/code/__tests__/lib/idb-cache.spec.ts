@@ -11,13 +11,21 @@ function createMockIDB() {
     return {
       get(key: string) {
         const result = store.get(key);
-        const req = { result, onsuccess: null as (() => void) | null, onerror: null as (() => void) | null };
+        const req = {
+          result,
+          onsuccess: null as (() => void) | null,
+          onerror: null as (() => void) | null,
+        };
         queueMicrotask(() => req.onsuccess?.());
         return req;
       },
       put(value: { key: string }) {
         store.set(value.key, value);
-        const req = { result: undefined, onsuccess: null as (() => void) | null, onerror: null as (() => void) | null };
+        const req = {
+          result: undefined,
+          onsuccess: null as (() => void) | null,
+          onerror: null as (() => void) | null,
+        };
         queueMicrotask(() => req.onsuccess?.());
         return req;
       },
@@ -36,8 +44,12 @@ function createMockIDB() {
             req.result = {
               value,
               key,
-              delete: () => { store.delete(key); },
-              continue: () => { queueMicrotask(advance); },
+              delete: () => {
+                store.delete(key);
+              },
+              continue: () => {
+                queueMicrotask(advance);
+              },
             };
           } else {
             req.result = null;
@@ -66,7 +78,9 @@ function createMockIDB() {
     transaction: mockTransaction,
     close: vi.fn(),
     objectStoreNames,
-    createObjectStore: (name: string, _opts?: unknown) => { stores[name] = new Map(); },
+    createObjectStore: (name: string, _opts?: unknown) => {
+      stores[name] = new Map();
+    },
   };
 
   const mockOpen = (_name: string, _version?: number) => {
@@ -186,7 +200,13 @@ describe("idb-cache", () => {
   it("should gracefully handle IDB errors in getAtaCache", async () => {
     vi.stubGlobal("indexedDB", {
       open: () => {
-        const req = { result: null, onupgradeneeded: null, onsuccess: null, onerror: null as (() => void) | null, error: new Error("IDB error") };
+        const req = {
+          result: null,
+          onupgradeneeded: null,
+          onsuccess: null,
+          onerror: null as (() => void) | null,
+          error: new Error("IDB error"),
+        };
         queueMicrotask(() => req.onerror?.());
         return req;
       },
@@ -201,7 +221,13 @@ describe("idb-cache", () => {
   it("should gracefully handle IDB errors in setAtaCache", async () => {
     vi.stubGlobal("indexedDB", {
       open: () => {
-        const req = { result: null, onupgradeneeded: null, onsuccess: null, onerror: null as (() => void) | null, error: new Error("IDB error") };
+        const req = {
+          result: null,
+          onupgradeneeded: null,
+          onsuccess: null,
+          onerror: null as (() => void) | null,
+          error: new Error("IDB error"),
+        };
         queueMicrotask(() => req.onerror?.());
         return req;
       },

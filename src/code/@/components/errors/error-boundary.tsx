@@ -1,5 +1,5 @@
-import { Component } from 'react';
-import type { ErrorInfo, ReactNode } from 'react';
+import { Component } from "react";
+import type { ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children?: ReactNode;
@@ -14,7 +14,7 @@ interface State {
 
 export class ErrorBoundary extends Component<Props, State> {
   public override state: State = {
-    hasError: false
+    hasError: false,
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -25,7 +25,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
-    console.error('Uncaught error:', error, errorInfo);
+    console.error("Uncaught error:", error, errorInfo);
   }
 
   public override render() {
@@ -36,9 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="p-4 border border-red-500 rounded bg-red-50 text-red-900">
           <h2 className="text-lg font-bold mb-2">Something went wrong.</h2>
-          <details className="whitespace-pre-wrap">
-            {this.state.error?.toString()}
-          </details>
+          <details className="whitespace-pre-wrap">{this.state.error?.toString()}</details>
         </div>
       );
     }

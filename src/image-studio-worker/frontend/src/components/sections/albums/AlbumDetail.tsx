@@ -341,9 +341,7 @@ export function AlbumDetail({ selectedAlbum, albums, onBack }: AlbumDetailProps)
                                 <div className="relative shrink-0">
                                   <button
                                     onClick={() =>
-                                      setImageMenu(
-                                        imageMenu === img.image_id ? null : img.image_id,
-                                      )
+                                      setImageMenu(imageMenu === img.image_id ? null : img.image_id)
                                     }
                                     className={`p-1 rounded-lg transition-all ${
                                       imageMenu === img.image_id

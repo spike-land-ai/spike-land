@@ -113,10 +113,7 @@ export class ServerManager {
     return result;
   }
 
-  async callTool(
-    namespacedName: string,
-    args: Record<string, unknown>,
-  ): Promise<ToolCallResult> {
+  async callTool(namespacedName: string, args: Record<string, unknown>): Promise<ToolCallResult> {
     // Check meta-tools first
     if (this.toolsetManager?.isMetaTool(namespacedName)) {
       return this.toolsetManager.handleMetaTool(namespacedName, args);

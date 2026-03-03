@@ -98,7 +98,7 @@ export class SpikeDatabase extends DurableObject<Env> {
       return Response.json({ ok: false, error: "Schema not initialized" }, { status: 500 });
     }
 
-    const body = await request.json() as { args?: unknown[]; sender?: string };
+    const body = (await request.json()) as { args?: unknown[]; sender?: string };
     const args = body.args ?? [];
     const sender = body.sender ?? "http";
 
@@ -156,7 +156,9 @@ export class SpikeDatabase extends DurableObject<Env> {
 
   private handleReducerCall(ws: WebSocket, id: string, reducerName: string, args: unknown[]): void {
     if (!this.schema) {
-      ws.send(serialize({ type: "reducer_result", id, ok: false, error: "Schema not initialized" }));
+      ws.send(
+        serialize({ type: "reducer_result", id, ok: false, error: "Schema not initialized" }),
+      );
       return;
     }
 
@@ -169,12 +171,14 @@ export class SpikeDatabase extends DurableObject<Env> {
 
     const result = executeReducer(this.sql, this.schema, reducerName, args, sender, scheduleFn);
 
-    ws.send(serialize({
-      type: "reducer_result",
-      id,
-      ok: !result.error,
-      error: result.error,
-    }));
+    ws.send(
+      serialize({
+        type: "reducer_result",
+        id,
+        ok: !result.error,
+        error: result.error,
+      }),
+    );
 
     if (!result.error && result.mutations.length > 0) {
       this.subscriptionManager.broadcastDeltas(result.mutations, sender, reducerName);

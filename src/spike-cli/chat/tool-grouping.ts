@@ -66,11 +66,7 @@ export function groupToolsByPrefix(
   const groups = new Map<string, ToolGroup>();
 
   for (const tool of tools) {
-    const prefix = extractPrefix(
-      tool.namespacedName,
-      tool.serverName,
-      separator,
-    );
+    const prefix = extractPrefix(tool.namespacedName, tool.serverName, separator);
     const group = groups.get(prefix);
     if (group) {
       group.tools.push(tool);
@@ -94,17 +90,10 @@ export function groupToolsByApp(
 
   for (const tool of tools) {
     // Strip namespace to get original tool name for registry lookup
-    const stripped = stripNamespace(
-      tool.namespacedName,
-      tool.serverName,
-      separator,
-    );
-    const app = appRegistry.getAppForTool(stripped)
-      ?? appRegistry.getAppForTool(tool.originalName);
+    const stripped = stripNamespace(tool.namespacedName, tool.serverName, separator);
+    const app = appRegistry.getAppForTool(stripped) ?? appRegistry.getAppForTool(tool.originalName);
 
-    const key = app
-      ? app.slug
-      : extractPrefix(tool.namespacedName, tool.serverName, separator);
+    const key = app ? app.slug : extractPrefix(tool.namespacedName, tool.serverName, separator);
     const group = groups.get(key);
     if (group) {
       group.tools.push(tool);
@@ -139,7 +128,7 @@ export function isEntryPointTool(tool: NamespacedTool): boolean {
  */
 function isDependentTool(tool: NamespacedTool): boolean {
   const required = (tool.inputSchema.required as string[] | undefined) ?? [];
-  return required.some(param => param.endsWith("_id"));
+  return required.some((param) => param.endsWith("_id"));
 }
 
 /**
@@ -147,7 +136,7 @@ function isDependentTool(tool: NamespacedTool): boolean {
  */
 function getRequiredIdParams(tool: NamespacedTool): string[] {
   const required = (tool.inputSchema.required as string[] | undefined) ?? [];
-  return required.filter(p => p.endsWith("_id"));
+  return required.filter((p) => p.endsWith("_id"));
 }
 
 /**
@@ -158,16 +147,9 @@ function isBlockedByConfig(
   sessionState: SessionState,
   separator: string = "__",
 ): boolean {
-  const stripped = stripNamespace(
-    tool.namespacedName,
-    tool.serverName,
-    separator,
-  );
+  const stripped = stripNamespace(tool.namespacedName, tool.serverName, separator);
   for (const [configTool, dependents] of Object.entries(CONFIG_PREREQUISITES)) {
-    if (
-      dependents.includes(stripped)
-      && !sessionState.hasConfigBeenCalled(configTool)
-    ) {
+    if (dependents.includes(stripped) && !sessionState.hasConfigBeenCalled(configTool)) {
       return true;
     }
   }
@@ -183,7 +165,7 @@ export function getVisibleTools(
   tools: NamespacedTool[],
   sessionState: SessionState,
   separator: string = "__",
-): { visible: NamespacedTool[]; hidden: number; } {
+): { visible: NamespacedTool[]; hidden: number } {
   const visible: NamespacedTool[] = [];
   let hidden = 0;
 
@@ -191,11 +173,7 @@ export function getVisibleTools(
     if (isEntryPointTool(tool)) {
       visible.push(tool);
     } else if (isDependentTool(tool)) {
-      const prefix = extractPrefix(
-        tool.namespacedName,
-        tool.serverName,
-        separator,
-      );
+      const prefix = extractPrefix(tool.namespacedName, tool.serverName, separator);
       if (sessionState.hasCreated(prefix)) {
         visible.push(tool);
       } else {
@@ -216,7 +194,7 @@ export function getVisibleToolsEnhanced(
   tools: NamespacedTool[],
   sessionState: SessionState,
   separator: string = "__",
-): { visible: NamespacedTool[]; hidden: number; } {
+): { visible: NamespacedTool[]; hidden: number } {
   const visible: NamespacedTool[] = [];
   let hidden = 0;
 
@@ -232,17 +210,13 @@ export function getVisibleToolsEnhanced(
     } else if (isDependentTool(tool)) {
       // Check if ALL required ID params have been seen
       const requiredIds = getRequiredIdParams(tool);
-      const allIdsSatisfied = requiredIds.every(p => sessionState.hasId(p));
+      const allIdsSatisfied = requiredIds.every((p) => sessionState.hasId(p));
 
       if (allIdsSatisfied) {
         visible.push(tool);
       } else {
         // Fall back to prefix-based check
-        const prefix = extractPrefix(
-          tool.namespacedName,
-          tool.serverName,
-          separator,
-        );
+        const prefix = extractPrefix(tool.namespacedName, tool.serverName, separator);
         if (sessionState.hasCreated(prefix)) {
           visible.push(tool);
         } else {

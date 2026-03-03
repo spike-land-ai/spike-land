@@ -160,17 +160,32 @@ function getDefaultConcepts(): ConceptDefinition[] {
       variants: [
         {
           question: "What is the main topic of this content?",
-          options: ["The primary subject discussed", "An unrelated topic", "A minor detail", "Background information"],
+          options: [
+            "The primary subject discussed",
+            "An unrelated topic",
+            "A minor detail",
+            "Background information",
+          ],
           correctIndex: 0,
         },
         {
           question: "Which best describes the central theme?",
-          options: ["A secondary theme", "The main theme of the content", "An opposing viewpoint", "A tangential idea"],
+          options: [
+            "A secondary theme",
+            "The main theme of the content",
+            "An opposing viewpoint",
+            "A tangential idea",
+          ],
           correctIndex: 1,
         },
         {
           question: "The content primarily focuses on:",
-          options: ["Unrelated matters", "Historical context only", "The core subject matter", "Future predictions"],
+          options: [
+            "Unrelated matters",
+            "Historical context only",
+            "The core subject matter",
+            "Future predictions",
+          ],
           correctIndex: 2,
         },
       ],
@@ -180,17 +195,32 @@ function getDefaultConcepts(): ConceptDefinition[] {
       variants: [
         {
           question: "Which detail is most important to the content?",
-          options: ["A minor footnote", "A key supporting detail", "An unmentioned fact", "A contradicting claim"],
+          options: [
+            "A minor footnote",
+            "A key supporting detail",
+            "An unmentioned fact",
+            "A contradicting claim",
+          ],
           correctIndex: 1,
         },
         {
           question: "What supporting evidence is presented?",
-          options: ["The main evidence from the content", "No evidence at all", "Only anecdotal claims", "Only statistical data"],
+          options: [
+            "The main evidence from the content",
+            "No evidence at all",
+            "Only anecdotal claims",
+            "Only statistical data",
+          ],
           correctIndex: 0,
         },
         {
           question: "The most significant detail mentioned is:",
-          options: ["Something not in the content", "A trivial aside", "An important supporting fact", "A disputed claim"],
+          options: [
+            "Something not in the content",
+            "A trivial aside",
+            "An important supporting fact",
+            "A disputed claim",
+          ],
           correctIndex: 2,
         },
       ],
@@ -200,17 +230,32 @@ function getDefaultConcepts(): ConceptDefinition[] {
       variants: [
         {
           question: "What can be inferred from this content?",
-          options: ["Nothing meaningful", "A key implication", "The opposite of what's stated", "An unrelated conclusion"],
+          options: [
+            "Nothing meaningful",
+            "A key implication",
+            "The opposite of what's stated",
+            "An unrelated conclusion",
+          ],
           correctIndex: 1,
         },
         {
           question: "The content implies that:",
-          options: ["A logical conclusion from the content", "Something contradictory", "Something completely unrelated", "The content has no implications"],
+          options: [
+            "A logical conclusion from the content",
+            "Something contradictory",
+            "Something completely unrelated",
+            "The content has no implications",
+          ],
           correctIndex: 0,
         },
         {
           question: "Based on the content, which is most likely true?",
-          options: ["Something unrelated", "Something contradicted by the content", "Something not discussed", "A reasonable inference from the content"],
+          options: [
+            "Something unrelated",
+            "Something contradicted by the content",
+            "Something not discussed",
+            "A reasonable inference from the content",
+          ],
           correctIndex: 3,
         },
       ],
@@ -427,10 +472,7 @@ export function generateBadgeToken(payload: BadgePayload, secret: string): strin
 }
 
 /** Verify a badge token */
-export function verifyBadgeToken(
-  token: string,
-  secret: string,
-): BadgePayload | null {
+export function verifyBadgeToken(token: string, secret: string): BadgePayload | null {
   const parts = token.split(".");
   if (parts.length !== 2) return null;
 
@@ -520,7 +562,10 @@ export function registerQuizTools(registry: ToolRegistry, userId: string, db: Dr
           article: articleContent,
           concepts,
           conceptStates,
-          currentRound: { roundNumber: 0, questions: [] as unknown as [QuizQuestion, QuizQuestion, QuizQuestion] },
+          currentRound: {
+            roundNumber: 0,
+            questions: [] as unknown as [QuizQuestion, QuizQuestion, QuizQuestion],
+          },
           roundNumber: 1,
           conflicts: [],
           completed: false,
@@ -534,15 +579,12 @@ export function registerQuizTools(registry: ToolRegistry, userId: string, db: Dr
 
         sessions.set(id, session);
 
-        return jsonResult(
-          `Quiz session ${id} created with ${concepts.length} concepts`,
-          {
-            sessionId: id,
-            article: truncate(articleContent, 2000),
-            concepts: concepts.map((c) => c.name),
-            firstRound: sanitizeRound(session.currentRound),
-          },
-        );
+        return jsonResult(`Quiz session ${id} created with ${concepts.length} concepts`, {
+          sessionId: id,
+          article: truncate(articleContent, 2000),
+          concepts: concepts.map((c) => c.name),
+          firstRound: sanitizeRound(session.currentRound),
+        });
       }),
   );
 
@@ -555,7 +597,11 @@ export function registerQuizTools(registry: ToolRegistry, userId: string, db: Dr
         {
           session_id: z.string().describe("Quiz session ID."),
           answers: z
-            .tuple([z.number().int().min(0).max(3), z.number().int().min(0).max(3), z.number().int().min(0).max(3)])
+            .tuple([
+              z.number().int().min(0).max(3),
+              z.number().int().min(0).max(3),
+              z.number().int().min(0).max(3),
+            ])
             .describe("Answers for each of the 3 questions (0-3 index)."),
         },
       )
@@ -624,13 +670,9 @@ export function registerQuizTools(registry: ToolRegistry, userId: string, db: Dr
   // ── quiz_get_badge ───────────────────────────────────────────────────────
   registry.registerBuilt(
     freeTool(userId, db)
-      .tool(
-        "quiz_get_badge",
-        "Get the badge for a completed quiz session.",
-        {
-          session_id: z.string().describe("Quiz session ID."),
-        },
-      )
+      .tool("quiz_get_badge", "Get the badge for a completed quiz session.", {
+        session_id: z.string().describe("Quiz session ID."),
+      })
       .meta({ category: "learn", tier: "free" })
       .handler(async ({ input }) => {
         const session = sessions.get(input.session_id);

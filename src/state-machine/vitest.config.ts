@@ -7,12 +7,7 @@ export default mergeConfig(
     test: {
       name: "state-machine",
       coverage: {
-        exclude: [
-          "src/**/*.test.ts",
-          "src/cli.ts",
-          "src/index.ts",
-          "src/types.ts",
-        ],
+        exclude: ["src/**/*.test.ts", "src/cli.ts", "src/index.ts", "src/types.ts"],
       },
     },
   }),

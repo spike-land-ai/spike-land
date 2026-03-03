@@ -354,9 +354,11 @@ describe("proxy route — ai", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi.fn().mockResolvedValue(
-      new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValue(
+        new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
+      );
     vi.stubGlobal("fetch", mockFetch);
 
     await app.request(
@@ -839,9 +841,11 @@ describe("proxy route — body forwarding", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi.fn().mockResolvedValue(
-      new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValue(
+        new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
+      );
     vi.stubGlobal("fetch", mockFetch);
 
     await app.request(
@@ -870,9 +874,11 @@ describe("proxy route — body forwarding", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi.fn().mockResolvedValue(
-      new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValue(
+        new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
+      );
     vi.stubGlobal("fetch", mockFetch);
 
     await app.request(
@@ -896,9 +902,11 @@ describe("proxy route — body forwarding", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi.fn().mockResolvedValue(
-      new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValue(
+        new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
+      );
     vi.stubGlobal("fetch", mockFetch);
 
     await app.request(
@@ -927,9 +935,11 @@ describe("proxy route — body forwarding", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi.fn().mockResolvedValue(
-      new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValue(
+        new Response("{}", { status: 200, headers: { "content-type": "application/json" } }),
+      );
     vi.stubGlobal("fetch", mockFetch);
 
     await app.request(
@@ -953,9 +963,11 @@ describe("proxy route — body forwarding", () => {
     app.route("/", proxy);
 
     const env = createMockEnv();
-    const mockFetch = vi.fn().mockResolvedValue(
-      new Response("{}", { status: 201, headers: { "content-type": "application/json" } }),
-    );
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValue(
+        new Response("{}", { status: 201, headers: { "content-type": "application/json" } }),
+      );
     vi.stubGlobal("fetch", mockFetch);
 
     const res = await app.request(

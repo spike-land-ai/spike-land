@@ -68,8 +68,15 @@ export interface ChatMessagePayload {
 }
 
 export interface ChatSSEEvent {
-  type: "text_delta" | "thought" | "tool_call_start" | "tool_call_end" |
-        "browser_command" | "gallery_update" | "system_notice" | "error";
+  type:
+    | "text_delta"
+    | "thought"
+    | "tool_call_start"
+    | "tool_call_end"
+    | "browser_command"
+    | "gallery_update"
+    | "system_notice"
+    | "error";
 }
 
 export interface TextDeltaEvent extends ChatSSEEvent {

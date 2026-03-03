@@ -98,7 +98,12 @@ function generateMockSession(content: string): SessionState {
 function evaluateMockAnswers(
   state: SessionState,
   answers: [number, number, number],
-): { results: AnswerResult[]; conflicts: Conflict[]; nextRound: RoundData | null; badge: BadgeData | null } {
+): {
+  results: AnswerResult[];
+  conflicts: Conflict[];
+  nextRound: RoundData | null;
+  badge: BadgeData | null;
+} {
   // In the mock, option 0 is always correct
   const results: AnswerResult[] = answers.map((answer, idx) => ({
     questionIndex: idx,
@@ -134,7 +139,14 @@ function evaluateMockAnswers(
       conflicts: [],
       nextRound: null,
       badge: {
-        token: btoa(JSON.stringify({ sid: "mock", topic: state.concepts[0] ?? "Quiz", score, ts: Date.now() })),
+        token: btoa(
+          JSON.stringify({
+            sid: "mock",
+            topic: state.concepts[0] ?? "Quiz",
+            score,
+            ts: Date.now(),
+          }),
+        ),
         topic: state.concepts[0] ?? "Quiz",
         score,
         completedAt: new Date().toISOString(),
@@ -180,7 +192,9 @@ export function LearnSessionPage() {
   const [state, setState] = useState<SessionState | null>(null);
   const [articleCollapsed, setArticleCollapsed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [_roundHistory, setRoundHistory] = useState<Array<{ round: RoundData; results: AnswerResult[] }>>([]);
+  const [_roundHistory, setRoundHistory] = useState<
+    Array<{ round: RoundData; results: AnswerResult[] }>
+  >([]);
 
   useEffect(() => {
     // Load session data from sessionStorage
@@ -194,7 +208,9 @@ export function LearnSessionPage() {
         setState(generateMockSession("No content available. Try creating a new quiz."));
       }
     } else {
-      setState(generateMockSession("No content available. Try creating a new quiz from the Learn page."));
+      setState(
+        generateMockSession("No content available. Try creating a new quiz from the Learn page."),
+      );
     }
   }, [sessionId]);
 

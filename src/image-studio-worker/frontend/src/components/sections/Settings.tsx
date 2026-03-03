@@ -1,5 +1,16 @@
 import { useState, useEffect } from "react";
-import { Key, Save, Trash2, ShieldCheck, CheckCircle2, AlertCircle, Loader2, Sparkles, Brain, Image as ImageIcon } from "lucide-react";
+import {
+  Key,
+  Save,
+  Trash2,
+  ShieldCheck,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Sparkles,
+  Brain,
+  Image as ImageIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export function Settings() {
@@ -34,7 +45,9 @@ export function Settings() {
 
     try {
       // Basic call to list models to verify key
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
+      );
       if (res.ok) {
         setIsValidatingStatus("valid");
         toast.success("API Key verified");
@@ -78,8 +91,12 @@ export function Settings() {
               <Key className="w-5 h-5 text-amber-neon" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight uppercase">Access Token</h3>
-              <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Google AI Studio</p>
+              <h3 className="text-sm font-bold text-white tracking-tight uppercase">
+                Access Token
+              </h3>
+              <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">
+                Google AI Studio
+              </p>
             </div>
           </div>
 
@@ -108,7 +125,9 @@ export function Settings() {
               className="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-gray-400 hover:bg-white/10 hover:text-white transition-all disabled:opacity-20 flex items-center justify-center gap-2"
             >
               {isValidating ? <Loader2 className="w-3 h-3 animate-spin" /> : "Verify Token"}
-              {validationStatus === "valid" && <CheckCircle2 className="w-3 h-3 text-emerald-neon" />}
+              {validationStatus === "valid" && (
+                <CheckCircle2 className="w-3 h-3 text-emerald-neon" />
+              )}
               {validationStatus === "invalid" && <AlertCircle className="w-3 h-3 text-red-500" />}
             </button>
           </div>
@@ -131,7 +150,9 @@ export function Settings() {
             </div>
             <div>
               <h3 className="text-sm font-bold text-white tracking-tight uppercase">Engines</h3>
-              <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Routing Preferences</p>
+              <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">
+                Routing Preferences
+              </p>
             </div>
           </div>
 
@@ -164,16 +185,19 @@ export function Settings() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[8px] font-black uppercase tracking-widest text-gray-500">Thinking Budget</label>
+              <label className="text-[8px] font-black uppercase tracking-widest text-gray-500">
+                Thinking Budget
+              </label>
               <div className="grid grid-cols-3 gap-1.5">
                 {["off", "partial", "full"].map((mode) => (
                   <button
                     key={mode}
                     onClick={() => setThinkingBudget(mode)}
-                    className={`py-1.5 rounded-lg text-[8px] font-black uppercase transition-all ${thinkingBudget === mode
-                      ? "bg-emerald-neon text-obsidian-950 shadow-lg shadow-emerald-neon/20"
-                      : "bg-white/5 text-gray-600 hover:text-gray-400"
-                      }`}
+                    className={`py-1.5 rounded-lg text-[8px] font-black uppercase transition-all ${
+                      thinkingBudget === mode
+                        ? "bg-emerald-neon text-obsidian-950 shadow-lg shadow-emerald-neon/20"
+                        : "bg-white/5 text-gray-600 hover:text-gray-400"
+                    }`}
                   >
                     {mode}
                   </button>

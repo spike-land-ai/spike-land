@@ -1,5 +1,5 @@
 import { SpikeDbClient } from "./client/index.js";
-import type { SpikeDbClientOptions , ClientTable } from "./client/index.js";
+import type { SpikeDbClientOptions, ClientTable } from "./client/index.js";
 import { platformDatabase } from "./platform-schema.js";
 
 // ---------------------------------------------------------------------------
@@ -428,7 +428,12 @@ export class PlatformClient extends SpikeDbClient {
     return this.callReducer("mark_agent_message_delivered", messageId);
   }
 
-  async createApp(slug: string, name: string, description: string, r2CodeKey: string): Promise<void> {
+  async createApp(
+    slug: string,
+    name: string,
+    description: string,
+    r2CodeKey: string,
+  ): Promise<void> {
     return this.callReducer("create_app", slug, name, description, r2CodeKey);
   }
 
@@ -464,11 +469,20 @@ export class PlatformClient extends SpikeDbClient {
     return this.callReducer("send_app_message", appId, role, content);
   }
 
-  async registerTool(name: string, description: string, inputSchema: string, category: string): Promise<void> {
+  async registerTool(
+    name: string,
+    description: string,
+    inputSchema: string,
+    category: string,
+  ): Promise<void> {
     return this.callReducer("register_tool", name, description, inputSchema, category);
   }
 
-  async recordPlatformEvent(source: string, eventType: string, metadataJson: string): Promise<void> {
+  async recordPlatformEvent(
+    source: string,
+    eventType: string,
+    metadataJson: string,
+  ): Promise<void> {
     return this.callReducer("record_platform_event", source, eventType, metadataJson);
   }
 

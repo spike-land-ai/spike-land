@@ -72,7 +72,7 @@ export function registerGatesTools(server: McpServer): void {
         const available = getBuiltinRules().map((r) => r.name);
         return textResult(
           `Gate "${gateName}" not found. Available gates:\n` +
-          available.map((n) => `  - ${n}`).join("\n"),
+            available.map((n) => `  - ${n}`).join("\n"),
         );
       }
 

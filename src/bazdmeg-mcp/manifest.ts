@@ -211,7 +211,10 @@ function parseScalar(value: string): string | number | boolean | null {
   const clean = commentIdx >= 0 ? value.slice(0, commentIdx).trim() : value;
 
   // Remove quotes
-  if ((clean.startsWith('"') && clean.endsWith('"')) || (clean.startsWith("'") && clean.endsWith("'"))) {
+  if (
+    (clean.startsWith('"') && clean.endsWith('"')) ||
+    (clean.startsWith("'") && clean.endsWith("'"))
+  ) {
     return clean.slice(1, -1);
   }
 

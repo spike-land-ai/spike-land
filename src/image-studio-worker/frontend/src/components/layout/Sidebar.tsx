@@ -1,15 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import {
-  Box,
-  Archive,
-  Cpu,
-  Share2,
-  Settings,
-  Activity,
-  Zap,
-  LogOut,
-  Grid,
-} from "lucide-react";
+import { Box, Archive, Cpu, Share2, Settings, Activity, Zap, LogOut, Grid } from "lucide-react";
 
 export type Workspace = "studio" | "gallery" | "archive" | "intelligence" | "showcase" | "settings";
 
@@ -46,18 +36,37 @@ function getInitial(user: SidebarUser): string {
   return "?";
 }
 
-function UserAvatar({ user, size = "md", onClick }: { user: SidebarUser; size?: "sm" | "md"; onClick?: () => void }) {
+function UserAvatar({
+  user,
+  size = "md",
+  onClick,
+}: {
+  user: SidebarUser;
+  size?: "sm" | "md";
+  onClick?: () => void;
+}) {
   const dim = size === "sm" ? "w-8 h-8" : "w-10 h-10";
   const textSize = size === "sm" ? "text-xs" : "text-sm";
   if (user.image) {
     return (
-      <button onClick={onClick} className={`${dim} rounded-xl overflow-hidden hover:ring-2 ring-amber-neon/50 transition-all cursor-pointer`}>
-        <img src={user.image} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+      <button
+        onClick={onClick}
+        className={`${dim} rounded-xl overflow-hidden hover:ring-2 ring-amber-neon/50 transition-all cursor-pointer`}
+      >
+        <img
+          src={user.image}
+          alt=""
+          className="w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+        />
       </button>
     );
   }
   return (
-    <button onClick={onClick} className={`${dim} rounded-xl bg-gradient-to-tr from-amber-neon to-emerald-neon flex items-center justify-center hover:ring-2 ring-amber-neon/50 transition-all cursor-pointer`}>
+    <button
+      onClick={onClick}
+      className={`${dim} rounded-xl bg-gradient-to-tr from-amber-neon to-emerald-neon flex items-center justify-center hover:ring-2 ring-amber-neon/50 transition-all cursor-pointer`}
+    >
       <span className={`${textSize} font-bold text-obsidian-950`}>{getInitial(user)}</span>
     </button>
   );
@@ -100,11 +109,13 @@ export function Sidebar({ active, onNavigate, user, onLogout }: SidebarProps) {
                 aria-label={label}
                 aria-current={isActive ? "page" : undefined}
               >
-                <Icon className={`w-5 h-5 ${isActive ? "drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]" : ""}`} />
+                <Icon
+                  className={`w-5 h-5 ${isActive ? "drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]" : ""}`}
+                />
                 {isActive && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-amber-neon rounded-r-full shadow-[0_0_8px_rgba(255,184,0,0.8)]" />
                 )}
-                
+
                 {/* Tooltip */}
                 <div className="absolute left-16 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-obsidian-900 border border-white/10 text-[10px] font-black uppercase tracking-widest text-gray-200 opacity-0 group-hover:opacity-100 pointer-events-none transition-all translate-x-[-10px] group-hover:translate-x-0 whitespace-nowrap z-50 shadow-2xl">
                   {label}
@@ -124,7 +135,9 @@ export function Sidebar({ active, onNavigate, user, onLogout }: SidebarProps) {
           <button
             onClick={() => onNavigate("settings")}
             className={`p-3 rounded-xl transition-all ${
-              active === "settings" ? "bg-white/10 text-white" : "text-gray-500 hover:text-white hover:bg-white/5"
+              active === "settings"
+                ? "bg-white/10 text-white"
+                : "text-gray-500 hover:text-white hover:bg-white/5"
             }`}
             aria-label="Settings"
             aria-current={active === "settings" ? "page" : undefined}
@@ -137,11 +150,20 @@ export function Sidebar({ active, onNavigate, user, onLogout }: SidebarProps) {
               {showPopover && (
                 <div className="absolute left-14 bottom-0 w-52 rounded-2xl bg-obsidian-900 border border-white/10 shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-200">
                   <div className="mb-3 px-1">
-                    {user.name && <div className="text-[11px] font-bold text-white truncate">{user.name}</div>}
-                    {user.email && <div className="text-[9px] text-gray-500 truncate font-medium">{user.email}</div>}
+                    {user.name && (
+                      <div className="text-[11px] font-bold text-white truncate">{user.name}</div>
+                    )}
+                    {user.email && (
+                      <div className="text-[9px] text-gray-500 truncate font-medium">
+                        {user.email}
+                      </div>
+                    )}
                   </div>
                   <button
-                    onClick={() => { setShowPopover(false); onLogout?.(); }}
+                    onClick={() => {
+                      setShowPopover(false);
+                      onLogout?.();
+                    }}
                     className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-red-400 hover:bg-red-500/5 transition-colors"
                   >
                     <LogOut className="w-3.5 h-3.5" />
@@ -169,7 +191,9 @@ export function Sidebar({ active, onNavigate, user, onLogout }: SidebarProps) {
               aria-current={isActive ? "page" : undefined}
             >
               <div className={`p-2 rounded-xl transition-all ${isActive ? "bg-amber-neon/5" : ""}`}>
-                <Icon className={`w-5 h-5 ${isActive ? "drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]" : ""}`} />
+                <Icon
+                  className={`w-5 h-5 ${isActive ? "drop-shadow-[0_0_8px_rgba(255,184,0,0.5)]" : ""}`}
+                />
               </div>
               <span className="text-[7px] font-black uppercase tracking-[0.2em]">{label}</span>
             </button>
@@ -183,7 +207,9 @@ export function Sidebar({ active, onNavigate, user, onLogout }: SidebarProps) {
           aria-label="Settings"
           aria-current={active === "settings" ? "page" : undefined}
         >
-          <div className={`p-2 rounded-xl transition-all ${active === "settings" ? "bg-white/5" : ""}`}>
+          <div
+            className={`p-2 rounded-xl transition-all ${active === "settings" ? "bg-white/5" : ""}`}
+          >
             <Settings className="w-5 h-5" />
           </div>
           <span className="text-[7px] font-black uppercase tracking-[0.2em]">Settings</span>

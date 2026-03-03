@@ -142,14 +142,7 @@ function Defs({ id }: { id: string }) {
       <pattern id={`${id}-dots`} width="20" height="20" patternUnits="userSpaceOnUse">
         <circle cx="10" cy="10" r="0.8" fill="rgba(148,163,184,0.06)" />
       </pattern>
-      <marker
-        id={`${id}-arrow`}
-        markerWidth="6"
-        markerHeight="6"
-        refX="5"
-        refY="3"
-        orient="auto"
-      >
+      <marker id={`${id}-arrow`} markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
         <path d="M0,0 L0,6 L6,3 z" fill="rgba(34,211,238,0.7)" />
       </marker>
       <marker
@@ -255,17 +248,13 @@ function Edge({
 
 // ─── Node circle ─────────────────────────────────────────────────────────────
 
-function Node({
-  node,
-  progress,
-  filterId,
-}: {
-  node: NodeDef;
-  progress: number;
-  filterId: string;
-}) {
+function Node({ node, progress, filterId }: { node: NodeDef; progress: number; filterId: string }) {
   const APPEAR_DURATION = 0.08;
-  const appearPhase = phaseOf(progress, node.isRoot ? 0 : node.activateAt - 0.05, node.activateAt + APPEAR_DURATION);
+  const appearPhase = phaseOf(
+    progress,
+    node.isRoot ? 0 : node.activateAt - 0.05,
+    node.activateAt + APPEAR_DURATION,
+  );
   const isLit = appearPhase >= 1 && (node.isRoot ? progress >= 0.2 : true);
 
   // Root pulses when first activated
@@ -274,7 +263,9 @@ function Node({
   const r = node.isRoot ? 30 : 22;
 
   // PR badge appears after node lights up
-  const prPhase = node.isRoot ? 0 : phaseOf(progress, node.activateAt + 0.06, node.activateAt + 0.14);
+  const prPhase = node.isRoot
+    ? 0
+    : phaseOf(progress, node.activateAt + 0.06, node.activateAt + 0.14);
   const showPr = prPhase > 0;
 
   const nodeColor = node.isRoot
@@ -301,7 +292,8 @@ function Node({
       ? "rgba(34,211,238,0.1)"
       : "rgba(15,23,42,0.8)";
 
-  const labelColor = isLit || (node.isRoot && progress >= 0.2) ? "rgba(226,232,240,0.9)" : "rgba(71,85,105,0.8)";
+  const labelColor =
+    isLit || (node.isRoot && progress >= 0.2) ? "rgba(226,232,240,0.9)" : "rgba(71,85,105,0.8)";
   const sublabelColor =
     isLit || (node.isRoot && progress >= 0.2) ? "rgba(34,211,238,0.7)" : "rgba(51,65,85,0.7)";
 
@@ -309,11 +301,7 @@ function Node({
     <g transform={`translate(${node.x}, ${node.y})`} opacity={appearPhase}>
       {/* Glow halo when lit */}
       {(isLit || (node.isRoot && progress >= 0.2)) && (
-        <circle
-          r={r + 8}
-          fill="rgba(34,211,238,0.05)"
-          filter={`url(#${filterId}-glow)`}
-        />
+        <circle r={r + 8} fill="rgba(34,211,238,0.05)" filter={`url(#${filterId}-glow)`} />
       )}
 
       {/* Root pulse ring */}
@@ -333,7 +321,7 @@ function Node({
         fill={fillColor}
         stroke={strokeColor}
         strokeWidth={node.isRoot ? 2 : 1.5}
-        filter={(isLit || (node.isRoot && progress >= 0.2)) ? `url(#${filterId}-glow)` : undefined}
+        filter={isLit || (node.isRoot && progress >= 0.2) ? `url(#${filterId}-glow)` : undefined}
         style={{ transition: "fill 0.4s ease, stroke 0.4s ease" }}
       />
 
@@ -347,7 +335,11 @@ function Node({
         fontWeight="bold"
         letterSpacing={0.5}
       >
-        {node.isRoot ? "shared" : node.label.length > 10 ? node.label.slice(0, 9) + "…" : node.label}
+        {node.isRoot
+          ? "shared"
+          : node.label.length > 10
+            ? node.label.slice(0, 9) + "…"
+            : node.label}
       </text>
       <text
         y={8}
@@ -358,7 +350,11 @@ function Node({
         letterSpacing={0.3}
         style={{ transition: "fill 0.4s ease" }}
       >
-        {node.isRoot ? "@spike-land-ai" : node.sublabel.length > 12 ? node.sublabel.slice(0, 11) + "…" : node.sublabel}
+        {node.isRoot
+          ? "@spike-land-ai"
+          : node.sublabel.length > 12
+            ? node.sublabel.slice(0, 11) + "…"
+            : node.sublabel}
       </text>
 
       {/* Full label below circle */}
@@ -426,7 +422,16 @@ function CounterBadge({ progress }: { progress: number }) {
           boxShadow: "0 0 20px rgba(34,197,94,0.1)",
         }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <polyline points="20 6 9 17 4 12" />
         </svg>
         <span>{count} repos updated</span>
@@ -539,12 +544,7 @@ export function DependencyCascadeDemo() {
 
           {/* Nodes */}
           {NODES.map((node) => (
-            <Node
-              key={node.id}
-              node={node}
-              progress={progress}
-              filterId={instanceId}
-            />
+            <Node key={node.id} node={node} progress={progress} filterId={instanceId} />
           ))}
 
           {/* "publish" label near root */}
@@ -603,13 +603,50 @@ export function DependencyCascadeDemo() {
 
           {/* Legend */}
           <g transform="translate(16, 462)" opacity={Math.min(1, progress * 5)}>
-            <circle cx={6} cy={0} r={4} fill="rgba(34,211,238,0.15)" stroke="rgba(34,211,238,0.6)" strokeWidth={1} />
-            <text x={16} y={4} fill="rgba(100,116,139,0.7)" fontSize={9} fontFamily="JetBrains Mono, monospace">
+            <circle
+              cx={6}
+              cy={0}
+              r={4}
+              fill="rgba(34,211,238,0.15)"
+              stroke="rgba(34,211,238,0.6)"
+              strokeWidth={1}
+            />
+            <text
+              x={16}
+              y={4}
+              fill="rgba(100,116,139,0.7)"
+              fontSize={9}
+              fontFamily="JetBrains Mono, monospace"
+            >
               Lit = updated
             </text>
-            <rect x={100} y={-5} width={20} height={12} rx={2} fill="rgba(34,197,94,0.12)" stroke="rgba(34,197,94,0.45)" strokeWidth={0.7} />
-            <text x={103} y={3} fill="rgba(34,197,94,0.8)" fontSize={7} fontFamily="JetBrains Mono, monospace" fontWeight="bold">PR</text>
-            <text x={126} y={4} fill="rgba(100,116,139,0.7)" fontSize={9} fontFamily="JetBrains Mono, monospace">
+            <rect
+              x={100}
+              y={-5}
+              width={20}
+              height={12}
+              rx={2}
+              fill="rgba(34,197,94,0.12)"
+              stroke="rgba(34,197,94,0.45)"
+              strokeWidth={0.7}
+            />
+            <text
+              x={103}
+              y={3}
+              fill="rgba(34,197,94,0.8)"
+              fontSize={7}
+              fontFamily="JetBrains Mono, monospace"
+              fontWeight="bold"
+            >
+              PR
+            </text>
+            <text
+              x={126}
+              y={4}
+              fill="rgba(100,116,139,0.7)"
+              fontSize={9}
+              fontFamily="JetBrains Mono, monospace"
+            >
               auto-PR opened
             </text>
           </g>
@@ -623,7 +660,8 @@ export function DependencyCascadeDemo() {
       <div className="flex flex-col items-center gap-3 mt-10">
         <div className="h-px w-32 bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
         <p className="text-center text-[10px] font-mono text-slate-500 tracking-[0.2em] uppercase max-w-md leading-relaxed">
-          One publish triggers a repository_dispatch cascade — every consumer receives an auto-merge PR
+          One publish triggers a repository_dispatch cascade — every consumer receives an auto-merge
+          PR
         </p>
       </div>
     </div>

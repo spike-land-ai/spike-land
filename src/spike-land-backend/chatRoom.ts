@@ -86,7 +86,6 @@ export class Code implements DurableObject {
     this.versionCount = versionNumber;
     await this.largeStorage.putDirect("version_count", versionNumber);
 
-
     return version;
   }
 
@@ -464,8 +463,7 @@ export class Code implements DurableObject {
       if (sessionCore && sessionCore.codeSpace === codeSpace) {
         // Ensure loaded core is for the correct codespace
         const code = (await this.largeStorage.get<string>("session_code")) ?? "";
-        const transpiled =
-          (await this.largeStorage.get<string>("session_transpiled")) ?? "";
+        const transpiled = (await this.largeStorage.get<string>("session_transpiled")) ?? "";
 
         const r2HtmlKey = `r2_html_${codeSpace}`;
         const r2CssKey = `r2_css_${codeSpace}`;
@@ -628,7 +626,7 @@ export class Code implements DurableObject {
 
       if (request.method === "POST" && request.url.endsWith("/session")) {
         try {
-          const newSession = await request.json() as ICodeSession;
+          const newSession = (await request.json()) as ICodeSession;
           await this.updateAndBroadcastSession(newSession);
         } catch (_error) {
           return new Response("Invalid session data", { status: 400 });

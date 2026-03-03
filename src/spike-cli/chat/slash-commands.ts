@@ -5,15 +5,8 @@
 
 import type { Interface as ReadlineInterface } from "node:readline";
 import type { ChatClient, Message } from "./client";
-import type {
-  NamespacedTool,
-  ServerManager,
-} from "../multiplexer/server-manager";
-import {
-  executeToolCall,
-  extractDefaults,
-  getRequiredParams,
-} from "./tool-adapter";
+import type { NamespacedTool, ServerManager } from "../multiplexer/server-manager";
+import { executeToolCall, extractDefaults, getRequiredParams } from "./tool-adapter";
 import { fuzzyFilter, fuzzyScore } from "../util/fuzzy";
 import { bold, cyan, dim, green, yellow } from "../shell/formatter";
 import type { AppRegistry } from "./app-registry";
@@ -128,12 +121,7 @@ function handleBuiltinCommand(
 
       // Use app-grouped display when registry is available and has apps
       if (appRegistry && appRegistry.getAllApps().length > 0) {
-        const output = formatAppGroupedTools(
-          tools,
-          sessionState,
-          appRegistry,
-          filter,
-        );
+        const output = formatAppGroupedTools(tools, sessionState, appRegistry, filter);
         return { output, exit: false, cleared: false };
       }
 
@@ -159,7 +147,7 @@ function handleBuiltinCommand(
       if (names.length === 0) {
         return { output: "No servers connected.", exit: false, cleared: false };
       }
-      const lines = names.map(name => {
+      const lines = names.map((name) => {
         const count = manager.getServerTools(name).length;
         return `  ${bold(name)} (${count} tools)`;
       });
@@ -201,7 +189,7 @@ function handleBuiltinCommand(
 
 ${bold("Direct tool invocation:")}
   ${cyan("/<tool_name>")}${dim(" [json-args]")}  Invoke an MCP tool directly
-  ${dim("  Example: /chess_create_game {\"time_control\": \"RAPID_10\"}")}
+  ${dim('  Example: /chess_create_game {"time_control": "RAPID_10"}')}
   ${dim("  Defaults from schema are applied automatically")}
   ${dim("  IDs from previous results are auto-filled")}
   ${dim("  Fuzzy matching resolves partial names")}`,
@@ -234,9 +222,9 @@ async function handleDirectToolCall(
   const resolved = resolveToolName(command, allTools);
   if (!resolved) {
     return {
-      output: `${yellow("No matching tool found for:")} /${command}\nType ${
-        dim("/tools")
-      } to see available tools.`,
+      output: `${yellow("No matching tool found for:")} /${command}\nType ${dim(
+        "/tools",
+      )} to see available tools.`,
       exit: false,
       cleared: false,
     };
@@ -252,9 +240,9 @@ async function handleDirectToolCall(
       userArgs = JSON.parse(argsRaw);
     } catch {
       return {
-        output: `${
-          yellow("Invalid JSON args:")
-        } ${argsRaw}\nExpected format: /tool_name {"key": "value"}`,
+        output: `${yellow(
+          "Invalid JSON args:",
+        )} ${argsRaw}\nExpected format: /tool_name {"key": "value"}`,
         exit: false,
         cleared: false,
       };
@@ -287,14 +275,12 @@ async function handleDirectToolCall(
 
   // Check for missing required params
   const missingParams = getRequiredParams(schema).filter(
-    p => !(p.name in mergedArgs) || mergedArgs[p.name] === undefined,
+    (p) => !(p.name in mergedArgs) || mergedArgs[p.name] === undefined,
   );
 
   // If we have a readline interface and missing params, prompt interactively
   if (missingParams.length > 0 && rl) {
-    console.error(
-      dim(`\nMissing required parameters for ${tool.namespacedName}:`),
-    );
+    console.error(dim(`\nMissing required parameters for ${tool.namespacedName}:`));
     for (const param of missingParams) {
       const value = await promptForParam(rl, param);
       if (!value) {
@@ -309,7 +295,7 @@ async function handleDirectToolCall(
   } else if (missingParams.length > 0) {
     // No readline available, show usage
     const paramList = missingParams
-      .map(p => `  ${bold(p.name)} (${p.type})${p.description ? ": " + p.description : ""}`)
+      .map((p) => `  ${bold(p.name)} (${p.type})${p.description ? ": " + p.description : ""}`)
       .join("\n");
     return {
       output: `${yellow("Missing required parameters:")}\n${paramList}\n\nUsage: /${command} {"${
@@ -322,11 +308,7 @@ async function handleDirectToolCall(
 
   // Execute the tool
   console.error(dim(`\n[calling ${tool.namespacedName}...]`));
-  const { result, isError } = await executeToolCall(
-    manager,
-    tool.namespacedName,
-    mergedArgs,
-  );
+  const { result, isError } = await executeToolCall(manager, tool.namespacedName, mergedArgs);
 
   // Track IDs in session state from result
   if (!isError) {
@@ -341,10 +323,7 @@ async function handleDirectToolCall(
 
   // Track create tools in session state
   const prefix = extractPrefix(tool.namespacedName, tool.serverName);
-  if (
-    tool.namespacedName.includes("create")
-    || tool.namespacedName.includes("bootstrap")
-  ) {
+  if (tool.namespacedName.includes("create") || tool.namespacedName.includes("bootstrap")) {
     const ids = extractIdsFromResult(result);
     if (ids.length > 0) {
       sessionState.recordCreate(prefix, ids);
@@ -376,27 +355,24 @@ async function handleDirectToolCall(
  * First tries exact match (with or without namespace), then fuzzy match.
  * Auto-executes best fuzzy match if it's significantly better than runner-up (2x score gap).
  */
-function resolveToolName(
-  command: string,
-  tools: NamespacedTool[],
-): NamespacedTool | null {
+function resolveToolName(command: string, tools: NamespacedTool[]): NamespacedTool | null {
   // Exact match on namespacedName
-  const exact = tools.find(t => t.namespacedName === command);
+  const exact = tools.find((t) => t.namespacedName === command);
   if (exact) return exact;
 
   // Exact match on original name
-  const exactOriginal = tools.find(t => t.originalName === command);
+  const exactOriginal = tools.find((t) => t.originalName === command);
   if (exactOriginal) return exactOriginal;
 
   // Exact match stripping namespace prefix
-  const exactStripped = tools.find(t => {
+  const exactStripped = tools.find((t) => {
     const stripped = stripNamespace(t.namespacedName, t.serverName);
     return stripped === command;
   });
   if (exactStripped) return exactStripped;
 
   // Fuzzy match
-  const fuzzyResults = fuzzyFilter(command, tools, t => {
+  const fuzzyResults = fuzzyFilter(command, tools, (t) => {
     const stripped = stripNamespace(t.namespacedName, t.serverName);
     return stripped;
   });
@@ -436,7 +412,7 @@ export function trackToolCallForSession(
 ): void {
   if (isError) return;
 
-  const tool = allTools.find(t => t.namespacedName === toolName);
+  const tool = allTools.find((t) => t.namespacedName === toolName);
   if (!tool) return;
 
   // Record IDs from result

@@ -12,11 +12,17 @@ vi.mock("@google/genai", () => {
           else if (prompt.includes("Extract")) text = '["#000"]';
           else if (prompt.includes("Compare")) text = '{"similarity":1,"differences":[]}';
           return Promise.resolve({
-            candidates: [{ content: { parts: [{ inlineData: { data: "base64", mimeType: "image/png" }, text }] } }]
+            candidates: [
+              {
+                content: {
+                  parts: [{ inlineData: { data: "base64", mimeType: "image/png" }, text }],
+                },
+              },
+            ],
           });
-        })
+        }),
       };
-    }
+    },
   };
 });
 
@@ -24,17 +30,17 @@ describe("generation", () => {
   const db = {
     generationJobCreate: vi.fn().mockResolvedValue({ id: "job-1" }),
     generationJobUpdate: vi.fn().mockResolvedValue({}),
-    imageFindById: vi.fn().mockResolvedValue({ originalR2Key: "k", originalFormat: "png" })
+    imageFindById: vi.fn().mockResolvedValue({ originalR2Key: "k", originalFormat: "png" }),
   } as any;
 
   const credits = {
     consume: vi.fn().mockResolvedValue({ success: true }),
-    refund: vi.fn()
+    refund: vi.fn(),
   } as any;
 
   const storage = {
     upload: vi.fn().mockResolvedValue({ url: "u", sizeBytes: 1 }),
-    download: vi.fn().mockResolvedValue(Buffer.from("a"))
+    download: vi.fn().mockResolvedValue(Buffer.from("a")),
   } as any;
 
   beforeEach(() => {
@@ -49,7 +55,12 @@ describe("generation", () => {
 
   it("createGenerationJob", async () => {
     const gen = createGeminiGeneration({ GEMINI_API_KEY: "k" } as any, db, credits, storage);
-    const res = await gen.createGenerationJob({ userId: "u", prompt: "p", tier: "FREE", aspectRatio: "1:1" } as any);
+    const res = await gen.createGenerationJob({
+      userId: "u",
+      prompt: "p",
+      tier: "FREE",
+      aspectRatio: "1:1",
+    } as any);
     expect(res.success).toBe(true);
   });
 
@@ -59,23 +70,36 @@ describe("generation", () => {
     const res = await gen.createGenerationJob({ userId: "u", prompt: "p", tier: "FREE" } as any);
     expect(res.success).toBe(false);
   });
-  
+
   it("createGenerationJob error", async () => {
     // If generationJobCreate fails, it throws
     db.generationJobCreate.mockRejectedValueOnce(new Error("fail"));
     const gen = createGeminiGeneration({ GEMINI_API_KEY: "k" } as any, db, credits, storage);
-    await expect(gen.createGenerationJob({ userId: "u", prompt: "p", tier: "FREE" } as any)).rejects.toThrow();
+    await expect(
+      gen.createGenerationJob({ userId: "u", prompt: "p", tier: "FREE" } as any),
+    ).rejects.toThrow();
   });
 
   it("createModificationJob", async () => {
     const gen = createGeminiGeneration({ GEMINI_API_KEY: "k" } as any, db, credits, storage);
-    const res = await gen.createModificationJob({ userId: "u", prompt: "p", imageData: "b64", mimeType: "image/png", tier: "FREE" } as any);
+    const res = await gen.createModificationJob({
+      userId: "u",
+      prompt: "p",
+      imageData: "b64",
+      mimeType: "image/png",
+      tier: "FREE",
+    } as any);
     expect(res.success).toBe(true);
   });
 
   it("createAdvancedGenerationJob", async () => {
     const gen = createGeminiGeneration({ GEMINI_API_KEY: "k" } as any, db, credits, storage);
-    const res = await gen.createAdvancedGenerationJob!({ userId: "u", prompt: "p", tier: "FREE", options: { negativePrompt: "n", aspectRatio: "1:1", textToRender: "t" } } as any);
+    const res = await gen.createAdvancedGenerationJob!({
+      userId: "u",
+      prompt: "p",
+      tier: "FREE",
+      options: { negativePrompt: "n", aspectRatio: "1:1", textToRender: "t" },
+    } as any);
     expect(res.success).toBe(true);
   });
 

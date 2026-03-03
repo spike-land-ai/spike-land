@@ -67,16 +67,14 @@ export function generateMigrationSql(migrations: Migration[]): string[] {
           }
           return parts.join(" ");
         });
-        statements.push(
-          `CREATE TABLE IF NOT EXISTS ${m.table} (\n  ${cols.join(",\n  ")}\n);`
-        );
+        statements.push(`CREATE TABLE IF NOT EXISTS ${m.table} (\n  ${cols.join(",\n  ")}\n);`);
         break;
       }
       case "add_column": {
         if (!m.column || !m.columnType) break;
         const nullable = m.columnType.nullable ? "" : " NOT NULL DEFAULT ''";
         statements.push(
-          `ALTER TABLE ${m.table} ADD COLUMN ${m.column} ${m.columnType.sqlType}${nullable};`
+          `ALTER TABLE ${m.table} ADD COLUMN ${m.column} ${m.columnType.sqlType}${nullable};`,
         );
         break;
       }
@@ -85,7 +83,7 @@ export function generateMigrationSql(migrations: Migration[]): string[] {
         const unique = m.index.unique ? "UNIQUE " : "";
         const cols = m.index.columns.join(", ");
         statements.push(
-          `CREATE ${unique}INDEX IF NOT EXISTS ${m.index.name} ON ${m.table} (${cols});`
+          `CREATE ${unique}INDEX IF NOT EXISTS ${m.index.name} ON ${m.table} (${cols});`,
         );
         break;
       }

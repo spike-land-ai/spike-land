@@ -36,7 +36,10 @@ describe("memo", () => {
   });
 
   it("works with typed props", () => {
-    interface ButtonProps { label: string; onClick: () => void }
+    interface ButtonProps {
+      label: string;
+      onClick: () => void;
+    }
     const Button = (_props: ButtonProps) => null;
     const MemoButton = memo(Button);
     expect(MemoButton.type).toBe(Button);

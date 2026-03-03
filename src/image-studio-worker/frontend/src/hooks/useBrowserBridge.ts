@@ -15,7 +15,15 @@ export function useBrowserBridge({ messages, onResult }: BrowserBridgeOptions) {
         case "browser_navigate": {
           const url = args.url as string;
           // Check if it's a section name
-          const sections = ["terminal", "generate", "library", "albums", "pipelines", "credits", "settings"];
+          const sections = [
+            "terminal",
+            "generate",
+            "library",
+            "albums",
+            "pipelines",
+            "credits",
+            "settings",
+          ];
           if (sections.includes(url)) {
             // Click the sidebar nav item
             const btn = document.querySelector(`[data-section="${url}"]`) as HTMLElement;
@@ -37,7 +45,8 @@ export function useBrowserBridge({ messages, onResult }: BrowserBridgeOptions) {
           const input = document.querySelector(args.selector as string) as HTMLInputElement;
           if (!input) return { success: false, error: `Input not found: ${args.selector}` };
           const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-            window.HTMLInputElement.prototype, "value",
+            window.HTMLInputElement.prototype,
+            "value",
           )?.set;
           nativeInputValueSetter?.call(input, args.value as string);
           input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -86,13 +95,15 @@ export function useBrowserBridge({ messages, onResult }: BrowserBridgeOptions) {
 
         case "browser_get_elements": {
           const sel = (args.selector as string) || "button, a, input, select, textarea";
-          const elements = Array.from(document.querySelectorAll(sel)).slice(0, 50).map((el) => ({
-            tag: el.tagName.toLowerCase(),
-            text: el.textContent?.trim().slice(0, 80) || "",
-            id: el.id || undefined,
-            className: el.className?.toString().slice(0, 100) || undefined,
-            type: (el as HTMLInputElement).type || undefined,
-          }));
+          const elements = Array.from(document.querySelectorAll(sel))
+            .slice(0, 50)
+            .map((el) => ({
+              tag: el.tagName.toLowerCase(),
+              text: el.textContent?.trim().slice(0, 80) || "",
+              id: el.id || undefined,
+              className: el.className?.toString().slice(0, 100) || undefined,
+              type: (el as HTMLInputElement).type || undefined,
+            }));
           return { success: true, elements };
         }
 

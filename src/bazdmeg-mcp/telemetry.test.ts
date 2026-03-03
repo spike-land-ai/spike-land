@@ -38,8 +38,16 @@ describe("telemetry", () => {
 
   afterEach(async () => {
     // Clean up temp files
-    try { await unlink(getTelemetryPath()); } catch { /* ok */ }
-    try { await unlink(getContextLogPath()); } catch { /* ok */ }
+    try {
+      await unlink(getTelemetryPath());
+    } catch {
+      /* ok */
+    }
+    try {
+      await unlink(getContextLogPath());
+    } catch {
+      /* ok */
+    }
   });
 
   it("logEvent writes JSONL", async () => {
@@ -126,7 +134,7 @@ describe("telemetry", () => {
 
   it("handles appendFile failure in logEvent", async () => {
     vi.mocked(appendFile).mockRejectedValueOnce(new Error("Disk error"));
-    
+
     await logEvent({
       eventType: "fail_test",
       tool: "none",

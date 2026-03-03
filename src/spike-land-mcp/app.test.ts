@@ -13,11 +13,11 @@ describe("app", () => {
   it("has expected routes", () => {
     const app = createApp();
     // Check if routes are registered
-    const routes = app.routes.map(r => r.path);
+    const routes = app.routes.map((r) => r.path);
     expect(routes).toContain("/health");
     // Hono might register .well-known as something else or sub-routes
-    expect(routes.some(r => r.includes(".well-known"))).toBe(true);
-    expect(routes.some(r => r.includes("oauth"))).toBe(true);
-    expect(routes.some(r => r.includes("mcp"))).toBe(true);
+    expect(routes.some((r) => r.includes(".well-known"))).toBe(true);
+    expect(routes.some((r) => r.includes("oauth"))).toBe(true);
+    expect(routes.some((r) => r.includes("mcp"))).toBe(true);
   });
 });

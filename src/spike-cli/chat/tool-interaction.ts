@@ -10,17 +10,14 @@ import { bold, dim } from "../shell/formatter";
  */
 export async function promptForParam(
   rl: ReadlineInterface,
-  param: { name: string; description: string; type: string; },
+  param: { name: string; description: string; type: string },
 ): Promise<string> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const hint = param.description ? ` (${param.description})` : "";
     const typeHint = param.type !== "string" ? ` [${param.type}]` : "";
-    rl.question(
-      `  ${bold(param.name)}${dim(hint)}${dim(typeHint)}: `,
-      answer => {
-        resolve(answer.trim());
-      },
-    );
+    rl.question(`  ${bold(param.name)}${dim(hint)}${dim(typeHint)}: `, (answer) => {
+      resolve(answer.trim());
+    });
   });
 }
 

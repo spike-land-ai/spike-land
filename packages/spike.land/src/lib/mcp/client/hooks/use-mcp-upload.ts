@@ -3,6 +3,6 @@ export const useMcpUpload = (_toolName?: string, _opts?: any) => {
     upload: async (_file?: File, _args?: any) => "",
     isUploading: false,
     isLoading: false,
-    progress: 0
+    progress: 0,
   };
 };

@@ -54,7 +54,10 @@ describe("context tool", () => {
       dispose: mockDispose,
     });
 
-    const result = (await handler({ entryPoints: ["in.js"] })) as { content: { text: string }[]; isError?: boolean };
+    const result = (await handler({ entryPoints: ["in.js"] })) as {
+      content: { text: string }[];
+      isError?: boolean;
+    };
 
     expect(mockContext).toHaveBeenCalled();
     expect(mockRebuild).toHaveBeenCalled();
@@ -67,7 +70,10 @@ describe("context tool", () => {
     const { handler } = makeServer();
     mockContext.mockRejectedValue(new Error("context fail"));
 
-    const result = (await handler({ entryPoints: ["in.js"] })) as { content: { text: string }[]; isError?: boolean };
+    const result = (await handler({ entryPoints: ["in.js"] })) as {
+      content: { text: string }[];
+      isError?: boolean;
+    };
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("context fail");
@@ -81,7 +87,10 @@ describe("context tool", () => {
       dispose: mockDispose,
     });
 
-    const result = (await handler({ entryPoints: ["in.js"] })) as { content: { text: string }[]; isError?: boolean };
+    const result = (await handler({ entryPoints: ["in.js"] })) as {
+      content: { text: string }[];
+      isError?: boolean;
+    };
 
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("rebuild fail");
@@ -101,7 +110,10 @@ describe("context tool", () => {
       dispose: mockDispose,
     });
 
-    const result = (await handler({ entryPoints: ["in.js"] })) as { content: { text: string }[]; isError?: boolean };
+    const result = (await handler({ entryPoints: ["in.js"] })) as {
+      content: { text: string }[];
+      isError?: boolean;
+    };
     const parsed = JSON.parse(result.content[0].text);
     expect(parsed.outputFiles).toEqual([]);
     expect(parsed.mangleCache).toEqual({ foo: "bar" });

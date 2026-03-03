@@ -34,7 +34,11 @@ export {
   type TypedTables,
   type TypedReducers,
 } from "./typed-tables.js";
-export { createStdbHttpClient, type StdbHttpClient, type StdbHttpClientConfig } from "./stdb-http-client.js";
+export {
+  createStdbHttpClient,
+  type StdbHttpClient,
+  type StdbHttpClientConfig,
+} from "./stdb-http-client.js";
 
 const server = createMcpServer({
   name: "spacetimedb-platform",

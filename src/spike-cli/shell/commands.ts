@@ -27,7 +27,7 @@ export function handleServers(ctx: ShellContext): string {
   const names = ctx.manager.getServerNames();
   if (names.length === 0) return "No servers connected.";
 
-  const lines = names.map(name => {
+  const lines = names.map((name) => {
     const connected = ctx.manager.isConnected(name);
     const toolCount = ctx.manager.getServerTools(name).length;
     const status = connected ? green("connected") : dim("disconnected");
@@ -49,14 +49,12 @@ export function handleTools(ctx: ShellContext, serverFilter?: string): string {
   const allTools = ctx.manager.getAllTools();
   if (allTools.length === 0) return "No tools available.";
 
-  return `${bold(`All tools (${allTools.length}):`)}\n${
-    formatToolList(
-      allTools.map(t => ({
-        name: t.namespacedName,
-        description: t.description,
-      })),
-    )
-  }`;
+  return `${bold(`All tools (${allTools.length}):`)}\n${formatToolList(
+    allTools.map((t) => ({
+      name: t.namespacedName,
+      description: t.description,
+    })),
+  )}`;
 }
 
 export async function handleCall(
@@ -89,7 +87,7 @@ export async function handleCall(
   try {
     const result = await ctx.manager.callTool(toolName, args);
     if (result.isError) {
-      return formatError(result.content.map(c => c.text ?? "").join("\n"));
+      return formatError(result.content.map((c) => c.text ?? "").join("\n"));
     }
     return formatJson(result.content);
   } catch (err) {
@@ -97,10 +95,7 @@ export async function handleCall(
   }
 }
 
-export async function handleReconnect(
-  ctx: ShellContext,
-  serverName: string,
-): Promise<string> {
+export async function handleReconnect(ctx: ShellContext, serverName: string): Promise<string> {
   if (!serverName) return formatError("Usage: reconnect <server>");
 
   const serverConfig = ctx.config.servers[serverName];
@@ -113,29 +108,25 @@ export async function handleReconnect(
     const toolCount = ctx.manager.getServerTools(serverName).length;
     return green(`Reconnected to ${serverName} (${toolCount} tools)`);
   } catch (err) {
-    return formatError(
-      `Reconnect failed: ${err instanceof Error ? err.message : String(err)}`,
-    );
+    return formatError(`Reconnect failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
 
 export function handleToolsets(ctx: ShellContext): string {
   const manager = ctx.manager.toolsetManager;
   if (!manager) {
-    return dim(
-      "Lazy loading is not enabled. Add toolsets + lazyLoading to config.",
-    );
+    return dim("Lazy loading is not enabled. Add toolsets + lazyLoading to config.");
   }
 
   const toolsets = manager.listToolsets();
   if (toolsets.length === 0) return dim("No toolsets configured.");
 
-  const lines = toolsets.map(ts => {
+  const lines = toolsets.map((ts) => {
     const status = ts.loaded ? green("loaded") : dim("unloaded");
     const desc = ts.description ? ` — ${ts.description}` : "";
-    return `  ${bold(ts.name)} [${status}] (${
-      ts.servers.join(", ")
-    }, ${ts.toolCount} tools)${desc}`;
+    return `  ${bold(ts.name)} [${status}] (${ts.servers.join(
+      ", ",
+    )}, ${ts.toolCount} tools)${desc}`;
   });
 
   return `${bold("Toolsets:")}\n${lines.join("\n")}`;
@@ -159,10 +150,7 @@ export function handleLoadToolset(ctx: ShellContext, name: string): string {
   }
 }
 
-export async function handleAlias(
-  ctx: ShellContext,
-  args: string[],
-): Promise<string> {
+export async function handleAlias(ctx: ShellContext, args: string[]): Promise<string> {
   const [subcommand, name, ...rest] = args;
 
   if (!subcommand || subcommand === "list") {
@@ -201,8 +189,8 @@ export async function handleAlias(
     const section = expansion.includes("__")
       ? "tools"
       : ["serve", "shell", "auth", "alias"].includes(expansion)
-      ? "commands"
-      : "servers";
+        ? "commands"
+        : "servers";
 
     await addAlias(section, name, expansion);
     return formatSuccess(`Alias set: ${name} -> ${expansion} (${section})`);
@@ -217,9 +205,7 @@ export async function handleAlias(
     return formatError(`No alias found with name "${name}"`);
   }
 
-  return formatError(
-    `Unknown alias subcommand: ${subcommand}. Use set, remove, or list.`,
-  );
+  return formatError(`Unknown alias subcommand: ${subcommand}. Use set, remove, or list.`);
 }
 
 export function handleHelp(): string {

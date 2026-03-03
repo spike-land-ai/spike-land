@@ -7,9 +7,9 @@ export function PrivacyPage() {
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Information We Collect</h2>
         <p className="leading-relaxed text-gray-700">
-          When you sign in via GitHub or Google, we receive your name, email address, and
-          profile picture from the identity provider. We also collect basic usage analytics
-          (page views, tool invocations) to improve the platform.
+          When you sign in via GitHub or Google, we receive your name, email address, and profile
+          picture from the identity provider. We also collect basic usage analytics (page views,
+          tool invocations) to improve the platform.
         </p>
       </section>
 
@@ -26,17 +26,17 @@ export function PrivacyPage() {
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Data Storage</h2>
         <p className="leading-relaxed text-gray-700">
-          Your data is stored on SpacetimeDB and Cloudflare infrastructure. We do not sell
-          your personal information to third parties. Application data you create (apps,
-          tools, messages) is stored as long as your account is active.
+          Your data is stored on SpacetimeDB and Cloudflare infrastructure. We do not sell your
+          personal information to third parties. Application data you create (apps, tools, messages)
+          is stored as long as your account is active.
         </p>
       </section>
 
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Cookies</h2>
         <p className="leading-relaxed text-gray-700">
-          We use essential cookies for authentication and session management. No
-          third-party advertising cookies are used.
+          We use essential cookies for authentication and session management. No third-party
+          advertising cookies are used.
         </p>
       </section>
 

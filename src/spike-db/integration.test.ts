@@ -83,7 +83,11 @@ class MockSqlStorage implements SqlStorage {
     }
     const limit = query.match(/LIMIT\s+(\d+)/i);
     if (limit) filtered = filtered.slice(0, Number(limit[1]));
-    return { toArray: () => filtered.map((r) => ({ ...r })), rowsRead: filtered.length, rowsWritten: 0 };
+    return {
+      toArray: () => filtered.map((r) => ({ ...r })),
+      rowsRead: filtered.length,
+      rowsWritten: 0,
+    };
   }
 
   private handleUpdate(query: string, params: unknown[]): SqlResult {
@@ -144,17 +148,14 @@ const messagesTable = defineTable("messages", {
   primaryKey: "id",
 });
 
-const registerReducer = defineReducer(
-  "register",
-  (ctx: unknown, name: unknown, email: unknown) => {
-    const c = ctx as ReducerContext;
-    c.db.users.insert({
-      id: c.timestamp,
-      name: name as string,
-      email: email as string,
-    });
-  },
-);
+const registerReducer = defineReducer("register", (ctx: unknown, name: unknown, email: unknown) => {
+  const c = ctx as ReducerContext;
+  c.db.users.insert({
+    id: c.timestamp,
+    name: name as string,
+    email: email as string,
+  });
+});
 
 const sendMessageReducer = defineReducer(
   "send_message",
@@ -170,13 +171,10 @@ const sendMessageReducer = defineReducer(
   },
 );
 
-const markReadReducer = defineReducer(
-  "mark_read",
-  (ctx: unknown, messageId: unknown) => {
-    const c = ctx as ReducerContext;
-    c.db.messages.update(messageId, { read: true });
-  },
-);
+const markReadReducer = defineReducer("mark_read", (ctx: unknown, messageId: unknown) => {
+  const c = ctx as ReducerContext;
+  c.db.messages.update(messageId, { read: true });
+});
 
 const testDb = defineDatabase("test-db", {
   tables: [usersTable, messagesTable],
@@ -201,7 +199,14 @@ describe("Integration: mini schema", () => {
 
   it("register reducer inserts a user and captures mutation", () => {
     const sql = new MockSqlStorage();
-    const result = executeReducer(sql, testDb, "register", ["Alice", "alice@test.com"], "sender1", vi.fn());
+    const result = executeReducer(
+      sql,
+      testDb,
+      "register",
+      ["Alice", "alice@test.com"],
+      "sender1",
+      vi.fn(),
+    );
 
     expect(result.error).toBeUndefined();
     expect(result.mutations).toHaveLength(1);
@@ -248,11 +253,31 @@ describe("Integration: platform schema", () => {
     expect(tableNames).toHaveLength(25);
 
     const expected = [
-      "user", "agent", "agent_message", "album", "album_image",
-      "app", "app_message", "app_version", "code_session", "credits",
-      "direct_message", "enhancement_job", "generation_job", "health_check", "image",
-      "mcp_task", "oauth_link", "page", "page_block", "pipeline",
-      "platform_event", "registered_tool", "subject", "tool_usage", "user_tool_preference",
+      "user",
+      "agent",
+      "agent_message",
+      "album",
+      "album_image",
+      "app",
+      "app_message",
+      "app_version",
+      "code_session",
+      "credits",
+      "direct_message",
+      "enhancement_job",
+      "generation_job",
+      "health_check",
+      "image",
+      "mcp_task",
+      "oauth_link",
+      "page",
+      "page_block",
+      "pipeline",
+      "platform_event",
+      "registered_tool",
+      "subject",
+      "tool_usage",
+      "user_tool_preference",
     ];
 
     for (const name of expected) {
@@ -266,11 +291,26 @@ describe("Integration: platform schema", () => {
     expect(reducerNames).toHaveLength(20);
 
     const expected = [
-      "register_user", "update_profile", "send_dm", "mark_dm_read",
-      "register_agent", "unregister_agent", "send_agent_message", "mark_agent_message_delivered",
-      "create_app", "update_app", "delete_app", "restore_app", "update_app_status",
-      "create_page", "update_page", "delete_page",
-      "send_app_message", "register_tool", "record_platform_event", "record_health_check",
+      "register_user",
+      "update_profile",
+      "send_dm",
+      "mark_dm_read",
+      "register_agent",
+      "unregister_agent",
+      "send_agent_message",
+      "mark_agent_message_delivered",
+      "create_app",
+      "update_app",
+      "delete_app",
+      "restore_app",
+      "update_app_status",
+      "create_page",
+      "update_page",
+      "delete_page",
+      "send_app_message",
+      "register_tool",
+      "record_platform_event",
+      "record_health_check",
     ];
 
     for (const name of expected) {
@@ -392,11 +432,31 @@ describe("Integration: PlatformClient", () => {
     // We cannot connect but can verify the accessor getters exist
     // by checking the prototype
     const accessors = [
-      "user", "agent", "agentMessage", "album", "albumImage",
-      "app", "appMessage", "appVersion", "codeSession", "credits",
-      "directMessage", "enhancementJob", "generationJob", "healthCheck", "image",
-      "mcpTask", "oauthLink", "page", "pageBlock", "pipeline",
-      "platformEvent", "registeredTool", "subject", "toolUsage", "userToolPreference",
+      "user",
+      "agent",
+      "agentMessage",
+      "album",
+      "albumImage",
+      "app",
+      "appMessage",
+      "appVersion",
+      "codeSession",
+      "credits",
+      "directMessage",
+      "enhancementJob",
+      "generationJob",
+      "healthCheck",
+      "image",
+      "mcpTask",
+      "oauthLink",
+      "page",
+      "pageBlock",
+      "pipeline",
+      "platformEvent",
+      "registeredTool",
+      "subject",
+      "toolUsage",
+      "userToolPreference",
     ];
 
     for (const accessor of accessors) {
@@ -408,11 +468,26 @@ describe("Integration: PlatformClient", () => {
 
   it("has typed reducer methods for all 20 reducers", () => {
     const methods = [
-      "registerUser", "updateProfile", "sendDm", "markDmRead",
-      "registerAgent", "unregisterAgent", "sendAgentMessage", "markAgentMessageDelivered",
-      "createApp", "updateApp", "deleteApp", "restoreApp", "updateAppStatus",
-      "createPage", "updatePage", "deletePage",
-      "sendAppMessage", "registerTool", "recordPlatformEvent", "recordHealthCheck",
+      "registerUser",
+      "updateProfile",
+      "sendDm",
+      "markDmRead",
+      "registerAgent",
+      "unregisterAgent",
+      "sendAgentMessage",
+      "markAgentMessageDelivered",
+      "createApp",
+      "updateApp",
+      "deleteApp",
+      "restoreApp",
+      "updateAppStatus",
+      "createPage",
+      "updatePage",
+      "deletePage",
+      "sendAppMessage",
+      "registerTool",
+      "recordPlatformEvent",
+      "recordHealthCheck",
     ];
 
     for (const method of methods) {

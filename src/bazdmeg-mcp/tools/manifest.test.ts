@@ -17,7 +17,12 @@ import { registerManifestTools } from "./manifest.js";
 const mockReadManifest = vi.mocked(readManifest);
 
 const MOCK_MANIFEST = {
-  defaults: { scope: "@spike-land-ai", registry: "npm.pkg.github.com", license: "MIT", type: "module" },
+  defaults: {
+    scope: "@spike-land-ai",
+    registry: "npm.pkg.github.com",
+    license: "MIT",
+    type: "module",
+  },
   packages: {
     "chess-engine": {
       kind: "library",
@@ -57,7 +62,9 @@ describe("manifest tools", () => {
     server = createMockServer();
     registerManifestTools(server as unknown as McpServer);
     vi.clearAllMocks();
-    mockReadManifest.mockResolvedValue(MOCK_MANIFEST as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+    mockReadManifest.mockResolvedValue(
+      MOCK_MANIFEST as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never,
+    );
   });
 
   describe("bazdmeg_manifest_query", () => {
@@ -146,7 +153,12 @@ describe("manifest tools", () => {
 
     it("detects missing deps", async () => {
       mockReadManifest.mockResolvedValue({
-        defaults: { scope: "@spike-land-ai", registry: "npm.pkg.github.com", license: "MIT", type: "module" },
+        defaults: {
+          scope: "@spike-land-ai",
+          registry: "npm.pkg.github.com",
+          license: "MIT",
+          type: "module",
+        },
         packages: {
           "pkg-a": {
             kind: "library",
@@ -167,7 +179,12 @@ describe("manifest tools", () => {
 
     it("detects worker package without worker section", async () => {
       mockReadManifest.mockResolvedValue({
-        defaults: { scope: "@spike-land-ai", registry: "npm.pkg.github.com", license: "MIT", type: "module" },
+        defaults: {
+          scope: "@spike-land-ai",
+          registry: "npm.pkg.github.com",
+          license: "MIT",
+          type: "module",
+        },
         packages: {
           "bad-worker": {
             kind: "worker",
@@ -184,7 +201,12 @@ describe("manifest tools", () => {
 
     it("warns on CLI without bin", async () => {
       mockReadManifest.mockResolvedValue({
-        defaults: { scope: "@spike-land-ai", registry: "npm.pkg.github.com", license: "MIT", type: "module" },
+        defaults: {
+          scope: "@spike-land-ai",
+          registry: "npm.pkg.github.com",
+          license: "MIT",
+          type: "module",
+        },
         packages: {
           "bad-cli": {
             kind: "cli",
@@ -201,7 +223,12 @@ describe("manifest tools", () => {
 
     it("detects missing required fields", async () => {
       mockReadManifest.mockResolvedValue({
-        defaults: { scope: "@spike-land-ai", registry: "npm.pkg.github.com", license: "MIT", type: "module" },
+        defaults: {
+          scope: "@spike-land-ai",
+          registry: "npm.pkg.github.com",
+          license: "MIT",
+          type: "module",
+        },
         packages: {
           "bad-pkg": {
             kind: "",
@@ -220,7 +247,12 @@ describe("manifest tools", () => {
 
     it("detects circular deps", async () => {
       mockReadManifest.mockResolvedValue({
-        defaults: { scope: "@spike-land-ai", registry: "npm.pkg.github.com", license: "MIT", type: "module" },
+        defaults: {
+          scope: "@spike-land-ai",
+          registry: "npm.pkg.github.com",
+          license: "MIT",
+          type: "module",
+        },
         packages: {
           "pkg-a": {
             kind: "library",

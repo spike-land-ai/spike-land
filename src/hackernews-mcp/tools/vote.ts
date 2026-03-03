@@ -20,7 +20,11 @@ export function registerVoteTools(server: McpServer, writeClient: HNWriteClient)
       if (result.data.success) {
         return jsonResult({ status: "upvoted", itemId });
       }
-      return errorResult(result.data.error, result.data.message, result.data.error === "RATE_LIMITED");
+      return errorResult(
+        result.data.error,
+        result.data.message,
+        result.data.error === "RATE_LIMITED",
+      );
     },
   );
 }

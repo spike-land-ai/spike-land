@@ -3,8 +3,20 @@ import { registerSwarmTools } from "./swarm-tools.js";
 import { createMockClient } from "../__test-utils__/index.js";
 
 class MockMcpServer {
-  tools = new Map<string, { description: string; schema: unknown; handler: (args: Record<string, unknown>) => Promise<unknown> }>();
-  tool(name: string, description: string, schema: unknown, handler: (args: Record<string, unknown>) => Promise<unknown>) {
+  tools = new Map<
+    string,
+    {
+      description: string;
+      schema: unknown;
+      handler: (args: Record<string, unknown>) => Promise<unknown>;
+    }
+  >();
+  tool(
+    name: string,
+    description: string,
+    schema: unknown,
+    handler: (args: Record<string, unknown>) => Promise<unknown>,
+  ) {
     this.tools.set(name, { description, schema, handler });
   }
 }
@@ -16,7 +28,10 @@ describe("swarm tools", () => {
   beforeEach(() => {
     server = new MockMcpServer();
     client = createMockClient();
-    registerSwarmTools(server as unknown as MockMcpServer, client as unknown as Parameters<typeof registerSwarmTools>[1]);
+    registerSwarmTools(
+      server as unknown as MockMcpServer,
+      client as unknown as Parameters<typeof registerSwarmTools>[1],
+    );
   });
 
   it("registers all swarm tools", () => {
@@ -60,7 +75,9 @@ describe("swarm tools", () => {
     await client.connect("wss://test", "mod");
     // @ts-expect-error - testing mock client internal method
     if (client.createMcpTask) {
-       await (client as unknown as { createMcpTask: (tool: string, args: string) => Promise<void> }).createMcpTask("tool", "{}");
+      await (
+        client as unknown as { createMcpTask: (tool: string, args: string) => Promise<void> }
+      ).createMcpTask("tool", "{}");
     }
     const handler = server.tools.get("stdb_list_tasks")!.handler;
     const result = await handler({});

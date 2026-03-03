@@ -77,7 +77,11 @@ class MockSqlStorage implements SqlStorage {
     }
     const limit = query.match(/LIMIT\s+(\d+)/i);
     if (limit) filtered = filtered.slice(0, Number(limit[1]));
-    return { toArray: () => filtered.map((r) => ({ ...r })), rowsRead: filtered.length, rowsWritten: 0 };
+    return {
+      toArray: () => filtered.map((r) => ({ ...r })),
+      rowsRead: filtered.length,
+      rowsWritten: 0,
+    };
   }
 
   private handleUpdate(query: string, params: unknown[]): SqlResult {
@@ -137,7 +141,14 @@ describe("executeReducer", () => {
 
     const sql = new MockSqlStorage();
     const scheduleFn = vi.fn();
-    const result = executeReducer(sql, schema, "add_item", ["i1", "Widget", 5], "user1", scheduleFn);
+    const result = executeReducer(
+      sql,
+      schema,
+      "add_item",
+      ["i1", "Widget", 5],
+      "user1",
+      scheduleFn,
+    );
 
     expect(result.error).toBeUndefined();
     expect(result.mutations).toHaveLength(1);

@@ -56,7 +56,7 @@ export async function runAgentLoop(
 
     // Check for tool_use blocks
     const toolUseBlocks = response.content.filter(
-      (block): block is Extract<ContentBlock, { type: "tool_use"; }> => block.type === "tool_use",
+      (block): block is Extract<ContentBlock, { type: "tool_use" }> => block.type === "tool_use",
     );
 
     if (toolUseBlocks.length === 0) {
@@ -73,11 +73,7 @@ export async function runAgentLoop(
       ctx.onToolCall?.(toolUse.name);
       ctx.onToolCallStart?.(toolUse.id, toolUse.name, serverName, input);
 
-      const { result, isError } = await executeToolCall(
-        ctx.manager,
-        toolUse.name,
-        input,
-      );
+      const { result, isError } = await executeToolCall(ctx.manager, toolUse.name, input);
 
       ctx.onToolCallEnd?.(toolUse.id, result, isError);
 
@@ -105,7 +101,7 @@ export async function runAgentLoop(
 /** Best-effort extraction of the server name from a namespaced tool. */
 function resolveServerName(manager: ServerManager, toolName: string): string {
   const allTools = manager.getAllTools();
-  const match = allTools.find(t => t.namespacedName === toolName);
+  const match = allTools.find((t) => t.namespacedName === toolName);
   return match?.serverName ?? "unknown";
 }
 

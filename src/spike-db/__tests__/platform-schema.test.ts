@@ -33,7 +33,7 @@ describe("platform-schema", () => {
         registered_tool: { insert: vi.fn() },
         platform_event: { insert: vi.fn() },
         health_check: { insert: vi.fn() },
-      }
+      },
     };
 
     const reducers = platformDatabase.reducers;
@@ -47,7 +47,7 @@ describe("platform-schema", () => {
     reducers.unregister_agent.handler(mockCtx);
     expect(mockCtx.db.agent.delete).toHaveBeenCalledWith("user-1");
   });
-  
+
   it("covers all reducers for coverage", () => {
     const mockDb: Record<string, unknown> = {};
     const tableNames = Object.keys(platformDatabase.tables);
@@ -55,7 +55,7 @@ describe("platform-schema", () => {
       mockDb[name] = { insert: vi.fn(), update: vi.fn(), delete: vi.fn() };
     }
     const mockCtx = { sender: "s", timestamp: 1, db: mockDb };
-    
+
     const reducers = platformDatabase.reducers;
     for (const r of Object.values(reducers)) {
       try {

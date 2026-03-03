@@ -77,10 +77,7 @@ interface AnimatedPctProps {
 
 function AnimatedPct({ value, color }: AnimatedPctProps) {
   return (
-    <span
-      className="text-[11px] font-mono font-bold tabular-nums"
-      style={{ color }}
-    >
+    <span className="text-[11px] font-mono font-bold tabular-nums" style={{ color }}>
       {Math.round(value)}%
     </span>
   );
@@ -103,16 +100,11 @@ function BarChart({ morph, progress }: BarChartProps) {
         const fromPct = seg.pct2023;
         const toPct = seg.pct2026;
         const currentPct = lerp(fromPct, toPct, easedMorph);
-        const displayLabel =
-          morph > 0.5 ? LABEL_2026[i] ?? seg.label : seg.label;
+        const displayLabel = morph > 0.5 ? (LABEL_2026[i] ?? seg.label) : seg.label;
 
         // Second segment switches colour from amber → green in 2026
         const currentColor =
-          i === 1
-            ? morph > 0.5
-              ? `rgba(34,197,94,${0.4 + morph * 0.6})`
-              : seg.color
-            : seg.color;
+          i === 1 ? (morph > 0.5 ? `rgba(34,197,94,${0.4 + morph * 0.6})` : seg.color) : seg.color;
 
         return (
           <div key={seg.label} className="flex flex-col gap-1.5">
@@ -121,8 +113,7 @@ function BarChart({ morph, progress }: BarChartProps) {
               <span
                 className="text-[11px] font-mono tracking-wide transition-colors duration-500 truncate"
                 style={{
-                  color:
-                    i === 1 && morph > 0.5 ? "#22c55e" : "rgba(148,163,184,0.9)",
+                  color: i === 1 && morph > 0.5 ? "#22c55e" : "rgba(148,163,184,0.9)",
                 }}
               >
                 {displayLabel}
@@ -154,8 +145,7 @@ function BarChart({ morph, progress }: BarChartProps) {
                     i === 1 && morph > 0.5
                       ? "0 0 12px rgba(34,197,94,0.5)"
                       : `0 0 12px ${seg.glowColor}`,
-                  transition:
-                    "width 0.05s linear, background 0.6s ease, box-shadow 0.6s ease",
+                  transition: "width 0.05s linear, background 0.6s ease, box-shadow 0.6s ease",
                 }}
               />
 
@@ -230,11 +220,7 @@ export function EffortInversionDemo() {
 
   // Phase description
   const phaseLabel =
-    progress < 0.3
-      ? "BEFORE · 2023"
-      : progress > 0.7
-        ? "AFTER · 2026"
-        : "MORPHING…";
+    progress < 0.3 ? "BEFORE · 2023" : progress > 0.7 ? "AFTER · 2026" : "MORPHING…";
 
   const phaseColor =
     progress < 0.3
@@ -314,9 +300,7 @@ export function EffortInversionDemo() {
                   ? "linear-gradient(90deg,#16a34a,#22c55e)"
                   : "linear-gradient(90deg,#d97706,#f59e0b)",
               boxShadow:
-                progress > 0.7
-                  ? "0 0 6px rgba(34,197,94,0.5)"
-                  : "0 0 6px rgba(245,158,11,0.5)",
+                progress > 0.7 ? "0 0 6px rgba(34,197,94,0.5)" : "0 0 6px rgba(245,158,11,0.5)",
               transition: "background 0.6s ease, box-shadow 0.6s ease",
             }}
           />

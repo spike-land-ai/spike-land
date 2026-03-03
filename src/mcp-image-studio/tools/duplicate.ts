@@ -23,7 +23,7 @@ export const duplicateTool = imageProcedure
     // Download original from storage
     const downloadResult = await tryCatch(deps.storage.download(image.originalR2Key));
     /* v8 ignore next */
-if (!downloadResult.ok) {
+    if (!downloadResult.ok) {
       return errorResult("DOWNLOAD_FAILED", "Failed to download original image from storage", true);
     }
 
@@ -37,7 +37,7 @@ if (!downloadResult.ok) {
       }),
     );
     /* v8 ignore next */
-if (!uploadResult.ok) {
+    if (!uploadResult.ok) {
       return errorResult("UPLOAD_FAILED", "Failed to upload duplicated image to storage", true);
     }
 

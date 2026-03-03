@@ -1127,7 +1127,17 @@ export async function getOrCreateDefaultAlbum(
       `INSERT INTO albums (id, handle, userId, name, description, privacy, defaultTier, sortOrder, isDefault, createdAt, updatedAt)
        VALUES (?, ?, ?, ?, ?, ?, ?, 0, 1, ?, ?)`,
     )
-    .bind(id, handle, userId, "My Gallery", "Your default image gallery", "PRIVATE", "FREE", now, now)
+    .bind(
+      id,
+      handle,
+      userId,
+      "My Gallery",
+      "Your default image gallery",
+      "PRIVATE",
+      "FREE",
+      now,
+      now,
+    )
     .run();
 
   return { id, handle };
@@ -1161,7 +1171,10 @@ export async function galleryRecentImages(
   sql += " ORDER BY createdAt DESC LIMIT ?";
   params.push(limit + 1);
 
-  const result = await db.prepare(sql).bind(...params).all<D1ImageRow>();
+  const result = await db
+    .prepare(sql)
+    .bind(...params)
+    .all<D1ImageRow>();
   const rows = result.results.map(mapImageRow);
 
   const hasMore = rows.length > limit;
@@ -1189,7 +1202,9 @@ export async function addImageToDefaultAlbum(
 
   try {
     await db
-      .prepare("INSERT INTO album_images (id, albumId, imageId, sortOrder, addedAt) VALUES (?, ?, ?, ?, ?)")
+      .prepare(
+        "INSERT INTO album_images (id, albumId, imageId, sortOrder, addedAt) VALUES (?, ?, ?, ?, ?)",
+      )
       .bind(id, album.id, imageId, nextSort, now)
       .run();
   } catch {

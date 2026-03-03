@@ -589,7 +589,7 @@ describe("spawnClaudeCode", () => {
     vi.mocked(spawn).mockReturnValue(proc as unknown as ChildProcess);
 
     const promise = agent.spawnClaudeCode("prompt", "system", "/tmp/mcp.json");
-    
+
     // Advance time beyond CLAUDE_TIMEOUT_MS (300000)
     await vi.advanceTimersByTimeAsync(300001);
 
@@ -756,11 +756,14 @@ describe("processMessage", () => {
   it("handles cleanup error in processMessage", async () => {
     // Force rm to fail
     vi.mocked(rm).mockRejectedValue(new Error("RM failed"));
-    
+
     const proc = makeMockProcess();
     vi.mocked(spawn).mockImplementation(() => {
       setImmediate(() => {
-        (proc.stdout as EventEmitter).emit("data", Buffer.from(JSON.stringify({ type: "result", result: "ok" }) + "\n"));
+        (proc.stdout as EventEmitter).emit(
+          "data",
+          Buffer.from(JSON.stringify({ type: "result", result: "ok" }) + "\n"),
+        );
         proc.emit("close", 0);
       });
       return proc as unknown as ChildProcess;

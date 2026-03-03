@@ -3,10 +3,7 @@
  */
 
 import type { NamespacedTool } from "../multiplexer/server-manager";
-import {
-  extractDefaults,
-  getRequiredParams,
-} from "./tool-adapter";
+import { extractDefaults, getRequiredParams } from "./tool-adapter";
 import { bold, cyan, dim } from "../shell/formatter";
 import type { AppRegistry } from "./app-registry";
 import type { SessionState } from "./session-state";
@@ -34,11 +31,7 @@ export function formatGroupedTools(
   for (const [prefix, group] of groups) {
     if (filterPrefix && prefix !== filterPrefix) continue;
 
-    const { visible, hidden } = getVisibleTools(
-      group.tools,
-      sessionState,
-      separator,
-    );
+    const { visible, hidden } = getVisibleTools(group.tools, sessionState, separator);
 
     // Server label
     const serverName = group.tools[0]?.serverName ?? "unknown";
@@ -46,11 +39,7 @@ export function formatGroupedTools(
 
     // Visible tools
     for (const tool of visible) {
-      const displayName = stripNamespace(
-        tool.namespacedName,
-        tool.serverName,
-        separator,
-      );
+      const displayName = stripNamespace(tool.namespacedName, tool.serverName, separator);
       const defaults = extractDefaults(tool.inputSchema);
       const requiredParams = getRequiredParams(tool.inputSchema);
 
@@ -62,21 +51,15 @@ export function formatGroupedTools(
         hint = ` [${defaultHints}]`;
       }
       if (requiredParams.length > 0) {
-        const reqHints = requiredParams.map(p => `${p.name} required`).join(
-          ", ",
-        );
+        const reqHints = requiredParams.map((p) => `${p.name} required`).join(", ");
         hint += hint ? ` [${reqHints}]` : ` [${reqHints}]`;
       }
 
-      lines.push(
-        `  ${cyan("/" + displayName)}  ${dim(tool.description ?? "")}${dim(hint)}`,
-      );
+      lines.push(`  ${cyan("/" + displayName)}  ${dim(tool.description ?? "")}${dim(hint)}`);
     }
 
     if (hidden > 0) {
-      lines.push(
-        `    ${dim(`+ ${hidden} more (use entry-point tools first)`)}`,
-      );
+      lines.push(`    ${dim(`+ ${hidden} more (use entry-point tools first)`)}`);
     }
 
     lines.push("");
@@ -108,16 +91,11 @@ export function formatAppGroupedTools(
       const f = filter.toLowerCase();
       const matchesKey = key.toLowerCase().includes(f);
       const matchesAppName = group.app?.name.toLowerCase().includes(f) ?? false;
-      const matchesCategory = group.app?.category.toLowerCase().includes(f)
-        ?? false;
+      const matchesCategory = group.app?.category.toLowerCase().includes(f) ?? false;
       if (!matchesKey && !matchesAppName && !matchesCategory) continue;
     }
 
-    const { visible, hidden } = getVisibleToolsEnhanced(
-      group.tools,
-      sessionState,
-      separator,
-    );
+    const { visible, hidden } = getVisibleToolsEnhanced(group.tools, sessionState, separator);
     group.hiddenCount = hidden;
 
     if (group.app) {
@@ -131,27 +109,18 @@ export function formatAppGroupedTools(
     }
 
     for (const tool of visible) {
-      const displayName = stripNamespace(
-        tool.namespacedName,
-        tool.serverName,
-        separator,
-      );
+      const displayName = stripNamespace(tool.namespacedName, tool.serverName, separator);
       const defaults = extractDefaults(tool.inputSchema);
       const requiredParams = getRequiredParams(tool.inputSchema);
 
-      const hasAllDefaults = requiredParams.length === 0
-        && Object.keys(defaults).length >= 0;
+      const hasAllDefaults = requiredParams.length === 0 && Object.keys(defaults).length >= 0;
       const readyBadge = hasAllDefaults ? dim(" (ready)") : "";
 
-      lines.push(
-        `  ${cyan("/" + displayName)}${readyBadge}  ${dim(tool.description ?? "")}`,
-      );
+      lines.push(`  ${cyan("/" + displayName)}${readyBadge}  ${dim(tool.description ?? "")}`);
     }
 
     if (hidden > 0) {
-      lines.push(
-        `    ${dim(`+ ${hidden} more (use entry-point tools first)`)}`,
-      );
+      lines.push(`    ${dim(`+ ${hidden} more (use entry-point tools first)`)}`);
     }
 
     lines.push("");
@@ -176,9 +145,9 @@ export function formatAppsList(appRegistry: AppRegistry): string {
   const lines: string[] = [bold("Apps:")];
   for (const app of apps) {
     lines.push(
-      `  ${bold(app.name)} ${dim(`(${app.slug})`)} ${dim(`[${app.category}]`)} ${dim("—")} ${
-        dim(app.tagline)
-      }`,
+      `  ${bold(app.name)} ${dim(`(${app.slug})`)} ${dim(`[${app.category}]`)} ${dim("—")} ${dim(
+        app.tagline,
+      )}`,
     );
   }
   return lines.join("\n");

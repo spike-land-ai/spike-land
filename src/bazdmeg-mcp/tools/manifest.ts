@@ -13,7 +13,8 @@ export function registerManifestTools(server: McpServer): void {
   // ── bazdmeg_manifest_query ────────────────────────────────────────────────
   createZodTool(server, {
     name: "bazdmeg_manifest_query",
-    description: "Query packages.yaml for package info. Filter by name, kind, or extract specific fields.",
+    description:
+      "Query packages.yaml for package info. Filter by name, kind, or extract specific fields.",
     schema: ManifestQuerySchema.shape,
     handler: async (args) => {
       const { packageName, kind, field } = args as {
@@ -40,9 +41,7 @@ export function registerManifestTools(server: McpServer): void {
         const filters: string[] = [];
         if (packageName) filters.push(`name=${packageName}`);
         if (kind) filters.push(`kind=${kind}`);
-        return textResult(
-          `**No packages found** matching: ${filters.join(", ")}`,
-        );
+        return textResult(`**No packages found** matching: ${filters.join(", ")}`);
       }
 
       // If a specific field is requested
@@ -93,7 +92,8 @@ export function registerManifestTools(server: McpServer): void {
   // ── bazdmeg_manifest_validate ─────────────────────────────────────────────
   createZodTool(server, {
     name: "bazdmeg_manifest_validate",
-    description: "Validate manifest integrity: deps exist, no circular deps, required fields present, worker packages have worker section.",
+    description:
+      "Validate manifest integrity: deps exist, no circular deps, required fields present, worker packages have worker section.",
     schema: ManifestValidateSchema.shape,
     handler: async () => {
       const repoRoot = process.cwd();
@@ -185,7 +185,10 @@ export function registerManifestTools(server: McpServer): void {
           for (const w of warnings) report += `- ${w}\n`;
           report += "\n";
         }
-        report += errors.length > 0 ? `**INVALID** — ${errors.length} error(s) found.` : `**VALID** — ${warnings.length} warning(s).`;
+        report +=
+          errors.length > 0
+            ? `**INVALID** — ${errors.length} error(s) found.`
+            : `**VALID** — ${warnings.length} warning(s).`;
       }
 
       return textResult(report);

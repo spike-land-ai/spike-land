@@ -239,12 +239,7 @@ const BUNDLED_APP_REGISTRY: AppInfo[] = [
     icon: "Briefcase",
     category: "lifestyle",
     tagline: "Career intelligence tool",
-    toolNames: [
-      "assess_skills",
-      "search_occupations",
-      "salary_data",
-      "job_listings",
-    ],
+    toolNames: ["assess_skills", "search_occupations", "salary_data", "job_listings"],
   },
   {
     slug: "be-uniq",
@@ -348,18 +343,15 @@ export class AppRegistryImpl implements AppRegistry {
     try {
       // Look for the store_list_apps_with_tools tool
       const allTools = manager.getAllTools();
-      const storeTool = allTools.find(t =>
-        t.originalName === "store_list_apps_with_tools"
-        || t.namespacedName.endsWith("store_list_apps_with_tools")
+      const storeTool = allTools.find(
+        (t) =>
+          t.originalName === "store_list_apps_with_tools" ||
+          t.namespacedName.endsWith("store_list_apps_with_tools"),
       );
 
       if (!storeTool) return;
 
-      const { result, isError } = await executeToolCall(
-        manager,
-        storeTool.namespacedName,
-        {},
-      );
+      const { result, isError } = await executeToolCall(manager, storeTool.namespacedName, {});
 
       if (isError) return;
 

@@ -76,23 +76,31 @@ export function AnimatedGenerations() {
   // Ghost Cursor Logic
   useEffect(() => {
     const labels = ["Aura_9", "PixelMapper", "NeuralOps", "SynthDirector", "Vizionary"];
-    const colors = ["text-amber-neon", "text-emerald-neon", "text-blue-400", "text-purple-400", "text-pink-400"];
-    
+    const colors = [
+      "text-amber-neon",
+      "text-emerald-neon",
+      "text-blue-400",
+      "text-purple-400",
+      "text-pink-400",
+    ];
+
     const initialCursors = labels.map((label, i) => ({
       id: i,
       x: Math.random() * 80 + 10,
       y: Math.random() * 80 + 10,
       label,
-      color: colors[i]
+      color: colors[i],
     }));
     setCursors(initialCursors);
 
     const interval = setInterval(() => {
-      setCursors(prev => prev.map(c => ({
-        ...c,
-        x: Math.max(5, Math.min(95, c.x + (Math.random() - 0.5) * 10)),
-        y: Math.max(5, Math.min(95, c.y + (Math.random() - 0.5) * 10)),
-      })));
+      setCursors((prev) =>
+        prev.map((c) => ({
+          ...c,
+          x: Math.max(5, Math.min(95, c.x + (Math.random() - 0.5) * 10)),
+          y: Math.max(5, Math.min(95, c.y + (Math.random() - 0.5) * 10)),
+        })),
+      );
     }, 3000);
 
     return () => clearInterval(interval);
@@ -111,7 +119,9 @@ export function AnimatedGenerations() {
       <div className="w-full h-[300px] flex items-center justify-center rounded-[2.5rem] bg-white/5 border border-white/5">
         <div className="flex flex-col items-center gap-4 opacity-20">
           <Sparkles className="w-10 h-10 text-amber-neon animate-pulse" />
-          <span className="text-[10px] font-black uppercase tracking-[0.3em]">Awaiting Manifestations...</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.3em]">
+            Awaiting Manifestations...
+          </span>
         </div>
       </div>
     );
@@ -128,7 +138,7 @@ export function AnimatedGenerations() {
         >
           <img src={img.url} alt={img.prompt} className="w-full h-full object-cover opacity-60" />
           <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950 via-obsidian-950/20 to-transparent" />
-          
+
           <div className="absolute bottom-0 left-0 right-0 p-10 space-y-4">
             <div className="flex items-center gap-3">
               <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-amber-neon backdrop-blur-md">
@@ -145,7 +155,7 @@ export function AnimatedGenerations() {
       {/* Ghost Cursors Overlay */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {cursors.map((c) => (
-          <div 
+          <div
             key={c.id}
             className={`absolute transition-all duration-[3000ms] ease-in-out ${c.color} opacity-40`}
             style={{ left: `${c.x}%`, top: `${c.y}%` }}
@@ -153,7 +163,9 @@ export function AnimatedGenerations() {
             <div className="flex flex-col items-start gap-1">
               <MousePointer2 className="w-4 h-4 fill-current" />
               <div className="px-2 py-0.5 rounded bg-black/50 border border-white/10 backdrop-blur-sm">
-                <span className="text-[8px] font-black uppercase tracking-tighter text-white/80">{c.label}</span>
+                <span className="text-[8px] font-black uppercase tracking-tighter text-white/80">
+                  {c.label}
+                </span>
               </div>
             </div>
           </div>
@@ -162,7 +174,9 @@ export function AnimatedGenerations() {
 
       <div className="absolute top-6 left-6 flex items-center gap-3 px-4 py-2 bg-black/40 backdrop-blur-xl rounded-2xl border border-white/5">
         <div className="w-1.5 h-1.5 rounded-full bg-emerald-neon animate-ping" />
-        <span className="text-[9px] font-black text-gray-300 uppercase tracking-[0.2em]">Neural Feed Active</span>
+        <span className="text-[9px] font-black text-gray-300 uppercase tracking-[0.2em]">
+          Neural Feed Active
+        </span>
       </div>
     </div>
   );
