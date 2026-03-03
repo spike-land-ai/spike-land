@@ -8,7 +8,7 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",
     "deploy:staging": "wrangler deploy --minify --env staging",
-    "build": "tsc --noEmit",
+    "build": "echo 'CF Worker — no build step required'",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",

@@ -42,15 +42,167 @@ export function clearTestgen(): void {
 
 // ─── Engine functions ────────────────────────────────────────────────────────
 
+function frameworkImport(framework: string): string {
+  if (framework === "playwright") {
+    return `import { test, expect } from "@playwright/test";`;
+  }
+  return `import { describe, it, expect, beforeEach, afterEach, vi } from "${framework === "vitest" ? "vitest" : "@jest/globals"}";`;
+}
+
+/** Extract exported function/class names from source code for targeted test generation. */
+function extractExports(sourceCode: string): string[] {
+  const names: string[] = [];
+  const patterns = [
+    /export\s+(?:async\s+)?function\s+(\w+)/g,
+    /export\s+const\s+(\w+)\s*=/g,
+    /export\s+class\s+(\w+)/g,
+    /export\s+(?:default\s+)?(?:async\s+)?function\s*\*?\s*(\w+)/g,
+  ];
+  for (const pattern of patterns) {
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(sourceCode)) !== null) {
+      const name = match[1];
+      if (name && !names.includes(name)) names.push(name);
+    }
+  }
+  return names;
+}
+
+/** Detect whether source uses async patterns so stubs can match. */
+function hasAsyncExports(sourceCode: string): boolean {
+  return /export\s+async\s+function/.test(sourceCode) || /export\s+const\s+\w+\s*=\s*async/.test(sourceCode);
+}
+
 function generateTestCode(spec: string, framework: string): string {
-  let code = `import { describe, it, expect } from "${framework === "vitest" ? "vitest" : "jest"}";\n\n`;
-  code += `describe("Generated tests", () => {\n`;
-  code += `  it("should satisfy specification: ${spec}", () => {\n`;
-  code += `    // TODO: Implement test logic\n`;
-  code += `    expect(true).toBe(true);\n`;
-  code += `  });\n`;
-  code += `});`;
-  return code;
+  const imports = frameworkImport(framework);
+  const itFn = framework === "playwright" ? "test" : "it";
+
+  if (framework === "playwright") {
+    return [
+      imports,
+      "",
+      `test.describe("${spec}", () => {`,
+      `  test.beforeEach(async ({ page }) => {`,
+      `    // Navigate to the page under test`,
+      `    // await page.goto("https://example.com");`,
+      `  });`,
+      "",
+      `  ${itFn}("should render the expected UI", async ({ page }) => {`,
+      `    // Replace with actual selector and assertion`,
+      `    // await expect(page.locator("h1")).toBeVisible();`,
+      `    expect(true).toBe(true); // placeholder — replace with real assertion`,
+      `  });`,
+      "",
+      `  ${itFn}("should handle user interaction", async ({ page }) => {`,
+      `    // Example: await page.click("button#submit");`,
+      `    // await expect(page.locator(".result")).toContainText("Success");`,
+      `    expect(true).toBe(true); // placeholder — replace with real assertion`,
+      `  });`,
+      `});`,
+    ].join("\n");
+  }
+
+  return [
+    imports,
+    "",
+    `describe("${spec}", () => {`,
+    `  beforeEach(() => {`,
+    `    // Set up shared state or mocks before each test`,
+    `    // vi.clearAllMocks();`,
+    `  });`,
+    "",
+    `  afterEach(() => {`,
+    `    // Tear down state or restore mocks after each test`,
+    `  });`,
+    "",
+    `  ${itFn}("should return the expected result for a typical input", () => {`,
+    `    // Arrange`,
+    `    const input = undefined; // TODO: replace with a real input value`,
+    `    const expected = undefined; // TODO: replace with the expected output`,
+    "",
+    `    // Act`,
+    `    const result = undefined; // TODO: call the function under test, e.g. myFunction(input)`,
+    "",
+    `    // Assert`,
+    `    expect(result).toEqual(expected);`,
+    `  });`,
+    "",
+    `  ${itFn}("should handle edge case: empty / null input", () => {`,
+    `    // TODO: test boundary conditions`,
+    `    expect(() => {`,
+    `      // myFunction(null);`,
+    `    }).not.toThrow();`,
+    `  });`,
+    "",
+    `  ${itFn}("should throw on invalid input", () => {`,
+    `    // TODO: verify error handling`,
+    `    expect(() => {`,
+    `      // myFunction(invalidValue);`,
+    `    }).toThrow();`,
+    `  });`,
+    `});`,
+  ].join("\n");
+}
+
+function generateTestCodeFromSource(sourceCode: string, targetPath: string): string {
+  const exports = extractExports(sourceCode);
+  const isAsync = hasAsyncExports(sourceCode);
+  const moduleName = targetPath.replace(/^.*\//, "").replace(/\.[^.]+$/, "");
+
+  const importLine = exports.length > 0
+    ? `import { ${exports.join(", ")} } from "./${moduleName}";`
+    : `// import { myFunction } from "./${moduleName}";`;
+
+  const lines: string[] = [
+    `import { describe, it, expect, beforeEach, vi } from "vitest";`,
+    importLine,
+    "",
+  ];
+
+  if (exports.length === 0) {
+    lines.push(
+      `describe("${moduleName}", () => {`,
+      `  it("should be importable and functional", () => {`,
+      `    // No exports detected — add your own imports above and write tests here`,
+      `    expect(true).toBe(true);`,
+      `  });`,
+      `});`,
+    );
+    return lines.join("\n");
+  }
+
+  lines.push(`describe("${moduleName}", () => {`);
+  lines.push(`  beforeEach(() => {`);
+  lines.push(`    vi.clearAllMocks();`);
+  lines.push(`  });`);
+  lines.push("");
+
+  for (const name of exports) {
+    const awaitKw = isAsync ? "await " : "";
+    lines.push(`  describe("${name}", () => {`);
+    lines.push(`    it("should return the expected result", ${isAsync ? "async " : ""}() => {`);
+    lines.push(`      // Arrange`);
+    lines.push(`      const input = undefined; // TODO: provide a real input`);
+    lines.push(`      const expected = undefined; // TODO: provide the expected output`);
+    lines.push("");
+    lines.push(`      // Act`);
+    lines.push(`      const result = ${awaitKw}${name}(input as never);`);
+    lines.push("");
+    lines.push(`      // Assert`);
+    lines.push(`      expect(result).toEqual(expected);`);
+    lines.push(`    });`);
+    lines.push("");
+    lines.push(`    it("should handle invalid input gracefully", ${isAsync ? "async " : ""}() => {`);
+    lines.push(`      ${isAsync ? "await " : ""}expect(${isAsync ? "async " : ""}() => ${awaitKw}${name}(null as never)).rejects // or .toThrow()`);
+    lines.push(`        // .toThrow("expected error message");`);
+    lines.push(`      expect(true).toBe(true); // placeholder — remove once real assertion is in place`);
+    lines.push(`    });`);
+    lines.push(`  });`);
+    lines.push("");
+  }
+
+  lines.push(`});`);
+  return lines.join("\n");
 }
 
 function applyPattern(pattern: TestPattern, variables: Record<string, string>): string {
@@ -102,7 +254,7 @@ export function registerTestgenTools(registry: ToolRegistry, userId: string, db:
       .meta({ category: "testgen", tier: "free" })
       .handler(async ({ input }) => {
         const id = crypto.randomUUID();
-        const testCode = generateTestCode("Tests for provided source code", "vitest");
+        const testCode = generateTestCodeFromSource(input.source_code, input.target_path);
         const suite: TestSuite = {
           id,
           targetPath: input.target_path,
