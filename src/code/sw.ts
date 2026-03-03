@@ -77,14 +77,14 @@ async function loadManifestAndPrecache(): Promise<void> {
 }
 
 self.addEventListener("install", (event) => {
-  console.log("Service worker installing...");
+  console.debug("Service worker installing...");
   event.waitUntil(
     loadManifestAndPrecache().then(() => self.skipWaiting()),
   );
 });
 
 self.addEventListener("activate", (event) => {
-  console.log("Service worker activating...");
+  console.debug("Service worker activating...");
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(

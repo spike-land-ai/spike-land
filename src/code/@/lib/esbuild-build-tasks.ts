@@ -576,7 +576,7 @@ export async function buildPrecacheManifest(distDir: string): Promise<void> {
     console.error("Error writing sw-version.json:", versionWriteError);
   }
 
-  console.log(
+  console.debug(
     `Precache manifest: ${assets.length} assets, version: ${version}`,
   );
 }

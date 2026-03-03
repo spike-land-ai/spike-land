@@ -86,7 +86,6 @@ export function createAuth(env: Env) {
       magicLink({
         sendMagicLink: async () => {
           // This will be called from the Worker to send magic links
-          console.log("Magic link sent");
           // Send via external service...
         },
       }),

@@ -71,7 +71,7 @@ function createStdbClient(): StdbClient {
   client.onConnect((identity: { toHexString(): string }, token?: { string: string }) => {
     state = "connected";
     retryCount = 0;
-    console.log("[SpacetimeDB] Connected with identity:", identity.toHexString());
+    console.debug("[SpacetimeDB] Connected with identity:", identity.toHexString());
     if (token) {
       localStorage.setItem("stdb_token", token.string);
     }
@@ -87,7 +87,7 @@ function createStdbClient(): StdbClient {
   client.onDisconnect(() => {
     state = "disconnected";
     _connection = null;
-    console.log("[SpacetimeDB] Disconnected");
+    console.debug("[SpacetimeDB] Disconnected");
 
     const delay = Math.min(1000 * 2 ** retryCount, 30000);
     retryCount++;

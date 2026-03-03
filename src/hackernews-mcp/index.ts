@@ -48,4 +48,4 @@ await client.connect("ws://localhost:3000", "spike-platform");
 const transport = new SpacetimeServerTransport(client, "hackernews");
 await server.connect(transport);
 
-console.log("HackerNews MCP Swarm Node Connected to SpacetimeDB.");
+console.error("HackerNews MCP Swarm Node Connected to SpacetimeDB.");

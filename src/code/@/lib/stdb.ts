@@ -44,7 +44,7 @@ export function connectToSpacetimeDB() {
 
   // Verify connectivity
   client.sql("SELECT 1").then(() => {
-    console.log("Connected to SpacetimeDB via HTTP");
+    console.debug("Connected to SpacetimeDB via HTTP");
     stdbClient = client;
     isConnecting = false;
     connectionListeners.forEach((cb) => cb(client));
