@@ -38,6 +38,10 @@ bucket_name = "code-chain"
 preview_bucket_name = "code-chain"
 
 [[migrations]]
+tag = "v4"
+deleted_classes = ["Users"]
+
+[[migrations]]
 tag = "v3"
 
 [[migrations]]
@@ -56,6 +60,10 @@ services = []
 kv_namespaces = [
   { binding = "KV", id = "7cafeba860c9485bbfca337099c82ce3", preview_id = "e2b898af453c46e2ac584745ea92424d" },
 ]
+
+[[env.testing.migrations]]
+tag = "v4"
+deleted_classes = ["Users"]
 
 [[env.testing.migrations]]
 tag = "v3"
