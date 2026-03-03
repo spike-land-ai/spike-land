@@ -1,0 +1,11 @@
+{
+  "extends": "@spike-land-ai/tsconfig/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "strict": true,
+    "noEmit": true
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

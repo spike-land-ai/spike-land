@@ -1,0 +1,30 @@
+{
+  "name": "@spike-land-ai/block-sdk",
+  "version": "0.1.0",
+  "description": "Full-stack block SDK — defineBlock(), StorageAdapter, React bindings, MCP integration",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": "./index.ts",
+    "./storage": "./storage/index.ts",
+    "./adapters/d1": "./adapters/d1.ts",
+    "./adapters/idb": "./adapters/idb.ts",
+    "./react": "./react/index.ts",
+    "./mcp": "./mcp/index.ts"
+  },
+  "dependencies": {
+    "@spike-land-ai/shared": "workspace:*",
+    "@spike-land-ai/mcp-server-base": "workspace:*",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:coverage": "vitest run --config vitest.config.ts --coverage",
+    "typecheck": "tsc --noEmit"
+  }
+}
