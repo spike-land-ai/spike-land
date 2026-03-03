@@ -79,7 +79,7 @@ export function Sidebar({ active, onNavigate, user, onLogout }: SidebarProps) {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-16 glass-panel flex-col items-center py-6 z-50 border-r-0 rounded-r-[2rem] my-2 ml-2">
+      <aside className="hidden md:flex absolute top-0 left-0 bottom-0 w-16 glass-panel flex-col items-center py-6 z-50 border-y-0 border-l-0 rounded-r-[2rem] my-4 shadow-[30px_0_60px_-15px_rgba(0,0,0,0.5)]">
         <div className="w-10 h-10 rounded-xl bg-amber-neon flex items-center justify-center mb-10 shadow-lg shadow-amber-neon/20">
           <Box className="w-6 h-6 text-obsidian-950 stroke-[2.5]" />
         </div>

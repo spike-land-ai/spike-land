@@ -19,7 +19,7 @@ export type {
   ToolInfo,
   ToolCallRequest,
   ToolCallResponse,
-} from "../../shared-types";
+} from "../../../shared-types";
 
 // Frontend-only types
 

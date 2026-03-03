@@ -47,7 +47,7 @@ export function Pipelines() {
       name: "",
       description: "",
       visibility: "PRIVATE",
-      tier: "TIER_1K",
+      tier: "FREE",
     },
   });
 
@@ -134,9 +134,11 @@ export function Pipelines() {
       <div className="flex flex-col md:flex-row gap-6">
         <div className="w-full md:w-72 shrink-0 space-y-2">
           {loading ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-16 bg-gray-800 rounded-lg animate-pulse" />
-            ))
+            <div className="animate-delayed-show space-y-2 w-full">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-16 bg-obsidian-900 border border-white/5 rounded-lg animate-pulse" />
+              ))}
+            </div>
           ) : pipelines.length === 0 ? (
             <p className="text-gray-500 text-sm text-center py-8">No pipelines</p>
           ) : (

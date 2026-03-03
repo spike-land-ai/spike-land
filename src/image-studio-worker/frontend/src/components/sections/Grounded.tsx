@@ -10,7 +10,7 @@ type Tab = "grounded" | "current-event";
 export function Grounded() {
   const [tab, setTab] = useState<Tab>("grounded");
   const [prompt, setPrompt] = useState("");
-  const [tier, setTier] = useState("TIER_1K");
+  const [tier, setTier] = useState("FREE");
   const [eventStyle, setEventStyle] = useState("editorial");
   const [loading, setLoading] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);

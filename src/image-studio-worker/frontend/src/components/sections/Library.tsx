@@ -95,10 +95,12 @@ export function Library() {
 
       {/* Image grid */}
       {isLoading ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-square bg-gray-800 rounded-xl animate-pulse" />
-          ))}
+        <div className="animate-delayed-show">
+          <ImageGrid columns={6}>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className="aspect-square bg-obsidian-900 border border-white/5 rounded-[1.5rem] animate-pulse" />
+            ))}
+          </ImageGrid>
         </div>
       ) : images.length === 0 ? (
         <div className="text-center py-16">

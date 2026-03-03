@@ -5,6 +5,7 @@ export interface LocalImage {
   width: number;
   height: number;
   opfsPath: string;
+  blobData?: Blob;
   url: string; // Object URL representing the blob
 }
 
@@ -35,24 +36,31 @@ const getOpfsRoot = async () => {
 export const storage = {
   async saveImageToLocal(
     blob: Blob,
-    metadata: Omit<LocalImage, "id" | "createdAt" | "opfsPath" | "url">,
+    metadata: Omit<LocalImage, "id" | "createdAt" | "opfsPath" | "url" | "blobData">,
   ): Promise<LocalImage> {
     const id = crypto.randomUUID();
     const createdAt = Date.now();
     const opfsPath = `img_${id}.png`;
 
-    // Save to OPFS
-    const root = await getOpfsRoot();
-    const fileHandle = await root.getFileHandle(opfsPath, { create: true });
-    const writable = await fileHandle.createWritable();
-    await writable.write(blob);
-    await writable.close();
+    let usedOpfs = false;
+    // Try to save to OPFS
+    try {
+      const root = await getOpfsRoot();
+      const fileHandle = await root.getFileHandle(opfsPath, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      usedOpfs = true;
+    } catch (e) {
+      console.warn("OPFS not available, falling back to IndexedDB blob storage", e);
+    }
 
     const record = {
       id,
       ...metadata,
       createdAt,
-      opfsPath,
+      opfsPath: usedOpfs ? opfsPath : "",
+      blobData: usedOpfs ? undefined : blob,
     };
 
     // Save metadata to IndexedDB
@@ -101,19 +109,34 @@ export const storage = {
       pagedRecords = pagedRecords.slice(0, limit);
     }
 
-    const root = await getOpfsRoot();
+    let root: FileSystemDirectoryHandle | null = null;
+    try {
+      root = await getOpfsRoot();
+    } catch (e) {
+      console.warn("OPFS not available for reading", e);
+    }
+
     const images: LocalImage[] = [];
 
     for (const record of pagedRecords) {
       try {
-        const fileHandle = await root.getFileHandle(record.opfsPath);
-        const file = await fileHandle.getFile();
-        images.push({
-          ...record,
-          url: URL.createObjectURL(file), // create Object URL for each
-        });
+        let url = "";
+        if (record.opfsPath && root) {
+          const fileHandle = await root.getFileHandle(record.opfsPath);
+          const file = await fileHandle.getFile();
+          url = URL.createObjectURL(file);
+        } else if (record.blobData) {
+          url = URL.createObjectURL(record.blobData as Blob);
+        }
+
+        if (url) {
+          images.push({
+            ...record,
+            url,
+          });
+        }
       } catch (e) {
-        console.warn(`Failed to load OPFS file for image ${record.id}`, e);
+        console.warn(`Failed to load file for image ${record.id}`, e);
       }
     }
     return images;
@@ -131,7 +154,7 @@ export const storage = {
       req.onerror = () => reject(req.error);
     });
 
-    if (record) {
+    if (record && record.opfsPath) {
       // Delete from OPFS
       try {
         const root = await getOpfsRoot();
@@ -160,7 +183,7 @@ export const storage = {
         await root.removeEntry(entry.name, { recursive: true });
       }
     } catch (e) {
-      console.warn("Error clearing OPFS", e);
+      console.warn("Error clearing OPFS or OPFS not available", e);
     }
 
     // Clear IndexedDB

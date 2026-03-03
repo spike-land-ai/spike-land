@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* Obsidian Core - Refined to be less "void-black" */
-  --color-obsidian-950: #0a0a0c;
-  --color-obsidian-900: #111116;
-  --color-obsidian-800: #18181f;
-  --color-obsidian-700: #24242d;
+  /* Obsidian Core - Deep midnight blue-purple */
+  --color-obsidian-950: #0a0c14;
+  --color-obsidian-900: #101321;
+  --color-obsidian-800: #181c31;
+  --color-obsidian-700: #252a47;
   
   /* Creation Amber - Warmer, more premium */
   --color-amber-neon: #ffb800;
@@ -39,7 +39,7 @@
 
 @layer components {
   .glass-panel {
-    @apply bg-obsidian-900/70 backdrop-blur-2xl border border-white/10 shadow-2xl;
+    @apply bg-obsidian-900/60 backdrop-blur-[32px] border border-white/5 shadow-2xl;
   }
   
   .glass-card {
@@ -64,9 +64,19 @@
   .nice-scrollbar::-webkit-scrollbar-track { background: transparent; }
   .nice-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
   .nice-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+  .animate-delayed-show {
+    opacity: 0;
+    animation: fadeIn 0.4s ease-out 0.15s forwards;
+  }
 }
 
 /* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }

@@ -22,7 +22,7 @@ interface RefImage {
 export function ReferenceGen() {
   const [tab, setTab] = useState<Tab>("references");
   const [prompt, setPrompt] = useState("");
-  const [tier, setTier] = useState("TIER_1K");
+  const [tier, setTier] = useState("FREE");
   const [refs, setRefs] = useState<RefImage[]>([{ image_id: "", role: "style" }]);
   const [loading, setLoading] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);

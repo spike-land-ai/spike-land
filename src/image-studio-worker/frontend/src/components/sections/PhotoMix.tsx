@@ -25,7 +25,7 @@ export function PhotoMix() {
   const [prompt, setPrompt] = useState("");
   const [blendMode, setBlendMode] = useState("overlay");
   const [strength, setStrength] = useState("50");
-  const [tier, setTier] = useState("TIER_1K");
+  const [tier, setTier] = useState("FREE");
   const [loading, setLoading] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
   const [history, setHistory] = useState<Array<Record<string, unknown>>>([]);

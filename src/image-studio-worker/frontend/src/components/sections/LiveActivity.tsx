@@ -31,7 +31,7 @@ export function LiveActivity() {
           const fetchedLogs: ToolCallLog[] = data.calls
             .map((c: Record<string, unknown>) => ({
               id: c.id,
-              timestamp: new Date(c.createdAt),
+              timestamp: new Date(c.createdAt as string | number),
               toolName: c.toolName,
               args: (typeof c.args === "string" ? JSON.parse(c.args) : c.args) || {},
               durationMs: c.durationMs,

@@ -19,7 +19,7 @@ export function Generate() {
   const [tab, setTab] = useState<Tab>("generate");
   const [prompt, setPrompt] = useState("");
   const [negativePrompt, setNegativePrompt] = useState("");
-  const [tier, setTier] = useState("TIER_1K");
+  const [tier, setTier] = useState("FREE");
   const [aspectRatio, setAspectRatio] = useState("1:1");
   const [loading, setLoading] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);

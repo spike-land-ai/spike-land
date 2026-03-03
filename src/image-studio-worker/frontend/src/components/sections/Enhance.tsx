@@ -11,7 +11,7 @@ export function Enhance() {
   const [tab, setTab] = useState<Tab>("single");
   // Single enhance
   const [imageId, setImageId] = useState("");
-  const [tier, setTier] = useState("TIER_1K");
+  const [tier, setTier] = useState("FREE");
   const [loading, setLoading] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
   // Batch enhance

@@ -89,7 +89,7 @@ export function App() {
 
   if (authLoading) {
     return (
-      <div className="h-screen bg-obsidian-950 flex items-center justify-center text-gray-400">
+      <div className="h-[100dvh] bg-obsidian-950 flex items-center justify-center text-gray-400">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-amber-neon/20 border-t-amber-neon rounded-full animate-spin" />
           <span className="font-mono text-xs uppercase tracking-widest text-amber-neon/50">Initializing Studio...</span>
@@ -101,7 +101,7 @@ export function App() {
   if (!isLoggedIn && !isDemo) {
     return (
       <DragDropProvider>
-      <div className="min-h-screen bg-obsidian-950 text-gray-200 overflow-x-hidden relative selection:bg-amber-neon/30 selection:text-white font-sans antialiased">
+      <div className="min-h-[100dvh] bg-obsidian-950 text-gray-200 overflow-x-hidden relative selection:bg-amber-neon/30 selection:text-white font-sans antialiased">
         {/* Cinematic Neural Background */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-amber-neon/5 blur-[160px] rounded-full animate-pulse-slow" />
@@ -242,10 +242,10 @@ export function App() {
   return (
     <DragDropProvider>
     <div className="h-[100dvh] flex flex-col md:flex-row bg-obsidian-950 text-gray-200 overflow-hidden font-sans antialiased selection:bg-amber-neon/20">
-      <Sidebar active={workspace} onNavigate={setWorkspace} user={user} onLogout={logout} />
+      <Sidebar active={workspace} onNavigate={(ws) => setWorkspace(ws as Workspace)} user={user} onLogout={logout} />
       
       <div className="flex-1 flex flex-col relative min-w-0 h-full">
-        <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-10 z-40 bg-obsidian-950/40 backdrop-blur-xl border-b border-white/5">
+        <header className="absolute top-0 left-0 right-0 h-14 md:h-16 flex items-center justify-between px-4 md:px-10 z-40 bg-obsidian-950/60 backdrop-blur-2xl border-b border-white/5">
           <div className="flex items-center gap-4">
             <div className="w-8 h-8 rounded-lg bg-amber-neon md:hidden flex items-center justify-center shadow-lg shadow-amber-neon/20">
               <Sparkles className="w-5 h-5 text-obsidian-950 stroke-[2.5]" />
@@ -264,7 +264,7 @@ export function App() {
                 {balanceLoading ? (
                   <div className="w-12 h-3 bg-white/5 animate-pulse rounded" />
                 ) : (
-                  <span className="text-sm font-black text-amber-neon">{balance?.remaining ?? 0}</span>
+                  <span className="text-sm font-black text-amber-neon">{balance ?? 0}</span>
                 )}
                 <Zap className="w-3 h-3 text-amber-neon fill-amber-neon" />
               </div>
@@ -304,7 +304,7 @@ export function App() {
           </div>
         </header>
 
-        <div className="flex-1 flex overflow-hidden relative md:m-2 glass-panel md:rounded-[2rem]">
+        <div className={`flex-1 flex overflow-hidden relative ${workspace === 'studio' ? '' : 'pt-14 md:pt-16 md:pl-20'}`}>
           <MainContent workspace={workspace} />
         </div>
       </div>

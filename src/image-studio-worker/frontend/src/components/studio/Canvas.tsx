@@ -48,7 +48,7 @@ export function Canvas() {
     try {
       const result = await StudioEngine.generateAsset(prompt);
       addAsset({
-        id: result.jobId,
+        id: (result as { jobId: string }).jobId || `gen-${Date.now()}`,
         type: "image",
         url: "https://placehold.co/600x400/020203/white?text=Generating...",
         name: prompt
@@ -163,7 +163,7 @@ export function Canvas() {
       </div>
 
       {/* Floating UI: Global Spark Bar */}
-      <div className={`absolute bottom-20 md:top-10 md:bottom-auto left-1/2 -translate-x-1/2 w-full max-w-xl px-4 z-50 transition-all duration-500 ${selectedAssetId ? "scale-95 opacity-0 pointer-events-none translate-y-4 md:-translate-y-4" : "scale-100 opacity-100"}`}>
+      <div className={`absolute bottom-[calc(5rem+env(safe-area-inset-bottom))] md:top-10 md:bottom-auto left-1/2 -translate-x-1/2 w-full max-w-xl px-4 z-50 transition-all duration-500 ${selectedAssetId ? "scale-95 opacity-0 pointer-events-none translate-y-4 md:-translate-y-4" : "scale-100 opacity-100"}`}>
         <form onSubmit={handleGenerate} className="glass-panel rounded-2xl flex items-center px-4 md:px-6 py-2.5 md:py-4 gap-3 md:gap-4 focus-within:ring-2 ring-amber-neon/30 transition-all shadow-2xl">
           {isGenerating ? (
             <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-amber-neon animate-spin" />
@@ -193,7 +193,7 @@ export function Canvas() {
       />
 
       {/* Canvas Controls */}
-      <div className="absolute bottom-4 md:bottom-8 right-4 md:left-1/2 md:-translate-x-1/2 glass-panel rounded-2xl p-1 md:p-1.5 flex items-center gap-1 md:gap-1.5 z-50 shadow-2xl transition-all">
+      <div className="absolute top-20 right-4 md:top-auto md:bottom-8 md:left-1/2 md:-translate-x-1/2 glass-panel rounded-2xl p-1 md:p-1.5 flex flex-col md:flex-row items-center gap-1 md:gap-1.5 z-50 shadow-2xl transition-all">
         <button 
           onClick={handleClear}
           className="p-2 rounded-xl hover:bg-red-500/10 text-gray-500 hover:text-red-400 transition-colors group"
@@ -202,7 +202,7 @@ export function Canvas() {
           <Trash2 className="w-4 h-4 md:w-4.5 md:h-4.5 group-active:scale-90 transition-transform" />
         </button>
 
-        <div className="w-px h-5 bg-white/10 mx-0.5" />
+        <div className="w-5 h-px md:w-px md:h-5 bg-white/10 my-0.5 md:mx-0.5 md:my-0" />
         
         <button className="hidden md:flex p-2 rounded-xl hover:bg-white/5 text-gray-500 hover:text-amber-neon transition-colors group">
           <MousePointer2 className="w-4 h-4 md:w-4.5 md:h-4.5 group-active:scale-90 transition-transform" />
@@ -210,31 +210,31 @@ export function Canvas() {
         
         <div className="hidden md:block w-px h-5 bg-white/10 mx-0.5" />
         <UploadZone onUploadComplete={addAsset} />
-        <div className="w-px h-5 bg-white/10 mx-0.5" />
+        <div className="w-5 h-px md:w-px md:h-5 bg-white/10 my-0.5 md:mx-0.5 md:my-0" />
 
-        <div className="flex items-center bg-white/5 rounded-xl px-1">
-          <button 
-            onClick={() => setZoom(prev => Math.max(prev - 0.2, 0.1))}
-            className="p-1.5 text-gray-500 hover:text-white transition-colors"
-          >
-            <Minus className="w-3 h-3 md:w-3.5 md:h-3.5" />
-          </button>
-          
-          <div className="px-2 py-1 flex items-center gap-2 border-x border-white/5">
-            <span className="text-[9px] md:text-xs font-black font-mono text-gray-400 w-8 md:w-10 text-center uppercase">
-              {Math.round(zoom * 100)}%
-            </span>
-          </div>
-
+        <div className="flex flex-col md:flex-row items-center bg-white/5 rounded-xl p-1 md:px-1">
           <button 
             onClick={() => setZoom(prev => Math.min(prev + 0.2, 5))}
             className="p-1.5 text-gray-500 hover:text-white transition-colors"
           >
             <Plus className="w-3 h-3 md:w-3.5 md:h-3.5" />
           </button>
+          
+          <div className="py-2 px-1 md:px-2 md:py-1 flex items-center gap-2 border-y md:border-y-0 md:border-x border-white/5">
+            <span className="text-[9px] md:text-xs font-black font-mono text-gray-400 w-8 md:w-10 text-center uppercase">
+              {Math.round(zoom * 100)}%
+            </span>
+          </div>
+
+          <button 
+            onClick={() => setZoom(prev => Math.max(prev - 0.2, 0.1))}
+            className="p-1.5 text-gray-500 hover:text-white transition-colors"
+          >
+            <Minus className="w-3 h-3 md:w-3.5 md:h-3.5" />
+          </button>
         </div>
 
-        <div className="w-px h-5 bg-white/10 mx-0.5" />
+        <div className="w-5 h-px md:w-px md:h-5 bg-white/10 my-0.5 md:mx-0.5 md:my-0" />
         <button 
           onClick={() => setSelectedAssetId(null)}
           className="px-3 py-1.5 text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-white transition-colors disabled:opacity-20"

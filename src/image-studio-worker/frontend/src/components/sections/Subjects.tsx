@@ -57,7 +57,7 @@ export function Subjects() {
   // Generate
   const [genPrompt, setGenPrompt] = useState("");
   const [genSubjects, setGenSubjects] = useState<string[]>([]);
-  const [genTier, setGenTier] = useState("TIER_1K");
+  const [genTier, setGenTier] = useState("FREE");
   const [generating, setGenerating] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
 
@@ -131,7 +131,7 @@ export function Subjects() {
           Registered Subjects ({subjects.length})
         </h3>
         {loading ? (
-          <div className="h-16 bg-gray-800 rounded animate-pulse" />
+          <div className="h-10 bg-obsidian-900 border border-white/5 rounded-lg animate-pulse animate-delayed-show" />
         ) : subjects.length === 0 ? (
           <p className="text-gray-500 text-sm">No subjects registered</p>
         ) : (

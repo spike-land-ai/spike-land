@@ -10,7 +10,7 @@ export function BrandKit() {
   const [colors, setColors] = useState("");
   const [tagline, setTagline] = useState("");
   const [assets, setAssets] = useState<string[]>(["logo"]);
-  const [tier, setTier] = useState("TIER_1K");
+  const [tier, setTier] = useState("FREE");
   const [loading, setLoading] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
   const [resultData, setResultData] = useState<Record<string, unknown> | null>(null);

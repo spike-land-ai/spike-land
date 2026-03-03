@@ -354,7 +354,7 @@ export function Albums() {
 
             {/* Image grid */}
             {loadingImages ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 animate-delayed-show">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div
                     key={i}
@@ -615,7 +615,7 @@ export function Albums() {
 
       {/* Album grid */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 animate-delayed-show">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}

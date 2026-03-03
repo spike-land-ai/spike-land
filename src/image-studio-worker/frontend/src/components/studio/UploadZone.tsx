@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { eventBus } from "../../services/event-bus";
 
 interface UploadZoneProps {
-  onUploadComplete: (asset: { id: string; type: string; url: string; name: string }) => void;
+  onUploadComplete: (asset: { id: string; type: "image" | "cluster"; url: string; name: string }) => void;
 }
 
 export function UploadZone({ onUploadComplete }: UploadZoneProps) {

@@ -8,7 +8,7 @@ import { ENHANCEMENT_TIERS, ENHANCEMENT_COSTS } from "@/constants/enums";
 export function Storyboard() {
   const [prompt, setPrompt] = useState("");
   const [frameCount, setFrameCount] = useState("4");
-  const [tier, setTier] = useState("TIER_1K");
+  const [tier, setTier] = useState("FREE");
   const [loading, setLoading] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
   const [frames, setFrames] = useState<string[]>([]);

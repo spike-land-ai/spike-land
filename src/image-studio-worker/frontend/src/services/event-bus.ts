@@ -19,11 +19,11 @@ class EventBus {
     if (!this.handlers.has(event)) {
       this.handlers.set(event, new Set());
     }
-    this.handlers.get(event)!.add(handler);
+    this.handlers.get(event)!.add(handler as (...args: unknown[]) => void);
 
     // Return unsubscribe function
     return () => {
-      this.handlers.get(event)?.delete(handler);
+      this.handlers.get(event)?.delete(handler as (...args: unknown[]) => void);
     };
   }
 
@@ -41,7 +41,7 @@ class EventBus {
   }
 
   off<K extends keyof EventMap>(event: K, handler: EventHandler<K>): void {
-    this.handlers.get(event)?.delete(handler);
+    this.handlers.get(event)?.delete(handler as (...args: unknown[]) => void);
   }
 
   clear(): void {
