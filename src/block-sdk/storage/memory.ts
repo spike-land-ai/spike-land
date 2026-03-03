@@ -93,14 +93,14 @@ function createMemorySQL(): SQLAdapter {
         return { rows: [...table] as T[], rowsAffected: 0 };
       }
       const conditions = selectMatch[2].split(/\s+AND\s+/i).map((c) => c.trim());
-      let paramIdx = 0;
-      const filtered = table.filter((row) =>
-        conditions.every((cond) => {
+      const filtered = table.filter((row) => {
+        let paramIdx = 0;
+        return conditions.every((cond) => {
           const [col] = cond.split(/\s*=\s*/);
           const value = params?.[paramIdx++];
           return row[col!.trim()] === value;
-        }),
-      );
+        });
+      });
       return { rows: filtered as T[], rowsAffected: 0 };
     }
 
@@ -146,14 +146,14 @@ function createMemorySQL(): SQLAdapter {
         return { rows: [] as T[], rowsAffected: count };
       }
       const conditions = deleteMatch[2].split(/\s+AND\s+/i).map((c) => c.trim());
-      let paramIdx = 0;
       const before = table.length;
-      const remaining = table.filter((row) =>
-        !conditions.every((cond) => {
+      const remaining = table.filter((row) => {
+        let paramIdx = 0;
+        return !conditions.every((cond) => {
           const [col] = cond.split(/\s*=\s*/);
           return row[col!.trim()] === params?.[paramIdx++];
-        }),
-      );
+        });
+      });
       tables.set(tableName, remaining);
       return { rows: [] as T[], rowsAffected: before - remaining.length };
     }

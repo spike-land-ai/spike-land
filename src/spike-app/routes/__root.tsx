@@ -50,6 +50,7 @@ const ROUTE_META: Record<string, { title: string; description: string }> = {
 
 const navItems = [
   { to: "/", label: "Dashboard" },
+  { to: "/blog", label: "Blog" },
   { to: "/tools", label: "Tools" },
   { to: "/apps", label: "Apps" },
   { to: "/store", label: "Store" },

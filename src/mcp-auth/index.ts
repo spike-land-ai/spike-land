@@ -7,6 +7,7 @@ import { createAuth, type Env } from "./auth";
 
 // CORS configuration for Better Auth and MCP
 const ALLOWED_ORIGINS = [
+  "https://spike.land",
   "https://image-studio-mcp.spike.land",
   "https://auth-mcp.spike.land",
   "http://localhost:5173",

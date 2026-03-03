@@ -51,6 +51,16 @@ app.route("/", live);
 app.route("/", analytics);
 app.route("/", quizBadge);
 app.route("/", version);
+
+// Better Auth proxy
+app.all("/api/auth/*", async (c) => {
+  const url = new URL(c.req.url);
+  url.hostname = "auth-mcp.spike.land";
+  url.port = "";
+  url.protocol = "https:";
+  return fetch(url.toString(), c.req.raw);
+});
+
 app.route("/", spa);
 
 export { RateLimiter };

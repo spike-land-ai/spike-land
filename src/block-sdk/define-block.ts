@@ -7,7 +7,7 @@
  */
 
 import type { BuiltTool, CallToolResult, Procedure } from "@spike-land-ai/shared/tool-builder";
-import { createProcedure } from "@spike-land-ai/shared/tool-builder";
+import { createProcedure, middleware } from "@spike-land-ai/shared/tool-builder";
 import type { SchemaDef, TableDef } from "./schema/types.js";
 import { schemaToSQL } from "./schema/types.js";
 import type { StorageAdapter } from "./storage/types.js";
@@ -144,7 +144,10 @@ export function defineBlock<
     const blockCtx: BlockContext = { storage, userId, nanoid };
 
     // Create a base procedure with BlockContext injected via middleware
-    const procedure = createProcedure<BlockContext>();
+    const withBlockContext = middleware<Record<string, never>, BlockContext>(
+      async ({ ctx, next }) => next({ ...ctx, ...blockCtx }),
+    );
+    const procedure = createProcedure().use(withBlockContext) as Procedure<BlockContext>;
 
     // The user's procedure factory receives the context builder
     return definition.procedures({ procedure });

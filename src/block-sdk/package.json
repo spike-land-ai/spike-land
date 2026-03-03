@@ -13,13 +13,13 @@
     "./mcp": "./mcp/index.ts"
   },
   "dependencies": {
-    "@spike-land-ai/shared": "workspace:*",
     "@spike-land-ai/mcp-server-base": "workspace:*",
-    "zod": "^3.23.0"
+    "@spike-land-ai/shared": "workspace:*",
+    "zod": "^4.0.0"
   },
   "devDependencies": {
-    "vitest": "^3.0.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
   },
   "scripts": {
     "build": "tsc --noEmit",

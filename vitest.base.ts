@@ -23,6 +23,7 @@ export default defineConfig({
       "@spike-land-ai/block-sdk/react": path.join(root, "src/block-sdk/react/index.ts"),
       "@spike-land-ai/block-sdk/mcp": path.join(root, "src/block-sdk/mcp/index.ts"),
       "@spike-land-ai/block-sdk": path.join(root, "src/block-sdk/index.ts"),
+      "@spike-land-ai/block-tasks": path.join(root, "src/block-tasks/index.ts"),
       "@spike-land-ai/mcp-server-base": path.join(root, "src/mcp-server-base/index.ts"),
     },
   },
