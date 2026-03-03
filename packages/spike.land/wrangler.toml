@@ -1,0 +1,23 @@
+name = "spike-land"
+compatibility_date = "2026-03-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Hyperdrive connection to PostgreSQL (managed connection pooling)
+# Create with: npx wrangler hyperdrive create spike-db --connection-string="$DATABASE_URL"
+# Then update the id below with the returned Hyperdrive ID
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "PLACEHOLDER_HYPERDRIVE_ID"
+
+# R2 bucket for asset storage (images, uploads)
+# [[r2_buckets]]
+# binding = "R2_BUCKET"
+# bucket_name = "spike-land-assets"
+
+# KV namespace for ISR cache
+# [[kv_namespaces]]
+# binding = "KV_CACHE"
+# id = "PLACEHOLDER_KV_ID"
+
+[vars]
+NODE_ENV = "production"
