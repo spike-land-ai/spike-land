@@ -1,3 +1,10 @@
+declare global {
+  interface Navigator {
+    /** RAM in GB (approximate/clamped). Part of Device Memory API (not yet in TS lib). */
+    readonly deviceMemory?: number;
+  }
+}
+
 export function detectSlowDevice(): boolean {
   if (typeof navigator === "undefined") return false;
 
@@ -6,7 +13,6 @@ export function detectSlowDevice(): boolean {
   const hardwareConcurrency = navigator.hardwareConcurrency || 4;
 
   // deviceMemory gives the RAM in GB (approximate/clamped).
-  // @ts-expect-error - deviceMemory is not in standard TS lib yet
   const deviceMemory = navigator.deviceMemory ?? 4;
 
   return hardwareConcurrency < 4 || deviceMemory < 4;

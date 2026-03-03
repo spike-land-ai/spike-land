@@ -12,7 +12,6 @@ export async function shareMachine(
     initialContext: Record<string, unknown>;
   },
 ): Promise<string> {
-  // @ts-expect-error - Prisma is part of the monorepo
   const prisma = (await import("@/lib/prisma")).default;
   const { randomBytes } = await import("node:crypto");
 
@@ -55,7 +54,6 @@ export async function shareMachine(
 
 /** Get a shared machine by token. */
 export async function getSharedMachine(token: string): Promise<MachineExport> {
-  // @ts-expect-error - Prisma is part of the monorepo
   const prisma = (await import("@/lib/prisma")).default;
   const shared = await prisma.stateMachine.findUnique({
     where: { shareToken: token },

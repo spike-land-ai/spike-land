@@ -10,7 +10,11 @@ let AS = globalThis.AbortSignal;
 
 /* c8 ignore start */
 if (typeof AC === "undefined") {
-  // @ts-expect-error Polyfill for environments without AbortSignal
+  // @ts-expect-error The polyfill class intentionally does not implement the
+  // full AbortSignal interface (missing dispatchEvent, throwIfAborted, etc.).
+  // A cast to the full type is impossible here since we only provide the
+  // minimal surface needed by LRUCache.fetch(). This cannot be fixed without
+  // pulling in a full spec-compliant polyfill as a dependency.
   AS = class AbortSignal {
     onabort?: (...a: unknown[]) => unknown;
     _onabort: Array<(...a: unknown[]) => unknown> = [];

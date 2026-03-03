@@ -5,7 +5,7 @@
  *
  * @example
  * ```ts
- * const isTypedArray = (obj: any): obj is TypedArray => obj instanceof TypedArray;
+ * const isTypedArray = (obj: unknown): obj is TypedArray => obj instanceof TypedArray;
  * console.warn(isTypedArray(new Uint8Array(10))); // true
  * ```
  */

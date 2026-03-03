@@ -2,7 +2,12 @@
   "extends": "@spike-land-ai/tsconfig/tsconfig.mcp.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@/lib/prisma": ["./prisma.d.ts"]
+    }
   },
-  "include": ["src/**/*"]
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "dist", "vitest.config.ts"]
 }
