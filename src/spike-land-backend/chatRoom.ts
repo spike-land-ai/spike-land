@@ -55,6 +55,7 @@ export class Code implements DurableObject {
   // Version history tracking
   private versionCount = 0;
 
+  private static readonly MAX_LOG_ENTRIES = 50;
   private xLog: (sess: ICodeSession) => Promise<void>;
 
   // private historyManager: CodeHistoryManager;
@@ -136,6 +137,9 @@ export class Code implements DurableObject {
     // this.historyManager = createCodeHistoryManager(this.env);
     this.xLog = async (c: ICodeSession) => {
       this.logs.push(c);
+      if (this.logs.length > Code.MAX_LOG_ENTRIES) {
+        this.logs = this.logs.slice(-Code.MAX_LOG_ENTRIES);
+      }
     }; // this.historyManager.logCodeSpace.bind(this.historyManager);
 
     this.backupSession = sanitizeSession({

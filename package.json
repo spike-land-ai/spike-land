@@ -19,7 +19,8 @@
     "format:check": "biome format .",
     "changeset": "changeset",
     "release": "changeset publish",
-    "bazdmeg": "npx tsx scripts/bazdmeg.ts"
+    "bazdmeg": "npx tsx scripts/bazdmeg.ts",
+    "bazdmeg:verbose": "npx tsx scripts/bazdmeg.ts --verbose"
   },
   "dependencies": {
     "rehype-raw": "^7.0.0",

@@ -28,8 +28,8 @@ async function tryRegister(
     if (typeof fn === "function") {
       (fn as RegisterFn)(registry, userId, db, kv);
     }
-  } catch {
-    // Module not yet migrated — skip silently
+  } catch (err) {
+    console.error(`[MCP] Failed to register ${fnName} from ${modulePath}:`, err);
   }
 }
 
@@ -159,7 +159,9 @@ export async function registerAllTools(
   db: DrizzleDB,
   kv?: KVNamespace,
 ): Promise<void> {
-  for (const [modulePath, fnName] of TOOL_MODULES) {
-    await tryRegister(modulePath, fnName, registry, userId, db, kv);
-  }
+  await Promise.all(
+    TOOL_MODULES.map(([modulePath, fnName]) =>
+      tryRegister(modulePath, fnName, registry, userId, db, kv),
+    ),
+  );
 }

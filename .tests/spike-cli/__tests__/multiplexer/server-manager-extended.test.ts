@@ -10,7 +10,7 @@ const mockCallTool = vi.hoisted(() => vi.fn());
 const mockClose = vi.hoisted(() => vi.fn());
 const mockConnectedGetter = vi.hoisted(() => vi.fn().mockReturnValue(true));
 
-vi.mock("../../multiplexer/upstream-client.js", () => ({
+vi.mock("../../../../src/spike-cli/multiplexer/upstream-client.js", () => ({
   UpstreamClient: class MockUpstreamClient {
     name: string;
     config: unknown;

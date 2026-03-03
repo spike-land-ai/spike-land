@@ -5,12 +5,12 @@ import * as alias from "../../src/spike-cli/commands/alias";
 import { main } from "../../src/spike-cli/cli";
 
 // Mock the commands so we don't trigger real logic
-vi.mock("./commands/auth", () => ({ registerAuthCommand: vi.fn() }));
-vi.mock("./commands/alias", () => ({ registerAliasCommand: vi.fn() }));
-vi.mock("./commands/completions", () => ({ registerCompletionsCommand: vi.fn() }));
-vi.mock("./commands/registry", () => ({ registerRegistryCommand: vi.fn() }));
-vi.mock("./commands/agent", () => ({ registerAgentCommand: vi.fn() }));
-vi.mock("./alias/store", () => ({ loadAliases: vi.fn().mockResolvedValue({ commands: {} }) }));
+vi.mock("../../src/spike-cli/commands/auth", () => ({ registerAuthCommand: vi.fn() }));
+vi.mock("../../src/spike-cli/commands/alias", () => ({ registerAliasCommand: vi.fn() }));
+vi.mock("../../src/spike-cli/commands/completions", () => ({ registerCompletionsCommand: vi.fn() }));
+vi.mock("../../src/spike-cli/commands/registry", () => ({ registerRegistryCommand: vi.fn() }));
+vi.mock("../../src/spike-cli/commands/agent", () => ({ registerAgentCommand: vi.fn() }));
+vi.mock("../../src/spike-cli/alias/store", () => ({ loadAliases: vi.fn().mockResolvedValue({ commands: {} }) }));
 
 describe("cli", () => {
   const originalArgv = process.argv;

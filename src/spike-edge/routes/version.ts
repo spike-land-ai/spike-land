@@ -13,8 +13,8 @@ version.get("/api/version", async (c) => {
     const html = await indexObj.text();
     const shaMatch = html.match(/<meta\s+name="build-sha"\s+content="([^"]+)"/);
     const timeMatch = html.match(/<meta\s+name="build-time"\s+content="([^"]+)"/);
-    if (shaMatch) sha = shaMatch[1];
-    if (timeMatch) buildTime = timeMatch[1];
+    if (shaMatch?.[1]) sha = shaMatch[1];
+    if (timeMatch?.[1]) buildTime = timeMatch[1];
   }
 
   // Paginated list of all deployed assets

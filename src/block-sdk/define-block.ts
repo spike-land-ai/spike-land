@@ -12,6 +12,9 @@ import type { SchemaDef, TableDef } from "./schema/types.js";
 import { schemaToSQL } from "./schema/types.js";
 import type { StorageAdapter } from "./storage/types.js";
 
+/** Base constraint for BuiltTool that avoids handler contravariance issues */
+type AnyBuiltTool = BuiltTool<never, CallToolResult>;
+
 // ─── Block Context ─────────────────────────────────────────────────────────
 
 /** Context available to all block procedures */
@@ -57,7 +60,7 @@ export interface BlockDefinition<
 
 /** Resolved block — the output of defineBlock() */
 export interface Block<
-  TStorage extends Record<string, TableDef>,
+  _TStorage extends Record<string, TableDef>,
   TProcedures extends Record<string, BuiltTool>,
   TComponents extends BlockComponents,
 > {
@@ -144,10 +147,10 @@ export function defineBlock<
     const blockCtx: BlockContext = { storage, userId, nanoid };
 
     // Create a base procedure with BlockContext injected via middleware
-    const withBlockContext = middleware<Record<string, never>, BlockContext>(
+    const withBlockContext = middleware<Record<string, unknown>, BlockContext>(
       async ({ ctx, next }) => next({ ...ctx, ...blockCtx }),
     );
-    const procedure = createProcedure().use(withBlockContext) as Procedure<BlockContext>;
+    const procedure = createProcedure().use(withBlockContext) as unknown as Procedure<BlockContext>;
 
     // The user's procedure factory receives the context builder
     return definition.procedures({ procedure });

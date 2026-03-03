@@ -1,8 +1,13 @@
 import { execSync } from "node:child_process";
 import type { CheckResult, CheckSuite } from "./types.js";
+import { isVerbose } from "./verbose.js";
 
 function runCheck(name: string, command: string): CheckResult {
+  const verbose = isVerbose();
   const start = Date.now();
+  if (verbose) {
+    console.log(`    [verbose] running: ${command}`);
+  }
   try {
     const output = execSync(command, {
       encoding: "utf-8",
@@ -10,6 +15,9 @@ function runCheck(name: string, command: string): CheckResult {
       stdio: ["pipe", "pipe", "pipe"],
       maxBuffer: 10 * 1024 * 1024,
     });
+    if (verbose) {
+      console.log(`    [verbose] ${name} PASS (${((Date.now() - start) / 1000).toFixed(1)}s)`);
+    }
     return {
       name,
       passed: true,
@@ -19,6 +27,10 @@ function runCheck(name: string, command: string): CheckResult {
   } catch (err: unknown) {
     const e = err as { stdout?: string; stderr?: string; status?: number };
     const output = [e.stdout ?? "", e.stderr ?? ""].filter(Boolean).join("\n");
+    if (verbose) {
+      console.log(`    [verbose] ${name} FAIL (${((Date.now() - start) / 1000).toFixed(1)}s)`);
+      console.log(`    [verbose] ${name} output:\n${output.trim().slice(0, 2000)}${output.length > 2000 ? "\n    ... (truncated)" : ""}`);
+    }
     return {
       name,
       passed: false,

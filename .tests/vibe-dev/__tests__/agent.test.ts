@@ -6,8 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("fs");
 vi.mock("fs/promises");
-vi.mock("../api.js");
-vi.mock("../redis.js");
+vi.mock("../../../src/vibe-dev/api.js");
+vi.mock("../../../src/vibe-dev/redis.js");
 vi.mock("child_process", () => ({ spawn: vi.fn() }));
 
 import { spawn } from "child_process";

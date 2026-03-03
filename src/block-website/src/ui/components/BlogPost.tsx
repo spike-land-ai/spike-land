@@ -3,7 +3,7 @@ import rehypeRaw from "rehype-raw";
 import { getPostBySlug } from "../../core/reducers";
 import * as Interactive from "../interactive";
 
-const COMPONENT_MAP: Record<string, any> = {
+const COMPONENT_MAP = {
   convergencedemo: Interactive.ConvergenceDemo,
   dependencycascadedemo: Interactive.DependencyCascadeDemo,
   stackcollapsedemo: Interactive.StackCollapseDemo,
@@ -26,7 +26,7 @@ const COMPONENT_MAP: Record<string, any> = {
   paradigmguilttimeline: Interactive.ParadigmGuiltTimeline,
   effortinversiondemo: Interactive.EffortInversionDemo,
   contextlayerbuilderdemo: Interactive.ContextLayerBuilderDemo,
-  callout: ({ children, type }: any) => (
+  callout: ({ children, type }: { children?: React.ReactNode; type?: string }) => (
     <div className={`p-4 my-6 rounded-xl border ${
       type === 'info' ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 text-blue-900 dark:text-blue-100' : 
       'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700'

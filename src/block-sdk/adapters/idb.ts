@@ -279,7 +279,7 @@ function createIDBBlobs(dbPromise: Promise<IDBDatabase>): BlobAdapter {
       if (data instanceof ArrayBuffer) {
         buffer = data;
       } else if (data instanceof Uint8Array) {
-        buffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+        buffer = (data.buffer as ArrayBuffer).slice(data.byteOffset, data.byteOffset + data.byteLength);
       } else {
         const reader = (data as ReadableStream).getReader();
         const chunks: Uint8Array[] = [];

@@ -115,45 +115,12 @@ export function createAuth(env: Env) {
               use: [],
             },
             async (ctx) => {
-              const { qrHash, qrOneTimeCode } = ctx.body;
-              if (!qrHash || !qrOneTimeCode) {
-                return ctx.json(
-                  { error: "Missing required fields" },
-                  {
-                    status: 400,
-                  },
-                );
-              }
-
-              // In reality, you'd lookup the QR state from KV/D1 here
-              // For now, we stub it out until we migrate qr-auth-service
-              const userId = "stub-user-id";
-              if (!userId) {
-                return ctx.json({ error: "Invalid QR code" }, { status: 401 });
-              }
-
-              // Lookup the user in D1
-              const user = await db.query.user.findFirst({
-                where: (u, { eq }) => eq(u.id, userId),
-              });
-
-              if (!user) {
-                return ctx.json({ error: "User not found" }, { status: 401 });
-              }
-
-              const session = await ctx.context.internalAdapter.createSession(user.id, ctx.request);
-
-              // Using dummy cookies since it's an API, setCookie is handled by better-auth internals
-              return ctx.json({
-                session,
-                user: {
-                  id: user.id,
-                  email: user.email || "",
-                  name: user.name || "",
-                  image: user.image || "",
-                  role: user.role,
-                },
-              });
+              // QR sign-in is not yet implemented. Return 501 to prevent
+              // the stub from creating sessions for a hardcoded user ID.
+              return ctx.json(
+                { error: "QR sign-in is not yet implemented" },
+                { status: 501 },
+              );
             },
           ),
         },

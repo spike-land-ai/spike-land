@@ -17,6 +17,7 @@ export type TaskStatus = (typeof TASK_STATUSES)[number];
 
 /** Task row shape */
 export interface Task {
+  [key: string]: unknown;
   id: string;
   title: string;
   description: string;

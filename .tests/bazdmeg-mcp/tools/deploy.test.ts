@@ -6,12 +6,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 
-vi.mock("../shell.js", () => ({
+vi.mock("../../../src/bazdmeg-mcp/shell.js", () => ({
   runCommand: vi.fn(),
   hasScript: vi.fn(),
 }));
 
-vi.mock("../manifest.js", () => ({
+vi.mock("../../../src/bazdmeg-mcp/manifest.js", () => ({
   getManifestPackage: vi.fn(),
   readManifest: vi.fn(),
   clearManifestCache: vi.fn(),

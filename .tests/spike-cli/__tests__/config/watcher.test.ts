@@ -15,7 +15,7 @@ vi.mock("node:fs", () => ({
   }),
 }));
 
-vi.mock("../../config/discovery.js", () => ({
+vi.mock("../../../../src/spike-cli/config/discovery.js", () => ({
   discoverConfig: vi.fn().mockResolvedValue({
     servers: { newServer: { command: "node", args: ["new.js"] } },
   }),

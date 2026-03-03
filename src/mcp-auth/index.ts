@@ -53,6 +53,19 @@ export default {
 
     const url = new URL(request.url);
 
+    // Health check / root redirect
+    if (url.pathname === "/") {
+      return withCors(new Response(null, {
+        status: 302,
+        headers: { Location: "https://spike.land" },
+      }), request);
+    }
+
+    // Suppress favicon noise
+    if (url.pathname === "/favicon.ico") {
+      return new Response(null, { status: 204 });
+    }
+
     // 1. Better Auth catch-all API routes (OAuth, Magic Links, Session queries)
     if (url.pathname.startsWith("/api/auth/")) {
       const auth = createAuth(env);

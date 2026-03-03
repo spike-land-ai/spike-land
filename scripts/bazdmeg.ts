@@ -29,6 +29,7 @@ import {
   addLogEvent,
   formatTrend,
 } from "./bazdmeg/metrics.js";
+import { setVerbose, isVerbose } from "./bazdmeg/verbose.js";
 import type {
   Outcome,
   Phase1Result,
@@ -37,6 +38,11 @@ import type {
   PromptUsage,
   RunRecord,
 } from "./bazdmeg/types.js";
+
+// Parse --verbose flag
+if (process.argv.includes("--verbose") || process.argv.includes("-v")) {
+  setVerbose(true);
+}
 
 function getBranch(): string {
   return execSync("git branch --show-current", {
@@ -53,13 +59,21 @@ function getSha(): string {
 function header(): void {
   const branch = getBranch();
   const sha = getSha();
-  const inner = `  BAZDMEG Pipeline  |  ${branch} @ ${sha}  `;
+  const verbose = isVerbose();
+  const mode = verbose ? " (VERBOSE)" : "";
+  const inner = `  BAZDMEG Pipeline${mode}  |  ${branch} @ ${sha}  `;
   const bar = "═".repeat(inner.length);
   console.log(`
 ╔${bar}╗
 ║${inner}║
 ╚${bar}╝
 `);
+  if (verbose) {
+    console.log("  [verbose] Verbose mode enabled — showing all command output");
+    console.log(`  [verbose] CWD: ${process.cwd()}`);
+    console.log(`  [verbose] Node: ${process.version}`);
+    console.log("");
+  }
 }
 
 // ── Phase 1: Auto-Fix Loop ──────────────────────────────────────────

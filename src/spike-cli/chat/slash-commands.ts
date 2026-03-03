@@ -10,7 +10,7 @@ import { executeToolCall, extractDefaults, getRequiredParams } from "./tool-adap
 import { fuzzyFilter, fuzzyScore } from "../util/fuzzy";
 import { bold, cyan, dim, green, yellow } from "../shell/formatter";
 import type { AppRegistry } from "./app-registry";
-import { CONFIG_PREREQUISITES, SessionState } from "./session-state";
+import { CONFIG_PREREQUISITES, type SessionState } from "./session-state";
 import { extractPrefix, stripNamespace } from "./tool-grouping";
 import { formatAppGroupedTools, formatAppsList, formatGroupedTools } from "./tool-formatting";
 import { coerceValue, extractIdsFromResult, promptForParam } from "./tool-interaction";
@@ -26,7 +26,7 @@ export {
   isEntryPointTool,
   stripNamespace,
 } from "./tool-grouping";
-export { SessionState } from "./session-state";
+export type { SessionState } from "./session-state";
 
 /** Parsed slash command input. */
 export interface ParsedSlashInput {

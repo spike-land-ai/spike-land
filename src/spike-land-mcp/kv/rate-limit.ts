@@ -1,6 +1,10 @@
 /**
  * KV-backed sliding window rate limiter.
  * Replaces Upstash Redis from spike.land.
+ *
+ * Note: KV is eventually consistent so this is best-effort under high
+ * concurrency. The await on put() ensures at least single-request
+ * consistency and reduces the TOCTOU window vs fire-and-forget.
  */
 
 const WINDOW_MS = 60 * 1000; // 60 seconds
@@ -42,8 +46,10 @@ export async function checkRateLimit(
   const isLimited = entry.count > maxRequests;
   const remaining = Math.max(0, maxRequests - entry.count);
 
-  // Fire-and-forget — no need to block the response on KV write
-  void kv.put(kvKey, JSON.stringify(entry), {
+  // Await the put to reduce the TOCTOU window. KV is still eventually
+  // consistent so this isn't fully atomic, but it's significantly better
+  // than fire-and-forget under normal load patterns.
+  await kv.put(kvKey, JSON.stringify(entry), {
     expirationTtl: Math.ceil(windowMs / 1000) + 10,
   });
 

@@ -5,13 +5,13 @@ import * as flow from "../../../src/spike-cli/auth/device-flow";
 import * as store from "../../../src/spike-cli/auth/token-store";
 import type { AuthTokens } from "../../../src/spike-cli/auth/token-store";
 
-vi.mock("../auth/device-flow", () => ({ deviceCodeLogin: vi.fn() }));
-vi.mock("../auth/token-store", () => ({
+vi.mock("../../../src/spike-cli/auth/device-flow", () => ({ deviceCodeLogin: vi.fn() }));
+vi.mock("../../../src/spike-cli/auth/token-store", () => ({
   deleteTokens: vi.fn(),
   loadTokens: vi.fn(),
   isTokenExpired: vi.fn(),
 }));
-vi.mock("../onboarding/wizard", () => ({
+vi.mock("../../../src/spike-cli/onboarding/wizard", () => ({
   runOnboardingWizard: vi.fn().mockRejectedValue(new Error("skip")),
   submitOnboarding: vi.fn(),
 }));

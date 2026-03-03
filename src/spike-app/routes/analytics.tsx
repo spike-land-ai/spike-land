@@ -86,9 +86,9 @@ export function AnalyticsPage() {
   const cutoff = Date.now() - timeRangeToMs(timeRange);
 
   // TODO: wire up to edge API
-  const allEvents: PlatformEvent[] = [];
-  const agents: Agent[] = [];
-  const apps: App[] = [];
+  const allEvents: PlatformEvent[] = useMemo(() => [], []);
+  const agents: Agent[] = useMemo(() => [], []);
+  const apps: App[] = useMemo(() => [], []);
 
   const filteredEvents = useMemo(
     () => allEvents.filter((e) => e.created_at >= cutoff),

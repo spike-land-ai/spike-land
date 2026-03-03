@@ -57,7 +57,7 @@ export function AppDetailPage() {
         setIsLoading(false);
       }, 1500);
     },
-    [appId],
+    [],
   );
 
   function handleAction(_action: "archive" | "delete" | "restore") {

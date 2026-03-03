@@ -44,10 +44,21 @@ proxy.post("/proxy/stripe", async (c) => {
   });
 });
 
+const AI_URL_ALLOWLIST = [
+  "https://api.anthropic.com/",
+  "https://api.openai.com/",
+  "https://generativelanguage.googleapis.com/",
+  "https://api.groq.com/",
+];
+
 proxy.post("/proxy/ai", async (c) => {
   const body = await c.req.json<unknown>();
   if (!validateProxyBody(body)) {
     return c.json({ error: "Invalid request body: url is required" }, 400);
+  }
+
+  if (!AI_URL_ALLOWLIST.some((prefix) => body.url.startsWith(prefix))) {
+    return c.json({ error: "Invalid AI API URL" }, 400);
   }
 
   const response = await fetch(body.url, {

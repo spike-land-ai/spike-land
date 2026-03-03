@@ -348,7 +348,7 @@ export function BazdmegDashboardPage() {
   const cutoff = Date.now() - timeRangeToMs(timeRange);
 
   // TODO: wire up to edge API
-  const allEvents: PlatformEvent[] = [];
+  const allEvents: PlatformEvent[] = useMemo(() => [], []);
 
   const handleReplayChange = useCallback((ts: number) => setReplayTimestamp(ts), []);
   const handleGoLive = useCallback(() => setReplayTimestamp(null), []);

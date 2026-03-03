@@ -4,7 +4,7 @@
 
 import type { NamespacedTool } from "../multiplexer/server-manager";
 import type { AppInfo, AppRegistry } from "./app-registry";
-import { CONFIG_PREREQUISITES, SessionState } from "./session-state";
+import { CONFIG_PREREQUISITES, type SessionState } from "./session-state";
 
 /** Grouped tools for display. */
 export interface ToolGroup {

@@ -5,7 +5,7 @@ import type { AuthVariables } from "../../../src/spike-land-mcp/auth/middleware"
 import { createMockKV, mockEnv } from "../__test-utils__/mock-env";
 
 // Mock the MCP server creation to avoid pulling in all tool dependencies
-vi.mock("../mcp/server", () => ({
+vi.mock("../../../src/spike-land-mcp/mcp/server", () => ({
   createMcpServer: vi.fn().mockImplementation(async () => ({
     connect: vi.fn(),
     close: vi.fn(),

@@ -10,7 +10,7 @@ import * as watcher from "../../../src/vibe-dev/watcher.js";
 vi.mock("fs");
 vi.mock("fs/promises");
 vi.mock("chokidar");
-vi.mock("../sync");
+vi.mock("../../../src/vibe-dev/sync.js");
 
 describe("Watcher Module", () => {
   const mockWatcher: Pick<FSWatcher, "on" | "close"> = {

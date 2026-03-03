@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 
-vi.mock("../manifest.js", async (importOriginal) => {
+vi.mock("../../../src/bazdmeg-mcp/manifest.js", async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
   return {
     ...actual,

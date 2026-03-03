@@ -156,7 +156,7 @@ function createD1Blobs(r2?: R2Bucket): BlobAdapter | undefined {
       data: ArrayBuffer | Uint8Array | ReadableStream,
     ): Promise<void> {
       if (data instanceof Uint8Array) {
-        await r2.put(key, data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
+        await r2.put(key, (data.buffer as ArrayBuffer).slice(data.byteOffset, data.byteOffset + data.byteLength));
       } else {
         await r2.put(key, data as ArrayBuffer | ReadableStream);
       }

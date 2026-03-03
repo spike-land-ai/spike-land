@@ -5,10 +5,11 @@
  * Uses useSyncExternalStore for concurrent-safe subscriptions.
  */
 
+import { useSyncExternalStore } from "react";
 import type { BuiltTool, CallToolResult } from "@spike-land-ai/shared/tool-builder";
 import type { Block, BlockComponents } from "../define-block.js";
 import type { Row, StorageAdapter } from "../storage/types.js";
-import type { SchemaDef, TableDef } from "../schema/types.js";
+import type { TableDef } from "../schema/types.js";
 
 // ─── Block Client ──────────────────────────────────────────────────────────
 
@@ -207,12 +208,8 @@ export function createBlockHooks<TProcedures extends Record<string, BuiltTool>>(
     useBlock: () => client,
 
     useSubscription: <T extends Row>(tableName: string, filter?: Partial<T>): T[] => {
-      // This is designed to be used with React's useSyncExternalStore.
-      // The consumer wraps: useSyncExternalStore(sub.subscribe, sub.getSnapshot)
-      // We return the snapshot directly for simplicity — real integration
-      // would use useSyncExternalStore inside a proper React hook.
       const sub = getOrCreateSub<T>(tableName, filter);
-      return sub.getSnapshot();
+      return useSyncExternalStore(sub.subscribe, sub.getSnapshot, sub.getSnapshot);
     },
   };
 }

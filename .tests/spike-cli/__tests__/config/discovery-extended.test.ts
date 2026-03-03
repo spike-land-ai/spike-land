@@ -23,7 +23,7 @@ vi.mock("node:fs", () => {
   return { ...mocked, default: mocked };
 });
 
-vi.mock("../../auth/token-store.js", () => ({
+vi.mock("../../../../src/spike-cli/auth/token-store.js", () => ({
   hasValidToken: mockHasValidToken,
   loadTokens: mockLoadTokens,
 }));

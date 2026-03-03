@@ -9,6 +9,7 @@
     "dev": "wrangler dev",
     "dev:remote": "wrangler dev --remote",
     "build:worker": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --format=esm --target=es2020 --external:esbuild-wasm --external:@spike-land-ai/code --external:@spike-land-ai/esbuild-wasm --loader:.wasm=file",
+    "deploy": "wrangler deploy --minify",
     "w:deploy:prod": "wrangler deploy src/index.ts",
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",

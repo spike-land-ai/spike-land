@@ -8,7 +8,7 @@ const mockClose = vi.hoisted(() => vi.fn());
 const mockConnected = vi.hoisted(() => vi.fn());
 const mockDiscoverConfig = vi.hoisted(() => vi.fn());
 
-vi.mock("../../multiplexer/upstream-client.js", () => ({
+vi.mock("../../../../src/spike-cli/multiplexer/upstream-client.js", () => ({
   UpstreamClient: class MockUpstreamClient {
     name: string;
     connect = mockConnect;
@@ -23,7 +23,7 @@ vi.mock("../../multiplexer/upstream-client.js", () => ({
   },
 }));
 
-vi.mock("../../config/discovery.js", () => ({
+vi.mock("../../../../src/spike-cli/config/discovery.js", () => ({
   discoverConfig: mockDiscoverConfig,
 }));
 

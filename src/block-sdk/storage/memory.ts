@@ -187,7 +187,7 @@ function createMemoryBlobs(): BlobAdapter {
       if (data instanceof ArrayBuffer) {
         store.set(key, data);
       } else if (data instanceof Uint8Array) {
-        store.set(key, data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
+        store.set(key, (data.buffer as ArrayBuffer).slice(data.byteOffset, data.byteOffset + data.byteLength));
       } else {
         // ReadableStream — collect chunks
         const reader = (data as ReadableStream).getReader();

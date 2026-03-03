@@ -85,8 +85,6 @@ upload_file() {
 export -f upload_file
 export R2_BUCKET
 
-find dist -type f | while read -r file; do
-  upload_file "$file"
-done
+find dist -type f -print0 | xargs -0 -P 8 -I {} bash -c 'upload_file "$@"' _ {}
 
 echo "Deployed ${HEAD_SHA:0:12} @ ${COMMIT_TIME}"

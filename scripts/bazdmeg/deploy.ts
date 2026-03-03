@@ -219,6 +219,42 @@ export function deployWorkers(): string[] {
   return deployed;
 }
 
+interface SmokeResult {
+  endpoint: string;
+  passed: boolean;
+  status: number | null;
+  error?: string;
+}
+
+function smokeTest(): SmokeResult[] {
+  const endpoints: Array<{ url: string; expect: (status: number) => boolean }> = [
+    { url: "https://spike.land", expect: (s) => s === 200 },
+    { url: "https://spike.land/api/version", expect: (s) => s === 200 },
+    { url: "https://auth-mcp.spike.land/", expect: (s) => s >= 200 && s < 400 },
+    { url: "https://mcp.spike.land/", expect: (s) => s >= 200 && s < 500 },
+  ];
+
+  const results: SmokeResult[] = [];
+
+  for (const { url, expect } of endpoints) {
+    try {
+      const output = execSync(
+        `curl -sf -o /dev/null -w "%{http_code}" --max-time 15 "${url}"`,
+        { encoding: "utf-8" },
+      );
+      const status = parseInt(output.trim(), 10);
+      const passed = expect(status);
+      results.push({ endpoint: url, passed, status });
+      console.log(`  ${passed ? "PASS" : "FAIL"} ${url} → ${status}`);
+    } catch {
+      results.push({ endpoint: url, passed: false, status: null, error: "unreachable" });
+      console.log(`  FAIL ${url} → unreachable`);
+    }
+  }
+
+  return results;
+}
+
 export function runPhase3(): Phase3Result {
   const start = Date.now();
 
@@ -228,6 +264,9 @@ export function runPhase3(): Phase3Result {
 
   console.log("  Worker deploy:");
   const workersDeployed = deployWorkers();
+
+  console.log("  Smoke tests:");
+  smokeTest();
 
   return {
     spaUploaded: uploaded,

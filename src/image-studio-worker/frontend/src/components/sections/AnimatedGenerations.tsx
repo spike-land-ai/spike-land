@@ -38,7 +38,7 @@ export function AnimatedGenerations() {
 
           try {
             const parsedResult = JSON.parse(call.result);
-            let resultData: Record<string, any> = parsedResult;
+            let resultData: Record<string, unknown> = parsedResult;
             if (parsedResult.content?.[0]?.text) {
               try {
                 resultData = JSON.parse(parsedResult.content[0].text);

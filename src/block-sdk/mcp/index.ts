@@ -6,7 +6,7 @@ import type { BuiltTool, CallToolResult } from "@spike-land-ai/shared/tool-build
 import type { Block } from "../define-block.js";
 import type { StorageAdapter } from "../storage/types.js";
 import type { BlockComponents } from "../define-block.js";
-import type { SchemaDef, TableDef } from "../schema/types.js";
+import type { TableDef } from "../schema/types.js";
 
 /** MCP server interface (minimal — compatible with @modelcontextprotocol/sdk) */
 export interface McpToolRegistry {

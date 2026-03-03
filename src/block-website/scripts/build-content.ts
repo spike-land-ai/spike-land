@@ -11,7 +11,7 @@ async function buildContent() {
   
   try {
     await mkdir(OUT_DIR, { recursive: true });
-  } catch (err) {
+  } catch (_err) {
     // Ignore if exists
   }
 

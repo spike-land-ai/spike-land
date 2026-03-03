@@ -22,8 +22,8 @@ tag = "v1"
 new_classes = ["RateLimiter"]
 
 # Custom domain — Cloudflare manages DNS automatically
+# QUIZ_BADGE_SECRET moved to wrangler secrets (run: wrangler secret put QUIZ_BADGE_SECRET)
 [vars]
-QUIZ_BADGE_SECRET = "dev-quiz-badge-secret"
 
 [[routes]]
 pattern = "edge.spike.land"

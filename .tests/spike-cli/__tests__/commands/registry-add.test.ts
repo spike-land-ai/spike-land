@@ -7,11 +7,11 @@ const mockLoadTokens = vi.hoisted(() => vi.fn());
 const mockGetRegistryServer = vi.hoisted(() => vi.fn());
 const mockSearchRegistry = vi.hoisted(() => vi.fn());
 
-vi.mock("../../auth/token-store.js", () => ({
+vi.mock("../../../../src/spike-cli/auth/token-store.js", () => ({
   loadTokens: mockLoadTokens,
 }));
 
-vi.mock("../../registry/client.js", () => ({
+vi.mock("../../../../src/spike-cli/registry/client.js", () => ({
   searchRegistry: mockSearchRegistry,
   getRegistryServer: mockGetRegistryServer,
 }));

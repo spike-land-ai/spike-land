@@ -9,7 +9,7 @@ import { enterWorkspace, resetWorkspaceState } from "../../../src/bazdmeg-mcp/wo
 import { unlink } from "node:fs/promises";
 
 // Mock the shell module
-vi.mock("../shell.js", () => ({
+vi.mock("../../../src/bazdmeg-mcp/shell.js", () => ({
   runCommand: vi.fn(),
   hasScript: vi.fn(),
 }));

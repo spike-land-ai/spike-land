@@ -8,7 +8,6 @@ import { bold, cyan, dim } from "../shell/formatter";
 import type { AppRegistry } from "./app-registry";
 import type { SessionState } from "./session-state";
 import {
-  extractPrefix,
   getVisibleTools,
   getVisibleToolsEnhanced,
   groupToolsByApp,

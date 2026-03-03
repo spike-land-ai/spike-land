@@ -101,7 +101,7 @@ export function Canvas() {
           name,
         });
         setTimeout(() => setSelectedAssetId(assetId), 100);
-      } catch (e) {}
+      } catch (_e) {}
     }
   }, [addAsset, setSelectedAssetId]);
 
