@@ -60,25 +60,74 @@ interface SessionState {
 
 // ─── Mock quiz engine (mirrors MCP tool logic) ─────────────────────────────
 
-function generateMockSession(content: string): SessionState {
-  const paragraphs = content.split(/\n\n+/).filter((p) => p.trim().length > 20);
-  const numConcepts = Math.min(6, Math.max(3, paragraphs.length || 3));
+function extractSentences(text: string): string[] {
+  return text
+    .split(/[.!?]+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 20 && !s.startsWith("http"));
+}
 
+function generateMockSession(content: string): SessionState {
+  // Split into paragraphs, filtering out very short ones and bare URLs
+  const paragraphs = content
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter((p) => p.length > 20 && !p.match(/^https?:\/\/\S+$/));
+
+  // Extract meaningful sentences from all paragraphs
+  const allSentences = paragraphs.flatMap(extractSentences);
+
+  // If we don't have enough content, use paragraphs directly
+  const sourcePool =
+    allSentences.length >= 3 ? allSentences : paragraphs.length >= 1 ? paragraphs : [];
+
+  if (sourcePool.length === 0) {
+    // Content is too short or invalid (e.g. bare URL) — return empty state
+    return {
+      article: content,
+      concepts: ["Insufficient content"],
+      currentRound: {
+        roundNumber: 1,
+        questions: [
+          {
+            conceptIndex: 0,
+            question:
+              "Not enough content was provided to generate a quiz. Please go back and paste article text.",
+            options: [
+              "I understand",
+              "I understand",
+              "I understand",
+              "I understand",
+            ] as [string, string, string, string],
+          },
+        ],
+      },
+      progress: [
+        { concept: "Insufficient content", mastered: false, correctCount: 0, attempts: 0 },
+      ],
+      results: null,
+      conflicts: [],
+      score: 0,
+      completed: false,
+      badge: null,
+    };
+  }
+
+  const numConcepts = Math.min(6, Math.max(3, sourcePool.length));
   const concepts: string[] = [];
   for (let i = 0; i < numConcepts; i++) {
-    const p = paragraphs[i % (paragraphs.length || 1)] ?? `Concept ${i + 1}`;
-    const sentence = p.split(/[.!?]+/)[0]?.trim() ?? `Concept ${i + 1}`;
-    concepts.push(sentence.slice(0, 60));
+    const raw = sourcePool[i % sourcePool.length] ?? `Concept ${i + 1}`;
+    concepts.push(raw.slice(0, 80));
   }
 
   const questions: QuizQuestion[] = concepts.slice(0, 3).map((name, idx) => ({
     conceptIndex: idx,
-    question: `Which statement about "${name.slice(0, 40)}" is correct?`,
+    question: `Which statement about "${name.slice(0, 60)}" is correct?`,
     options: [
-      `This accurately reflects: ${name.slice(0, 30)}`,
-      `This contradicts: ${name.slice(0, 30)}`,
-      `This is unrelated to: ${name.slice(0, 30)}`,
-      `This oversimplifies: ${name.slice(0, 30)}`,
+      `This accurately reflects the concept`,
+      `This contradicts the concept`,
+      `This is unrelated to the concept`,
+      `This oversimplifies the concept`,
     ] as [string, string, string, string],
   }));
 
@@ -172,12 +221,12 @@ function evaluateMockAnswers(
     const name = state.concepts[idx] ?? `Concept ${idx}`;
     nextQuestions.push({
       conceptIndex: idx,
-      question: `Regarding "${name.slice(0, 40)}", which is true?`,
+      question: `Regarding "${name.slice(0, 60)}", which is true?`,
       options: [
-        `This accurately reflects: ${name.slice(0, 30)}`,
-        `This contradicts: ${name.slice(0, 30)}`,
-        `This is unrelated to: ${name.slice(0, 30)}`,
-        `This oversimplifies: ${name.slice(0, 30)}`,
+        `This accurately reflects the concept`,
+        `This contradicts the concept`,
+        `This is unrelated to the concept`,
+        `This oversimplifies the concept`,
       ] as [string, string, string, string],
     });
   }
@@ -210,7 +259,7 @@ export function LearnSessionPage() {
           contentUrl?: string;
           contentText?: string;
         };
-        const content = data.contentText ?? data.contentUrl ?? "No content provided";
+        const content = data.contentText ?? "No content provided";
         setState(generateMockSession(content));
       } catch {
         setState(generateMockSession("No content available. Try creating a new quiz."));
