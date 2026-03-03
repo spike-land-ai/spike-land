@@ -9,7 +9,8 @@ import logger from "@/lib/logger";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-export const maxDuration = 120;
+// Workers: wall-clock streaming is unlimited, CPU time is capped at 30s per request.
+// maxDuration is a Next.js/Vercel concept — not needed on Cloudflare Workers.
 
 const SSE_HEADERS = {
   "Content-Type": "text/event-stream",
