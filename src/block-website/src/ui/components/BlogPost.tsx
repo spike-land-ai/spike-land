@@ -3,6 +3,17 @@ import rehypeRaw from "rehype-raw";
 import { getPostBySlug } from "../../core/reducers";
 import * as Interactive from "../interactive";
 
+/**
+ * Convert self-closing JSX/HTML tags for custom components to explicit
+ * open/close pairs. HTML5 only treats void elements (img, br, hr, etc.)
+ * as self-closing — `<Foo />` is parsed as `<Foo>` by rehype-raw,
+ * which swallows all subsequent content as children.
+ */
+function fixSelfClosingTags(markdown: string): string {
+  return markdown.replace(/<([A-Z][a-zA-Z]*)((?:\s+[a-zA-Z-]+=(?:"[^"]*"|'[^']*'|{[^}]*}))*)\s*\/>/g,
+    (_, tag, attrs) => `<${tag}${attrs}></${tag}>`);
+}
+
 const COMPONENT_MAP = {
   convergencedemo: Interactive.ConvergenceDemo,
   dependencycascadedemo: Interactive.DependencyCascadeDemo,
@@ -75,7 +86,7 @@ export function BlogPostView({ slug }: { slug: string }) {
       
       <div className="prose prose-lg dark:prose-invert max-w-none prose-img:rounded-xl prose-img:shadow-lg">
         <Markdown rehypePlugins={[rehypeRaw]} components={COMPONENT_MAP as unknown as Record<string, React.ComponentType>}>
-          {post.content}
+          {fixSelfClosingTags(post.content)}
         </Markdown>
       </div>
     </article>

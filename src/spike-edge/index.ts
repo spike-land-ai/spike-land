@@ -63,7 +63,12 @@ app.all("/api/auth/*", async (c) => {
   newRequest.headers.set("X-Forwarded-Host", "spike.land");
   newRequest.headers.set("X-Forwarded-Proto", "https");
 
-  return c.env.AUTH_MCP.fetch(newRequest);
+  const response = await c.env.AUTH_MCP.fetch(newRequest);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: new Headers(response.headers),
+  });
 });
 
 app.route("/", spa);

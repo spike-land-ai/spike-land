@@ -41,6 +41,8 @@ export default tseslint.config(
     ignores: [
       "node_modules/**",
       "dist/**",
+      "src/**/dist/**",
+      "src/**/dist-vite/**",
       "coverage/**",
       ".tsbuildinfo",
       ".wrangler/**",

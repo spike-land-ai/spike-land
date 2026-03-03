@@ -20,13 +20,52 @@ export function LearnIndexPage() {
     setError(null);
 
     try {
-      // Create a session ID from the content (in production, this calls the MCP tool)
+      let fetchedText: string | undefined;
+
+      // If URL mode, fetch the actual content from the URL
+      if (inputMode === "url") {
+        try {
+          const res = await fetch(contentUrl.trim());
+          if (!res.ok) {
+            throw new Error(`Failed to fetch URL (${res.status})`);
+          }
+          const html = await res.text();
+          // Extract text content from HTML
+          const doc = new DOMParser().parseFromString(html, "text/html");
+          // Remove script and style elements
+          for (const el of doc.querySelectorAll("script, style, nav, header, footer")) {
+            el.remove();
+          }
+          // Try to get article/main content first, fall back to body
+          const mainContent =
+            doc.querySelector("article") ?? doc.querySelector("main") ?? doc.body;
+          fetchedText = (mainContent?.textContent ?? "")
+            .replace(/\s+/g, " ")
+            .replace(/\n{3,}/g, "\n\n")
+            .trim();
+
+          if (fetchedText.length < 50) {
+            throw new Error("Could not extract enough text content from the URL.");
+          }
+        } catch (fetchErr) {
+          // If fetch fails (CORS, network, etc.), show a helpful error
+          const msg =
+            fetchErr instanceof Error ? fetchErr.message : "Failed to fetch URL content";
+          setError(
+            `${msg}. Try pasting the article text directly using the "Paste Text" tab instead.`,
+          );
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Create a session ID
       const sessionId = crypto.randomUUID();
 
-      // Store content in sessionStorage for the quiz page to use
+      // Store the actual text content in sessionStorage
       const sessionData = {
         contentUrl: inputMode === "url" ? contentUrl : undefined,
-        contentText: inputMode === "text" ? contentText : undefined,
+        contentText: inputMode === "url" ? fetchedText : contentText,
       };
       sessionStorage.setItem(`quiz-${sessionId}`, JSON.stringify(sessionData));
 

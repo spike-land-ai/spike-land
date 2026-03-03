@@ -5,19 +5,19 @@
   "description": "Frontend React application for the spike.land real-time collaborative code editor, featuring Monaco Editor, TypeScript, and live preview.",
   "entry": "dist/modules.mjs",
   "main": "dist/modules.mjs",
-  "source": "src/modules.ts",
-  "types": "dts/src/modules.d.ts",
+  "source": "modules.ts",
+  "types": "modules.ts",
   "module": "dist/modules.mjs",
   "exports": {
     ".": {
-      "types": "./dts/src/modules.d.ts",
+      "types": "./modules.ts",
       "import": "./dist/modules.mjs",
       "default": "./dist/modules.mjs"
     },
     "./src/@/lib/transpile": {
-      "types": "./dts/src/@/lib/transpile.d.ts",
-      "import": "./src/@/lib/transpile.ts",
-      "default": "./src/@/lib/transpile.ts"
+      "types": "./@/lib/transpile.ts",
+      "import": "./@/lib/transpile.ts",
+      "default": "./@/lib/transpile.ts"
     }
   },
   "files": [
@@ -31,12 +31,13 @@
   "scripts": {
     "dev": "concurrently --kill-others-on-fail=false \"npm run dev:vite\" \"npm run types:watch\" \"npm run dev:workers\"",
     "dev:vite": "vite",
-    "dev:workers": "tsx src/@/lib/esbuild-dev.ts --watch",
-    "build": "npm run clean && npm run build:all",
+    "dev:workers": "tsx @/lib/esbuild-dev.ts --watch",
+    "build": "npm run clean && npm run build:lib",
+    "build:lib": "vite build && cp -a -f dist-vite/. dist/",
     "build:all": "concurrently --kill-others-on-fail \"npm run build:vite\" \"npm run build:types\" \"npm run build:workers\" && npm run post-build",
     "build:vite": "vite build",
     "build:vite:watch": "vite build --watch --outDir dist & npm run types:build",
-    "build:workers": "tsx src/@/lib/esbuild-dev.ts",
+    "build:workers": "tsx @/lib/esbuild-dev.ts",
     "build:types": "(tsc --build || true) && npm run types:cp",
     "post-build-delete": "npm run remove-extraneous",
     "post-build": "cp -a -f dist-vite/. dist/  && npm run remove-extraneous",
