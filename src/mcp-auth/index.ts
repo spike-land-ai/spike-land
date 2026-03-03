@@ -142,7 +142,7 @@ export default {
 
     // 3. Setup standard MCP WebTransport Endpoint
     if (url.pathname !== "/mcp") {
-      return new Response("Not found", { status: 404, headers: CORS_HEADERS });
+      return withCors(new Response("Not found", { status: 404 }), request);
     }
 
     const transport = new WebStandardStreamableHTTPServerTransport({

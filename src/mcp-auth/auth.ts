@@ -48,7 +48,7 @@ export function createAuth(env: Env) {
         domain: ".spike.land",
       },
       defaultCookieAttributes: {
-        sameSite: "none" as const,
+        sameSite: "lax" as const,
       },
     },
     database: drizzleAdapter(db, {
