@@ -75,13 +75,13 @@ export async function handleAnthropicRequest(originalRequest: Request, env: Env)
         const bodyText = await clonedRequest.clone().text();
         const bodyJson = JSON.parse(bodyText);
         if (bodyJson.tools) {
-          console.log(
+          console.debug(
             "[Anthropic Proxy] Request contains tools:",
             JSON.stringify(bodyJson.tools, null, 2),
           );
         }
       } catch (_e) {
-        console.log("[Anthropic Proxy] Could not parse request body");
+        console.debug("[Anthropic Proxy] Could not parse request body");
       }
     }
 
@@ -116,7 +116,7 @@ export async function handleAnthropicRequest(originalRequest: Request, env: Env)
       if (response.ok) {
         // Token worked — persist it
         if (attempt > 0) {
-          console.log(`[Anthropic Proxy] Token fallback: switched to index ${idx}`);
+          console.debug(`[Anthropic Proxy] Token fallback: switched to index ${idx}`);
           await setLastGoodIdx(env.KV, idx);
         }
         return addCorsHeadersToResponse(response);
