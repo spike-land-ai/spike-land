@@ -1,0 +1,9 @@
+{
+  "extends": "@spike-land-ai/tsconfig/tsconfig.bundler.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "__tests__"]
+}

@@ -1,0 +1,55 @@
+{
+  "name": "@spike-land-ai/react-ts-worker",
+  "version": "0.1.1",
+  "description": "From-scratch React implementation with Fiber reconciler, scheduler, and multi-target rendering",
+  "type": "module",
+  "main": "./dist/react/index.js",
+  "module": "./dist/react/index.js",
+  "types": "./dist/react/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spike-land-ai/react-ts-worker.git"
+  },
+  "exports": {
+    "./react": "./dist/react/index.js",
+    "./react/jsx-runtime": "./dist/react/jsx-runtime.js",
+    "./react-dom": "./dist/react-dom/index.js",
+    "./react-dom/client": "./dist/react-dom/client.js",
+    "./react-dom/server": "./dist/react-dom/server.js",
+    "./react-worker-dom": "./dist/react-worker-dom/index.js",
+    "./react-worker-dom/main": "./dist/react-worker-dom/main-entry.js",
+    "./react-worker-dom/bridge": "./dist/react-worker-dom/bridge/index.js",
+    "./scheduler": "./dist/scheduler/Scheduler.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --quiet .",
+    "prepare": "tsc",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.29.8",
+    "@spike-land-ai/eslint-config": "*",
+    "@spike-land-ai/tsconfig": "*",
+    "eslint": "10.0.2",
+    "jsdom": "28.1.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.56.1",
+    "vitest": "4.0.18"
+  }
+}

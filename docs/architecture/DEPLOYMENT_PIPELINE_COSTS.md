@@ -27,7 +27,7 @@
 | unit-tests-2 (shard 2/4)         | **5 min 21 sec** | Slowest shard (bottleneck)  |
 | unit-tests-3 (shard 3/4)         | 2 min 10 sec     |                             |
 | unit-tests-4 (shard 4/4)         | 4 min 26 sec     |                             |
-| Package Tests                    | skipped          | Only when packages/ changed |
+| Package Tests                    | skipped          | Only when src/ changed |
 
 **CI total: ~5.5 min** (wall clock, parallel jobs)
 

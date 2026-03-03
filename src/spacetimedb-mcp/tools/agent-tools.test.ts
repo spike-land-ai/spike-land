@@ -55,8 +55,7 @@ describe("agent-tools", () => {
       });
 
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("ALREADY_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: ALREADY_CONNECTED**");
     });
 
     it("returns error on connection failure", async () => {
@@ -70,9 +69,8 @@ describe("agent-tools", () => {
       });
 
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("CONNECTION_FAILED");
-      expect(parsed.retryable).toBe(true);
+      expect(result.content[0].text).toContain("**Error: CONNECTION_FAILED**");
+      expect(result.content[0].text).toContain("**Retryable:** true");
     });
 
     it("passes token when provided", async () => {
@@ -118,8 +116,7 @@ describe("agent-tools", () => {
       });
       const result = await server.call("stdb_disconnect", {});
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.message).toBe("unexpected");
+      expect(result.content[0].text).toContain("unexpected");
     });
   });
 
@@ -150,8 +147,7 @@ describe("agent-tools", () => {
       });
 
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
   });
 
@@ -301,8 +297,7 @@ describe("agent-tools", () => {
 
       const result = await dcServer.call("stdb_get_messages", {});
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
 
     it("returns QUERY_FAILED on non-connection errors", async () => {
@@ -311,8 +306,7 @@ describe("agent-tools", () => {
       });
       const result = await server.call("stdb_get_messages", { includeDelivered: false });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("QUERY_FAILED");
+      expect(result.content[0].text).toContain("**Error: QUERY_FAILED**");
     });
   });
 
@@ -334,8 +328,7 @@ describe("agent-tools", () => {
 
       const result = await dcServer.call("stdb_mark_delivered", { messageId: "1" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
 
     it("returns REDUCER_FAILED on other errors", async () => {
@@ -344,9 +337,8 @@ describe("agent-tools", () => {
       });
       const result = await server.call("stdb_mark_delivered", { messageId: "1" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("REDUCER_FAILED");
-      expect(parsed.retryable).toBe(true);
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
+      expect(result.content[0].text).toContain("**Retryable:** true");
     });
   });
 
@@ -362,8 +354,7 @@ describe("agent-tools", () => {
         content: "test",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 
@@ -379,8 +370,7 @@ describe("agent-tools", () => {
         capabilities: [],
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 
@@ -393,8 +383,7 @@ describe("agent-tools", () => {
       });
       const result = await server.call("stdb_list_agents", { onlineOnly: false });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("QUERY_FAILED");
+      expect(result.content[0].text).toContain("**Error: QUERY_FAILED**");
     });
   });
 });

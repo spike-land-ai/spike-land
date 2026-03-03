@@ -61,8 +61,7 @@ describe("comment tools", () => {
         text: "Comment",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("AUTH_REQUIRED");
+      expect(result.content[0].text).toContain("**Error: AUTH_REQUIRED**");
     });
 
     it("handles network errors", async () => {
@@ -79,8 +78,7 @@ describe("comment tools", () => {
         text: "Comment",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
     });
 
     it("returns COMMENT_FAILED with retryable info", async () => {
@@ -103,9 +101,8 @@ describe("comment tools", () => {
         text: "Comment",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("COMMENT_FAILED");
-      expect(parsed.retryable).toBe(false);
+      expect(result.content[0].text).toContain("**Error: COMMENT_FAILED**");
+      expect(result.content[0].text).toContain("**Retryable:** false");
     });
 
     it("returns RATE_LIMITED retryable", async () => {
@@ -133,9 +130,8 @@ describe("comment tools", () => {
         text: "Comment",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("RATE_LIMITED");
-      expect(parsed.retryable).toBe(true);
+      expect(result.content[0].text).toContain("**Error: RATE_LIMITED**");
+      expect(result.content[0].text).toContain("**Retryable:** true");
     });
 
     it("returns CSRF_EXPIRED retryable true", async () => {
@@ -158,9 +154,8 @@ describe("comment tools", () => {
         text: "Comment",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("CSRF_EXPIRED");
-      expect(parsed.retryable).toBe(true);
+      expect(result.content[0].text).toContain("**Error: CSRF_EXPIRED**");
+      expect(result.content[0].text).toContain("**Retryable:** true");
     });
 
     it("handles non-Error thrown values in hn_post_comment", async () => {
@@ -178,9 +173,8 @@ describe("comment tools", () => {
         text: "Comment",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
-      expect(parsed.message).toBe("string-fail");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
+      expect(result.content[0].text).toContain("string-fail");
     });
   });
 });

@@ -21,6 +21,10 @@ vi.mock("node:fs/promises", () => ({
   writeFile: vi.fn(),
 }));
 
+vi.mock("node:fs", () => ({
+  existsSync: vi.fn(() => true),
+}));
+
 import { runCommand } from "../shell.js";
 import { getManifestPackage } from "../manifest.js";
 import { writeFile } from "node:fs/promises";

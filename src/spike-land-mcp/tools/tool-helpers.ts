@@ -7,6 +7,7 @@
 
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { tryCatch } from "@spike-land-ai/mcp-server-base";
+export { textResult } from "@spike-land-ai/mcp-server-base";
 import { eq, and } from "drizzle-orm";
 import type { DrizzleDB } from "../db/index";
 import { workspaces, workspaceMembers, vaultSecrets } from "../db/schema";
@@ -76,6 +77,11 @@ export const MCP_ERROR_RETRYABLE: Record<McpErrorCode, boolean> = {
   [McpErrorCode.UNKNOWN]: true,
 };
 
+/**
+ * spike-land-mcp McpError — intentionally diverges from mcp-server-base McpError.
+ * Uses McpErrorCode enum (not string), takes (message, code, retryable?, cause?) args,
+ * includes classifyError system and getUserMessage(). Keep local.
+ */
 export class McpError extends Error {
   public readonly code: McpErrorCode;
   public readonly retryable: boolean;
@@ -283,16 +289,6 @@ export async function safeToolCall(
 }
 
 // ─── Result Helpers ───────────────────────────────────────────────────────────
-
-const MAX_RESPONSE_SIZE = 8192;
-
-export function textResult(text: string): CallToolResult {
-  const truncated =
-    text.length > MAX_RESPONSE_SIZE
-      ? text.slice(0, MAX_RESPONSE_SIZE) + "\n...(truncated, response exceeded 8KB)"
-      : text;
-  return { content: [{ type: "text", text: truncated }] };
-}
 
 export function jsonResult(text: string, data: unknown): CallToolResult {
   return {

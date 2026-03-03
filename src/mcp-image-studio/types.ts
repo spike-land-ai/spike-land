@@ -79,6 +79,12 @@ export function asPercentage(n: number): Percentage {
 // ─── Enums (mirror Prisma enums without importing Prisma) ───
 
 import { z } from "zod";
+import {
+  textResult,
+  jsonResult,
+  errorResult as baseErrorResult,
+  type CallToolResult,
+} from "@spike-land-ai/mcp-server-base";
 
 export const ENHANCEMENT_TIER_VALUES = [
   "FREE",
@@ -721,10 +727,7 @@ export interface ImageStudioDeps {
 
 // ─── Tool Registry Interface (subset of main app's ToolRegistry) ───
 
-export interface CallToolResult {
-  content: Array<{ type: "text"; text: string }>;
-  isError?: boolean | undefined;
-}
+export type { CallToolResult };
 
 export interface JsonSchema {
   type: "object";
@@ -824,15 +827,7 @@ export interface ImageStudioToolRegistry {
 
 // ─── Helper Functions ───
 
-export function textResult(text: string): CallToolResult {
-  const MAX = 8192;
-  const truncated = text.length > MAX ? text.slice(0, MAX) + "\n...(truncated)" : text;
-  return { content: [{ type: "text", text: truncated }] };
-}
-
-export function jsonResult(data: unknown): CallToolResult {
-  return textResult(JSON.stringify(data, null, 2));
-}
+export { textResult, jsonResult };
 
 export function batchResult<T extends Record<string, unknown>>(data: T): CallToolResult {
   return {
@@ -909,13 +904,5 @@ export const ERROR_CODES = {
 export type ErrorCode = keyof typeof ERROR_CODES;
 
 export function errorResult(code: ErrorCode, message: string, retryable = false): CallToolResult {
-  return {
-    content: [
-      {
-        type: "text",
-        text: `**Error: ${code}**\n${message}\n**Retryable:** ${retryable}`,
-      },
-    ],
-    isError: true,
-  };
+  return baseErrorResult(code, message, retryable);
 }

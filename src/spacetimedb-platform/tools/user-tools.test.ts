@@ -51,8 +51,7 @@ describe("user-tools", () => {
         email: "t@t.com",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
 
     it("returns REDUCER_FAILED on other errors", async () => {
@@ -65,9 +64,8 @@ describe("user-tools", () => {
         email: "t@t.com",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("REDUCER_FAILED");
-      expect(parsed.retryable).toBe(true);
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
+      expect(result.content[0].text).toContain("**Retryable:** true");
     });
 
     it("handles non-Error thrown values", async () => {
@@ -80,8 +78,7 @@ describe("user-tools", () => {
         email: "t@t.com",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 
@@ -109,8 +106,7 @@ describe("user-tools", () => {
     it("returns NOT_FOUND for missing user", async () => {
       const result = await server.call("stdb_get_user", { identity: "nonexistent" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_FOUND");
+      expect(result.content[0].text).toContain("**Error: NOT_FOUND**");
     });
 
     it("returns NOT_CONNECTED when disconnected", async () => {
@@ -120,8 +116,7 @@ describe("user-tools", () => {
 
       const result = await dcServer.call("stdb_get_user", { identity: "user-1" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
   });
 
@@ -216,8 +211,7 @@ describe("user-tools", () => {
 
       const result = await dcServer.call("stdb_update_profile", { displayName: "X" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
 
     it("returns REDUCER_FAILED on other errors", async () => {
@@ -226,8 +220,7 @@ describe("user-tools", () => {
       });
       const result = await server.call("stdb_update_profile", { displayName: "X" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 });

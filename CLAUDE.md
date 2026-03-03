@@ -4,75 +4,75 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-This is the **spike-land-ai** umbrella directory containing 27 independent git repositories under the `@spike-land-ai` GitHub org. All packages live under the `packages/` directory, each as a separate git submodule with its own history. The root `package.json` uses a single Yarn workspace glob: `"workspaces": ["packages/*"]`.
+This is the **spike-land-ai** consolidated monorepo under the `@spike-land-ai` GitHub org. All packages live under the `src/` directory as first-class source (no submodules). The root `package.json` uses a single Yarn workspace glob: `"workspaces": ["src/*"]`.
 
 All packages are published to GitHub Packages (`npm.pkg.github.com`) under the `@spike-land-ai` scope using Changesets. CI/CD is shared via a reusable workflow in `.github/.github/workflows/ci-publish.yml`.
 
 ## Packages
 
-All packages live under `packages/`:
+All packages live under `src/`:
 
 ### SpacetimeDB (real-time backbone)
 
 | Directory | Package | Runtime | Purpose |
 |-----------|---------|---------|---------|
-| `packages/spacetimedb-platform` | `@spike-land-ai/spacetimedb-platform` | SpacetimeDB 2.0 (WASM) | Platform module — users, tools, apps, agents, content, messaging (14 tables, 30+ reducers) |
-| `packages/spacetimedb-mcp` | `@spike-land-ai/spacetimedb-mcp` | Node.js | MCP server for agent coordination — real-time messaging, tasks |
+| `src/spacetimedb-platform` | `@spike-land-ai/spacetimedb-platform` | SpacetimeDB 2.0 (WASM) | Platform module — users, tools, apps, agents, content, messaging (14 tables, 30+ reducers) |
+| `src/spacetimedb-mcp` | `@spike-land-ai/spacetimedb-mcp` | Node.js | MCP server for agent coordination — real-time messaging, tasks |
 
 ### New Platform Stack
 
 | Directory | Package | Runtime | Purpose |
 |-----------|---------|---------|---------|
-| `packages/spike-app` | `@spike-land-ai/spike-app` | Browser (Vite + TanStack Router) | Frontend SPA replacing Next.js UI |
-| `packages/spike-edge` | `@spike-land-ai/spike-edge` | Cloudflare Workers | Edge API service (Hono) |
-| `packages/spike-land-mcp` | `@spike-land-ai/spike-land-mcp` | Cloudflare Workers + D1 | MCP registry with 80+ tools |
-| `packages/mcp-auth` | `@spike-land-ai/mcp-auth` | Cloudflare Workers | Auth MCP server (Better Auth + Drizzle) |
-| `packages/mcp-server-base` | `@spike-land-ai/mcp-server-base` | Node.js | Shared base utilities for MCP servers |
+| `src/spike-app` | `@spike-land-ai/spike-app` | Browser (Vite + TanStack Router) | Frontend SPA replacing Next.js UI |
+| `src/spike-edge` | `@spike-land-ai/spike-edge` | Cloudflare Workers | Edge API service (Hono) |
+| `src/spike-land-mcp` | `@spike-land-ai/spike-land-mcp` | Cloudflare Workers + D1 | MCP registry with 80+ tools |
+| `src/mcp-auth` | `@spike-land-ai/mcp-auth` | Cloudflare Workers | Auth MCP server (Better Auth + Drizzle) |
+| `src/mcp-server-base` | `@spike-land-ai/mcp-server-base` | Node.js | Shared base utilities for MCP servers |
 
 ### Domain Packages
 
 | Directory | Package | Runtime | Purpose |
 |-----------|---------|---------|---------|
-| `packages/chess-engine` | `@spike-land-ai/chess-engine` | Node.js | Chess ELO engine with game/player/challenge managers |
-| `packages/qa-studio` | `@spike-land-ai/qa-studio` | Node.js | Browser automation utilities (Playwright) |
-| `packages/state-machine` | `@spike-land-ai/state-machine` | Node.js | Statechart engine with guard parser and CLI |
+| `src/chess-engine` | `@spike-land-ai/chess-engine` | Node.js | Chess ELO engine with game/player/challenge managers |
+| `src/qa-studio` | `@spike-land-ai/qa-studio` | Node.js | Browser automation utilities (Playwright) |
+| `src/state-machine` | `@spike-land-ai/state-machine` | Node.js | Statechart engine with guard parser and CLI |
 
 ### Core Infrastructure
 
 | Directory | Package | Runtime | Purpose |
 |-----------|---------|---------|---------|
-| `packages/code` | `@spike-land-ai/code` | Browser (Vite) | Monaco-based code editor with live preview |
-| `packages/spike-land-backend` | `@spike-land-ai/spike-land-backend` | Cloudflare Workers | Backend API with Durable Objects, Hono framework |
-| `packages/transpile` | `@spike-land-ai/transpile` | Cloudflare Workers | On-demand JS/TS transpilation via esbuild-wasm |
-| `packages/react-ts-worker` | `@spike-land-ai/react-ts-worker` | Browser/Workers/Node | From-scratch React implementation (Fiber reconciler, scheduler, multi-target rendering) |
-| `packages/esbuild-wasm` | `@spike-land-ai/esbuild-wasm` | Browser (WASM) | Cross-platform esbuild WASM binary |
-| `packages/esbuild-wasm-mcp` | `@spike-land-ai/esbuild-wasm-mcp` | Node.js | MCP server wrapping esbuild-wasm |
-| `packages/shared` | `@spike-land-ai/shared` | Node/Browser | Shared types, validations, constants, utilities |
+| `src/code` | `@spike-land-ai/code` | Browser (Vite) | Monaco-based code editor with live preview |
+| `src/spike-land-backend` | `@spike-land-ai/spike-land-backend` | Cloudflare Workers | Backend API with Durable Objects, Hono framework |
+| `src/transpile` | `@spike-land-ai/transpile` | Cloudflare Workers | On-demand JS/TS transpilation via esbuild-wasm |
+| `src/react-ts-worker` | `@spike-land-ai/react-ts-worker` | Browser/Workers/Node | From-scratch React implementation (Fiber reconciler, scheduler, multi-target rendering) |
+| `src/esbuild-wasm` | `@spike-land-ai/esbuild-wasm` | Browser (WASM) | Cross-platform esbuild WASM binary |
+| `src/esbuild-wasm-mcp` | `@spike-land-ai/esbuild-wasm-mcp` | Node.js | MCP server wrapping esbuild-wasm |
+| `src/shared` | `@spike-land-ai/shared` | Node/Browser | Shared types, validations, constants, utilities |
 
 ### MCP Servers & Tools
 
 | Directory | Package | Runtime | Purpose |
 |-----------|---------|---------|---------|
-| `packages/spike-cli` | `@spike-land-ai/spike-cli` | Node.js CLI | MCP multiplexer CLI with Claude chat integration |
-| `packages/spike-review` | `@spike-land-ai/spike-review` | Node.js | AI code review bot with GitHub integration |
-| `packages/hackernews-mcp` | `@spike-land-ai/hackernews-mcp` | Node.js | MCP server for HackerNews read/write |
-| `packages/mcp-image-studio` | `@spike-land-ai/mcp-image-studio` | Node.js | AI image generation, enhancement, albums & pipelines MCP tools |
-| `packages/openclaw-mcp` | `@spike-land-ai/openclaw-mcp` | Node.js | MCP bridge for OpenClaw gateway |
-| `packages/vibe-dev` | `@spike-land-ai/vibe-dev` | Node.js CLI | Docker-based dev workflow tool |
-| `packages/video` | `@spike-land-ai/video` | Remotion | Educational video compositions |
+| `src/spike-cli` | `@spike-land-ai/spike-cli` | Node.js CLI | MCP multiplexer CLI with Claude chat integration |
+| `src/spike-review` | `@spike-land-ai/spike-review` | Node.js | AI code review bot with GitHub integration |
+| `src/hackernews-mcp` | `@spike-land-ai/hackernews-mcp` | Node.js | MCP server for HackerNews read/write |
+| `src/mcp-image-studio` | `@spike-land-ai/mcp-image-studio` | Node.js | AI image generation, enhancement, albums & pipelines MCP tools |
+| `src/openclaw-mcp` | `@spike-land-ai/openclaw-mcp` | Node.js | MCP bridge for OpenClaw gateway |
+| `src/vibe-dev` | `@spike-land-ai/vibe-dev` | Node.js CLI | Docker-based dev workflow tool |
+| `src/video` | `@spike-land-ai/video` | Remotion | Educational video compositions |
 
 ### Shared Config
 
 | Directory | Package | Runtime | Purpose |
 |-----------|---------|---------|---------|
-| `packages/eslint-config` | `@spike-land-ai/eslint-config` | — | Shared ESLint configuration |
-| `packages/tsconfig` | `@spike-land-ai/tsconfig` | — | Shared TypeScript configuration |
+| `src/eslint-config` | `@spike-land-ai/eslint-config` | — | Shared ESLint configuration |
+| `src/tsconfig` | `@spike-land-ai/tsconfig` | — | Shared TypeScript configuration |
 
 ### Legacy
 
 | Directory | Package | Runtime | Purpose |
 |-----------|---------|---------|---------|
-| `packages/spike.land` | `spike-land` | Next.js 16 / AWS ECS | Legacy platform — MCP registry, app store, auth, payments (being replaced by SpacetimeDB stack) |
+| `packages/spike.land` | `spike-land` | Next.js 16 | Legacy platform — MCP registry, app store, auth, payments (being replaced by SpacetimeDB stack) |
 
 ## Common Commands
 
@@ -88,12 +88,12 @@ spacetime build                          # Compile WASM module
 spacetime publish rightful-dirt-5033     # Deploy to maincloud
 
 # spike-app (Vite + TanStack Router frontend)
-cd packages/spike-app
+cd src/spike-app
 npm run dev           # Vite dev server
 npm run build         # Production build
 
 # spike-edge (Cloudflare Workers edge API)
-cd packages/spike-edge
+cd src/spike-edge
 npm run dev           # Local wrangler dev
 npm run deploy        # Deploy to production
 
@@ -142,7 +142,7 @@ Cloudflare Workers using Hono framework. `spike-edge` is the primary edge API. `
 
 ### Custom React (react-ts-worker)
 
-Full React reimplementation with Fiber reconciler, lane-based scheduling, and host config pattern for multi-target rendering (DOM, Worker-DOM, server streaming). See `packages/react-ts-worker/CLAUDE.md` for architecture details.
+Full React reimplementation with Fiber reconciler, lane-based scheduling, and host config pattern for multi-target rendering (DOM, Worker-DOM, server streaming). See `src/react-ts-worker/CLAUDE.md` for architecture details.
 
 ### MCP Ecosystem
 
@@ -163,7 +163,7 @@ Next.js 16 App Router application with ~520 routes, ~383 API endpoints, PostgreS
 - Shared workflow: `.github/.github/workflows/ci-publish.yml` (reusable across all repos)
 - Node 24, GitHub Packages npm registry
 - Changesets for versioning and publishing on main branch push
-- spike.land has its own extensive CI (legacy): ESLint, TypeScript, Vitest (4 shards), Next.js build, AWS ECS deploy
+- spike.land has its own extensive CI (legacy): ESLint, TypeScript, Vitest (4 shards), Next.js build
 
 ## Dependency Cascade System
 

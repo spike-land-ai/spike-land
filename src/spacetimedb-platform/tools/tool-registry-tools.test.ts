@@ -126,7 +126,7 @@ describe("tool-registry-tools", () => {
       registerToolRegistryTools(dcServer as unknown as McpServer, dcClient);
       const result = await dcServer.call("stdb_enable_tool", { name: "x" });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
   });
 
@@ -146,7 +146,7 @@ describe("tool-registry-tools", () => {
       });
       const result = await server.call("stdb_disable_tool", { name: "x" });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 

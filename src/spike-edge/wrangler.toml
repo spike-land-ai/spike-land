@@ -1,0 +1,38 @@
+name = "spike-edge"
+main = "index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "spike-platform"
+
+[[r2_buckets]]
+binding = "SPA_ASSETS"
+bucket_name = "spike-app-assets"
+
+[durable_objects]
+bindings = [
+  { name = "LIMITERS", class_name = "RateLimiter" }
+]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["RateLimiter"]
+
+# Custom domain — Cloudflare manages DNS automatically
+[vars]
+QUIZ_BADGE_SECRET = "dev-quiz-badge-secret"
+
+[[routes]]
+pattern = "edge.spike.land"
+custom_domain = true
+
+[[routes]]
+pattern = "spike.land/*"
+zone_name = "spike.land"
+
+[[routes]]
+pattern = "www.spike.land/*"
+zone_name = "spike.land"

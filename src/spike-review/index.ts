@@ -5,8 +5,8 @@
  * Exposes review tools via Model Context Protocol.
  */
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { createMcpServer, startMcpServer } from "@spike-land-ai/mcp-server-base";
 import { GitHubClient } from "./github/client.js";
 import type { DiffSide } from "./types.js";
 import {
@@ -30,7 +30,7 @@ import type { RuleContext } from "./rules/engine.js";
 import { buildReviewPrompt } from "./ai/prompts.js";
 
 export function createServer(githubToken: string): McpServer {
-  const server = new McpServer({
+  const server = createMcpServer({
     name: "Spike Review",
     version: "0.1.0",
   });
@@ -265,8 +265,7 @@ export async function startServer(): Promise<void> {
   }
 
   const server = createServer(token);
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+  await startMcpServer(server);
 }
 
 export { GitHubClient } from "./github/client.js";

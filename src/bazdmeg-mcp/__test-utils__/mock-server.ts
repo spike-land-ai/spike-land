@@ -1,16 +1,14 @@
 /**
- * Mock MCP Server for testing tool registrations.
- * Uses the createMockServer from mcp-server-base.
+ * Mock MCP server for testing.
+ * Delegates to @spike-land-ai/mcp-server-base createMockServer, adding vi.fn() spy.
  */
 
 import { vi } from "vitest";
-
-interface CallToolResult {
-  content: Array<{ type: "text"; text: string }>;
-  isError?: boolean;
-}
-
-type ToolHandler = (args: Record<string, unknown>) => Promise<CallToolResult>;
+import {
+  createMockServer as createBaseServer,
+  type CallToolResult,
+  type ToolHandler,
+} from "@spike-land-ai/mcp-server-base";
 
 export interface MockMcpServer {
   tool: ReturnType<typeof vi.fn>;
@@ -19,26 +17,7 @@ export interface MockMcpServer {
 }
 
 export function createMockServer(): MockMcpServer {
-  const handlers = new Map<string, ToolHandler>();
-
-  const toolFn = vi.fn(
-    (
-      name: string,
-      _description: string,
-      _schema: Record<string, unknown>,
-      handler: ToolHandler,
-    ) => {
-      handlers.set(name, handler);
-    },
-  );
-
-  return {
-    tool: toolFn,
-    handlers,
-    call: async (name: string, args: Record<string, unknown> = {}) => {
-      const handler = handlers.get(name);
-      if (!handler) throw new Error(`Tool "${name}" not registered`);
-      return handler(args);
-    },
-  };
+  const base = createBaseServer();
+  const toolFn = vi.fn(base.tool);
+  return { ...base, tool: toolFn };
 }

@@ -7,12 +7,11 @@
  * and task coordination via SpacetimeDB.
  */
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { createMcpServer, startMcpServer } from "@spike-land-ai/mcp-server-base";
 import { createLiveSpacetimeMcpClient } from "./client.js";
 import { registerSwarmTools } from "./tools/swarm-tools.js";
 
-const server = new McpServer({
+const server = createMcpServer({
   name: "spacetimedb-mcp",
   version: "0.1.0",
 });
@@ -21,5 +20,4 @@ const client = createLiveSpacetimeMcpClient();
 
 registerSwarmTools(server, client);
 
-const transport = new StdioServerTransport();
-await server.connect(transport);
+await startMcpServer(server);

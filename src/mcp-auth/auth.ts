@@ -98,7 +98,7 @@ export function createAuth(env: Env) {
               path: string,
               options: { method: string; body: ReturnType<typeof z.object>; use: never[] },
               handler: (ctx: QRAuthContext) => Promise<Response>,
-            ) => unknown
+            ) => ReturnType<typeof createAuthEndpoint>
           )(
             "/sign-in/qr",
             {

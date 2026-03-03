@@ -191,30 +191,6 @@ export type StdbErrorCode =
   | "UNAUTHORIZED"
   | "PERMISSION_DENIED";
 
-// ─── Result Helpers ───
+// ─── Result Helpers (re-exported from mcp-server-base) ───
 
-export interface CallToolResult {
-  [key: string]: unknown;
-  content: Array<{ type: "text"; text: string }>;
-  isError?: boolean;
-}
-
-export function jsonResult(data: unknown): CallToolResult {
-  return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
-}
-
-export function errorResult(
-  code: StdbErrorCode,
-  message: string,
-  retryable = false,
-): CallToolResult {
-  return {
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify({ error: code, message, retryable }),
-      },
-    ],
-    isError: true,
-  };
-}
+export { type CallToolResult, jsonResult, errorResult } from "@spike-land-ai/mcp-server-base";

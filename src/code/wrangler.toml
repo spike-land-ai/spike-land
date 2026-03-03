@@ -1,0 +1,18 @@
+name = "spike-land-frontend"
+main = "worker.ts"
+compatibility_date = "2025-11-11"
+
+route = { pattern = "testing.spike.land", custom_domain = true }
+
+[assets]
+directory = "./dist-vite/client"
+not_found_handling = "single-page-application"
+
+# KV namespaces — uncomment when ready to enable rate-limiting and credits
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT_KV"
+# id = "<your-kv-namespace-id>"
+#
+# [[kv_namespaces]]
+# binding = "CREDITS_KV"
+# id = "<your-kv-namespace-id>"

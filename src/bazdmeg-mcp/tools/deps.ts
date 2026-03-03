@@ -6,7 +6,7 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, formatError } from "@spike-land-ai/mcp-server-base";
+import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
 import { DepGraphSchema } from "../types.js";
 import { readManifest, topologicalSort } from "../manifest.js";
 import type { ManifestPackage } from "../manifest.js";
@@ -144,74 +144,68 @@ function buildList(
 
 export function registerDepGraphTools(server: McpServer): void {
   // ── bazdmeg_dep_graph ─────────────────────────────────────────────────────
-  (server as unknown as {
-    tool: (name: string, desc: string, schema: Record<string, unknown>, handler: (args: Record<string, unknown>) => Promise<unknown>) => void;
-  }).tool(
-    "bazdmeg_dep_graph",
-    "Show dependency graph and topological sort. Supports tree, list, and mermaid formats.",
-    DepGraphSchema.shape,
-    async (args) => {
-      try {
-        const { packageName, format = "tree" } = args as {
-          packageName?: string;
-          format?: string;
-        };
+  createZodTool(server, {
+    name: "bazdmeg_dep_graph",
+    description: "Show dependency graph and topological sort. Supports tree, list, and mermaid formats.",
+    schema: DepGraphSchema.shape,
+    handler: async (args) => {
+      const { packageName, format = "tree" } = args as {
+        packageName?: string;
+        format?: string;
+      };
 
-        const repoRoot = process.cwd();
-        const manifest = await readManifest(repoRoot);
+      const repoRoot = process.cwd();
+      const manifest = await readManifest(repoRoot);
 
-        if (packageName && !manifest.packages[packageName]) {
-          return textResult(
-            `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
-          );
-        }
-
-        let report: string;
-
-        switch (format) {
-          case "mermaid": {
-            const mermaid = buildMermaid(manifest.packages, packageName);
-            report = `## Dependency Graph — ${packageName ?? "All Packages"}\n\n\`\`\`mermaid\n${mermaid}\n\`\`\``;
-            break;
-          }
-          case "list": {
-            report = buildList(manifest.packages, packageName);
-            break;
-          }
-          case "tree":
-          default: {
-            if (packageName) {
-              const tree = buildTree(packageName, manifest.packages, "", new Set());
-              report = `## Dependency Tree — ${packageName}\n\n\`\`\`\n${tree}\`\`\``;
-            } else {
-              // Show all root packages (those not depended on by others)
-              const allDeps = new Set<string>();
-              for (const pkg of Object.values(manifest.packages)) {
-                if (pkg.deps) {
-                  for (const d of pkg.deps) allDeps.add(d);
-                }
-              }
-
-              const roots = Object.keys(manifest.packages).filter(
-                (n) => !allDeps.has(n),
-              );
-
-              let tree = "";
-              for (const root of roots) {
-                tree += buildTree(root, manifest.packages, "", new Set());
-                tree += "\n";
-              }
-
-              report = `## Dependency Tree — All Packages\n\n**Roots**: ${roots.length} | **Total**: ${Object.keys(manifest.packages).length}\n\n\`\`\`\n${tree}\`\`\``;
-            }
-            break;
-          }
-        }
-
-        return textResult(report);
-      } catch (err: unknown) {
-        return formatError(err);
+      if (packageName && !manifest.packages[packageName]) {
+        return textResult(
+          `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
+        );
       }
+
+      let report: string;
+
+      switch (format) {
+        case "mermaid": {
+          const mermaid = buildMermaid(manifest.packages, packageName);
+          report = `## Dependency Graph — ${packageName ?? "All Packages"}\n\n\`\`\`mermaid\n${mermaid}\n\`\`\``;
+          break;
+        }
+        case "list": {
+          report = buildList(manifest.packages, packageName);
+          break;
+        }
+        case "tree":
+        default: {
+          if (packageName) {
+            const tree = buildTree(packageName, manifest.packages, "", new Set());
+            report = `## Dependency Tree — ${packageName}\n\n\`\`\`\n${tree}\`\`\``;
+          } else {
+            // Show all root packages (those not depended on by others)
+            const allDeps = new Set<string>();
+            for (const pkg of Object.values(manifest.packages)) {
+              if (pkg.deps) {
+                for (const d of pkg.deps) allDeps.add(d);
+              }
+            }
+
+            const roots = Object.keys(manifest.packages).filter(
+              (n) => !allDeps.has(n),
+            );
+
+            let tree = "";
+            for (const root of roots) {
+              tree += buildTree(root, manifest.packages, "", new Set());
+              tree += "\n";
+            }
+
+            report = `## Dependency Tree — All Packages\n\n**Roots**: ${roots.length} | **Total**: ${Object.keys(manifest.packages).length}\n\n\`\`\`\n${tree}\`\`\``;
+          }
+          break;
+        }
+      }
+
+      return textResult(report);
     },
-  );
+  });
 }

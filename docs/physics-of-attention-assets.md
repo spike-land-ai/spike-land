@@ -1,7 +1,7 @@
 # Asset Requirements: Physics of Attention
 
 Please generate the following images and save them to
-`packages/video/public/images/attention/`.
+`src/video/public/images/attention/`.
 
 | File                     | Description                                                                                  | Scene    |
 | ------------------------ | -------------------------------------------------------------------------------------------- | -------- |

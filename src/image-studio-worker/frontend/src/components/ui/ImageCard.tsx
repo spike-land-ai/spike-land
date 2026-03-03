@@ -34,45 +34,45 @@ export function ImageCard({
 
   return (
     <div
-      className={`group relative bg-obsidian-900 rounded-2xl border overflow-hidden transition-all duration-300 hover:border-white/20 ${
-        selected ? "border-amber-neon ring-4 ring-amber-neon/20" : "border-white/5"
+      className={`group relative bg-obsidian-900 rounded-[1.5rem] border overflow-hidden transition-all duration-500 hover:border-white/20 shadow-lg ${
+        selected ? "border-amber-neon ring-2 ring-amber-neon/20 scale-[1.02]" : "border-white/5 hover:shadow-2xl"
       }`}
     >
       <div className="aspect-square relative cursor-pointer group" onClick={onClick ?? onSelect}>
-        <img src={url} alt={name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
-        <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <img src={url} alt={name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-t from-obsidian-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
         {onSelect && (
           <div
-            className={`absolute top-3 left-3 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+            className={`absolute top-2.5 left-2.5 w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
               selected
-                ? "bg-amber-neon border-amber-neon shadow-[0_0_10px_rgba(255,170,0,0.5)]"
-                : "border-white/30 bg-black/30 opacity-0 group-hover:opacity-100"
+                ? "bg-amber-neon border-amber-neon shadow-lg shadow-amber-neon/30 scale-110"
+                : "border-white/30 bg-black/30 opacity-0 group-hover:opacity-100 backdrop-blur-md"
             }`}
           >
-            {selected && <span className="text-obsidian-950 text-xs font-black">✓</span>}
+            {selected && <span className="text-obsidian-950 text-[10px] font-black">✓</span>}
           </div>
         )}
-        {badge && <div className="absolute top-3 right-3">{badge}</div>}
+        {badge && <div className="absolute top-2.5 right-2.5">{badge}</div>}
       </div>
 
-      <div className="p-4 bg-obsidian-900/50 backdrop-blur-sm">
+      <div className="p-3.5 bg-obsidian-900/40 backdrop-blur-xl border-t border-white/5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-gray-100 truncate">{name}</p>
-            {description && <p className="text-[10px] text-gray-500 truncate mt-0.5 font-medium uppercase tracking-wider">{description}</p>}
+            <p className="text-xs font-bold text-white truncate uppercase tracking-tight">{name}</p>
+            {description && <p className="text-[8px] text-gray-500 truncate mt-0.5 font-bold uppercase tracking-widest">{description}</p>}
           </div>
           {actions && actions.length > 0 && (
             <div className="relative shrink-0">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className={`p-2 rounded-xl transition-all ${menuOpen ? "bg-amber-neon text-obsidian-950" : "hover:bg-white/10 text-gray-500 hover:text-gray-300"}`}
+                className={`p-1.5 rounded-lg transition-all ${menuOpen ? "bg-amber-neon text-obsidian-950" : "hover:bg-white/10 text-gray-500 hover:text-white"}`}
               >
-                <MoreVertical className="w-4 h-4" />
+                <MoreVertical className="w-3.5 h-3.5" />
               </button>
               {menuOpen && (
                 <>
                   <div className="fixed inset-0 z-[100]" onClick={() => setMenuOpen(false)} />
-                  <div className="absolute right-0 bottom-12 md:bottom-auto md:top-12 z-[110] bg-obsidian-800 border border-white/10 rounded-2xl shadow-2xl py-2 min-w-[160px] animate-in fade-in zoom-in-95 duration-200">
+                  <div className="absolute right-0 bottom-10 md:bottom-auto md:top-10 z-[110] bg-obsidian-900 border border-white/10 rounded-xl shadow-2xl py-1.5 min-w-[140px] animate-in fade-in zoom-in-95 duration-200">
                     {actions.map((action) => (
                       <button
                         key={action.label}
@@ -80,9 +80,9 @@ export function ImageCard({
                           action.onClick();
                           setMenuOpen(false);
                         }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-bold uppercase tracking-widest transition-colors ${
+                        className={`w-full text-left px-3 py-2 text-[9px] font-black uppercase tracking-widest transition-colors ${
                           action.danger
-                            ? "text-red-400 hover:bg-red-500/10"
+                            ? "text-red-400 hover:bg-red-500/5"
                             : "text-gray-400 hover:bg-white/5 hover:text-white"
                         }`}
                       >
@@ -97,19 +97,19 @@ export function ImageCard({
         </div>
         
         {(tags && tags.length > 0) || (width && height) ? (
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
-            <div className="flex flex-wrap gap-1.5 flex-1">
+          <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-white/5">
+            <div className="flex flex-wrap gap-1 flex-1">
               {tags?.slice(0, 2).map((tag) => (
                 <span
                   key={tag}
-                  className="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-neon/10 text-amber-neon border border-amber-neon/20"
+                  className="text-[7px] font-black uppercase tracking-[0.1em] px-1.5 py-0.5 rounded-md bg-white/5 text-gray-400 border border-white/5"
                 >
                   {tag}
                 </span>
               ))}
             </div>
             {width && height && (
-              <span className="text-[9px] font-mono text-gray-600 font-bold">
+              <span className="text-[8px] font-mono text-gray-600 font-black">
                 {width}×{height}
               </span>
             )}

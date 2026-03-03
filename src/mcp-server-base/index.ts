@@ -59,12 +59,16 @@ export interface McpServerConfig {
 export class McpError extends Error {
   readonly code: string;
   readonly retryable: boolean;
+  override readonly cause?: Error;
 
-  constructor(code: string, message: string, retryable = false) {
+  constructor(code: string, message: string, retryable = false, cause?: Error) {
     super(message);
     this.name = "McpError";
     this.code = code;
     this.retryable = retryable;
+    if (cause !== undefined) {
+      this.cause = cause;
+    }
   }
 }
 

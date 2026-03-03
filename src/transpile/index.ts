@@ -1,4 +1,4 @@
-import { build, transpile, wasmFile as wasmModule } from "@spike-land-ai/code/src/@/lib/transpile";
+import { build, transpile, wasmFile as wasmModule } from "@spike-land-ai/code/@/lib/transpile";
 
 Object.assign(globalThis, {
   performance: {

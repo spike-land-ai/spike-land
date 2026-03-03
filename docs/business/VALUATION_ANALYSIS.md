@@ -73,7 +73,7 @@ pre-revenue stage.
 | Metric                       | Value                                                       |
 | ---------------------------- | ----------------------------------------------------------- |
 | TypeScript lines (src/)      | 844,494                                                     |
-| TypeScript lines (packages/) | 99,229                                                      |
+| TypeScript lines (src/ packages) | 99,229                                                  |
 | **Total TypeScript lines**   | **~943,723**                                                |
 | Prisma database models       | 233 (5,807-line schema)                                     |
 | Page routes (page.tsx)       | 204                                                         |
@@ -425,8 +425,8 @@ materially.
 | Component                                       | TS Lines            | Dev Days (50-100 LOC/day) | Cost @ £600/day    | Notes                                                                                                                  |
 | ----------------------------------------------- | ------------------- | ------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | **Core Application** (src/)                     | 844,494             | 8,445 - 16,889            | £5.1M - £10.1M     | App Router, API routes, UI components                                                                                  |
-| **Worker Packages** (packages/ excl. spike-cli) | 99,229              | 992 - 1,985               | £0.6M - £1.2M      | Cloudflare Workers, shared libs                                                                                        |
-| **spike-cli** (packages/spike-cli/)             | ~9,200              | 184 - 368                 | £110K - £221K      | 46 files: multiplexer, auth, shell, transport, config                                                                  |
+| **Worker Packages** (src/ excl. spike-cli)      | 99,229              | 992 - 1,985               | £0.6M - £1.2M      | Cloudflare Workers, shared libs                                                                                        |
+| **spike-cli** (src/spike-cli/)                  | ~9,200              | 184 - 368                 | £110K - £221K      | 46 files: multiplexer, auth, shell, transport, config                                                                  |
 | **spike-cli Architecture Premium**              | —                   | 100 - 200                 | £60K - £120K       | Multiplexer design, server discovery, auto-reconnection, namespace isolation — architectural complexity beyond raw LOC |
 | **Database Schema**                             | 5,807 (233 models)  | 290 - 581                 | £0.2M - £0.3M      | Prisma schema, migrations, indexes                                                                                     |
 | **MCP Tooling**                                 | ~25,000 (147 tools) | 250 - 500                 | £0.2M - £0.3M      | Business logic exposed as tools                                                                                        |
@@ -770,7 +770,7 @@ strategic premium of the dual-interface positioning.
 | Source                                          | Usage                                                                          |
 | ----------------------------------------------- | ------------------------------------------------------------------------------ |
 | Company codebase (verified metrics)             | Lines of code, models, routes, MCP tools, spike-cli file count                 |
-| `packages/spike-cli/`                           | spike-cli source verification (46 files, subsystem architecture)               |
+| `src/spike-cli/`                                | spike-cli source verification (46 files, subsystem architecture)               |
 | `docs/ROADMAP.md`                               | Revenue projections, monetization tiers, competitive landscape                 |
 | `docs/business/BUSINESS_STRUCTURE.md`           | Company details, incorporation, tax structure                                  |
 | `docs/business/MARKETING_PERSONAS.md`           | Unit economics (CAC, LTV, payback periods)                                     |

@@ -1,17 +1,19 @@
-import { defineConfig } from "vitest/config";
+import { defineConfig, mergeConfig } from "vitest/config";
+import baseConfig from "../../vitest.base";
 
-export default defineConfig({
-  resolve: {
-    alias: {
-      "cloudflare:workers": new URL("./__mocks__/cloudflare-workers.ts", import.meta.url)
-        .pathname,
+export default mergeConfig(
+  baseConfig,
+  defineConfig({
+    resolve: {
+      alias: {
+        "cloudflare:workers": new URL("./__mocks__/cloudflare-workers.ts", import.meta.url)
+          .pathname,
+      },
     },
-  },
-  test: {
-    name: "src-spike-edge",
-    globals: true,
-    environment: "node",
-    include: ["**/*.test.ts"],
-    exclude: ["node_modules", "dist"],
-  },
-});
+    test: {
+      name: "src-spike-edge",
+      include: ["**/*.test.ts"],
+      exclude: ["node_modules", "dist"],
+    },
+  }),
+);

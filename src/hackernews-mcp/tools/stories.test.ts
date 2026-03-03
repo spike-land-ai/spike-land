@@ -83,9 +83,8 @@ describe("stories tools", () => {
         limit: 10,
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
-      expect(parsed.retryable).toBe(true);
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
+      expect(result.content[0].text).toContain("**Retryable:** true");
     });
 
     it("handles non-Error thrown values in hn_get_stories", async () => {
@@ -103,9 +102,8 @@ describe("stories tools", () => {
         limit: 10,
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
-      expect(parsed.message).toBe("string-fail");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
+      expect(result.content[0].text).toContain("string-fail");
     });
   });
 });

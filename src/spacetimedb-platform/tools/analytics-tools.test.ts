@@ -50,7 +50,7 @@ describe("analytics-tools", () => {
         metadataJson: "{}",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
 
     it("returns REDUCER_FAILED on error", async () => {
@@ -63,7 +63,7 @@ describe("analytics-tools", () => {
         metadataJson: "{}",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
 
     it("handles non-Error thrown values", async () => {
@@ -270,7 +270,7 @@ describe("analytics-tools", () => {
       });
       const result = await server.call("stdb_health_check", {});
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("QUERY_FAILED");
+      expect(result.content[0].text).toContain("**Error: QUERY_FAILED**");
     });
   });
 });

@@ -1,0 +1,11 @@
+{
+  "extends": "@spike-land-ai/tsconfig/tsconfig.bundler.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "./src",
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

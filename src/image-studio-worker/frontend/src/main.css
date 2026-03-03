@@ -1,75 +1,82 @@
 @import "tailwindcss";
 
 @theme {
-  /* Obsidian Core */
-  --color-obsidian-950: #020203;
-  --color-obsidian-900: #050507;
-  --color-obsidian-800: #0a0a0f;
-  --color-obsidian-700: #12121a;
+  /* Obsidian Core - Refined to be less "void-black" */
+  --color-obsidian-950: #0a0a0c;
+  --color-obsidian-900: #111116;
+  --color-obsidian-800: #18181f;
+  --color-obsidian-700: #24242d;
   
-  /* Creation Amber */
-  --color-amber-neon: #ffaa00;
-  --color-amber-glow: rgba(255, 170, 0, 0.15);
+  /* Creation Amber - Warmer, more premium */
+  --color-amber-neon: #ffb800;
+  --color-amber-glow: rgba(255, 184, 0, 0.12);
   
-  /* Cyber Emerald */
-  --color-emerald-neon: #00ffaa;
-  --color-emerald-glow: rgba(0, 255, 170, 0.15);
+  /* Cyber Emerald - Brighter, more electric */
+  --color-emerald-neon: #00ffcc;
+  --color-emerald-glow: rgba(0, 255, 204, 0.12);
 
-  /* Legacy Accent (Lavender) */
-  --color-accent-50: #f5f3ff;
-  --color-accent-100: #ede9fe;
-  --color-accent-200: #ddd6fe;
-  --color-accent-300: #c4b5fd;
-  --color-accent-400: #a78bfa;
-  --color-accent-500: #8b5cf6;
-  --color-accent-600: #7c3aed;
-  --color-accent-700: #6d28d9;
-  --color-accent-800: #5b21b6;
-  --color-accent-900: #4c1d95;
-  --color-accent-950: #2e1065;
+  /* Refined Accent Palette */
+  --color-accent-50: #f5f7ff;
+  --color-accent-100: #ebf0fe;
+  --color-accent-200: #ced9fd;
+  --color-accent-300: #a3b8fc;
+  --color-accent-400: #728ef8;
+  --color-accent-500: #4a66f3;
+  --color-accent-600: #384ceb;
+  --color-accent-700: #2d3bbd;
+  --color-accent-800: #253099;
+  --color-accent-900: #22297a;
+  --color-accent-950: #141747;
 }
 
 @layer base {
   body {
-    @apply bg-obsidian-950 text-gray-100 selection:bg-amber-neon/30;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    @apply bg-obsidian-950 text-gray-200 selection:bg-amber-neon/20 selection:text-white;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-obsidian-900/60 backdrop-blur-xl border border-white/5 shadow-2xl;
+    @apply bg-obsidian-900/70 backdrop-blur-2xl border border-white/10 shadow-2xl;
   }
   
   .glass-card {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/20 transition-all duration-300;
+    @apply bg-white/5 backdrop-blur-lg border border-white/10 hover:border-white/20 transition-all duration-500 hover:shadow-xl hover:shadow-black/20;
   }
 
   .neon-border-amber {
-    @apply border border-amber-neon/30 shadow-[0_0_15px_rgba(255,170,0,0.1)];
+    @apply border border-amber-neon/40 shadow-[0_0_20px_rgba(255,184,0,0.15)];
   }
 
   .neon-border-emerald {
-    @apply border border-emerald-neon/30 shadow-[0_0_15px_rgba(0,255,170,0.1)];
+    @apply border border-emerald-neon/40 shadow-[0_0_20px_rgba(0,255,204,0.15)];
   }
   
   .canvas-grid {
-    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0);
-    background-size: 40px 40px;
+    background-image: 
+      radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0);
+    background-size: 32px 32px;
   }
+
+  .nice-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+  .nice-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .nice-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+  .nice-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-
-/* Liquid Motion Utilities */
-.liquid-transition {
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
+/* Animations */
 @keyframes shimmer {
+  0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

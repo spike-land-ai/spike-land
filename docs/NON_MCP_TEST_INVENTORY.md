@@ -24,13 +24,13 @@ feat/mcp-architecture-phase-a
 | Type tests (`src/types/`)                     | 1        | 1       | 0         | Done                                                      |
 | Root-level src tests                          | 4        | 4       | 0         | Done                                                      |
 | Workflow tests (`src/workflows/`)             | 5        | 5       | 0         | Done                                                      |
-| `packages/code` tests                         | 37       | 37      | 0         | Done (pkg extracted to @spike-land-ai/code)               |
-| `packages/testing.spike.land` tests           | 23       | 23      | 0         | Done (pkg extracted to @spike-land-ai/testing.spike.land) |
-| `packages/shared` tests                       | 4        | 4       | 0         | Done (pkg extracted to @spike-land-ai/shared)             |
-| `packages/opfs-node-adapter` tests            | 40       | 40      | 0         | Done (pkg removed)                                        |
-| `packages/js.spike.land` tests                | 1        | 1       | 0         | Done (pkg extracted to @spike-land-ai/js.spike.land)      |
-| `packages/video` tests                        | 1        | 1       | 0         | Done (pkg removed)                                        |
-| `packages/vibe-dev` tests                     | 4        | 4       | 0         | Done (pkg extracted to @spike-land-ai/vibe-dev)           |
+| `src/code` tests                         | 37       | 37      | 0         | Done (pkg extracted to @spike-land-ai/code)               |
+| `src/testing.spike.land` tests           | 23       | 23      | 0         | Done (pkg extracted to @spike-land-ai/testing.spike.land) |
+| `src/shared` tests                       | 4        | 4       | 0         | Done (pkg extracted to @spike-land-ai/shared)             |
+| `src/opfs-node-adapter` tests            | 40       | 40      | 0         | Done (pkg removed)                                        |
+| `src/js.spike.land` tests                | 1        | 1       | 0         | Done (pkg extracted to @spike-land-ai/js.spike.land)      |
+| `src/video` tests                        | 1        | 1       | 0         | Done (pkg removed)                                        |
+| `src/vibe-dev` tests                     | 4        | 4       | 0         | Done (pkg extracted to @spike-land-ai/vibe-dev)           |
 | `apps/audio-mixer` tests                      | 11       | 0       | 0         | Relocated                                                 |
 | `apps/display` tests                          | 10       | 0       | 0         | Relocated                                                 |
 | `apps/tabletop-simulator` tests               | 21       | 0       | 0         | Relocated                                                 |
@@ -1161,148 +1161,148 @@ feat/mcp-architecture-phase-a
 
 ---
 
-### 10. `packages/code` Tests -- 37 files
+### 10. `src/code` Tests -- 37 files
 
-- `packages/code/src/__tests__/@/lib/make-sess.integration.spec.tsx`
-- `packages/code/src/__tests__/@/lib/make-sess.spec.ts`
-- `packages/code/src/__tests__/@/lib/render-app.spec.tsx`
-- `packages/code/src/__tests__/@/lib/text-delta.spec.tsx`
-- `packages/code/src/__tests__/ChatInterface.spec.tsx`
-- `packages/code/src/__tests__/components/AutoSaveHistory.spec.tsx`
-- `packages/code/src/__tests__/components/start-with-prompt.spec.tsx`
-- `packages/code/src/__tests__/Editor.spec.tsx`
-- `packages/code/src/__tests__/importmap-utils.spec.ts`
-- `packages/code/src/__tests__/integration/start-with-prompt-flow.spec.tsx`
-- `packages/code/src/__tests__/memfs.spec.ts`
-- `packages/code/src/__tests__/memfs/directory-operations.spec.ts`
-- `packages/code/src/__tests__/memfs/file-operations.spec.ts`
-- `packages/code/src/__tests__/memfs/index.spec.ts`
-- `packages/code/src/__tests__/memfs/misc-operations.spec.ts`
-- `packages/code/src/__tests__/memfs/utils.spec.ts`
-- `packages/code/src/__tests__/RenderService.spec.tsx`
-- `packages/code/src/__tests__/rep.spec.tsx`
-- `packages/code/src/__tests__/router.spec.tsx`
-- `packages/code/src/__tests__/serve-with-cache.spec.tsx`
-- `packages/code/src/__tests__/services/code/__tests__/CodeProcessor.spec.tsx`
-- `packages/code/src/__tests__/services/CodeSession.spec.tsx`
-- `packages/code/src/__tests__/services/message/MessageHandlerService.spec.tsx`
-- `packages/code/src/__tests__/services/screenshot/__tests__/ScreenshotService.spec.tsx`
-- `packages/code/src/__tests__/services/worker/__tests__/ServiceWorkerManager.spec.tsx`
-- `packages/code/src/__tests__/ServiceWorkerManager.spec.ts`
-- `packages/code/src/__tests__/useEditorState.spec.tsx`
-- `packages/code/src/__tests__/utils/chatUtils.spec.ts`
-- `packages/code/src/__tests__/utils/diffUtils.spec.tsx`
-- `packages/code/src/__tests__/utils/updateSearchReplace.spec.ts`
-- `packages/code/src/__tests__/utils/utils.spec.tsx`
-- `packages/code/src/__tests__/WebSocketManager.spec.tsx`
-- `packages/code/src/@/lib/__tests__/lru-cache.spec.ts`
-- `packages/code/src/@/lib/__tests__/render-messages.spec.tsx`
-- `packages/code/src/@/lib/__tests__/transferables.spec.ts`
-- `packages/code/src/@/services/__tests__/CodeProcessor.spec.ts`
-- `packages/code/src/@/workers/__tests__/ata.worker.spec.ts`
-
----
-
-### 11. `packages/testing.spike.land` Tests -- 23 files
-
-- `packages/testing.spike.land/src/__tests__/chat.spec.ts`
-- `packages/testing.spike.land/src/__tests__/replicateHandler.spec.ts`
-- `packages/testing.spike.land/src/apiHandler.spec.ts`
-- `packages/testing.spike.land/src/chatRoom.test.ts`
-- `packages/testing.spike.land/src/fetchHandler.spec.ts`
-- `packages/testing.spike.land/src/handlers/postHandler.messages.spec.ts`
-- `packages/testing.spike.land/src/handlers/postHandler.response.spec.ts`
-- `packages/testing.spike.land/src/handlers/postHandler.spec.ts`
-- `packages/testing.spike.land/src/handlers/postHandler.tools.spec.ts`
-- `packages/testing.spike.land/src/handlers/postHandler.validation.spec.ts`
-- `packages/testing.spike.land/src/largeValueStorage.test.ts`
-- `packages/testing.spike.land/src/Logs.spec.ts`
-- `packages/testing.spike.land/src/mainFetchHandler.spec.ts`
-- `packages/testing.spike.land/src/makeResponse.spec.ts`
-- `packages/testing.spike.land/src/mcpServer.unit.spec.ts`
-- `packages/testing.spike.land/src/r2bucket.spec.ts`
-- `packages/testing.spike.land/src/rateLimiter.spec.ts`
-- `packages/testing.spike.land/src/routeHandler.spec.ts`
-- `packages/testing.spike.land/src/utils.spec.ts`
-- `packages/testing.spike.land/src/utils/jsonSchemaToZod.spec.ts`
-- `packages/testing.spike.land/src/websocketHandler.spec.ts`
-- `packages/testing.spike.land/tests/index.spec.ts`
-- `packages/testing.spike.land/tests/minimal.test.ts`
+- `src/code/__tests__/@/lib/make-sess.integration.spec.tsx`
+- `src/code/__tests__/@/lib/make-sess.spec.ts`
+- `src/code/__tests__/@/lib/render-app.spec.tsx`
+- `src/code/__tests__/@/lib/text-delta.spec.tsx`
+- `src/code/__tests__/ChatInterface.spec.tsx`
+- `src/code/__tests__/components/AutoSaveHistory.spec.tsx`
+- `src/code/__tests__/components/start-with-prompt.spec.tsx`
+- `src/code/__tests__/Editor.spec.tsx`
+- `src/code/__tests__/importmap-utils.spec.ts`
+- `src/code/__tests__/integration/start-with-prompt-flow.spec.tsx`
+- `src/code/__tests__/memfs.spec.ts`
+- `src/code/__tests__/memfs/directory-operations.spec.ts`
+- `src/code/__tests__/memfs/file-operations.spec.ts`
+- `src/code/__tests__/memfs/index.spec.ts`
+- `src/code/__tests__/memfs/misc-operations.spec.ts`
+- `src/code/__tests__/memfs/utils.spec.ts`
+- `src/code/__tests__/RenderService.spec.tsx`
+- `src/code/__tests__/rep.spec.tsx`
+- `src/code/__tests__/router.spec.tsx`
+- `src/code/__tests__/serve-with-cache.spec.tsx`
+- `src/code/__tests__/services/code/__tests__/CodeProcessor.spec.tsx`
+- `src/code/__tests__/services/CodeSession.spec.tsx`
+- `src/code/__tests__/services/message/MessageHandlerService.spec.tsx`
+- `src/code/__tests__/services/screenshot/__tests__/ScreenshotService.spec.tsx`
+- `src/code/__tests__/services/worker/__tests__/ServiceWorkerManager.spec.tsx`
+- `src/code/__tests__/ServiceWorkerManager.spec.ts`
+- `src/code/__tests__/useEditorState.spec.tsx`
+- `src/code/__tests__/utils/chatUtils.spec.ts`
+- `src/code/__tests__/utils/diffUtils.spec.tsx`
+- `src/code/__tests__/utils/updateSearchReplace.spec.ts`
+- `src/code/__tests__/utils/utils.spec.tsx`
+- `src/code/__tests__/WebSocketManager.spec.tsx`
+- `src/code/@/lib/__tests__/lru-cache.spec.ts`
+- `src/code/@/lib/__tests__/render-messages.spec.tsx`
+- `src/code/@/lib/__tests__/transferables.spec.ts`
+- `src/code/@/services/__tests__/CodeProcessor.spec.ts`
+- `src/code/@/workers/__tests__/ata.worker.spec.ts`
 
 ---
 
-### 12. `packages/shared` Tests -- 4 files
+### 11. `src/testing.spike.land` Tests -- 23 files
 
-- `packages/shared/src/constants/index.test.ts`
-- `packages/shared/src/types/social-api-guards.test.ts`
-- `packages/shared/src/utils/index.test.ts`
-- `packages/shared/src/validations/index.test.ts`
-
----
-
-### 13. `packages/opfs-node-adapter` Tests -- 40 files
-
-- `packages/opfs-node-adapter/src/__tests__/directory-operations.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/file-handle.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/file-operations.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/index.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/memfs.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/misc-operations.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/access.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/cp.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/cwd.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/exists.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/glob.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/lstat.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/mkdir.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/mkdtemp.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/opendir.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/readdir.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/rm.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/rmdir.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/stat.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/statfs.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/directory/watch.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/appendFile.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/chmod.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/chown.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/copyFile.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/lchmod.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/lchown.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/link.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/lutimes.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/readFile.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/readFileSync.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/readlink.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/realpath.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/rename.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/symlink.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/truncate.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/unlink.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/utimes.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/operations/file/writeFile.spec.ts`
-- `packages/opfs-node-adapter/src/__tests__/utils.spec.ts`
+- `src/testing.spike.land/__tests__/chat.spec.ts`
+- `src/testing.spike.land/__tests__/replicateHandler.spec.ts`
+- `src/testing.spike.land/apiHandler.spec.ts`
+- `src/testing.spike.land/chatRoom.test.ts`
+- `src/testing.spike.land/fetchHandler.spec.ts`
+- `src/testing.spike.land/handlers/postHandler.messages.spec.ts`
+- `src/testing.spike.land/handlers/postHandler.response.spec.ts`
+- `src/testing.spike.land/handlers/postHandler.spec.ts`
+- `src/testing.spike.land/handlers/postHandler.tools.spec.ts`
+- `src/testing.spike.land/handlers/postHandler.validation.spec.ts`
+- `src/testing.spike.land/largeValueStorage.test.ts`
+- `src/testing.spike.land/Logs.spec.ts`
+- `src/testing.spike.land/mainFetchHandler.spec.ts`
+- `src/testing.spike.land/makeResponse.spec.ts`
+- `src/testing.spike.land/mcpServer.unit.spec.ts`
+- `src/testing.spike.land/r2bucket.spec.ts`
+- `src/testing.spike.land/rateLimiter.spec.ts`
+- `src/testing.spike.land/routeHandler.spec.ts`
+- `src/testing.spike.land/utils.spec.ts`
+- `src/testing.spike.land/utils/jsonSchemaToZod.spec.ts`
+- `src/testing.spike.land/websocketHandler.spec.ts`
+- `src/testing.spike.land/tests/index.spec.ts`
+- `src/testing.spike.land/tests/minimal.test.ts`
 
 ---
 
-### 14. `packages/js.spike.land` Tests -- 1 file
+### 12. `src/shared` Tests -- 4 files
 
-- `packages/js.spike.land/src/index.spec.ts`
-
----
-
-### 15. `packages/video` Tests -- 1 file
-
-- `packages/video/src/components/core/CoreComponents.test.tsx`
+- `src/shared/constants/index.test.ts`
+- `src/shared/types/social-api-guards.test.ts`
+- `src/shared/utils/index.test.ts`
+- `src/shared/validations/index.test.ts`
 
 ---
 
-### 16. `packages/vibe-dev` Tests -- 4 files
+### 13. `src/opfs-node-adapter` Tests -- 40 files
 
-- `packages/vibe-dev/src/__tests__/api.test.ts`
-- `packages/vibe-dev/src/__tests__/redis.test.ts`
-- `packages/vibe-dev/src/__tests__/sync.test.ts`
-- `packages/vibe-dev/src/__tests__/watcher.test.ts`
+- `src/opfs-node-adapter/__tests__/directory-operations.spec.ts`
+- `src/opfs-node-adapter/__tests__/file-handle.spec.ts`
+- `src/opfs-node-adapter/__tests__/file-operations.spec.ts`
+- `src/opfs-node-adapter/__tests__/index.spec.ts`
+- `src/opfs-node-adapter/__tests__/memfs.spec.ts`
+- `src/opfs-node-adapter/__tests__/misc-operations.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/access.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/cp.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/cwd.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/exists.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/glob.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/lstat.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/mkdir.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/mkdtemp.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/opendir.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/readdir.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/rm.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/rmdir.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/stat.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/statfs.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/directory/watch.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/appendFile.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/chmod.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/chown.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/copyFile.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/lchmod.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/lchown.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/link.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/lutimes.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/readFile.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/readFileSync.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/readlink.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/realpath.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/rename.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/symlink.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/truncate.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/unlink.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/utimes.spec.ts`
+- `src/opfs-node-adapter/__tests__/operations/file/writeFile.spec.ts`
+- `src/opfs-node-adapter/__tests__/utils.spec.ts`
+
+---
+
+### 14. `src/js.spike.land` Tests -- 1 file
+
+- `src/js.spike.land/index.spec.ts`
+
+---
+
+### 15. `src/video` Tests -- 1 file
+
+- `src/video/components/core/CoreComponents.test.tsx`
+
+---
+
+### 16. `src/vibe-dev` Tests -- 4 files
+
+- `src/vibe-dev/__tests__/api.test.ts`
+- `src/vibe-dev/__tests__/redis.test.ts`
+- `src/vibe-dev/__tests__/sync.test.ts`
+- `src/vibe-dev/__tests__/watcher.test.ts`
 
 ---
 

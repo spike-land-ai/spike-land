@@ -36,6 +36,8 @@
       "@spike-land-ai/spacetimedb-platform": ["./src/spacetimedb-platform/index.ts"],
       "@spike-land-ai/spacetimedb-platform/stdb-http-client": ["./src/spacetimedb-platform/stdb-http-client.ts"],
       "@spike-land-ai/spacetimedb-mcp": ["./src/spacetimedb-mcp/index.ts"],
+      "@spike-land-ai/spacetimedb-mcp/client": ["./src/spacetimedb-mcp/client.ts"],
+      "@spike-land-ai/spacetimedb-mcp/transport": ["./src/spacetimedb-mcp/transport.ts"],
       "@spike-land-ai/code": ["./src/code/modules.ts"],
       "@spike-land-ai/code/*": ["./src/code/*"],
       "@spike-land-ai/spike-cli": ["./src/spike-cli/index.ts"],

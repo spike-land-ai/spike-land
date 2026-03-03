@@ -53,7 +53,7 @@ describe("content-tools", () => {
         description: "",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
 
     it("returns REDUCER_FAILED on error", async () => {
@@ -66,7 +66,7 @@ describe("content-tools", () => {
         description: "",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 
@@ -92,7 +92,7 @@ describe("content-tools", () => {
     it("returns NOT_FOUND for missing page", async () => {
       const result = await server.call("stdb_get_page", { slug: "missing" });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("NOT_FOUND");
+      expect(result.content[0].text).toContain("**Error: NOT_FOUND**");
     });
 
     it("returns NOT_CONNECTED when disconnected", async () => {
@@ -131,7 +131,7 @@ describe("content-tools", () => {
         title: "X",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 

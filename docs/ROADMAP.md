@@ -193,7 +193,7 @@ Merge all credits into "Spike Credits":
 - [x] Dev workflow MCP tools added (5 tools, 25 tests)
 - [x] Dead code removal (~420 files removed)
 - [x] Logger refactoring (~300 files)
-- [x] Remove unused deps from packages/code (extracted to external repo)
+- [x] Remove unused deps from src/code (extracted to external repo)
 - [ ] Increase test coverage to 80% (from ~30%)
 
 ### Upcoming

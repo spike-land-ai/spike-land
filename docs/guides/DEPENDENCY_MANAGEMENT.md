@@ -13,7 +13,7 @@ auditing, and handling Dependabot updates.
 | Package Manager          | Yarn 4.12.0           |
 | Production Dependencies  | 62                    |
 | Development Dependencies | 33                    |
-| Workspaces               | `packages/*`          |
+| Workspaces               | `src/*`               |
 | Lock File                | `yarn.lock` (checked) |
 
 ---

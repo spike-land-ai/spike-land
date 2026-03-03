@@ -51,8 +51,7 @@ describe("vote tools", () => {
     it("returns AUTH_REQUIRED when not logged in", async () => {
       const result = await server.call("hn_upvote", { itemId: 12345 });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("AUTH_REQUIRED");
+      expect(result.content[0].text).toContain("**Error: AUTH_REQUIRED**");
     });
 
     it("handles network errors", async () => {
@@ -66,8 +65,7 @@ describe("vote tools", () => {
 
       const result = await failServer.call("hn_upvote", { itemId: 12345 });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
     });
 
     it("returns VOTE_FAILED with retryable false", async () => {
@@ -84,9 +82,8 @@ describe("vote tools", () => {
 
       const result = await failServer.call("hn_upvote", { itemId: 12345 });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("VOTE_FAILED");
-      expect(parsed.retryable).toBe(false);
+      expect(result.content[0].text).toContain("**Error: VOTE_FAILED**");
+      expect(result.content[0].text).toContain("**Retryable:** false");
     });
 
     it("returns RATE_LIMITED with retryable true", async () => {
@@ -107,9 +104,8 @@ describe("vote tools", () => {
 
       const result = await failServer.call("hn_upvote", { itemId: 12345 });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("RATE_LIMITED");
-      expect(parsed.retryable).toBe(true);
+      expect(result.content[0].text).toContain("**Error: RATE_LIMITED**");
+      expect(result.content[0].text).toContain("**Retryable:** true");
     });
 
     it("handles non-Error thrown values in hn_upvote", async () => {
@@ -124,9 +120,8 @@ describe("vote tools", () => {
 
       const result = await failServer.call("hn_upvote", { itemId: 12345 });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
-      expect(parsed.message).toBe("string-fail");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
+      expect(result.content[0].text).toContain("string-fail");
     });
   });
 });

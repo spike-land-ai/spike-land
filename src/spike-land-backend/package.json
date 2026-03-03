@@ -1,0 +1,55 @@
+{
+  "name": "@spike-land-ai/spike-land-backend",
+  "description": "Main backend for spike.land, providing real-time collaboration, API services, AI integrations, and static asset hosting via Cloudflare Workers.",
+  "version": "0.9.57",
+  "type": "module",
+  "module": "dist/index.js",
+  "private": true,
+  "peerDependencies": {
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "scripts": {
+    "dev": "npx wrangler dev",
+    "dev:remote": "npx wrangler dev --remote",
+    "build:worker": "echo 'No build required - using direct deployment'",
+    "w:deploy:dev": "npx wrangler deploy --env testing --minify",
+    "w:deploy:prod": "npx wrangler deploy --minify",
+    "clean": "rimraf dist",
+    "types:check": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:api": "yarn types:check && yarn lint && yarn test:unit",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint --quiet src/",
+    "__STATIC_CONTENT_MANIFEST": "./src/staticContent.mjs"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.29.8",
+    "@cloudflare/vitest-pool-workers": "0.12.18",
+    "@cloudflare/workers-types": "4.20260305.0",
+    "@spike-land-ai/esbuild-wasm-mcp": "*",
+    "@spike-land-ai/tsconfig": "*",
+    "@vitest/coverage-istanbul": "4.0.18",
+    "@vitest/coverage-v8": "4.0.18",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "rimraf": "6.1.3",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18",
+    "wrangler": "4.69.0"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "3.0.50",
+    "@ai-sdk/google": "3.0.34",
+    "@modelcontextprotocol/sdk": "1.27.1",
+    "@spike-land-ai/code": "*",
+    "@spike-land-ai/esbuild-wasm": "*",
+    "@types/node": "25.3.3",
+    "ai": "6.0.105",
+    "replicate": "1.4.0",
+    "zod": "4.3.6"
+  }
+}

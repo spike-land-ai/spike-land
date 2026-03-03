@@ -51,8 +51,8 @@ Items are prioritized P0 (critical) through P3 (minor/nice-to-have).
 - **Impact**: Code duplication, potential behavioral differences
 - **Details**: ErrorBoundary previously existed in both
   `src/components/errors/error-boundary.tsx` and
-  `packages/code/src/@/components/app/error-boundary.tsx`.
-- **Resolution**: `packages/code` extracted to external `@spike-land-ai/code`
+  `src/code/@/components/app/error-boundary.tsx`.
+- **Resolution**: `src/code` extracted to external `@spike-land-ai/code`
   repo. Only `src/components/errors/error-boundary.tsx` remains in this repo.
 
 #### TD-P1-2: Duplicate route handling logic in testing.spike.land
@@ -74,8 +74,8 @@ Items are prioritized P0 (critical) through P3 (minor/nice-to-have).
 - **Status**: Mostly resolved (14 packages extracted to external repos)
 - **Impact**: Bloated node_modules, slower installs, unnecessary security
   surface
-- **Details**: Previously `packages/code` had 38 unused, `packages/testing.spike.land`
-  had 8, `packages/js.spike.land` had 1. All 14 packages now extracted to
+- **Details**: Previously `src/code` had 38 unused, `src/testing.spike.land`
+  had 8, `src/js.spike.land` had 1. All 14 packages now extracted to
   `@spike-land-ai` npm org.
 - **Action**: Continue cleaning root-level unused dependencies.
 
@@ -84,7 +84,7 @@ Items are prioritized P0 (critical) through P3 (minor/nice-to-have).
 - **Status**: Mostly resolved (~420 files removed + 14 packages extracted)
 - **Impact**: Code maintenance burden, confusing codebase navigation
 - **Details**: ~420 dead code files removed in Feb 2026 cleanup. 14 packages
-  extracted to external repos. Only `packages/store-apps` remains.
+  extracted to external repos. Only `src/store-apps` remains.
 - **Action**: Continue reviewing remaining unused files in `src/`.
 
 ### P2 - Medium Priority
@@ -102,8 +102,8 @@ Items are prioritized P0 (critical) through P3 (minor/nice-to-have).
 #### TD-P2-2: @ai-sdk/anthropic not in root package.json
 
 - **Status**: Resolved (packages extracted)
-- **Details**: `@ai-sdk/anthropic` was used in `packages/testing.spike.land` and
-  `packages/code`, both now extracted to external repos.
+- **Details**: `@ai-sdk/anthropic` was used in `src/testing.spike.land` and
+  `src/code`, both now extracted to external repos.
 
 #### TD-P2-3: Wrangler compatibility dates need update
 

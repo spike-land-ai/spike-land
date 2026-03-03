@@ -110,9 +110,8 @@ describe("search tools", () => {
         hitsPerPage: 20,
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
-      expect(parsed.message).toBe("string-fail");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
+      expect(result.content[0].text).toContain("string-fail");
     });
   });
 

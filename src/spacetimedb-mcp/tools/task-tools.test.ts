@@ -66,8 +66,7 @@ describe("task-tools", () => {
       });
 
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
   });
 
@@ -171,8 +170,7 @@ describe("task-tools", () => {
     it("returns REDUCER_FAILED for non-existent task", async () => {
       const result = await server.call("stdb_claim_task", { taskId: "999" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
 
     it("returns NOT_CONNECTED when disconnected", async () => {
@@ -182,8 +180,7 @@ describe("task-tools", () => {
 
       const result = await dcServer.call("stdb_claim_task", { taskId: "1" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
   });
 
@@ -212,8 +209,7 @@ describe("task-tools", () => {
     it("returns REDUCER_FAILED for non-existent task", async () => {
       const result = await server.call("stdb_complete_task", { taskId: "999" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
 
     it("returns NOT_CONNECTED when disconnected", async () => {
@@ -223,8 +219,7 @@ describe("task-tools", () => {
 
       const result = await dcServer.call("stdb_complete_task", { taskId: "1" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
   });
 
@@ -241,8 +236,7 @@ describe("task-tools", () => {
         context: "",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
 
     it("handles non-Error thrown values", async () => {
@@ -255,8 +249,7 @@ describe("task-tools", () => {
         context: "",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.message).toBe("42");
+      expect(result.content[0].text).toContain("42");
     });
   });
 
@@ -267,8 +260,7 @@ describe("task-tools", () => {
       });
       const result = await server.call("stdb_list_tasks", {});
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("QUERY_FAILED");
+      expect(result.content[0].text).toContain("**Error: QUERY_FAILED**");
     });
 
     it("handles non-Error thrown values", async () => {
@@ -277,8 +269,7 @@ describe("task-tools", () => {
       });
       const result = await server.call("stdb_list_tasks", {});
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.message).toBe("oops");
+      expect(result.content[0].text).toContain("oops");
     });
   });
 
@@ -289,8 +280,7 @@ describe("task-tools", () => {
       });
       const result = await server.call("stdb_claim_task", { taskId: "1" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 
@@ -301,8 +291,7 @@ describe("task-tools", () => {
       });
       const result = await server.call("stdb_complete_task", { taskId: "1" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 });

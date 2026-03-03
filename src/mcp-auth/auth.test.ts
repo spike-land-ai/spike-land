@@ -83,12 +83,12 @@ describe("createAuth", () => {
     expect(callArg.baseURL).toBe("https://myapp.example.com");
   });
 
-  it("falls back to localhost:3000 when APP_URL is not provided", async () => {
+  it("falls back to https://auth-mcp.spike.land when APP_URL is not provided", async () => {
     const { betterAuth } = await import("better-auth");
     const env = makeEnv({ APP_URL: undefined });
     createAuth(env);
     const callArg = vi.mocked(betterAuth).mock.calls[0][0] as Record<string, unknown>;
-    expect(callArg.baseURL).toBe("http://localhost:3000");
+    expect(callArg.baseURL).toBe("https://auth-mcp.spike.land");
   });
 
   it("configures social providers with env values", async () => {

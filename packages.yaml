@@ -331,7 +331,7 @@ packages:
       d1_databases:
         - binding: AUTH_DB
           database_name: spike-auth-production
-          database_id: fbe3ebd5-7d2d-4861-bd8c-fa090dff6c30
+          database_id: 2afd3ffd-0e4e-4b2d-b395-7510d54af8dc
       r2_buckets:
         - binding: AUTH_R2
           bucket_name: spike-auth-assets

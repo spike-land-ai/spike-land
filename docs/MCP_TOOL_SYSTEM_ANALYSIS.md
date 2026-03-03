@@ -295,10 +295,10 @@ No competitor has automated cross-package dependency cascading for MCP servers.
 | `packages/spike.land/src/app/api/mcp/route.ts` | Primary Streamable HTTP endpoint |
 | `packages/spike.land/src/app/api/mcp/apps/[slug]/route.ts` | Per-app scoped MCP endpoints |
 | `packages/spike.land/src/lib/mcp/auth.ts` | Three-path token authentication |
-| `packages/mcp-image-studio/src/define-tool.ts` | ToolBuilder fluent chain |
-| `packages/spike-cli/src/multiplexer/server-manager.ts` | Hot config reload, namespace routing |
-| `packages/spike-cli/src/multiplexer/toolset-manager.ts` | Lazy toolset loading |
-| `packages/mcp-server-base/src/` | Shared utilities: textResult, McpError, createMockServer |
+| `src/mcp-image-studio/define-tool.ts` | ToolBuilder fluent chain |
+| `src/spike-cli/multiplexer/server-manager.ts` | Hot config reload, namespace routing |
+| `src/spike-cli/multiplexer/toolset-manager.ts` | Lazy toolset loading |
+| `src/mcp-server-base/` | Shared utilities: textResult, McpError, createMockServer |
 
 ---
 

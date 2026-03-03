@@ -101,10 +101,20 @@ describe("worker fetch handler", () => {
       expect(res.status).toBe(204);
     });
 
-    it("sets Access-Control-Allow-Origin: *", async () => {
+    it("sets Access-Control-Allow-Origin to allowed origin when Origin header matches", async () => {
+      const req = new Request("https://example.com/anything", {
+        method: "OPTIONS",
+        headers: { Origin: "https://image-studio-mcp.spike.land" },
+      });
+      const res = await worker.fetch(req, makeEnv());
+      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://image-studio-mcp.spike.land");
+    });
+
+    it("sets Access-Control-Allow-Origin to fallback when Origin header is missing", async () => {
       const req = makeRequest("OPTIONS", "/anything");
       const res = await worker.fetch(req, makeEnv());
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("*");
+      // No Origin header → falls back to first allowed origin
+      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://image-studio-mcp.spike.land");
     });
 
     it("sets Access-Control-Allow-Methods with GET, POST, DELETE, OPTIONS", async () => {
@@ -188,7 +198,8 @@ describe("worker fetch handler", () => {
     it("adds CORS headers to the MCP response", async () => {
       const req = makeRequest("POST", "/mcp");
       const res = await worker.fetch(req, makeEnv());
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("*");
+      // No Origin header → falls back to first allowed origin
+      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://image-studio-mcp.spike.land");
     });
 
     it("connects McpServer to transport before handling request", async () => {
@@ -214,9 +225,12 @@ describe("worker fetch handler", () => {
           headers: { "x-custom-header": "custom-value" },
         }),
       );
-      const req = makeRequest("POST", "/mcp");
+      const req = new Request("https://example.com/mcp", {
+        method: "POST",
+        headers: { Origin: "https://auth-mcp.spike.land" },
+      });
       const res = await worker.fetch(req, makeEnv());
-      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("*");
+      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://auth-mcp.spike.land");
       expect(res.headers.get("x-custom-header")).toBe("custom-value");
       expect(res.status).toBe(201);
     });

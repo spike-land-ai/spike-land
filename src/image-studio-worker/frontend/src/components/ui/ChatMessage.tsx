@@ -142,19 +142,19 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} group`}>
       <div
-        className={`relative max-w-[90%] rounded-3xl p-5 ${
+        className={`relative max-w-[92%] rounded-2xl p-4 ${
           isUser
-            ? "bg-amber-neon text-obsidian-950 rounded-tr-lg shadow-[0_10px_30px_rgba(255,170,0,0.1)]"
-            : "glass-panel border-white/10 text-gray-200 rounded-tl-lg"
+            ? "bg-amber-neon text-obsidian-950 rounded-tr-sm shadow-xl shadow-amber-neon/5"
+            : "glass-panel border-white/5 text-gray-200 rounded-tl-sm"
         }`}
       >
         {isEmpty ? (
           <LoadingDots />
         ) : (
-          <div className="flex gap-4">
-            <div className="flex-1 space-y-3 overflow-hidden">
+          <div className="flex gap-3">
+            <div className="flex-1 space-y-2.5 overflow-hidden">
               {message.content && (
-                <div className={`text-sm ${isUser ? "font-bold" : "font-medium leading-relaxed"}`}>
+                <div className={`text-xs ${isUser ? "font-bold" : "font-medium leading-relaxed"}`}>
                   <SimpleMarkdown text={message.content} isUser={isUser} />
                 </div>
               )}
@@ -174,7 +174,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           </div>
         )}
         <div
-          className={`text-[9px] font-black uppercase tracking-widest mt-3 opacity-40 ${
+          className={`text-[8px] font-black uppercase tracking-widest mt-2 opacity-30 ${
             isUser ? "text-obsidian-950 text-right" : "text-gray-500"
           }`}
         >

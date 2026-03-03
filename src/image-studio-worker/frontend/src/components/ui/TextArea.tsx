@@ -8,20 +8,20 @@ interface TextAreaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 export function TextArea({ label, error, className = "", id, ...props }: TextAreaProps) {
   const textareaId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1">
       {label && (
-        <label htmlFor={textareaId} className="block text-sm font-medium text-gray-300">
+        <label htmlFor={textareaId} className="block text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
           {label}
         </label>
       )}
       <textarea
         id={textareaId}
-        className={`w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-100
-          placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-500/50 focus:border-accent-500
-          disabled:opacity-50 text-sm resize-y min-h-20 ${error ? "border-red-500" : ""} ${className}`}
+        className={`w-full px-4 py-2.5 rounded-xl bg-obsidian-950/50 border border-white/10 text-white
+          placeholder:text-gray-700 focus:outline-none focus:ring-1 ring-amber-neon/30 focus:border-white/20
+          disabled:opacity-20 text-xs font-medium transition-all resize-y min-h-20 ${error ? "border-red-500/50" : ""} ${className}`}
         {...props}
       />
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-[9px] font-bold text-red-400 mt-1 ml-1 uppercase tracking-tighter">{error}</p>}
     </div>
   );
 }

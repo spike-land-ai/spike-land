@@ -57,7 +57,7 @@ export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient
       category: z.string().optional().describe("Category filter (e.g. 'code', 'image')"),
     },
     async ({ category }) => {
-      const result = await tryCatch(Promise.resolve(client.listRegisteredTools(category)));
+      const result = await tryCatch(Promise.resolve().then(() => client.listRegisteredTools(category)));
       if (!result.ok) {
         if (result.error.message.includes("Not connected")) {
           return errorResult("NOT_CONNECTED", result.error.message, false);
@@ -110,7 +110,7 @@ export function registerSwarmTools(server: McpServer, client: SpacetimeMcpClient
       statusFilter: z.string().optional().describe("Filter by 'pending', 'claimed', 'completed', 'failed'"),
     },
     async ({ statusFilter }) => {
-      const result = await tryCatch(Promise.resolve(client.listMcpTasks(statusFilter)));
+      const result = await tryCatch(Promise.resolve().then(() => client.listMcpTasks(statusFilter)));
       if (!result.ok) {
         if (result.error.message.includes("Not connected")) {
           return errorResult("NOT_CONNECTED", result.error.message, false);

@@ -163,22 +163,22 @@ export function Canvas() {
       </div>
 
       {/* Floating UI: Global Spark Bar */}
-      <div className={`absolute bottom-24 md:top-12 md:bottom-auto left-1/2 -translate-x-1/2 w-full max-w-2xl px-4 md:px-6 z-50 transition-all duration-500 ${selectedAssetId ? "scale-95 opacity-0 pointer-events-none translate-y-4 md:-translate-y-4" : "scale-100 opacity-100"}`}>
-        <form onSubmit={handleGenerate} className="glass-panel rounded-2xl md:rounded-[2rem] flex items-center px-4 md:px-8 py-3 md:py-5 gap-3 md:gap-6 focus-within:ring-2 ring-amber-neon/30 transition-all shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+      <div className={`absolute bottom-20 md:top-10 md:bottom-auto left-1/2 -translate-x-1/2 w-full max-w-xl px-4 z-50 transition-all duration-500 ${selectedAssetId ? "scale-95 opacity-0 pointer-events-none translate-y-4 md:-translate-y-4" : "scale-100 opacity-100"}`}>
+        <form onSubmit={handleGenerate} className="glass-panel rounded-2xl flex items-center px-4 md:px-6 py-2.5 md:py-4 gap-3 md:gap-4 focus-within:ring-2 ring-amber-neon/30 transition-all shadow-2xl">
           {isGenerating ? (
-            <Loader2 className="w-5 h-5 md:w-6 md:h-6 text-amber-neon animate-spin" />
+            <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-amber-neon animate-spin" />
           ) : (
-            <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-amber-neon animate-pulse" />
+            <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-amber-neon animate-pulse" />
           )}
           <input 
             type="text" 
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Spark vision..." 
-            className="flex-1 bg-transparent border-none outline-none text-base md:text-xl font-medium text-gray-100 placeholder:text-gray-700"
+            className="flex-1 bg-transparent border-none outline-none text-sm md:text-lg font-semibold text-white placeholder:text-gray-600"
           />
-          <div className="hidden md:flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black text-gray-500 uppercase tracking-tighter">
+          <div className="hidden md:flex items-center gap-2">
+            <div className="flex items-center gap-1 px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-gray-500 uppercase tracking-tighter">
               <span>⌘</span>
               <span>K</span>
             </div>
@@ -193,55 +193,55 @@ export function Canvas() {
       />
 
       {/* Canvas Controls */}
-      <div className="absolute bottom-6 md:bottom-12 right-6 md:left-1/2 md:-translate-x-1/2 glass-panel rounded-2xl p-1.5 md:p-2 flex items-center gap-1 md:gap-2 z-50 shadow-2xl transition-all">
+      <div className="absolute bottom-4 md:bottom-8 right-4 md:left-1/2 md:-translate-x-1/2 glass-panel rounded-2xl p-1 md:p-1.5 flex items-center gap-1 md:gap-1.5 z-50 shadow-2xl transition-all">
         <button 
           onClick={handleClear}
-          className="p-2 md:p-3 rounded-xl hover:bg-white/10 text-gray-400 hover:text-red-500 transition-colors group"
+          className="p-2 rounded-xl hover:bg-red-500/10 text-gray-500 hover:text-red-400 transition-colors group"
           title="Clear Canvas"
         >
-          <Trash2 className="w-4 h-4 md:w-5 md:h-5 group-active:scale-90 transition-transform" />
+          <Trash2 className="w-4 h-4 md:w-4.5 md:h-4.5 group-active:scale-90 transition-transform" />
         </button>
 
-        <div className="w-px h-6 bg-white/10 mx-0.5 md:mx-1" />
+        <div className="w-px h-5 bg-white/10 mx-0.5" />
         
-        <button className="hidden md:flex p-2 md:p-3 rounded-xl hover:bg-white/10 text-gray-400 hover:text-amber-neon transition-colors group">
-          <MousePointer2 className="w-4 h-4 md:w-5 md:h-5 group-active:scale-90 transition-transform" />
+        <button className="hidden md:flex p-2 rounded-xl hover:bg-white/5 text-gray-500 hover:text-amber-neon transition-colors group">
+          <MousePointer2 className="w-4 h-4 md:w-4.5 md:h-4.5 group-active:scale-90 transition-transform" />
         </button>
         
-        <div className="hidden md:block w-px h-6 bg-white/10 mx-0.5 md:mx-1" />
+        <div className="hidden md:block w-px h-5 bg-white/10 mx-0.5" />
         <UploadZone onUploadComplete={addAsset} />
-        <div className="w-px h-6 bg-white/10 mx-0.5 md:mx-1" />
+        <div className="w-px h-5 bg-white/10 mx-0.5" />
 
-        <div className="flex items-center bg-white/5 rounded-xl px-1 md:px-2">
+        <div className="flex items-center bg-white/5 rounded-xl px-1">
           <button 
             onClick={() => setZoom(prev => Math.max(prev - 0.2, 0.1))}
-            className="p-1.5 md:p-2 text-gray-500 hover:text-white transition-colors"
+            className="p-1.5 text-gray-500 hover:text-white transition-colors"
           >
-            <Minus className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <Minus className="w-3 h-3 md:w-3.5 md:h-3.5" />
           </button>
           
-          <div className="px-2 md:px-4 py-1.5 md:py-2 flex items-center gap-2 md:gap-3 border-x border-white/5">
-            <span className="text-[10px] md:text-sm font-black font-mono text-gray-400 w-8 md:w-12 text-center">
+          <div className="px-2 py-1 flex items-center gap-2 border-x border-white/5">
+            <span className="text-[9px] md:text-xs font-black font-mono text-gray-400 w-8 md:w-10 text-center uppercase">
               {Math.round(zoom * 100)}%
             </span>
           </div>
 
           <button 
             onClick={() => setZoom(prev => Math.min(prev + 0.2, 5))}
-            className="p-1.5 md:p-2 text-gray-500 hover:text-white transition-colors"
+            className="p-1.5 text-gray-500 hover:text-white transition-colors"
           >
-            <Plus className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <Plus className="w-3 h-3 md:w-3.5 md:h-3.5" />
           </button>
         </div>
 
-        <div className="w-px h-6 bg-white/10 mx-0.5 md:mx-1" />
+        <div className="w-px h-5 bg-white/10 mx-0.5" />
         <button 
           onClick={() => setSelectedAssetId(null)}
-          className="px-3 md:px-4 py-1.5 md:py-2 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-white transition-colors disabled:opacity-20"
+          className="px-3 py-1.5 text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-gray-500 hover:text-white transition-colors disabled:opacity-20"
           disabled={!selectedAssetId}
         >
-          <span className="hidden md:inline">Reset Selection</span>
-          <X className="w-4 h-4 md:hidden" />
+          <span className="hidden md:inline">Reset</span>
+          <X className="w-3.5 h-3.5 md:hidden" />
         </button>
       </div>
     </div>

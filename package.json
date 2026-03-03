@@ -3,7 +3,7 @@
   "name": "spike-land-ai",
   "packageManager": "yarn@4.12.0",
   "workspaces": [
-    "packages/*"
+    "src/*"
   ],
   "scripts": {
     "build": "yarn workspaces foreach -Apt run build",

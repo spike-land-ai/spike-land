@@ -5,7 +5,7 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, formatError } from "@spike-land-ai/mcp-server-base";
+import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
 import { SessionBootstrapSchema, PlanningInterviewSchema, PrePRCheckSchema } from "../types.js";
 import { getWorkspace } from "../workspace-state.js";
 import {
@@ -382,291 +382,273 @@ function formatMCQsForResponse(round: InterviewRound, session: InterviewSession)
 
 export function registerWorkflowTools(server: McpServer): void {
   // ── bazdmeg_session_bootstrap ────────────────────────────────────────────
-  (server as unknown as {
-    tool: (name: string, desc: string, schema: Record<string, unknown>, handler: (args: Record<string, unknown>) => Promise<unknown>) => void;
-  }).tool(
-    "bazdmeg_session_bootstrap",
-    "Checkpoint 0: verify branch, git status, workspace readiness",
-    SessionBootstrapSchema.shape,
-    async (args) => {
-      try {
-        const { packageName, branch } = args as { packageName: string; branch?: string };
-        const workspace = getWorkspace();
+  createZodTool(server, {
+    name: "bazdmeg_session_bootstrap",
+    description: "Checkpoint 0: verify branch, git status, workspace readiness",
+    schema: SessionBootstrapSchema.shape,
+    handler: async (args) => {
+      const { packageName, branch } = args as { packageName: string; branch?: string };
+      const workspace = getWorkspace();
 
-        const checks: string[] = [];
+      const checks: string[] = [];
 
-        // Check workspace
-        if (workspace) {
-          if (workspace.packageName === packageName) {
-            checks.push(`[PASS] Workspace active: ${packageName}`);
-          } else {
-            checks.push(`[WARN] Different workspace active: ${workspace.packageName} (expected ${packageName})`);
-          }
+      // Check workspace
+      if (workspace) {
+        if (workspace.packageName === packageName) {
+          checks.push(`[PASS] Workspace active: ${packageName}`);
         } else {
-          checks.push(`[INFO] No workspace active — call bazdmeg_enter_workspace("${packageName}") to set up isolation`);
+          checks.push(`[WARN] Different workspace active: ${workspace.packageName} (expected ${packageName})`);
         }
-
-        // Branch info
-        if (branch) {
-          checks.push(`[INFO] Expected branch: ${branch}`);
-        }
-
-        // Package exists check
-        checks.push(`[INFO] Target package: packages/${packageName}/`);
-
-        return textResult(
-          `## Session Bootstrap — ${packageName}\n\n` +
-          checks.join("\n") +
-          `\n\n### Next Steps\n` +
-          `1. Enter workspace: bazdmeg_enter_workspace\n` +
-          `2. Get context: bazdmeg_get_context\n` +
-          `3. Plan: bazdmeg_planning_interview\n` +
-          `4. Code, test, iterate\n` +
-          `5. Pre-PR check: bazdmeg_pre_pr_check`,
-        );
-      } catch (err: unknown) {
-        return formatError(err);
+      } else {
+        checks.push(`[INFO] No workspace active — call bazdmeg_enter_workspace("${packageName}") to set up isolation`);
       }
+
+      // Branch info
+      if (branch) {
+        checks.push(`[INFO] Expected branch: ${branch}`);
+      }
+
+      // Package exists check
+      checks.push(`[INFO] Target package: packages/${packageName}/`);
+
+      return textResult(
+        `## Session Bootstrap — ${packageName}\n\n` +
+        checks.join("\n") +
+        `\n\n### Next Steps\n` +
+        `1. Enter workspace: bazdmeg_enter_workspace\n` +
+        `2. Get context: bazdmeg_get_context\n` +
+        `3. Plan: bazdmeg_planning_interview\n` +
+        `4. Code, test, iterate\n` +
+        `5. Pre-PR check: bazdmeg_pre_pr_check`,
+      );
     },
-  );
+  });
 
   // ── bazdmeg_planning_interview (MCQ system) ─────────────────────────────
-  (server as unknown as {
-    tool: (name: string, desc: string, schema: Record<string, unknown>, handler: (args: Record<string, unknown>) => Promise<unknown>) => void;
-  }).tool(
-    "bazdmeg_planning_interview",
-    "MCQ verification before coding — tests understanding across 6 concepts",
-    PlanningInterviewSchema.shape,
-    async (args) => {
-      try {
-        const { taskDescription, packageName, sessionId, answers } = args as {
-          taskDescription?: string;
-          packageName?: string;
-          sessionId?: string;
-          answers?: [number, number, number];
-        };
+  createZodTool(server, {
+    name: "bazdmeg_planning_interview",
+    description: "MCQ verification before coding — tests understanding across 6 concepts",
+    schema: PlanningInterviewSchema.shape,
+    handler: async (args) => {
+      const { taskDescription, packageName, sessionId, answers } = args as {
+        taskDescription?: string;
+        packageName?: string;
+        sessionId?: string;
+        answers?: [number, number, number];
+      };
 
-        // ── Follow-up call: evaluate answers ─────────────────────────────
-        if (sessionId) {
-          const session = interviewSessions.get(sessionId);
-          if (!session) {
-            return textResult(`**ERROR**: Session \`${sessionId}\` not found. Start a new interview with taskDescription.`);
-          }
+      // ── Follow-up call: evaluate answers ─────────────────────────────
+      if (sessionId) {
+        const session = interviewSessions.get(sessionId);
+        if (!session) {
+          return textResult(`**ERROR**: Session \`${sessionId}\` not found. Start a new interview with taskDescription.`);
+        }
 
-          if (session.completed) {
-            return textResult(`**Session already completed**: ${session.result}`);
-          }
+        if (session.completed) {
+          return textResult(`**Session already completed**: ${session.result}`);
+        }
 
-          if (!answers) {
-            return textResult(`**ERROR**: answers are required for follow-up calls. Provide \`answers: [a, b, c]\` (0-3).`);
-          }
+        if (!answers) {
+          return textResult(`**ERROR**: answers are required for follow-up calls. Provide \`answers: [a, b, c]\` (0-3).`);
+        }
 
-          // Evaluate answers
-          const round = session.currentRound;
-          let roundCorrect = 0;
-          const roundResults: string[] = [];
+        // Evaluate answers
+        const round = session.currentRound;
+        let roundCorrect = 0;
+        const roundResults: string[] = [];
 
-          for (let i = 0; i < 3; i++) {
-            const q = round.questions[i]!;
-            const givenAnswer = answers[i]!;
-            const isCorrect = givenAnswer === q.correctIndex;
-            const conceptState = session.conceptStates[q.conceptIndex]!;
-            const conceptName = session.concepts[q.conceptIndex]!.name;
+        for (let i = 0; i < 3; i++) {
+          const q = round.questions[i]!;
+          const givenAnswer = answers[i]!;
+          const isCorrect = givenAnswer === q.correctIndex;
+          const conceptState = session.conceptStates[q.conceptIndex]!;
+          const conceptName = session.concepts[q.conceptIndex]!.name;
 
-            conceptState.attempts++;
+          conceptState.attempts++;
 
-            if (isCorrect) {
-              roundCorrect++;
+          if (isCorrect) {
+            roundCorrect++;
 
-              conceptState.correctCount++;
-              conceptState.answerHistory.set(q.variantIndex, givenAnswer);
+            conceptState.correctCount++;
+            conceptState.answerHistory.set(q.variantIndex, givenAnswer);
 
-              // Mastery: 2+ correct across different variants
-              if (conceptState.correctCount >= 2 && !conceptState.mastered) {
-                conceptState.mastered = true;
-              }
-
-              roundResults.push(`  Q${i + 1} [${conceptName}]: CORRECT`);
-            } else {
-              // Check for conflict: previously answered this variant correctly with a different answer
-              const previousAnswer = conceptState.answerHistory.get(q.variantIndex);
-              if (previousAnswer !== undefined && previousAnswer === q.correctIndex) {
-                // They previously got this right but now gave wrong answer — contradiction
-                const correctOption = q.options[q.correctIndex] ?? "unknown";
-                const chosenOption = q.options[givenAnswer] ?? "unknown";
-                const conflict: InterviewConflict = {
-                  concept: conceptName,
-                  round: session.roundNumber,
-                  detail: `Previously answered "${correctOption}" correctly, now chose "${chosenOption}"`,
-                };
-                session.conflicts.push(conflict);
-
-                // Reset mastery for this concept
-                conceptState.correctCount = 0;
-                conceptState.mastered = false;
-              }
-
-              conceptState.answerHistory.set(q.variantIndex, givenAnswer);
-              const correctOption = q.options[q.correctIndex] ?? "unknown";
-              roundResults.push(`  Q${i + 1} [${conceptName}]: WRONG (correct: ${q.correctIndex} — "${correctOption}")`);
+            // Mastery: 2+ correct across different variants
+            if (conceptState.correctCount >= 2 && !conceptState.mastered) {
+              conceptState.mastered = true;
             }
+
+            roundResults.push(`  Q${i + 1} [${conceptName}]: CORRECT`);
+          } else {
+            // Check for conflict: previously answered this variant correctly with a different answer
+            const previousAnswer = conceptState.answerHistory.get(q.variantIndex);
+            if (previousAnswer !== undefined && previousAnswer === q.correctIndex) {
+              // They previously got this right but now gave wrong answer — contradiction
+              const correctOption = q.options[q.correctIndex] ?? "unknown";
+              const chosenOption = q.options[givenAnswer] ?? "unknown";
+              const conflict: InterviewConflict = {
+                concept: conceptName,
+                round: session.roundNumber,
+                detail: `Previously answered "${correctOption}" correctly, now chose "${chosenOption}"`,
+              };
+              session.conflicts.push(conflict);
+
+              // Reset mastery for this concept
+              conceptState.correctCount = 0;
+              conceptState.mastered = false;
+            }
+
+            conceptState.answerHistory.set(q.variantIndex, givenAnswer);
+            const correctOption = q.options[q.correctIndex] ?? "unknown";
+            roundResults.push(`  Q${i + 1} [${conceptName}]: WRONG (correct: ${q.correctIndex} — "${correctOption}")`);
           }
+        }
 
-          session.roundNumber++;
+        session.roundNumber++;
 
-          // ── Stopping rule: 3+ conflicts ──────────────────────────────
-          if (session.conflicts.length >= 3) {
-            session.completed = true;
-            session.result = "FAILED_CONTRADICTIONS";
+        // ── Stopping rule: 3+ conflicts ──────────────────────────────
+        if (session.conflicts.length >= 3) {
+          session.completed = true;
+          session.result = "FAILED_CONTRADICTIONS";
 
-            const conflictDetails = session.conflicts
-              .map((c, i) => `  ${i + 1}. [${c.concept}] ${c.detail}`)
-              .join("\n");
-
-            return textResult(
-              `## INTERVIEW FAILED — Too Many Contradictions\n\n` +
-              `**${session.conflicts.length} contradictions detected.** Review the codebase before continuing.\n\n` +
-              `### Conflicts:\n${conflictDetails}\n\n` +
-              `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join("\n")}`,
-            );
-          }
-
-          // ── Stopping rule: score < 50% ───────────────────────────────
-          if (roundCorrect < 2) {
-            session.completed = true;
-            session.result = "FAILED_LOW_SCORE";
-
-            return textResult(
-              `## INTERVIEW FAILED — Research Before Continuing\n\n` +
-              `**Score: ${roundCorrect}/3 (${Math.round((roundCorrect / 3) * 100)}%).** Score too low.\n\n` +
-              `### Round ${session.roundNumber} Results:\n${roundResults.join("\n")}\n\n` +
-              `Research the codebase and start a new interview.`,
-            );
-          }
-
-          // ── Check if all mastered ────────────────────────────────────
-          const allMastered = session.conceptStates.every((s) => s.mastered);
-          if (allMastered) {
-            session.completed = true;
-            session.result = "PASSED";
-
-            const masteryReport = session.conceptStates
-              .map((s) => `  - ${s.name}: ${s.correctCount} correct / ${s.attempts} attempts`)
-              .join("\n");
-
-            return textResult(
-              `## INTERVIEW PASSED — Proceed to Implementation\n\n` +
-              `All 6 concepts mastered.\n\n` +
-              `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join("\n")}\n\n` +
-              `### Mastery Report:\n${masteryReport}\n\n` +
-              `### Conflicts: ${session.conflicts.length}`,
-            );
-          }
-
-          // ── Next round ───────────────────────────────────────────────
-          const nextRound = selectRoundQuestions(session);
-          session.currentRound = nextRound;
-
-          const masteredCount = session.conceptStates.filter((s) => s.mastered).length;
+          const conflictDetails = session.conflicts
+            .map((c, i) => `  ${i + 1}. [${c.concept}] ${c.detail}`)
+            .join("\n");
 
           return textResult(
-            `## Round ${session.roundNumber} Results (${roundCorrect}/3)\n\n` +
-            roundResults.join("\n") +
-            `\n\n**Progress**: ${masteredCount}/6 concepts mastered | Conflicts: ${session.conflicts.length}/3\n\n` +
-            `---\n\n` +
-            formatMCQsForResponse(nextRound, session),
+            `## INTERVIEW FAILED — Too Many Contradictions\n\n` +
+            `**${session.conflicts.length} contradictions detected.** Review the codebase before continuing.\n\n` +
+            `### Conflicts:\n${conflictDetails}\n\n` +
+            `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join("\n")}`,
           );
         }
 
-        // ── First call: create session ─────────────────────────────────
-        if (!taskDescription) {
-          return textResult(`**ERROR**: taskDescription is required for the first call. Provide a description of the task.`);
+        // ── Stopping rule: score < 50% ───────────────────────────────
+        if (roundCorrect < 2) {
+          session.completed = true;
+          session.result = "FAILED_LOW_SCORE";
+
+          return textResult(
+            `## INTERVIEW FAILED — Research Before Continuing\n\n` +
+            `**Score: ${roundCorrect}/3 (${Math.round((roundCorrect / 3) * 100)}%).** Score too low.\n\n` +
+            `### Round ${session.roundNumber} Results:\n${roundResults.join("\n")}\n\n` +
+            `Research the codebase and start a new interview.`,
+          );
         }
 
-        const workspace = getWorkspace();
-        const activePackage = packageName ?? workspace?.packageName ?? "unknown";
-        const id = generateSessionId();
-        const concepts = buildQuestionBank();
+        // ── Check if all mastered ────────────────────────────────────
+        const allMastered = session.conceptStates.every((s) => s.mastered);
+        if (allMastered) {
+          session.completed = true;
+          session.result = "PASSED";
 
-        const conceptStates: InterviewConceptState[] = concepts.map((c) => ({
-          name: c.name,
-          correctCount: 0,
-          attempts: 0,
-          mastered: false,
-          answerHistory: new Map(),
-        }));
+          const masteryReport = session.conceptStates
+            .map((s) => `  - ${s.name}: ${s.correctCount} correct / ${s.attempts} attempts`)
+            .join("\n");
 
-        const session: InterviewSession = {
-          id,
-          packageName: activePackage,
-          taskDescription,
-          concepts,
-          conceptStates,
-          currentRound: { roundNumber: 0, questions: [] as unknown as [InterviewQuestion, InterviewQuestion, InterviewQuestion] },
-          roundNumber: 0,
-          conflicts: [],
-          completed: false,
-          result: null,
-        };
+          return textResult(
+            `## INTERVIEW PASSED — Proceed to Implementation\n\n` +
+            `All 6 concepts mastered.\n\n` +
+            `### Round ${session.roundNumber} Results (${roundCorrect}/3):\n${roundResults.join("\n")}\n\n` +
+            `### Mastery Report:\n${masteryReport}\n\n` +
+            `### Conflicts: ${session.conflicts.length}`,
+          );
+        }
 
-        const firstRound = selectRoundQuestions(session);
-        session.currentRound = firstRound;
+        // ── Next round ───────────────────────────────────────────────
+        const nextRound = selectRoundQuestions(session);
+        session.currentRound = nextRound;
 
-        interviewSessions.set(id, session);
-
-        return textResult(formatMCQsForResponse(firstRound, session));
-      } catch (err: unknown) {
-        return formatError(err);
-      }
-    },
-  );
-
-  // ── bazdmeg_pre_pr_check ─────────────────────────────────────────────────
-  (server as unknown as {
-    tool: (name: string, desc: string, schema: Record<string, unknown>, handler: (args: Record<string, unknown>) => Promise<unknown>) => void;
-  }).tool(
-    "bazdmeg_pre_pr_check",
-    "Final validation before PR — runs all quality gates and workspace scope check",
-    PrePRCheckSchema.shape,
-    async (args) => {
-      try {
-        const { diff, prTitle, prBody } = args as {
-          diff: string;
-          prTitle: string;
-          prBody: string;
-        };
-
-        const workspace = getWorkspace();
-        const files = getChangedFiles(diff);
-        const { additions, deletions } = countChanges(diff);
-
-        const context = {
-          diff,
-          files,
-          additions,
-          deletions,
-          prTitle,
-          prBody,
-          claudeMdRules: [],
-          allowedPaths: workspace?.allowedPaths,
-        };
-
-        const rules = getBuiltinRules();
-        const results = runGates(rules, context);
-        const formatted = formatGateResults(results);
-
-        const hasRed = results.some((r) => r.status === "RED");
+        const masteredCount = session.conceptStates.filter((s) => s.mastered).length;
 
         return textResult(
-          formatted +
-          `\n\n---\n\n` +
-          (hasRed
-            ? `**BLOCKED**: Fix RED gates before creating PR.`
-            : `**READY**: All critical gates passing. Proceed with PR creation.`),
+          `## Round ${session.roundNumber} Results (${roundCorrect}/3)\n\n` +
+          roundResults.join("\n") +
+          `\n\n**Progress**: ${masteredCount}/6 concepts mastered | Conflicts: ${session.conflicts.length}/3\n\n` +
+          `---\n\n` +
+          formatMCQsForResponse(nextRound, session),
         );
-      } catch (err: unknown) {
-        return formatError(err);
       }
+
+      // ── First call: create session ─────────────────────────────────
+      if (!taskDescription) {
+        return textResult(`**ERROR**: taskDescription is required for the first call. Provide a description of the task.`);
+      }
+
+      const workspace = getWorkspace();
+      const activePackage = packageName ?? workspace?.packageName ?? "unknown";
+      const id = generateSessionId();
+      const concepts = buildQuestionBank();
+
+      const conceptStates: InterviewConceptState[] = concepts.map((c) => ({
+        name: c.name,
+        correctCount: 0,
+        attempts: 0,
+        mastered: false,
+        answerHistory: new Map(),
+      }));
+
+      const session: InterviewSession = {
+        id,
+        packageName: activePackage,
+        taskDescription,
+        concepts,
+        conceptStates,
+        currentRound: { roundNumber: 0, questions: [] as unknown as [InterviewQuestion, InterviewQuestion, InterviewQuestion] },
+        roundNumber: 0,
+        conflicts: [],
+        completed: false,
+        result: null,
+      };
+
+      const firstRound = selectRoundQuestions(session);
+      session.currentRound = firstRound;
+
+      interviewSessions.set(id, session);
+
+      return textResult(formatMCQsForResponse(firstRound, session));
     },
-  );
+  });
+
+  // ── bazdmeg_pre_pr_check ─────────────────────────────────────────────────
+  createZodTool(server, {
+    name: "bazdmeg_pre_pr_check",
+    description: "Final validation before PR — runs all quality gates and workspace scope check",
+    schema: PrePRCheckSchema.shape,
+    handler: async (args) => {
+      const { diff, prTitle, prBody } = args as {
+        diff: string;
+        prTitle: string;
+        prBody: string;
+      };
+
+      const workspace = getWorkspace();
+      const files = getChangedFiles(diff);
+      const { additions, deletions } = countChanges(diff);
+
+      const context = {
+        diff,
+        files,
+        additions,
+        deletions,
+        prTitle,
+        prBody,
+        claudeMdRules: [],
+        allowedPaths: workspace?.allowedPaths,
+      };
+
+      const rules = getBuiltinRules();
+      const results = runGates(rules, context);
+      const formatted = formatGateResults(results);
+
+      const hasRed = results.some((r) => r.status === "RED");
+
+      return textResult(
+        formatted +
+        `\n\n---\n\n` +
+        (hasRed
+          ? `**BLOCKED**: Fix RED gates before creating PR.`
+          : `**READY**: All critical gates passing. Proceed with PR creation.`),
+      );
+    },
+  });
 }

@@ -60,8 +60,7 @@ describe("item tools", () => {
     it("returns NOT_FOUND for missing item", async () => {
       const result = await server.call("hn_get_item", { id: 99999 });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_FOUND");
+      expect(result.content[0].text).toContain("**Error: NOT_FOUND**");
     });
 
     it("handles network errors", async () => {
@@ -74,8 +73,7 @@ describe("item tools", () => {
 
       const result = await failServer.call("hn_get_item", { id: 12345 });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
     });
   });
 
@@ -112,8 +110,7 @@ describe("item tools", () => {
         depth: 2,
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
     });
 
     it("handles non-Error thrown values in get_item_with_comments", async () => {
@@ -131,9 +128,8 @@ describe("item tools", () => {
         depth: 2,
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
-      expect(parsed.message).toBe("string-error");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
+      expect(result.content[0].text).toContain("string-error");
     });
   });
 
@@ -150,9 +146,8 @@ describe("item tools", () => {
 
       const result = await failServer.call("hn_get_item", { id: 12345 });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
-      expect(parsed.message).toBe("string-fail");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
+      expect(result.content[0].text).toContain("string-fail");
     });
   });
 });

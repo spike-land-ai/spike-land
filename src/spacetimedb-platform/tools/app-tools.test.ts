@@ -60,7 +60,7 @@ describe("app-tools", () => {
         r2CodeKey: "k",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
 
     it("returns REDUCER_FAILED on other errors", async () => {
@@ -74,7 +74,7 @@ describe("app-tools", () => {
         r2CodeKey: "k",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 
@@ -163,7 +163,7 @@ describe("app-tools", () => {
     it("returns NOT_FOUND for missing app", async () => {
       const result = await server.call("stdb_get_app", { slug: "missing" });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("NOT_FOUND");
+      expect(result.content[0].text).toContain("**Error: NOT_FOUND**");
     });
   });
 
@@ -191,7 +191,7 @@ describe("app-tools", () => {
         content: "Hi",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 
@@ -249,7 +249,7 @@ describe("app-tools", () => {
         status: "paused",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 

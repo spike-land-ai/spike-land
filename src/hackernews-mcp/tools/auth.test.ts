@@ -65,9 +65,8 @@ describe("auth tools", () => {
         password: "bad",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("AUTH_FAILED");
-      expect(parsed.message).toBe("Invalid username or password");
+      expect(result.content[0].text).toContain("**Error: AUTH_FAILED**");
+      expect(result.content[0].text).toContain("Invalid username or password");
     });
 
     it("returns error on unexpected response", async () => {
@@ -77,8 +76,7 @@ describe("auth tools", () => {
         password: "test",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("AUTH_FAILED");
+      expect(result.content[0].text).toContain("**Error: AUTH_FAILED**");
     });
 
     it("handles network errors", async () => {
@@ -96,8 +94,7 @@ describe("auth tools", () => {
         password: "test",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
     });
   });
 
@@ -140,9 +137,8 @@ describe("auth tools", () => {
         password: "test",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
-      expect(parsed.message).toBe("string-fail");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
+      expect(result.content[0].text).toContain("string-fail");
     });
   });
 });

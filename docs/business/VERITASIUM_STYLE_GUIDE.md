@@ -44,7 +44,7 @@ spike.land.
 
 ## Components
 
-### Core Components (`packages/video/src/components/core/`)
+### Core Components (`src/video/components/core/`)
 
 Pure React components that take a `progress` prop (0-1) and encapsulate all
 rendering logic.

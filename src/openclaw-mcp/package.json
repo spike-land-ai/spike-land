@@ -1,0 +1,51 @@
+{
+  "name": "@spike-land-ai/openclaw-mcp",
+  "version": "0.1.1",
+  "description": "Standalone MCP bridge for OpenClaw gateway",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "bin": "./dist/cli.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --quiet .",
+    "start": "node dist/cli.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spike-land-ai/openclaw-mcp.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.29.8",
+    "@modelcontextprotocol/sdk": "1.27.1",
+    "@spike-land-ai/eslint-config": "*",
+    "@spike-land-ai/tsconfig": "*",
+    "@types/node": "25.3.3",
+    "eslint": "10.0.2",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.56.1",
+    "vitest": "4.0.18"
+  }
+}

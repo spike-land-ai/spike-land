@@ -31,16 +31,14 @@ describe("errorResult", () => {
     const result = errorResult("NOT_CONNECTED", "Not connected to database");
     expect(result.isError).toBe(true);
     expect(result.content).toHaveLength(1);
-    const parsed = JSON.parse(result.content[0].text);
-    expect(parsed.error).toBe("NOT_CONNECTED");
-    expect(parsed.message).toBe("Not connected to database");
-    expect(parsed.retryable).toBe(false);
+    expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
+    expect(result.content[0].text).toContain("Not connected to database");
+    expect(result.content[0].text).toContain("**Retryable:** false");
   });
 
   it("supports retryable flag", () => {
     const result = errorResult("CONNECTION_FAILED", "Timeout", true);
-    const parsed = JSON.parse(result.content[0].text);
-    expect(parsed.retryable).toBe(true);
+    expect(result.content[0].text).toContain("**Retryable:** true");
   });
 
   it("supports all error codes", () => {
@@ -59,8 +57,7 @@ describe("errorResult", () => {
     for (const code of codes) {
       const result = errorResult(code, `Error: ${code}`);
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe(code);
+      expect(result.content[0].text).toContain(`**Error: ${code}**`);
     }
   });
 });

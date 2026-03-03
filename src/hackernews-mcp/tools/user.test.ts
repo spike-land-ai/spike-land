@@ -52,8 +52,7 @@ describe("user tools", () => {
     it("returns NOT_FOUND for unknown user", async () => {
       const result = await server.call("hn_get_user", { username: "nobody" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_FOUND");
+      expect(result.content[0].text).toContain("**Error: NOT_FOUND**");
     });
 
     it("handles network errors", async () => {
@@ -66,8 +65,7 @@ describe("user tools", () => {
 
       const result = await failServer.call("hn_get_user", { username: "pg" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
     });
 
     it("handles non-Error thrown values in hn_get_user", async () => {
@@ -82,9 +80,8 @@ describe("user tools", () => {
 
       const result = await failServer.call("hn_get_user", { username: "pg" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
-      expect(parsed.message).toBe("string-fail");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
+      expect(result.content[0].text).toContain("string-fail");
     });
   });
 });

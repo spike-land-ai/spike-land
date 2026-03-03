@@ -112,6 +112,17 @@ describe("McpError", () => {
   it("is an instance of Error", () => {
     expect(new McpError("X", "y")).toBeInstanceOf(Error);
   });
+
+  it("stores optional cause error", () => {
+    const cause = new Error("root cause");
+    const err = new McpError("INTERNAL_ERROR", "something failed", false, cause);
+    expect(err.cause).toBe(cause);
+  });
+
+  it("cause is undefined when not provided", () => {
+    const err = new McpError("INTERNAL_ERROR", "oops");
+    expect(err.cause).toBeUndefined();
+  });
 });
 
 // ─── formatError ─────────────────────────────────────────────────────────────

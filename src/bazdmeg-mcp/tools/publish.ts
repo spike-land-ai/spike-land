@@ -5,7 +5,7 @@
  */
 
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { textResult, formatError } from "@spike-land-ai/mcp-server-base";
+import { textResult, createZodTool } from "@spike-land-ai/mcp-server-base";
 import { GeneratePackageJsonSchema, PublishNpmSchema } from "../types.js";
 import { readManifest } from "../manifest.js";
 import { runCommand } from "../shell.js";
@@ -98,137 +98,125 @@ function buildPackageJson(
 
 export function registerPublishTools(server: McpServer): void {
   // ── bazdmeg_generate_package_json ─────────────────────────────────────────
-  (server as unknown as {
-    tool: (name: string, desc: string, schema: Record<string, unknown>, handler: (args: Record<string, unknown>) => Promise<unknown>) => void;
-  }).tool(
-    "bazdmeg_generate_package_json",
-    "Generate a valid package.json from packages.yaml entry for npm publishing.",
-    GeneratePackageJsonSchema.shape,
-    async (args) => {
-      try {
-        const { packageName, dryRun = true } = args as {
-          packageName: string;
-          dryRun?: boolean;
-        };
+  createZodTool(server, {
+    name: "bazdmeg_generate_package_json",
+    description: "Generate a valid package.json from packages.yaml entry for npm publishing.",
+    schema: GeneratePackageJsonSchema.shape,
+    handler: async (args) => {
+      const { packageName, dryRun = true } = args as {
+        packageName: string;
+        dryRun?: boolean;
+      };
 
-        const repoRoot = process.cwd();
-        const manifest = await readManifest(repoRoot);
-        const pkg = manifest.packages[packageName];
+      const repoRoot = process.cwd();
+      const manifest = await readManifest(repoRoot);
+      const pkg = manifest.packages[packageName];
 
-        if (!pkg) {
-          return textResult(
-            `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
-          );
-        }
-
-        const generated = buildPackageJson(packageName, pkg, manifest.defaults);
-        const json = JSON.stringify(generated, null, 2);
-
-        if (!dryRun) {
-          const outPath = join(repoRoot, "packages", packageName, "package.json");
-          await writeFile(outPath, json + "\n", "utf-8");
-          return textResult(
-            `## Generated package.json — ${packageName}\n\nWritten to \`${outPath}\`\n\n\`\`\`json\n${json}\n\`\`\``,
-          );
-        }
-
+      if (!pkg) {
         return textResult(
-          `## Generated package.json — ${packageName} (dry run)\n\n\`\`\`json\n${json}\n\`\`\``,
+          `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
         );
-      } catch (err: unknown) {
-        return formatError(err);
       }
+
+      const generated = buildPackageJson(packageName, pkg, manifest.defaults);
+      const json = JSON.stringify(generated, null, 2);
+
+      if (!dryRun) {
+        const outPath = join(repoRoot, "packages", packageName, "package.json");
+        await writeFile(outPath, json + "\n", "utf-8");
+        return textResult(
+          `## Generated package.json — ${packageName}\n\nWritten to \`${outPath}\`\n\n\`\`\`json\n${json}\n\`\`\``,
+        );
+      }
+
+      return textResult(
+        `## Generated package.json — ${packageName} (dry run)\n\n\`\`\`json\n${json}\n\`\`\``,
+      );
     },
-  );
+  });
 
   // ── bazdmeg_publish_npm ───────────────────────────────────────────────────
-  (server as unknown as {
-    tool: (name: string, desc: string, schema: Record<string, unknown>, handler: (args: Record<string, unknown>) => Promise<unknown>) => void;
-  }).tool(
-    "bazdmeg_publish_npm",
-    "Build + generate package.json + npm publish. Full publishing pipeline.",
-    PublishNpmSchema.shape,
-    async (args) => {
-      try {
-        const {
-          packageName,
-          registry = "github",
-          dryRun = true,
-        } = args as {
-          packageName: string;
-          registry?: string;
-          dryRun?: boolean;
-        };
+  createZodTool(server, {
+    name: "bazdmeg_publish_npm",
+    description: "Build + generate package.json + npm publish. Full publishing pipeline.",
+    schema: PublishNpmSchema.shape,
+    handler: async (args) => {
+      const {
+        packageName,
+        registry = "github",
+        dryRun = true,
+      } = args as {
+        packageName: string;
+        registry?: string;
+        dryRun?: boolean;
+      };
 
-        const repoRoot = process.cwd();
-        const manifest = await readManifest(repoRoot);
-        const pkg = manifest.packages[packageName];
+      const repoRoot = process.cwd();
+      const manifest = await readManifest(repoRoot);
+      const pkg = manifest.packages[packageName];
 
-        if (!pkg) {
-          return textResult(
-            `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
-          );
-        }
-
-        let report = `## Publish Pipeline — ${packageName}\n\n`;
-        report += `**Registry**: ${registry}\n`;
-        report += `**Version**: ${pkg.version}\n`;
-        report += `**Dry Run**: ${dryRun}\n\n`;
-
-        const pkgDir = `${repoRoot}/packages/${packageName}`;
-
-        // Step 1: Build
-        report += `### 1. Build\n`;
-        const buildStart = Date.now();
-        const buildResult = await runCommand("npm", ["run", "build"], pkgDir);
-        const buildDur = ((Date.now() - buildStart) / 1000).toFixed(1);
-
-        if (!buildResult.ok) {
-          report += `**FAILED** (${buildDur}s)\n`;
-          report += `\`\`\`\n${(buildResult.stderr || buildResult.stdout).trim().slice(0, 1000)}\n\`\`\`\n`;
-          report += `\n**BLOCKED** at build step.`;
-          return textResult(report);
-        }
-        report += `PASS (${buildDur}s)\n\n`;
-
-        // Step 2: Generate package.json
-        report += `### 2. Generate package.json\n`;
-        const generated = buildPackageJson(packageName, pkg, manifest.defaults);
-        const json = JSON.stringify(generated, null, 2);
-        report += `\`\`\`json\n${json}\n\`\`\`\n\n`;
-
-        if (dryRun) {
-          report += `### 3. Publish (skipped — dry run)\n`;
-          report += `Would run: \`npm publish --registry https://${registry === "github" ? "npm.pkg.github.com" : "registry.npmjs.org"}\`\n`;
-          return textResult(report);
-        }
-
-        // Write package.json
-        const outPath = join(pkgDir, "package.json");
-        await writeFile(outPath, json + "\n", "utf-8");
-
-        // Step 3: Publish
-        report += `### 3. Publish\n`;
-        const registryUrl = registry === "github" ? "https://npm.pkg.github.com" : "https://registry.npmjs.org";
-        const publishStart = Date.now();
-        const publishResult = await runCommand(
-          "npm",
-          ["publish", "--registry", registryUrl],
-          pkgDir,
+      if (!pkg) {
+        return textResult(
+          `**ERROR**: Package \`${packageName}\` not found in packages.yaml.`,
         );
-        const publishDur = ((Date.now() - publishStart) / 1000).toFixed(1);
-
-        if (publishResult.ok) {
-          report += `**PUBLISHED** (${publishDur}s)\n`;
-        } else {
-          report += `**FAILED** (${publishDur}s)\n`;
-          report += `\`\`\`\n${(publishResult.stderr || publishResult.stdout).trim().slice(0, 1000)}\n\`\`\``;
-        }
-
-        return textResult(report);
-      } catch (err: unknown) {
-        return formatError(err);
       }
+
+      let report = `## Publish Pipeline — ${packageName}\n\n`;
+      report += `**Registry**: ${registry}\n`;
+      report += `**Version**: ${pkg.version}\n`;
+      report += `**Dry Run**: ${dryRun}\n\n`;
+
+      const pkgDir = `${repoRoot}/packages/${packageName}`;
+
+      // Step 1: Build
+      report += `### 1. Build\n`;
+      const buildStart = Date.now();
+      const buildResult = await runCommand("npm", ["run", "build"], pkgDir);
+      const buildDur = ((Date.now() - buildStart) / 1000).toFixed(1);
+
+      if (!buildResult.ok) {
+        report += `**FAILED** (${buildDur}s)\n`;
+        report += `\`\`\`\n${(buildResult.stderr || buildResult.stdout).trim().slice(0, 1000)}\n\`\`\`\n`;
+        report += `\n**BLOCKED** at build step.`;
+        return textResult(report);
+      }
+      report += `PASS (${buildDur}s)\n\n`;
+
+      // Step 2: Generate package.json
+      report += `### 2. Generate package.json\n`;
+      const generated = buildPackageJson(packageName, pkg, manifest.defaults);
+      const json = JSON.stringify(generated, null, 2);
+      report += `\`\`\`json\n${json}\n\`\`\`\n\n`;
+
+      if (dryRun) {
+        report += `### 3. Publish (skipped — dry run)\n`;
+        report += `Would run: \`npm publish --registry https://${registry === "github" ? "npm.pkg.github.com" : "registry.npmjs.org"}\`\n`;
+        return textResult(report);
+      }
+
+      // Write package.json
+      const outPath = join(pkgDir, "package.json");
+      await writeFile(outPath, json + "\n", "utf-8");
+
+      // Step 3: Publish
+      report += `### 3. Publish\n`;
+      const registryUrl = registry === "github" ? "https://npm.pkg.github.com" : "https://registry.npmjs.org";
+      const publishStart = Date.now();
+      const publishResult = await runCommand(
+        "npm",
+        ["publish", "--registry", registryUrl],
+        pkgDir,
+      );
+      const publishDur = ((Date.now() - publishStart) / 1000).toFixed(1);
+
+      if (publishResult.ok) {
+        report += `**PUBLISHED** (${publishDur}s)\n`;
+      } else {
+        report += `**FAILED** (${publishDur}s)\n`;
+        report += `\`\`\`\n${(publishResult.stderr || publishResult.stdout).trim().slice(0, 1000)}\n\`\`\``;
+      }
+
+      return textResult(report);
     },
-  );
+  });
 }

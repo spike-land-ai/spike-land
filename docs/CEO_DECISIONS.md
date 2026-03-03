@@ -30,7 +30,7 @@
 
 **Related Files Updated**:
 
-- `packages/spike-cli/src/commands/agent.ts` - Refactored to use `@google/genai` instead of `@anthropic-ai/sdk`.
+- `src/spike-cli/commands/agent.ts` - Refactored to use `@google/genai` instead of `@anthropic-ai/sdk`.
 
 ---
 

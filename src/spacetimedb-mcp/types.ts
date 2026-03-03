@@ -2,25 +2,6 @@
  * SpacetimeDB MCP Server — Types & Helpers
  */
 
-// ─── Agent Types ───
-
-export interface Agent {
-  identity: string;
-  displayName: string;
-  capabilities: string[];
-  online: boolean;
-  lastSeen: bigint;
-}
-
-export interface AgentMessage {
-  id: bigint;
-  fromAgent: string;
-  toAgent: string;
-  content: string;
-  timestamp: bigint;
-  delivered: boolean;
-}
-
 export interface RegisteredTool {
   id: bigint;
   name: string;
@@ -44,26 +25,9 @@ export interface McpTask {
   completedAt?: bigint;
 }
 
-// ─── Connection State ───
+// ─── Shared types from spacetimedb-platform (canonical source) ───
 
-export interface ConnectionState {
-  connected: boolean;
-  uri: string | null;
-  moduleName: string | null;
-  identity: string | null;
-  token: string | null;
-}
-
-export interface Task {
-  id: bigint;
-  description: string;
-  assignedTo: string | undefined;
-  status: string;
-  priority: number;
-  context: string;
-  createdBy: string;
-  createdAt: bigint;
-}
+export type { Agent, AgentMessage, ConnectionState, Task } from "@spike-land-ai/spacetimedb-platform";
 
 // ─── Error Codes ───
 
@@ -76,34 +40,6 @@ export type StdbErrorCode =
   | "INVALID_INPUT"
   | "ALREADY_CONNECTED";
 
-// ─── Re-export tryCatch from mcp-server-base ───
+// ─── Result Helpers (re-exported from mcp-server-base) ───
 
-export { tryCatch } from "@spike-land-ai/mcp-server-base";
-
-// ─── Result Helpers ───
-
-export interface CallToolResult {
-  [key: string]: unknown;
-  content: Array<{ type: "text"; text: string }>;
-  isError?: boolean;
-}
-
-export function jsonResult(data: unknown): CallToolResult {
-  return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
-}
-
-export function errorResult(
-  code: StdbErrorCode,
-  message: string,
-  retryable = false,
-): CallToolResult {
-  return {
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify({ error: code, message, retryable }),
-      },
-    ],
-    isError: true,
-  };
-}
+export { tryCatch, type CallToolResult, jsonResult, errorResult } from "@spike-land-ai/mcp-server-base";

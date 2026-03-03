@@ -45,8 +45,7 @@ describe("submit tools", () => {
       session.login("testuser", "user=testuser");
       const result = await server.call("hn_submit_story", { title: "Title" });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("INVALID_INPUT");
+      expect(result.content[0].text).toContain("**Error: INVALID_INPUT**");
     });
 
     it("submits url story successfully", async () => {
@@ -75,8 +74,7 @@ describe("submit tools", () => {
         url: "https://example.com",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("AUTH_REQUIRED");
+      expect(result.content[0].text).toContain("**Error: AUTH_REQUIRED**");
     });
 
     it("handles network errors", async () => {
@@ -93,8 +91,7 @@ describe("submit tools", () => {
         url: "https://example.com",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NETWORK_ERROR");
+      expect(result.content[0].text).toContain("**Error: NETWORK_ERROR**");
     });
 
     it("returns RATE_LIMITED retryable", async () => {
@@ -119,9 +116,8 @@ describe("submit tools", () => {
         url: "https://spam.com",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("RATE_LIMITED");
-      expect(parsed.retryable).toBe(true);
+      expect(result.content[0].text).toContain("**Error: RATE_LIMITED**");
+      expect(result.content[0].text).toContain("**Retryable:** true");
     });
 
     it("returns CSRF_EXPIRED retryable", async () => {
@@ -144,9 +140,8 @@ describe("submit tools", () => {
         url: "https://example.com",
       });
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("CSRF_EXPIRED");
-      expect(parsed.retryable).toBe(true);
+      expect(result.content[0].text).toContain("**Error: CSRF_EXPIRED**");
+      expect(result.content[0].text).toContain("**Retryable:** true");
     });
   });
 });

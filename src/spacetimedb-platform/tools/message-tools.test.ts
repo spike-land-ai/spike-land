@@ -47,7 +47,7 @@ describe("message-tools", () => {
         content: "hi",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("NOT_CONNECTED");
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
     });
 
     it("returns REDUCER_FAILED on error", async () => {
@@ -59,7 +59,7 @@ describe("message-tools", () => {
         content: "hi",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
 
     it("handles non-Error thrown values", async () => {
@@ -71,7 +71,7 @@ describe("message-tools", () => {
         content: "hi",
       });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 
@@ -194,7 +194,7 @@ describe("message-tools", () => {
       });
       const result = await server.call("stdb_mark_dm_read", { messageId: "1" });
       expect(result.isError).toBe(true);
-      expect(JSON.parse(result.content[0].text).error).toBe("REDUCER_FAILED");
+      expect(result.content[0].text).toContain("**Error: REDUCER_FAILED**");
     });
   });
 });

@@ -32,22 +32,19 @@ describe("types", () => {
     it("creates error result with code and message", () => {
       const result = errorResult("NOT_CONNECTED", "No active connection");
       expect(result.isError).toBe(true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.error).toBe("NOT_CONNECTED");
-      expect(parsed.message).toBe("No active connection");
-      expect(parsed.retryable).toBe(false);
+      expect(result.content[0].text).toContain("**Error: NOT_CONNECTED**");
+      expect(result.content[0].text).toContain("No active connection");
+      expect(result.content[0].text).toContain("**Retryable:** false");
     });
 
     it("supports retryable flag", () => {
       const result = errorResult("CONNECTION_FAILED", "Timeout", true);
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.retryable).toBe(true);
+      expect(result.content[0].text).toContain("**Retryable:** true");
     });
 
     it("defaults retryable to false", () => {
       const result = errorResult("INVALID_INPUT", "Bad data");
-      const parsed = JSON.parse(result.content[0].text);
-      expect(parsed.retryable).toBe(false);
+      expect(result.content[0].text).toContain("**Retryable:** false");
     });
   });
 });
