@@ -1,13 +1,3 @@
-declare module "@spacetime-db/sdk" {
-  export class SpacetimeClient {
-    connect(baseUrl: string, moduleName: string, token: string | null): void;
-    disconnect(): void;
-    onConnect(callback: (identity: { toHexString(): string }, token?: { string: string }) => void): void;
-    onDisconnect(callback: () => void): void;
-    onConnectError(callback: (err: string) => void): void;
-  }
-}
-
 declare module "@react-three/fiber" {
   import type { FC, ReactNode } from "react";
   export function useFrame(callback: (state: { clock: { getElapsedTime(): number } }) => void): void;
