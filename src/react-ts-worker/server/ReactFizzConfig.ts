@@ -82,7 +82,7 @@ export function pushStartInstance(type: string, props: Record<string, unknown>):
   let html = "<" + type;
 
   for (const propKey in props) {
-    if (!props.hasOwnProperty(propKey)) continue;
+    if (!Object.hasOwn(props, propKey)) continue;
     if (SKIP_PROPS.has(propKey)) continue;
     if (propKey.startsWith("on")) continue; // Skip event handlers
 
@@ -130,7 +130,7 @@ export function pushTextInstance(text: string): string {
 function renderStyleAttribute(style: Record<string, unknown>): string {
   let result = "";
   for (const key in style) {
-    if (!style.hasOwnProperty(key)) continue;
+    if (!Object.hasOwn(style, key)) continue;
     const value = style[key];
     if (value == null || value === "") continue;
 

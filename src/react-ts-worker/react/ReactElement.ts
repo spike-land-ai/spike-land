@@ -2,8 +2,6 @@ import type { ReactElement as ReactElementType } from "./ReactTypes.js";
 import { REACT_ELEMENT_TYPE } from "./ReactSymbols.js";
 import assign from "../shared/assign.js";
 
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-
 function ReactElement(
   type: unknown,
   key: string | null,
@@ -40,7 +38,7 @@ export function createElement(
 
     for (const propName in config) {
       if (
-        hasOwnProperty.call(config, propName) &&
+        Object.hasOwn(config, propName) &&
         propName !== "key" &&
         propName !== "ref" &&
         propName !== "__self" &&
@@ -103,7 +101,7 @@ export function cloneElement(
 
     for (const propName in config) {
       if (
-        hasOwnProperty.call(config, propName) &&
+        Object.hasOwn(config, propName) &&
         propName !== "key" &&
         propName !== "ref" &&
         propName !== "__self" &&

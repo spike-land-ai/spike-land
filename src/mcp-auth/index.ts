@@ -10,8 +10,6 @@ const ALLOWED_ORIGINS = [
   "https://spike.land",
   "https://image-studio-mcp.spike.land",
   "https://auth-mcp.spike.land",
-  "http://localhost:5173",
-  "http://localhost:3000",
 ];
 
 function getCorsOrigin(request: Request): string {
@@ -20,7 +18,6 @@ function getCorsOrigin(request: Request): string {
 }
 
 const CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
   "Access-Control-Allow-Headers":
     "Content-Type, Authorization, Mcp-Session-Id, Mcp-Protocol-Version, Cookie",

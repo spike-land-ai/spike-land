@@ -24,12 +24,16 @@ export class HNReadClient {
     this.fetchFn = fetchFn;
   }
 
+  private logApiError(status: number, url: string): void {
+    console.error(`HN API error ${status} for ${url}`);
+  }
+
   async getItem(id: number): Promise<HNItem | null> {
     const url = `${HN_FIREBASE_BASE}/item/${id}.json`;
     const resp = await this.fetchFn(url);
     if (resp.status === 404) return null;
     if (!resp.ok) {
-      console.error(`HN API error ${resp.status} for ${url}`);
+      this.logApiError(resp.status, url);
       return null;
     }
     let data: unknown;
@@ -47,7 +51,7 @@ export class HNReadClient {
     const resp = await this.fetchFn(url);
     if (resp.status === 404) return null;
     if (!resp.ok) {
-      console.error(`HN API error ${resp.status} for ${url}`);
+      this.logApiError(resp.status, url);
       return null;
     }
     let data: unknown;
@@ -66,7 +70,7 @@ export class HNReadClient {
     const resp = await this.fetchFn(url);
     if (resp.status === 404) return [];
     if (!resp.ok) {
-      console.error(`HN API error ${resp.status} for ${url}`);
+      this.logApiError(resp.status, url);
       return [];
     }
     let data: unknown;
@@ -130,7 +134,7 @@ export class HNReadClient {
     const resp = await this.fetchFn(url);
     if (resp.status === 404) return { items: [], profiles: [] };
     if (!resp.ok) {
-      console.error(`HN API error ${resp.status} for ${url}`);
+      this.logApiError(resp.status, url);
       return { items: [], profiles: [] };
     }
     let data: unknown;
@@ -167,7 +171,7 @@ export class HNReadClient {
       return { hits: [], nbHits: 0, page: 0, nbPages: 0, hitsPerPage };
     }
     if (!resp.ok) {
-      console.error(`HN API error ${resp.status} for ${url}`);
+      this.logApiError(resp.status, url);
       return { hits: [], nbHits: 0, page: 0, nbPages: 0, hitsPerPage };
     }
     let data: unknown;

@@ -72,7 +72,52 @@ fi
 sed -i.bak "s|</head>|<meta name=\"build-sha\" content=\"${HEAD_SHA}\" /><meta name=\"build-time\" content=\"${COMMIT_TIME}\" /></head>|" dist/index.html
 rm -f dist/index.html.bak
 
-# ── 5. Upload dist/ to R2 ──
+# ── 5. Archive current build in R2 for rollback ──
+if [ -n "$DEPLOYED_SHA" ] && [ "$DEPLOYED_SHA" != "unknown" ]; then
+  echo "Archiving current build (${DEPLOYED_SHA:0:12}) to builds/${DEPLOYED_SHA}/..."
+  # Copy root assets to builds/{sha}/ prefix
+  LIST_OUTPUT="$(yarn wrangler r2 object list "${R2_BUCKET}" --remote 2>/dev/null || echo "")"
+  if [ -n "$LIST_OUTPUT" ]; then
+    echo "$LIST_OUTPUT" | python3 -c "
+import sys, json
+try:
+  data = json.load(sys.stdin)
+  for obj in data.get('objects', data) if isinstance(data, dict) else data:
+    key = obj.get('key', '') if isinstance(obj, dict) else ''
+    if key and not key.startswith('builds/') and not key.startswith('blog/'):
+      print(key)
+except: pass
+" | while read -r key; do
+      yarn wrangler r2 object copy "${R2_BUCKET}/${key}" "${R2_BUCKET}/builds/${DEPLOYED_SHA}/${key}" --remote 2>/dev/null || true
+    done
+  fi
+
+  # Prune old builds — keep only the 5 most recent
+  EXISTING_BUILDS="$(yarn wrangler r2 object list "${R2_BUCKET}" --prefix "builds/" --remote 2>/dev/null || echo "")"
+  if [ -n "$EXISTING_BUILDS" ]; then
+    OLD_SHAS="$(echo "$EXISTING_BUILDS" | python3 -c "
+import sys, json
+try:
+  data = json.load(sys.stdin)
+  objs = data.get('objects', data) if isinstance(data, dict) else data
+  shas = sorted(set(
+    obj.get('key','').split('/')[1]
+    for obj in (objs if isinstance(objs, list) else [])
+    if isinstance(obj, dict) and obj.get('key','').startswith('builds/') and len(obj['key'].split('/')) > 2
+  ))
+  # Print SHAs to delete (all except last 5)
+  for sha in shas[:-5]:
+    print(sha)
+except: pass
+")"
+    for old_sha in $OLD_SHAS; do
+      echo "Pruning old build: ${old_sha:0:12}..."
+      yarn wrangler r2 object delete "${R2_BUCKET}/builds/${old_sha}/" --remote 2>/dev/null || true
+    done
+  fi
+fi
+
+# ── 6. Upload new dist/ to R2 ──
 echo "Uploading to R2 bucket: ${R2_BUCKET}..."
 
 upload_file() {
@@ -106,5 +151,19 @@ export -f upload_file
 export R2_BUCKET
 
 find dist -type f -print0 | xargs -0 -P 8 -I {} bash -c 'upload_file "$@"' _ {}
+
+# ── 7. Upload blog JSON files to R2 ──
+BLOG_JSON_DIR="../block-website/dist/blog"
+if [ -d "$BLOG_JSON_DIR" ]; then
+  echo "Uploading blog JSON files..."
+  for f in "$BLOG_JSON_DIR"/*.json; do
+    key="blog/$(basename "$f")"
+    yarn wrangler r2 object put "${R2_BUCKET}/${key}" \
+      --file "$f" \
+      --content-type "application/json" \
+      --remote
+  done
+  echo "Blog JSON uploaded."
+fi
 
 echo "Deployed ${HEAD_SHA:0:12} @ ${COMMIT_TIME}"

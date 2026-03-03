@@ -12,7 +12,8 @@ import type {
   PostRequestBody,
   ToolDefinition,
 } from "../types/aiRoutes";
-import { DEFAULT_CORS_HEADERS, isMessageContentPart } from "../types/aiRoutes";
+import { DEFAULT_CORS_HEADERS } from "../utils";
+import { isMessageContentPart } from "../types/aiRoutes";
 
 // Constants for validation
 const MAX_MESSAGE_LENGTH = 100000; // 100KB per message

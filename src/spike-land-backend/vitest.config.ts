@@ -23,7 +23,7 @@ export default mergeConfig(
       },
     ],
     test: {
-      name: "testing.spike.land",
+      name: "spike-land-backend",
       reporters: process.env.COVERAGE
         ? ["../../vitest-minimal-reporter.ts"]
         : ["hanging-process", "../../vitest-minimal-reporter.ts"],
@@ -50,12 +50,12 @@ export default mergeConfig(
     },
     resolve: {
       alias: {
-        replicate: path.resolve(__dirname, "__mocks__/replicate.js"),
-        "snakecase-keys": path.resolve(__dirname, "__mocks__/snakecase-keys.js"),
-        cookie: path.resolve(__dirname, "__mocks__/cookie.js"),
-        "@spike-land-ai/code": path.resolve(__dirname, "__mocks__/@spike-land-ai/code.js"),
+        replicate: path.resolve(import.meta.dirname, "__mocks__/replicate.js"),
+        "snakecase-keys": path.resolve(import.meta.dirname, "__mocks__/snakecase-keys.js"),
+        cookie: path.resolve(import.meta.dirname, "__mocks__/cookie.js"),
+        "@spike-land-ai/code": path.resolve(import.meta.dirname, "__mocks__/@spike-land-ai/code.js"),
         "@spike-land-ai/esbuild-wasm": path.resolve(
-          __dirname,
+          import.meta.dirname,
           "node_modules/@spike-land-ai/esbuild-wasm",
         ),
       },

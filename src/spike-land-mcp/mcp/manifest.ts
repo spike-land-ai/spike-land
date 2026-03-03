@@ -12,7 +12,12 @@
 import type { ToolRegistry } from "./registry";
 import type { DrizzleDB } from "../db/index";
 
-type RegisterFn = (registry: ToolRegistry, userId: string, db: DrizzleDB, kv?: KVNamespace) => void;
+export interface ToolRegistrationEnv {
+  kv?: KVNamespace;
+  vaultSecret?: string;
+}
+
+type RegisterFn = (registry: ToolRegistry, userId: string, db: DrizzleDB, kv?: KVNamespace, vaultSecret?: string) => void;
 
 async function tryRegister(
   modulePath: string,
@@ -20,13 +25,13 @@ async function tryRegister(
   registry: ToolRegistry,
   userId: string,
   db: DrizzleDB,
-  kv?: KVNamespace,
+  env?: ToolRegistrationEnv,
 ): Promise<void> {
   try {
     const mod: Record<string, unknown> = await import(modulePath);
     const fn = mod[fnName];
     if (typeof fn === "function") {
-      (fn as RegisterFn)(registry, userId, db, kv);
+      (fn as RegisterFn)(registry, userId, db, env?.kv, env?.vaultSecret);
     }
   } catch (err) {
     console.error(`[MCP] Failed to register ${fnName} from ${modulePath}:`, err);
@@ -157,11 +162,11 @@ export async function registerAllTools(
   registry: ToolRegistry,
   userId: string,
   db: DrizzleDB,
-  kv?: KVNamespace,
+  env?: ToolRegistrationEnv,
 ): Promise<void> {
   await Promise.all(
     TOOL_MODULES.map(([modulePath, fnName]) =>
-      tryRegister(modulePath, fnName, registry, userId, db, kv),
+      tryRegister(modulePath, fnName, registry, userId, db, env),
     ),
   );
 }

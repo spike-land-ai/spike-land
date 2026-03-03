@@ -42,7 +42,9 @@ export function AnimatedGenerations() {
             if (parsedResult.content?.[0]?.text) {
               try {
                 resultData = JSON.parse(parsedResult.content[0].text);
-              } catch (_e) {}
+              } catch (e) {
+                console.error("Failed to parse nested content text:", e);
+              }
             }
 
             const imgUrl = resultData.url || resultData.outputImageUrl || resultData.enhancedUrl;
@@ -57,12 +59,16 @@ export function AnimatedGenerations() {
                 timestamp: new Date(call.createdAt).getTime(),
               });
             }
-          } catch (_e) {}
+          } catch (e) {
+            console.error("Failed to parse call result:", e);
+          }
         }
 
         const unique = generated.filter((v, i, a) => a.findIndex((t) => t.url === v.url) === i);
         setImages(unique.slice(0, 15));
-      } catch (_err) {}
+      } catch (err) {
+      console.error("Failed to fetch monitoring calls:", err);
+    }
     }
 
     fetchCalls();

@@ -160,9 +160,16 @@ export function Generate() {
                         width: 1024,
                         height: 1024,
                       })
-                      .then((saved) => setResultUrl(saved.url));
+                      .then((saved) => setResultUrl(saved.url))
+                      .catch((err) => {
+                        console.error("Failed to save image to local storage:", err);
+                        setResultUrl(url);
+                      });
                   })
-                  .catch(() => setResultUrl(url)); // Fallback
+                  .catch((err) => {
+                    console.error("Failed to fetch generated image blob:", err);
+                    setResultUrl(url);
+                  });
               }
             }}
           />

@@ -28,16 +28,16 @@ export default defineConfig({
   plugins: [htmlRawPlugin()],
   resolve: {
     alias: {
-      "@/": resolve(__dirname, "@") + "/",
-      "@": resolve(__dirname, "@"),
+      "@/": resolve(import.meta.dirname, "@") + "/",
+      "@": resolve(import.meta.dirname, "@"),
     },
   },
   build: {
     outDir: "dist-vite",
     lib: {
       entry: {
-        modules: resolve(__dirname, "modules.ts"),
-        "cf-esbuild": resolve(__dirname, "cf-esbuild.mjs"),
+        modules: resolve(import.meta.dirname, "modules.ts"),
+        "cf-esbuild": resolve(import.meta.dirname, "cf-esbuild.mjs"),
       },
       formats: ["es"],
       fileName: (_format, entryName) => `${entryName}.mjs`,

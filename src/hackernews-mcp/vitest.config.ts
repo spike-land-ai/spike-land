@@ -5,7 +5,7 @@ export default mergeConfig(
   baseConfig,
   defineConfig({
     test: {
-    include: ["../../.tests/hackernews-mcp/**/*.test.ts"],
+      include: ["../../.tests/hackernews-mcp/**/*.test.ts"],
       name: "hackernews-mcp",
       pool: "forks",
       fileParallelism: true,

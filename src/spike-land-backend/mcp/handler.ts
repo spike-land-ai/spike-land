@@ -141,7 +141,8 @@ export class McpHandler {
         return new Response(JSON.stringify(response), {
           headers: RESPONSE_HEADERS,
         });
-      } catch (_error) {
+      } catch (error) {
+        console.error("[mcp/handler] Failed to parse or handle MCP request:", error);
         const errorResponse: McpResponse = {
           jsonrpc: "2.0",
           id: 0,

@@ -3,7 +3,7 @@ import type Env from "../env";
 import { GetHandler } from "../handlers/getHandler";
 import { PostHandler } from "../handlers/postHandler";
 import { StorageService } from "../services/storageService";
-import { PREFLIGHT_CORS_HEADERS } from "../types/aiRoutes";
+import { PREFLIGHT_CORS_HEADERS } from "../utils";
 
 export class AiRoutes {
   private env: Env;

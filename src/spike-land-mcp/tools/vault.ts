@@ -42,15 +42,18 @@ async function getSecretLimit(db: DrizzleDB, userId: string): Promise<number> {
   return FREE_SECRET_LIMIT;
 }
 
-async function encryptValue(userId: string, value: string): Promise<string> {
+async function encryptValue(userId: string, value: string, vaultSecret: string): Promise<string> {
   const encoder = new TextEncoder();
 
   // Random per-secret salt (16 bytes) prevents identical userIds yielding identical keys
   const salt = crypto.getRandomValues(new Uint8Array(16));
 
+  // v2: Combine server-side pepper with userId so offline key derivation is infeasible
+  const keyInput = vaultSecret ? `${vaultSecret}:${userId}` : userId;
+
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
-    encoder.encode(userId),
+    encoder.encode(keyInput),
     "PBKDF2",
     false,
     ["deriveKey"],
@@ -71,7 +74,9 @@ async function encryptValue(userId: string, value: string): Promise<string> {
   );
 
   // Envelope includes the random salt so decryption can reconstruct the key
+  // v: 2 marks secrets encrypted with the server-side pepper
   const envelope = {
+    v: vaultSecret ? 2 : 1,
     iv: btoa(String.fromCharCode(...iv)),
     data: btoa(String.fromCharCode(...new Uint8Array(ciphertext))),
     salt: btoa(String.fromCharCode(...salt)),
@@ -79,7 +84,7 @@ async function encryptValue(userId: string, value: string): Promise<string> {
   return btoa(JSON.stringify(envelope));
 }
 
-export function registerVaultTools(registry: ToolRegistry, userId: string, db: DrizzleDB): void {
+export function registerVaultTools(registry: ToolRegistry, userId: string, db: DrizzleDB, _kv?: KVNamespace, vaultSecret?: string): void {
   const t = freeTool(userId, db);
 
   registry.registerBuilt(
@@ -121,7 +126,7 @@ export function registerVaultTools(registry: ToolRegistry, userId: string, db: D
             };
           }
 
-          const encryptedValue = await encryptValue(ctx.userId, input.value);
+          const encryptedValue = await encryptValue(ctx.userId, input.value, vaultSecret ?? "");
           const now = Date.now();
 
           // Check if secret with this key already exists for this user

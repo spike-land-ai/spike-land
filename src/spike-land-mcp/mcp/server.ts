@@ -6,6 +6,7 @@ import type { DrizzleDB } from "../db/index";
 export interface CreateMcpServerOptions {
   enabledCategories?: string[];
   kv?: KVNamespace;
+  vaultSecret?: string;
 }
 
 export async function createMcpServer(
@@ -19,7 +20,10 @@ export async function createMcpServer(
   );
 
   const registry = new ToolRegistry(mcpServer, userId);
-  await registerAllTools(registry, userId, db, options?.kv);
+  await registerAllTools(registry, userId, db, {
+    kv: options?.kv,
+    vaultSecret: options?.vaultSecret,
+  });
 
   if (options?.enabledCategories && options.enabledCategories.length > 0) {
     registry.restoreCategories(options.enabledCategories);

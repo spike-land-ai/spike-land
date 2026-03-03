@@ -5,7 +5,7 @@ export default mergeConfig(
   baseConfig,
   defineConfig({
     test: {
-    include: ["../../.tests/spike-review/**/*.test.ts"],
+      include: ["../../.tests/spike-review/**/*.test.ts"],
       name: "spike-review",
       coverage: {
         exclude: [

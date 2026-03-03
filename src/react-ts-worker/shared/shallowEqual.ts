@@ -1,7 +1,5 @@
 import objectIs from "./objectIs.js";
 
-const hasOwnProperty = Object.prototype.hasOwnProperty;
-
 export default function shallowEqual(objA: unknown, objB: unknown): boolean {
   if (objectIs(objA, objB)) {
     return true;
@@ -21,7 +19,7 @@ export default function shallowEqual(objA: unknown, objB: unknown): boolean {
   for (let i = 0; i < keysA.length; i++) {
     const currentKey = keysA[i]!;
     if (
-      !hasOwnProperty.call(objB, currentKey) ||
+      !Object.hasOwn(objB as object, currentKey) ||
       !objectIs(
         (objA as Record<string, unknown>)[currentKey],
         (objB as Record<string, unknown>)[currentKey],

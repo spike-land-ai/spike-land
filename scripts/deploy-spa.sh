@@ -6,7 +6,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-SPA_DIR="$ROOT_DIR/packages/spike-app"
+SPA_DIR="$ROOT_DIR/src/spike-app"
 BUCKET="spike-app-assets"
 
 echo "==> Building spike-app..."
@@ -66,4 +66,4 @@ done
 echo ""
 echo "==> SPA uploaded to R2 bucket: $BUCKET"
 echo "==> Deploy spike-edge to serve SPA:"
-echo "    cd packages/spike-edge && npm run deploy"
+echo "    cd src/spike-edge && npm run deploy"

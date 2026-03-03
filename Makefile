@@ -11,7 +11,8 @@ SHELL := /bin/bash
 ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 .PHONY: build-all test-all lint-all check-all health status validate \
-        build test test-watch test-coverage typecheck lint
+        build test test-watch test-coverage typecheck lint \
+        rollback-worker rollback-spa rollback-spa-list
 
 build-all:
 	yarn workspaces foreach -Apt run build
@@ -44,6 +45,17 @@ test-coverage:
 typecheck:
 	yarn workspaces foreach -Apt run typecheck
 lint: lint-all
+
+rollback-worker:
+	@test -n "$(WORKER)" || (echo "Usage: make rollback-worker WORKER=spike-edge" && exit 1)
+	bash "$(ROOT)scripts/rollback.sh" worker "$(WORKER)"
+
+rollback-spa-list:
+	bash "$(ROOT)scripts/rollback.sh" spa list
+
+rollback-spa:
+	@test -n "$(SHA)" || (echo "Usage: make rollback-spa SHA=abc123" && exit 1)
+	bash "$(ROOT)scripts/rollback.sh" spa "$(SHA)"
 
 status:
 	@for dir in $$(yarn workspaces list --json 2>/dev/null | node -e "\

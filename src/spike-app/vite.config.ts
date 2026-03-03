@@ -12,10 +12,10 @@ function invalidateDepCache(): import("vite").Plugin {
   return {
     name: "invalidate-dep-cache",
     config() {
-      const depCacheDir = resolve(__dirname, "node_modules/.vite");
+      const depCacheDir = resolve(import.meta.dirname, "node_modules/.vite");
       // block-website's compiled blog content
       const contentFile = resolve(
-        __dirname,
+        import.meta.dirname,
         "../block-website/dist/core/generated-posts.js",
       );
       const cacheStamp = resolve(depCacheDir, ".content-stamp");
@@ -35,7 +35,7 @@ function invalidateDepCache(): import("vite").Plugin {
     },
     buildEnd() {
       // Write a stamp so we know what content the cache was built against
-      const depCacheDir = resolve(__dirname, "node_modules/.vite");
+      const depCacheDir = resolve(import.meta.dirname, "node_modules/.vite");
       const cacheStamp = resolve(depCacheDir, ".content-stamp");
       try {
         mkdirSync(depCacheDir, { recursive: true });
@@ -50,7 +50,7 @@ function invalidateDepCache(): import("vite").Plugin {
 export default defineConfig({
   plugins: [invalidateDepCache(), react(), tailwindcss()],
   resolve: {
-    alias: { "@": resolve(__dirname, ".") },
+    alias: { "@": resolve(import.meta.dirname, ".") },
   },
   server: {
     proxy: { "/api": "http://localhost:8787" },

@@ -6,7 +6,8 @@ export interface Env {
   LIMITERS: DurableObjectNamespace;
   AUTH_MCP: Fetcher;
   STRIPE_SECRET_KEY: string;
-  AI_API_KEY: string;
+  GEMINI_API_KEY: string;
+  CLAUDE_OAUTH_TOKEN: string;
   GITHUB_TOKEN: string;
   ALLOWED_ORIGINS: string;
   QUIZ_BADGE_SECRET: string;

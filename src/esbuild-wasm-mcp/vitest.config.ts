@@ -5,7 +5,7 @@ export default mergeConfig(
   baseConfig,
   defineConfig({
     test: {
-    include: ["../../.tests/esbuild-wasm-mcp/**/*.test.ts"],
+      include: ["../../.tests/esbuild-wasm-mcp/**/*.test.ts"],
       name: "esbuild-wasm-mcp",
       pool: "forks",
       fileParallelism: true,

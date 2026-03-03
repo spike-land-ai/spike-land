@@ -101,7 +101,9 @@ export function Canvas() {
           name,
         });
         setTimeout(() => setSelectedAssetId(assetId), 100);
-      } catch (_e) {}
+      } catch (e) {
+        console.error("Failed to parse studio initial image from sessionStorage:", e);
+      }
     }
   }, [addAsset, setSelectedAssetId]);
 

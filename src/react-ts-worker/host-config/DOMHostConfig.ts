@@ -48,7 +48,7 @@ function setInitialProperties(
   props: Record<string, unknown>,
 ): void {
   for (const propKey in props) {
-    if (!Object.prototype.hasOwnProperty.call(props, propKey)) continue;
+    if (!Object.hasOwn(props, propKey)) continue;
     const propValue = props[propKey];
     if (propValue == null) continue;
 
@@ -82,7 +82,7 @@ function updateProperties(
     if (propKey === "children" || propKey === "key" || propKey === "ref") {
       continue;
     }
-    if (Object.prototype.hasOwnProperty.call(newProps, propKey)) continue;
+    if (Object.hasOwn(newProps, propKey)) continue;
 
     if (propKey === "style") {
       const style = (domElement as HTMLElement).style;
@@ -156,7 +156,7 @@ function setStyles(
   // Remove old styles
   if (oldStyles) {
     for (const key in oldStyles) {
-      if (!newStyles || !newStyles.hasOwnProperty(key)) {
+      if (!newStyles || !Object.hasOwn(newStyles, key)) {
         if (key.indexOf("-") > -1) {
           style.removeProperty(key);
         } else {

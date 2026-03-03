@@ -6,6 +6,23 @@ export const API_CORS_HEADERS = {
 } as const;
 
 /**
+ * Default CORS headers for responses
+ */
+export const DEFAULT_CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "https://spike.land",
+  "Content-Type": "application/json; charset=UTF-8",
+};
+
+/**
+ * Preflight CORS headers for OPTIONS requests
+ */
+export const PREFLIGHT_CORS_HEADERS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "https://spike.land",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+/**
  * Creates a CORS preflight response for API proxies (OPTIONS requests)
  */
 export function createCorsPreflightResponse(): Response {

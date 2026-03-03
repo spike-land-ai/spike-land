@@ -1,6 +1,7 @@
+import { useState, useEffect } from "react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { getPostBySlug } from "../../core/reducers";
+import type { BlogPost } from "../../core/generated-posts";
 import * as Interactive from "../interactive";
 
 /**
@@ -39,7 +40,7 @@ const COMPONENT_MAP = {
   contextlayerbuilderdemo: Interactive.ContextLayerBuilderDemo,
   callout: ({ children, type }: { children?: React.ReactNode; type?: string }) => (
     <div className={`p-4 my-6 rounded-xl border ${
-      type === 'info' ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 text-blue-900 dark:text-blue-100' : 
+      type === 'info' ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 text-blue-900 dark:text-blue-100' :
       'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700'
     }`}>
       {children}
@@ -48,9 +49,41 @@ const COMPONENT_MAP = {
 };
 
 export function BlogPostView({ slug }: { slug: string }) {
-  const post = getPostBySlug(slug);
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  if (!post) {
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+    fetch(`/api/blog/${slug}`)
+      .then((r) => {
+        if (!r.ok) throw new Error("Not found");
+        return r.json() as Promise<BlogPost>;
+      })
+      .then(setPost)
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8 animate-pulse">
+        <div className="text-center mb-10">
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mx-auto mb-4" />
+          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mx-auto mb-4" />
+          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-1/2 mx-auto" />
+        </div>
+        <div className="space-y-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !post) {
     return (
       <div className="max-w-3xl mx-auto py-12 px-4 text-center">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Post not found</h1>
@@ -83,7 +116,7 @@ export function BlogPostView({ slug }: { slug: string }) {
           </p>
         )}
       </header>
-      
+
       <div className="prose prose-lg dark:prose-invert max-w-none prose-img:rounded-xl prose-img:shadow-lg">
         <Markdown rehypePlugins={[rehypeRaw]} components={COMPONENT_MAP as unknown as Record<string, React.ComponentType>}>
           {fixSelfClosingTags(post.content)}

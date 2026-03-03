@@ -1,5 +1,5 @@
 import type { StorageService } from "../services/storageService";
-import { DEFAULT_CORS_HEADERS } from "../types/aiRoutes";
+import { DEFAULT_CORS_HEADERS } from "../utils";
 
 export class GetHandler {
   constructor(private storageService: StorageService) {}

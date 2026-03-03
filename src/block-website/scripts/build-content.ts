@@ -5,6 +5,7 @@ import matter from "gray-matter";
 const BLOG_DIR = resolve(process.cwd(), "../../content/blog");
 const OUT_DIR = resolve(process.cwd(), "src/core");
 const OUT_FILE = join(OUT_DIR, "generated-posts.ts");
+const JSON_DIR = resolve(process.cwd(), "dist/blog");
 
 async function buildContent() {
   console.log(`Building content from ${BLOG_DIR}...`);
@@ -60,6 +61,20 @@ export const posts: BlogPost[] = ${JSON.stringify(posts, null, 2)};
 
   await writeFile(OUT_FILE, tsCode, "utf-8");
   console.log(`Generated ${posts.length} posts to ${OUT_FILE}`);
+
+  // Also output JSON files for on-demand loading via edge API
+  await mkdir(JSON_DIR, { recursive: true });
+
+  // index.json — metadata only (no content)
+  const index = posts.map(({ content: _content, ...meta }) => meta);
+  await writeFile(join(JSON_DIR, "index.json"), JSON.stringify(index), "utf-8");
+
+  // Per-slug JSON files — full post with content
+  for (const post of posts) {
+    await writeFile(join(JSON_DIR, `${post.slug}.json`), JSON.stringify(post), "utf-8");
+  }
+
+  console.log(`Generated ${posts.length} JSON files to ${JSON_DIR}`);
 }
 
 buildContent().catch(console.error);

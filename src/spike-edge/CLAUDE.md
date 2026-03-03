@@ -25,6 +25,8 @@ npm run test:coverage # Tests with coverage
 ├── index.ts          # App entrypoint — mounts middleware and routes
 ├── env.ts            # Env bindings interface (R2, LIMITERS, secrets)
 ├── rate-limiter.ts   # RateLimiter Durable Object class
+├── middleware/
+│   └── auth.ts       # Session auth via AUTH_MCP service binding
 ├── routes/
 │   ├── health.ts     # GET /health — R2 connectivity check
 │   ├── r2.ts         # GET/POST/DELETE /r2/:key — R2 object storage
@@ -55,17 +57,18 @@ Declared in `env.ts`:
 | Variable            | Purpose                                                              |
 | ------------------- | -------------------------------------------------------------------- |
 | `STRIPE_SECRET_KEY` | Stripe API auth for `/proxy/stripe`                                  |
-| `AI_API_KEY`        | AI API auth for `/proxy/ai`                                          |
+| `GEMINI_API_KEY`    | Google Gemini API auth for `/proxy/ai`                               |
+| `CLAUDE_OAUTH_TOKEN`| Anthropic Claude auth for `/proxy/ai` (x-api-key header)            |
 | `GITHUB_TOKEN`      | GitHub API auth for `/proxy/github`                                  |
-| `SPACETIMEDB_URI`   | SpacetimeDB connection URI                                           |
 | `ALLOWED_ORIGINS`   | Comma-separated CORS allowed origins (default: `https://spike.land`) |
 
 ## Middleware (global, applied to all routes)
 
 1. **CORS** — dynamic allowed origins from `ALLOWED_ORIGINS` env var
-2. **Security headers** — `X-Content-Type-Options`, `X-XSS-Protection`,
-   `X-Frame-Options: DENY`
-3. **Error handler** — logs to console, returns
+2. **Security headers** — CSP, HSTS, X-Content-Type-Options, X-Frame-Options,
+   Referrer-Policy
+3. **Auth** — session validation via AUTH_MCP on `/proxy/*` and R2 mutations
+4. **Error handler** — logs to console, returns
    `{ error: "Internal Server Error" }` with 500
 
 ## Rate Limiter
@@ -82,10 +85,14 @@ All proxy routes validate the request body has a `url` field (string,
 non-empty):
 
 - `POST /proxy/stripe` — proxies to `https://api.stripe.com/*` only; injects
-  `STRIPE_SECRET_KEY`
-- `POST /proxy/ai` — proxies to any AI API URL; injects `AI_API_KEY`
+  `STRIPE_SECRET_KEY`. Requires auth.
+- `POST /proxy/ai` — proxies to Anthropic and Google Gemini APIs; selects
+  correct key per provider. Requires auth.
 - `POST /proxy/github` — proxies to `https://api.github.com/*` only; injects
-  `GITHUB_TOKEN` with GitHub headers
+  `GITHUB_TOKEN` with GitHub headers. Requires auth.
+
+All proxy routes sanitize caller-provided headers against an explicit allowlist
+(Content-Type, Accept, Accept-Language, X-Request-Id only).
 
 ## Code Quality Rules
 

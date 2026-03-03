@@ -55,6 +55,7 @@ mcpRoute.post("/", async (c) => {
   const mcpServer = await createMcpServer(userId, db, {
     enabledCategories,
     kv: c.env.KV,
+    vaultSecret: c.env.VAULT_SECRET,
   });
 
   // Normalize Accept header for MCP spec compliance

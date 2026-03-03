@@ -17,7 +17,7 @@ export default mergeConfig(
       },
     ],
     test: {
-      name: "js.spike.land",
+      name: "transpile",
       include: ["../../.tests/transpile/**/*.{test,spec}.ts"],
     },
   }),

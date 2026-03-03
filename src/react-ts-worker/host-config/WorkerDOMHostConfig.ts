@@ -64,7 +64,7 @@ function setWorkerProps(
   eventRegistry?: WorkerEventRegistry,
 ): void {
   for (const key in props) {
-    if (!Object.prototype.hasOwnProperty.call(props, key)) continue;
+    if (!Object.hasOwn(props, key)) continue;
     const value = props[key];
     if (value == null || key === "children" || key === "key" || key === "ref") {
       continue;
@@ -190,7 +190,7 @@ export function createWorkerDOMHostConfig(
     ): void {
       for (const key in oldProps) {
         if (key === "children" || key === "key" || key === "ref") continue;
-        if (Object.prototype.hasOwnProperty.call(newProps, key)) continue;
+        if (Object.hasOwn(newProps, key)) continue;
         if (key.startsWith("on")) {
           // Remove old event handler
           if (eventRegistry && "__nodeId" in instance) {

@@ -12,12 +12,12 @@ export default mergeConfig(
       include: ["../../.tests/code/**/*.{test,spec}.{ts,tsx}"],
       exclude: ["node_modules", "dist", ".next"],
       alias: {
-        "@": path.resolve(__dirname, "./@"),
+        "@": path.resolve(import.meta.dirname, "./@"),
       },
     },
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./@"),
+        "@": path.resolve(import.meta.dirname, "./@"),
       },
     },
   }),

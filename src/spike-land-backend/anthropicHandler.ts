@@ -146,7 +146,7 @@ export async function handleAnthropicRequest(originalRequest: Request, env: Env)
           console.error("[Anthropic Proxy] API Error Response:", errorBody);
         }
       } catch (_e) {
-        // Ignore
+        // Ignore — best-effort read of error body; the outer error is thrown regardless
       }
       throw new Error(
         `ANTHROPIC API responded with status: ${request.url} ${response.status}${errorDetails}`,

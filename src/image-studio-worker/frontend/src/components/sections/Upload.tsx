@@ -39,7 +39,9 @@ export function Upload() {
         const data = parseToolResult<{ albums: Array<{ handle: string; name: string }> }>(res);
         setAlbums(data.albums || []);
       })
-      .catch(() => {});
+      .catch((err) => {
+        console.error("Failed to load album list:", err);
+      });
   }, []);
 
   const handleFile = (f: FileData) => {

@@ -16,6 +16,9 @@ export interface Env {
   GEMINI_API_KEY: string;
   ELEVENLABS_API_KEY: string;
 
+  // Vault
+  VAULT_SECRET: string; // Server-side pepper for vault encryption (PBKDF2 input)
+
   // App config
   APP_ENV: string;
   SPIKE_LAND_URL: string; // https://spike.land

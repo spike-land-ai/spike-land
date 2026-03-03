@@ -267,19 +267,4 @@ export type StreamChunk =
   | StreamErrorChunk
   | StreamFinishChunk;
 
-/**
- * Default CORS headers for responses
- */
-export const DEFAULT_CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "https://spike.land",
-  "Content-Type": "application/json; charset=UTF-8",
-};
-
-/**
- * Preflight CORS headers for OPTIONS requests
- */
-export const PREFLIGHT_CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "https://spike.land",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
+export { DEFAULT_CORS_HEADERS, PREFLIGHT_CORS_HEADERS } from "../utils";

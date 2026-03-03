@@ -34,7 +34,17 @@ version.get("/api/version", async (c) => {
     cursor = listing.truncated ? listing.cursor : undefined;
   } while (cursor);
 
-  return c.json({ sha, buildTime, assets });
+  // Extract available rollback SHAs from builds/ prefix
+  const rollbackShas = [
+    ...new Set(
+      assets
+        .filter((a) => a.key.startsWith("builds/"))
+        .map((a) => a.key.split("/")[1])
+        .filter(Boolean),
+    ),
+  ];
+
+  return c.json({ sha, buildTime, rollbackShas, assets });
 });
 
 export { version };

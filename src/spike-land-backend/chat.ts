@@ -100,8 +100,6 @@ const main = {
       });
     }
 
-    //   "files.json": async () => handleFilesJson(),
-
     const logger = new KVLogger("myapp", env.KV);
 
     await env.KV.put("lastRequest", request.url);
@@ -151,16 +149,6 @@ const main = {
           "Content-Type": "application/javascript",
         },
       });
-
-      // return await env.ESBUILD.fetch({
-      //   body,
-      //   method: "POST",
-      //   headers: {
-      //     "TR_ORIGIN": url.origin,
-      //   }
-
-      // }
-      // );
     }
     if (url.pathname === "/ASSET_MANIFEST") {
       return new Response(ASSET_MANIFEST as unknown as string, {
@@ -171,20 +159,19 @@ const main = {
     }
 
     if (url.pathname === serverFetchUrl) {
-      // export const handleEnhancedFetch = async (request: Request) => {
-      // try {
       const optionsParam = (await request.json()) as RequestInit & {
         url: string;
       };
 
-      // Perform the fetch
-      // const res = await fetch(optionsParam.url, optionsParam);
-
-      // // Clone the response
-      // const response = res.clone();
-      // const body = await res.blob();
-      return fetch(optionsParam.url, optionsParam) as unknown as Response;
-      // return handleEnhancedFetch(request);
+      try {
+        return await fetch(optionsParam.url, optionsParam);
+      } catch (error) {
+        console.error("serverFetchUrl fetch failed:", error);
+        return new Response(JSON.stringify({ error: "Fetch failed" }), {
+          status: 502,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
     }
 
     if (request.url.includes("anthropic")) {
@@ -278,22 +265,6 @@ const main = {
     if (request.url.includes("/api/my-turn")) {
       return generateTURNCredentials(env.CF_REAL_TURN_TOKEN);
     }
-
-    // ctx.waitUntil(logger.log(`Request for ${request.url}`));
-
-    // const cache = caches.default;
-
-    // const mightAsset = url.pathname.slice(1);
-    // const cacheKey = new Request(new URL(files[mightAsset] || mightAsset, url.origin).toString(), request.clone());
-    // const cachedResponse = await cache.match(cacheKey);
-    // if (cachedResponse) {
-    //   return makeResponse(cachedResponse as any, mightAsset);
-    // }
-
-    // const resp =await handleMainFetch(request, env, ctx);
-    // if (resp && resp.status === 200 && resp.headers.get('cache-control')?.includes('public')) {
-    //   ctx.waitUntil(cache.put(cacheKey,  new Response(resp.clone().body, resp)))
-    // }
 
     return handleMainFetch(request, env, ctx);
   },

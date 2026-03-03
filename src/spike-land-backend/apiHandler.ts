@@ -72,7 +72,8 @@ export async function handleApiRequest(
 
         try {
           return (await fetch(url, options)) as unknown as Response;
-        } catch (_error) {
+        } catch (error) {
+          console.error("[apiHandler] Server-side fetch failed:", error);
           return new Response("Server-side fetch failed", { status: 500 });
         }
       } else {
