@@ -72,15 +72,13 @@ function makeDb(overrides: Partial<ImageStudioDeps["db"]> = {}): ImageStudioDeps
     albumUpdate: vi.fn().mockResolvedValue(makeAlbumRow()),
     albumDelete: vi.fn().mockResolvedValue(undefined),
     albumMaxSortOrder: vi.fn().mockResolvedValue(0),
-    albumImageAdd: vi
-      .fn()
-      .mockResolvedValue({
-        id: "ai-1",
-        albumId: "alb-1",
-        imageId: "img-1",
-        sortOrder: 0,
-        addedAt: new Date(),
-      }),
+    albumImageAdd: vi.fn().mockResolvedValue({
+      id: "ai-1",
+      albumId: "alb-1",
+      imageId: "img-1",
+      sortOrder: 0,
+      addedAt: new Date(),
+    }),
     albumImageRemove: vi.fn().mockResolvedValue(1),
     albumImageReorder: vi.fn().mockResolvedValue(undefined),
     albumImageList: vi.fn().mockResolvedValue([]),
@@ -135,22 +133,18 @@ function makeDeps(overrides: Partial<ImageStudioDeps> = {}): ImageStudioDeps {
     storage: makeStorage(),
     credits: makeCredits(),
     generation: {
-      generate: vi
-        .fn()
-        .mockResolvedValue({
-          url: "https://example.com/gen.png",
-          width: 512,
-          height: 512,
-          sizeBytes: 5000,
-        }),
-      edit: vi
-        .fn()
-        .mockResolvedValue({
-          url: "https://example.com/edited.png",
-          width: 512,
-          height: 512,
-          sizeBytes: 5000,
-        }),
+      generate: vi.fn().mockResolvedValue({
+        url: "https://example.com/gen.png",
+        width: 512,
+        height: 512,
+        sizeBytes: 5000,
+      }),
+      edit: vi.fn().mockResolvedValue({
+        url: "https://example.com/edited.png",
+        width: 512,
+        height: 512,
+        sizeBytes: 5000,
+      }),
     } as unknown as ImageStudioDeps["generation"],
     resolvers: {} as ImageStudioDeps["resolvers"],
     nanoid: () => "test-nanoid-id",
