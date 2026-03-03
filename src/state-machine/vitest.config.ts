@@ -12,7 +12,6 @@ export default mergeConfig(
           "src/cli.ts",
           "src/index.ts",
           "src/types.ts",
-          "src/user-test.ts",
         ],
       },
     },
