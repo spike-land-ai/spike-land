@@ -3,6 +3,7 @@ import { jsonSchema as aiJsonSchema, streamText, tool } from "ai";
 import type { ModelMessage, Tool } from "ai";
 import type { Code } from "../chatRoom";
 import type Env from "../env";
+import { hashClientId, sendGA4Events } from "../lib/ga4";
 import type { McpTool } from "../mcp";
 import { StorageService } from "../services/storageService";
 import type {
@@ -160,6 +161,21 @@ export class PostHandler {
 
       const codeSpace = this.code.getSession().codeSpace;
       const messages = this.convertMessages(body.messages as MessageWithParts[]);
+
+      // Track ai_message_request event (fire-and-forget)
+      if (this.env.GA_MEASUREMENT_ID && this.env.GA_API_SECRET) {
+        hashClientId(codeSpace).then((clientId) =>
+          sendGA4Events(this.env.GA_MEASUREMENT_ID, this.env.GA_API_SECRET, clientId, [
+            {
+              name: "ai_message_request",
+              params: {
+                code_space: codeSpace,
+                request_id: requestId,
+              },
+            },
+          ]),
+        ).catch(() => {});
+      }
 
       await this.storageService.saveRequestBody(codeSpace, body);
 

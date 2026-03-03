@@ -321,6 +321,7 @@ export class Code implements DurableObject {
     this.wsHandler = new WebSocketHandler(this, this.state);
     this.routeHandler = new RouteHandler(this);
     this.mcpServer = new McpServer(this);
+    this.mcpServer.setEnv(this.env);
   }
 
   getMcpServer() {

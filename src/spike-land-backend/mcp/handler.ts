@@ -1,5 +1,7 @@
 import type { ICodeSession } from "@spike-land-ai/code";
 import type { Code } from "../chatRoom";
+import type Env from "../env";
+import { hashClientId, sendGA4Events } from "../lib/ga4";
 import {
   applyLineEdits,
   editTools,
@@ -66,7 +68,13 @@ export class McpHandler {
     },
   ];
 
+  private env: Env | null = null;
+
   constructor(private durableObject: Code) {}
+
+  setEnv(env: Env): void {
+    this.env = env;
+  }
 
   private async getSessionForCodeSpace(codeSpace: string): Promise<ICodeSession> {
     const currentSession = this.durableObject.getSession();
@@ -321,6 +329,31 @@ export class McpHandler {
     }
   }
 
+  private trackToolCall(
+    toolName: string,
+    codeSpace: string,
+    durationMs: number,
+    success: boolean,
+  ): void {
+    if (!this.env?.GA_MEASUREMENT_ID || !this.env?.GA_API_SECRET) {
+      return;
+    }
+    const env = this.env;
+    hashClientId(codeSpace).then((clientId) =>
+      sendGA4Events(env.GA_MEASUREMENT_ID, env.GA_API_SECRET, clientId, [
+        {
+          name: "backend_tool_call",
+          params: {
+            tool_name: toolName,
+            code_space: codeSpace,
+            duration_ms: durationMs,
+            success: String(success),
+          },
+        },
+      ]),
+    ).catch(() => {});
+  }
+
   public async executeTool(
     toolName: string,
     args: Record<string, unknown>,
@@ -329,6 +362,8 @@ export class McpHandler {
     if (!requestedCodeSpace) {
       throw new Error(`codeSpace parameter is required for tool '${toolName}'`);
     }
+
+    const startTime = Date.now();
 
     const session = await this.getSessionForCodeSpace(requestedCodeSpace);
 
@@ -342,6 +377,7 @@ export class McpHandler {
 
     let result: Record<string, unknown>;
 
+    try {
     switch (toolName) {
       case "read_code":
         result = executeReadCode(session, requestedCodeSpace);
@@ -464,6 +500,8 @@ export class McpHandler {
         throw new Error(`Unknown tool: ${toolName}`);
     }
 
+    this.trackToolCall(toolName, requestedCodeSpace, Date.now() - startTime, true);
+
     return {
       content: [
         {
@@ -472,6 +510,10 @@ export class McpHandler {
         },
       ],
     };
+    } catch (error) {
+      this.trackToolCall(toolName, requestedCodeSpace, Date.now() - startTime, false);
+      throw error;
+    }
   }
 
   addTool(tool: Tool): void {

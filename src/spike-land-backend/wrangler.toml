@@ -12,6 +12,9 @@ compatibility_date = "2025-07-12"
 
 logpush = true
 
+[vars]
+GA_MEASUREMENT_ID = "G-9WNEM9ZHE7"
+
 services = []
 
 kv_namespaces = [
