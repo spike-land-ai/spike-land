@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
-import type { ImageStudioDeps } from "@spike-land-ai/mcp-image-studio";
+import type { ImageStudioDeps, ImageId, AlbumHandle } from "@spike-land-ai/mcp-image-studio";
 import { createD1Credits } from "./deps/credits.ts";
-import { createD1Db } from "./deps/db.ts";
+import { createD1Db, getOrCreateDefaultAlbum, galleryRecentImages, addImageToDefaultAlbum } from "./deps/db.ts";
 import { createGeminiGeneration } from "./deps/generation.ts";
 import { nanoid } from "./deps/nanoid.ts";
 import { createResolvers } from "./deps/resolvers.ts";
@@ -20,7 +20,7 @@ app.use(
   "*",
   cors({
     origin: (origin) => origin || "*",
-    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization", "Mcp-Session-Id", "Mcp-Protocol-Version", "X-Gemini-Key", "X-Text-Model", "X-Image-Model", "X-Thinking-Budget"],
     exposeHeaders: ["Mcp-Session-Id"],
     credentials: true,
@@ -28,6 +28,21 @@ app.use(
 );
 
 // Provide R2 image fetching (public)
+app.on("HEAD", "/r2/:key", async (c) => {
+  const key = c.req.param("key");
+  const obj = await c.env.IMAGE_R2.head(key);
+  if (!obj) return c.notFound();
+  return new Response(null, {
+    headers: {
+      "Content-Type": obj.httpMetadata?.contentType ?? "application/octet-stream",
+      "Content-Length": String(obj.size),
+      "ETag": obj.etag,
+      ...(obj.customMetadata?.width ? { "X-Image-Width": obj.customMetadata.width } : {}),
+      ...(obj.customMetadata?.height ? { "X-Image-Height": obj.customMetadata.height } : {}),
+    },
+  });
+});
+
 app.get("/r2/:key", async (c) => {
   const key = c.req.param("key");
   const obj = await c.env.IMAGE_R2.get(key);
@@ -35,8 +50,9 @@ app.get("/r2/:key", async (c) => {
   return new Response(obj.body, {
     headers: {
       "Content-Type": obj.httpMetadata?.contentType ?? "application/octet-stream",
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": "public, max-age=31536000, immutable",
       "Access-Control-Allow-Origin": "*",
+      "ETag": obj.etag,
     },
   });
 });
@@ -49,8 +65,9 @@ app.get("/:userId/:filename{.+\\.\\w+$}", async (c) => {
   return new Response(obj.body, {
     headers: {
       "Content-Type": obj.httpMetadata?.contentType ?? "application/octet-stream",
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": "public, max-age=31536000, immutable",
       "Access-Control-Allow-Origin": "*",
+      "ETag": obj.etag,
     },
   });
 });
@@ -169,6 +186,201 @@ app.post("/api/tool", async (c) => {
   return c.json({ result });
 });
 
+// ─── Gallery API Routes ───
+
+// GET /api/gallery — user's default gallery with cursor-based pagination
+app.get("/api/gallery", async (c) => {
+  const { userId } = await buildDeps(c);
+  const cursor = c.req.query("cursor");
+  const limit = parseInt(c.req.query("limit") ?? "50", 10);
+  const search = c.req.query("search");
+  const tag = c.req.query("tag");
+
+  const result = await galleryRecentImages(c.env.IMAGE_DB, userId, { cursor, limit, search, tag });
+  const album = await getOrCreateDefaultAlbum(c.env.IMAGE_DB, userId);
+
+  return c.json({
+    album: { id: album.id, handle: album.handle, name: "My Gallery" },
+    images: result.images,
+    nextCursor: result.nextCursor,
+  });
+});
+
+// GET /api/gallery/albums — list user's albums
+app.get("/api/gallery/albums", async (c) => {
+  const { userId, deps } = await buildDeps(c);
+  const albums = await deps.db.albumFindMany({ userId });
+  return c.json({ albums });
+});
+
+// GET /api/gallery/album/:id — album detail with images
+app.get("/api/gallery/album/:id", async (c) => {
+  const albumId = c.req.param("id");
+  const { deps } = await buildDeps(c);
+  const album = await deps.db.albumFindById(albumId);
+  if (!album) return c.json({ error: "Album not found" }, 404);
+
+  const images = await deps.db.albumImageList(album.id);
+  return c.json({ album, images });
+});
+
+// POST /api/gallery/upload — multipart upload → R2 + D1 + default album
+app.post("/api/gallery/upload", async (c) => {
+  const { userId, deps } = await buildDeps(c);
+  const formData = await c.req.formData();
+  const file = formData.get("file") as File | null;
+  if (!file) return c.json({ error: "Missing file" }, 400);
+
+  const name = (formData.get("name") as string) || file.name;
+  const tagsRaw = formData.get("tags") as string | null;
+  const tags: string[] = tagsRaw ? JSON.parse(tagsRaw) : [];
+  const albumId = formData.get("albumId") as string | null;
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+
+  // Upload to R2
+  const baseUrl = new URL(c.req.url).origin;
+  const storage = createR2Storage(c.env, baseUrl);
+  const uploadResult = await storage.upload(userId, bytes, {
+    filename: file.name,
+    contentType: file.type,
+  });
+
+  // Create D1 image record
+  const image = await deps.db.imageCreate({
+    userId,
+    name,
+    description: null,
+    originalUrl: uploadResult.url,
+    originalR2Key: uploadResult.r2Key,
+    originalWidth: 0,
+    originalHeight: 0,
+    originalSizeBytes: uploadResult.sizeBytes,
+    originalFormat: file.type.split("/")[1] || "unknown",
+    isPublic: false,
+    tags,
+    shareToken: null,
+  });
+
+  // Add to default album (or specified album)
+  if (albumId) {
+    const maxSort = await deps.db.albumImageMaxSortOrder(albumId);
+    await deps.db.albumImageAdd(albumId, image.id, maxSort + 1);
+  } else {
+    await addImageToDefaultAlbum(c.env.IMAGE_DB, userId, image.id);
+  }
+
+  return c.json({
+    image,
+    url: uploadResult.url,
+  });
+});
+
+// DELETE /api/gallery/image/:id — remove from gallery
+app.delete("/api/gallery/image/:id", async (c) => {
+  const imageId = c.req.param("id");
+  const { userId, deps } = await buildDeps(c);
+
+  const image = await deps.db.imageFindById(imageId as ImageId);
+  if (!image) return c.json({ error: "Image not found" }, 404);
+  if (image.userId !== userId) return c.json({ error: "Unauthorized" }, 403);
+
+  // Delete from R2
+  if (image.originalR2Key) {
+    await deps.storage.delete(image.originalR2Key);
+  }
+  // Delete from D1 (cascades to album_images)
+  await deps.db.imageDelete(imageId as ImageId);
+
+  return c.json({ success: true });
+});
+
+// POST /api/gallery/album — create new album
+app.post("/api/gallery/album", async (c) => {
+  const { userId, deps } = await buildDeps(c);
+  const body = await c.req.json<{ name: string; description?: string; privacy?: string }>();
+  if (!body.name) return c.json({ error: "Missing album name" }, 400);
+
+  const maxSort = await deps.db.albumMaxSortOrder(userId);
+  const handle = `${body.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30)}-${nanoid().slice(0, 6)}`;
+
+  const album = await deps.db.albumCreate({
+    handle: handle as AlbumHandle,
+    userId,
+    name: body.name,
+    description: body.description ?? null,
+    coverImageId: null,
+    privacy: (body.privacy as "PUBLIC" | "PRIVATE" | "UNLISTED") ?? "PRIVATE",
+    defaultTier: "FREE" as const,
+    shareToken: null,
+    sortOrder: maxSort + 1,
+    pipelineId: null,
+  });
+
+  return c.json({ album });
+});
+
+// POST /api/gallery/album/:id/images — add images to album
+app.post("/api/gallery/album/:id/images", async (c) => {
+  const albumId = c.req.param("id");
+  const { deps } = await buildDeps(c);
+  const body = await c.req.json<{ imageIds: string[] }>();
+  if (!body.imageIds?.length) return c.json({ error: "Missing imageIds" }, 400);
+
+  const album = await deps.db.albumFindById(albumId);
+  if (!album) return c.json({ error: "Album not found" }, 404);
+
+  let maxSort = await deps.db.albumImageMaxSortOrder(albumId);
+  const added: string[] = [];
+  for (const imageId of body.imageIds) {
+    const result = await deps.db.albumImageAdd(albumId, imageId as ImageId, maxSort + 1);
+    if (result) {
+      added.push(imageId);
+      maxSort++;
+    }
+  }
+
+  return c.json({ added, albumId });
+});
+
+// DELETE /api/gallery/album/:id/images — remove images from album
+app.delete("/api/gallery/album/:id/images", async (c) => {
+  const albumId = c.req.param("id");
+  const { deps } = await buildDeps(c);
+  const body = await c.req.json<{ imageIds: string[] }>();
+  if (!body.imageIds?.length) return c.json({ error: "Missing imageIds" }, 400);
+
+  const album = await deps.db.albumFindById(albumId);
+  if (!album) return c.json({ error: "Album not found" }, 404);
+
+  await deps.db.albumImageRemove(albumId, body.imageIds as ImageId[]);
+  return c.json({ removed: body.imageIds, albumId });
+});
+
+// PATCH /api/gallery/album/:id — update album metadata (name, description, privacy, coverImageId)
+app.patch("/api/gallery/album/:id", async (c) => {
+  const albumId = c.req.param("id");
+  const { deps } = await buildDeps(c);
+  const body = await c.req.json<{
+    name?: string;
+    description?: string;
+    privacy?: string;
+    coverImageId?: string | null;
+  }>();
+
+  const album = await deps.db.albumFindById(albumId);
+  if (!album) return c.json({ error: "Album not found" }, 404);
+
+  const updated = await deps.db.albumUpdate(album.handle as AlbumHandle, {
+    name: body.name,
+    description: body.description,
+    privacy: body.privacy as "PUBLIC" | "PRIVATE" | "UNLISTED" | undefined,
+    coverImageId: (body.coverImageId as ImageId | null | undefined),
+  });
+
+  return c.json({ album: updated });
+});
+
 // Chat agent endpoint
 app.post("/api/chat", async (c) => {
   try {
@@ -201,6 +413,151 @@ app.post("/api/chat", async (c) => {
     console.error("Chat endpoint error:", msg);
     return c.json({ error: msg }, 500);
   }
+});
+
+// ── Gallery API Routes ──
+
+app.get("/api/gallery", async (c) => {
+  const { userId } = await buildDeps(c);
+  const cursor = c.req.query("cursor");
+  const limit = c.req.query("limit") ? Number(c.req.query("limit")) : undefined;
+  const search = c.req.query("search");
+  const tag = c.req.query("tag");
+
+  const result = await galleryRecentImages(c.env.IMAGE_DB, userId, { cursor, limit, search, tag });
+  const defaultAlbum = await getOrCreateDefaultAlbum(c.env.IMAGE_DB, userId);
+
+  return c.json({ ...result, defaultAlbum });
+});
+
+app.get("/api/gallery/albums", async (c) => {
+  const { userId, deps } = await buildDeps(c);
+  const limit = c.req.query("limit") ? Number(c.req.query("limit")) : undefined;
+  const albums = await deps.db.albumFindMany({ userId, limit });
+
+  // Enrich with coverUrl: resolve cover image URL or fall back to first album image
+  const enriched = await Promise.all(
+    albums.map(async (album) => {
+      let coverUrl: string | null = null;
+      if (album.coverImageId) {
+        const img = await deps.db.imageFindById(album.coverImageId);
+        coverUrl = img?.originalUrl ?? null;
+      }
+      if (!coverUrl) {
+        const firstImages = await deps.db.albumImageList(album.id);
+        coverUrl = firstImages[0]?.image.originalUrl ?? null;
+      }
+      return { ...album, coverUrl };
+    }),
+  );
+
+  return c.json({ albums: enriched });
+});
+
+app.get("/api/gallery/album/:id", async (c) => {
+  const { deps } = await buildDeps(c);
+  const id = c.req.param("id");
+  const album = await deps.db.albumFindById(id);
+  if (!album) return c.json({ error: "Album not found" }, 404);
+
+  const images = await deps.db.albumImageList(album.id);
+  return c.json({ album, images });
+});
+
+app.post("/api/gallery/upload", async (c) => {
+  const { userId, deps } = await buildDeps(c);
+
+  const formData = await c.req.formData();
+  const file = formData.get("file") as File | null;
+  if (!file) return c.json({ error: "No file provided" }, 400);
+
+  const name = formData.get("name") as string | null || file.name;
+  const description = formData.get("description") as string | null || null;
+  const tagsRaw = formData.get("tags") as string | null;
+  const tags: string[] = tagsRaw ? JSON.parse(tagsRaw) : [];
+
+  const bytes = new Uint8Array(await file.arrayBuffer());
+
+  const uploaded = await deps.storage.upload(userId, bytes, {
+    filename: file.name,
+    contentType: file.type || "application/octet-stream",
+  });
+
+  const image = await deps.db.imageCreate({
+    userId,
+    name,
+    description,
+    originalUrl: uploaded.url,
+    originalR2Key: uploaded.r2Key,
+    originalWidth: 0,
+    originalHeight: 0,
+    originalSizeBytes: uploaded.sizeBytes,
+    originalFormat: file.type || "unknown",
+    isPublic: false,
+    tags,
+    shareToken: null,
+  });
+
+  await addImageToDefaultAlbum(c.env.IMAGE_DB, userId, image.id);
+
+  return c.json({ image }, 201);
+});
+
+app.delete("/api/gallery/image/:id", async (c) => {
+  const { userId, deps } = await buildDeps(c);
+  const id = c.req.param("id");
+
+  const image = await deps.db.imageFindById(id);
+  if (!image) return c.json({ error: "Image not found" }, 404);
+  if (image.userId !== userId) return c.json({ error: "Forbidden" }, 403);
+
+  await deps.storage.delete(image.originalR2Key);
+  await deps.db.imageDelete(id);
+
+  return c.json({ ok: true });
+});
+
+app.post("/api/gallery/album", async (c) => {
+  const { userId, deps } = await buildDeps(c);
+  const body = await c.req.json<{ name: string; description?: string; privacy?: string; defaultTier?: string }>();
+  if (!body.name) return c.json({ error: "Missing album name" }, 400);
+
+  const maxSort = await deps.db.albumMaxSortOrder(userId);
+  const handle = `album-${userId.slice(0, 8)}-${nanoid().slice(0, 6)}`;
+
+  const album = await deps.db.albumCreate({
+    handle,
+    userId,
+    name: body.name,
+    description: body.description ?? null,
+    coverImageId: null,
+    privacy: (body.privacy as "PRIVATE" | "PUBLIC" | "UNLISTED") ?? "PRIVATE",
+    defaultTier: (body.defaultTier as "FREE" | "BASIC" | "PRO" | "ULTRA") ?? "FREE",
+    shareToken: null,
+    sortOrder: maxSort + 1,
+    pipelineId: null,
+  });
+
+  return c.json({ album }, 201);
+});
+
+app.post("/api/gallery/album/:id/images", async (c) => {
+  const { deps } = await buildDeps(c);
+  const albumId = c.req.param("id");
+  const body = await c.req.json<{ imageIds: string[] }>();
+  if (!body.imageIds?.length) return c.json({ error: "Missing imageIds" }, 400);
+
+  const album = await deps.db.albumFindById(albumId);
+  if (!album) return c.json({ error: "Album not found" }, 404);
+
+  let maxSort = await deps.db.albumImageMaxSortOrder(albumId);
+  let added = 0;
+  for (const imageId of body.imageIds) {
+    const result = await deps.db.albumImageAdd(albumId, imageId, ++maxSort);
+    if (result) added++;
+  }
+
+  return c.json({ added });
 });
 
 // MCP SSE Transport

@@ -11,7 +11,15 @@ export function createR2Storage(env: Env, baseUrl: string): ImageStudioDeps["sto
       const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
 
       await env.IMAGE_R2.put(key, bytes, {
-        httpMetadata: { contentType: opts.contentType },
+        httpMetadata: {
+          contentType: opts.contentType,
+          cacheControl: "public, max-age=31536000, immutable",
+        },
+        customMetadata: {
+          userId,
+          contentType: opts.contentType,
+          uploadedAt: new Date().toISOString(),
+        },
       });
 
       return {

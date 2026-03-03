@@ -1,3 +1,28 @@
+// Re-export shared types for frontend use
+export type {
+  GalleryImage,
+  GalleryAlbum,
+  GalleryPage,
+  AlbumPage,
+  AlbumDetailPage,
+  UploadResponse,
+  ChatMessagePayload,
+  SSEEventData,
+  TextDeltaEvent,
+  ToolCallStartEvent,
+  ToolCallEndEvent,
+  BrowserCommandEvent,
+  GalleryUpdateEvent,
+  GalleryQueryParams,
+  CreateAlbumRequest,
+  AddImagesToAlbumRequest,
+  ToolInfo,
+  ToolCallRequest,
+  ToolCallResponse,
+} from "../../shared-types";
+
+// Frontend-only types
+
 export interface ImageData {
   id: string;
   name: string;
