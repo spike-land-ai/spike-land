@@ -3,6 +3,7 @@ import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import type { BlogPost } from "../../core/types";
+import { BlogListView } from "./BlogList";
 
 /**
  * Convert self-closing JSX/HTML tags for custom components to explicit
@@ -76,12 +77,11 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
     </div>
   ),
   callout: ({ children, type }: { children?: React.ReactNode; type?: string }) => (
-    <div className={`p-4 my-6 rounded-xl border ${
-      type === 'info' ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 text-blue-900 dark:text-blue-100' :
-      type === 'success' ? 'bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-800 text-green-900 dark:text-green-100' :
-      type === 'warning' ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/30 dark:border-amber-800 text-amber-900 dark:text-amber-100' :
-      'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700'
-    }`}>
+    <div className={`p-4 my-6 rounded-xl border ${type === 'info' ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 text-blue-900 dark:text-blue-100' :
+        type === 'success' ? 'bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-800 text-green-900 dark:text-green-100' :
+          type === 'warning' ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/30 dark:border-amber-800 text-amber-900 dark:text-amber-100' :
+            'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700'
+      }`}>
       {children}
     </div>
   ),
@@ -227,6 +227,13 @@ export function BlogPostView({ slug, linkComponent }: { slug: string; linkCompon
       </div>
 
       <SupportBanner title={post.title} slug={post.slug} />
+
+      <div className="mt-16 pt-8 border-t border-border">
+        <h2 className="text-2xl font-display font-bold text-foreground mb-8 text-center">
+          More from the blog
+        </h2>
+        <BlogListView linkComponent={linkComponent} limit={3} showHeader={false} />
+      </div>
     </article>
   );
 }

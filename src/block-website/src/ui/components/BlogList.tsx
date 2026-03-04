@@ -28,7 +28,7 @@ function CardImage({ post, className = "" }: { post: BlogMeta; className?: strin
           alt={post.title}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-auto transition-transform duration-300 group-hover:scale-105"
         />
       </div>
     );
@@ -47,7 +47,7 @@ function CardImage({ post, className = "" }: { post: BlogMeta; className?: strin
 function FeaturedCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.ComponentType<{ to: string; className?: string; children?: React.ReactNode }> | "a" }) {
   return (
     <article className="group relative bg-card rounded-2xl border border-border shadow-sm hover:border-primary/40 hover:shadow-lg transition-all duration-200 overflow-hidden mb-6">
-      <CardImage post={post} className="aspect-[21/9] rounded-t-2xl" />
+      <CardImage post={post} className={post.heroImage ? "rounded-t-2xl" : "aspect-[21/9] rounded-t-2xl"} />
       <div className="p-5 sm:p-6">
         <div className="flex items-center gap-x-3 text-xs font-medium tracking-wider uppercase mb-2">
           {post.category && <span className="text-primary">{post.category}</span>}
@@ -80,7 +80,7 @@ function FeaturedCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.Comp
 function BlogCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.ComponentType<{ to: string; className?: string; children?: React.ReactNode }> | "a" }) {
   return (
     <article className="group relative bg-card rounded-2xl border border-border shadow-sm hover:border-primary/40 hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col">
-      <CardImage post={post} className="aspect-[16/9] rounded-t-2xl" />
+      <CardImage post={post} className={post.heroImage ? "rounded-t-2xl" : "aspect-[16/9] rounded-t-2xl"} />
       <div className="p-4 sm:p-5 flex flex-col flex-1">
         <div className="flex items-center gap-x-3 text-xs font-medium tracking-wider uppercase mb-2">
           {post.category && <span className="text-primary">{post.category}</span>}
