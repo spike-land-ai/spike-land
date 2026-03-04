@@ -41,12 +41,15 @@ spa.get("/*", async (c) => {
     }, { ttl, swr: isImmutable ? undefined : 3600, immutable: isImmutable });
 
     if (cached) return cached;
+
+    // Static asset not in cache and not in R2 — return 404, never serve index.html
+    return c.text("Not Found", 404);
   }
 
-  const object = hasExtension ? null : await c.env.SPA_ASSETS.get(key);
+  const object = await c.env.SPA_ASSETS.get(key);
 
   if (!object) {
-    // SPA fallback: serve index.html for non-file paths
+    // SPA fallback: serve index.html for non-file paths (navigation routes only)
     const fallback = await c.env.SPA_ASSETS.get("index.html");
     if (!fallback) {
       return c.text("Not Found", 404);

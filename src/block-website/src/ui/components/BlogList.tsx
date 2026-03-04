@@ -132,34 +132,34 @@ export function BlogListView({ linkComponent, limit, showHeader = true }: { link
 
   if (loading) {
     return (
-      <div className={showHeader ? "max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8 font-sans" : "font-sans"}>
+      <div className={showHeader ? "max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 font-sans" : "font-sans"}>
         {showHeader && (
-          <div className="text-center max-w-2xl mx-auto mb-8">
-            <h1 className="text-2xl font-display font-extrabold text-foreground tracking-tight sm:text-3xl mb-3">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h1 className="text-3xl font-display font-extrabold text-foreground tracking-tight sm:text-4xl mb-4">
               The Spike.land Blog
             </h1>
-            <p className="text-base text-muted-foreground font-light">
+            <p className="text-lg text-muted-foreground font-light">
               Thoughts on AI agents, Cloudflare Workers, and the future of coding.
             </p>
           </div>
         )}
         {/* Skeleton: featured card */}
-        <div className="animate-pulse bg-card rounded-2xl border border-border overflow-hidden mb-6">
+        <div className="animate-pulse bg-card rounded-2xl border border-border overflow-hidden mb-8">
           <div className="aspect-[21/9] bg-muted" />
-          <div className="p-5">
-            <div className="h-3 bg-muted rounded w-1/4 mb-3" />
-            <div className="h-7 bg-muted rounded w-3/4 mb-3" />
+          <div className="p-6">
+            <div className="h-4 bg-muted rounded w-1/4 mb-4" />
+            <div className="h-8 bg-muted rounded w-3/4 mb-4" />
             <div className="h-4 bg-muted rounded w-1/2" />
           </div>
         </div>
         {/* Skeleton: grid cards */}
-        <div className="grid gap-6 sm:grid-cols-2">
-          {Array.from({ length: (limit ?? 4) - 1 }).map((_, i) => (
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: (limit ?? 6) - 1 }).map((_, i) => (
             <div key={i} className="animate-pulse bg-card rounded-2xl border border-border overflow-hidden">
               <div className="aspect-[16/9] bg-muted" />
-              <div className="p-4">
-                <div className="h-3 bg-muted rounded w-1/4 mb-3" />
-                <div className="h-6 bg-muted rounded w-3/4 mb-3" />
+              <div className="p-5">
+                <div className="h-3 bg-muted rounded w-1/4 mb-4" />
+                <div className="h-6 bg-muted rounded w-3/4 mb-4" />
                 <div className="h-4 bg-muted rounded w-full" />
               </div>
             </div>
@@ -173,21 +173,21 @@ export function BlogListView({ linkComponent, limit, showHeader = true }: { link
   const [featured, ...rest] = posts;
 
   return (
-    <div className={showHeader ? "max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8 font-sans" : "font-sans"}>
+    <div className={showHeader ? "max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 font-sans" : "font-sans"}>
       {showHeader && (
-        <div className="text-center max-w-2xl mx-auto mb-8">
-          <h1 className="text-2xl font-display font-extrabold text-foreground tracking-tight sm:text-3xl mb-3">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h1 className="text-4xl font-display font-black text-foreground tracking-tight sm:text-5xl mb-4">
             The Spike.land Blog
           </h1>
-          <p className="text-base text-muted-foreground font-light">
-            Thoughts on AI agents, Cloudflare Workers, and the future of coding.
+          <p className="text-xl text-muted-foreground font-light leading-relaxed">
+            Thoughts on AI agents, Cloudflare Workers, and the future of technology.
           </p>
         </div>
       )}
 
       {featured && <FeaturedCard post={featured} LinkComp={LinkComp} />}
 
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {rest.map((post) => (
           <BlogCard key={post.slug} post={post} LinkComp={LinkComp} />
         ))}

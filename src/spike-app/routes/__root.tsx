@@ -132,34 +132,41 @@ export function RootLayout() {
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Mobile sidebar drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-card shadow-lg transition-transform lg:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 transform bg-card shadow-2xl transition-transform duration-300 ease-in-out lg:hidden ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } border-r border-border`}
       >
-        <div className="flex h-16 items-center justify-between border-b border-border px-6">
+        <div className="flex h-16 items-center justify-between border-b border-border px-6 bg-card sticky top-0">
           <Link to="/" className="text-xl font-bold hover:opacity-80" onClick={() => setSidebarOpen(false)}>spike.land</Link>
-          <ThemeSwitcher theme={theme} setTheme={setTheme} />
+          <div className="flex items-center gap-2">
+            <ThemeSwitcher theme={theme} setTheme={setTheme} />
+            <button onClick={() => setSidebarOpen(false)} className="p-2 -mr-2 rounded-full hover:bg-muted text-muted-foreground" aria-label="Close menu">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
-        <nav className="flex flex-col gap-1 p-4">
+        <nav className="flex flex-col gap-1 p-4 overflow-y-auto max-h-[calc(100vh-8rem)]">
           {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className="rounded-lg px-4 py-2 text-sm font-medium hover:bg-muted [&.active]:bg-accent [&.active]:text-primary"
+              className="flex items-center rounded-xl px-4 py-3 text-base font-medium transition-all hover:bg-muted active:scale-[0.98] [&.active]:bg-primary/10 [&.active]:text-primary"
               onClick={() => setSidebarOpen(false)}
             >
               {item.label}
             </Link>
           ))}
         </nav>
-        <div className="mt-auto border-t border-border p-4">
+        <div className="mt-auto border-t border-border p-6 bg-card sticky bottom-0">
           <LoginButton />
         </div>
       </aside>

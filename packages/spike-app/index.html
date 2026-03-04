@@ -29,7 +29,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300..900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300..900&display=swap" rel="stylesheet"></noscript>
   </head>
-  <body class="bg-[#111110] text-[#A3A19C] antialiased">
+  <body class="antialiased selection:bg-primary/30">
+    <script>
+      (function() {
+        try {
+          var theme = localStorage.getItem('theme-preference') || 'system';
+          var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.classList.toggle('dark', isDark);
+          document.body.style.backgroundColor = isDark ? '#09090b' : '#f9fafb';
+        } catch (e) {}
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="../../src/spike-app/main.tsx"></script>
   </body>

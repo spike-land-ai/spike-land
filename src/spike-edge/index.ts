@@ -16,6 +16,7 @@ import { bugbook } from "./routes/bugbook.js";
 import { blogComments } from "./routes/blog-comments.js";
 import { whatsapp } from "./routes/whatsapp.js";
 import { stripeWebhook } from "./routes/stripe-webhook.js";
+import { checkout } from "./routes/checkout.js";
 import { spa } from "./routes/spa.js";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -94,6 +95,9 @@ app.delete("/r2/*", authMiddleware);
 // Auth middleware for WhatsApp linking API (not webhook — that uses HMAC)
 app.use("/whatsapp/link/*", authMiddleware);
 
+// Auth middleware for checkout
+app.use("/api/checkout", authMiddleware);
+
 // Error handling middleware
 app.onError((err, c) => {
   console.error(`[spike-edge] ${c.req.method} ${c.req.path}:`, err.message);
@@ -120,6 +124,7 @@ app.route("/", bugbook);
 app.route("/", blogComments);
 app.route("/", whatsapp);
 app.route("/", stripeWebhook);
+app.route("/", checkout);
 
 // MCP tools listing proxy (public, no auth required)
 app.get("/mcp/tools", async (c) => {

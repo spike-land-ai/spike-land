@@ -3,9 +3,16 @@
   "compilerOptions": {
     "outDir": "./dist",
     "noEmit": false,
-    "declaration": true,
-    "declarationMap": true
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../../src/spike-app/*"],
+      "@spike-land-ai/block-website/ui": ["../../src/block-website/src/ui/index.ts"],
+      "@spike-land-ai/block-website/core": ["../../src/block-website/src/core/index.ts"],
+      "@spike-land-ai/block-website/mcp": ["../../src/block-website/src/mcp/index.ts"],
+      "@spike-land-ai/block-website": ["../../src/block-website/src/index.ts"],
+      "@spike-land-ai/shared": ["../../src/shared/index.ts"]
+    }
   },
-  "include": ["index.ts"],
+  "include": ["../../src/spike-app/**/*.ts", "../../src/spike-app/**/*.tsx"],
   "references": []
 }

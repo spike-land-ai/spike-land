@@ -48,7 +48,7 @@ export function registerBillingTools(registry: ToolRegistry, userId: string, db:
             `**Tier:** ${input.tier}\n` +
             `**User:** ${ctx.userId}\n\n` +
             `To complete checkout, visit:\n` +
-            `https://spike.land/api/checkout?tier=${input.tier}&success_url=${encodeURIComponent(successUrl)}&cancel_url=${encodeURIComponent(cancelUrl)}`,
+            `https://edge.spike.land/api/checkout?tier=${input.tier}&success_url=${encodeURIComponent(successUrl)}&cancel_url=${encodeURIComponent(cancelUrl)}`,
         );
       }),
   );

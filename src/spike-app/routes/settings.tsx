@@ -352,7 +352,28 @@ interface Grant {
 
 function BillingTab() {
   const [currentPlan] = useState<Plan>("free");
+  const [upgrading, setUpgrading] = useState(false);
   const grants: Grant[] = [];
+
+  async function handleUpgrade(tier: "pro" | "elite") {
+    setUpgrading(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier }),
+      });
+      if (!res.ok) {
+        const err = (await res.json()) as { error?: string };
+        alert(err.error ?? "Checkout failed");
+        return;
+      }
+      const data = (await res.json()) as { url: string };
+      window.location.href = data.url;
+    } finally {
+      setUpgrading(false);
+    }
+  }
 
   const usageStats = {
     messagesUsed: 42,
@@ -419,20 +440,24 @@ function BillingTab() {
       {/* Upgrade buttons */}
       <div className="flex flex-col gap-3 sm:flex-row">
         {currentPlan === "free" && (
-          <a
-            href="#stripe-pro"
-            className="flex-1 rounded-lg bg-blue-600 px-6 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700"
+          <button
+            type="button"
+            onClick={() => handleUpgrade("pro")}
+            disabled={upgrading}
+            className="flex-1 rounded-lg bg-blue-600 px-6 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            Upgrade to Pro — Coming Soon
-          </a>
+            {upgrading ? "Redirecting..." : "Upgrade to Pro — $19/mo"}
+          </button>
         )}
         {currentPlan !== "elite" && (
-          <a
-            href="#stripe-elite"
-            className="flex-1 rounded-lg bg-purple-600 px-6 py-2.5 text-center text-sm font-medium text-white hover:bg-purple-700"
+          <button
+            type="button"
+            onClick={() => handleUpgrade("elite")}
+            disabled={upgrading}
+            className="flex-1 rounded-lg bg-purple-600 px-6 py-2.5 text-center text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
           >
-            Upgrade to Elite — Coming Soon
-          </a>
+            {upgrading ? "Redirecting..." : "Upgrade to Elite — £90/mo"}
+          </button>
         )}
       </div>
     </div>

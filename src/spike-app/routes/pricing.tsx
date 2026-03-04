@@ -5,10 +5,12 @@ interface PricingFeature {
 interface PricingPlan {
   name: string;
   price: string;
+  period?: string;
   description: string;
   features: PricingFeature[];
   cta: string;
-  ctaHref: string;
+  tier?: "pro" | "elite";
+  ctaHref?: string;
   highlighted: boolean;
 }
 
@@ -29,7 +31,8 @@ const PLANS: PricingPlan[] = [
   },
   {
     name: "Pro",
-    price: "Coming soon",
+    price: "$19",
+    period: "/mo",
     description: "Unlock professional tools and higher limits.",
     features: [
       { text: "500 messages per day" },
@@ -39,12 +42,13 @@ const PLANS: PricingPlan[] = [
       { text: "Priority bug reporting" },
     ],
     cta: "Upgrade to Pro",
-    ctaHref: "#stripe-pro",
+    tier: "pro",
     highlighted: true,
   },
   {
     name: "Elite",
-    price: "Coming soon",
+    price: "£90",
+    period: "/mo",
     description: "Unlimited access and priority support for power users.",
     features: [
       { text: "Unlimited messages per day" },
@@ -54,12 +58,37 @@ const PLANS: PricingPlan[] = [
       { text: "Bug bounty eligibility" },
     ],
     cta: "Upgrade to Elite",
-    ctaHref: "#stripe-elite",
+    tier: "elite",
     highlighted: false,
   },
 ];
 
+async function handleCheckout(tier: "pro" | "elite") {
+  const res = await fetch("/api/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tier }),
+  });
+  if (!res.ok) {
+    const err = (await res.json()) as { error?: string };
+    alert(err.error ?? "Checkout failed");
+    return;
+  }
+  const data = (await res.json()) as { url: string };
+  window.location.href = data.url;
+}
+
 function PlanCard({ plan }: { plan: PricingPlan }) {
+  const isFree = plan.name === "Free";
+
+  const buttonClass = `mt-8 block w-full rounded-lg px-6 py-2.5 text-center text-sm font-semibold transition ${
+    plan.highlighted
+      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+      : isFree
+        ? "border border-border text-muted-foreground cursor-default"
+        : "bg-muted text-foreground hover:bg-muted/80"
+  }`;
+
   return (
     <div
       className={`flex flex-col rounded-2xl border p-6 shadow-sm ${
@@ -79,6 +108,7 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
 
       <div className="mt-4">
         <span className="text-3xl font-extrabold text-foreground">{plan.price}</span>
+        {plan.period && <span className="text-base text-muted-foreground">{plan.period}</span>}
       </div>
 
       <ul className="mt-6 flex-1 space-y-2">
@@ -98,18 +128,19 @@ function PlanCard({ plan }: { plan: PricingPlan }) {
         ))}
       </ul>
 
-      <a
-        href={plan.ctaHref}
-        className={`mt-8 block rounded-lg px-6 py-2.5 text-center text-sm font-semibold transition ${
-          plan.highlighted
-            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-            : plan.name === "Free"
-            ? "border border-border text-muted-foreground cursor-default"
-            : "bg-muted text-foreground hover:bg-muted/80"
-        }`}
-      >
-        {plan.cta}
-      </a>
+      {plan.tier ? (
+        <button
+          type="button"
+          onClick={() => handleCheckout(plan.tier!)}
+          className={buttonClass}
+        >
+          {plan.cta}
+        </button>
+      ) : (
+        <a href={plan.ctaHref} className={buttonClass}>
+          {plan.cta}
+        </a>
+      )}
     </div>
   );
 }
@@ -131,7 +162,7 @@ export function PricingPage() {
       </div>
 
       <p className="text-center text-sm text-muted-foreground">
-        Pricing and limits are subject to change. Pro and Elite plans launch soon.
+        Pricing and limits are subject to change.
       </p>
     </div>
   );
