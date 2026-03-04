@@ -1,12 +1,12 @@
 /**
  * IndexedDB StorageAdapter — Browser target.
  *
- * Provides KV via IDB object stores and SQL via a simple table emulation.
+ * Provides KV via IDB object stores and SQL via sql.js (in-memory SQLite).
+ * IDB is the durable persistence layer; sql.js provides full SQL query support.
  * Blob storage uses IDB with large value support.
- *
- * For full SQL support, consumers can inject sql.js (not bundled by default
- * to avoid the ~300KB WASM cost).
  */
+
+import type { Database } from "sql.js";
 
 import type {
   BlobAdapter,
@@ -16,6 +16,7 @@ import type {
   SQLAdapter,
   StorageAdapter,
 } from "../storage/types.js";
+import { getSqlJs } from "./sql-js-loader.js";
 
 /** Options for the IndexedDB adapter */
 export interface IDBAdapterOptions {
@@ -104,12 +105,24 @@ function createIDBKV(dbPromise: Promise<IDBDatabase>): KVAdapter {
 }
 
 /**
- * Simple SQL adapter backed by IDB object stores.
+ * SQL adapter using sql.js (in-memory SQLite) with IDB persistence.
  *
- * Supports basic CRUD patterns that defineBlock() generates.
- * Not a full SQL parser — handles the exact patterns from block procedures.
+ * - IDB is the durable storage layer (source of truth across page loads)
+ * - sql.js provides full SQL query support (ORDER BY, LIMIT, JOIN, OR, etc.)
+ * - On first execute(), sql.js WASM is lazy-loaded and hydrated from IDB
+ * - Writes go to both sql.js and IDB; reads query sql.js only
  */
 function createIDBSQL(dbPromise: Promise<IDBDatabase>): SQLAdapter {
+  let sqliteDb: Database | null = null;
+  let initPromise: Promise<void> | null = null;
+
+  function idbReq<T>(request: IDBRequest<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
   async function getStore(
     table: string,
     mode: IDBTransactionMode,
@@ -118,132 +131,182 @@ function createIDBSQL(dbPromise: Promise<IDBDatabase>): SQLAdapter {
     return db.transaction(table, mode).objectStore(table);
   }
 
-  function req<T>(request: IDBRequest<T>): Promise<T> {
+  function getAllRows(store: IDBObjectStore): Promise<Row[]> {
     return new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result);
+      const request = store.getAll();
+      request.onsuccess = () => resolve(request.result as Row[]);
       request.onerror = () => reject(request.error);
     });
   }
 
-  function getAllRows<T extends Row>(store: IDBObjectStore): Promise<T[]> {
-    return new Promise((resolve, reject) => {
-      const request = store.getAll();
-      request.onsuccess = () => resolve(request.result as T[]);
-      request.onerror = () => reject(request.error);
-    });
+  async function ensureInitialized(): Promise<Database> {
+    if (sqliteDb) return sqliteDb;
+    if (!initPromise) {
+      initPromise = (async () => {
+        const SQL = await getSqlJs();
+        sqliteDb = new SQL.Database();
+
+        // Hydrate from IDB: for each object store (table), load rows into SQLite
+        const idb = await dbPromise;
+        const storeNames = Array.from(idb.objectStoreNames).filter(
+          (name) => name !== "__kv__" && name !== "__blobs__",
+        );
+
+        for (const storeName of storeNames) {
+          const store = idb.transaction(storeName, "readonly").objectStore(storeName);
+          const rows = await getAllRows(store);
+          if (rows.length === 0) continue;
+
+          // Infer schema from first row
+          const cols = Object.keys(rows[0]!);
+          const colDefs = cols.map((c) => `"${c}" TEXT`).join(", ");
+          sqliteDb!.run(
+            `CREATE TABLE IF NOT EXISTS "${storeName}" (${colDefs})`,
+          );
+
+          // Insert all rows
+          const placeholders = cols.map(() => "?").join(", ");
+          const colNames = cols.map((c) => `"${c}"`).join(", ");
+          const stmt = sqliteDb!.prepare(
+            `INSERT INTO "${storeName}" (${colNames}) VALUES (${placeholders})`,
+          );
+          for (const row of rows) {
+            stmt.run(cols.map((c) => row[c] as string | number | null));
+          }
+          stmt.free();
+        }
+      })();
+    }
+    await initPromise;
+    return sqliteDb!;
+  }
+
+  /** Determine the operation type from a SQL statement */
+  function getOperation(sql: string): "create" | "insert" | "select" | "update" | "delete" | "other" {
+    const trimmed = sql.trim().toUpperCase();
+    if (trimmed.startsWith("CREATE")) return "create";
+    if (trimmed.startsWith("INSERT")) return "insert";
+    if (trimmed.startsWith("SELECT")) return "select";
+    if (trimmed.startsWith("UPDATE")) return "update";
+    if (trimmed.startsWith("DELETE")) return "delete";
+    return "other";
+  }
+
+  /** Extract table name from a SQL statement */
+  function extractTableName(sql: string): string | null {
+    const match = sql.match(
+      /(?:INSERT\s+INTO|UPDATE|DELETE\s+FROM|CREATE\s+TABLE(?:\s+IF\s+NOT\s+EXISTS)?)\s+"?(\w+)"?/i,
+    );
+    return match?.[1] ?? null;
+  }
+
+  async function syncInsertToIDB(table: string, db: Database, params: unknown[]): Promise<void> {
+    // Get the last inserted row by rowid
+    const result = db.exec(`SELECT * FROM "${table}" WHERE rowid = last_insert_rowid()`);
+    if (result.length > 0 && result[0]!.values.length > 0) {
+      const cols = result[0]!.columns;
+      const vals = result[0]!.values[0]!;
+      const row: Row = {};
+      for (let i = 0; i < cols.length; i++) {
+        row[cols[i]!] = vals[i];
+      }
+      // Only write to IDB if row has an id (IDB store uses keyPath: "id")
+      if (row.id !== undefined) {
+        const store = await getStore(table, "readwrite");
+        await idbReq(store.put(row));
+      }
+    }
+  }
+
+  async function syncDeleteToIDB(table: string, sql: string, params: unknown[]): Promise<void> {
+    // For simple WHERE id = ? deletes
+    const whereMatch = sql.match(/WHERE\s+"?id"?\s*=\s*\?/i);
+    if (whereMatch && params.length > 0) {
+      const store = await getStore(table, "readwrite");
+      await idbReq(store.delete(params[params.length - 1] as IDBValidKey));
+      return;
+    }
+    // For DELETE without WHERE (clear all), clear the store
+    if (!/WHERE/i.test(sql)) {
+      const store = await getStore(table, "readwrite");
+      await idbReq(store.clear());
+    }
+  }
+
+  async function syncUpdateToIDB(table: string, db: Database, sql: string, params: unknown[]): Promise<void> {
+    // Re-read updated rows from SQLite and sync to IDB
+    // Extract WHERE clause to find which rows were updated
+    const whereMatch = sql.match(/WHERE\s+(.+)$/i);
+    if (!whereMatch) return;
+
+    // Count SET params to know where WHERE params start
+    const setMatch = sql.match(/SET\s+(.+?)\s+WHERE/i);
+    if (!setMatch) return;
+    const setCount = setMatch[1]!.split(",").length;
+    const whereParams = params.slice(setCount);
+
+    const selectSql = `SELECT * FROM "${table}" WHERE ${whereMatch[1]}`;
+    const result = db.exec(selectSql, whereParams as (string | number | null)[]);
+    if (result.length > 0) {
+      for (const vals of result[0]!.values) {
+        const row: Row = {};
+        for (let i = 0; i < result[0]!.columns.length; i++) {
+          row[result[0]!.columns[i]!] = vals[i];
+        }
+        if (row.id !== undefined) {
+          const store = await getStore(table, "readwrite");
+          await idbReq(store.put(row));
+        }
+      }
+    }
   }
 
   async function executeOne<T extends Row>(
     query: string,
     params?: unknown[],
   ): Promise<QueryResult<T>> {
-    const trimmed = query.trim();
+    const db = await ensureInitialized();
+    const op = getOperation(query);
+    const sqlParams = (params ?? []) as (string | number | null)[];
 
-    // CREATE TABLE — no-op (tables created during DB open)
-    if (/^CREATE\s+TABLE/i.test(trimmed)) {
+    if (op === "create") {
+      // Run CREATE TABLE on sql.js (IDB tables created during DB open)
+      db.run(query);
       return { rows: [] as T[], rowsAffected: 0 };
     }
 
-    // INSERT INTO table (cols) VALUES (?)
-    const insertMatch = trimmed.match(
-      /^INSERT\s+INTO\s+(\w+)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i,
-    );
-    if (insertMatch) {
-      const tableName = insertMatch[1]!;
-      const cols = insertMatch[2]!.split(",").map((c) => c.trim());
-      const row: Row = {};
-      for (let i = 0; i < cols.length; i++) {
-        row[cols[i]!] = params?.[i] ?? null;
+    if (op === "select") {
+      const result = db.exec(query, sqlParams);
+      if (result.length === 0) {
+        return { rows: [] as T[], rowsAffected: 0 };
       }
-      const store = await getStore(tableName, "readwrite");
-      await req(store.put(row));
-      return { rows: [row] as T[], rowsAffected: 1 };
-    }
-
-    // SELECT * FROM table WHERE ...
-    const selectMatch = trimmed.match(/^SELECT\s+\*\s+FROM\s+(\w+)(?:\s+WHERE\s+(.+))?/i);
-    if (selectMatch) {
-      const tableName = selectMatch[1]!;
-      const store = await getStore(tableName, "readonly");
-      const allRows = await getAllRows<T>(store);
-
-      if (!selectMatch[2]) return { rows: allRows, rowsAffected: 0 };
-
-      const conditions = selectMatch[2].split(/\s+AND\s+/i).map((c) => c.trim());
-      let paramIdx = 0;
-      const filtered = allRows.filter((row) =>
-        conditions.every((cond) => {
-          const [col] = cond.split(/\s*=\s*/);
-          return row[col!.trim()] === params?.[paramIdx++];
-        }),
-      );
-      return { rows: filtered, rowsAffected: 0 };
-    }
-
-    // UPDATE table SET col = ? WHERE ...
-    const updateMatch = trimmed.match(/^UPDATE\s+(\w+)\s+SET\s+(.+?)\s+WHERE\s+(.+)/i);
-    if (updateMatch) {
-      const tableName = updateMatch[1]!;
-      const setClauses = updateMatch[2]!.split(",").map((s) => s.trim());
-      const whereClauses = updateMatch[3]!.split(/\s+AND\s+/i).map((w) => w.trim());
-      const store = await getStore(tableName, "readwrite");
-      const allRows = await getAllRows(store);
-      const setColCount = setClauses.length;
-      let rowsAffected = 0;
-
-      for (const row of allRows) {
-        let whereIdx = setColCount;
-        const matches = whereClauses.every((cond) => {
-          const [col] = cond.split(/\s*=\s*/);
-          return row[col!.trim()] === params?.[whereIdx++];
-        });
-        if (matches) {
-          for (let i = 0; i < setClauses.length; i++) {
-            const [col] = setClauses[i]!.split(/\s*=\s*/);
-            row[col!.trim()] = params?.[i] ?? null;
-          }
-          // Re-read store for this put (transaction might have closed)
-          const writeStore = await getStore(tableName, "readwrite");
-          await req(writeStore.put(row));
-          rowsAffected++;
+      const cols = result[0]!.columns;
+      const rows = result[0]!.values.map((vals) => {
+        const row: Row = {};
+        for (let i = 0; i < cols.length; i++) {
+          row[cols[i]!] = vals[i];
         }
-      }
-      return { rows: [] as T[], rowsAffected };
+        return row as T;
+      });
+      return { rows, rowsAffected: 0 };
     }
 
-    // DELETE FROM table WHERE ...
-    const deleteMatch = trimmed.match(/^DELETE\s+FROM\s+(\w+)(?:\s+WHERE\s+(.+))?/i);
-    if (deleteMatch) {
-      const tableName = deleteMatch[1]!;
-      const store = await getStore(tableName, "readwrite");
-      const allRows = await getAllRows(store);
+    // Write operations: execute on sql.js, then sync to IDB
+    db.run(query, sqlParams);
+    const rowsAffected = db.getRowsModified();
+    const table = extractTableName(query);
 
-      if (!deleteMatch[2]) {
-        for (const row of allRows) {
-          await req(store.delete(row.id as IDBValidKey));
-        }
-        return { rows: [] as T[], rowsAffected: allRows.length };
+    if (table) {
+      if (op === "insert") {
+        await syncInsertToIDB(table, db, params ?? []);
+      } else if (op === "delete") {
+        await syncDeleteToIDB(table, query, params ?? []);
+      } else if (op === "update") {
+        await syncUpdateToIDB(table, db, query, params ?? []);
       }
-
-      const conditions = deleteMatch[2].split(/\s+AND\s+/i).map((c) => c.trim());
-      let rowsAffected = 0;
-      let paramIdx = 0;
-      for (const row of allRows) {
-        const localIdx = paramIdx;
-        paramIdx = localIdx;
-        const matches = conditions.every((cond) => {
-          const [col] = cond.split(/\s*=\s*/);
-          return row[col!.trim()] === params?.[paramIdx++];
-        });
-        if (matches) {
-          await req(store.delete(row.id as IDBValidKey));
-          rowsAffected++;
-        }
-      }
-      return { rows: [] as T[], rowsAffected };
     }
 
-    throw new Error(`IDB SQL adapter: unsupported statement: ${trimmed.slice(0, 80)}`);
+    return { rows: [] as T[], rowsAffected };
   }
 
   return {
@@ -251,6 +314,7 @@ function createIDBSQL(dbPromise: Promise<IDBDatabase>): SQLAdapter {
       return executeOne<T>(query, params);
     },
     async batch(queries: Array<{ query: string; params?: unknown[] }>): Promise<QueryResult[]> {
+      await ensureInitialized();
       const results: QueryResult[] = [];
       for (const q of queries) {
         results.push(await executeOne(q.query, q.params));

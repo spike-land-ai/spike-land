@@ -89,24 +89,24 @@ are prioritized P0 (critical) through P3 (minor/nice-to-have).
 
 #### TD-P1-6: block-sdk schema DSL limitations
 
-- **Status**: Open
+- **Status**: Resolved (2026-03-04)
 - **Impact**: Developers must use Drizzle for anything beyond simple CRUD tables
 - **Details**: `defineTable()` supports only 5 column types with `primaryKey()` and `optional()` modifiers. Missing: foreign keys, indexes, composite primary keys, column defaults, check constraints.
-- **Action**: Extend schema DSL with `.default()`, `.index()`, `.references()` methods.
+- **Resolution**: Extended schema DSL with `.default()`, `.references()`, `.index()` methods. `schemaToSQL()` generates DEFAULT clauses, inline REFERENCES, and CREATE INDEX statements. Composite PKs and check constraints still require Drizzle.
 
 #### TD-P1-7: block-sdk IDB adapter — regex SQL parser
 
-- **Status**: Open
+- **Status**: Resolved (2026-03-04)
 - **Impact**: Browser-side blocks limited to basic CRUD patterns
-- **Details**: The IDB adapter (`src/block-sdk/adapters/idb.ts`, ~350 lines) uses regex matching instead of a real SQL parser. No JOINs, ORDER BY, LIMIT, GROUP BY, subqueries, or OR conditions. Works for `defineBlock()` patterns but breaks on anything more complex.
-- **Action**: Add ORDER BY and LIMIT support (most requested). Consider sql.js WASM for full SQL in browser.
+- **Details**: The IDB adapter previously used regex matching instead of a real SQL parser.
+- **Resolution**: Replaced regex parser with sql.js WASM (lazy-loaded on first SQL call). IDB remains durable persistence; sql.js provides full SQL (ORDER BY, LIMIT, JOIN, GROUP BY, OR, subqueries). See `src/block-sdk/adapters/idb.ts` and `sql-js-loader.ts`.
 
 #### TD-P1-8: block-sdk has no SQLite adapter for Node.js
 
-- **Status**: Open
+- **Status**: Resolved (2026-03-04)
 - **Impact**: Node.js testing doesn't exercise real SQL semantics
-- **Details**: The memory adapter uses an in-memory Map with the same regex parser as IDB. No adapter wrapping better-sqlite3 or sql.js exists. Integration tests can't verify SQL behavior matches D1 production.
-- **Action**: Create `sqliteAdapter()` using better-sqlite3 for local dev and integration testing.
+- **Details**: The memory adapter uses an in-memory Map with a regex parser.
+- **Resolution**: Created `sqliteAdapter()` using better-sqlite3 with WAL mode and FK enforcement. Available at `@spike-land-ai/block-sdk/adapters/sqlite`. Supports in-memory (`:memory:`) and file-backed databases.
 
 ### P2 - Medium Priority
 

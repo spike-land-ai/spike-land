@@ -36,9 +36,9 @@ export const taskQueue = defineBlock({
     tasks: defineTable("tasks", {
       id: t.string().primaryKey(),
       title: t.string(),
-      description: t.string(),
-      status: t.string(), // enum enforced at procedure level via Zod
-      assignee: t.string(),
+      description: t.string().default(""),
+      status: t.string().default("pending"),
+      assignee: t.string().default(""),
       created: t.u64(),
       updated: t.u64(),
     }),

@@ -14,7 +14,7 @@ export type { Block, BlockComponents, BlockContext, BlockDefinition, BlockProced
 
 // Schema DSL
 export { defineTable, schemaToSQL, schemaTableNames, t, tableToSQL } from "./schema/types.js";
-export type { ColumnBuilder, ColumnDef, ColumnType, SchemaDef, TableDef } from "./schema/types.js";
+export type { ColumnBuilder, ColumnDef, ColumnType, IndexDef, SchemaDef, TableDef } from "./schema/types.js";
 
 // Storage interfaces
 export type {

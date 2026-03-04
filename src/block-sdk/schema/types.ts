@@ -13,6 +13,8 @@ export interface ColumnDef {
   primary: boolean;
   optional: boolean;
   enumValues?: string[];
+  defaultValue?: string | number | boolean;
+  foreignKey?: { table: string; column: string };
 }
 
 /** Fluent column builder */
@@ -21,14 +23,26 @@ export interface ColumnBuilder {
   primaryKey(): ColumnBuilder;
   /** Mark this column as optional (nullable) */
   optional(): ColumnBuilder;
+  /** Set a default value */
+  default(value: string | number | boolean): ColumnBuilder;
+  /** Add a foreign key reference */
+  references(table: string, column: string): ColumnBuilder;
   /** Get the final column definition */
   _def: ColumnDef;
+}
+
+/** Index definition */
+export interface IndexDef {
+  name: string;
+  columns: string[];
+  unique?: boolean;
 }
 
 /** Table definition */
 export interface TableDef {
   name: string;
   columns: Record<string, ColumnDef>;
+  indexes?: IndexDef[];
 }
 
 /** Schema definition — a collection of tables */
@@ -43,6 +57,14 @@ function createColumnBuilder(type: ColumnType, enumValues?: string[]): ColumnBui
     },
     optional() {
       def.optional = true;
+      return builder;
+    },
+    default(value: string | number | boolean) {
+      def.defaultValue = value;
+      return builder;
+    },
+    references(table: string, column: string) {
+      def.foreignKey = { table, column };
       return builder;
     },
     _def: def,
@@ -65,12 +87,17 @@ export const t = {
 export function defineTable(
   name: string,
   columns: Record<string, ColumnBuilder>,
+  options?: { indexes?: IndexDef[] },
 ): TableDef {
   const resolvedColumns: Record<string, ColumnDef> = {};
   for (const [key, builder] of Object.entries(columns)) {
     resolvedColumns[key] = builder._def;
   }
-  return { name, columns: resolvedColumns };
+  const table: TableDef = { name, columns: resolvedColumns };
+  if (options?.indexes) {
+    table.indexes = options.indexes;
+  }
+  return table;
 }
 
 /** Map ColumnType to SQL type */
@@ -88,6 +115,13 @@ function toSQLType(col: ColumnDef): string {
   }
 }
 
+/** Format a default value for SQL */
+function formatDefault(value: string | number | boolean): string {
+  if (typeof value === "string") return `DEFAULT '${value}'`;
+  if (typeof value === "boolean") return `DEFAULT ${value ? 1 : 0}`;
+  return `DEFAULT ${value}`;
+}
+
 /** Generate CREATE TABLE SQL from a TableDef */
 export function tableToSQL(table: TableDef): string {
   const cols: string[] = [];
@@ -95,14 +129,28 @@ export function tableToSQL(table: TableDef): string {
     let line = `  ${name} ${toSQLType(def)}`;
     if (def.primary) line += " PRIMARY KEY";
     if (!def.optional && !def.primary) line += " NOT NULL";
+    if (def.defaultValue !== undefined) line += ` ${formatDefault(def.defaultValue)}`;
+    if (def.foreignKey) line += ` REFERENCES ${def.foreignKey.table}(${def.foreignKey.column})`;
     cols.push(line);
   }
   return `CREATE TABLE IF NOT EXISTS ${table.name} (\n${cols.join(",\n")}\n)`;
 }
 
-/** Generate all CREATE TABLE statements for a schema */
+/** Generate all CREATE TABLE and CREATE INDEX statements for a schema */
 export function schemaToSQL(schema: SchemaDef): string[] {
-  return Object.values(schema).map(tableToSQL);
+  const statements: string[] = [];
+  for (const table of Object.values(schema)) {
+    statements.push(tableToSQL(table));
+    if (table.indexes) {
+      for (const idx of table.indexes) {
+        const unique = idx.unique ? "UNIQUE " : "";
+        statements.push(
+          `CREATE ${unique}INDEX IF NOT EXISTS ${idx.name} ON ${table.name}(${idx.columns.join(", ")})`,
+        );
+      }
+    }
+  }
+  return statements;
 }
 
 /** Extract table names from a schema (for IDB object store creation) */

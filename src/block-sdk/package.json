@@ -9,6 +9,7 @@
     "./storage": "./storage/index.ts",
     "./adapters/d1": "./adapters/d1.ts",
     "./adapters/idb": "./adapters/idb.ts",
+    "./adapters/sqlite": "./adapters/sqlite.ts",
     "./react": "./react/index.ts",
     "./mcp": "./mcp/index.ts"
   },
@@ -25,8 +26,14 @@
       "optional": true
     }
   },
+  "optionalDependencies": {
+    "better-sqlite3": "^11.0.0",
+    "sql.js": "^1.11.0"
+  },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
     "@types/react": "^19.0.0",
+    "@types/sql.js": "^1.4.9",
     "react": "^19.0.0",
     "typescript": "5.9.3",
     "vitest": "4.0.18"
