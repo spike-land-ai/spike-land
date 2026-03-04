@@ -59,25 +59,9 @@ When an AI agent generates a React component, the UI code is cheap. Trivially ch
 
 The [Hourglass Model](/learnit/testing-pyramid-vs-hourglass-model-ai-development) flips the investment:
 
-```
-         ┌─────────────────────┐
-         │   E2E Specs (heavy)  │  ← Humans write these
-         │   User flows as       │
-         │   Given/When/Then     │
-         └──────────┬────────────┘
-                    │
-            ┌───────▼───────┐
-            │  UI Code       │  ← AI generates this
-            │  (thin,        │    Disposable.
-            │   disposable)  │    Regenerate, don't fix.
-            └───────┬───────┘
-                    │
-    ┌───────────────▼───────────────┐
-    │  Business Logic Tests (heavy)  │  ← MCP tools + unit tests
-    │  Validation, contracts, state   │    Bulletproof.
-    │  transitions, edge cases        │    Never skip.
-    └────────────────────────────────┘
-```
+<div className="my-8">
+  <img src="/blog/think-slowly-ship-fast/hourglass-model.svg" alt="Animated comparison diagram showing the Testing Pyramid (heavy unit tests at bottom, generated for humans) versus the Hourglass Model (heavy E2E specs at top, disposable UI in middle, bulletproof business logic at bottom, designed for AI agents)" className="w-full rounded-xl border border-gray-800 bg-gray-900" />
+</div>
 
 The top of the hourglass is wide: E2E specs that describe what the user experiences. "Given a logged-in user, when they change their email and confirm, then the profile shows the new email." These are written by humans. They are the requirements.
 
@@ -253,6 +237,10 @@ context_rules:
 Each persona's `*_sees` rule defines exactly what enters its context window. The PM never sees component code. The developer never sees the data model migration. The QA agent sees the tool interface and the acceptance criteria — enough to verify, not enough to get lost.
 
 This is [context engineering applied to project management](/blog/how-claude-code-engineers-context). The same attention-budget physics that makes prompts fail at 30K tokens makes planning fail when an agent carries the entire project in its context. BMAD's answer: do not carry the entire project. Carry exactly what this agent, at this step, needs to produce its artifact.
+
+<div className="my-8">
+  <img src="/blog/think-slowly-ship-fast/epic-sharding.svg" alt="Animated diagram of the BMAD Epic Sharding model showing context isolation between PM, Architect, Developer, and QA personas" className="w-full rounded-xl border border-gray-800 bg-gray-900" />
+</div>
 
 The manifest is the single source of truth. It tracks what is done, what is blocked, and what each persona needs to see next. When a new agent spins up for the next slice, it reads the manifest, loads its artifacts, and starts with a fresh context that is dense with relevant information and free of accumulated noise.
 
