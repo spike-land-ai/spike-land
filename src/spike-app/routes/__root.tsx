@@ -160,6 +160,17 @@ export function RootLayout() {
   const location = useRouterState({ select: (s) => s.location });
   const { pathname, searchStr } = location;
 
+  // Auto-close sidebar on route change
+  useEffect(() => { setSidebarOpen(false); }, [pathname]);
+
+  // Close sidebar on Escape key
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setSidebarOpen(false); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [sidebarOpen]);
+
   // Inject JSON-LD structured data once on mount
   useEffect(() => {
     injectJsonLd("jsonld-organization", ORGANIZATION_JSON_LD);
@@ -222,17 +233,20 @@ export function RootLayout() {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <WelcomeModal userName={user?.name} />
-      {/* Mobile sidebar overlay */}
+      {/* Sidebar overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 cursor-pointer"
+          role="button"
+          tabIndex={-1}
           onClick={() => setSidebarOpen(false)}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setSidebarOpen(false); }}
         />
       )}
 
-      {/* Sidebar — Persistent on Desktop, Drawer on Mobile */}
+      {/* Sidebar — Always a drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform border-r border-border bg-card shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-0 lg:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform border-r border-border bg-card shadow-2xl transition-transform duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -242,7 +256,7 @@ export function RootLayout() {
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="p-2 rounded-full hover:bg-muted lg:hidden"
+            className="p-2 rounded-full hover:bg-muted"
             aria-label="Close menu"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -274,7 +288,7 @@ export function RootLayout() {
         </nav>
 
         <div className="mt-auto border-t border-border p-4 bg-card">
-          <div className="flex items-center justify-between mb-4 lg:hidden">
+          <div className="flex items-center justify-between mb-4">
             <span className="text-xs text-muted-foreground uppercase font-bold">Theme</span>
             <ThemeSwitcher theme={theme} setTheme={setTheme} />
           </div>
@@ -287,7 +301,7 @@ export function RootLayout() {
         <header className="sticky top-0 z-30 flex h-16 items-center border-b border-border bg-card/80 backdrop-blur-md px-6">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="mr-4 rounded-lg p-2 hover:bg-muted lg:hidden"
+            className="mr-4 rounded-lg p-2 hover:bg-muted"
             aria-label="Open navigation menu"
           >
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -296,19 +310,8 @@ export function RootLayout() {
           </button>
 
           <div className="flex flex-1 items-center justify-between">
-            <div className="lg:hidden">
-               <Link to="/" className="text-xl font-bold">spike.land</Link>
-            </div>
-            <div className="hidden lg:block" />
-
-            <div className="flex items-center gap-4">
-              <div className="hidden lg:block">
-                <ThemeSwitcher theme={theme} setTheme={setTheme} />
-              </div>
-              <div className="lg:hidden">
-                {/* Auth status or small profile could go here */}
-              </div>
-            </div>
+            <Link to="/" className="text-xl font-bold">spike.land</Link>
+            <div />
           </div>
         </header>
 

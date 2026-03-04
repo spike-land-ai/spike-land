@@ -31,6 +31,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.5",
     "@changesets/cli": "2.30.0",
+    "@google/genai": "^1.43.0",
     "@types/node": "25.3.3",
     "@vitest/coverage-v8": "4.0.18",
     "agent-browser": "^0.16.3",

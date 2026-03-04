@@ -17045,6 +17045,7 @@ __metadata:
   dependencies:
     "@biomejs/biome": "npm:^2.4.5"
     "@changesets/cli": "npm:2.30.0"
+    "@google/genai": "npm:^1.43.0"
     "@types/node": "npm:25.3.3"
     "@vitest/coverage-v8": "npm:4.0.18"
     agent-browser: "npm:^0.16.3"

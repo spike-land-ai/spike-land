@@ -220,6 +220,48 @@ export function BlogPostView({ slug, linkComponent }: { slug: string; linkCompon
           {fixSelfClosingTags(cleanContent)}
         </Markdown>
       </div>
+
+      <SupportBanner title={post.title} slug={post.slug} />
     </article>
+  );
+}
+
+function SupportBanner({ title, slug }: { title: string; slug: string }) {
+  const url = `https://spike.land/blog/${slug}`;
+  const xIntent = `https://x.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`;
+  const linkedInIntent = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+
+  return (
+    <div className="border-t border-border mt-12 pt-8">
+      <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+        Written by an independent developer in Brighton, UK. Recently made redundant. No VC, no team — just a laptop, a mass of MCP servers, and an mass of mass-produced coffee. If this post was useful, consider sharing it or supporting the work.
+      </p>
+      <div className="flex flex-wrap items-center gap-4 text-sm">
+        <a
+          href={xIntent}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Share on X
+        </a>
+        <a
+          href={linkedInIntent}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Share on LinkedIn
+        </a>
+        <span className="text-muted-foreground/40">&bull;</span>
+        <a
+          href="/pricing"
+          className="text-primary hover:opacity-80 transition-colors font-medium"
+        >
+          Support this work
+        </a>
+      </div>
+      <p className="text-xs text-muted-foreground/60 mt-3">Every little counts.</p>
+    </div>
   );
 }

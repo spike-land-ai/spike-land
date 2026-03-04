@@ -1,13 +1,13 @@
 ---
 title: "A Chemist Walked Into a Codebase"
 slug: "a-chemist-walked-into-a-codebase"
-description: "How a chemist with no coding experience built a flawless coaching platform by writing business logic as MCP servers first — and what that means for the future of software."
-date: "2026-02-16"
+description: "How a chemist with no coding experience built three production apps in a few evenings — and accidentally proved that most of the software industry is a very expensive group therapy session."
+date: "2026-03-04"
 author: "Zoltan Erdos"
 category: "Developer Experience"
-tags: ["mcp", "vibe-coding", "bazdmeg", "agents", "architecture", "beginners"]
+tags: ["mcp", "vibe-coding", "bazdmeg", "agents", "architecture", "beginners", "bullshit-jobs"]
 featured: true
-primer: "Zero coding experience. Flawless coaching platform. MCP-first."
+primer: "A chemist. A few evenings. Three production apps. £90K of software. Zero standups."
 heroImage: "/blog/a-chemist-walked-into-a-codebase/hero.png"
 ---
 
@@ -15,13 +15,13 @@ heroImage: "/blog/a-chemist-walked-into-a-codebase/hero.png"
 
 ## The Phone Call
 
-Gianluca sent me a video. 
+[Gian Pierre](https://www.gianpierre.co.uk/) sent me a video.
 
 No context. No preamble. Just a screen recording of a coaching platform doing exactly what it was supposed to do. Calendar bookings flowed smoothly into a database. Different coaching frameworks loaded dynamically based on what kind of session it was. An AI chat assistant remembered the client's past history. Multiple backend systems were talking to each other without a single error.
 
 I stared at it for a full minute before responding.
 
-Gianluca Lopez is a chemist. He doesn't write code professionally. His background is in molecular structures and lab work. He has been teaching himself programming for years, trying to understand how web applications work, but he's never had a software engineering job. No professional team experience. No shipped products.
+[Gian Pierre](https://www.gianpierre.co.uk/) Lopez is a chemist. He doesn't write code professionally. His background is in molecular structures and lab work. He has been teaching himself programming for years, trying to understand how web applications work, but he's never had a software engineering job. No professional team experience. No shipped products.
 
 And yet, he had just built something that would normally take a team of senior full-stack developers weeks to deliver. 
 
@@ -32,7 +32,7 @@ It worked flawlessly. On the first real test.
 If you're a junior developer, you probably start a project like this:
 You pick a framework (like React or Next.js). You set up your files and folders. You start building from the inside out: writing components, setting up routes, and figuring out state management. 
 
-Gianluca didn't do any of that. 
+Gian Pierre didn't do any of that. 
 
 He couldn't. He didn't have the mental model of a traditional software engineer. When you've spent your career thinking about chemical reactions, you don't think in terms of React components. You think in terms of what a system *does*.
 
@@ -43,8 +43,6 @@ He knew the app needed to:
 - Manage client progress.
 
 These aren't technical details. They are business capabilities described in plain English. 
-
-![A diagram showing traditional app development vs MCP-first development, comparing writing components inside out versus defining capabilities first](https://placehold.co/600x300)
 
 Instead of building a React app that calls APIs, he built what we call **MCP (Model Context Protocol) servers**. These are essentially little tools that describe what the app can do. Then, he just wrapped a user interface around them.
 
@@ -68,24 +66,106 @@ When an AI agent tests the tools it depends on during the planning phase, you ge
 
 Spike Land exposes these MCPs directly. The same tools the AI uses to help you build the app become the actual production API. There’s no fake mock data, and no outdated API documentation. There is one single source of truth for your app's logic.
 
-## What Gianluca Actually Built
+## What Gian Pierre Actually Built
 
-He built a coaching platform. It sounds simple, but it’s incredibly complex.
+He didn’t build one app. He built three. Check them yourself at [gianpierre.co.uk](https://www.gianpierre.co.uk/).
 
-It handles calendar availability, time zones, and cancellations. It dynamically loads different coaching methods. The AI chat remembers what was discussed in past sessions. Client progress is tracked over time.
+**The Coaching App** — an evidence-based coaching platform with 24 structured lessons across 6 modules, 7 coaching frameworks, 6 interactive exercise types, a life satisfaction radar chart measuring 8 dimensions, a streak and badge gamification system, and a reflective journal. Built with Next.js 16, Drizzle ORM, and NextAuth. Full competitive audit of BetterUp, Marlee, Noom, and four others. Five user personas with willingness-to-pay analysis. Deployed to production.
 
-![A complex state machine diagram showing bookings, chat context, and frameworks connected by glowing lines](https://placehold.co/600x300)
+**HealthBridge** — an AI symptom triage assistant powered by Google Gemini 2.5 Flash. A full RAG pipeline with cosine similarity search and text-embedding-004. Three specialized tools with Zod validation schemas. Multi-step reasoning that chains up to 3 tool calls per turn. Emergency overrides that bypass all reasoning for chest pain and stroke signs. Streaming token-by-token UI. This is not a tutorial project. This is production-grade AI engineering.
 
-Normally, getting all these features to work together is a nightmare. A booking affects the calendar, which affects the chat context, which updates the client's progress. 
+**GlassBank** — an inclusive mobile banking app with WCAG 2.1 AA accessibility, a glassmorphism design system, dual-interface modes (Standard and Simplified), and a competitive analysis of 6 banks. [Live on Vercel](https://glassbank-app.vercel.app/).
 
-Gianluca built it all using Spike Land's infrastructure. He told the agents what capabilities he wanted (his MCP tools), and the agents built the application around them. 
+A chemist built all of this. In a few evenings. After work.
 
-The result? 100% code coverage. Not because someone forced him to write tests, but because the AI naturally wrote tests to figure out how his tools worked before building the UI.
+The result? 100% code coverage on the coaching platform. Not because someone forced him to write tests, but because the AI naturally wrote tests to figure out how his tools worked before building the UI.
 
-## Stop Thinking in Code
+## The £90,000 Question
 
-Gianluca's lack of professional coding experience was his superpower. He didn't have bad habits. He didn't try to over-engineer a complex React architecture. He just thought clearly about what the app needed to do.
+Let’s do the math. Not to be cute — to be honest about what the software industry actually costs.
 
-This is the most valuable skill for any developer today, especially juniors. The future of software isn't about memorizing syntax or wrestling with build tools. It's about clearly understanding a problem and describing the solution so well that an AI can build it for you.
+A traditional team to build Gian Pierre’s three projects:
 
-*Zoltan Erdos is a developer based in Brighton, UK, building [spike.land](https://spike.land). He believes the best developers will be the ones who never learned to think in code.*
+| Role | Duration | Cost |
+|------|----------|------|
+| Senior Full-Stack Developer | 6 weeks | £11,250 |
+| AI/ML Engineer | 4 weeks | £8,500 |
+| UX Designer | 4 weeks | £5,500 |
+| Frontend Developer | 4 weeks | £6,000 |
+| Product Manager | 10 weeks | £17,500 |
+| Scrum Master | 10 weeks | £13,750 |
+| **Total** | | **£62,500 - £120,000** |
+
+Gian Pierre did it in roughly 60-80 hours. Midpoint cost to hire a team: £90,000. His effective rate: **£1,286 per hour**.
+
+For context, a UK senior developer earns £40-75/hour. A McKinsey consultant bills £300-500/hour. Gian Pierre, the chemist, produced £1,286/hour of market value.
+
+But here’s the part that should make you uncomfortable. Look at that team table again. The Product Manager and the Scrum Master together cost **£31,250**. Half the budget. Their entire job is translating between the person who understands the problem and the people who can build it.
+
+Gian Pierre IS the person who understands the problem. The AI IS the builder. The translation layer — the most expensive line item — simply didn’t need to exist.
+
+## The Bullshit Jobs Problem
+
+In 2018, the anthropologist David Graeber published [*Bullshit Jobs*](https://en.wikipedia.org/wiki/Bullshit_Jobs). His thesis: a huge portion of the modern economy consists of jobs that even the people doing them secretly believe are pointless. He identified five types.
+
+Every single one exists in a typical software team.
+
+**Flunkies** — people whose job is to make someone else feel important. In software: the senior engineer whose primary output is attending leadership meetings and nodding. Gian Pierre had no org chart to perform for.
+
+**Goons** — roles that exist only because competitors have them. An arms race of pointlessness. In software: adopting Kubernetes because your competitor did. Gian Pierre picked Next.js because it solved his problem, not because it was on a tech radar published by a consultancy whose business model depends on you feeling behind.
+
+**Duct Tapers** — people hired to fix problems that shouldn’t exist. In software: the platform engineer who spends their career managing YAML files for a deployment pipeline that a `git push` to Vercel would have replaced. MCP-first means the abstraction was right from the start, so nobody needed to tape over it.
+
+**Box Tickers** — people who create the appearance of productivity without the substance. Sprint retrospectives that change nothing. Velocity charts that are gamed. JIRA ticket grooming sessions that exist because someone once read the Scrum Guide and confused ritual with progress. Gian Pierre’s process: describe capability, build, ship. No ceremonies were harmed in the making of his software.
+
+**Taskmasters** — people whose job is to create work for others. The project manager who translates business requirements into JIRA stories so developers can translate JIRA stories back into... business requirements, but in TypeScript. Gian Pierre collapsed this entire game of telephone into one step: tell the AI what the system should do.
+
+<Callout type="warning">
+Graeber cited a YouGov poll: 37% of British workers believe their own job makes no meaningful contribution to the world. Apply that to a 6-person dev team. That’s 2.2 people. At £65K average salary, that’s **£143,000 per year** spent on work that even the workers think is pointless. Per team.
+</Callout>
+
+## Human Nature: The Real Bug
+
+Here’s the part nobody wants to talk about.
+
+We didn’t build this mountain of ceremony because we’re stupid. We built it because we’re *human*. And humans have some deeply inconvenient firmware.
+
+**We confuse complexity with competence.** A developer who sets up Kubernetes for a three-person startup isn’t solving a scaling problem. They’re performing sophistication. The same instinct that made medieval monks illuminate manuscripts with gold leaf makes modern engineers add a service mesh to a TODO app. It feels like work. It looks impressive. It is, in Graeber’s precise terminology, bullshit.
+
+**We’d rather be busy than effective.** Gian Pierre’s entire development process could fit in a tweet: "Described what I needed. AI built it. Shipped." That’s terrifying. Where’s the struggle? Where’s the craft? Where are the 14-hour days and the war stories? We have built an entire professional identity around suffering through complexity. A chemist who skips all of it and ships better software in an evening is not inspiring — he’s insulting.
+
+**We protect what we know, not what works.** The React developer who spent three years mastering hooks, context, and state management has a legitimate emotional investment in that knowledge. Telling them a chemist just did their job in an evening with AI is like telling a calligrapher that the printing press is here. Technically a promotion for humanity. Personally devastating.
+
+**We build empires, not solutions.** Graeber noticed that managers are evaluated by headcount. A director managing 20 engineers outranks one managing 5. This creates a gravitational pull toward hiring, toward complexity, toward inventing problems that justify the team’s existence. Nobody gets promoted for saying "actually, one person with Claude Code could do this."
+
+Sandi Metz nailed it in 2016: *"Duplication is far cheaper than the wrong abstraction."* The software industry heard that, nodded sagely, and immediately built seventeen more abstractions. Because abstractions create jobs. And jobs create org charts. And org charts create directors. And directors create the meetings that the flunkies attend.
+
+**The sunk cost of identity.** This is the deepest one. We don’t just learn frameworks — we *become* them. "I’m a React developer." "I’m a backend engineer." "I’m a DevOps specialist." These aren’t job descriptions. They’re identities. And identities don’t go quietly. A chemist who builds production software without those identities isn’t just a productivity story — he’s an existential threat to every person whose sense of self is wrapped up in knowing how `useEffect` cleanup functions work.
+
+## The 64x Multiplier
+
+Gian Pierre produced roughly £90,000 of software in 70 hours. A junior developer at £20/hour produces roughly £20/hour of value. That’s a **64x multiplier**.
+
+Not because Gian Pierre is 64 times smarter. Because he carried zero overhead. No framework religion. No architecture astronautics. No ceremony. No translation layers. No identity crisis about whether he’s a "real developer."
+
+He’s a chemist who needed a coaching platform. He described what it should do. The AI built it. He shipped it.
+
+The 10x developer was always a myth. The real multiplier was never about typing speed or algorithm knowledge. It was about how much bullshit you could avoid. Gian Pierre avoided all of it — not by discipline, but by ignorance. He didn’t know the bullshit existed, so he didn’t do it.
+
+That’s not a bug. That’s the most devastating feature request the software industry has ever received.
+
+## So What Should He Earn?
+
+Three answers, depending on your worldview:
+
+**The capitalist answer:** He produces £1,286/hour of value. Pay him accordingly. A company hiring Gian Pierre at £150K/year while he replaces a £400K team is getting the deal of a lifetime.
+
+**The Graeber answer:** He should earn what the productive fraction of a traditional team earns — roughly £40K per project — but since he can do 10+ projects a year, that’s £400K+. The difference between that and the team’s total cost is the bullshit tax the industry has been charging.
+
+**The honest answer:** It doesn’t matter what we think he should earn. The market will decide. And the market is about to discover that domain experts with AI produce better software faster than professional developers drowning in ceremony. The pricing will adjust. It always does. Just ask the calligraphers.
+
+*Oh, and [Gian Pierre](https://www.gianpierre.co.uk/)? He’s actively looking for work. If you’re hiring someone who ships £90K of software in a few evenings — [here’s his portfolio](https://www.gianpierre.co.uk/). You’re welcome.*
+
+---
+
+*Zoltan Erdos is a developer based in Brighton, UK, building [spike.land](https://spike.land). He believes the best developers will be the ones who never learned to think in code. Gian Pierre’s portfolio: [gianpierre.co.uk](https://www.gianpierre.co.uk/).*
