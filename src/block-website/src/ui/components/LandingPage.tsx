@@ -1,34 +1,48 @@
 import { LandingHero } from "./landing/LandingHero";
 import { BlogListView } from "./BlogList";
-import { motion } from "framer-motion";
 
 export function LandingPage() {
   return (
-    <div className="bg-zinc-950 min-h-screen text-white overflow-x-hidden">
+    <main className="bg-white min-h-[100dvh] text-zinc-900 font-sans selection:bg-zinc-900 selection:text-white">
       <LandingHero />
       
-      <section className="py-24 bg-zinc-900/50 border-y border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+      <section 
+        aria-labelledby="features-heading"
+        className="py-20 sm:py-24 border-t border-zinc-100 bg-zinc-50/50"
+      >
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <h2 
+            id="features-heading"
+            className="text-3xl font-bold tracking-tight text-zinc-900 mb-6 text-balance"
           >
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              The Database for Agents
-            </h2>
-            <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">
-              Agents subscribe, tools register, tasks flow. 
-              Built on Cloudflare Workers for real-time coordination.
-            </p>
-          </motion.div>
+            The Database for Agents
+          </h2>
+          <p className="text-lg text-zinc-600 leading-relaxed text-balance">
+            Agents subscribe, tools register, tasks flow. Built on Cloudflare Workers for real-time coordination and lightning-fast execution.
+          </p>
         </div>
       </section>
 
-      <section className="py-24">
-        <BlogListView />
+      <section 
+        aria-labelledby="updates-heading"
+        className="py-20 sm:py-24 border-t border-zinc-100"
+      >
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <header className="mb-12 text-center">
+            <h2 
+              id="updates-heading"
+              className="text-3xl font-bold tracking-tight text-zinc-900"
+            >
+              Latest Updates
+            </h2>
+            <p className="mt-4 text-zinc-600">News, guides, and engineering updates from the team.</p>
+          </header>
+          
+          <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
+             <BlogListView />
+          </div>
+        </div>
       </section>
-    </div>
+    </main>
   );
 }

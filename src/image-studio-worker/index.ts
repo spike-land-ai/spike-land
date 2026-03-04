@@ -99,6 +99,8 @@ app.all("/api/auth/*", async (c) => {
 
   const forwardHeaders = new Headers(c.req.raw.headers);
   forwardHeaders.delete("host");
+  forwardHeaders.set("x-forwarded-host", url.host);
+  forwardHeaders.set("x-forwarded-proto", url.protocol.replace(":", ""));
 
   try {
     const res = await fetch(targetUrl, {

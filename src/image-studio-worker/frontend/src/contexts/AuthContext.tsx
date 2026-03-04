@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoginError(null);
       const result = await authClient.signIn.social({
         provider: provider,
-        callbackURL: window.location.origin,
+        callbackURL: window.location.origin + "/",
       });
       if (result.error) {
         const msg = result.error.message || `Sign-in with ${provider} failed`;
