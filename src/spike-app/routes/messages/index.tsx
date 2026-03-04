@@ -27,28 +27,28 @@ const conversations = [
 export function MessagesIndexPage() {
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Messages</h1>
-      <div className="divide-y rounded-xl border bg-white">
+      <h1 className="text-2xl font-bold text-foreground">Messages</h1>
+      <div className="divide-y divide-border rounded-xl border border-border bg-card">
         {conversations.map((conv) => (
           <Link
             key={conv.userId}
             to="/messages/$userId"
             params={{ userId: conv.userId }}
-            className="flex items-center gap-4 p-4 hover:bg-gray-50"
+            className="flex items-center gap-4 p-4 hover:bg-muted transition-colors"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-info/10 text-sm font-semibold text-info-foreground">
               {conv.name[0]}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <span className={`text-sm ${conv.unread ? "font-semibold" : "font-medium"}`}>
+                <span className={`text-sm ${conv.unread ? "font-semibold text-foreground" : "font-medium text-foreground"}`}>
                   {conv.name}
                 </span>
-                <span className="text-xs text-gray-400">{conv.time}</span>
+                <span className="text-xs text-muted-foreground">{conv.time}</span>
               </div>
-              <p className="truncate text-sm text-gray-500">{conv.lastMessage}</p>
+              <p className="truncate text-sm text-muted-foreground">{conv.lastMessage}</p>
             </div>
-            {conv.unread && <span className="h-2.5 w-2.5 rounded-full bg-blue-600" />}
+            {conv.unread && <span className="h-2.5 w-2.5 rounded-full bg-primary" />}
           </Link>
         ))}
       </div>

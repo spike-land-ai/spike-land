@@ -14,20 +14,20 @@ export function QuizProgress({ progress, masteryThreshold = 2 }: QuizProgressPro
   const masteredCount = progress.filter((p) => p.mastered).length;
 
   return (
-    <div className="rounded-xl border bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Concept Mastery
         </h3>
-        <span className="text-sm font-medium text-gray-600">
+        <span className="text-sm font-medium text-muted-foreground">
           {masteredCount}/{progress.length} mastered
         </span>
       </div>
 
       {/* Overall progress bar */}
-      <div className="mb-4 h-2 overflow-hidden rounded-full bg-gray-100">
+      <div className="mb-4 h-2 overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-blue-600 transition-all duration-500"
+          className="h-full rounded-full bg-primary transition-all duration-500"
           style={{
             width: `${progress.length > 0 ? (masteredCount / progress.length) * 100 : 0}%`,
           }}
@@ -41,25 +41,25 @@ export function QuizProgress({ progress, masteryThreshold = 2 }: QuizProgressPro
             <span
               className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs ${
                 p.mastered
-                  ? "bg-green-100 text-green-700"
+                  ? "bg-success/15 text-success-foreground"
                   : p.correctCount > 0
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-gray-100 text-gray-400"
+                    ? "bg-warning/15 text-warning-foreground"
+                    : "bg-muted text-muted-foreground"
               }`}
             >
               {p.mastered ? "✓" : p.correctCount}
             </span>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">{p.concept}</span>
-                <span className="text-xs text-gray-400">
+                <span className="text-sm text-foreground">{p.concept}</span>
+                <span className="text-xs text-muted-foreground">
                   {p.correctCount}/{masteryThreshold}
                 </span>
               </div>
-              <div className="mt-1 h-1 overflow-hidden rounded-full bg-gray-100">
+              <div className="mt-1 h-1 overflow-hidden rounded-full bg-muted">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
-                    p.mastered ? "bg-green-500" : "bg-blue-400"
+                    p.mastered ? "bg-success" : "bg-primary"
                   }`}
                   style={{
                     width: `${Math.min((p.correctCount / masteryThreshold) * 100, 100)}%`,

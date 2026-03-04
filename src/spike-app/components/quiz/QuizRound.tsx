@@ -50,9 +50,9 @@ export function QuizRound({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Round {roundNumber}</h3>
+        <h3 className="text-lg font-semibold text-foreground">Round {roundNumber}</h3>
         {results && (
-          <span className="text-sm font-medium text-gray-500">
+          <span className="text-sm font-medium text-muted-foreground">
             {results.filter((r) => r.correct).length}/{results.length} correct
           </span>
         )}
@@ -77,8 +77,8 @@ export function QuizRound({
           disabled={!allAnswered || submitting}
           className={`w-full rounded-lg px-6 py-3 text-sm font-semibold transition-colors ${
             allAnswered && !submitting
-              ? "bg-blue-600 text-white hover:bg-blue-700"
-              : "cursor-not-allowed bg-gray-200 text-gray-400"
+              ? "bg-primary text-primary-foreground hover:bg-primary/90"
+              : "cursor-not-allowed bg-muted text-muted-foreground"
           }`}
         >
           {submitting ? "Checking..." : "Submit Answers"}

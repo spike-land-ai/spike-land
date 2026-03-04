@@ -1,12 +1,12 @@
 type AppStatus = "prompting" | "drafting" | "building" | "live" | "archived" | "deleted";
 
 const statusConfig: Record<AppStatus, { color: string; icon: string }> = {
-  prompting: { color: "bg-yellow-100 text-yellow-700", icon: "?" },
-  drafting: { color: "bg-blue-100 text-blue-700", icon: "\u270E" },
-  building: { color: "bg-orange-100 text-orange-700", icon: "\u2699" },
-  live: { color: "bg-green-100 text-green-700", icon: "\u25CF" },
-  archived: { color: "bg-gray-100 text-gray-600", icon: "\u25A0" },
-  deleted: { color: "bg-red-100 text-red-700", icon: "\u2715" },
+  prompting: { color: "bg-warning text-warning-foreground", icon: "?" },
+  drafting: { color: "bg-info text-info-foreground", icon: "\u270E" },
+  building: { color: "bg-warning text-warning-foreground", icon: "\u2699" },
+  live: { color: "bg-success text-success-foreground", icon: "\u25CF" },
+  archived: { color: "bg-muted text-muted-foreground", icon: "\u25A0" },
+  deleted: { color: "bg-destructive text-destructive-foreground", icon: "\u2715" },
 };
 
 interface StatusBadgeProps {

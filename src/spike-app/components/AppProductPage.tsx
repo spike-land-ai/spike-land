@@ -70,14 +70,14 @@ export function AppProductPage({ appId }: AppProductPageProps) {
     <div className="flex flex-col space-y-10 p-8 lg:p-12">
       {/* Header */}
       <div className="space-y-4">
-        <div className="inline-flex items-center gap-2 rounded-full bg-cyan-50 px-4 py-1.5 text-sm font-semibold text-cyan-700">
+        <div className="inline-flex items-center gap-2 rounded-full bg-info/10 px-4 py-1.5 text-sm font-semibold text-info-foreground">
           <Terminal className="h-4 w-4" />
           <span>MCP Tool</span>
         </div>
-        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl leading-tight">
+        <h1 className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl leading-tight">
           {meta.name}
         </h1>
-        <p className="text-xl text-gray-500 leading-relaxed max-w-2xl">
+        <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl">
           {meta.description}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 pt-2">
@@ -85,7 +85,7 @@ export function AppProductPage({ appId }: AppProductPageProps) {
             onClick={() => {
               window.dispatchEvent(new CustomEvent("change-tab", { detail: "Terminal" }));
             }}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-8 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-foreground px-8 py-4 text-lg font-bold text-background shadow-lg transition hover:bg-foreground/90 hover:scale-[1.02] active:scale-[0.98]"
           >
             <Terminal className="h-5 w-5" />
             Open Terminal
@@ -96,12 +96,12 @@ export function AppProductPage({ appId }: AppProductPageProps) {
       {/* Tool Names */}
       {meta.toolNames.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-lg font-bold text-gray-900">Available Tools</h2>
+          <h2 className="text-lg font-bold text-foreground">Available Tools</h2>
           <div className="flex flex-wrap gap-2">
             {meta.toolNames.map((name) => (
               <code
                 key={name}
-                className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-mono text-slate-700"
+                className="rounded-lg bg-muted px-3 py-1.5 text-sm font-mono text-foreground"
               >
                 {name}
               </code>
@@ -113,37 +113,37 @@ export function AppProductPage({ appId }: AppProductPageProps) {
       {/* Capabilities Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {meta.capabilities.map((capability, i) => (
-            <div key={i} className="flex flex-col gap-3 rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md hover:border-cyan-100">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
+            <div key={i} className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:shadow-md">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-info/10 text-info-foreground">
                 {i % 5 === 0 && <Shield className="h-5 w-5" />}
                 {i % 5 === 1 && <Zap className="h-5 w-5" />}
                 {i % 5 === 2 && <Layout className="h-5 w-5" />}
                 {i % 5 === 3 && <CheckCircle className="h-5 w-5" />}
                 {i % 5 === 4 && <Terminal className="h-5 w-5" />}
               </div>
-              <p className="text-gray-600 leading-snug">{capability}</p>
+              <p className="text-muted-foreground leading-snug">{capability}</p>
             </div>
           ))}
       </div>
 
       {/* Package Info */}
-      <div className="rounded-2xl bg-slate-50 p-6 text-sm text-slate-600">
-        <h3 className="font-bold text-slate-900 mb-2">Package Info</h3>
+      <div className="rounded-2xl bg-muted p-6 text-sm text-muted-foreground border border-border">
+        <h3 className="font-bold text-foreground mb-2">Package Info</h3>
         <div className="grid gap-2 sm:grid-cols-2">
           <div>
-            <span className="text-slate-400">Package: </span>
-            <code className="text-slate-700">@spike-land-ai/{appId}</code>
+            <span className="text-muted-foreground">Package: </span>
+            <code className="text-foreground">@spike-land-ai/{appId}</code>
           </div>
           <div>
-            <span className="text-slate-400">Source: </span>
-            <code className="text-slate-700">{meta.packagePath}</code>
+            <span className="text-muted-foreground">Source: </span>
+            <code className="text-foreground">{meta.packagePath}</code>
           </div>
           <div>
-            <span className="text-slate-400">Protocol: </span>
+            <span className="text-muted-foreground">Protocol: </span>
             <span>Model Context Protocol (MCP)</span>
           </div>
           <div>
-            <span className="text-slate-400">Runtime: </span>
+            <span className="text-muted-foreground">Runtime: </span>
             <span>Node.js / Cloudflare Workers</span>
           </div>
         </div>

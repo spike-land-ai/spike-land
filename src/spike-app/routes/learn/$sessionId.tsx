@@ -322,7 +322,7 @@ export function LearnSessionPage() {
   if (!state) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="text-gray-400">Loading quiz...</div>
+        <div className="text-muted-foreground">Loading quiz...</div>
       </div>
     );
   }
@@ -330,9 +330,9 @@ export function LearnSessionPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Learning Quiz</h1>
+        <h1 className="text-2xl font-bold text-foreground">Learning Quiz</h1>
         {!state.completed && (
-          <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+          <span className="rounded-full bg-info/10 px-3 py-1 text-sm font-medium text-info-foreground">
             Score: {state.score}%
           </span>
         )}
@@ -378,7 +378,7 @@ export function LearnSessionPage() {
           {state.results && !state.completed && (
             <button
               onClick={handleNextRound}
-              className="w-full rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+              className="w-full rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               Next Round
             </button>

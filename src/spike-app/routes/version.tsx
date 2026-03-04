@@ -59,8 +59,8 @@ export function VersionPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-4xl p-6">
-        <h1 className="mb-4 text-2xl font-bold">Version</h1>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+        <h1 className="mb-4 text-2xl font-bold text-foreground">Version</h1>
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-destructive">
           Failed to load version info: {error}
         </div>
       </div>
@@ -70,11 +70,11 @@ export function VersionPage() {
   if (!data) {
     return (
       <div className="mx-auto max-w-4xl p-6">
-        <h1 className="mb-4 text-2xl font-bold">Version</h1>
+        <h1 className="mb-4 text-2xl font-bold text-foreground">Version</h1>
         <div className="animate-pulse space-y-4">
-          <div className="h-6 w-48 rounded bg-gray-200" />
-          <div className="h-6 w-64 rounded bg-gray-200" />
-          <div className="h-64 rounded bg-gray-200" />
+          <div className="h-6 w-48 rounded bg-muted" />
+          <div className="h-6 w-64 rounded bg-muted" />
+          <div className="h-64 rounded bg-muted" />
         </div>
       </div>
     );
@@ -93,60 +93,60 @@ export function VersionPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <h1 className="text-2xl font-bold">Version</h1>
+      <h1 className="text-2xl font-bold text-foreground">Version</h1>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border bg-white p-4">
-          <div className="text-sm text-gray-500">Build SHA</div>
+        <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <div className="text-sm text-muted-foreground">Build SHA</div>
           <button
             onClick={expanded ? handleCopy : () => setExpanded(true)}
-            className="mt-1 font-mono text-lg hover:text-blue-600"
+            className="mt-1 font-mono text-lg text-foreground hover:text-primary"
             title={expanded ? "Click to copy" : "Click to expand"}
           >
             {expanded ? data.sha : shortSha}
           </button>
-          {copied && <span className="ml-2 text-sm text-green-600">Copied!</span>}
+          {copied && <span className="ml-2 text-sm text-success">Copied!</span>}
         </div>
-        <div className="rounded-lg border bg-white p-4">
-          <div className="text-sm text-gray-500">Build Time</div>
-          <div className="mt-1 text-lg">{buildTimeStr}</div>
+        <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <div className="text-sm text-muted-foreground">Build Time</div>
+          <div className="mt-1 text-lg text-foreground">{buildTimeStr}</div>
         </div>
       </div>
 
-      <div className="rounded-lg border bg-white">
-        <div className="border-b px-4 py-3">
-          <h2 className="font-semibold">Deployed Assets ({data.assets.length})</h2>
+      <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
+        <div className="border-b border-border px-4 py-3">
+          <h2 className="font-semibold text-foreground">Deployed Assets ({data.assets.length})</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b bg-gray-50">
+            <thead className="border-b border-border bg-muted">
               <tr>
-                <th className="px-4 py-2 font-medium text-gray-600">File</th>
-                <th className="px-4 py-2 font-medium text-gray-600">Type</th>
-                <th className="px-4 py-2 text-right font-medium text-gray-600">Size</th>
-                <th className="px-4 py-2 font-medium text-gray-600">Uploaded</th>
-                <th className="px-4 py-2 font-medium text-gray-600" />
+                <th className="px-4 py-2 font-medium text-muted-foreground">File</th>
+                <th className="px-4 py-2 font-medium text-muted-foreground">Type</th>
+                <th className="px-4 py-2 text-right font-medium text-muted-foreground">Size</th>
+                <th className="px-4 py-2 font-medium text-muted-foreground">Uploaded</th>
+                <th className="px-4 py-2 font-medium text-muted-foreground" />
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-border">
               {data.assets.map((asset) => (
-                <tr key={asset.key} className="hover:bg-gray-50">
-                  <td className="max-w-xs truncate px-4 py-2 font-mono text-xs" title={asset.key}>
+                <tr key={asset.key} className="hover:bg-muted transition-colors">
+                  <td className="max-w-xs truncate px-4 py-2 font-mono text-xs text-foreground" title={asset.key}>
                     {asset.key}
                   </td>
                   <td className="px-4 py-2">
-                    <span className="inline-block rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                    <span className="inline-block rounded bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
                       {fileTypeIcon(asset.key)}
                     </span>
                   </td>
-                  <td className="px-4 py-2 text-right tabular-nums">{formatSize(asset.size)}</td>
-                  <td className="px-4 py-2 text-gray-500">
+                  <td className="px-4 py-2 text-right tabular-nums text-foreground">{formatSize(asset.size)}</td>
+                  <td className="px-4 py-2 text-muted-foreground">
                     {new Date(asset.uploaded).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-2">
                     <a
                       href={`https://spike.land/${asset.key}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-primary hover:underline"
                       target="_blank"
                       rel="noopener noreferrer"
                     >

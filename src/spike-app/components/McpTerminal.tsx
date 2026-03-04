@@ -257,18 +257,18 @@ export function McpTerminal({ appId }: McpTerminalProps) {
 
   return (
     <div className="flex h-full min-h-[400px] flex-col">
-      <div className="flex items-center justify-between border-b bg-slate-900 px-3 py-2">
+      <div className="flex items-center justify-between border-b border-border bg-card px-3 py-2">
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
-            <div className="h-3 w-3 rounded-full bg-red-500" />
-            <div className="h-3 w-3 rounded-full bg-yellow-500" />
-            <div className="h-3 w-3 rounded-full bg-green-500" />
+            <div className="h-3 w-3 rounded-full bg-destructive" />
+            <div className="h-3 w-3 rounded-full bg-warning" />
+            <div className="h-3 w-3 rounded-full bg-success" />
           </div>
-          <span className="ml-2 text-xs text-slate-400">
+          <span className="ml-2 text-xs text-muted-foreground">
             MCP Terminal {appId ? `— ${appId}` : ""}
           </span>
         </div>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-muted-foreground">
           {tools.length > 0 ? `${tools.length} tools loaded` : ""}
         </span>
       </div>

@@ -21,14 +21,14 @@ export function LoginButton() {
   }, [menuOpen]);
 
   if (isLoading) {
-    return <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />;
+    return <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />;
   }
 
   if (!isAuthenticated || !user) {
     return (
       <button
         onClick={() => login()}
-        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
       >
         Sign in
       </button>
@@ -46,7 +46,7 @@ export function LoginButton() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-gray-100"
+        className="flex items-center gap-2 rounded-lg px-2 py-1 hover:bg-muted text-foreground"
         aria-label={`Account menu for ${user.name ?? user.email ?? "User"}`}
         aria-expanded={menuOpen}
         aria-haspopup="menu"
@@ -54,7 +54,7 @@ export function LoginButton() {
         {user.picture ? (
           <img src={user.picture} alt="" className="h-8 w-8 rounded-full" />
         ) : (
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-xs font-medium text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
             {initials}
           </div>
         )}
@@ -64,15 +64,15 @@ export function LoginButton() {
       </button>
 
       {menuOpen && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border bg-white py-1 shadow-lg">
-          <div className="border-b px-4 py-2">
-            <p className="truncate text-sm font-medium">{user.name ?? "User"}</p>
-            {user.email && <p className="truncate text-xs text-gray-500">{user.email}</p>}
+        <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-border bg-card py-1 shadow-lg">
+          <div className="border-b border-border px-4 py-2">
+            <p className="truncate text-sm font-medium text-foreground">{user.name ?? "User"}</p>
+            {user.email && <p className="truncate text-xs text-muted-foreground">{user.email}</p>}
           </div>
           <Link
             to="/settings"
             onClick={() => setMenuOpen(false)}
-            className="block px-4 py-2 text-sm hover:bg-gray-50"
+            className="block px-4 py-2 text-sm text-foreground hover:bg-muted"
           >
             Settings
           </Link>
@@ -81,7 +81,7 @@ export function LoginButton() {
               setMenuOpen(false);
               logout();
             }}
-            className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50"
+            className="block w-full px-4 py-2 text-left text-sm text-destructive hover:bg-muted"
           >
             Log out
           </button>

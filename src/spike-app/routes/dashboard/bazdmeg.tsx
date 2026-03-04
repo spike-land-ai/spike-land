@@ -43,10 +43,10 @@ function MetricCard({
   color?: string;
 }) {
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className={`mt-1 text-2xl font-bold ${color ?? "text-gray-900"}`}>{value}</p>
-      {subtitle && <p className="mt-1 text-xs text-gray-400">{subtitle}</p>}
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className={`mt-1 text-2xl font-bold ${color ?? "text-foreground"}`}>{value}</p>
+      {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }
@@ -60,15 +60,15 @@ function TimeRangeSelector({
 }) {
   const ranges: TimeRange[] = ["24h", "7d", "30d"];
   return (
-    <div className="flex gap-1 rounded-lg border bg-gray-50 p-1">
+    <div className="flex gap-1 rounded-lg border border-border bg-muted p-1">
       {ranges.map((range) => (
         <button
           key={range}
           onClick={() => onChange(range)}
           className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
             value === range
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           {range}
@@ -80,14 +80,14 @@ function TimeRangeSelector({
 
 function GateStatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    GREEN: "bg-green-100 text-green-800",
-    YELLOW: "bg-yellow-100 text-yellow-800",
-    RED: "bg-red-100 text-red-800",
+    GREEN: "bg-success text-success-foreground",
+    YELLOW: "bg-warning text-warning-foreground",
+    RED: "bg-destructive text-destructive-foreground",
   };
   return (
     <span
       className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-        colors[status] ?? "bg-gray-100 text-gray-600"
+        colors[status] ?? "bg-muted text-muted-foreground"
       }`}
     >
       {status}
@@ -97,20 +97,20 @@ function GateStatusBadge({ status }: { status: string }) {
 
 function EventTypeBadge({ eventType }: { eventType: string }) {
   const colors: Record<string, string> = {
-    workspace_enter: "bg-blue-100 text-blue-700",
-    workspace_exit: "bg-blue-50 text-blue-500",
-    tool_call: "bg-gray-100 text-gray-600",
-    gate_check: "bg-purple-100 text-purple-700",
-    context_served: "bg-green-100 text-green-700",
-    context_gap: "bg-orange-100 text-orange-700",
-    agent_stuck: "bg-red-100 text-red-700",
-    stuck_resolved: "bg-emerald-100 text-emerald-700",
-    jail_block: "bg-red-50 text-red-600",
+    workspace_enter: "bg-info text-info-foreground",
+    workspace_exit: "bg-info/60 text-info-foreground",
+    tool_call: "bg-muted text-muted-foreground",
+    gate_check: "bg-info text-info-foreground",
+    context_served: "bg-success text-success-foreground",
+    context_gap: "bg-warning text-warning-foreground",
+    agent_stuck: "bg-destructive text-destructive-foreground",
+    stuck_resolved: "bg-success text-success-foreground",
+    jail_block: "bg-destructive/60 text-destructive-foreground",
   };
   return (
     <span
       className={`inline-block rounded px-1.5 py-0.5 text-xs font-medium ${
-        colors[eventType] ?? "bg-gray-100 text-gray-600"
+        colors[eventType] ?? "bg-muted text-muted-foreground"
       }`}
     >
       {eventType}
@@ -183,14 +183,14 @@ function reconstructState(events: PlatformEvent[], upTo: number): ReconstructedS
 }
 
 const EVENT_DOT_COLORS: Record<string, string> = {
-  workspace_enter: "bg-blue-500",
-  workspace_exit: "bg-blue-300",
-  gate_check: "bg-purple-500",
-  agent_stuck: "bg-red-500",
-  stuck_resolved: "bg-emerald-500",
-  context_served: "bg-green-500",
-  context_gap: "bg-orange-500",
-  tool_call: "bg-gray-400",
+  workspace_enter: "bg-primary",
+  workspace_exit: "bg-primary/60",
+  gate_check: "bg-info",
+  agent_stuck: "bg-destructive",
+  stuck_resolved: "bg-success",
+  context_served: "bg-success",
+  context_gap: "bg-warning",
+  tool_call: "bg-muted-foreground",
 };
 
 function ReplaySlider({
@@ -218,7 +218,7 @@ function ReplaySlider({
     if (range <= 0) return [];
     return sortedByTime.map((e) => ({
       position: ((e.created_at - earliest) / range) * 100,
-      color: EVENT_DOT_COLORS[e.event_type] ?? "bg-gray-300",
+      color: EVENT_DOT_COLORS[e.event_type] ?? "bg-muted-foreground",
       type: e.event_type,
     }));
   }, [sortedByTime, earliest, range]);
@@ -226,19 +226,19 @@ function ReplaySlider({
   if (events.length === 0) return null;
 
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm">
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Workspace Replay
         </h3>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500">{new Date(current).toLocaleString()}</span>
+          <span className="text-xs text-muted-foreground">{new Date(current).toLocaleString()}</span>
           <button
             onClick={onGoLive}
             className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
               replayTimestamp === null
-                ? "bg-green-100 text-green-700"
-                : "bg-gray-100 text-gray-600 hover:bg-green-50 hover:text-green-700"
+                ? "bg-success text-success-foreground"
+                : "bg-muted text-muted-foreground hover:bg-success/20 hover:text-success-foreground"
             }`}
           >
             {replayTimestamp === null ? "LIVE" : "Go Live"}
@@ -265,7 +265,7 @@ function ReplaySlider({
           max={latest}
           value={current}
           onChange={(e) => onTimestampChange(Number(e.target.value))}
-          className="relative z-10 w-full cursor-pointer accent-blue-600"
+          className="relative z-10 w-full cursor-pointer accent-primary"
         />
       </div>
 
@@ -283,18 +283,18 @@ function ReconstructedStateDisplay({ events, upTo }: { events: PlatformEvent[]; 
   const workspaceEntries = Array.from(state.activeWorkspaces.entries());
 
   return (
-    <div className="mt-4 grid gap-3 border-t pt-4 sm:grid-cols-3">
+    <div className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-3">
       {/* Active workspaces at this point */}
       <div>
-        <p className="mb-1 text-xs font-medium text-gray-500">Active Workspaces</p>
+        <p className="mb-1 text-xs font-medium text-muted-foreground">Active Workspaces</p>
         {workspaceEntries.length === 0 ? (
-          <p className="text-xs text-gray-400">None</p>
+          <p className="text-xs text-muted-foreground">None</p>
         ) : (
           <div className="space-y-1">
             {workspaceEntries.map(([name, info]) => (
-              <div key={name} className="rounded bg-blue-50 px-2 py-1">
-                <span className="text-xs font-medium text-blue-700">{name}</span>
-                <span className="ml-2 text-xs text-blue-400">
+              <div key={name} className="rounded bg-info/10 px-2 py-1">
+                <span className="text-xs font-medium text-info-foreground">{name}</span>
+                <span className="ml-2 text-xs text-muted-foreground">
                   since {new Date(info.enteredAt).toLocaleTimeString()}
                 </span>
               </div>
@@ -305,15 +305,15 @@ function ReconstructedStateDisplay({ events, upTo }: { events: PlatformEvent[]; 
 
       {/* Gate status at this point */}
       <div>
-        <p className="mb-1 text-xs font-medium text-gray-500">Gate Status</p>
+        <p className="mb-1 text-xs font-medium text-muted-foreground">Gate Status</p>
         {state.latestGates.size === 0 ? (
-          <p className="text-xs text-gray-400">No checks</p>
+          <p className="text-xs text-muted-foreground">No checks</p>
         ) : (
           <div className="space-y-1">
             {Array.from(state.latestGates.entries()).map(([name, gate]) => (
               <div key={name} className="flex items-center gap-1">
                 <GateStatusBadge status={gate.status} />
-                <span className="text-xs text-gray-600">{name}</span>
+                <span className="text-xs text-muted-foreground">{name}</span>
               </div>
             ))}
           </div>
@@ -322,15 +322,15 @@ function ReconstructedStateDisplay({ events, upTo }: { events: PlatformEvent[]; 
 
       {/* Unresolved stuck signals */}
       <div>
-        <p className="mb-1 text-xs font-medium text-gray-500">Unresolved Stuck</p>
+        <p className="mb-1 text-xs font-medium text-muted-foreground">Unresolved Stuck</p>
         {state.unresolvedStuck.length === 0 ? (
-          <p className="text-xs text-gray-400">None</p>
+          <p className="text-xs text-muted-foreground">None</p>
         ) : (
           <div className="space-y-1">
             {state.unresolvedStuck.map((s, i) => (
-              <div key={i} className="rounded bg-red-50 px-2 py-1">
-                <span className="text-xs font-medium text-red-700">{s.workspace}</span>
-                <p className="text-xs text-red-500">{s.reason}</p>
+              <div key={i} className="rounded bg-destructive/10 px-2 py-1">
+                <span className="text-xs font-medium text-destructive">{s.workspace}</span>
+                <p className="text-xs text-destructive/80">{s.reason}</p>
               </div>
             ))}
           </div>
@@ -442,7 +442,7 @@ export function BazdmegDashboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">BAZDMEG Dashboard</h1>
+        <h1 className="text-2xl font-bold text-foreground">BAZDMEG Dashboard</h1>
         <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
       </div>
 
@@ -470,28 +470,28 @@ export function BazdmegDashboardPage() {
             gatePassRate === null
               ? undefined
               : gatePassRate >= 80
-                ? "text-green-600"
+                ? "text-success-foreground"
                 : gatePassRate >= 50
-                  ? "text-yellow-600"
-                  : "text-red-600"
+                  ? "text-warning-foreground"
+                  : "text-destructive"
           }
         />
         <MetricCard
           label="Stuck Signals"
           value={String(stuckSignals.length)}
           subtitle={stuckSignals.length > 0 ? "needs attention" : "all clear"}
-          color={stuckSignals.length > 0 ? "text-red-600" : "text-green-600"}
+          color={stuckSignals.length > 0 ? "text-destructive" : "text-success-foreground"}
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Gate Results */}
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Latest Gate Results
           </h3>
           {latestGateResults.length === 0 ? (
-            <div className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed text-gray-400">
+            <div className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground">
               No gate checks yet
             </div>
           ) : (
@@ -499,11 +499,11 @@ export function BazdmegDashboardPage() {
               {latestGateResults.map((gate) => (
                 <div
                   key={gate.name}
-                  className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
+                  className="flex items-center justify-between rounded-lg bg-muted px-3 py-2"
                 >
-                  <span className="text-sm font-medium text-gray-700">{gate.name}</span>
+                  <span className="text-sm font-medium text-foreground">{gate.name}</span>
                   <div className="flex items-center gap-2">
-                    <span className="max-w-48 truncate text-xs text-gray-500">{gate.detail}</span>
+                    <span className="max-w-48 truncate text-xs text-muted-foreground">{gate.detail}</span>
                     <GateStatusBadge status={gate.status} />
                   </div>
                 </div>
@@ -513,12 +513,12 @@ export function BazdmegDashboardPage() {
         </div>
 
         {/* Stuck Signals */}
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Stuck Signals
           </h3>
           {stuckSignals.length === 0 ? (
-            <div className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed text-gray-400">
+            <div className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground">
               No stuck signals
             </div>
           ) : (
@@ -526,18 +526,18 @@ export function BazdmegDashboardPage() {
               {stuckSignals.map((signal) => {
                 const meta = parseMeta(signal.metadata);
                 return (
-                  <div key={signal.id} className="rounded-lg border border-red-100 bg-red-50 p-3">
+                  <div key={signal.id} className="rounded-lg border border-destructive/30 bg-destructive/10 p-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-red-800">
+                      <span className="text-sm font-medium text-destructive">
                         {String(meta.workspace ?? "unknown")}
                       </span>
-                      <span className="text-xs text-red-400">
+                      <span className="text-xs text-destructive/70">
                         {new Date(signal.created_at).toLocaleTimeString()}
                       </span>
                     </div>
-                    <p className="mt-1 text-sm text-red-700">{String(meta.reason ?? "")}</p>
+                    <p className="mt-1 text-sm text-destructive/90">{String(meta.reason ?? "")}</p>
                     {typeof meta.attemptedAction === "string" && (
-                      <p className="mt-1 text-xs text-red-500">Attempted: {meta.attemptedAction}</p>
+                      <p className="mt-1 text-xs text-destructive/70">Attempted: {meta.attemptedAction}</p>
                     )}
                   </div>
                 );
@@ -548,23 +548,23 @@ export function BazdmegDashboardPage() {
       </div>
 
       {/* Event Log */}
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Event Log</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Event Log</h3>
           <select
             value={eventTypeFilter}
             onChange={(e) => setEventTypeFilter(e.target.value)}
-            className="rounded-md border bg-gray-50 px-2 py-1 text-sm text-gray-700"
+            className="rounded-md border border-border bg-muted px-2 py-1 text-sm text-foreground"
           >
             {eventTypes.map((type) => (
-              <option key={type} value={type}>
+              <option key={type} value={type} className="bg-card">
                 {type === "all" ? "All Events" : type}
               </option>
             ))}
           </select>
         </div>
         {filteredEvents.length === 0 ? (
-          <div className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed text-gray-400">
+          <div className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground">
             No events found
           </div>
         ) : (
@@ -576,24 +576,24 @@ export function BazdmegDashboardPage() {
                 <div key={event.id}>
                   <button
                     onClick={() => setExpandedEvent(isExpanded ? null : event.id)}
-                    className="flex w-full items-center justify-between rounded px-2 py-1.5 text-left hover:bg-gray-50"
+                    className="flex w-full items-center justify-between rounded px-2 py-1.5 text-left hover:bg-muted transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <EventTypeBadge eventType={event.event_type} />
                       {typeof meta.workspace === "string" && (
-                        <span className="text-xs text-gray-500">{meta.workspace}</span>
+                        <span className="text-xs text-muted-foreground">{meta.workspace}</span>
                       )}
                       {typeof meta.tool === "string" && (
-                        <span className="text-xs text-gray-400">{meta.tool}</span>
+                        <span className="text-xs text-muted-foreground">{meta.tool}</span>
                       )}
                     </div>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-muted-foreground">
                       {new Date(event.created_at).toLocaleTimeString()}
                     </span>
                   </button>
                   {isExpanded && (
-                    <div className="mb-1 ml-2 rounded bg-gray-50 p-2">
-                      <pre className="overflow-x-auto text-xs text-gray-600">
+                    <div className="mb-1 ml-2 rounded bg-muted p-2 border border-border">
+                      <pre className="overflow-x-auto text-xs text-muted-foreground">
                         {JSON.stringify(meta, null, 2)}
                       </pre>
                     </div>

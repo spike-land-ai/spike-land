@@ -5,7 +5,7 @@ export function AboutPage() {
 
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">What is spike.land?</h2>
-        <p className="leading-relaxed text-gray-700">
+        <p className="leading-relaxed text-foreground">
           spike.land is an AI development platform for building, deploying, and managing AI-powered
           applications with real-time collaboration. It combines a powerful MCP tool registry, live
           code editing, and real-time collaboration into a single cohesive platform.
@@ -14,7 +14,7 @@ export function AboutPage() {
 
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Key Features</h2>
-        <ul className="list-inside list-disc space-y-2 text-gray-700">
+        <ul className="list-inside list-disc space-y-2 text-foreground">
           <li>80+ MCP tools available through the tool registry</li>
           <li>Real-time collaboration</li>
           <li>Live code editor with Monaco and instant preview</li>
@@ -25,11 +25,11 @@ export function AboutPage() {
 
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Open Source</h2>
-        <p className="leading-relaxed text-gray-700">
+        <p className="leading-relaxed text-foreground">
           spike.land is built in the open. Visit our{" "}
           <a
             href="https://github.com/spike-land-ai"
-            className="text-blue-600 underline hover:text-blue-800"
+            className="text-primary underline hover:text-primary/80"
             target="_blank"
             rel="noopener noreferrer"
           >

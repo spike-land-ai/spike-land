@@ -81,13 +81,13 @@ export function JsonSchemaForm({ schema, onChange, onSubmit, isPending }: JsonSc
   if (!schema.properties || Object.keys(schema.properties).length === 0) {
     return (
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="rounded-lg bg-gray-50 p-4 text-sm text-gray-500 dark:bg-zinc-800/50 dark:text-zinc-400 border border-gray-200 dark:border-zinc-800">
+        <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground border border-border">
           This tool requires no input arguments.
         </div>
         <button
           type="submit"
           disabled={isPending}
-          className="w-full sm:w-auto rounded-lg bg-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-500 disabled:opacity-50 transition-colors focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+          className="w-full sm:w-auto rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50 transition-colors focus:ring-2 focus:ring-ring focus:outline-none"
         >
           {isPending ? "Executing..." : "Execute Tool"}
         </button>
@@ -103,12 +103,12 @@ export function JsonSchemaForm({ schema, onChange, onSubmit, isPending }: JsonSc
 
           return (
             <div key={key} className="space-y-1.5">
-              <label htmlFor={key} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                {key} {isRequired && <span className="text-red-500">*</span>}
+              <label htmlFor={key} className="block text-sm font-medium text-foreground">
+                {key} {isRequired && <span className="text-destructive">*</span>}
               </label>
 
               {prop.description && (
-                <p className="text-xs text-gray-500 dark:text-zinc-400 mb-2">{prop.description}</p>
+                <p className="text-xs text-muted-foreground mb-2">{prop.description}</p>
               )}
 
               {prop.type === "boolean" ? (
@@ -118,9 +118,9 @@ export function JsonSchemaForm({ schema, onChange, onSubmit, isPending }: JsonSc
                     type="checkbox"
                     checked={!!formData[key]}
                     onChange={(e) => handleChange(key, e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-600 dark:border-zinc-700 dark:bg-zinc-900"
+                    className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
                   />
-                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Enable</span>
+                  <span className="ml-2 text-sm text-muted-foreground">Enable</span>
                 </div>
               ) : prop.enum ? (
                 <select
@@ -128,7 +128,7 @@ export function JsonSchemaForm({ schema, onChange, onSubmit, isPending }: JsonSc
                   value={formData[key] || ""}
                   onChange={(e) => handleChange(key, e.target.value)}
                   required={isRequired}
-                  className="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-cyan-600 sm:text-sm sm:leading-6 dark:bg-zinc-900 dark:text-white dark:ring-zinc-700"
+                  className="block w-full rounded-md border-0 py-2 pl-3 pr-10 text-foreground bg-card ring-1 ring-inset ring-border focus:ring-2 focus:ring-inset focus:ring-ring sm:text-sm sm:leading-6"
                 >
                   {prop.enum.map((opt) => (
                     <option key={opt} value={opt}>
@@ -143,7 +143,7 @@ export function JsonSchemaForm({ schema, onChange, onSubmit, isPending }: JsonSc
                   value={formData[key] ?? ""}
                   onChange={(e) => handleChange(key, e.target.value === "" ? "" : Number(e.target.value))}
                   required={isRequired}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-cyan-600 sm:text-sm sm:leading-6 dark:bg-zinc-900 dark:text-white dark:ring-zinc-700 dark:placeholder:text-zinc-500"
+                  className="block w-full rounded-md border-0 py-1.5 text-foreground bg-card shadow-sm ring-1 ring-inset ring-border placeholder:text-muted-foreground focus:ring-2 focus:ring-inset focus:ring-ring sm:text-sm sm:leading-6"
                 />
               ) : prop.type === "string" && prop.description && prop.description.length > 50 ? (
                 <textarea
@@ -152,7 +152,7 @@ export function JsonSchemaForm({ schema, onChange, onSubmit, isPending }: JsonSc
                   value={formData[key] || ""}
                   onChange={(e) => handleChange(key, e.target.value)}
                   required={isRequired}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-cyan-600 sm:text-sm sm:leading-6 dark:bg-zinc-900 dark:text-white dark:ring-zinc-700 dark:placeholder:text-zinc-500"
+                  className="block w-full rounded-md border-0 py-1.5 text-foreground bg-card shadow-sm ring-1 ring-inset ring-border placeholder:text-muted-foreground focus:ring-2 focus:ring-inset focus:ring-ring sm:text-sm sm:leading-6"
                 />
               ) : (
                 <div className="relative">
@@ -164,7 +164,7 @@ export function JsonSchemaForm({ schema, onChange, onSubmit, isPending }: JsonSc
                     value={formData[key] || ""}
                     onChange={(e) => handleChange(key, e.target.value)}
                     required={isRequired}
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-cyan-600 sm:text-sm sm:leading-6 dark:bg-zinc-900 dark:text-white dark:ring-zinc-700 dark:placeholder:text-zinc-500"
+                    className="block w-full rounded-md border-0 py-1.5 text-foreground bg-card shadow-sm ring-1 ring-inset ring-border placeholder:text-muted-foreground focus:ring-2 focus:ring-inset focus:ring-ring sm:text-sm sm:leading-6"
                   />
                   {key === "content_url" && urlOptions.length > 0 && (
                     <datalist id="content-url-options">
@@ -182,7 +182,7 @@ export function JsonSchemaForm({ schema, onChange, onSubmit, isPending }: JsonSc
       <button
         type="submit"
         disabled={isPending}
-        className="w-full sm:w-auto rounded-lg bg-cyan-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-cyan-500 disabled:opacity-50 transition-colors focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+        className="w-full sm:w-auto rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50 transition-colors focus:ring-2 focus:ring-ring focus:outline-none"
       >
         {isPending ? "Executing..." : "Execute Tool"}
       </button>

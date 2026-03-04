@@ -27,10 +27,10 @@ function MetricCard({
   subtitle?: string;
 }) {
   return (
-    <div className="rounded-xl border bg-white p-5 shadow-sm">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="mt-1 text-2xl font-bold">{value}</p>
-      {subtitle && <p className="mt-1 text-xs text-gray-400">{subtitle}</p>}
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-bold text-foreground">{value}</p>
+      {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }
@@ -44,15 +44,15 @@ function TimeRangeSelector({
 }) {
   const ranges: TimeRange[] = ["24h", "7d", "30d"];
   return (
-    <div className="flex gap-1 rounded-lg border bg-gray-50 p-1">
+    <div className="flex gap-1 rounded-lg border border-border bg-muted p-1">
       {ranges.map((range) => (
         <button
           key={range}
           onClick={() => onChange(range)}
           className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
             value === range
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           {range}
@@ -102,7 +102,7 @@ export function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Analytics</h1>
+        <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
         <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
       </div>
 
@@ -131,12 +131,12 @@ export function AnalyticsPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Tool Usage */}
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Top Tools by Usage
           </h3>
           {!summary?.toolUsage.length ? (
-            <div className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed text-gray-400">
+            <div className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground">
               {loading ? "Loading..." : "No tool usage data yet"}
             </div>
           ) : (
@@ -144,12 +144,12 @@ export function AnalyticsPage() {
               {summary.toolUsage.slice(0, 10).map((tool) => (
                 <div
                   key={tool.tool_name}
-                  className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2"
+                  className="flex items-center justify-between rounded-lg bg-muted px-3 py-2"
                 >
-                  <span className="text-sm font-medium text-gray-700">{tool.tool_name}</span>
+                  <span className="text-sm font-medium text-foreground">{tool.tool_name}</span>
                   <div className="flex items-center gap-2">
                     <div
-                      className="h-2 rounded-full bg-blue-500"
+                      className="h-2 rounded-full bg-primary"
                       style={{
                         width: `${Math.max(
                           12,
@@ -157,7 +157,7 @@ export function AnalyticsPage() {
                         )}px`,
                       }}
                     />
-                    <span className="text-xs text-gray-500">{tool.count}</span>
+                    <span className="text-xs text-muted-foreground">{tool.count}</span>
                   </div>
                 </div>
               ))}
@@ -166,12 +166,12 @@ export function AnalyticsPage() {
         </div>
 
         {/* Recent Activity */}
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Recent Activity
           </h3>
           {recentEvents.length === 0 ? (
-            <div className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed text-gray-400">
+            <div className="flex h-48 items-center justify-center rounded-lg border-2 border-dashed border-border text-muted-foreground">
               {loading ? "Loading..." : "No recent events"}
             </div>
           ) : (
@@ -179,15 +179,15 @@ export function AnalyticsPage() {
               {recentEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="flex items-center justify-between rounded px-2 py-1.5 hover:bg-gray-50"
+                  className="flex items-center justify-between rounded px-2 py-1.5 hover:bg-muted"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="inline-block rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-600">
+                    <span className="inline-block rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
                       {event.event_type}
                     </span>
-                    <span className="text-sm text-gray-500">{event.source}</span>
+                    <span className="text-sm text-muted-foreground">{event.source}</span>
                   </div>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-muted-foreground">
                     {new Date(event.created_at).toLocaleTimeString()}
                   </span>
                 </div>
@@ -199,23 +199,23 @@ export function AnalyticsPage() {
 
       {/* Events by Type */}
       {summary?.eventsByType && summary.eventsByType.length > 0 && (
-        <div className="rounded-xl border bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Events by Type
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b text-gray-500">
+                <tr className="border-b border-border text-muted-foreground">
                   <th className="pb-2 font-medium">Event Type</th>
                   <th className="pb-2 text-right font-medium">Count</th>
                 </tr>
               </thead>
               <tbody>
                 {summary.eventsByType.map((entry) => (
-                  <tr key={entry.event_type} className="border-b last:border-0">
-                    <td className="py-2 font-medium text-gray-900">{entry.event_type}</td>
-                    <td className="py-2 text-right text-gray-700">{entry.count}</td>
+                  <tr key={entry.event_type} className="border-b border-border last:border-0">
+                    <td className="py-2 font-medium text-foreground">{entry.event_type}</td>
+                    <td className="py-2 text-right text-foreground">{entry.count}</td>
                   </tr>
                 ))}
               </tbody>

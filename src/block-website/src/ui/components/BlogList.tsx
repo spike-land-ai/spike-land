@@ -18,20 +18,20 @@ export function BlogListView({ linkComponent }: { linkComponent?: React.Componen
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8 font-sans">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <h1 className="text-4xl font-display font-extrabold text-foreground tracking-tight sm:text-5xl mb-6 drop-shadow-sm">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <h1 className="text-2xl font-display font-extrabold text-foreground tracking-tight sm:text-3xl mb-3">
             The Spike.land Blog
           </h1>
-          <p className="text-xl text-muted-foreground font-light">
+          <p className="text-base text-muted-foreground font-light">
             Thoughts on AI agents, Cloudflare Workers, and the future of coding.
           </p>
         </div>
-        <div className="grid gap-8 lg:grid-cols-2 lg:gap-x-10 lg:gap-y-10">
+        <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="animate-pulse bg-card p-6 sm:p-8 rounded-3xl border border-border">
-              <div className="h-4 bg-muted rounded w-1/4 mb-6" />
-              <div className="h-8 bg-muted rounded w-3/4 mb-6" />
-              <div className="h-5 bg-muted rounded w-full" />
+            <div key={i} className="animate-pulse bg-card p-4 sm:p-5 rounded-xl border border-border">
+              <div className="h-3 bg-muted rounded w-1/4 mb-3" />
+              <div className="h-6 bg-muted rounded w-3/4 mb-3" />
+              <div className="h-4 bg-muted rounded w-full" />
             </div>
           ))}
         </div>
@@ -43,7 +43,7 @@ export function BlogListView({ linkComponent }: { linkComponent?: React.Componen
 
   return (
     <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="text-center max-w-2xl mx-auto mb-12">
+      <div className="text-center max-w-2xl mx-auto mb-8">
         <h1 className="text-4xl font-display font-extrabold text-foreground tracking-tight sm:text-5xl mb-6 drop-shadow-sm">
           The Spike.land Blog
         </h1>
@@ -52,10 +52,10 @@ export function BlogListView({ linkComponent }: { linkComponent?: React.Componen
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2 lg:gap-x-10 lg:gap-y-10">
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
         {posts.map((post) => (
-          <article key={post.slug} className="flex flex-col items-start justify-between bg-card p-6 sm:p-8 rounded-3xl shadow-lg border border-border hover:border-primary/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300">
-            <div className="flex items-center gap-x-4 text-sm font-medium tracking-wider uppercase mb-4">
+          <article key={post.slug} className="flex flex-col items-start justify-between bg-card p-4 sm:p-5 rounded-xl border border-border shadow-sm hover:border-primary/40 hover:shadow-md transition-all duration-200">
+            <div className="flex items-center gap-x-3 text-xs font-medium tracking-wider uppercase mb-2">
               <time dateTime={post.date} className="text-muted-foreground/80">
                 {new Date(post.date).toLocaleDateString()}
               </time>
@@ -69,7 +69,7 @@ export function BlogListView({ linkComponent }: { linkComponent?: React.Componen
               )}
             </div>
             <div className="group relative">
-              <h3 className="text-2xl font-display font-bold leading-tight text-foreground group-hover:text-primary transition-colors mb-4">
+              <h3 className="text-lg sm:text-xl font-display font-bold leading-snug text-foreground group-hover:text-primary transition-colors mb-2">
                 {linkComponent ? (
                   <LinkComp to={`/blog/${post.slug}`}>
                     <span className="absolute inset-0" />
@@ -82,7 +82,7 @@ export function BlogListView({ linkComponent }: { linkComponent?: React.Componen
                   </a>
                 )}
               </h3>
-              <p className="line-clamp-3 text-lg leading-relaxed text-muted-foreground font-light">
+              <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
                 {post.description}
               </p>
             </div>

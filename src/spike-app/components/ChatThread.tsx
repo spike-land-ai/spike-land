@@ -43,7 +43,7 @@ export function ChatThread({ messages, onSendMessage, isLoading }: ChatThreadPro
     <div className="flex h-full flex-col">
       <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.length === 0 && (
-          <div className="py-12 text-center text-sm text-gray-400">
+          <div className="py-12 text-center text-sm text-muted-foreground">
             No messages yet. Start a conversation.
           </div>
         )}
@@ -54,14 +54,14 @@ export function ChatThread({ messages, onSendMessage, isLoading }: ChatThreadPro
           >
             <div
               className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
-                msg.role === "user" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-800"
+                msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
               }`}
             >
               <p className="whitespace-pre-wrap">{msg.content}</p>
               {msg.timestamp && (
                 <p
                   className={`mt-1 text-[10px] ${
-                    msg.role === "user" ? "text-blue-200" : "text-gray-400"
+                    msg.role === "user" ? "text-primary-foreground/70" : "text-muted-foreground"
                   }`}
                 >
                   {new Date(msg.timestamp).toLocaleTimeString()}
@@ -72,15 +72,15 @@ export function ChatThread({ messages, onSendMessage, isLoading }: ChatThreadPro
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="flex items-center gap-1 rounded-2xl bg-gray-100 px-4 py-3">
-              <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400 [animation-delay:0ms]" />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400 [animation-delay:150ms]" />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-gray-400 [animation-delay:300ms]" />
+            <div className="flex items-center gap-1 rounded-2xl bg-muted px-4 py-3">
+              <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:0ms]" />
+              <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]" />
+              <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]" />
             </div>
           </div>
         )}
       </div>
-      <div className="border-t p-3">
+      <div className="border-t border-border p-3">
         <div className="flex gap-2">
           <textarea
             ref={inputRef}
@@ -89,12 +89,12 @@ export function ChatThread({ messages, onSendMessage, isLoading }: ChatThreadPro
             onKeyDown={handleKeyDown}
             placeholder="Type a message... (Ctrl+Enter to send)"
             rows={2}
-            className="flex-1 resize-none rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="flex-1 resize-none rounded-lg border border-border bg-card px-3 py-2 text-sm text-card-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="self-end rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+            className="self-end rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             Send
           </button>

@@ -121,7 +121,7 @@ export function LearnIndexPage() {
               value={contentUrl}
               onChange={(e) => setContentUrl(e.target.value)}
               placeholder="https://en.wikipedia.org/wiki/..."
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
         ) : (
@@ -132,13 +132,13 @@ export function LearnIndexPage() {
               onChange={(e) => setContentText(e.target.value)}
               placeholder="Paste the article or content you want to learn from..."
               rows={10}
-              className="w-full resize-y rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full resize-y rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
             />
             <p className="mt-1 text-xs text-muted-foreground">{contentText.length} characters</p>
           </div>
         )}
 
-        {error && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
 
         <button
           onClick={handleStart}
@@ -146,7 +146,7 @@ export function LearnIndexPage() {
           className={`mt-4 w-full rounded-lg px-6 py-3 text-sm font-semibold transition-colors ${
             loading
               ? "cursor-not-allowed bg-muted text-muted-foreground"
-              : "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
+              : "bg-primary text-primary-foreground hover:bg-primary/90"
           }`}
         >
           {loading ? "Creating Quiz..." : "Start Quiz"}
@@ -160,25 +160,25 @@ export function LearnIndexPage() {
         </h3>
         <ol className="space-y-2 text-sm text-muted-foreground">
           <li className="flex gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-xs font-bold text-blue-700 dark:text-blue-400">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
               1
             </span>
             <span>Paste a URL or content to learn from</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-xs font-bold text-blue-700 dark:text-blue-400">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
               2
             </span>
             <span>Read the generated article summary</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-xs font-bold text-blue-700 dark:text-blue-400">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
               3
             </span>
             <span>Answer quiz rounds (3 questions each) to prove understanding</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-xs font-bold text-blue-700 dark:text-blue-400">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
               4
             </span>
             <span>Master all concepts to earn a shareable badge</span>

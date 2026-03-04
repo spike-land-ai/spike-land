@@ -44,7 +44,7 @@ const options: { value: ThemePreference; label: string; Icon: () => ReactNode }[
 
 export function ThemeSwitcher({ theme, setTheme }: ThemeSwitcherProps) {
   return (
-    <div className="rounded-lg p-0.5 flex gap-0.5 bg-gray-100 dark:bg-zinc-800">
+    <div className="rounded-lg p-0.5 flex gap-0.5 bg-muted">
       {options.map(({ value, label, Icon }) => (
         <button
           key={value}
@@ -55,8 +55,8 @@ export function ThemeSwitcher({ theme, setTheme }: ThemeSwitcherProps) {
           className={[
             "rounded-md p-1.5 transition-colors",
             theme === value
-              ? "bg-white dark:bg-zinc-700 shadow-sm text-gray-900 dark:text-gray-100"
-              : "text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200",
+              ? "bg-card shadow-sm text-foreground"
+              : "text-muted-foreground hover:text-foreground",
           ].join(" ")}
         >
           <Icon />

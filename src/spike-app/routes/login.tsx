@@ -41,17 +41,17 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
-      <div className="w-full max-w-sm space-y-6 rounded-xl border bg-white p-8 shadow-sm">
+      <div className="w-full max-w-sm space-y-6 rounded-xl border border-border bg-card p-8 shadow-sm">
         <div className="text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-xl font-bold text-white">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-xl font-bold text-primary-foreground">
             S
           </div>
-          <h1 className="text-2xl font-bold">Sign in to Spike Platform</h1>
-          <p className="mt-2 text-sm text-gray-500">Choose your preferred sign-in method</p>
+          <h1 className="text-2xl font-bold text-foreground">Sign in to Spike Platform</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Choose your preferred sign-in method</p>
         </div>
 
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {error.message}
           </div>
         )}
@@ -60,7 +60,7 @@ export function LoginPage() {
           <button
             onClick={() => login("github")}
             disabled={isLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-foreground px-4 py-2.5 text-sm font-medium text-background hover:bg-foreground/90 disabled:opacity-50 transition-colors"
           >
             <GitHubIcon />
             Continue with GitHub
@@ -68,7 +68,7 @@ export function LoginPage() {
           <button
             onClick={() => login("google")}
             disabled={isLoading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50 transition-colors"
           >
             <GoogleIcon />
             Continue with Google
@@ -77,18 +77,18 @@ export function LoginPage() {
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t" />
+            <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-400">or</span>
+            <span className="bg-card px-2 text-muted-foreground">or</span>
           </div>
         </div>
 
         <div className="text-center">
-          <Link to="/" className="text-sm text-gray-500 hover:text-gray-700 hover:underline">
+          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
             Continue as guest
           </Link>
-          <p className="mt-1 text-xs text-gray-400">Limited features</p>
+          <p className="mt-1 text-xs text-muted-foreground">Limited features</p>
         </div>
       </div>
     </div>

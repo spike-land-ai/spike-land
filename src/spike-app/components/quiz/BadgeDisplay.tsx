@@ -12,7 +12,11 @@ export function BadgeDisplay({ token, topic, score, completedAt }: BadgeDisplayP
 
   const badgeUrl = `${window.location.origin}/learn/badge/${token}`;
   const scoreColor =
-    score >= 80 ? "text-green-600" : score >= 60 ? "text-yellow-600" : "text-red-600";
+    score >= 80
+      ? "text-success-foreground"
+      : score >= 60
+        ? "text-warning-foreground"
+        : "text-destructive-foreground";
   const scoreLabel = score >= 80 ? "Excellent" : score >= 60 ? "Good" : "Passing";
 
   const handleCopy = async () => {
@@ -34,15 +38,15 @@ export function BadgeDisplay({ token, topic, score, completedAt }: BadgeDisplayP
   };
 
   return (
-    <div className="mx-auto max-w-md rounded-2xl border bg-white p-8 shadow-lg">
+    <div className="mx-auto max-w-md rounded-2xl border border-border bg-card p-8 shadow-lg">
       <div className="text-center">
         <div className="mb-4 text-5xl">🎓</div>
-        <h2 className="text-xl font-bold text-gray-900">{topic}</h2>
+        <h2 className="text-xl font-bold text-foreground">{topic}</h2>
         <div className={`mt-2 text-4xl font-extrabold ${scoreColor}`}>{score}%</div>
         <div className={`mt-1 text-sm font-semibold uppercase tracking-wide ${scoreColor}`}>
           {scoreLabel}
         </div>
-        <p className="mt-3 text-sm text-gray-500">
+        <p className="mt-3 text-sm text-muted-foreground">
           Completed{" "}
           {new Date(completedAt).toLocaleDateString("en-US", {
             year: "numeric",
@@ -52,25 +56,25 @@ export function BadgeDisplay({ token, topic, score, completedAt }: BadgeDisplayP
         </p>
       </div>
 
-      <div className="mt-6 border-t pt-4">
-        <label className="mb-1 block text-xs font-medium text-gray-500">Share this badge</label>
+      <div className="mt-6 border-t border-border pt-4">
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Share this badge</label>
         <div className="flex items-center gap-2">
           <input
             type="text"
             readOnly
             value={badgeUrl}
-            className="flex-1 rounded-lg border bg-gray-50 px-3 py-2 text-xs text-gray-600"
+            className="flex-1 rounded-lg border border-border bg-muted px-3 py-2 text-xs text-muted-foreground"
           />
           <button
             onClick={handleCopy}
-            className="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700"
+            className="shrink-0 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             {copied ? "Copied!" : "Copy"}
           </button>
         </div>
       </div>
 
-      <p className="mt-4 text-center text-xs text-gray-400">
+      <p className="mt-4 text-center text-xs text-muted-foreground">
         Verified learning badge from spike.land
       </p>
     </div>

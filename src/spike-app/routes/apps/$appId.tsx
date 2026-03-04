@@ -95,13 +95,13 @@ export function AppDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/apps" className="text-blue-600 hover:underline">
+          <Link to="/apps" className="text-primary hover:underline">
             MCP Tools
           </Link>
-          <span className="text-gray-400">/</span>
-          <h1 className="text-2xl font-bold">{appId}</h1>
+          <span className="text-muted-foreground">/</span>
+          <h1 className="text-2xl font-bold text-foreground">{appId}</h1>
           <StatusBadge status={appStatus} />
-          <span className="rounded bg-cyan-50 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-600">
+          <span className="rounded bg-info/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-info-foreground">
             MCP
           </span>
         </div>
@@ -109,7 +109,7 @@ export function AppDetailPage() {
           {appStatus === "live" && (
             <button
               onClick={() => handleAction("archive")}
-              className="rounded-lg border px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+              className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted"
             >
               Archive
             </button>
@@ -117,14 +117,14 @@ export function AppDetailPage() {
           {appStatus === "archived" && (
             <button
               onClick={() => handleAction("restore")}
-              className="rounded-lg border px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50"
+              className="rounded-lg border border-border px-3 py-1.5 text-sm text-primary hover:bg-muted"
             >
               Restore
             </button>
           )}
           <button
             onClick={() => handleAction("delete")}
-            className="rounded-lg border border-red-200 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
+            className="rounded-lg border border-destructive/30 px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10"
           >
             Delete
           </button>
@@ -132,15 +132,15 @@ export function AppDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b">
+      <div className="flex gap-1 border-b border-border">
         {tabs.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`border-b-2 px-4 py-2 text-sm font-medium transition ${
               activeTab === tab
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             {tab}
@@ -149,12 +149,12 @@ export function AppDetailPage() {
       </div>
 
       {/* Tab content */}
-      <div className="min-h-0 flex-1 rounded-xl border bg-white overflow-y-auto">
+      <div className="min-h-0 flex-1 rounded-xl border border-border bg-card overflow-y-auto">
         {activeTab === "Overview" && <AppProductPage appId={appId ?? ""} />}
         {activeTab === "Terminal" && (
           <Suspense
             fallback={
-              <div className="flex h-full items-center justify-center bg-slate-900 text-slate-400">
+              <div className="flex h-full items-center justify-center bg-muted text-muted-foreground">
                 Loading terminal...
               </div>
             }

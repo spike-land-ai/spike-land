@@ -10,17 +10,17 @@ const SORTS = [
 ];
 
 const severityColor: Record<string, string> = {
-  low: "bg-gray-100 text-gray-700",
-  medium: "bg-yellow-100 text-yellow-700",
-  high: "bg-orange-100 text-orange-700",
-  critical: "bg-red-100 text-red-700",
+  low: "bg-muted text-foreground",
+  medium: "bg-warning text-warning-foreground",
+  high: "bg-warning text-warning-foreground",
+  critical: "bg-destructive text-destructive-foreground",
 };
 
 const statusColor: Record<string, string> = {
-  CANDIDATE: "bg-blue-100 text-blue-700",
-  ACTIVE: "bg-red-100 text-red-700",
-  FIXED: "bg-green-100 text-green-700",
-  DEPRECATED: "bg-gray-100 text-gray-500",
+  CANDIDATE: "bg-info text-info-foreground",
+  ACTIVE: "bg-destructive text-destructive-foreground",
+  FIXED: "bg-success text-success-foreground",
+  DEPRECATED: "bg-muted text-muted-foreground",
 };
 
 function BugCard({ bug }: { bug: Bug }) {
@@ -28,11 +28,11 @@ function BugCard({ bug }: { bug: Bug }) {
     <Link
       to="/bugbook/$bugId"
       params={{ bugId: bug.id }}
-      className="group block rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
+      className="group block rounded-xl border border-border bg-card p-5 shadow-sm transition hover:shadow-md hover:bg-muted/50"
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-semibold leading-tight group-hover:text-blue-600">{bug.title}</h3>
-        <span className="shrink-0 rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-bold text-indigo-700">
+        <h3 className="font-semibold leading-tight text-foreground group-hover:text-primary">{bug.title}</h3>
+        <span className="shrink-0 rounded-full bg-info text-info-foreground px-2.5 py-0.5 text-xs font-bold">
           {bug.elo}
         </span>
       </div>
@@ -44,12 +44,12 @@ function BugCard({ bug }: { bug: Bug }) {
         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${severityColor[bug.severity] ?? ""}`}>
           {bug.severity}
         </span>
-        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+        <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
           {bug.category}
         </span>
       </div>
 
-      <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
+      <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
         <span>{bug.report_count} report{bug.report_count !== 1 ? "s" : ""}</span>
         <span>Last seen {new Date(bug.last_seen_at).toLocaleDateString()}</span>
       </div>
@@ -77,17 +77,17 @@ export function BugbookIndexPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Bugbook</h1>
-          <p className="text-sm text-gray-500">Public bug tracker with ELO ranking</p>
+          <h1 className="text-2xl font-bold text-foreground">Bugbook</h1>
+          <p className="text-sm text-muted-foreground">Public bug tracker with ELO ranking</p>
         </div>
         <div className="flex gap-2">
           <Link
             to="/bugbook/leaderboard"
-            className="rounded-lg bg-indigo-50 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-100"
+            className="rounded-lg bg-info text-info-foreground px-3 py-1.5 text-sm font-medium hover:bg-info/80"
           >
             Leaderboard
           </Link>
-          <span className="rounded-lg bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700">
+          <span className="rounded-lg bg-success text-success-foreground px-3 py-1.5 text-xs font-medium">
             {data?.total ?? 0} bugs
           </span>
         </div>
@@ -98,7 +98,7 @@ export function BugbookIndexPage() {
         placeholder="Search bugs..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full rounded-lg border px-4 py-2 text-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+        className="w-full rounded-lg border border-border bg-card px-4 py-2 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground"
       />
 
       <div className="flex flex-wrap items-center gap-3">
@@ -109,8 +109,8 @@ export function BugbookIndexPage() {
               onClick={() => setStatus(s)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition ${
                 status === s
-                  ? "bg-cyan-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-foreground hover:bg-muted/80"
               }`}
             >
               {s}
@@ -125,8 +125,8 @@ export function BugbookIndexPage() {
               onClick={() => setSort(s.value)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition ${
                 sort === s.value
-                  ? "bg-gray-800 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  ? "bg-foreground text-background"
+                  : "bg-muted text-foreground hover:bg-muted/80"
               }`}
             >
               {s.label}
@@ -137,18 +137,18 @@ export function BugbookIndexPage() {
 
       {isLoading && (
         <div className="flex justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-cyan-600" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
         </div>
       )}
 
       {isError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-600">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-center text-destructive">
           Failed to load bugs. Try refreshing.
         </div>
       )}
 
       {!isLoading && !isError && filtered.length === 0 && (
-        <div className="rounded-xl border border-dashed p-12 text-center text-gray-500">
+        <div className="rounded-xl border border-dashed border-border p-12 text-center text-muted-foreground">
           No bugs found matching your filters.
         </div>
       )}

@@ -28,12 +28,12 @@ export function MessageThreadPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center gap-3 border-b pb-4">
-        <Link to="/messages" className="text-blue-600 hover:underline">
+      <div className="flex items-center gap-3 border-b border-border pb-4">
+        <Link to="/messages" className="text-primary hover:underline">
           Messages
         </Link>
-        <span className="text-gray-400">/</span>
-        <h1 className="text-lg font-bold capitalize">{userId}</h1>
+        <span className="text-muted-foreground">/</span>
+        <h1 className="text-lg font-bold capitalize text-foreground">{userId}</h1>
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto py-4">
@@ -44,12 +44,12 @@ export function MessageThreadPage() {
           >
             <div
               className={`max-w-xs rounded-2xl px-4 py-2 ${
-                msg.from === "me" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"
+                msg.from === "me" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
               }`}
             >
               <p className="text-sm">{msg.text}</p>
               <p
-                className={`mt-1 text-xs ${msg.from === "me" ? "text-blue-200" : "text-gray-400"}`}
+                className={`mt-1 text-xs ${msg.from === "me" ? "text-primary-foreground/70" : "text-muted-foreground"}`}
               >
                 {msg.time}
               </p>
@@ -58,15 +58,15 @@ export function MessageThreadPage() {
         ))}
       </div>
 
-      <div className="flex gap-2 border-t pt-4">
+      <div className="flex gap-2 border-t border-border pt-4">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
-          className="flex-1 rounded-lg border px-4 py-2"
+          className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
-        <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
+        <button className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 transition-colors">
           Send
         </button>
       </div>

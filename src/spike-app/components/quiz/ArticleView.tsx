@@ -9,13 +9,13 @@ export function ArticleView({ content, collapsed = false, onToggle }: ArticleVie
   const paragraphs = content.split(/\n\n+/).filter((p) => p.trim().length > 0);
 
   return (
-    <div className="rounded-xl border bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b px-6 py-4">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Article</h3>
+    <div className="rounded-xl border border-border bg-card shadow-sm">
+      <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Article</h3>
         {onToggle && (
           <button
             onClick={onToggle}
-            className="text-xs font-medium text-blue-600 hover:text-blue-700"
+            className="text-xs font-medium text-primary hover:text-primary/80"
           >
             {collapsed ? "Show Article" : "Hide Article"}
           </button>
@@ -23,7 +23,7 @@ export function ArticleView({ content, collapsed = false, onToggle }: ArticleVie
       </div>
       {!collapsed && (
         <div className="max-h-96 overflow-y-auto px-6 py-4">
-          <div className="prose prose-sm max-w-none text-gray-700">
+          <div className="prose prose-sm max-w-none text-foreground">
             {paragraphs.map((p, i) => (
               <p key={i} className="mb-3 leading-relaxed">
                 {p}

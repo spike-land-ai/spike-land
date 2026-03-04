@@ -47,7 +47,7 @@ export function AppsNewPage() {
   const [submitting, setSubmitting] = useState(false);
   const [buildStatus, setBuildStatus] = useState<AppStatus | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
-  
+
   const search = useSearch({ from: "/apps/new" }) as { prompt?: string };
   const navigate = useNavigate();
 
@@ -124,11 +124,11 @@ export function AppsNewPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link to="/apps" className="text-blue-600 hover:underline">
+        <Link to="/apps" className="text-primary hover:underline">
           Apps
         </Link>
-        <span className="text-gray-400">/</span>
-        <h1 className="text-2xl font-bold">Create App</h1>
+        <span className="text-muted-foreground">/</span>
+        <h1 className="text-2xl font-bold text-foreground">Create App</h1>
       </div>
 
       {/* Step indicators */}
@@ -140,15 +140,15 @@ export function AppsNewPage() {
             disabled={i > currentStep || submitting}
             className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${
               i === currentStep
-                ? "bg-blue-600 text-white"
+                ? "bg-primary text-primary-foreground"
                 : i < currentStep
-                  ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                  : "bg-gray-100 text-gray-400"
+                  ? "bg-primary/10 text-primary hover:bg-primary/20"
+                  : "bg-muted text-muted-foreground"
             }`}
           >
             <span
               className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
-                i < currentStep ? "bg-blue-600 text-white" : "bg-white/20"
+                i < currentStep ? "bg-primary text-primary-foreground" : "bg-background/20"
               }`}
             >
               {i < currentStep ? "\u2713" : i + 1}
@@ -160,73 +160,73 @@ export function AppsNewPage() {
 
       {/* Build status */}
       {buildStatus && (
-        <div className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-          <span className="text-sm font-medium text-blue-700">Building your app...</span>
+        <div className="flex items-center gap-3 rounded-lg border border-info/30 bg-info/10 p-4">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <span className="text-sm font-medium text-info-foreground">Building your app...</span>
           <StatusBadge status={buildStatus} />
         </div>
       )}
 
       {/* Step content */}
       <form onSubmit={handleSubmit}>
-        <div className="rounded-xl border bg-white p-8">
+        <div className="rounded-xl border border-border bg-card p-8">
           {currentStep === 0 && (
             <div className="space-y-4">
               <div>
-                <label htmlFor="name" className="mb-1 block text-sm font-medium">
-                  App Name <span className="text-red-500">*</span>
+                <label htmlFor="name" className="mb-1 block text-sm font-medium text-foreground">
+                  App Name <span className="text-destructive">*</span>
                 </label>
                 <input
                   id="name"
                   type="text"
                   value={data.name}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => update("name", e.target.value)}
-                  className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.name ? "border-red-400" : ""
+                  className={`w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring ${
+                    errors.name ? "border-destructive" : ""
                   }`}
                   placeholder="My Awesome App"
                 />
-                {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+                {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
               </div>
               <div>
-                <label htmlFor="slug" className="mb-1 block text-sm font-medium">Slug</label>
+                <label htmlFor="slug" className="mb-1 block text-sm font-medium text-foreground">Slug</label>
                 <input
                   id="slug"
                   type="text"
                   value={data.slug}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => update("slug", e.target.value)}
-                  className={`w-full rounded-lg border px-4 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.slug ? "border-red-400" : ""
+                  className={`w-full rounded-lg border border-border bg-background px-4 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring ${
+                    errors.slug ? "border-destructive" : ""
                   }`}
                   placeholder="my-awesome-app"
                 />
-                {errors.slug && <p className="mt-1 text-xs text-red-500">{errors.slug}</p>}
+                {errors.slug && <p className="mt-1 text-xs text-destructive">{errors.slug}</p>}
               </div>
               <div>
-                <label htmlFor="description" className="mb-1 block text-sm font-medium">Description</label>
+                <label htmlFor="description" className="mb-1 block text-sm font-medium text-foreground">Description</label>
                 <textarea
                   id="description"
                   value={data.description}
                   onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
                     update("description", e.target.value)
                   }
-                  className="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   rows={3}
                   placeholder="What does your app do?"
                 />
               </div>
               <div>
-                <label htmlFor="category" className="mb-1 block text-sm font-medium">Category</label>
+                <label htmlFor="category" className="mb-1 block text-sm font-medium text-foreground">Category</label>
                 <select
                   id="category"
                   value={data.category}
                   onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                     update("category", e.target.value)
                   }
-                  className="w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 >
                   {categories.map((cat) => (
-                    <option key={cat} value={cat}>
+                    <option key={cat} value={cat} className="bg-card">
                       {cat.charAt(0).toUpperCase() + cat.slice(1)}
                     </option>
                   ))}
@@ -238,10 +238,10 @@ export function AppsNewPage() {
           {currentStep === 1 && (
             <div className="space-y-4">
               <div>
-                <label htmlFor="prompt" className="mb-1 block text-sm font-medium">
-                  Prompt <span className="text-red-500">*</span>
+                <label htmlFor="prompt" className="mb-1 block text-sm font-medium text-foreground">
+                  Prompt <span className="text-destructive">*</span>
                 </label>
-                <p className="mb-2 text-sm text-gray-500">
+                <p className="mb-2 text-sm text-muted-foreground">
                   Describe what you want your app to do. Be as specific as possible.
                 </p>
                 <textarea
@@ -250,42 +250,42 @@ export function AppsNewPage() {
                   onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
                     update("prompt", e.target.value)
                   }
-                  className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.prompt ? "border-red-400" : ""
+                  className={`w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring ${
+                    errors.prompt ? "border-destructive" : ""
                   }`}
                   rows={8}
                   placeholder="I want an app that..."
                 />
-                {errors.prompt && <p className="mt-1 text-xs text-red-500">{errors.prompt}</p>}
+                {errors.prompt && <p className="mt-1 text-xs text-destructive">{errors.prompt}</p>}
               </div>
             </div>
           )}
 
           {currentStep === 2 && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold">Review your app</h3>
+              <h3 className="text-lg font-semibold text-foreground">Review your app</h3>
               <dl className="space-y-3">
                 <div>
-                  <dt className="text-xs font-medium text-gray-500">Name</dt>
-                  <dd className="text-sm">{data.name}</dd>
+                  <dt className="text-xs font-medium text-muted-foreground">Name</dt>
+                  <dd className="text-sm text-foreground">{data.name}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-medium text-gray-500">Slug</dt>
-                  <dd className="font-mono text-sm">{data.slug}</dd>
+                  <dt className="text-xs font-medium text-muted-foreground">Slug</dt>
+                  <dd className="font-mono text-sm text-foreground">{data.slug}</dd>
                 </div>
                 {data.description && (
                   <div>
-                    <dt className="text-xs font-medium text-gray-500">Description</dt>
-                    <dd className="text-sm">{data.description}</dd>
+                    <dt className="text-xs font-medium text-muted-foreground">Description</dt>
+                    <dd className="text-sm text-foreground">{data.description}</dd>
                   </div>
                 )}
                 <div>
-                  <dt className="text-xs font-medium text-gray-500">Category</dt>
-                  <dd className="text-sm capitalize">{data.category}</dd>
+                  <dt className="text-xs font-medium text-muted-foreground">Category</dt>
+                  <dd className="text-sm capitalize text-foreground">{data.category}</dd>
                 </div>
                 <div>
-                  <dt className="text-xs font-medium text-gray-500">Prompt</dt>
-                  <dd className="whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-sm">
+                  <dt className="text-xs font-medium text-muted-foreground">Prompt</dt>
+                  <dd className="whitespace-pre-wrap rounded-lg bg-muted p-3 text-sm text-foreground border border-border">
                     {data.prompt}
                   </dd>
                 </div>
@@ -300,7 +300,7 @@ export function AppsNewPage() {
             type="button"
             onClick={goPrev}
             disabled={currentStep === 0 || submitting}
-            className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium hover:bg-gray-200 disabled:opacity-50"
+            className="rounded-lg bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/80 disabled:opacity-50"
           >
             Previous
           </button>
@@ -308,7 +308,7 @@ export function AppsNewPage() {
             <button
               type="button"
               onClick={goNext}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               Next
             </button>
@@ -316,7 +316,7 @@ export function AppsNewPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-green-600 px-6 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+              className="rounded-lg bg-success px-6 py-2 text-sm font-medium text-success-foreground hover:bg-success/90 disabled:opacity-50"
             >
               {submitting ? "Creating..." : "Create App"}
             </button>
