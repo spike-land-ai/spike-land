@@ -41,7 +41,7 @@ if [ -f "$CACHE_DIR/app.treehash" ]; then
 fi
 
 # Also hash block-website content (blog posts flow through it)
-CONTENT_HASH="$(git ls-tree -r HEAD -- ../block-website/src/core/generated-posts.ts 2>/dev/null | git hash-object --stdin 2>/dev/null || echo "none")"
+CONTENT_HASH="$(git ls-tree -r HEAD -- ../../src/block-website/src/core/generated-posts.ts 2>/dev/null | git hash-object --stdin 2>/dev/null || echo "none")"
 CACHED_CONTENT=""
 if [ -f "$CACHE_DIR/content.treehash" ]; then
   CACHED_CONTENT="$(cat "$CACHE_DIR/content.treehash")"
@@ -53,7 +53,7 @@ if [ "$TREE_HASH" != "$CACHED_HASH" ] || [ ! -d "dist" ]; then
 fi
 if [ "$CONTENT_HASH" != "$CACHED_CONTENT" ]; then
   echo "Blog content changed — rebuilding block-website..."
-  (cd ../block-website && npm run build)
+  (cd ../../src/block-website && npx tsx scripts/build-content.ts)
   # Clear Vite dep cache so it picks up new block-website dist
   rm -rf node_modules/.vite
   NEED_BUILD=true
@@ -61,7 +61,7 @@ fi
 
 if [ "$NEED_BUILD" = true ]; then
   echo "Building spike-app..."
-  npm run build
+  npx vite build
   echo "$TREE_HASH" > "$CACHE_DIR/app.treehash"
   echo "$CONTENT_HASH" > "$CACHE_DIR/content.treehash"
 else
@@ -153,7 +153,7 @@ export R2_BUCKET
 find dist -type f -print0 | xargs -0 -P 1 -I {} bash -c 'upload_file "$@"' _ {}
 
 # ── 7. Upload blog JSON files to R2 ──
-BLOG_JSON_DIR="../block-website/dist/blog"
+BLOG_JSON_DIR="../../src/block-website/dist/blog"
 if [ -d "$BLOG_JSON_DIR" ]; then
   echo "Uploading blog JSON files..."
   for f in "$BLOG_JSON_DIR"/*.json; do

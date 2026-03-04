@@ -79,11 +79,12 @@ app.delete("/r2/*", authMiddleware);
 // Error handling middleware
 app.onError((err, c) => {
   console.error(`[spike-edge] ${c.req.method} ${c.req.path}:`, err.message);
-  // Fire-and-forget error log insertion
-  const logWork = c.env.DB.prepare(
-    "INSERT INTO error_logs (service_name, error_code, message, stack_trace, severity) VALUES (?, ?, ?, ?, ?)",
-  ).bind("spike-edge", "INTERNAL_ERROR", err.message, err.stack ?? null, "error").run().catch(() => {});
-  try { c.executionCtx.waitUntil(logWork); } catch { /* no ExecutionContext in tests */ }
+  try {
+    const logWork = c.env.DB.prepare(
+      "INSERT INTO error_logs (service_name, error_code, message, stack_trace, severity) VALUES (?, ?, ?, ?, ?)",
+    ).bind("spike-edge", "INTERNAL_ERROR", err.message, err.stack ?? null, "error").run().catch(() => {});
+    try { c.executionCtx.waitUntil(logWork); } catch { /* no ExecutionContext in tests */ }
+  } catch { /* DB unavailable — skip error logging to prevent double-error */ }
   return c.json({ error: "Internal Server Error" }, 500);
 });
 
