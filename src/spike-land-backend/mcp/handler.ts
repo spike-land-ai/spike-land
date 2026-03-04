@@ -351,7 +351,7 @@ export class McpHandler {
           },
         },
       ]),
-    ).catch(() => {});
+    ).catch((err) => console.error("Failed to send GA4 event:", err));
   }
 
   public async executeTool(

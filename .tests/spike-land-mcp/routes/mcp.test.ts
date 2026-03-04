@@ -88,6 +88,7 @@ describe("POST /mcp (mcpRoute handler)", () => {
         body: JSON.stringify({ jsonrpc: "2.0", method: "tools/list", id: 1 }),
       },
       env,
+      { waitUntil: () => {} },
     );
 
     expect(res.status).toBe(401);
@@ -109,6 +110,7 @@ describe("POST /mcp (mcpRoute handler)", () => {
         body: JSON.stringify({ jsonrpc: "2.0", method: "tools/list", id: 1 }),
       },
       env,
+      { waitUntil: () => {} },
     );
 
     expect(res.status).toBe(401);
@@ -129,6 +131,7 @@ describe("POST /mcp (mcpRoute handler)", () => {
         body: JSON.stringify({ jsonrpc: "2.0", method: "tools/list", id: 1 }),
       },
       env,
+      { waitUntil: () => {} },
     );
 
     expect(res.status).toBe(200);
@@ -159,6 +162,7 @@ describe("POST /mcp (mcpRoute handler)", () => {
         body: JSON.stringify({ jsonrpc: "2.0", method: "tools/list", id: 1 }),
       },
       env,
+      { waitUntil: () => {} },
     );
 
     expect(res.status).toBe(429);
@@ -181,6 +185,7 @@ describe("POST /mcp (mcpRoute handler)", () => {
         body: "not valid json {{{",
       },
       env,
+      { waitUntil: () => {} },
     );
 
     expect(res.status).toBe(400);
@@ -209,6 +214,7 @@ describe("GET /mcp (mcpRoute handler)", () => {
         headers: { Authorization: "Bearer valid-test-token" },
       },
       env,
+      { waitUntil: () => {} },
     );
 
     expect(res.status).toBe(405);

@@ -161,10 +161,11 @@ export function AppsNewPage() {
           {currentStep === 0 && (
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium">
+                <label htmlFor="name" className="mb-1 block text-sm font-medium">
                   App Name <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="name"
                   type="text"
                   value={data.name}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => update("name", e.target.value)}
@@ -176,8 +177,9 @@ export function AppsNewPage() {
                 {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium">Slug</label>
+                <label htmlFor="slug" className="mb-1 block text-sm font-medium">Slug</label>
                 <input
+                  id="slug"
                   type="text"
                   value={data.slug}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => update("slug", e.target.value)}
@@ -189,8 +191,9 @@ export function AppsNewPage() {
                 {errors.slug && <p className="mt-1 text-xs text-red-500">{errors.slug}</p>}
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium">Description</label>
+                <label htmlFor="description" className="mb-1 block text-sm font-medium">Description</label>
                 <textarea
+                  id="description"
                   value={data.description}
                   onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
                     update("description", e.target.value)
@@ -201,8 +204,9 @@ export function AppsNewPage() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium">Category</label>
+                <label htmlFor="category" className="mb-1 block text-sm font-medium">Category</label>
                 <select
+                  id="category"
                   value={data.category}
                   onChange={(e: ChangeEvent<HTMLSelectElement>) =>
                     update("category", e.target.value)
@@ -222,13 +226,14 @@ export function AppsNewPage() {
           {currentStep === 1 && (
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium">
+                <label htmlFor="prompt" className="mb-1 block text-sm font-medium">
                   Prompt <span className="text-red-500">*</span>
                 </label>
                 <p className="mb-2 text-sm text-gray-500">
                   Describe what you want your app to do. Be as specific as possible.
                 </p>
                 <textarea
+                  id="prompt"
                   value={data.prompt}
                   onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
                     update("prompt", e.target.value)

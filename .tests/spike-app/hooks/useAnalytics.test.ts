@@ -60,7 +60,7 @@ describe("useAnalytics", () => {
     vi.advanceTimersByTime(31000);
 
     expect(mockFetch).toHaveBeenCalledWith(
-      "/api/analytics/ingest",
+      "/analytics/ingest",
       expect.objectContaining({
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,7 +94,7 @@ describe("useAnalytics", () => {
     vi.advanceTimersByTime(31000);
 
     expect(mockSendBeacon).toHaveBeenCalledWith(
-      "/api/analytics/ingest",
+      "/analytics/ingest",
       expect.any(Blob),
     );
 

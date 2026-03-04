@@ -84,7 +84,7 @@ export function LandingHero() {
                         size="lg"
                         className="relative bg-primary text-primary-foreground gap-2 text-base px-10 h-16 rounded-full font-bold shadow-[0_0_50px_rgba(6,182,212,0.4)] hover:shadow-[0_0_80px_rgba(6,182,212,0.8)] transition-all duration-300 hover:scale-[1.05] active:scale-[0.95] w-full sm:w-auto overflow-hidden group border-0"
                     >
-                        <Link href="/create" className="relative z-10 flex items-center justify-center w-full">
+                        <Link href="/apps/new" className="relative z-10 flex items-center justify-center w-full">
                             {/* Animated hover gradient background */}
                             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 opacity-80 group-hover:opacity-100 transition-opacity duration-300 z-0" />
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 opacity-0 group-hover:opacity-100 group-hover:animate-gradient-x transition-opacity duration-300 z-0" />
@@ -102,7 +102,7 @@ export function LandingHero() {
                         size="lg"
                         className="border-border bg-background/50 backdrop-blur-xl text-muted-foreground hover:text-foreground gap-3 text-base px-10 h-16 rounded-full font-medium w-full sm:w-auto transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.05] hover:border-border/80 active:scale-[0.95] relative group"
                     >
-                        <Link href="/mcp">
+                        <Link href="/tools">
                             <Terminal className="w-5 h-5 opacity-70 group-hover:opacity-100 group-hover:text-cyan-300 transition-colors" />
                             <span className="tracking-wide">Explore MCP Tools</span>
                         </Link>

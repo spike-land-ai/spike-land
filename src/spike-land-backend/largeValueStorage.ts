@@ -47,7 +47,7 @@ export class LargeValueStorage {
     if (size <= THRESHOLD) {
       await this.storage.put(key, value);
       // Fire-and-forget cleanup of any previous R2 overflow
-      this.r2.delete(this.r2Key(key)).catch(() => {});
+      this.r2.delete(this.r2Key(key)).catch((err) => console.error("Failed to delete from R2:", err));
       return;
     }
 

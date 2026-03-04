@@ -147,7 +147,7 @@ function createSqliteBlobs(db: InstanceType<typeof Database>): BlobAdapter {
         | undefined;
       if (!row) return null;
       const buf = row.data;
-      return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+      return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
     },
     async delete(key: string): Promise<boolean> {
       const result = db.prepare("DELETE FROM __blobs__ WHERE key = ?").run(key);

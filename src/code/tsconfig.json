@@ -37,5 +37,5 @@
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["__tests__/**", "**/*.test.ts", "**/*.test.tsx"]
+  "exclude": ["__tests__/**", "**/*.test.ts", "**/*.test.tsx", "vitest.config.ts"]
 }

@@ -118,7 +118,7 @@ describe("Session Patch Integration Tests", () => {
 
   it("should handle live errors correctly", async () => {
     const { originalCode, targetCode, originalTransformedCode, modifiedTransformed } = await import(
-      "@/../__tests__/fixtures/live-error-bug-01"
+      "../../fixtures/live-error-bug-01"
     );
     const initialSession = createTestSession({
       code: originalCode,

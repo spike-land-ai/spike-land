@@ -200,7 +200,7 @@ function createIDBSQL(dbPromise: Promise<IDBDatabase>): SQLAdapter {
     return match?.[1] ?? null;
   }
 
-  async function syncInsertToIDB(table: string, db: Database, params: unknown[]): Promise<void> {
+  async function syncInsertToIDB(table: string, db: Database, _params: unknown[]): Promise<void> {
     // Get the last inserted row by rowid
     const result = db.exec(`SELECT * FROM "${table}" WHERE rowid = last_insert_rowid()`);
     if (result.length > 0 && result[0]!.values.length > 0) {

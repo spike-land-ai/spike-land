@@ -5,7 +5,7 @@ export class WebsocketRoutes {
   constructor(private code: Code) {}
 
   async handleWebsocketRoute(request: Request): Promise<Response> {
-    if (request.headers.get("Upgrade") !== "websocket") {
+    if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") {
       return new Response("Expected websocket", { status: 400 });
     }
 

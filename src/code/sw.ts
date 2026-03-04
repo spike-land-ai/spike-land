@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-declare const self: ServiceWorkerGlobalScope;
+const sw = self as unknown as ServiceWorkerGlobalScope & typeof globalThis;
 
 const CACHE_NAME_PREFIX = "spike-land-cache-v";
 let CACHE_NAME = "spike-land-cache-v3";
@@ -73,12 +73,12 @@ async function loadManifestAndPrecache(): Promise<void> {
   }
 }
 
-self.addEventListener("install", (event) => {
+sw.addEventListener("install", (event) => {
   console.debug("Service worker installing...");
-  event.waitUntil(loadManifestAndPrecache().then(() => self.skipWaiting()));
+  event.waitUntil(loadManifestAndPrecache().then(() => sw.skipWaiting()));
 });
 
-self.addEventListener("activate", (event) => {
+sw.addEventListener("activate", (event) => {
   console.debug("Service worker activating...");
   event.waitUntil(
     caches
@@ -97,18 +97,18 @@ self.addEventListener("activate", (event) => {
           }),
         );
       })
-      .then(() => self.clients.claim()),
+      .then(() => sw.clients.claim()),
   );
 });
 
 async function notifyClientsOffline(): Promise<void> {
-  const allClients = await self.clients.matchAll({ type: "window" });
+  const allClients = await sw.clients.matchAll({ type: "window" });
   for (const client of allClients) {
     client.postMessage({ type: "OFFLINE_MODE" });
   }
 }
 
-self.addEventListener("fetch", (event) => {
+sw.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
@@ -129,7 +129,7 @@ self.addEventListener("fetch", (event) => {
 
   // Only cache GET requests from our origin if they look like static assets or are in PRECACHE
   const isLocalAsset =
-    url.origin === self.location.origin &&
+    url.origin === sw.location.origin &&
     (url.pathname.startsWith("/assets/") ||
       url.pathname.startsWith("/@fs/") ||
       url.pathname.includes("/workers/") ||

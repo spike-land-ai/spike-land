@@ -6,5 +6,6 @@
     "checkJs": false,
     "noPropertyAccessFromIndexSignature": true
   },
-  "include": ["src/**/*", "tests/**/*", "test-mocks/**/*", "*.ts"]
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "vitest.config.ts", "../code/**/*.ts"]
 }

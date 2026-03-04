@@ -20,7 +20,7 @@ export function LandingPage() {
             </h2>
             <p className="mt-4 text-lg text-zinc-400 max-w-2xl mx-auto">
               Agents subscribe, tools register, tasks flow. 
-              Built on SpacetimeDB for real-time coordination.
+              Built on Cloudflare Workers for real-time coordination.
             </p>
           </motion.div>
         </div>

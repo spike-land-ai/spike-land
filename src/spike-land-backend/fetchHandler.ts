@@ -208,10 +208,14 @@ async function handleIpfsRequest(request: Request): Promise<Response> {
   const pathname = new URL(request.url).pathname;
 
   // Try cloudflare-ipfs.com first, fall back to ipfs.io on non-ok response
-  const primaryUrl = new URL(pathname, "https://cloudflare-ipfs.com").toString();
-  const resp = await fetch(primaryUrl);
-  if (resp.ok) {
-    return resp;
+  try {
+    const primaryUrl = new URL(pathname, "https://cloudflare-ipfs.com").toString();
+    const resp = await fetch(primaryUrl);
+    if (resp.ok) {
+      return resp;
+    }
+  } catch (err) {
+    // Ignore error and fall back to ipfs.io
   }
 
   const fallbackUrl = new URL(pathname, "https://ipfs.io").toString();
