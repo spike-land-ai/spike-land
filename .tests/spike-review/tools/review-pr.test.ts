@@ -77,6 +77,50 @@ describe("reviewPR", () => {
     expect(result.decision).toBe("APPROVE");
   });
 
+  it("suggests COMMENT when gates are YELLOW (PR body 20-99 chars)", async () => {
+    // YELLOW: PR body is 20-99 chars (brief), all other gates GREEN
+    mockGetPRDetails.mockResolvedValue({
+      ...mockPRDetails,
+      body: "Fix bug in auth module.", // 23 chars — YELLOW for PR Description
+      additions: 5,
+      deletions: 2,
+    });
+    mockGetPRDiff.mockResolvedValue(
+      `--- a/src/auth.ts
++++ b/src/auth.ts
+@@ -1,3 +1,4 @@
+ const a = 1;
++const b = 2;
+ export { a };`,
+    );
+    mockGetPRFiles.mockResolvedValue([
+      {
+        filename: "src/auth.ts",
+        status: "modified" as const,
+        additions: 2,
+        deletions: 0,
+        patch: "@@ -1,3 +1,4 @@\n const a = 1;\n+const b = 2;\n export { a };",
+        hunks: [],
+      },
+      {
+        filename: "src/auth.test.ts",
+        status: "modified" as const,
+        additions: 3,
+        deletions: 0,
+        patch: "@@ -1 +1,4 @@\n test('a', () => {});\n+test('b', () => {});",
+        hunks: [],
+      },
+    ]);
+
+    const result = await reviewPR(
+      { owner: "zerdos", repo: "test", prNumber: 3 },
+      { githubToken: "fake-token" },
+    );
+
+    // Should be COMMENT (YELLOW) because PR body is brief but otherwise OK
+    expect(result.decision).toBe("COMMENT");
+  });
+
   it("suggests REQUEST_CHANGES when gates are RED", async () => {
     mockGetPRDetails.mockResolvedValue(mockPRDetails);
     mockGetPRDiff.mockResolvedValue(

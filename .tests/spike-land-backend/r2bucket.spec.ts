@@ -184,6 +184,21 @@ describe("R2BucketHandler", () => {
       expect(response.status).toBe(400);
       expect(await response.text()).toBe("Missing request body");
     });
+
+    it("should return 400 when body blob has size 0 (handlePut line 5 true branch)", async () => {
+      // Empty blob: size === 0 triggers handlePut's guard
+      const emptyBlob = new Blob([]); // size === 0
+      const mockRequest = new Request("https://example.com/test-key", {
+        method: "PUT",
+        body: emptyBlob,
+      });
+
+      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+
+      expect(mockEnv.R2.put).not.toHaveBeenCalled();
+      expect(response.status).toBe(400);
+      expect(await response.text()).toBe("Missing request body");
+    });
   });
 
   describe("GET Request Handling", () => {
@@ -283,6 +298,45 @@ describe("R2BucketHandler", () => {
       expect(mockConsoleError).toHaveBeenCalledWith("R2 get error:", error);
       expect(response.status).toBe(500);
       expect(await response.text()).toBe("Failed to retrieve object");
+    });
+
+    it("should handle R2 delete error (lines 42-43)", async () => {
+      const mockRequest = createMockRequest("DELETE");
+
+      const error = new Error("Delete failed");
+      (mockEnv.R2.delete as Mock).mockRejectedValueOnce(error);
+
+      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+
+      expect(mockConsoleError).toHaveBeenCalledWith("R2 delete error:", error);
+      expect(response.status).toBe(500);
+      expect(await response.text()).toBe("Failed to delete object");
+    });
+
+    it("should handle R2 put error (line 12-14)", async () => {
+      const mockBlob = new Blob(["test data"]);
+      const mockRequest = new Request("https://example.com/test-key", {
+        method: "PUT",
+        body: mockBlob,
+      });
+
+      const error = new Error("Put failed");
+      (mockEnv.R2.put as Mock).mockRejectedValueOnce(error);
+
+      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+
+      expect(mockConsoleError).toHaveBeenCalledWith("R2 put error:", error);
+      expect(response.status).toBe(500);
+      expect(await response.text()).toBe("Failed to store object");
+    });
+
+    it("should handle outer fetch error (lines 72-73) — invalid URL", async () => {
+      const request = { method: "GET", url: "not-a-url" } as unknown as Request;
+      const response = await R2BucketHandler.fetch!(request, mockEnv, {} as ExecutionContext);
+
+      expect(mockConsoleError).toHaveBeenCalledWith("R2 Bucket Handler Error:", expect.any(Error));
+      expect(response.status).toBe(500);
+      expect(await response.text()).toBe("Internal Server Error");
     });
   });
 });

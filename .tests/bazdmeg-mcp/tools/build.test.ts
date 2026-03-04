@@ -257,5 +257,52 @@ describe("build tools", () => {
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain("IO error");
     });
+
+    it("skips packages without typecheck script in all-packages mode", async () => {
+      mockReadManifest.mockResolvedValue({
+        defaults: {
+          scope: "@spike-land-ai",
+          registry: "npm.pkg.github.com",
+          license: "MIT",
+          type: "module",
+        },
+        packages: {
+          "pkg-with-script": {
+            kind: "library",
+            version: "1.0.0",
+            description: "a",
+            entry: "src/index.ts",
+          },
+          "pkg-without-script": {
+            kind: "library",
+            version: "1.0.0",
+            description: "b",
+            entry: "src/index.ts",
+          },
+        },
+      });
+      // First package has typecheck script, second doesn't
+      mockHasScript.mockImplementation(async (_dir, _script) => {
+        return _dir.includes("pkg-with-script");
+      });
+      mockRunCommand.mockResolvedValue(ok());
+
+      const result = await server.call("bazdmeg_typecheck", {});
+      const text = result.content[0].text;
+      expect(text).toContain("skip");
+      expect(text).toContain("ALL PASSED");
+    });
+
+    it("reports direct tsc failure when no typecheck script", async () => {
+      mockHasScript.mockResolvedValue(false);
+      mockRunCommand.mockResolvedValue(fail("TS error in direct tsc"));
+
+      const result = await server.call("bazdmeg_typecheck", {
+        packageName: "pkg",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("FAIL");
+      expect(text).toContain("direct tsc");
+    });
   });
 });

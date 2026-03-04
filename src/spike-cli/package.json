@@ -18,9 +18,9 @@
     }
   },
   "scripts": {
-    "prepack": "tsup src/cli.ts src/index.ts --format esm,cjs --dts --clean",
-    "build": "tsup src/cli.ts src/index.ts --format esm,cjs --dts --clean",
-    "dev": "tsx src/cli.ts",
+    "prepack": "tsup cli.ts index.ts --format esm,cjs --dts --clean",
+    "build": "tsup cli.ts index.ts --format esm,cjs --dts --clean",
+    "dev": "tsx cli.ts",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",

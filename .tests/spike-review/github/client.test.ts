@@ -275,5 +275,128 @@ describe("GitHubClient", () => {
       const result = client.validateCommentTarget([], 5);
       expect(result.valid).toBe(false);
     });
+
+    it("returns nearestLine as startLine when closer to start", () => {
+      const hunks = [
+        {
+          oldStart: 10,
+          oldLines: 5,
+          newStart: 10,
+          newLines: 5,
+          lines: [],
+        },
+      ];
+      // Line 8 is closer to start (10) than end (14), dist=2 vs dist=6
+      const result = client.validateCommentTarget(hunks, 8);
+      expect(result.valid).toBe(false);
+      // nearestLine should be start (10) since it's closer
+      expect(result.nearestValidLine?.line).toBe(10);
+    });
+
+    it("does not update nearest when second hunk is farther away (line 221 - if false branch)", () => {
+      // Two hunks: first at 1-5, second at 100-105
+      // Target line = 4 (inside first hunk) would be valid
+      // Target line = 6 (just outside first hunk, dist=1) vs second hunk (dist=94)
+      // First hunk sets nearestDistance=1, second hunk has minDist=94 > 1, so if is false
+      const hunks = [
+        {
+          oldStart: 1,
+          oldLines: 5,
+          newStart: 1,
+          newLines: 5,
+          lines: [],
+        },
+        {
+          oldStart: 100,
+          oldLines: 5,
+          newStart: 100,
+          newLines: 5,
+          lines: [],
+        },
+      ];
+      // Line 6 is 1 away from hunk1 end (5), and 94 away from hunk2 start (100)
+      const result = client.validateCommentTarget(hunks, 6);
+      expect(result.valid).toBe(false);
+      // nearestLine should be end of first hunk (5) since it's closer
+      expect(result.nearestValidLine?.line).toBe(5);
+    });
+  });
+
+  describe("error handling", () => {
+    it("getPRDetails throws wrapped error on API failure", async () => {
+      mockPullsGet.mockRejectedValueOnce(new Error("API rate limit exceeded"));
+
+      const client = new GitHubClient({ token: "test" });
+      await expect(client.getPRDetails("owner", "repo", 1)).rejects.toThrow(
+        "Failed to get PR details",
+      );
+    });
+
+    it("getPRDiff throws when API returns non-string data", async () => {
+      mockPullsGet.mockResolvedValueOnce({ data: { notAString: true } });
+
+      const client = new GitHubClient({ token: "test" });
+      await expect(client.getPRDiff("owner", "repo", 1)).rejects.toThrow(
+        "Failed to get PR diff",
+      );
+    });
+
+    it("getPRDiff throws wrapped error on API failure", async () => {
+      mockPullsGet.mockRejectedValueOnce(new Error("Not found"));
+
+      const client = new GitHubClient({ token: "test" });
+      await expect(client.getPRDiff("owner", "repo", 1)).rejects.toThrow(
+        "Failed to get PR diff",
+      );
+    });
+
+    it("getPRFiles throws wrapped error on API failure", async () => {
+      mockPullsListFiles.mockRejectedValueOnce(new Error("Forbidden"));
+
+      const client = new GitHubClient({ token: "test" });
+      await expect(client.getPRFiles("owner", "repo", 1)).rejects.toThrow(
+        "Failed to get PR files",
+      );
+    });
+
+    it("submitReview throws wrapped error on API failure", async () => {
+      mockPullsCreateReview.mockRejectedValueOnce(new Error("Unprocessable Entity"));
+
+      const client = new GitHubClient({ token: "test" });
+      await expect(
+        client.submitReview("owner", "repo", 1, {
+          body: "Review",
+          event: "COMMENT",
+          commitId: "abc",
+        }),
+      ).rejects.toThrow("Failed to submit review");
+    });
+
+    it("createCheckRun throws wrapped error on API failure", async () => {
+      mockChecksCreate.mockRejectedValueOnce(new Error("Server error"));
+
+      const client = new GitHubClient({ token: "test" });
+      await expect(
+        client.createCheckRun("owner", "repo", {
+          name: "Check",
+          headSha: "abc",
+          status: "queued",
+          summary: "Test",
+        }),
+      ).rejects.toThrow("Failed to create check run");
+    });
+
+    it("updateCheckRun throws wrapped error on API failure", async () => {
+      mockChecksUpdate.mockRejectedValueOnce(new Error("Check run not found"));
+
+      const client = new GitHubClient({ token: "test" });
+      await expect(
+        client.updateCheckRun("owner", "repo", 99, {
+          status: "completed",
+          conclusion: "failure",
+          summary: "Failed",
+        }),
+      ).rejects.toThrow("Failed to update check run");
+    });
   });
 });

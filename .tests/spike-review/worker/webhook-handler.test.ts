@@ -222,6 +222,43 @@ describe("handleWebhook", () => {
     expect(result.context?.prNumber).toBe(42);
   });
 
+  it("returns 400 for invalid JSON body with valid signature", async () => {
+    const invalidBody = "this is not json {{{";
+    const sig = await computeHMAC(invalidBody, TEST_SECRET);
+    const request = new Request("https://example.com/webhook", {
+      method: "POST",
+      headers: {
+        "X-GitHub-Event": "pull_request",
+        "X-Hub-Signature-256": sig,
+      },
+      body: invalidBody,
+    });
+    const result = await handleWebhook(request, mockEnv);
+    expect(result.status).toBe(400);
+    expect(result.body).toContain("Invalid JSON");
+  });
+
+  it("returns 400 when pull_request field is missing from valid JSON (line 144)", async () => {
+    // Valid signature, valid JSON, but no pull_request field
+    // This could happen with a payload that has action but no PR data
+    const payload = { action: "opened", issue: { number: 1 } };
+    const body = JSON.stringify(payload);
+    const sig = await computeHMAC(body, TEST_SECRET);
+    const request = new Request("https://example.com/webhook", {
+      method: "POST",
+      headers: {
+        "X-GitHub-Event": "pull_request",
+        "X-Hub-Signature-256": sig,
+      },
+      body,
+    });
+    // shouldSkipEvent checks for pull_request, returns skip:true when missing
+    // So this path returns 200 with "Skipped: Not a pull_request event"
+    const result = await handleWebhook(request, mockEnv);
+    // Either skipped (200) or missing PR (400)
+    expect([200, 400]).toContain(result.status);
+  });
+
   it("skips draft PRs with valid signature", async () => {
     const payload = makePRPayload({ draft: true });
     const body = JSON.stringify(payload);

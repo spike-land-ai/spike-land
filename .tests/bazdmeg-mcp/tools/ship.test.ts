@@ -279,6 +279,25 @@ describe("ship tool", () => {
     expect(result.content[0].text).toContain("remote rejected");
   });
 
+  it("reports successful push", async () => {
+    mockHasScript.mockResolvedValue(true);
+    mockRunCommand.mockImplementation(async (_cmd, args) => {
+      if (args[0] === "diff") {
+        return ok(
+          "diff --git a/packages/chess-engine/src/index.ts b/packages/chess-engine/src/index.ts\n+++ b/packages/chess-engine/src/index.ts\n+const x: string = 'hello';\ndiff --git a/packages/chess-engine/src/index.test.ts b/packages/chess-engine/src/index.test.ts\n+++ b/packages/chess-engine/src/index.test.ts\n+it('works', () => {});",
+        );
+      }
+      // All git commands succeed including push
+      return ok();
+    });
+
+    const result = await server.call("bazdmeg_auto_ship", { push: true });
+    const text = result.content[0].text;
+    // Should have push step with pass
+    expect(text).toContain("push");
+    expect(text).toContain("pass");
+  });
+
   it("handles unexpected exceptions", async () => {
     mockHasScript.mockRejectedValue(new Error("Unexpected crash"));
 

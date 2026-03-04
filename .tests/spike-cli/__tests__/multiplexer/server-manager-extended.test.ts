@@ -368,6 +368,61 @@ describe("ServerManager — isConnected / getServerTools", () => {
   });
 });
 
+describe("ServerManager — noPrefix mode callTool success (lines 132-134)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockConnect.mockResolvedValue(undefined);
+    mockClose.mockResolvedValue(undefined);
+    mockConnectedGetter.mockReturnValue(true);
+    mockCallTool.mockResolvedValue({ content: [{ type: "text", text: "pong" }] });
+  });
+
+  it("calls tool directly by name in noPrefix mode when tool exists", async () => {
+    mockGetTools.mockReturnValue([{ name: "ping", description: "", inputSchema: {} }]);
+
+    const manager = new ServerManager({ noPrefix: true });
+    await manager.connectAll(cfg({ srv: { command: "s" } }));
+
+    const result = await manager.callTool("ping", {});
+    expect(mockCallTool).toHaveBeenCalledWith("ping", {});
+    expect(result.content[0].text).toBe("pong");
+  });
+
+  it("skips servers without tool and finds it in second server (line 133 false branch)", async () => {
+    // First server has no tools, second server has "ping"
+    mockGetTools
+      .mockReturnValueOnce([]) // first server: no tools
+      .mockReturnValue([{ name: "ping", description: "", inputSchema: {} }]); // second server
+
+    const manager = new ServerManager({ noPrefix: true });
+    await manager.connectAll(cfg({ srv1: { command: "s1" }, srv2: { command: "s2" } }));
+
+    const result = await manager.callTool("ping", {});
+    expect(result.content[0].text).toBe("pong");
+  });
+});
+
+describe("ServerManager — reconnect with unknown server throws (line 168)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockConnect.mockResolvedValue(undefined);
+    mockClose.mockResolvedValue(undefined);
+  });
+
+  it("throws when reconnecting unknown server with no config provided", async () => {
+    const manager = new ServerManager();
+    // Server "ghost" was never connected and no config given
+    await expect(manager.reconnect("ghost")).rejects.toThrow("Unknown server: ghost");
+  });
+});
+
+describe("ServerManager — getServerConfig always returns undefined (line 236)", () => {
+  it("getServerConfig returns undefined", () => {
+    const manager = new ServerManager();
+    expect(manager.getServerConfig("any")).toBeUndefined();
+  });
+});
+
 describe("ServerManager — callTool filtered tool check", () => {
   beforeEach(() => {
     vi.clearAllMocks();

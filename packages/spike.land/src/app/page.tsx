@@ -1,24 +1,14 @@
-import dynamic from "next/dynamic";
 import { BlogPreviewSection } from "@/components/landing/BlogPreviewSection";
 import { AppShowcaseSection } from "@/components/landing/AppShowcaseSection";
 import { CreateCTASection } from "@/components/landing/CreateCTASection";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { McpShowcaseSection } from "@/components/landing/McpShowcaseSection";
 import { ThreePillarsSection } from "@/components/landing/ThreePillarsSection";
+import { PersonalizedWelcome } from "@/components/client-only-providers";
 import { LandingPageStructuredData } from "@/components/seo/LandingPageStructuredData";
 import { ScrollToTopButton } from "@/components/ui/scroll-to-top";
 import { getLatestShowcaseApps } from "@/lib/landing/showcase-feed";
 import { logger } from "@/lib/logger";
-
-// PersonalizedWelcome is purely client-side (API fetch in useEffect) — skip SSR
-// and defer hydration so it doesn't block the initial page paint
-const PersonalizedWelcome = dynamic(
-  () =>
-    import("@/components/landing/PersonalizedWelcome").then((m) => ({
-      default: m.PersonalizedWelcome,
-    })),
-  { ssr: false },
-);
 
 // Revalidate every 5 minutes so stats stay fresh
 export const revalidate = 300;

@@ -117,6 +117,86 @@ describe("publish tools", () => {
       expect(text).toContain("./dist/cli.js");
     });
 
+    it("generates package.json for a worker kind", async () => {
+      const result = await server.call("bazdmeg_generate_package_json", {
+        packageName: "spike-edge",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("@spike-land-ai/spike-edge");
+      expect(text).toContain("./dist/index.js");
+    });
+
+    it("generates package.json for a browser kind", async () => {
+      mockReadManifest.mockResolvedValue({
+        ...MOCK_MANIFEST,
+        packages: {
+          ...MOCK_MANIFEST.packages,
+          "code-editor": {
+            kind: "browser",
+            version: "1.0.0",
+            description: "Browser code editor",
+            entry: "src/index.ts",
+          },
+        },
+      } as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+
+      const result = await server.call("bazdmeg_generate_package_json", {
+        packageName: "code-editor",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("@spike-land-ai/code-editor");
+      expect(text).toContain("./dist/index.js");
+    });
+
+    it("generates package.json with exports override from manifest", async () => {
+      mockReadManifest.mockResolvedValue({
+        ...MOCK_MANIFEST,
+        packages: {
+          ...MOCK_MANIFEST.packages,
+          "export-pkg": {
+            kind: "library",
+            version: "1.0.0",
+            description: "Package with custom exports",
+            entry: "src/index.ts",
+            exports: {
+              ".": "./dist/index.js",
+              "./utils": "./dist/utils.js",
+            },
+          },
+        },
+      } as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+
+      const result = await server.call("bazdmeg_generate_package_json", {
+        packageName: "export-pkg",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("./utils");
+      expect(text).toContain("./dist/utils.d.ts");
+    });
+
+    it("generates package.json for CLI without binName uses packageName", async () => {
+      mockReadManifest.mockResolvedValue({
+        ...MOCK_MANIFEST,
+        packages: {
+          ...MOCK_MANIFEST.packages,
+          "auto-bin": {
+            kind: "cli",
+            version: "1.0.0",
+            description: "CLI without explicit binName",
+            entry: "src/index.ts",
+            bin: "./dist/cli.js",
+          },
+        },
+      } as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+
+      const result = await server.call("bazdmeg_generate_package_json", {
+        packageName: "auto-bin",
+      });
+      const text = result.content[0].text;
+      // bin key should default to packageName "auto-bin"
+      expect(text).toContain("auto-bin");
+    });
+
     it("writes to disk when dryRun=false", async () => {
       mockWriteFile.mockResolvedValue(undefined);
 
@@ -223,6 +303,51 @@ describe("publish tools", () => {
         packageName: "pkg",
       });
       expect(result.isError).toBe(true);
+    });
+
+    it("uses npmjs registry when registry=npmjs", async () => {
+      mockRunCommand.mockResolvedValue(ok("build ok"));
+      mockWriteFile.mockResolvedValue(undefined);
+
+      const result = await server.call("bazdmeg_publish_npm", {
+        packageName: "chess-engine",
+        registry: "npmjs",
+        dryRun: true,
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("registry.npmjs.org");
+    });
+
+    it("uses npmjs registry when publishing (dryRun=false)", async () => {
+      mockRunCommand.mockResolvedValue(ok("published"));
+      mockWriteFile.mockResolvedValue(undefined);
+
+      const result = await server.call("bazdmeg_publish_npm", {
+        packageName: "shared",
+        registry: "npmjs",
+        dryRun: false,
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("PUBLISHED");
+    });
+
+    it("reports publish failure with stdout when stderr is empty", async () => {
+      let callCount = 0;
+      mockRunCommand.mockImplementation(async () => {
+        callCount++;
+        if (callCount === 1) return ok(); // build passes
+        // Publish fails but with stdout instead of stderr
+        return { ok: false, stdout: "ERR! conflict", stderr: "", code: 1 };
+      });
+      mockWriteFile.mockResolvedValue(undefined);
+
+      const result = await server.call("bazdmeg_publish_npm", {
+        packageName: "shared",
+        dryRun: false,
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("FAILED");
+      expect(text).toContain("ERR! conflict");
     });
   });
 });

@@ -6,8 +6,8 @@
     "useDefineForClassFields": true,
     "types": ["node"],
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "."
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "vitest.config.ts"]
 }

@@ -388,6 +388,89 @@ describe("workflow tools", () => {
 
   // ── Planning Interview: Conflict Detection ───────────────────────────────
 
+  it("conflict detection: answering previously-correct question wrong creates contradiction", async () => {
+    // Create session
+    const firstResult = await server.call("bazdmeg_planning_interview", {
+      taskDescription: "Conflict test",
+    });
+    const sessionIdMatch = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/);
+    const sessionId = sessionIdMatch![1];
+
+    // Get session and directly seed the answerHistory with a "correct" answer
+    // so the next wrong answer for the same variantIndex triggers conflict detection
+    const session = getInterviewSession(sessionId);
+    expect(session).toBeDefined();
+
+    // Get first round questions
+    const firstRoundQuestions = session!.currentRound.questions;
+
+    // Seed answerHistory for the first question with correct answer (simulating a prior correct response)
+    const firstQ = firstRoundQuestions[0];
+    const conceptState = session!.conceptStates[firstQ.conceptIndex]!;
+    // Mark this variant as previously answered correctly
+    conceptState.answerHistory.set(firstQ.variantIndex, firstQ.correctIndex);
+
+    // Now submit ALL wrong answers (to avoid FAILED_LOW_SCORE masking conflict)
+    // For the first question specifically, we answer wrong which should trigger conflict
+    const wrongAnswers: [number, number, number] = [
+      (firstQ.correctIndex + 1) % 4,      // wrong - triggers conflict for Q1
+      (firstRoundQuestions[1].correctIndex + 1) % 4,  // wrong
+      (firstRoundQuestions[2].correctIndex + 1) % 4,  // wrong
+    ];
+
+    const result = await server.call("bazdmeg_planning_interview", {
+      sessionId,
+      answers: wrongAnswers,
+    });
+
+    // With all wrong (0/3), should get FAILED_LOW_SCORE but conflict was registered
+    const text = result.content[0].text;
+    // The conflict detection code should have run (lines 497-508)
+    expect(text).toContain("FAILED");
+  });
+
+  it("3+ conflicts returns FAILED_CONTRADICTIONS when score is high enough each round", async () => {
+    // Strategy: answer 2/3 correct each round to pass score check, but specifically
+    // re-answer previously correct questions incorrectly
+    const firstResult = await server.call("bazdmeg_planning_interview", {
+      taskDescription: "Multi-contradiction test",
+    });
+    const sessionIdMatch = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/);
+    const sessionId = sessionIdMatch![1];
+
+    // Pre-seed 3 conflicts directly in the session to test FAILED_CONTRADICTIONS path
+    const session = getInterviewSession(sessionId);
+    expect(session).toBeDefined();
+
+    // Directly add 2 conflicts to session (we'll create the 3rd via the answer)
+    session!.conflicts.push(
+      { concept: "file_awareness", round: 0, detail: "Previously correct, now wrong" },
+      { concept: "test_strategy", round: 1, detail: "Previously correct, now wrong" },
+    );
+
+    // Seed one question's answerHistory for conflict
+    const currentQ = session!.currentRound.questions[0];
+    const conceptState = session!.conceptStates[currentQ.conceptIndex]!;
+    conceptState.answerHistory.set(currentQ.variantIndex, currentQ.correctIndex);
+
+    // Answer: Q1 wrong (creates 3rd conflict), Q2+Q3 correct (passes score check of 2/3)
+    const answers: [number, number, number] = [
+      (currentQ.correctIndex + 1) % 4,  // wrong for Q1 — triggers 3rd conflict
+      session!.currentRound.questions[1].correctIndex, // correct
+      session!.currentRound.questions[2].correctIndex, // correct
+    ];
+
+    const result = await server.call("bazdmeg_planning_interview", {
+      sessionId,
+      answers,
+    });
+
+    const text = result.content[0].text;
+    expect(text).toContain("Too Many Contradictions");
+    expect(text).toContain("contradictions");
+    expect(text).toContain("Conflicts:");
+  });
+
   it("3+ conflicts returns FAILED_CONTRADICTIONS", async () => {
     const firstResult = await server.call("bazdmeg_planning_interview", {
       taskDescription: "Contradiction test",

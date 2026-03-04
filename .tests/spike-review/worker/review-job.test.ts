@@ -254,4 +254,33 @@ describe("runReviewJob", () => {
     expect(result.success).toBe(false);
     expect(result.summary).toContain("rate limited");
   });
+
+  it("returns empty string when Claude response has no text block (line 59)", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          content: [
+            {
+              type: "image",
+              data: "base64-encoded-image",
+            },
+          ],
+        }),
+    });
+
+    // Should not throw - returns empty string from ?? ""
+    const result = await runReviewJob(testCtx, testEnv);
+    // Job still succeeds even with no text content
+    expect(result.success).toBe(true);
+  });
+
+  it("handles non-Error exception in catch block (line 132)", async () => {
+    // Throw a non-Error object to test `String(error)` branch
+    mockGetPRDetails.mockRejectedValue("string error not an Error instance");
+
+    const result = await runReviewJob(testCtx, testEnv);
+    expect(result.success).toBe(false);
+    expect(result.summary).toBe("string error not an Error instance");
+  });
 });

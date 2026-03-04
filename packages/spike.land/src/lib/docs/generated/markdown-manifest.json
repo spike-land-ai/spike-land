@@ -630,6 +630,13 @@
     "filePath": "database/album-enhance-pagination-optimization.md"
   },
   {
+    "slug": "deployment-inventory",
+    "title": "Deployment Inventory",
+    "excerpt": "| Platform                | Count | Services                                                                                     | | ----------------------- | ----- | ---------------------------------",
+    "category": "general",
+    "filePath": "deployment-inventory.md"
+  },
+  {
     "slug": "E2E_TEST_IMPLEMENTATION",
     "title": "E2E Test Implementation for Image Enhancement App Features",
     "excerpt": "> **Status (2026-02-26):** The E2E test files referenced in this document > (`e2e/features/*.feature`, `e2e/step-definitions/*.steps.ts`) were removed > during the dead code cleanup (~420 files remove",
@@ -814,7 +821,7 @@
   {
     "slug": "physics-of-attention-assets",
     "title": "Asset Requirements: Physics of Attention",
-    "excerpt": "Please generate the following images and save them to `packages/video/public/images/attention/`.",
+    "excerpt": "Please generate the following images and save them to `src/video/public/images/attention/`.",
     "category": "general",
     "filePath": "physics-of-attention-assets.md"
   },

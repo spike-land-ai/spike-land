@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   handleCall,
   handleHelp,
+  handleLoadToolset,
   handleReconnect,
   handleServers,
   handleTools,
@@ -148,6 +149,54 @@ describe("shell commands", () => {
       expect(output).toContain("reconnect");
       expect(output).toContain("help");
       expect(output).toContain("quit");
+    });
+  });
+
+  describe("additional branch coverage", () => {
+    it("handleServers shows disconnected status (line 33 dim branch)", () => {
+      (mockManager.isConnected as ReturnType<typeof vi.fn>).mockReturnValue(false);
+      const output = handleServers(ctx);
+      expect(output).toContain("disconnected");
+    });
+
+    it("handleTools returns 'No tools available' when no tools (line 50)", () => {
+      (mockManager.getAllTools as ReturnType<typeof vi.fn>).mockReturnValue([]);
+      const output = handleTools(ctx);
+      expect(output).toBe("No tools available.");
+    });
+
+    it("handleCall formats non-Error thrown as String (line 94)", async () => {
+      (mockManager.callTool as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        "raw string error",
+      );
+      const output = await handleCall(ctx, "some__tool", "{}");
+      expect(output).toContain("raw string error");
+    });
+
+    it("handleReconnect formats non-Error as String (line 111)", async () => {
+      (mockManager.reconnect as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        "reconnect string error",
+      );
+      const output = await handleReconnect(ctx, "vitest");
+      expect(output).toContain("reconnect string error");
+    });
+
+    it("handleLoadToolset formats non-Error as String (line 149)", () => {
+      const mockToolsetManager = {
+        loadToolset: vi.fn().mockImplementation(() => {
+          throw "plain string toolset error"; // non-Error
+        }),
+      };
+      const ctxWithToolset = {
+        ...ctx,
+        manager: {
+          ...mockManager,
+          toolsetManager: mockToolsetManager,
+        } as unknown as ServerManager,
+      };
+
+      const output = handleLoadToolset(ctxWithToolset, "bad-toolset");
+      expect(output).toContain("plain string toolset error");
     });
   });
 });

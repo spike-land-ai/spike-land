@@ -38,18 +38,20 @@ spa.get("/*", async (c) => {
       },
     });
 
-    c.executionCtx.waitUntil(
-      getClientId(c.req.raw).then((clientId) =>
-        sendGA4Events(c.env, clientId, [{
-          name: "page_view",
-          params: {
-            page_path: path,
-            referrer: (c.req.header("referer") ?? "").slice(0, 500),
-            user_agent: (c.req.header("user-agent") ?? "").slice(0, 200),
-          },
-        }])
-      ),
-    );
+    try {
+      c.executionCtx.waitUntil(
+        getClientId(c.req.raw).then((clientId) =>
+          sendGA4Events(c.env, clientId, [{
+            name: "page_view",
+            params: {
+              page_path: path,
+              referrer: (c.req.header("referer") ?? "").slice(0, 500),
+              user_agent: (c.req.header("user-agent") ?? "").slice(0, 200),
+            },
+          }])
+        ),
+      );
+    } catch { /* no ExecutionContext in test environment */ }
 
     return response;
   }

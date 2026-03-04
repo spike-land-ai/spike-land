@@ -18,6 +18,23 @@ describe("Sync Module", () => {
     delete process.env.TESTING_SPIKE_LAND_URL;
   });
 
+  it("uses default testing.spike.land URL when env var not set", async () => {
+    vi.resetModules();
+    delete process.env.TESTING_SPIKE_LAND_URL;
+    const freshSync = await import("../../../src/vibe-dev/sync.js");
+    global.fetch = mockFetch;
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ code: "const x = 1;" }),
+    });
+
+    await freshSync.pullCode("code1");
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("testing.spike.land"),
+    );
+  });
+
   describe("pullCode", () => {
     it("should return code from session response", async () => {
       mockFetch.mockResolvedValue({
@@ -120,6 +137,29 @@ describe("Sync Module", () => {
 
       await expect(sync.withRetry(fn, 2, 1)).rejects.toThrow("fail");
       expect(fn).toHaveBeenCalledTimes(2);
+    });
+
+    it("handles non-Error thrown values in withRetry", async () => {
+      // Throw a non-Error (plain string) - tests the String(error) branch at line 107
+      const fn = vi.fn().mockRejectedValue("plain string error");
+
+      await expect(sync.withRetry(fn, 1, 1)).rejects.toThrow("plain string error");
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it("covers the empty string fallback when both code fields absent", async () => {
+      vi.resetModules();
+      process.env.TESTING_SPIKE_LAND_URL = "https://test-server";
+      const freshSync = await import("../../../src/vibe-dev/sync.js");
+      global.fetch = mockFetch;
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: async () => ({}),
+      });
+
+      const code = await freshSync.pullCode("code1");
+      expect(code).toBe("");
     });
   });
 });

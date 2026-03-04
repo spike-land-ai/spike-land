@@ -9,6 +9,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { logger } from "@/lib/logger";
 
 import type {
@@ -21,6 +22,7 @@ import type {
   DocsToolParam,
 } from "./types";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../../..");
 const OUT_DIR = path.join(ROOT, "src/lib/docs/generated");
 

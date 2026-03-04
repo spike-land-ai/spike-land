@@ -72,7 +72,7 @@ export class InProcessToolProvider {
         namespacedName: d.name,
         originalName: d.name,
         serverName: "in-process",
-        description: d.description,
+        ...(d.description != null ? { description: d.description } : {}),
         inputSchema: d.inputSchema
           ? (zodToJsonSchema(
               z.object(d.inputSchema) as unknown as Parameters<typeof zodToJsonSchema>[0],

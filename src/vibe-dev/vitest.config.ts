@@ -8,7 +8,13 @@ export default mergeConfig(
       name: "vibe-dev",
       include: ["../../.tests/vibe-dev/**/*.test.ts"],
       coverage: {
-        exclude: ["src/**/*.test.ts", "src/cli.ts"],
+        exclude: [
+          "src/**/*.test.ts",
+          "src/cli.ts",
+          "vitest.config.ts",
+          "../../vitest.base.ts",
+          "../../vitest-minimal-reporter.ts",
+        ],
       },
     },
   }),

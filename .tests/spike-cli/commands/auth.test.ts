@@ -97,4 +97,56 @@ describe("auth command", () => {
 
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Logged in successfully"));
   });
+
+  it("login triggers onUserCode callback", async () => {
+    vi.mocked(flow.deviceCodeLogin).mockImplementation(async (options) => {
+      options.onUserCode?.("USER-CODE", "https://spike.land/activate");
+      return { accessToken: "abc", baseUrl: "https://test" } as unknown as AuthTokens;
+    });
+
+    registerAuthCommand(program);
+    const login = program.commands[0].commands.find((c) => c.name() === "login")!;
+    // @ts-expect-error
+    await login._actionHandler([{ baseUrl: "https://test" }, []]);
+
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining("https://spike.land/activate"));
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining("USER-CODE"));
+  });
+
+  it("login completes onboarding successfully", async () => {
+    vi.mocked(flow.deviceCodeLogin).mockResolvedValue({
+      accessToken: "abc",
+      baseUrl: "https://test",
+    } as unknown as AuthTokens);
+    const wizard = await import("../../../src/spike-cli/onboarding/wizard");
+    vi.mocked(wizard.runOnboardingWizard).mockResolvedValue({
+      personaName: "Coder",
+      personaId: 1,
+      personaSlug: "coder",
+      answers: [true],
+    });
+    vi.mocked(wizard.submitOnboarding).mockResolvedValue(undefined);
+
+    registerAuthCommand(program);
+    const login = program.commands[0].commands.find((c) => c.name() === "login")!;
+    // @ts-expect-error
+    await login._actionHandler([{ baseUrl: "https://test" }, []]);
+
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Welcome"));
+  });
+
+  it("status shows expiry info when expiresAt is set", async () => {
+    vi.mocked(store.loadTokens).mockResolvedValue({
+      baseUrl: "https://test",
+      expiresAt: "2030-01-01T00:00:00Z",
+    } as unknown as AuthTokens);
+    vi.mocked(store.isTokenExpired).mockReturnValue(false);
+
+    registerAuthCommand(program);
+    const status = program.commands[0].commands.find((c) => c.name() === "status")!;
+    // @ts-expect-error
+    await status._actionHandler([{}, []]);
+
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Expires at:"));
+  });
 });

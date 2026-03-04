@@ -26,12 +26,17 @@ function createMockEnv(): Env {
         fetch: vi.fn().mockResolvedValue(new Response("0")),
       }),
     } as unknown as DurableObjectNamespace,
+    AUTH_MCP: {
+      fetch: vi.fn().mockResolvedValue(new Response("{}", { status: 200 })),
+    } as unknown as Fetcher,
     STRIPE_SECRET_KEY: "sk_test_xxx",
-    AI_API_KEY: "ai-key",
+    CLAUDE_OAUTH_TOKEN: "claude-token",
+    GEMINI_API_KEY: "gemini-key",
     GITHUB_TOKEN: "ghp_xxx",
-    SPACETIMEDB_URI: "http://localhost:3000",
     ALLOWED_ORIGINS: "https://spike.land",
     QUIZ_BADGE_SECRET: "test-secret",
+    GA_MEASUREMENT_ID: "G-TEST123",
+    GA_API_SECRET: "ga-secret",
   };
 }
 
@@ -328,13 +333,13 @@ describe("proxy route — ai", () => {
     expect(body.error).toContain("url is required");
   });
 
-  it("proxies AI request to any URL with AI_API_KEY", async () => {
+  it("proxies Anthropic request with x-api-key header (CLAUDE_OAUTH_TOKEN)", async () => {
     const app = new Hono<{ Bindings: Env }>();
     app.route("/", proxy);
 
     const env = createMockEnv();
     const mockFetch = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ choices: [] }), {
+      new Response(JSON.stringify({ content: [] }), {
         status: 200,
         headers: { "content-type": "application/json" },
       }),
@@ -353,43 +358,67 @@ describe("proxy route — ai", () => {
 
     expect(res.status).toBe(200);
     const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.headers.Authorization).toBe("Bearer ai-key");
+    expect(fetchCall[1]!.headers["x-api-key"]).toBe("claude-token");
 
     vi.unstubAllGlobals();
   });
 
-  it("forwards custom headers in AI proxy request", async () => {
+  it("proxies Gemini request with Authorization Bearer header (GEMINI_API_KEY)", async () => {
     const app = new Hono<{ Bindings: Env }>();
     app.route("/", proxy);
 
     const env = createMockEnv();
     const mockFetch = vi.fn().mockResolvedValue(
-      new Response("{}", {
+      new Response(JSON.stringify({ candidates: [] }), {
         status: 200,
         headers: { "content-type": "application/json" },
       }),
     );
     vi.stubGlobal("fetch", mockFetch);
 
-    await app.request(
+    const res = await app.request(
+      "/proxy/ai",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent",
+          body: { contents: [] },
+        }),
+      },
+      env,
+    );
+
+    expect(res.status).toBe(200);
+    const fetchCall = mockFetch.mock.calls[0]!;
+    expect(fetchCall[1]!.headers.Authorization).toBe("Bearer gemini-key");
+    expect(fetchCall[1]!.body).toBe(JSON.stringify({ contents: [] }));
+
+    vi.unstubAllGlobals();
+  });
+
+  it("returns 400 for non-allowlisted AI URL (e.g. OpenAI)", async () => {
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/", proxy);
+
+    const env = createMockEnv();
+
+    const res = await app.request(
       "/proxy/ai",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           url: "https://api.openai.com/v1/chat/completions",
-          headers: { "X-Custom-Header": "test-value" },
           body: { model: "gpt-4" },
         }),
       },
       env,
     );
 
-    const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.headers["X-Custom-Header"]).toBe("test-value");
-    expect(fetchCall[1]!.body).toBe(JSON.stringify({ model: "gpt-4" }));
-
-    vi.unstubAllGlobals();
+    expect(res.status).toBe(400);
+    const body = await res.json<{ error: string }>();
+    expect(body.error).toContain("Invalid AI API URL");
   });
 });
 
@@ -570,30 +599,43 @@ describe("analytics route", () => {
     expect(body.error).toContain("No valid events");
   });
 
-  it("returns 429 when rate limited", async () => {
+  it("returns 429 when rate limited (exceeds 10 per minute per IP)", async () => {
     const app = new Hono<{ Bindings: Env }>();
     app.route("/", analytics);
 
     const env = createMockEnv();
-    const limiterStub = {
-      fetch: vi.fn().mockResolvedValue(new Response("0.5")),
-    };
-    (env.LIMITERS.get as ReturnType<typeof vi.fn>).mockReturnValue(limiterStub);
+    const mockFetch = vi.fn().mockResolvedValue(new Response("ok", { status: 200 }));
+    vi.stubGlobal("fetch", mockFetch);
 
-    const res = await app.request(
-      "/analytics/ingest",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify([{ source: "web", eventType: "click" }]),
-      },
-      env,
-    );
+    // Use a unique IP to avoid state leakage from other tests
+    const makeReq = () =>
+      app.request(
+        "/analytics/ingest",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "cf-connecting-ip": "192.0.2.99",
+          },
+          body: JSON.stringify([{ source: "web", eventType: "click" }]),
+        },
+        env,
+      );
 
+    // Send 10 requests (the max allowed)
+    for (let i = 0; i < 10; i++) {
+      const r = await makeReq();
+      expect(r.status).toBe(200);
+    }
+
+    // 11th request should be rate limited
+    const res = await makeReq();
     expect(res.status).toBe(429);
     const body = await res.json<{ error: string; retryAfter: number }>();
     expect(body.error).toBe("Rate limited");
-    expect(body.retryAfter).toBe(0.5);
+    expect(body.retryAfter).toBe(60);
+
+    vi.unstubAllGlobals();
   });
 
   it("accepts valid events and returns accepted count", async () => {
@@ -625,7 +667,7 @@ describe("analytics route", () => {
     vi.unstubAllGlobals();
   });
 
-  it("does not fail when SpacetimeDB forwarding errors", async () => {
+  it("returns 200 even when GA4 forwarding errors (best-effort)", async () => {
     const app = new Hono<{ Bindings: Env }>();
     app.route("/", analytics);
 
@@ -637,7 +679,10 @@ describe("analytics route", () => {
       "/analytics/ingest",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "cf-connecting-ip": "192.0.2.50",
+        },
         body: JSON.stringify([{ source: "web", eventType: "click" }]),
       },
       env,
@@ -651,27 +696,35 @@ describe("analytics route", () => {
     vi.unstubAllGlobals();
   });
 
-  it("skips SpacetimeDB forwarding when SPACETIMEDB_URI is absent", async () => {
+  it("returns accepted count for mixed valid and invalid events", async () => {
     const app = new Hono<{ Bindings: Env }>();
     app.route("/", analytics);
 
     const env = createMockEnv();
-    env.SPACETIMEDB_URI = "";
-    const mockFetch = vi.fn();
+    const mockFetch = vi.fn().mockResolvedValue(new Response("ok", { status: 200 }));
     vi.stubGlobal("fetch", mockFetch);
 
     const res = await app.request(
       "/analytics/ingest",
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify([{ source: "web", eventType: "click" }]),
+        headers: {
+          "Content-Type": "application/json",
+          "cf-connecting-ip": "192.0.2.51",
+        },
+        body: JSON.stringify([
+          { source: "web", eventType: "click" },
+          { source: "api", eventType: "tool_call", metadata: { tool: "test", count: 5, flag: true } },
+          { badField: "invalid" },
+          null,
+        ]),
       },
       env,
     );
 
     expect(res.status).toBe(200);
-    expect(mockFetch).not.toHaveBeenCalled();
+    const body = await res.json<{ accepted: number }>();
+    expect(body.accepted).toBe(2);
 
     vi.unstubAllGlobals();
   });

@@ -187,4 +187,27 @@ describe("mirror tools", () => {
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("network error");
   });
+
+  it("syncs with empty stdout (no code block appended)", async () => {
+    mockGetManifestPackage.mockResolvedValue(
+      MIRROR_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+    );
+    mockRunCommand.mockImplementation(async (_cmd, args) => {
+      if (args[0] === "remote" && args[1] === "get-url") {
+        return ok("git@github.com:org/repo.git");
+      }
+      // subtree push returns empty stdout
+      if (args[0] === "subtree") return ok("");
+      return ok();
+    });
+
+    const result = await server.call("bazdmeg_sync_mirror", {
+      packageName: "chess-engine",
+      dryRun: false,
+    });
+    const text = result.content[0].text;
+    expect(text).toContain("SYNCED");
+    // No code block since empty stdout
+    expect(text).not.toContain("```\n\n```");
+  });
 });

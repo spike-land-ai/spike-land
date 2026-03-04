@@ -93,6 +93,26 @@ describe("Redis Client", () => {
       );
     });
 
+    it("should fallback to pipeline if EVAL fails with non-Error value", async () => {
+      // First call rejects with a non-Error (covers the `error instanceof Error ? ... : error` branch)
+      mockFetch.mockRejectedValueOnce("string error value");
+
+      // Second call succeeds (Pipeline: RPOP, LLEN)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ result: "msg2" }, { result: 0 }],
+      });
+
+      // Third call succeeds (SREM)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ result: 1 }),
+      });
+
+      const result = await redis.dequeueMessage(mockConfig, "app1");
+      expect(result).toBe("msg2");
+    });
+
     it("should fallback to pipeline if EVAL fails", async () => {
       // First call fails (EVAL)
       mockFetch.mockRejectedValueOnce(new Error("EVAL not supported"));
@@ -112,6 +132,42 @@ describe("Redis Client", () => {
       const result = await redis.dequeueMessage(mockConfig, "app1");
       expect(result).toBe("msg1");
       expect(mockFetch).toHaveBeenCalledTimes(3);
+    });
+
+    it("should skip SREM when remaining > 0 in pipeline fallback", async () => {
+      // First call fails (EVAL)
+      mockFetch.mockRejectedValueOnce(new Error("EVAL not supported"));
+
+      // Second call succeeds (Pipeline: RPOP, LLEN) - remaining is 2, not 0
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ result: "msg1" }, { result: 2 }],
+      });
+
+      const result = await redis.dequeueMessage(mockConfig, "app1");
+      expect(result).toBe("msg1");
+      // Only 2 calls (EVAL failed + pipeline), no SREM because remaining > 0
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+    });
+
+    it("should return null when no message in queue via pipeline fallback", async () => {
+      // First call fails (EVAL)
+      mockFetch.mockRejectedValueOnce(new Error("EVAL not supported"));
+
+      // Second call succeeds (Pipeline: RPOP returns null, LLEN returns 0)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => [{ result: null }, { result: 0 }],
+      });
+
+      // SREM still called when remaining is 0
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ result: 1 }),
+      });
+
+      const result = await redis.dequeueMessage(mockConfig, "app1");
+      expect(result).toBeNull();
     });
   });
 

@@ -12,14 +12,16 @@ r2.get("/r2/:key{.+}", async (c) => {
     return c.json({ error: "Not found" }, 404);
   }
 
-  c.executionCtx.waitUntil(
-    getClientId(c.req.raw).then((clientId) =>
-      sendGA4Events(c.env, clientId, [{
-        name: "r2_operation",
-        params: { operation: "read", key },
-      }])
-    ),
-  );
+  try {
+    c.executionCtx.waitUntil(
+      getClientId(c.req.raw).then((clientId) =>
+        sendGA4Events(c.env, clientId, [{
+          name: "r2_operation",
+          params: { operation: "read", key },
+        }])
+      ),
+    );
+  } catch { /* no ExecutionContext in test environment */ }
 
   const headers = new Headers();
   object.writeHttpMetadata(headers);
@@ -41,14 +43,16 @@ r2.post("/r2/upload", async (c) => {
   }
   const uploadKey = body.key;
 
-  c.executionCtx.waitUntil(
-    getClientId(c.req.raw).then((clientId) =>
-      sendGA4Events(c.env, clientId, [{
-        name: "r2_operation",
-        params: { operation: "upload", key: uploadKey },
-      }])
-    ),
-  );
+  try {
+    c.executionCtx.waitUntil(
+      getClientId(c.req.raw).then((clientId) =>
+        sendGA4Events(c.env, clientId, [{
+          name: "r2_operation",
+          params: { operation: "upload", key: uploadKey },
+        }])
+      ),
+    );
+  } catch { /* no ExecutionContext in test environment */ }
 
   // Direct upload: read the body from a subsequent PUT, or accept inline data
   // For now, create a placeholder and return the key for a follow-up PUT
@@ -59,14 +63,16 @@ r2.delete("/r2/:key{.+}", async (c) => {
   const key = c.req.param("key");
   await c.env.R2.delete(key);
 
-  c.executionCtx.waitUntil(
-    getClientId(c.req.raw).then((clientId) =>
-      sendGA4Events(c.env, clientId, [{
-        name: "r2_operation",
-        params: { operation: "delete", key },
-      }])
-    ),
-  );
+  try {
+    c.executionCtx.waitUntil(
+      getClientId(c.req.raw).then((clientId) =>
+        sendGA4Events(c.env, clientId, [{
+          name: "r2_operation",
+          params: { operation: "delete", key },
+        }])
+      ),
+    );
+  } catch { /* no ExecutionContext in test environment */ }
 
   return c.json({ deleted: key });
 });

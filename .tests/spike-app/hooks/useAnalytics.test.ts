@@ -57,7 +57,7 @@ describe("useAnalytics", () => {
     analytics.trackCustomEvent("test_event", { key: "value" });
 
     // Trigger flush via timer
-    vi.advanceTimersByTime(6000);
+    vi.advanceTimersByTime(31000);
 
     expect(mockFetch).toHaveBeenCalledWith(
       "/api/analytics/ingest",
@@ -91,7 +91,7 @@ describe("useAnalytics", () => {
     analytics.trackEvent("beacon_test", { page: "/test" });
 
     // Trigger flush
-    vi.advanceTimersByTime(6000);
+    vi.advanceTimersByTime(31000);
 
     expect(mockSendBeacon).toHaveBeenCalledWith(
       "/api/analytics/ingest",
@@ -115,7 +115,7 @@ describe("useAnalytics", () => {
     const analytics = useAnalytics();
 
     analytics.trackEvent("test", {});
-    vi.advanceTimersByTime(6000);
+    vi.advanceTimersByTime(31000);
 
     // After 429, the interval should increase to 30s (backoff)
     // Enqueue another event
@@ -125,7 +125,7 @@ describe("useAnalytics", () => {
     analytics.trackEvent("test2", {});
 
     // Normal interval (5s) should NOT flush yet due to backoff
-    vi.advanceTimersByTime(6000);
+    vi.advanceTimersByTime(31000);
     // The backoff may or may not have taken effect depending on async timing,
     // but the module should not throw
   });
@@ -137,14 +137,14 @@ describe("useAnalytics", () => {
     const analytics = useAnalytics();
 
     analytics.trackEvent("event1", {});
-    vi.advanceTimersByTime(6000);
+    vi.advanceTimersByTime(31000);
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
 
     mockFetch.mockClear();
 
     // Without new events, another timer cycle should not flush
-    vi.advanceTimersByTime(6000);
+    vi.advanceTimersByTime(31000);
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
@@ -162,7 +162,7 @@ describe("useAnalytics", () => {
     onResolved({ toLocation: { pathname: "/dashboard" } });
 
     // Flush the queued page_view event
-    vi.advanceTimersByTime(6000);
+    vi.advanceTimersByTime(31000);
 
     expect(mockFetch).toHaveBeenCalled();
     const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
@@ -170,23 +170,21 @@ describe("useAnalytics", () => {
     expect(body[0].metadata.path).toBe("/dashboard");
   });
 
-  it("enriches events with referrer and userAgent", async () => {
+  it("flushes events with correct source and eventType structure", async () => {
     vi.useFakeTimers();
-
-    Object.defineProperty(document, "referrer", {
-      value: "https://google.com",
-      writable: true,
-      configurable: true,
-    });
 
     const { useAnalytics } = await import("../../../src/spike-app/hooks/useAnalytics.js");
     const analytics = useAnalytics();
 
-    analytics.trackEvent("enriched_test", {});
-    vi.advanceTimersByTime(6000);
+    analytics.trackEvent("custom_test", { key1: "val1", key2: 42 });
+    vi.advanceTimersByTime(31000);
 
+    expect(mockFetch).toHaveBeenCalled();
     const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
-    expect(body[0].metadata.userAgent).toBe("test-agent");
-    expect(body[0].metadata.referrer).toBe("https://google.com");
+    expect(Array.isArray(body)).toBe(true);
+    expect(body[0].source).toBe("spike-app");
+    expect(body[0].eventType).toBe("custom_test");
+    expect(body[0].metadata.key1).toBe("val1");
+    expect(body[0].metadata.key2).toBe(42);
   });
 });

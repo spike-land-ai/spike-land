@@ -54,6 +54,17 @@ describe("token-store", () => {
     expect(result).toBeNull();
   });
 
+  it("loadTokens returns null when file contains invalid JSON (line 30 catch)", async () => {
+    const { writeFile, mkdir } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    // Create the .spike directory and write a corrupted auth file
+    const spikeDir = join(tempDir, ".spike");
+    await mkdir(spikeDir, { recursive: true });
+    await writeFile(join(spikeDir, "auth.json"), "not-valid-json", "utf-8");
+    const result = await loadTokens();
+    expect(result).toBeNull();
+  });
+
   it("save/load round-trip preserves tokens", async () => {
     await saveTokens(sampleTokens);
     const loaded = await loadTokens();
@@ -65,6 +76,16 @@ describe("token-store", () => {
     const stats = await stat(getAuthPath());
     // Check owner-only read/write (0o600 = 0o100600, mask with 0o777)
     expect(stats.mode & 0o777).toBe(0o600);
+  });
+
+  it("saveTokens does not call mkdir when .spike dir already exists (line 38 false branch)", async () => {
+    // Save once to create the dir
+    await saveTokens(sampleTokens);
+    // Save again — .spike dir exists, so mkdir should be skipped
+    const updatedTokens = { ...sampleTokens, accessToken: "new-token" };
+    await saveTokens(updatedTokens);
+    const loaded = await loadTokens();
+    expect(loaded?.accessToken).toBe("new-token");
   });
 
   it("deleteTokens removes the file", async () => {

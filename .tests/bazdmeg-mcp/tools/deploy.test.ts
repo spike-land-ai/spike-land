@@ -149,6 +149,72 @@ describe("deploy tools", () => {
     });
   });
 
+  describe("bazdmeg_generate_wrangler_toml — additional coverage", () => {
+    it("generates toml without compatibility_flags", async () => {
+      mockGetManifestPackage.mockResolvedValue({
+        kind: "worker",
+        version: "1.0.0",
+        description: "Edge worker",
+        entry: "src/index.ts",
+        worker: {
+          name: "minimal-worker",
+          compatibility_date: "2024-01-01",
+        },
+      });
+
+      const result = await server.call("bazdmeg_generate_wrangler_toml", {
+        packageName: "minimal-worker",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain('name = "minimal-worker"');
+      expect(text).not.toContain("compatibility_flags");
+    });
+
+    it("generates toml with assets and site", async () => {
+      mockGetManifestPackage.mockResolvedValue({
+        kind: "worker",
+        version: "1.0.0",
+        description: "Edge worker",
+        entry: "src/index.ts",
+        worker: {
+          name: "assets-worker",
+          compatibility_date: "2024-01-01",
+          assets: { directory: "./dist", not_found_handling: "single-page-application" },
+          site: { bucket: "./public" },
+        },
+      });
+
+      const result = await server.call("bazdmeg_generate_wrangler_toml", {
+        packageName: "assets-worker",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("[assets]");
+      expect(text).toContain("not_found_handling");
+      expect(text).toContain("[site]");
+    });
+
+    it("generates toml with rules", async () => {
+      mockGetManifestPackage.mockResolvedValue({
+        kind: "worker",
+        version: "1.0.0",
+        description: "Edge worker",
+        entry: "src/index.ts",
+        worker: {
+          name: "rules-worker",
+          compatibility_date: "2024-01-01",
+          rules: [{ type: "Text", globs: ["**/*.txt", "**/*.md"] }],
+        },
+      });
+
+      const result = await server.call("bazdmeg_generate_wrangler_toml", {
+        packageName: "rules-worker",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("[[rules]]");
+      expect(text).toContain("**/*.txt");
+    });
+  });
+
   describe("bazdmeg_deploy_worker", () => {
     it("registers the tool", () => {
       expect(server.handlers.has("bazdmeg_deploy_worker")).toBe(true);
@@ -262,6 +328,226 @@ describe("deploy tools", () => {
         packageName: "pkg",
       });
       expect(result.isError).toBe(true);
+    });
+
+    it("skips build step when no package.json exists", async () => {
+      const { existsSync } = await import("node:fs");
+      vi.mocked(existsSync).mockReturnValueOnce(true).mockReturnValueOnce(false); // pkgDir exists but not package.json
+      mockGetManifestPackage.mockResolvedValue(
+        WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+      );
+      mockWriteFile.mockResolvedValue(undefined);
+
+      const result = await server.call("bazdmeg_deploy_worker", {
+        packageName: "spike-edge",
+        dryRun: true,
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("skipped — no package.json");
+    });
+
+    it("runs frontend build when assets directory includes frontend/", async () => {
+      const { existsSync } = await import("node:fs");
+      // existsSync calls: pkgDir check, hasBuildScript, frontendDir exists, node_modules not exists
+      vi.mocked(existsSync)
+        .mockReturnValueOnce(true)  // pkgDir exists
+        .mockReturnValueOnce(true)  // hasBuildScript (package.json)
+        .mockReturnValueOnce(true)  // frontendDir exists
+        .mockReturnValueOnce(false); // node_modules not exists
+
+      mockGetManifestPackage.mockResolvedValue({
+        kind: "worker",
+        version: "1.0.0",
+        description: "Edge worker with frontend",
+        entry: "src/index.ts",
+        worker: {
+          name: "frontend-worker",
+          compatibility_date: "2024-01-01",
+          assets: { directory: "frontend/dist" },
+        },
+      });
+
+      let callCount = 0;
+      mockRunCommand.mockImplementation(async () => {
+        callCount++;
+        return ok();
+      });
+      mockWriteFile.mockResolvedValue(undefined);
+
+      const result = await server.call("bazdmeg_deploy_worker", {
+        packageName: "frontend-worker",
+        dryRun: true,
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("Frontend Build");
+    });
+
+    it("blocks when frontend npm install fails", async () => {
+      const { existsSync } = await import("node:fs");
+      vi.mocked(existsSync)
+        .mockReturnValueOnce(true)  // pkgDir
+        .mockReturnValueOnce(true)  // hasBuildScript
+        .mockReturnValueOnce(true)  // frontendDir exists
+        .mockReturnValueOnce(false); // node_modules not exists
+
+      mockGetManifestPackage.mockResolvedValue({
+        kind: "worker",
+        version: "1.0.0",
+        description: "Edge worker with frontend",
+        entry: "src/index.ts",
+        worker: {
+          name: "frontend-worker",
+          compatibility_date: "2024-01-01",
+          assets: { directory: "frontend/dist" },
+        },
+      });
+
+      let callCount = 0;
+      mockRunCommand.mockImplementation(async () => {
+        callCount++;
+        // First call is npm run build (succeeds), second is npm install (fails)
+        return callCount === 1 ? ok() : fail("npm install error");
+      });
+
+      const result = await server.call("bazdmeg_deploy_worker", {
+        packageName: "frontend-worker",
+        dryRun: true,
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("BLOCKED");
+      expect(text).toContain("frontend install");
+    });
+
+    it("blocks when vite build fails", async () => {
+      const { existsSync } = await import("node:fs");
+      vi.mocked(existsSync)
+        .mockReturnValueOnce(true)   // pkgDir
+        .mockReturnValueOnce(true)   // hasBuildScript
+        .mockReturnValueOnce(true)   // frontendDir exists
+        .mockReturnValueOnce(true);  // node_modules exists (skip install)
+
+      mockGetManifestPackage.mockResolvedValue({
+        kind: "worker",
+        version: "1.0.0",
+        description: "Edge worker with frontend",
+        entry: "src/index.ts",
+        worker: {
+          name: "frontend-worker",
+          compatibility_date: "2024-01-01",
+          assets: { directory: "frontend/dist" },
+        },
+      });
+
+      let callCount = 0;
+      mockRunCommand.mockImplementation(async () => {
+        callCount++;
+        // First call is npm run build (succeeds), second is vite build (fails)
+        return callCount === 1 ? ok() : fail("vite build error");
+      });
+      mockWriteFile.mockResolvedValue(undefined);
+
+      const result = await server.call("bazdmeg_deploy_worker", {
+        packageName: "frontend-worker",
+        dryRun: true,
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("BLOCKED");
+      expect(text).toContain("frontend build");
+    });
+
+    it("blocks when vite build fails with stdout only (no stderr)", async () => {
+      const { existsSync } = await import("node:fs");
+      vi.mocked(existsSync)
+        .mockReturnValueOnce(true)   // pkgDir
+        .mockReturnValueOnce(true)   // hasBuildScript
+        .mockReturnValueOnce(true)   // frontendDir exists
+        .mockReturnValueOnce(true);  // node_modules exists
+
+      mockGetManifestPackage.mockResolvedValue({
+        kind: "worker",
+        version: "1.0.0",
+        description: "Edge worker with frontend",
+        entry: "src/index.ts",
+        worker: {
+          name: "frontend-worker2",
+          compatibility_date: "2024-01-01",
+          assets: { directory: "frontend/dist" },
+        },
+      });
+
+      let callCount = 0;
+      mockRunCommand.mockImplementation(async () => {
+        callCount++;
+        if (callCount === 1) return ok(); // npm build passes
+        // vite fails with stdout only
+        return { ok: false, stdout: "vite error in stdout", stderr: "", code: 1 };
+      });
+      mockWriteFile.mockResolvedValue(undefined);
+
+      const result = await server.call("bazdmeg_deploy_worker", {
+        packageName: "frontend-worker2",
+        dryRun: true,
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("BLOCKED");
+    });
+
+    it("passes env flag when dryRun=false", async () => {
+      mockGetManifestPackage.mockResolvedValue(
+        WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+      );
+      mockRunCommand.mockResolvedValue(ok("deployed"));
+      mockWriteFile.mockResolvedValue(undefined);
+
+      const result = await server.call("bazdmeg_deploy_worker", {
+        packageName: "spike-edge",
+        env: "production",
+        dryRun: false,
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("DEPLOYED");
+      expect(text).toContain("production");
+    });
+
+    it("DEPLOYED shows stdout when present", async () => {
+      mockGetManifestPackage.mockResolvedValue(
+        WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+      );
+      let callCount = 0;
+      mockRunCommand.mockImplementation(async () => {
+        callCount++;
+        return callCount === 1 ? ok() : ok("Deployed to spike-edge.workers.dev");
+      });
+      mockWriteFile.mockResolvedValue(undefined);
+
+      const result = await server.call("bazdmeg_deploy_worker", {
+        packageName: "spike-edge",
+        dryRun: false,
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("DEPLOYED");
+      expect(text).toContain("spike-edge.workers.dev");
+    });
+
+    it("deploy failure uses stdout when stderr is empty", async () => {
+      mockGetManifestPackage.mockResolvedValue(
+        WORKER_PKG as ReturnType<typeof getManifestPackage> extends Promise<infer T> ? T : never,
+      );
+      let callCount = 0;
+      mockRunCommand.mockImplementation(async () => {
+        callCount++;
+        if (callCount === 1) return ok(); // build passes
+        return { ok: false, stdout: "error in stdout", stderr: "", code: 1 };
+      });
+      mockWriteFile.mockResolvedValue(undefined);
+
+      const result = await server.call("bazdmeg_deploy_worker", {
+        packageName: "spike-edge",
+        dryRun: false,
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("FAILED");
+      expect(text).toContain("error in stdout");
     });
   });
 });

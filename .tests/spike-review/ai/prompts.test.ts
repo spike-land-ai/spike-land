@@ -65,4 +65,10 @@ describe("buildReviewPrompt", () => {
     const prompt = buildReviewPrompt(pr, "+code");
     expect(prompt).toContain("(no description)");
   });
+
+  it("handles undefined author (line 66 - ?? unknown branch)", () => {
+    const pr = { ...mockPR, author: undefined };
+    const prompt = buildReviewPrompt(pr, "+code");
+    expect(prompt).toContain("unknown");
+  });
 });

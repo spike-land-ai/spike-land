@@ -145,4 +145,23 @@ describe("runAgentLoop", () => {
     const content = toolResultMsg.content as Array<{ type: string; is_error?: boolean }>;
     expect(content[0].is_error).toBe(true);
   });
+
+  it("resolveServerName returns 'unknown' when tool is not in getAllTools (line 105 ?? branch)", async () => {
+    // Manager returns no matching tool — resolveServerName falls to ?? "unknown"
+    (mockManager.getAllTools as ReturnType<typeof vi.fn>).mockReturnValue([]);
+
+    const onToolCallStart = vi.fn();
+    const stream1 = createMockStream([toolUseBlock("t1", "unknown__mystery_tool", {})]);
+    const stream2 = createMockStream([textBlock("done")]);
+
+    mockClient = {
+      createStream: vi.fn().mockReturnValueOnce(stream1).mockReturnValueOnce(stream2),
+      model: "claude-sonnet-4-6",
+    } as unknown as ChatClient;
+
+    await runAgentLoop("run", makeCtx({ onToolCallStart }));
+
+    // onToolCallStart should have been called with serverName = "unknown"
+    expect(onToolCallStart).toHaveBeenCalledWith("t1", "unknown__mystery_tool", "unknown", {});
+  });
 });

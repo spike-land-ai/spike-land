@@ -92,4 +92,17 @@ describe("alias command output", () => {
     expect(output).toContain("Removed alias");
     expect(output).toContain("foo");
   });
+
+  it("prints error when removing a non-existent alias (line 38 false branch)", async () => {
+    const program = new Command();
+    program.exitOverride();
+    registerAliasCommand(program);
+
+    // Try to remove an alias that does not exist
+    await program.parseAsync(["node", "spike", "alias", "remove", "nonexistent"]);
+
+    const output = stderrSpy.mock.calls.map((c) => c.join(" ")).join("\n");
+    expect(output).toContain("No alias found with name");
+    expect(output).toContain("nonexistent");
+  });
 });

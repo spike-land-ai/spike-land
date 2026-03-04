@@ -14,7 +14,8 @@ export default mergeConfig(
       include: ["../../.tests/chess-engine/**/*.test.ts"],
       name: "chess-engine",
       coverage: {
-        exclude: ["src/**/*.test.ts", "src/index.ts", "src/generated/**", "src/lib/prisma.ts"],
+        exclude: ["src/**/*.test.ts", "src/index.ts", "src/generated/**", "src/lib/prisma.ts",
+          "**/index.ts", "**/generated/**", "**/lib/prisma.ts"],
       },
     },
   }),

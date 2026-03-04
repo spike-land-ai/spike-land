@@ -209,6 +209,42 @@ describe("LiveRoutes", () => {
 
       expect(response.status).toBe(404);
     });
+
+    it("should serve saved version from storage for path[3]=index.tsx (lines 147-151)", async () => {
+      // path[3] === "index.tsx" && path[4] means path = ["live", "codeSpace", "X", "index.tsx", "timestamp"]
+      const savedCode = "export default () => <div>Saved v1</div>;";
+      const timestamp = 1234567890;
+
+      (mockCode.getState as ReturnType<typeof vi.fn>).mockReturnValue({
+        storage: {
+          get: vi.fn().mockImplementation(async (key: string) => {
+            if (key === `savedVersion_${timestamp}`) return savedCode;
+            return null;
+          }),
+        },
+      });
+
+      const path = ["live", "test-space", "files", "index.tsx", String(timestamp)];
+      const request = new Request(`https://example.com/live/test-space/files/index.tsx/${timestamp}`);
+      const url = new URL(`https://example.com/live/test-space/files/index.tsx/${timestamp}`);
+
+      const response = await liveRoutes.handleLiveRoute(request, url, path);
+
+      expect(response.status).toBe(200);
+      expect(await response.text()).toBe(savedCode);
+    });
+
+    it("should return 404 for path[3]=index.tsx when saved version not found", async () => {
+      // storage returns null for the timestamp
+      const timestamp = 9999999999;
+      const path = ["live", "test-space", "files", "index.tsx", String(timestamp)];
+      const request = new Request(`https://example.com/live/test-space/files/index.tsx/${timestamp}`);
+      const url = new URL(`https://example.com/live/test-space/files/index.tsx/${timestamp}`);
+
+      const response = await liveRoutes.handleLiveRoute(request, url, path);
+
+      expect(response.status).toBe(404);
+    });
   });
 
   describe("handleVersionRoute", () => {
@@ -313,6 +349,27 @@ describe("LiveRoutes", () => {
       expect(body).toBe(mockVersion.code);
     });
 
+    it("should handle /version/1/index.css (line 63)", async () => {
+      const request = new Request("https://example.com/version/1/index.css");
+      const url = new URL("https://example.com/version/1/index.css");
+      const path = ["version", "1", "index.css"];
+
+      const response = await liveRoutes.handleVersionRoute(request, url, path);
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Content-Type")).toContain("text/css");
+    });
+
+    it("should handle /version/1/html (line 73)", async () => {
+      const request = new Request("https://example.com/version/1/html");
+      const url = new URL("https://example.com/version/1/html");
+      const path = ["version", "1", "html"];
+
+      const response = await liveRoutes.handleVersionRoute(request, url, path);
+
+      expect(response.status).toBe(200);
+    });
+
     it("should return 404 for unknown sub-route", async () => {
       const request = new Request("https://example.com/version/1/unknown");
       const url = new URL("https://example.com/version/1/unknown");
@@ -408,6 +465,17 @@ describe("LiveRoutes", () => {
       const response = await liveRoutes.handleVersionedContentRoute(1, "code");
 
       expect(response.headers.get("Cache-Control")).toContain("immutable");
+    });
+
+    it("returns 400 for invalid content type (line 293 default case)", async () => {
+      // Force a type that's not in the switch to hit default
+      const response = await liveRoutes.handleVersionedContentRoute(
+        1,
+        "invalid" as "code" | "js" | "css" | "html" | "embed",
+      );
+
+      expect(response.status).toBe(400);
+      expect(await response.text()).toBe("Invalid content type");
     });
   });
 

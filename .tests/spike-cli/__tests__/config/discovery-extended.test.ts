@@ -90,6 +90,44 @@ describe("discoverConfig — auth auto-injection", () => {
   });
 });
 
+describe("discoverConfig — global config path branches", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockHasValidToken.mockResolvedValue(false);
+  });
+
+  it("loads toolsets and lazyLoading from global ~/.mcp.json", async () => {
+    // Make existsSync return true only for paths ending in .mcp.json (global path)
+    mockExistsSync.mockImplementation((p: string) => p.endsWith(".mcp.json"));
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        mcpServers: { globalSrv: { command: "node", args: ["srv.js"] } },
+        toolsets: { global: { servers: ["globalSrv"] } },
+        lazyLoading: true,
+      }),
+    );
+
+    const result = await discoverConfig({});
+    expect(result.servers.globalSrv).toBeDefined();
+    expect(result.toolsets?.global).toBeDefined();
+    expect(result.lazyLoading).toBe(true);
+    // configSources should include the global path
+    expect(result.configSources?.length).toBeGreaterThan(0);
+  });
+
+  it("tracks global config in configSources when it has servers", async () => {
+    mockExistsSync.mockImplementation((p: string) => p.endsWith(".mcp.json"));
+    mockReadFile.mockResolvedValue(
+      JSON.stringify({
+        mcpServers: { srv: { command: "cmd" } },
+      }),
+    );
+
+    const result = await discoverConfig({});
+    expect(result.configSources?.some((s: string) => s.endsWith(".mcp.json"))).toBe(true);
+  });
+});
+
 describe("discoverConfig — toolsets and lazyLoading", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -250,5 +288,25 @@ describe("discoverConfig — error handling in loadConfigFile", () => {
 
     const result = await discoverConfig({ configPath: "/p/config.json" });
     expect(Object.keys(result.servers)).toHaveLength(0);
+  });
+
+  it("uses String(err) branch when non-Error is thrown in loadConfigFile (line 39)", async () => {
+    mockExistsSync.mockImplementation((p: string) => p.endsWith("config.json"));
+    // Throw a non-Error value to exercise String(err) branch
+    mockReadFile.mockRejectedValue("plain string error");
+
+    const result = await discoverConfig({ configPath: "/p/config.json" });
+    // Should gracefully skip and return empty servers
+    expect(Object.keys(result.servers)).toHaveLength(0);
+  });
+
+  it("does not add global config to configSources when it has no servers (line 60 false branch)", async () => {
+    // Global path exists but has empty mcpServers
+    mockExistsSync.mockImplementation((p: string) => p.endsWith(".mcp.json"));
+    mockReadFile.mockResolvedValue(JSON.stringify({ mcpServers: {} }));
+
+    const result = await discoverConfig({});
+    // configSources should be empty since no servers found
+    expect(result.configSources).toHaveLength(0);
   });
 });

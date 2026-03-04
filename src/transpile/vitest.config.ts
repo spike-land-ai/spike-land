@@ -19,6 +19,9 @@ export default mergeConfig(
     test: {
       name: "transpile",
       include: ["../../.tests/transpile/**/*.{test,spec}.ts"],
+      coverage: {
+        exclude: ["../../.tests/**", "vitest.config.ts", "**/*.d.ts", "wasm.d.ts"],
+      },
     },
   }),
 );

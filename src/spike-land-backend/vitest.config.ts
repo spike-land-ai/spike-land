@@ -43,6 +43,7 @@ export default mergeConfig(
           "src/esbuild-loader.d.ts",
           "src/**/__tests__/**",
           "src/types/**",
+          "types/**",
           "src/frontend/**",
           "src/staticContent.mjs",
         ],

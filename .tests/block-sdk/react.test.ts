@@ -190,6 +190,61 @@ describe("createBlockClient", () => {
 
       expect(listener).not.toHaveBeenCalled();
     });
+
+    it("subscribe with filter builds WHERE clause", async () => {
+      const storage = createMemoryAdapter();
+      await testBlock.initialize(storage);
+
+      const client = createBlockClient(testBlock, storage, {
+        userId: "user-1",
+        pollInterval: 50,
+      });
+
+      // Add items
+      await client.call("addItem", { label: "x" });
+      await client.call("addItem", { label: "y" });
+
+      // Toggle first item
+      const all = await client.query("items");
+      const first = all[0] as { id: string };
+      await client.call("toggleItem", { id: first.id });
+
+      // Subscribe with filter — only done items
+      const sub = client.subscribe("items", { done: 1 });
+      const listener = vi.fn();
+      const unsub = sub.subscribe(listener);
+
+      await vi.advanceTimersByTimeAsync(100);
+
+      // Snapshot should contain only the done item
+      const snapshot = sub.getSnapshot();
+      expect(snapshot).toHaveLength(1);
+
+      unsub();
+    });
+
+    it("subscribe without filter returns all rows", async () => {
+      const storage = createMemoryAdapter();
+      await testBlock.initialize(storage);
+
+      const client = createBlockClient(testBlock, storage, {
+        userId: "user-1",
+        pollInterval: 50,
+      });
+
+      await client.call("addItem", { label: "a" });
+      await client.call("addItem", { label: "b" });
+      await client.call("addItem", { label: "c" });
+
+      const sub = client.subscribe("items", {});
+      const listener = vi.fn();
+      const unsub = sub.subscribe(listener);
+
+      await vi.advanceTimersByTimeAsync(100);
+
+      expect(sub.getSnapshot()).toHaveLength(3);
+      unsub();
+    });
   });
 });
 
@@ -226,5 +281,63 @@ describe("createBlockHooks", () => {
     // Initially empty
     const { result } = renderHook(() => useSubscription("items"));
     expect(result.current).toEqual([]);
+  });
+
+  it("getOrCreateSub caches subscription on repeated calls", async () => {
+    const { renderHook } = await import("@testing-library/react");
+    const storage = createMemoryAdapter();
+    await testBlock.initialize(storage);
+
+    const client = createBlockClient(testBlock, storage, { userId: "user-1" });
+    const { useSubscription } = createBlockHooks(client);
+
+    // Call useSubscription twice for same table/filter - should return same cached sub
+    const { result: r1 } = renderHook(() => useSubscription("items"));
+    const { result: r2 } = renderHook(() => useSubscription("items"));
+    expect(r1.current).toEqual(r2.current);
+  });
+});
+
+describe("subscribe - multiple listeners", () => {
+  beforeEach(() => { vi.useFakeTimers(); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it("multiple listeners on same subscription all get notified", async () => {
+    const storage = createMemoryAdapter();
+    await testBlock.initialize(storage);
+
+    const client = createBlockClient(testBlock, storage, {
+      userId: "user-1",
+      pollInterval: 50,
+    });
+
+    const sub = client.subscribe("items");
+    const listener1 = vi.fn();
+    const listener2 = vi.fn();
+
+    const unsub1 = sub.subscribe(listener1);
+    // Second subscribe after first — should not restart polling
+    const unsub2 = sub.subscribe(listener2);
+
+    await client.call("addItem", { label: "shared" });
+    await vi.advanceTimersByTimeAsync(100);
+
+    expect(listener1).toHaveBeenCalled();
+    expect(listener2).toHaveBeenCalled();
+
+    unsub1();
+    // Timer still running (listener2 active)
+    listener1.mockClear();
+    listener2.mockClear();
+
+    await client.call("addItem", { label: "another" });
+    await vi.advanceTimersByTimeAsync(100);
+
+    // listener1 unsubscribed, should not receive
+    expect(listener1).not.toHaveBeenCalled();
+    // listener2 still active
+    expect(listener2).toHaveBeenCalled();
+
+    unsub2();
   });
 });

@@ -194,6 +194,25 @@ describe("HNWriteClient", () => {
       expect(result.success).toBe(true);
       expect(submitCallCount).toBe(2);
     });
+
+    it("returns SUBMIT_FAILED when response is ambiguous (no success or CSRF markers)", async () => {
+      session.login("testuser", "user=testuser");
+      const fetch = createMockFetch([
+        { url: `${HN_WEB_BASE}/submit`, response: { body: SUBMIT_PAGE_HTML } },
+        {
+          url: `${HN_WEB_BASE}/r`,
+          method: "POST",
+          // Response with none of the success indicators, rate limit markers, or CSRF markers
+          response: { body: "<html><body>An unexpected error occurred.</body></html>" },
+        },
+      ]);
+      const client = new HNWriteClient(session, fetch);
+      const result = await client.submitStory("Title", "https://example.com");
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("SUBMIT_FAILED");
+      expect(result.message).toBe("Submit failed");
+    });
   });
 
   describe("upvote", () => {

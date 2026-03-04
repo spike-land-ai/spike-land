@@ -146,4 +146,37 @@ describe("MultiplexerServer", () => {
       isError: true,
     });
   });
+
+  it("list tools handler uses empty string when description is undefined (line 30 ?? branch)", async () => {
+    (mockManager.getAllTools as ReturnType<typeof vi.fn>).mockReturnValue([
+      {
+        namespacedName: "vitest__no_desc",
+        originalName: "no_desc",
+        serverName: "vitest",
+        description: undefined,
+        inputSchema: { type: "object", properties: {} },
+      },
+    ]);
+    new MultiplexerServer(mockManager);
+
+    const listToolsHandler = mockSetRequestHandler.mock.calls[0][1] as () => Promise<unknown>;
+    const result = await listToolsHandler() as { tools: Array<{ description: string }> };
+
+    expect(result.tools[0].description).toBe("[vitest] ");
+  });
+
+  it("call tool handler uses empty object when args is undefined (line 39 ?? branch)", async () => {
+    new MultiplexerServer(mockManager);
+
+    const callToolHandler = mockSetRequestHandler.mock.calls[1][1] as (
+      req: unknown,
+    ) => Promise<unknown>;
+
+    // No arguments field in params — triggers args ?? {} fallback
+    await callToolHandler({
+      params: { name: "vitest__run_tests" }, // no arguments property
+    });
+
+    expect(mockManager.callTool).toHaveBeenCalledWith("vitest__run_tests", {});
+  });
 });

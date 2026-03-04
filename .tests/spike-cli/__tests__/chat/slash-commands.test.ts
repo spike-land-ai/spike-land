@@ -1205,6 +1205,314 @@ describe("trackToolCallForSession", () => {
   });
 });
 
+// ---------- readline interactive prompt ----------
+
+describe("handleSlashCommand with readline interface", () => {
+  it("prompts for missing params and executes tool when value provided (lines 283-293)", async () => {
+    const tools = [
+      mockTool({
+        namespacedName: "s__chess_make_move",
+        serverName: "s",
+        inputSchema: {
+          type: "object",
+          properties: {
+            game_id: { type: "string" },
+            from: { type: "string" },
+          },
+          required: ["game_id", "from"],
+        },
+      }),
+    ];
+    const manager = createMockManager(tools);
+    (manager.callTool as ReturnType<typeof vi.fn>).mockResolvedValue({
+      content: [{ type: "text", text: "ok" }],
+      isError: false,
+    });
+    const client = createMockClient();
+    // Mock readline interface
+    const mockRl = {
+      question: vi.fn(),
+    };
+    // promptForParam will call rl.question — make it return a value for each param
+    let callCount = 0;
+    mockRl.question.mockImplementation(
+      (_prompt: string, callback: (answer: string) => void) => {
+        callCount++;
+        callback(callCount === 1 ? "game_abc" : "e2");
+      },
+    );
+
+    const result = await handleSlashCommand("/chess_make_move", {
+      manager,
+      client,
+      messages: [],
+      sessionState: new SessionState(),
+      appRegistry: new AppRegistryImpl([]),
+      rl: mockRl as unknown as import("node:readline").Interface,
+    });
+
+    expect(result.exit).toBe(false);
+    expect(manager.callTool).toHaveBeenCalled();
+  });
+
+  it("returns Cancelled when promptForParam returns empty string (line 286-291)", async () => {
+    const tools = [
+      mockTool({
+        namespacedName: "s__chess_make_move",
+        serverName: "s",
+        inputSchema: {
+          type: "object",
+          properties: { game_id: { type: "string" } },
+          required: ["game_id"],
+        },
+      }),
+    ];
+    const manager = createMockManager(tools);
+    const client = createMockClient();
+    const mockRl = { question: vi.fn() };
+    // promptForParam returns empty string → cancelled
+    mockRl.question.mockImplementation(
+      (_prompt: string, callback: (answer: string) => void) => {
+        callback(""); // empty → cancels
+      },
+    );
+
+    const result = await handleSlashCommand("/chess_make_move", {
+      manager,
+      client,
+      messages: [],
+      sessionState: new SessionState(),
+      appRegistry: new AppRegistryImpl([]),
+      rl: mockRl as unknown as import("node:readline").Interface,
+    });
+
+    expect(result.output).toContain("Cancelled");
+    expect(manager.callTool).not.toHaveBeenCalled();
+  });
+});
+
+// ---------- Additional branch coverage ----------
+
+describe("handleSlashCommand direct tool invocation — additional branches", () => {
+  it("records _created when create tool returns result with no extractable IDs (line 332)", async () => {
+    const tools = [
+      mockTool({
+        namespacedName: "s__chess_create_game",
+        serverName: "s",
+        inputSchema: { type: "object", properties: {} },
+      }),
+    ];
+    // Return result with no id fields so extractIdsFromResult returns []
+    const manager = createMockManager(tools);
+    (manager.callTool as ReturnType<typeof vi.fn>).mockResolvedValue({
+      content: [{ type: "text", text: '{"status":"created"}' }],
+      isError: false,
+    });
+    const client = createMockClient();
+    const sessionState = new SessionState();
+
+    await handleSlashCommand("/chess_create_game", {
+      manager,
+      client,
+      messages: [],
+      sessionState,
+      appRegistry: new AppRegistryImpl([]),
+    });
+
+    // Should have recorded "_created" since no IDs were extracted
+    expect(sessionState.hasCreated("chess")).toBe(true);
+    expect(sessionState.getCreatedIds("chess")).toContain("_created");
+  });
+
+  it("formats non-JSON result as plain string (line 343)", async () => {
+    const tools = [
+      mockTool({
+        namespacedName: "s__some_tool",
+        serverName: "s",
+        inputSchema: { type: "object", properties: {} },
+      }),
+    ];
+    const manager = createMockManager(tools);
+    (manager.callTool as ReturnType<typeof vi.fn>).mockResolvedValue({
+      content: [{ type: "text", text: "plain text result, not JSON" }],
+      isError: false,
+    });
+    const client = createMockClient();
+
+    const result = await handleSlashCommand("/some_tool", {
+      manager,
+      client,
+      messages: [],
+      sessionState: new SessionState(),
+      appRegistry: new AppRegistryImpl([]),
+    });
+
+    expect(result.output).toContain("plain text result, not JSON");
+  });
+
+  it("records config call when invoking a config-prerequisite tool directly (line 321)", async () => {
+    const tools = [
+      mockTool({
+        namespacedName: "s__set_project_root",
+        serverName: "s",
+        originalName: "set_project_root",
+        inputSchema: {
+          type: "object",
+          properties: { path: { type: "string" } },
+          required: ["path"],
+        },
+      }),
+    ];
+    const manager = createMockManager(tools);
+    (manager.callTool as ReturnType<typeof vi.fn>).mockResolvedValue({
+      content: [{ type: "text", text: '{"ok":true}' }],
+      isError: false,
+    });
+    const client = createMockClient();
+    const sessionState = new SessionState();
+
+    await handleSlashCommand('/set_project_root {"path":"/some/path"}', {
+      manager,
+      client,
+      messages: [],
+      sessionState,
+      appRegistry: new AppRegistryImpl([]),
+    });
+
+    expect(sessionState.hasConfigBeenCalled("set_project_root")).toBe(true);
+  });
+
+  it("resolveToolName returns best match when scores are similar (ambiguous — line 398-399 false branch)", async () => {
+    // Two tools with very similar fuzzy scores — score gap < 2x → ambiguous fallback (line 399)
+    const tools = [
+      mockTool({
+        namespacedName: "s__chess_make_move",
+        serverName: "s",
+        inputSchema: { type: "object", properties: {} },
+      }),
+      mockTool({
+        namespacedName: "s__chess_make_list",
+        serverName: "s",
+        inputSchema: { type: "object", properties: {} },
+      }),
+    ];
+    const manager = createMockManager(tools);
+    (manager.callTool as ReturnType<typeof vi.fn>).mockResolvedValue({
+      content: [{ type: "text", text: "ok" }],
+      isError: false,
+    });
+    const client = createMockClient();
+
+    // "chess_make" matches both equally — ambiguous → returns first match anyway
+    await handleSlashCommand("/chess_make", {
+      manager,
+      client,
+      messages: [],
+      sessionState: new SessionState(),
+      appRegistry: new AppRegistryImpl([]),
+    });
+
+    // Should have called one of the two tools (the best fuzzy match)
+    expect(manager.callTool).toHaveBeenCalled();
+  });
+
+  it("resolveToolName auto-executes best fuzzy match when score gap >= 2x (lines 385-399)", async () => {
+    // "chess_create_game" should heavily score above "chess_create_player" when we type "chess_create_ga"
+    const tools = [
+      mockTool({
+        namespacedName: "s__chess_create_game",
+        serverName: "s",
+        inputSchema: { type: "object", properties: {} },
+      }),
+      mockTool({
+        namespacedName: "s__chess_create_player",
+        serverName: "s",
+        inputSchema: {
+          type: "object",
+          properties: { name: { type: "string" } },
+          required: ["name"],
+        },
+      }),
+    ];
+    const manager = createMockManager(tools);
+    (manager.callTool as ReturnType<typeof vi.fn>).mockResolvedValue({
+      content: [{ type: "text", text: "ok" }],
+      isError: false,
+    });
+    const client = createMockClient();
+    const sessionState = new SessionState();
+
+    // "chess_create_ga" strongly matches "chess_create_game" (exact prefix)
+    // but less so "chess_create_player" — triggers the 2x score gap branch
+    await handleSlashCommand("/chess_create_ga", {
+      manager,
+      client,
+      messages: [],
+      sessionState,
+      appRegistry: new AppRegistryImpl([]),
+    });
+
+    expect(manager.callTool).toHaveBeenCalledWith("s__chess_create_game", expect.anything());
+  });
+});
+
+// ---------- /model with argsRaw and default case ----------
+
+describe("handleSlashCommand — /model and default branches", () => {
+  it("returns 'No servers connected' when /servers called with no servers (line 148)", async () => {
+    const manager = createMockManager(); // no tools, so getServerNames returns []
+    (manager.getServerNames as ReturnType<typeof vi.fn>).mockReturnValue([]);
+    const client = createMockClient();
+
+    const result = await handleSlashCommand("/servers", {
+      manager,
+      client,
+      messages: [],
+      sessionState: new SessionState(),
+      appRegistry: new AppRegistryImpl([]),
+    });
+
+    expect(result.output).toContain("No servers connected");
+    expect(result.exit).toBe(false);
+  });
+
+  it("returns 'Model is fixed' when /model is called with an argument (line 167)", async () => {
+    const manager = createMockManager();
+    const client = createMockClient();
+
+    const result = await handleSlashCommand("/model some-other-model", {
+      manager,
+      client,
+      messages: [],
+      sessionState: new SessionState(),
+      appRegistry: new AppRegistryImpl([]),
+    });
+
+    expect(result.output).toContain("Model is fixed for this session");
+    expect(result.output).toContain("claude-sonnet-4-6");
+    expect(result.exit).toBe(false);
+  });
+
+  it("falls through to direct tool call for unrecognized commands (line 205 is unreachable dead code)", async () => {
+    // The default case in handleBuiltinCommand is unreachable because BUILTIN_COMMANDS
+    // exactly mirrors the switch cases. Unknown commands go to handleDirectToolCall instead.
+    const manager = createMockManager();
+    const client = createMockClient();
+
+    // An unknown command just tries tool resolution and returns "No matching tool found"
+    const result = await handleSlashCommand("/totally_unknown_cmd", {
+      manager,
+      client,
+      messages: [],
+      sessionState: new SessionState(),
+      appRegistry: new AppRegistryImpl([]),
+    });
+
+    expect(result.output).toContain("No matching tool found");
+    expect(result.exit).toBe(false);
+  });
+});
+
 // ---------- MessageParam type compatibility ----------
 
 describe("SlashCommandContext accepts MessageParam[]", () => {

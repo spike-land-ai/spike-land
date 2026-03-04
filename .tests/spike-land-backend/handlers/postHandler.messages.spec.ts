@@ -266,3 +266,116 @@ describe("PostHandler - Messages", () => {
     });
   });
 });
+
+describe("PostHandler - Messages extra branch coverage", () => {
+  let postHandler: PostHandler;
+  let mockCode: Code;
+  let mockEnv: Env;
+  let mockStorageService: StorageService;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCode = createMockCode();
+    mockEnv = createMockEnv();
+    mockStorageService = createMockStorageService();
+    setupStorageServiceMock(StorageService, mockStorageService);
+    postHandler = new PostHandler(mockCode, mockEnv);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const callConvertMessages = (messages: unknown[]) => {
+    return (
+      postHandler as unknown as {
+        convertMessages: (messages: unknown[]) => CoreMessage[];
+      }
+    ).convertMessages(messages);
+  };
+
+  describe("content array branches (lines 403, 405)", () => {
+    it("should use empty string when text part has empty text (line 403 branch 1)", () => {
+      // { type: "text", text: "" } passes isTextContentPart (empty string IS a string)
+      // Then part.text || "" hits the || "" branch since "" is falsy
+      const messages: Message[] = [
+        {
+          role: "user",
+          content: [{ type: "text", text: "" }],
+        },
+      ];
+
+      const result = callConvertMessages(messages);
+
+      // In content array path, empty text part stays as array with empty text
+      expect(result[0]?.content).toEqual([{ type: "text", text: "" }]);
+    });
+
+    it("should fall through to unsupported when image_url part has no image_url property (line 405 branch 1)", () => {
+      // A part that passes isMessageContentPart but is image_url without the image_url property
+      // can't normally happen, but we can pass a part that is image type (not image_url)
+      // that doesn't match any condition after the type guard passes
+      // Pass a tool_result part (passes type guard, but not text/image_url) → "[unsupported content]"
+      const messages: Message[] = [
+        {
+          role: "user",
+          content: [
+            {
+              type: "tool_result",
+              tool_use_id: "tool-1",
+              content: "result",
+            } as unknown as { type: string; text?: string },
+          ],
+        },
+      ];
+
+      const result = callConvertMessages(messages);
+
+      expect(result[0]?.content).toEqual([{ type: "text", text: "[unsupported content]" }]);
+    });
+  });
+
+  describe("parts array branches (lines 372-373)", () => {
+    it("should use part.image as url fallback (line 372 branch 2)", () => {
+      // part.image_url?.url is undefined, part.url is undefined, part.image is set
+      const messages = [
+        {
+          role: "user",
+          parts: [
+            {
+              type: "image",
+              image: "https://example.com/direct-image.jpg",
+              // no url, no image_url
+            },
+          ],
+        },
+      ];
+
+      const result = callConvertMessages(messages);
+
+      expect(result[0]?.content).toEqual([
+        { type: "image", image: "https://example.com/direct-image.jpg" },
+      ]);
+    });
+
+    it("should fall through to unsupported when image part has no url anywhere (line 373 branch 1)", () => {
+      // type: "image" but no image_url.url, no url, no image → url is undefined → if(url) is false
+      const messages = [
+        {
+          role: "user",
+          parts: [
+            {
+              type: "image",
+              // no url properties at all
+            },
+          ],
+        },
+      ];
+
+      const result = callConvertMessages(messages);
+
+      // Falls through to "[unsupported content]"
+      expect(result[0]?.content).toEqual("[unsupported content]");
+    });
+  });
+});

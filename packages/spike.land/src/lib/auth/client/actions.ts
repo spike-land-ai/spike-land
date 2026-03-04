@@ -26,7 +26,7 @@ interface SignInOptions {
 
 interface SignOutOptions {
   callbackUrl?: string;
-  redirect?: boolean;
+  fetchOptions?: Record<string, unknown>;
 }
 
 /**
@@ -40,5 +40,11 @@ export async function signIn(provider?: SignInProvider, options?: SignInOptions)
  * Trigger a sign-out flow.
  */
 export async function signOut(options?: SignOutOptions) {
-  return nextAuthSignOut(options);
+  const result = await nextAuthSignOut(
+    options?.fetchOptions ? { fetchOptions: options.fetchOptions } : undefined,
+  );
+  if (options?.callbackUrl) {
+    window.location.href = options.callbackUrl;
+  }
+  return result;
 }

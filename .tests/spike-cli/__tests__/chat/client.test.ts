@@ -83,4 +83,18 @@ describe("ChatClient", () => {
     const args = mockStream.mock.calls[0][0];
     expect(args.tools).toBeUndefined();
   });
+
+  it("throws when neither apiKey nor authToken provided (line 26)", () => {
+    expect(() => new ChatClient({} as Parameters<typeof ChatClient>[0])).toThrow(
+      "ChatClient requires either apiKey or authToken",
+    );
+  });
+
+  it("uses no defaultHeaders (undefined) when using apiKey without authToken (line 32 false branch)", () => {
+    // When apiKey is provided but not authToken, defaultHeaders should be undefined
+    // This exercises the false branch of `options.authToken ? { ... } : undefined`
+    const client = new ChatClient({ apiKey: "sk-test-key" });
+    expect(client.model).toBe("claude-sonnet-4-6");
+    // No error means the false branch was taken
+  });
 });

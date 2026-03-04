@@ -101,4 +101,17 @@ describe("alias store", () => {
     expect(path).toContain(".spike");
     expect(path).toContain("aliases.json");
   });
+
+  it("addAlias throws when passing string to composite section (line 51)", async () => {
+    await expect(addAlias("composite", "myalias", "string-value")).rejects.toThrow(
+      "requires a CompositeAlias object",
+    );
+  });
+
+  it("addAlias throws when passing object to non-composite section (line 56)", async () => {
+    const composite = { tool: "some__tool", args: {} };
+    await expect(
+      addAlias("commands", "myalias", composite as unknown as string),
+    ).rejects.toThrow("requires a string value");
+  });
 });

@@ -1,1 +1,1 @@
-export async function registerAllTools(registry: any, userId: string) {}
+export async function registerAllTools(_registry: unknown, _userId: string) {}

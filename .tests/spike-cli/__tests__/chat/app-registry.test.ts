@@ -210,5 +210,64 @@ describe("AppRegistryImpl", () => {
 
       expect(registry.getAllApps()).toHaveLength(2);
     });
+
+    it("finds tool via namespacedName.endsWith when originalName doesn't match (line 348 false branch)", async () => {
+      const registry = new AppRegistryImpl([]);
+
+      const remoteApps: AppInfo[] = [
+        {
+          slug: "some-app",
+          name: "Some App",
+          icon: "Star",
+          category: "productivity",
+          tagline: "Some app",
+          toolNames: ["some_tool"],
+        },
+      ];
+
+      // Tool with a non-matching originalName but namespacedName ends with the target
+      const manager = {
+        getAllTools: vi.fn().mockReturnValue([
+          {
+            namespacedName: "spike__store_list_apps_with_tools",
+            originalName: "different_original_name", // doesn't match — forces endsWith branch
+            serverName: "spike",
+            description: "List apps",
+            inputSchema: { type: "object", properties: {} },
+          },
+        ]),
+        callTool: vi.fn().mockResolvedValue({
+          content: [{ type: "text", text: JSON.stringify(remoteApps) }],
+          isError: false,
+        }),
+      } as unknown as ServerManager;
+
+      await registry.refreshFromRemote(manager);
+      expect(registry.getAllApps()).toHaveLength(1);
+    });
+
+    it("does nothing when result is empty array (line 359 false branch)", async () => {
+      const registry = new AppRegistryImpl(TEST_APPS);
+
+      const manager = {
+        getAllTools: vi.fn().mockReturnValue([
+          {
+            namespacedName: "spike__store_list_apps_with_tools",
+            originalName: "store_list_apps_with_tools",
+            serverName: "spike",
+            description: "List apps",
+            inputSchema: { type: "object", properties: {} },
+          },
+        ]),
+        callTool: vi.fn().mockResolvedValue({
+          content: [{ type: "text", text: "[]" }], // empty array
+          isError: false,
+        }),
+      } as unknown as ServerManager;
+
+      await registry.refreshFromRemote(manager);
+      // Should keep original data since empty array → does not update
+      expect(registry.getAllApps()).toHaveLength(2);
+    });
   });
 });

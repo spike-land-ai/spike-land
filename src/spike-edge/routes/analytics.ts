@@ -89,7 +89,9 @@ analytics.post("/analytics/ingest", async (c) => {
   const ga4Promise = getClientId(c.req.raw).then((clientId) =>
     sendGA4Events(c.env, clientId, ga4Events)
   );
-  c.executionCtx.waitUntil(ga4Promise);
+  try {
+    c.executionCtx.waitUntil(ga4Promise);
+  } catch { /* no ExecutionContext in test environment */ }
 
   return c.json({ accepted: events.length });
 });

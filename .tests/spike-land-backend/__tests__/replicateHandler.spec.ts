@@ -553,4 +553,100 @@ describe("handleReplicateRequest", () => {
       expect(mockEnv.R2.get).toHaveBeenCalled();
     });
   });
+
+  describe("origin restriction (lines 149-150)", () => {
+    it("returns 403 for requests from unauthorized origin", async () => {
+      const request = new Request("https://example.com/replicate/test.webp", {
+        headers: { "Origin": "https://unauthorized.com" },
+      });
+      const response = await handleReplicateRequest(request, mockEnv as unknown as Env, mockCtx);
+      expect(response.status).toBe(403);
+      const text = await response.text();
+      expect(text).toBe("Unauthorized Origin");
+    });
+
+    it("allows requests from spike.land subdomain", async () => {
+      (mockEnv.R2.get as Mock).mockResolvedValue(null);
+      const mockReplicateInstance = {
+        run: vi.fn().mockResolvedValue(["https://replicate.delivery/image.webp"]),
+      };
+      (Replicate as unknown as Mock).mockImplementation(function () {
+        return mockReplicateInstance;
+      });
+      const mockImageData = new ArrayBuffer(100);
+      global.fetch = vi.fn().mockResolvedValue(
+        new Response(mockImageData, { status: 200, headers: { "Content-Type": "image/webp" } }),
+      );
+
+      const request = new Request("https://example.com/replicate/test.webp", {
+        headers: { "Origin": "https://sub.spike.land" },
+      });
+      const response = await handleReplicateRequest(request, mockEnv as unknown as Env, mockCtx);
+      expect(response.status).not.toBe(403);
+    });
+
+    it("allows requests from localhost", async () => {
+      (mockEnv.R2.get as Mock).mockResolvedValue(null);
+      const mockReplicateInstance = {
+        run: vi.fn().mockResolvedValue(["https://replicate.delivery/image.webp"]),
+      };
+      (Replicate as unknown as Mock).mockImplementation(function () {
+        return mockReplicateInstance;
+      });
+      const mockImageData = new ArrayBuffer(100);
+      global.fetch = vi.fn().mockResolvedValue(
+        new Response(mockImageData, { status: 200, headers: { "Content-Type": "image/webp" } }),
+      );
+
+      const request = new Request("https://example.com/replicate/test.webp", {
+        headers: { "Origin": "http://localhost:3000" },
+      });
+      const response = await handleReplicateRequest(request, mockEnv as unknown as Env, mockCtx);
+      expect(response.status).not.toBe(403);
+    });
+
+    it("allows requests with no origin header", async () => {
+      (mockEnv.R2.get as Mock).mockResolvedValue(null);
+      const mockReplicateInstance = {
+        run: vi.fn().mockResolvedValue(["https://replicate.delivery/image.webp"]),
+      };
+      (Replicate as unknown as Mock).mockImplementation(function () {
+        return mockReplicateInstance;
+      });
+      const mockImageData = new ArrayBuffer(100);
+      global.fetch = vi.fn().mockResolvedValue(
+        new Response(mockImageData, { status: 200, headers: { "Content-Type": "image/webp" } }),
+      );
+
+      // No Origin header — should pass the check since `origin && ...` is false when origin is null
+      const request = new Request("https://example.com/replicate/test.webp");
+      const response = await handleReplicateRequest(request, mockEnv as unknown as Env, mockCtx);
+      expect(response.status).not.toBe(403);
+    });
+  });
+
+  describe("non-array imageU result (line 183)", () => {
+    it("handles Replicate returning a non-array response (single URL string)", async () => {
+      (mockEnv.R2.get as Mock).mockResolvedValue(null);
+
+      const mockReplicateInstance = {
+        // Return a single string (not array) to test the !Array.isArray branch at line 183
+        run: vi.fn().mockResolvedValue("https://replicate.delivery/single-image.webp"),
+      };
+      (Replicate as unknown as Mock).mockImplementation(function () {
+        return mockReplicateInstance;
+      });
+
+      const mockImageData = new ArrayBuffer(100);
+      global.fetch = vi.fn().mockResolvedValue(
+        new Response(mockImageData, { status: 200, headers: { "Content-Type": "image/webp" } }),
+      );
+
+      const params = "prompt=single result test";
+      const base64Params = btoa(params);
+      const request = new Request(`https://example.com/replicate/${base64Params}.webp`);
+      const response = await handleReplicateRequest(request, mockEnv as unknown as Env, mockCtx);
+      expect(response.status).toBe(200);
+    });
+  });
 });

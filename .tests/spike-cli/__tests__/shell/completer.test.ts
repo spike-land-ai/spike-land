@@ -105,4 +105,64 @@ describe("createCompleter", () => {
     const [completions] = completer("help extra");
     expect(completions).toEqual([]);
   });
+
+  it("returns empty completions for 'call' with more than 2 parts", () => {
+    const completer = createCompleter(mockManager);
+    const [completions, partial] = completer("call some-tool extra-arg");
+    expect(completions).toEqual([]);
+    expect(partial).toBe("extra-arg");
+  });
+
+  it("returns empty completions for 'tools' with more than 2 parts", () => {
+    const completer = createCompleter(mockManager);
+    const [completions, partial] = completer("tools vitest extra");
+    expect(completions).toEqual([]);
+    expect(partial).toBe("extra");
+  });
+
+  it("returns empty completions for 'reconnect' with more than 2 parts", () => {
+    const completer = createCompleter(mockManager);
+    const [completions, partial] = completer("reconnect vitest extra");
+    expect(completions).toEqual([]);
+    expect(partial).toBe("extra");
+  });
+
+  it("completes alias subcommands with partial match", () => {
+    const completer = createCompleter(mockManager);
+    const [completions, partial] = completer("alias se");
+    expect(completions).toContain("set");
+    expect(partial).toBe("se");
+  });
+
+  it("returns all alias subcommands when fuzzy yields no match", () => {
+    const completer = createCompleter(mockManager);
+    const [completions] = completer("alias zzzzz");
+    expect(completions).toEqual(["set", "remove", "list"]);
+  });
+
+  it("returns all commands when fuzzy yields no match", () => {
+    const completer = createCompleter(mockManager);
+    const [completions] = completer("zzzzz");
+    expect(completions).toContain("servers");
+    expect(completions).toContain("tools");
+  });
+
+  it("fuzzy-filters server names after 'reconnect ' with partial", () => {
+    const completer = createCompleter(mockManager);
+    const [completions] = completer("reconnect zzzzz");
+    expect(completions).toEqual(["vitest", "playwright"]);
+  });
+
+  it("fuzzy-filters tool names after 'call ' when no match returns all", () => {
+    const completer = createCompleter(mockManager);
+    const [completions] = completer("call zzzzz");
+    expect(completions).toContain("vitest__run_tests");
+  });
+
+  it("returns empty completions for 'alias' with more than 2 parts (line 92)", () => {
+    const completer = createCompleter(mockManager);
+    const [completions, partial] = completer("alias set name extra");
+    expect(completions).toEqual([]);
+    expect(partial).toBe("extra");
+  });
 });

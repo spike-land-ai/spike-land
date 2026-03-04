@@ -128,6 +128,23 @@ describe("installCompletions", () => {
     );
     expect(rcWrites).toHaveLength(0);
   });
+
+  it("adds newline separator when rc file content does not end with newline (line 139 false branch)", () => {
+    mockFs.existsSync.mockReturnValue(true);
+    // Content that does NOT end with "\n" and is not "" → separator = "\n"
+    mockFs.readFileSync.mockReturnValue("# existing config without trailing newline");
+
+    installCompletions("bash");
+
+    const rcWrites = mockFs.writeFileSync.mock.calls.filter((call: unknown[]) =>
+      (call[0] as string).endsWith(".bashrc"),
+    );
+    expect(rcWrites).toHaveLength(1);
+    // Content should have a "\n" inserted before the source line
+    const writtenContent = rcWrites[0][1] as string;
+    expect(writtenContent).toContain("\n");
+    expect(writtenContent).toContain("# existing config without trailing newline");
+  });
 });
 
 describe("uninstallCompletions", () => {
@@ -173,6 +190,29 @@ describe("uninstallCompletions", () => {
   it("returns false when no completions exist", () => {
     mockFs.existsSync.mockReturnValue(false);
     const result = uninstallCompletions("bash");
+    expect(result).toBe(false);
+    expect(mockFs.unlinkSync).not.toHaveBeenCalled();
+  });
+
+  it("returns false when zsh completions do not exist (line 104 false branch)", () => {
+    mockFs.existsSync.mockReturnValue(false);
+    const result = uninstallCompletions("zsh");
+    expect(result).toBe(false);
+    expect(mockFs.unlinkSync).not.toHaveBeenCalled();
+  });
+
+  it("removes existing fish completions", () => {
+    mockFs.existsSync.mockReturnValue(true);
+    const result = uninstallCompletions("fish");
+    expect(result).toBe(true);
+    expect(mockFs.unlinkSync).toHaveBeenCalledWith(
+      "/home/testuser/.config/fish/completions/spike.fish",
+    );
+  });
+
+  it("returns false when fish completions do not exist", () => {
+    mockFs.existsSync.mockReturnValue(false);
+    const result = uninstallCompletions("fish");
     expect(result).toBe(false);
     expect(mockFs.unlinkSync).not.toHaveBeenCalled();
   });

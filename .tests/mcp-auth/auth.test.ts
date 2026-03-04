@@ -167,6 +167,64 @@ describe("createAuth", () => {
     expect(qrPlugin).toBeDefined();
   });
 
+  it("QR auth endpoint returns 501 not implemented", async () => {
+    const { betterAuth } = await import("better-auth");
+    const env = makeEnv();
+    createAuth(env);
+    const callArg = vi.mocked(betterAuth).mock.calls[0][0] as Record<string, unknown>;
+    const qrPlugin = callArg.plugins.find((p: { id?: string }) => p.id === "qr-auth") as {
+      id: string;
+      endpoints: {
+        signInQR: (ctx: {
+          body: { qrHash: string; qrOneTimeCode: string };
+          request: Request;
+          json: (data: unknown, options?: { status: number }) => Response;
+          context: {
+            internalAdapter: {
+              createSession: (userId: string, request: Request) => Promise<unknown>;
+            };
+          };
+        }) => Promise<Response>;
+      };
+    };
+    expect(qrPlugin).toBeDefined();
+
+    // Since createAuthEndpoint is mocked to return the handler directly,
+    // signInQR IS the handler function — invoke it to cover line 120
+    const mockJson = (data: unknown, options?: { status: number }) =>
+      new Response(JSON.stringify(data), { status: options?.status ?? 200 });
+
+    const ctx = {
+      body: { qrHash: "test-hash", qrOneTimeCode: "test-code" },
+      request: new Request("https://example.com/sign-in/qr", { method: "POST" }),
+      json: mockJson,
+      context: {
+        internalAdapter: {
+          createSession: async () => ({ id: "session-1" }),
+        },
+      },
+    };
+
+    const response = await qrPlugin.endpoints.signInQR(ctx);
+    expect(response.status).toBe(501);
+    const body = await response.json() as { error: string };
+    expect(body.error).toContain("not yet implemented");
+  });
+
+  it("magicLink sendMagicLink callback exists and is callable", async () => {
+    const { magicLink } = await import("better-auth/plugins");
+    const env = makeEnv();
+    createAuth(env);
+    expect(magicLink).toHaveBeenCalledOnce();
+    // Get the config passed to magicLink
+    const magicLinkConfig = vi.mocked(magicLink).mock.calls[0][0] as {
+      sendMagicLink: () => Promise<void>;
+    };
+    expect(typeof magicLinkConfig.sendMagicLink).toBe("function");
+    // Call the sendMagicLink callback to cover the empty function body
+    await expect(magicLinkConfig.sendMagicLink()).resolves.toBeUndefined();
+  });
+
   it("configures drizzle adapter with sqlite provider", async () => {
     const { drizzleAdapter } = await import("better-auth/adapters/drizzle");
     const env = makeEnv();

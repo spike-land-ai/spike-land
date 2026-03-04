@@ -254,4 +254,289 @@ describe("HTTP server — createMcpServer", () => {
     // The server is a valid MCP Server instance
     expect(typeof server.connect).toBe("function");
   });
+
+  it("handles tool with undefined description (uses empty string fallback)", async () => {
+    const managerWithUndescribed = {
+      getAllTools: vi.fn().mockReturnValue([
+        {
+          namespacedName: "srv__no_desc",
+          originalName: "no_desc",
+          serverName: "srv",
+          description: undefined, // triggers ?? "" branch
+          inputSchema: { type: "object", properties: {} },
+        },
+      ]),
+      callTool: vi.fn().mockResolvedValue({ content: [{ type: "text", text: "ok" }] }),
+    } as unknown as ServerManager;
+
+    const { createMcpServer } = await import("../../../../src/spike-cli/transport/http-server.js");
+    const server = createMcpServer(managerWithUndescribed);
+    expect(server).toBeDefined();
+  });
+});
+
+describe("HTTP server — POST /mcp session creation and GET", () => {
+  let closeServer: () => Promise<void>;
+  let baseUrl: string;
+
+  beforeEach(async () => {
+    const result = await withHttpServer(makeManager());
+    closeServer = result.closeServer;
+    baseUrl = result.baseUrl;
+  });
+
+  afterEach(async () => {
+    await closeServer();
+  });
+
+  it("POST /mcp creates session and returns session ID", async () => {
+    const res = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "initialize",
+        id: 1,
+        params: {
+          protocolVersion: "2024-11-05",
+          capabilities: {},
+          clientInfo: { name: "test", version: "1" },
+        },
+      }),
+    });
+    // Initialize returns 200 with session ID header
+    expect(res.status).toBe(200);
+    const sessionId = res.headers.get("mcp-session-id");
+    expect(sessionId).toBeTruthy();
+  });
+
+  it("DELETE /mcp with known session closes and removes session", async () => {
+    // First create a session
+    const initRes = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "initialize",
+        id: 1,
+        params: {
+          protocolVersion: "2024-11-05",
+          capabilities: {},
+          clientInfo: { name: "test", version: "1" },
+        },
+      }),
+    });
+    const sessionId = initRes.headers.get("mcp-session-id");
+    expect(sessionId).toBeTruthy();
+
+    // Delete the session
+    const delRes = await fetch(`${baseUrl}/mcp`, {
+      method: "DELETE",
+      headers: { "mcp-session-id": sessionId! },
+    });
+    expect(delRes.status).toBe(200);
+  });
+
+  it("POST /mcp with empty body is handled gracefully (parsedBody = undefined path)", async () => {
+    const res = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+      },
+      body: "",
+    });
+    // Should not crash, returns some HTTP status
+    expect(res.status).toBeGreaterThanOrEqual(200);
+  });
+
+  it("POST /mcp with invalid JSON body is handled gracefully", async () => {
+    const res = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+      },
+      body: "not-valid-json",
+    });
+    // Should not crash, returns some HTTP status
+    expect(res.status).toBeGreaterThanOrEqual(200);
+  });
+});
+
+describe("HTTP server — tools/call invokes manager.callTool", () => {
+  let closeServer: () => Promise<void>;
+  let baseUrl: string;
+  let manager: ServerManager;
+
+  beforeEach(async () => {
+    manager = makeManager();
+    const result = await withHttpServer(manager);
+    closeServer = result.closeServer;
+    baseUrl = result.baseUrl;
+  });
+
+  afterEach(async () => {
+    await closeServer();
+  });
+
+  it("tools/call request invokes manager.callTool and returns result", async () => {
+    // Step 1: Initialize session
+    const initRes = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "initialize",
+        id: 1,
+        params: {
+          protocolVersion: "2024-11-05",
+          capabilities: {},
+          clientInfo: { name: "test", version: "1" },
+        },
+      }),
+    });
+    expect(initRes.status).toBe(200);
+    const sessionId = initRes.headers.get("mcp-session-id");
+    expect(sessionId).toBeTruthy();
+
+    // Step 2: Send initialized notification
+    await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+        "mcp-session-id": sessionId!,
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "notifications/initialized",
+        params: {},
+      }),
+    });
+
+    // Step 3: Call a tool - this triggers the registered tool callback (lines 44-45)
+    const callRes = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+        "mcp-session-id": sessionId!,
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "tools/call",
+        id: 3,
+        params: {
+          name: "srv__ping",
+          arguments: {},
+        },
+      }),
+    });
+    expect(callRes.status).toBeGreaterThanOrEqual(200);
+    expect(manager.callTool).toHaveBeenCalled();
+  });
+
+  it("GET /mcp with valid session triggers transport.handleRequest", async () => {
+    // Create session first
+    const initRes = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "initialize",
+        id: 1,
+        params: {
+          protocolVersion: "2024-11-05",
+          capabilities: {},
+          clientInfo: { name: "test", version: "1" },
+        },
+      }),
+    });
+    const sessionId = initRes.headers.get("mcp-session-id");
+    expect(sessionId).toBeTruthy();
+
+    // GET with valid session — uses AbortController to avoid hanging on SSE stream
+    const ac = new AbortController();
+    const getPromise = fetch(`${baseUrl}/mcp`, {
+      method: "GET",
+      headers: { "mcp-session-id": sessionId! },
+      signal: ac.signal,
+    }).catch(() => ({ status: -1 }));
+
+    // Give the server a moment to start processing then abort
+    await new Promise((r) => setTimeout(r, 50));
+    ac.abort();
+
+    const getRes = await getPromise;
+    // Should not return 400 (which would indicate unknown session)
+    expect((getRes as Response).status).not.toBe(400);
+  });
+});
+
+describe("HTTP server — POST /mcp reuses existing session", () => {
+  let closeServer: () => Promise<void>;
+  let baseUrl: string;
+
+  beforeEach(async () => {
+    const result = await withHttpServer(makeManager());
+    closeServer = result.closeServer;
+    baseUrl = result.baseUrl;
+  });
+
+  afterEach(async () => {
+    await closeServer();
+  });
+
+  it("POST /mcp with existing mcp-session-id reuses session", async () => {
+    // Create a session first
+    const initRes = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "initialize",
+        id: 1,
+        params: {
+          protocolVersion: "2024-11-05",
+          capabilities: {},
+          clientInfo: { name: "test", version: "1" },
+        },
+      }),
+    });
+    const sessionId = initRes.headers.get("mcp-session-id");
+    expect(sessionId).toBeTruthy();
+
+    // Send another request with the same session ID
+    const res = await fetch(`${baseUrl}/mcp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+        "mcp-session-id": sessionId!,
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "tools/list",
+        id: 2,
+        params: {},
+      }),
+    });
+    expect(res.status).toBeGreaterThanOrEqual(200);
+  });
 });

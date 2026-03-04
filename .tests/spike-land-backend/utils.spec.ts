@@ -135,5 +135,15 @@ describe("Utils Functions", () => {
       const result = await readRequestBody(mockRequest);
       expect(result).toBe("a file");
     });
+
+    it("should use empty string when content-type header is null (line 125 branch 1)", async () => {
+      // When get() returns null, the ?? "" branch fires → contentType = "" → else branch → "a file"
+      const mockRequest = {
+        headers: { get: () => null },
+      } as unknown as Request;
+
+      const result = await readRequestBody(mockRequest);
+      expect(result).toBe("a file");
+    });
   });
 });

@@ -843,7 +843,7 @@ function hashJSObj(obj) {
     obj.propertyIsEnumerable = function() {
       return this.constructor.prototype.propertyIsEnumerable.apply(
         this,
-         
+        // eslint-disable-next-line prefer-rest-params
         arguments
       );
     };

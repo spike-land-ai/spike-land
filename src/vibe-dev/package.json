@@ -18,8 +18,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
+    "build": "tsup cli.ts --format esm --dts --clean",
+    "dev": "tsup cli.ts --format esm --watch",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",

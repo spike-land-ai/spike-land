@@ -42,6 +42,15 @@ describe("RouteHandler", () => {
   });
 
   describe("handleRoute", () => {
+    it("should return 404 when path is empty (undefined firstPath, line 42)", async () => {
+      const request = new Request("https://example.com/");
+      const url = new URL("https://example.com/");
+
+      const response = await routeHandler.handleRoute(request, url, []);
+
+      expect(response.status).toBe(404);
+    });
+
     it("should return 404 for unknown route", async () => {
       const request = new Request("https://example.com/unknown");
       const url = new URL("https://example.com/unknown");

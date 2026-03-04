@@ -285,11 +285,63 @@ describe("status command", () => {
     });
   });
 
+  describe("collectStatus — non-Error exception (line 72)", () => {
+    it("handles non-Error thrown during connect (line 72 String branch)", async () => {
+      mockDiscoverConfig.mockResolvedValue({
+        servers: {
+          bad: { type: "sse", url: "http://localhost:9999/mcp" },
+        },
+      });
+      mockConnect.mockRejectedValue("plain string error"); // non-Error
+      mockClose.mockResolvedValue(undefined);
+
+      const result = await collectStatus();
+
+      expect(result.servers[0].connected).toBe(false);
+      expect(result.servers[0].error).toBe("plain string error");
+    });
+  });
+
+  describe("formatStatus — missing error (line 127 ?? branch)", () => {
+    it("shows 'failed' when server is disconnected with no error message (line 127 ?? branch)", () => {
+      const output = formatStatus({
+        servers: [
+          {
+            name: "mystery",
+            connected: false,
+            toolCount: 0,
+            // no error field
+            latencyMs: 5,
+          },
+        ],
+        env: {},
+      });
+
+      expect(output).toContain("failed");
+    });
+  });
+
   describe("exit code", () => {
     let exitSpy: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
       exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as never);
+    });
+
+    it("uses DEFAULT_TIMEOUT_MS when timeout option is invalid (line 161 || branch)", async () => {
+      mockDiscoverConfig.mockResolvedValue({ servers: {} });
+
+      const { Command } = await import("commander");
+      const testProgram = new Command();
+      registerStatusCommand(testProgram);
+
+      const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      // Pass "abc" as timeout — parseInt("abc", 10) = NaN → || DEFAULT_TIMEOUT_MS
+      await testProgram.parseAsync(["status", "--timeout", "abc"], { from: "user" });
+      logSpy.mockRestore();
+
+      // Should not throw; exits with 1 since no servers
+      expect(exitSpy).toHaveBeenCalledWith(1);
     });
 
     it("exits with 1 when a server has an error", async () => {

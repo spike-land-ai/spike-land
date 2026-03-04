@@ -370,4 +370,97 @@ describe("createMcpBridge", () => {
     expect(onceSpy).toHaveBeenCalledWith("SIGINT", expect.any(Function));
     onceSpy.mockRestore();
   });
+
+  it("serve() shuts down on SIGTERM", async () => {
+    const bridge = createMcpBridge({
+      transport: mockTransport(),
+      serverInfo: { name: "test", version: "0.0.1" },
+    });
+
+    // Trigger SIGTERM instead of SIGINT
+    const onceSpy = vi.spyOn(process, "once").mockImplementation((event, cb) => {
+      if (event === "SIGTERM") (cb as () => void)();
+      return process;
+    });
+
+    await bridge.serve();
+    expect(onceSpy).toHaveBeenCalledWith("SIGTERM", expect.any(Function));
+    onceSpy.mockRestore();
+  });
+
+  it("text content with undefined text falls back to empty string", async () => {
+    const transport = mockTransport();
+    transport.request.mockResolvedValueOnce({ tools: [{ name: "t" }] });
+    transport.request.mockResolvedValueOnce({
+      content: [{ type: "text" }], // no text property
+    });
+
+    const bridge = createMcpBridge({
+      transport,
+      serverInfo: { name: "test", version: "0.0.1" },
+    });
+    await bridge.loadGatewayTools();
+    const result = await bridge.callTool("t", {});
+    expect(result.content[0].text).toBe("");
+  });
+
+  it("image with base64 but no mimeType falls back to application/octet-stream", async () => {
+    const transport = mockTransport();
+    transport.request.mockResolvedValueOnce({ tools: [{ name: "img" }] });
+    transport.request.mockResolvedValueOnce({
+      content: [{ type: "image", data: "abc123" }], // no mimeType
+    });
+
+    const bridge = createMcpBridge({
+      transport,
+      serverInfo: { name: "t", version: "v" },
+    });
+    await bridge.loadGatewayTools();
+    const result = await bridge.callTool("img", {});
+    expect(result.content[0]).toEqual({
+      type: "image",
+      source: { type: "base64", data: "abc123", mediaType: "application/octet-stream" },
+    });
+  });
+
+  it("image with no data/url but no mimeType falls back to unknown", async () => {
+    const transport = mockTransport();
+    transport.request.mockResolvedValueOnce({ tools: [{ name: "img" }] });
+    transport.request.mockResolvedValueOnce({
+      content: [{ type: "image" }], // no data, url, or mimeType
+    });
+
+    const bridge = createMcpBridge({
+      transport,
+      serverInfo: { name: "t", version: "v" },
+    });
+    await bridge.loadGatewayTools();
+    const result = await bridge.callTool("img", {});
+    expect(result.content[0].text).toBe("[image: unknown]");
+  });
+
+  it("callTool with no args argument uses default empty object", async () => {
+    const transport = mockTransport();
+    transport.request.mockResolvedValueOnce({
+      tools: [{ name: "greet", description: "Greet" }],
+      sessionKey: "agent:x:x",
+    });
+    transport.request.mockResolvedValueOnce({
+      content: [{ type: "text", text: "hi" }],
+    });
+
+    const bridge = createMcpBridge({
+      transport,
+      serverInfo: { name: "test", version: "0.0.1" },
+    });
+    await bridge.loadGatewayTools();
+    const result = await bridge.callTool("greet", {});
+
+    expect(transport.request).toHaveBeenCalledWith("tools.call", {
+      sessionKey: "agent:x:x",
+      name: "greet",
+      args: {},
+    });
+    expect(result.content[0].text).toBe("hi");
+  });
 });

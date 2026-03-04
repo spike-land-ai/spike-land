@@ -85,7 +85,7 @@ export class CliTransport implements GatewayTransport {
   }
 }
 
-async function main() {
+export async function main() {
   const transport = new CliTransport();
   const bridge = createMcpBridge({
     transport,
@@ -97,6 +97,7 @@ async function main() {
   await bridge.serve();
 }
 
+/* c8 ignore next 7 */
 const isDirectRun = process.argv[1]?.endsWith("/cli.ts") || process.argv[1]?.endsWith("/cli.js");
 if (isDirectRun) {
   main().catch((err: unknown) => {

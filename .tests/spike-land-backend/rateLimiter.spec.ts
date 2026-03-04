@@ -114,4 +114,19 @@ describe("CodeRateLimiter", () => {
       expect(handleErrors).toHaveBeenCalled();
     });
   });
+
+  describe("reset() method (line 36)", () => {
+    it("resets requestCount to 0", async () => {
+      const postRequest = new Request("http://example.com", { method: "POST" });
+      // Trigger rate limit
+      for (let i = 0; i < 5; i++) {
+        await rateLimiter.fetch(postRequest);
+      }
+      // Now reset
+      rateLimiter.reset();
+      // After reset, should be allowed again
+      const response = await rateLimiter.fetch(postRequest);
+      expect(await response.text()).toBe("0");
+    });
+  });
 });

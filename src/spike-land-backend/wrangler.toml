@@ -12,14 +12,12 @@ compatibility_date = "2025-07-12"
 
 logpush = true
 
-[vars]
-GA_MEASUREMENT_ID = "G-9WNEM9ZHE7"
-
-services = []
-
 kv_namespaces = [
   { binding = "KV", id = "e05276b573af4afd905bc6ac1ed371d5", preview_id = "9db106837d4d437a962612dd04197581" },
 ]
+
+[vars]
+GA_MEASUREMENT_ID = "G-9WNEM9ZHE7"
 
 [durable_objects]
 bindings = [
@@ -41,43 +39,28 @@ bucket_name = "code-chain"
 preview_bucket_name = "code-chain"
 
 [[migrations]]
-tag = "v4"
+tag = "v1"
+new_classes = ["Users"]
+
+[[migrations]]
+tag = "v5"
 deleted_classes = ["Users"]
-
-[[migrations]]
-tag = "v3"
-
-[[migrations]]
-tag = "v2" # Should be unique for each entry
-new_classes = ["Code", "CodeRateLimiter"] # Array of new classes
-
-[[migrations]]
-tag = "v1" # Should be unique for each entry
-new_classes = ["Users"] # Array of new classes
 
 [env.testing]
 logpush = true
 name = "testing-spike-land"
-services = []
 
 kv_namespaces = [
   { binding = "KV", id = "7cafeba860c9485bbfca337099c82ce3", preview_id = "e2b898af453c46e2ac584745ea92424d" },
 ]
 
 [[env.testing.migrations]]
-tag = "v4"
+tag = "v1"
+new_classes = ["Users"]
+
+[[env.testing.migrations]]
+tag = "v5"
 deleted_classes = ["Users"]
-
-[[env.testing.migrations]]
-tag = "v3"
-
-[[env.testing.migrations]]
-tag = "v2"
-new_classes = ["Users", "Code", "CodeRateLimiter"]
-
-[[env.testing.migrations]]
-tag = "v1" # Should be unique for each entry
-new_classes = ["Users"] # Array of new classes
 
 [env.testing.durable_objects]
 bindings = [

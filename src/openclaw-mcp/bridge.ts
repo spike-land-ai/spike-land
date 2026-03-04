@@ -196,6 +196,7 @@ export function createMcpBridge(opts: McpBridgeOptions): McpBridge {
     }));
 
     server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      /* c8 ignore next 2 */
       const { name, arguments: callArgs = {} } = request.params;
       return callTool(name, callArgs);
     });

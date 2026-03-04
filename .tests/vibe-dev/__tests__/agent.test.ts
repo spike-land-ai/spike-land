@@ -1,7 +1,7 @@
 import { type ChildProcess } from "child_process";
 import { EventEmitter } from "events";
 import { existsSync, mkdirSync } from "fs";
-import { mkdir, rm, writeFile } from "fs/promises";
+import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("fs");
@@ -755,6 +755,27 @@ describe("processMessage", () => {
     expect(result.agentMessage).toBe("code done");
   });
 
+  it("handles cleanup error (non-Error value) in processMessage", async () => {
+    // Force rm to throw a non-Error value — covers the String(err) branch in cleanupMcpConfig
+    vi.mocked(rm).mockRejectedValue("plain cleanup error");
+
+    const proc = makeMockProcess();
+    vi.mocked(spawn).mockImplementation(() => {
+      setImmediate(() => {
+        (proc.stdout as EventEmitter).emit(
+          "data",
+          Buffer.from(JSON.stringify({ type: "result", result: "ok" }) + "\n"),
+        );
+        proc.emit("close", 0);
+      });
+      return proc as unknown as ChildProcess;
+    });
+
+    const result = await agent.processMessage(mockApiConfig, "app1", "msg1", baseContext as never);
+    expect(result.success).toBe(true);
+    expect(rm).toHaveBeenCalled();
+  });
+
   it("handles cleanup error in processMessage", async () => {
     // Force rm to fail
     vi.mocked(rm).mockRejectedValue(new Error("RM failed"));
@@ -991,5 +1012,474 @@ describe("poll", () => {
 
     const total = await agent.poll(mockRedisConfig as never, mockApiConfig);
     expect(total).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// processMessage additional branches
+// ---------------------------------------------------------------------------
+
+describe("processMessage additional paths", () => {
+  const mockApiConfig = { baseUrl: "https://api.example.com", apiKey: "key" };
+  const originalFetch = global.fetch;
+  const mockFetch = vi.fn();
+
+  beforeEach(() => {
+    global.fetch = mockFetch;
+    vi.mocked(api.markMessageRead).mockResolvedValue(undefined as never);
+    vi.mocked(api.postAgentResponse).mockResolvedValue({} as never);
+    vi.mocked(api.updateApp).mockResolvedValue({} as never);
+    vi.mocked(mkdir).mockResolvedValue(undefined);
+    vi.mocked(writeFile).mockResolvedValue(undefined);
+    vi.mocked(rm).mockResolvedValue(undefined);
+    vi.mocked(existsSync).mockReturnValue(true);
+    vi.mocked(readFile).mockResolvedValue("const x = 1;" as never);
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+    vi.resetAllMocks();
+  });
+
+  it("catches downloadCodeToLocal error and continues processing", async () => {
+    // downloadCodeToLocal will throw (fetch fails)
+    mockFetch
+      .mockRejectedValueOnce(new Error("Network error")) // for downloadCodeToLocal
+      // createTempMcpConfig won't use fetch, spawnClaudeCode result
+      ;
+
+    const proc = makeMockProcess();
+    vi.mocked(spawn).mockImplementation(() => {
+      setImmediate(() => {
+        (proc.stdout as EventEmitter).emit(
+          "data",
+          Buffer.from(JSON.stringify({ type: "result", result: "done" }) + "\n"),
+        );
+        proc.emit("close", 0);
+      });
+      return proc as unknown as ChildProcess;
+    });
+
+    const context = {
+      app: {
+        id: "app1",
+        name: "App",
+        status: "active",
+        codespaceId: "existing-space",
+        codespaceUrl: null,
+        description: null,
+      },
+      chatHistory: [
+        {
+          id: "msg1",
+          role: "USER" as const,
+          content: "Hello",
+          createdAt: "2024-01-01",
+          attachments: [],
+        },
+      ],
+    };
+
+    const result = await agent.processMessage(mockApiConfig, "app1", "msg1", context as never);
+    // Should still succeed even though local file download failed
+    expect(result.success).toBe(true);
+  });
+
+  it("updates codespaceId when claude returns new codespaceId", async () => {
+    const proc = makeMockProcess();
+    vi.mocked(spawn).mockImplementation(() => {
+      setImmediate(() => {
+        const toolEvent = JSON.stringify({
+          type: "tool_use",
+          name: "mcp__spike-land__codespace_update",
+          input: { codespace_id: "new-space-123" },
+        });
+        const resultLine = JSON.stringify({ type: "result", result: "created codespace" });
+        (proc.stdout as EventEmitter).emit(
+          "data",
+          Buffer.from(toolEvent + "\n" + resultLine + "\n"),
+        );
+        proc.emit("close", 0);
+      });
+      return proc as unknown as ChildProcess;
+    });
+
+    const context = {
+      app: {
+        id: "app1",
+        name: "App",
+        status: "active",
+        codespaceId: null as string | null,
+        codespaceUrl: null,
+        description: null,
+      },
+      chatHistory: [
+        {
+          id: "msg1",
+          role: "USER" as const,
+          content: "Create a new app",
+          createdAt: "2024-01-01",
+          attachments: [],
+        },
+      ],
+    };
+
+    const result = await agent.processMessage(mockApiConfig, "app1", "msg1", context as never);
+    expect(result.success).toBe(true);
+    expect(api.updateApp).toHaveBeenCalledWith(
+      mockApiConfig,
+      "app1",
+      expect.objectContaining({ codespaceId: "new-space-123" }),
+    );
+    expect(result.codespaceId).toBe("new-space-123");
+  });
+
+  it("syncs final code to server when localFilePath and codespaceId set", async () => {
+    // Make download succeed so localFilePath is set
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ code: "const x = 1;" }),
+      });
+
+    const proc = makeMockProcess();
+    vi.mocked(spawn).mockImplementation(() => {
+      setImmediate(() => {
+        const resultLine = JSON.stringify({ type: "result", result: "done" });
+        (proc.stdout as EventEmitter).emit("data", Buffer.from(resultLine + "\n"));
+        proc.emit("close", 0);
+      });
+      return proc as unknown as ChildProcess;
+    });
+
+    // Mock syncCodeToServer (it uses fetch internally)
+    mockFetch.mockResolvedValue({ ok: true });
+
+    const context = {
+      app: {
+        id: "app1",
+        name: "App",
+        status: "active",
+        codespaceId: "existing-space",
+        codespaceUrl: null,
+        description: null,
+      },
+      chatHistory: [
+        {
+          id: "msg1",
+          role: "USER" as const,
+          content: "Update code",
+          createdAt: "2024-01-01",
+          attachments: [],
+        },
+      ],
+    };
+
+    const result = await agent.processMessage(mockApiConfig, "app1", "msg1", context as never);
+    expect(result.success).toBe(true);
+    // readFile should have been called for the final sync
+    expect(readFile).toHaveBeenCalled();
+  });
+
+  it("handles final sync error gracefully", async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ code: "const x = 1;" }),
+      });
+
+    const proc = makeMockProcess();
+    vi.mocked(spawn).mockImplementation(() => {
+      setImmediate(() => {
+        const resultLine = JSON.stringify({ type: "result", result: "done" });
+        (proc.stdout as EventEmitter).emit("data", Buffer.from(resultLine + "\n"));
+        proc.emit("close", 0);
+      });
+      return proc as unknown as ChildProcess;
+    });
+
+    // Make readFile throw so the final sync try-catch catches it
+    vi.mocked(readFile).mockRejectedValue(new Error("File read failed"));
+
+    const context = {
+      app: {
+        id: "app1",
+        name: "App",
+        status: "active",
+        codespaceId: "existing-space",
+        codespaceUrl: null,
+        description: null,
+      },
+      chatHistory: [
+        {
+          id: "msg1",
+          role: "USER" as const,
+          content: "Update code",
+          createdAt: "2024-01-01",
+          attachments: [],
+        },
+      ],
+    };
+
+    const result = await agent.processMessage(mockApiConfig, "app1", "msg1", context as never);
+    // Should succeed even if final sync fails
+    expect(result.success).toBe(true);
+  });
+
+  it("handles non-Error thrown in final sync (String fallback)", async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ code: "const x = 1;" }),
+      });
+
+    const proc = makeMockProcess();
+    vi.mocked(spawn).mockImplementation(() => {
+      setImmediate(() => {
+        const resultLine = JSON.stringify({ type: "result", result: "done" });
+        (proc.stdout as EventEmitter).emit("data", Buffer.from(resultLine + "\n"));
+        proc.emit("close", 0);
+      });
+      return proc as unknown as ChildProcess;
+    });
+
+    // Make readFile throw a non-Error value
+    vi.mocked(readFile).mockRejectedValue("plain string error");
+
+    const context = {
+      app: {
+        id: "app1",
+        name: "App",
+        status: "active",
+        codespaceId: "existing-space",
+        codespaceUrl: null,
+        description: null,
+      },
+      chatHistory: [
+        {
+          id: "msg1",
+          role: "USER" as const,
+          content: "Update code",
+          createdAt: "2024-01-01",
+          attachments: [],
+        },
+      ],
+    };
+
+    const result = await agent.processMessage(mockApiConfig, "app1", "msg1", context as never);
+    expect(result.success).toBe(true);
+  });
+
+  it("handles result.error being undefined (uses response as error)", async () => {
+    const proc = makeMockProcess();
+    vi.mocked(spawn).mockImplementation(() => {
+      setImmediate(() => {
+        // Exit non-zero with no stderr (so errorOutput is empty, error field is empty string)
+        proc.emit("close", 1);
+      });
+      return proc as unknown as ChildProcess;
+    });
+
+    const context = {
+      app: {
+        id: "app1",
+        name: "App",
+        status: "active",
+        codespaceId: null as string | null,
+        codespaceUrl: null,
+        description: null,
+      },
+      chatHistory: [
+        {
+          id: "msg1",
+          role: "USER" as const,
+          content: "Do something",
+          createdAt: "2024-01-01",
+          attachments: [],
+        },
+      ],
+    };
+
+    const result = await agent.processMessage(mockApiConfig, "app1", "msg1", context as never);
+    expect(result.success).toBe(false);
+    // When error is empty string, error || response gives response
+    expect(result.error).toBeDefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// cleanupMcpConfig non-Error branch and SKIP_PERMISSIONS branch
+// ---------------------------------------------------------------------------
+
+describe("spawnClaudeCode AGENT_REQUIRE_PERMISSIONS branch", () => {
+  beforeEach(() => {
+    vi.mocked(mkdir).mockResolvedValue(undefined);
+    vi.mocked(writeFile).mockResolvedValue(undefined);
+    vi.mocked(rm).mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+    delete process.env.AGENT_REQUIRE_PERMISSIONS;
+  });
+
+  it("includes --dangerously-skip-permissions when not required (default)", async () => {
+    delete process.env.AGENT_REQUIRE_PERMISSIONS;
+    const proc = makeMockProcess();
+    vi.mocked(spawn).mockReturnValue(proc as unknown as ReturnType<typeof spawn>);
+
+    const promise = agent.spawnClaudeCode("prompt", "system", "/tmp/mcp.json");
+    proc.emit("close", 0);
+    await promise;
+
+    expect(spawn).toHaveBeenCalledWith(
+      "claude",
+      expect.arrayContaining(["--dangerously-skip-permissions"]),
+      expect.any(Object),
+    );
+  });
+
+  it("omits --dangerously-skip-permissions when AGENT_REQUIRE_PERMISSIONS=true", async () => {
+    // SKIP_PERMISSIONS is computed at module level, so we need a fresh module import
+    vi.resetModules();
+    process.env.AGENT_REQUIRE_PERMISSIONS = "true";
+
+    const freshAgent = await import("../../../src/vibe-dev/agent.js");
+    const proc = makeMockProcess();
+    vi.mocked(spawn).mockReturnValue(proc as unknown as ReturnType<typeof spawn>);
+    vi.mocked(mkdir).mockResolvedValue(undefined);
+    vi.mocked(writeFile).mockResolvedValue(undefined);
+
+    const promise = freshAgent.spawnClaudeCode("prompt", "system", "/tmp/mcp.json");
+    proc.emit("close", 0);
+    await promise;
+
+    const callArgs = vi.mocked(spawn).mock.calls[0]![1] as string[];
+    expect(callArgs).not.toContain("--dangerously-skip-permissions");
+
+    delete process.env.AGENT_REQUIRE_PERMISSIONS;
+    vi.resetModules();
+  });
+});
+
+describe("processMessage mcpConfigPath false branch and codespace_update without codespace_id", () => {
+  const mockApiConfig = { baseUrl: "https://api.example.com", apiKey: "key" };
+
+  beforeEach(() => {
+    vi.mocked(api.markMessageRead).mockResolvedValue(undefined as never);
+    vi.mocked(api.postAgentResponse).mockResolvedValue({} as never);
+    vi.mocked(api.updateApp).mockResolvedValue({} as never);
+    vi.mocked(rm).mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it("skips cleanup when mcpConfigPath is null (mkdir throws before assignment)", async () => {
+    // When mkdir (used inside createTempMcpConfig) throws, mcpConfigPath stays null
+    // The error propagates from processMessage (no try/catch wrapping createTempMcpConfig)
+    vi.mocked(mkdir).mockRejectedValue(new Error("mkdir failed"));
+    vi.mocked(writeFile).mockResolvedValue(undefined);
+
+    const context = {
+      app: {
+        id: "app1",
+        name: "App",
+        status: "active",
+        codespaceId: null as string | null,
+        codespaceUrl: null,
+        description: null,
+      },
+      chatHistory: [
+        {
+          id: "msg1",
+          role: "USER" as const,
+          content: "Hello",
+          createdAt: "2024-01-01",
+          attachments: [],
+        },
+      ],
+    };
+
+    // createTempMcpConfig throws, so processMessage throws too (mcpConfigPath stays null)
+    await expect(
+      agent.processMessage(mockApiConfig, "app1", "msg1", context as never),
+    ).rejects.toThrow("mkdir failed");
+    // rm should NOT have been called since mcpConfigPath was never set
+    expect(rm).not.toHaveBeenCalled();
+  });
+
+  it("sets codeUpdated when codespace_update called without codespace_id in input", async () => {
+    const proc = makeMockProcess();
+    vi.mocked(mkdir).mockResolvedValue(undefined);
+    vi.mocked(writeFile).mockResolvedValue(undefined);
+    vi.mocked(spawn).mockImplementation(() => {
+      setImmediate(() => {
+        // codespace_update without codespace_id field - covers the false branch of if(event.input?.codespace_id)
+        const toolEvent = JSON.stringify({
+          type: "tool_use",
+          name: "mcp__spike-land__codespace_update",
+          input: {},
+        });
+        const resultLine = JSON.stringify({ type: "result", result: "updated" });
+        (proc.stdout as EventEmitter).emit("data", Buffer.from(toolEvent + "\n" + resultLine + "\n"));
+        proc.emit("close", 0);
+      });
+      return proc as unknown as ReturnType<typeof spawn>;
+    });
+
+    const context = {
+      app: {
+        id: "app1",
+        name: "App",
+        status: "active",
+        codespaceId: null as string | null,
+        codespaceUrl: null,
+        description: null,
+      },
+      chatHistory: [
+        {
+          id: "msg1",
+          role: "USER" as const,
+          content: "Update the app",
+          createdAt: "2024-01-01",
+          attachments: [],
+        },
+      ],
+    };
+
+    const result = await agent.processMessage(mockApiConfig, "app1", "msg1", context as never);
+    expect(result.success).toBe(true);
+    expect(result.codeUpdated).toBe(true);
+    // codespaceId should be undefined since it wasn't provided
+    expect(result.codespaceId).toBeUndefined();
+  });
+});
+
+describe("processApp non-Error thrown branch", () => {
+  const mockRedisConfig = { url: "redis://localhost" };
+  const mockApiConfig = { baseUrl: "https://api.example.com", apiKey: "key" };
+
+  beforeEach(() => {
+    vi.mocked(redis.setAgentWorking).mockResolvedValue(undefined as never);
+    vi.mocked(redis.dequeueMessage).mockResolvedValue(null as never);
+    vi.mocked(mkdir).mockResolvedValue(undefined);
+    vi.mocked(writeFile).mockResolvedValue(undefined);
+    vi.mocked(rm).mockResolvedValue(undefined);
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it("uses 'Unknown error' string when non-Error is thrown", async () => {
+    vi.mocked(api.getAppContext).mockRejectedValue("plain string, not Error");
+
+    await expect(
+      agent.processApp(mockRedisConfig as never, mockApiConfig, "app1"),
+    ).rejects.toBe("plain string, not Error");
+
+    expect(redis.setAgentWorking).toHaveBeenCalledWith(mockRedisConfig, "app1", false);
   });
 });

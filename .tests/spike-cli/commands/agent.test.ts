@@ -90,4 +90,53 @@ describe("agent command", () => {
     await handler(req, res);
     expect(res.json).toHaveBeenCalledWith({ completion: "mock response" });
   });
+
+  it("returns 400 when prefix is missing", async () => {
+    process.env.GEMINI_API_KEY = "test-key";
+    const express = await import("express");
+    const app = (
+      express.default as unknown as () => Record<string, { mock: { calls: Array<Array<unknown>> } }>
+    )();
+
+    registerAgentCommand(program);
+    const agentCmd = program.commands.find((c) => c.name() === "agent")!;
+    await (agentCmd as Record<string, unknown>)._actionHandler([{ port: "3005" }, []]);
+
+    const postCall = app.post.mock.calls.find((c: Array<unknown>) => c[0] === "/completion");
+    const handler = postCall![1] as (req: unknown, res: unknown) => Promise<void>;
+    const req = { body: {} }; // no prefix
+    const res = { json: vi.fn(), status: vi.fn().mockReturnThis() };
+
+    await handler(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: "Missing prefix" });
+  });
+
+  it("returns 500 when AI throws an error", async () => {
+    process.env.GEMINI_API_KEY = "test-key";
+
+    const express = await import("express");
+    const app = (
+      express.default as unknown as () => Record<string, { mock: { calls: Array<Array<unknown>> } }>
+    )();
+
+    registerAgentCommand(program);
+    const agentCmd = program.commands.find((c) => c.name() === "agent")!;
+    await (agentCmd as Record<string, unknown>)._actionHandler([{ port: "3005" }, []]);
+
+    const postCall = app.post.mock.calls.find((c: Array<unknown>) => c[0] === "/completion");
+    const handler = postCall![1] as (req: unknown, res: unknown) => Promise<void>;
+
+    // Use the ai module's generateContent and make it throw
+    const { ai } = await import("../../../src/spike-cli/commands/agent");
+    vi.mocked(ai.models.generateContent).mockRejectedValueOnce(new Error("AI failed"));
+
+    const req = { body: { prefix: "const x =" } };
+    const res = { json: vi.fn(), status: vi.fn().mockReturnThis() };
+
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    await handler(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "Internal server error" });
+  });
 });

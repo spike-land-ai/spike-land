@@ -13,14 +13,16 @@ live.get("/live/:appId", async (c) => {
     return c.json({ error: "App not found" }, 404);
   }
 
-  c.executionCtx.waitUntil(
-    getClientId(c.req.raw).then((clientId) =>
-      sendGA4Events(c.env, clientId, [{
-        name: "live_app_view",
-        params: { app_id: appId },
-      }])
-    ),
-  );
+  try {
+    c.executionCtx.waitUntil(
+      getClientId(c.req.raw).then((clientId) =>
+        sendGA4Events(c.env, clientId, [{
+          name: "live_app_view",
+          params: { app_id: appId },
+        }])
+      ),
+    );
+  } catch { /* no ExecutionContext in test environment */ }
 
   return new Response(object.body, {
     headers: {

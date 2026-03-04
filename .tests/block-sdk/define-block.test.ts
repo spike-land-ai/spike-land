@@ -158,4 +158,145 @@ describe("defineBlock", () => {
   it("components default to empty object", () => {
     expect(testBlock.components).toEqual({});
   });
+
+  it("includes custom components in block", () => {
+    const FakeComponent = () => null;
+    const block = defineBlock({
+      name: "with-components",
+      version: "2.0.0",
+      storage: {},
+      procedures: () => ({}),
+      components: { FakeComponent },
+    });
+    expect(block.components.FakeComponent).toBe(FakeComponent);
+  });
+
+  it("handles block with undefined tools (no tools exposed)", () => {
+    const block = defineBlock({
+      name: "no-tools-key",
+      version: "1.0.0",
+      storage: {},
+      procedures: (ctx) => ({
+        hidden: ctx.procedure
+          .tool("hidden_op", "Hidden", {})
+          .handler(async () => ({ content: [{ type: "text", text: "ok" }] })),
+      }),
+      // No tools key at all - toolNames should be empty
+    });
+
+    expect(block.toolNames).toHaveLength(0);
+  });
+
+  it("getTools returns empty array when toolNames is empty", async () => {
+    const storage = createMemoryAdapter();
+    const block = defineBlock({
+      name: "no-tools-block",
+      version: "1.0.0",
+      storage: {},
+      procedures: (ctx) => ({
+        internal: ctx.procedure
+          .tool("internal_fn", "Internal", {})
+          .handler(async () => ({ content: [{ type: "text", text: "ok" }] })),
+      }),
+      tools: [],
+    });
+    const tools = block.getTools(storage, "u");
+    expect(tools).toHaveLength(0);
+  });
+
+  it("schema reflects all table definitions", () => {
+    const block = defineBlock({
+      name: "multi-table",
+      version: "1.0.0",
+      storage: {
+        users: defineTable("users", { id: t.string().primaryKey() }),
+        posts: defineTable("posts", { id: t.string().primaryKey(), title: t.string() }),
+      },
+      procedures: () => ({}),
+    });
+
+    expect(Object.keys(block.schema)).toEqual(["users", "posts"]);
+    expect(block.migrations).toHaveLength(2);
+  });
+
+  it("nanoid generates unique IDs", async () => {
+    const storage = createMemoryAdapter();
+    await testBlock.initialize(storage);
+
+    const procs = testBlock.createProcedures(storage, "u");
+
+    // Generate multiple items and check IDs are unique
+    const r1 = await procs.addItem.handler({ name: "a", count: 1 });
+    const r2 = await procs.addItem.handler({ name: "b", count: 1 });
+    const id1 = JSON.parse(r1.content[0]!.text!).id;
+    const id2 = JSON.parse(r2.content[0]!.text!).id;
+    expect(id1).not.toBe(id2);
+    expect(typeof id1).toBe("string");
+    expect(id1.length).toBe(8);
+  });
+
+  it("initialize runs all migrations for multi-table schema", async () => {
+    const storage = createMemoryAdapter();
+    const block = defineBlock({
+      name: "multi-migrate",
+      version: "1.0.0",
+      storage: {
+        a: defineTable("a", { id: t.string().primaryKey() }),
+        b: defineTable("b", { id: t.string().primaryKey(), val: t.number() }),
+      },
+      procedures: () => ({}),
+    });
+
+    await block.initialize(storage);
+
+    // Both tables should exist
+    const ra = await storage.sql.execute("SELECT * FROM a");
+    const rb = await storage.sql.execute("SELECT * FROM b");
+    expect(ra.rows).toHaveLength(0);
+    expect(rb.rows).toHaveLength(0);
+  });
+
+  it("auto tool discovery skips non-tool entries in procedures", () => {
+    // When procedures returns objects that don't have name+handler, they should be skipped
+    const block = defineBlock({
+      name: "mixed-procs",
+      version: "1.0.0",
+      storage: {},
+      procedures: (ctx) => {
+        const realTool = ctx.procedure
+          .tool("real_tool", "A real tool", {})
+          .handler(async () => ({ content: [{ type: "text", text: "ok" }] }));
+        // Return a mix of tool and non-tool
+        return {
+          realTool,
+          // This is a valid BuiltTool so it will be discovered
+        };
+      },
+      tools: "auto",
+    });
+
+    expect(block.toolNames).toContain("real_tool");
+  });
+
+  it("getTools filters to only toolNames entries", async () => {
+    const storage = createMemoryAdapter();
+    const block = defineBlock({
+      name: "filter-test",
+      version: "1.0.0",
+      storage: {},
+      procedures: (ctx) => ({
+        toolA: ctx.procedure
+          .tool("tool_a", "A", {})
+          .handler(async () => ({ content: [{ type: "text", text: "a" }] })),
+        toolB: ctx.procedure
+          .tool("tool_b", "B", {})
+          .handler(async () => ({ content: [{ type: "text", text: "b" }] })),
+      }),
+      tools: ["tool_a"], // Only expose tool_a
+    });
+
+    const tools = block.getTools(storage, "u");
+    expect(tools).toHaveLength(1);
+    expect(tools[0]!.name).toBe("tool_a");
+  });
 });

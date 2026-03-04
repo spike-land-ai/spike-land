@@ -92,4 +92,34 @@ describe("Schema DSL", () => {
       expect(names).toEqual(["users", "tasks"]);
     });
   });
+
+  describe("toSQLType default branch", () => {
+    it("returns TEXT for unknown column type", () => {
+      const table = defineTable("test", {
+        col: t.string(),
+      });
+      // Force the type to an unknown value to hit the default branch
+      (table.columns["col"] as { type: string }).type = "unknown_type";
+      const sql = tableToSQL(table);
+      expect(sql).toContain("col TEXT");
+    });
+  });
+
+  describe("ColumnBuilder chaining", () => {
+    it("primaryKey and optional are chainable and state is reflected", () => {
+      const col = t.string().primaryKey();
+      expect(col._def.primary).toBe(true);
+      expect(col._def.optional).toBe(false);
+
+      const col2 = t.number().optional();
+      expect(col2._def.optional).toBe(true);
+      expect(col2._def.primary).toBe(false);
+    });
+
+    it("enum column has enumValues in _def", () => {
+      const col = t.enum(["a", "b", "c"]);
+      expect(col._def.enumValues).toEqual(["a", "b", "c"]);
+      expect(col._def.type).toBe("string");
+    });
+  });
 });

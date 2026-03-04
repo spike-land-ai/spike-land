@@ -66,4 +66,47 @@ describe("ReconnectManager", () => {
     mgr.cancelAll();
     expect(mgr.pendingReconnects).toBe(0);
   });
+
+  it("fires reconnect callback after timer elapses", async () => {
+    const mgr = new ReconnectManager(reconnectFn);
+    const config: ServerConfig = { command: "node", args: ["server.js"] };
+    mgr.scheduleReconnect("test-server", config);
+
+    await vi.runAllTimersAsync();
+
+    expect(reconnectFn).toHaveBeenCalledWith("test-server", config);
+    expect(mgr.pendingReconnects).toBe(0);
+  });
+
+  it("reschedules on reconnect failure", async () => {
+    const failingFn: ReconnectFn = vi.fn(async () => {
+      throw new Error("connection refused");
+    });
+
+    const mgr = new ReconnectManager(failingFn, { maxAttempts: 3 });
+    const config: ServerConfig = { command: "node" };
+    mgr.scheduleReconnect("bad-server", config);
+
+    // Fire only the first timer (1000ms)
+    await vi.advanceTimersByTimeAsync(1001);
+
+    expect(failingFn).toHaveBeenCalledTimes(1);
+    expect(mgr.pendingReconnects).toBe(1); // second attempt queued
+  });
+
+  it("stops rescheduling after max attempts exceeded", async () => {
+    const failingFn: ReconnectFn = vi.fn(async () => {
+      throw new Error("always fails");
+    });
+
+    const mgr = new ReconnectManager(failingFn, { maxAttempts: 1 });
+    const config: ServerConfig = { command: "node" };
+    mgr.scheduleReconnect("srv", config);
+
+    await vi.runAllTimersAsync();
+
+    // First attempt fires, fails, tries to schedule again but maxAttempts=1 already reached
+    expect(failingFn).toHaveBeenCalledTimes(1);
+    expect(mgr.pendingReconnects).toBe(0);
+  });
 });

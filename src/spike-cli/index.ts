@@ -12,3 +12,6 @@ export type {
   StdioServerConfig,
 } from "./config/types";
 export { setVerbose } from "./util/logger";
+export { ChatClient, type ChatClientOptions } from "./chat/client";
+export { runAgentLoop, type AgentLoopContext } from "./chat/loop";
+export { ServerManager, type ServerManagerOptions } from "./multiplexer/server-manager";

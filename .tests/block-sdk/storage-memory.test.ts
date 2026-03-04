@@ -194,5 +194,92 @@ describe("createMemoryAdapter", () => {
       const imgs = await adapter.blobs!.list("img/");
       expect(imgs.sort()).toEqual(["img/1.png", "img/2.png"]);
     });
+
+    it("lists all blobs when no prefix", async () => {
+      const adapter = createMemoryAdapter();
+      await adapter.blobs!.put("a.txt", new Uint8Array([1]));
+      await adapter.blobs!.put("b.txt", new Uint8Array([2]));
+      const all = await adapter.blobs!.list();
+      expect(all.sort()).toEqual(["a.txt", "b.txt"]);
+    });
+
+    it("puts ReadableStream", async () => {
+      const adapter = createMemoryAdapter();
+      const text = "stream data";
+      const encoded = new TextEncoder().encode(text);
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(encoded);
+          controller.close();
+        },
+      });
+      await adapter.blobs!.put("stream-key", stream);
+      const result = await adapter.blobs!.get("stream-key");
+      expect(result).not.toBeNull();
+      expect(new TextDecoder().decode(result!)).toBe(text);
+    });
+
+    it("delete returns false for missing key", async () => {
+      const adapter = createMemoryAdapter();
+      expect(await adapter.blobs!.delete("nonexistent")).toBe(false);
+    });
+  });
+
+  describe("SQL - additional coverage", () => {
+    it("deletes all rows from table without WHERE clause", async () => {
+      const adapter = createMemoryAdapter();
+      await adapter.sql.execute("CREATE TABLE things (id TEXT)");
+      await adapter.sql.execute("INSERT INTO things (id) VALUES (?)", ["1"]);
+      await adapter.sql.execute("INSERT INTO things (id) VALUES (?)", ["2"]);
+      await adapter.sql.execute("INSERT INTO things (id) VALUES (?)", ["3"]);
+
+      const result = await adapter.sql.execute("DELETE FROM things");
+      expect(result.rowsAffected).toBe(3);
+
+      const remaining = await adapter.sql.execute("SELECT * FROM things");
+      expect(remaining.rows).toHaveLength(0);
+    });
+
+    it("kv delete returns false for non-existent key", async () => {
+      const adapter = createMemoryAdapter();
+      expect(await adapter.kv.delete("ghost")).toBe(false);
+    });
+
+    it("INSERT without params inserts nulls", async () => {
+      const adapter = createMemoryAdapter();
+      await adapter.sql.execute("CREATE TABLE t (id TEXT, val TEXT)");
+      // No params provided - columns should be null
+      const result = await adapter.sql.execute("INSERT INTO t (id, val) VALUES (?, ?)");
+      expect(result.rows[0]).toEqual({ id: null, val: null });
+    });
+
+    it("UPDATE SET without null params uses null fallback", async () => {
+      const adapter = createMemoryAdapter();
+      await adapter.sql.execute("CREATE TABLE t (id TEXT, name TEXT)");
+      await adapter.sql.execute("INSERT INTO t (id, name) VALUES (?, ?)", ["1", "old"]);
+      // Only provide WHERE params, not SET params - SET values become null
+      await adapter.sql.execute(
+        "UPDATE t SET name = ? WHERE id = ?",
+        [undefined as unknown as string, "1"],
+      );
+      const rows = await adapter.sql.execute("SELECT * FROM t WHERE id = ?", ["1"]);
+      // The SET value was undefined/null
+      expect(rows.rows[0]).toBeDefined();
+    });
+
+    it("SELECT with WHERE AND multiple conditions", async () => {
+      const adapter = createMemoryAdapter();
+      await adapter.sql.execute("CREATE TABLE t (id TEXT, status TEXT, assignee TEXT)");
+      await adapter.sql.execute("INSERT INTO t (id, status, assignee) VALUES (?, ?, ?)", ["1", "active", "alice"]);
+      await adapter.sql.execute("INSERT INTO t (id, status, assignee) VALUES (?, ?, ?)", ["2", "active", "bob"]);
+      await adapter.sql.execute("INSERT INTO t (id, status, assignee) VALUES (?, ?, ?)", ["3", "done", "alice"]);
+
+      const result = await adapter.sql.execute(
+        "SELECT * FROM t WHERE status = ? AND assignee = ?",
+        ["active", "alice"],
+      );
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0]).toEqual({ id: "1", status: "active", assignee: "alice" });
+    });
   });
 });

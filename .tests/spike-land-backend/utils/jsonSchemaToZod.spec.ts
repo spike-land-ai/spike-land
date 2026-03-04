@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { Code } from "../../../src/spike-land-backend/chatRoom";
 import { McpServer } from "../../../src/spike-land-backend/mcp";
-import { JsonSchemaToZodConverter, type JsonSchemaType } from "../../../src/spike-land-backend/utils/jsonSchemaToZod";
+import {
+  JsonSchemaToZodConverter,
+  isJsonSchemaType,
+  isMcpToolInputSchema,
+  type JsonSchemaType,
+} from "../../../src/spike-land-backend/utils/jsonSchemaToZod";
 
 describe("JsonSchemaToZodConverter", () => {
   let converter: JsonSchemaToZodConverter;
@@ -611,6 +616,321 @@ describe("JsonSchemaToZodConverter", () => {
         // For tool schemas, we expect type to be "object"
         expect(schema.type).not.toBe("object");
       });
+    });
+  });
+
+  describe("Additional Type Conversion Coverage", () => {
+    it("should convert null type", () => {
+      const schema = { type: "null" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(null)).toBe(null);
+      expect(() => zodSchema.parse("not null")).toThrow();
+    });
+
+    it("should convert integer type with constraints", () => {
+      const schema = {
+        type: "integer",
+        minimum: 1,
+        maximum: 100,
+        exclusiveMinimum: 0,
+        exclusiveMaximum: 101,
+        multipleOf: 2,
+      };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(2)).toBe(2);
+      expect(() => zodSchema.parse(3)).toThrow(); // not multipleOf 2
+    });
+
+    it("should convert number with all constraints", () => {
+      const schema = {
+        type: "number",
+        minimum: 0,
+        maximum: 10,
+        exclusiveMinimum: -1,
+        exclusiveMaximum: 11,
+        multipleOf: 0.5,
+        description: "A constrained number",
+      };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(5)).toBe(5);
+    });
+
+    it("should convert string with pattern constraint", () => {
+      const schema = {
+        type: "string",
+        pattern: "^[a-z]+$",
+      };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("abc")).toBe("abc");
+      expect(() => zodSchema.parse("ABC")).toThrow();
+    });
+
+    it("should handle invalid regex pattern gracefully", () => {
+      const schema = {
+        type: "string",
+        pattern: "[invalid",
+      };
+      // Should not throw
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("anything")).toBe("anything");
+    });
+
+    it("should convert string with email format", () => {
+      const schema = { type: "string", format: "email" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("test@example.com")).toBe("test@example.com");
+      expect(() => zodSchema.parse("not-an-email")).toThrow();
+    });
+
+    it("should convert string with uri format", () => {
+      const schema = { type: "string", format: "uri" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("https://example.com")).toBe("https://example.com");
+    });
+
+    it("should convert string with url format", () => {
+      const schema = { type: "string", format: "url" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("https://example.com")).toBe("https://example.com");
+    });
+
+    it("should convert string with uuid format", () => {
+      const schema = { type: "string", format: "uuid" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("550e8400-e29b-41d4-a716-446655440000")).toBe("550e8400-e29b-41d4-a716-446655440000");
+    });
+
+    it("should convert string with unknown format (falls through)", () => {
+      const schema = { type: "string", format: "date-time" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("2021-01-01")).toBe("2021-01-01");
+    });
+
+    it("should convert boolean with description", () => {
+      const schema = { type: "boolean", description: "A boolean field" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(true)).toBe(true);
+    });
+
+    it("should convert array with minItems and maxItems", () => {
+      const schema = {
+        type: "array",
+        items: { type: "string" },
+        minItems: 1,
+        maxItems: 5,
+        description: "A string array",
+      };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(["a", "b"])).toEqual(["a", "b"]);
+      expect(() => zodSchema.parse([])).toThrow(); // minItems violation
+    });
+
+    it("should convert object with additionalProperties: true", () => {
+      const schema = {
+        type: "object",
+        additionalProperties: true,
+      };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse({ any: "value" })).toEqual({ any: "value" });
+    });
+
+    it("should convert object with additionalProperties as schema", () => {
+      const schema = {
+        type: "object",
+        additionalProperties: { type: "string" },
+      };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse({ key: "value" })).toEqual({ key: "value" });
+      expect(() => zodSchema.parse({ key: 123 })).toThrow();
+    });
+
+    it("should convert object with description", () => {
+      const schema = {
+        type: "object",
+        properties: { name: { type: "string" } },
+        description: "An object with description",
+      };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse({ name: "test" })).toEqual({ name: "test" });
+    });
+
+    it("should handle const value", () => {
+      const schema = { type: "string", const: "fixed-value" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("fixed-value")).toBe("fixed-value");
+      expect(() => zodSchema.parse("other-value")).toThrow();
+    });
+
+    it("should convert enum with single string value", () => {
+      const schema = { type: "string", enum: ["only-option"], description: "Single enum" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("only-option")).toBe("only-option");
+    });
+
+    it("should convert enum with multiple string values", () => {
+      const schema = { type: "string", enum: ["a", "b", "c"] };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("a")).toBe("a");
+      expect(zodSchema.parse("b")).toBe("b");
+      expect(() => zodSchema.parse("d")).toThrow();
+    });
+
+    it("should convert enum with multiple string values and description", () => {
+      const schema = { type: "string", enum: ["x", "y"], description: "xy enum" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("x")).toBe("x");
+    });
+
+    it("should convert enum with mixed types (null + string)", () => {
+      const schema = {
+        type: "string",
+        enum: [null, "value1", "value2"],
+      };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(null)).toBe(null);
+      expect(zodSchema.parse("value1")).toBe("value1");
+    });
+
+    it("should convert enum with single null value", () => {
+      const schema = { enum: [null] };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(null)).toBe(null);
+    });
+
+    it("should convert enum with single null and description", () => {
+      const schema = { enum: [null], description: "nullable" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(null)).toBe(null);
+    });
+
+    it("should convert enum with number values", () => {
+      const schema = { enum: [1, 2, 3] };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(1)).toBe(1);
+      expect(zodSchema.parse(2)).toBe(2);
+    });
+
+    it("should convert enum with number values and description", () => {
+      const schema = { enum: [10, 20], description: "number enum" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(10)).toBe(10);
+    });
+
+    it("should return unknown for empty enum", () => {
+      const schema = { enum: [] };
+      const zodSchema = converter.convert(schema);
+      // Should return z.unknown()
+      expect(zodSchema.parse("anything")).toBe("anything");
+    });
+
+    it("should convert string with minLength constraint", () => {
+      const schema = { type: "string", minLength: 3 };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("abc")).toBe("abc");
+      expect(() => zodSchema.parse("ab")).toThrow(); // too short
+    });
+
+    it("should convert string with maxLength constraint", () => {
+      const schema = { type: "string", maxLength: 5 };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("hello")).toBe("hello");
+      expect(() => zodSchema.parse("toolong")).toThrow(); // too long
+    });
+
+    it("should convert string with both minLength and maxLength", () => {
+      const schema = { type: "string", minLength: 2, maxLength: 6 };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("ok")).toBe("ok");
+      expect(zodSchema.parse("hello")).toBe("hello");
+      expect(() => zodSchema.parse("x")).toThrow();
+      expect(() => zodSchema.parse("toolong7")).toThrow();
+    });
+
+    it("should convert enum with single mixed-type value and description", () => {
+      const schema = { enum: [null], description: "nullable only" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(null)).toBe(null);
+    });
+
+    it("should convert enum with multiple mixed-type values and description", () => {
+      const schema = { enum: [null, 42], description: "null or number" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(null)).toBe(null);
+      expect(zodSchema.parse(42)).toBe(42);
+    });
+
+    it("should convert single-string enum with description", () => {
+      const schema = { type: "string" as const, enum: ["only"], description: "single value" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("only")).toBe("only");
+      expect(() => zodSchema.parse("other")).toThrow();
+    });
+
+    it("should convert single-string enum WITHOUT description (line 396 branch 1)", () => {
+      // Covers the false branch of if(schema.description) for single string literal
+      const schema = { type: "string" as const, enum: ["solo"] };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse("solo")).toBe("solo");
+      expect(() => zodSchema.parse("other")).toThrow();
+    });
+
+    it("should convert single mixed-type enum WITHOUT description (line 429 branch 1)", () => {
+      // Mixed-type enum (not all strings), single value, no description
+      // -> goes to literals branch, literals.length === 1, no description
+      const schema = { type: "string" as const, enum: [null as unknown as string] };
+      const zodSchema = converter.convert(schema);
+      // z.null() literal
+      expect(zodSchema.parse(null)).toBe(null);
+    });
+
+    it("should convert single mixed-type enum WITH description (line 429 branch 0)", () => {
+      // Mixed-type enum, single value, with description
+      const schema = { type: "string" as const, enum: [null as unknown as string], description: "null only" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(null)).toBe(null);
+    });
+
+    it("should convert multiple mixed-type enum WITH description (line 442 branch 0)", () => {
+      // Multiple mixed-type literals with description
+      const schema = { type: "string" as const, enum: [null as unknown as string, "value"], description: "null or value" };
+      const zodSchema = converter.convert(schema);
+      expect(zodSchema.parse(null)).toBe(null);
+      expect(zodSchema.parse("value")).toBe("value");
+    });
+
+    it("isJsonSchemaType returns false for null", () => {
+      expect(isJsonSchemaType(null)).toBe(false);
+    });
+
+    it("isJsonSchemaType returns false for non-object", () => {
+      expect(isJsonSchemaType("string")).toBe(false);
+      expect(isJsonSchemaType(42)).toBe(false);
+    });
+
+    it("isJsonSchemaType returns false for invalid type value", () => {
+      expect(isJsonSchemaType({ type: 123 })).toBe(false);
+      expect(isJsonSchemaType({ type: "invalid-type-xyz" })).toBe(false);
+    });
+
+    it("isJsonSchemaType returns true for valid object without type", () => {
+      expect(isJsonSchemaType({})).toBe(true);
+    });
+
+    it("isMcpToolInputSchema returns true for valid MCP schema", () => {
+      expect(isMcpToolInputSchema({ type: "object", properties: {} })).toBe(true);
+    });
+
+    it("isMcpToolInputSchema returns false for non-object type", () => {
+      expect(isMcpToolInputSchema({ type: "string", properties: {} })).toBe(false);
+    });
+
+    it("isMcpToolInputSchema returns false for null properties", () => {
+      expect(isMcpToolInputSchema({ type: "object", properties: null })).toBe(false);
+    });
+
+    it("isMcpToolInputSchema returns false for invalid value", () => {
+      expect(isMcpToolInputSchema(null)).toBe(false);
+      expect(isMcpToolInputSchema("string")).toBe(false);
     });
   });
 });

@@ -31,6 +31,33 @@ describe("parseClaudeMd", () => {
     expect(result.testingRequirements[0]).toContain("80%");
   });
 
+  it("extracts blocking rules via dedicated blocking section header (lines 41-42)", () => {
+    const content = `## Blocking Rules
+
+- **NEVER** commit secrets
+- **ALWAYS** write tests
+
+## Critical Checks
+- Security scan must pass`;
+
+    const result = parseClaudeMd(content);
+    // The "Blocking Rules" section matches RULE_SECTION_PATTERNS[2] (/blocking|critical/i)
+    // Items with NEVER/ALWAYS go to blockingRules
+    expect(result.blockingRules.some((r) => r.includes("NEVER"))).toBe(true);
+  });
+
+  it("extracts rules from Critical section (pattern[2])", () => {
+    const content = `## Critical Requirements
+
+- **NEVER** push to main directly
+- Follow security guidelines`;
+
+    const result = parseClaudeMd(content);
+    expect(result.blockingRules.some((r) => r.includes("NEVER"))).toBe(true);
+    // Regular bullet in blocking section goes to blockingRules too
+    expect(result.blockingRules.some((r) => r.includes("security"))).toBe(true);
+  });
+
   it("handles empty content", () => {
     const result = parseClaudeMd("");
     expect(result.codeQualityRules).toHaveLength(0);

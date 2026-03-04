@@ -31,4 +31,33 @@ describe("common command helpers", () => {
   it("parseInlineUrls validates ports", () => {
     expect(() => parseInlineUrls(["s1=http://localhost:99999"])).toThrow("Port must be 1–65535");
   });
+
+  it("parseInlineUrls throws when no = separator", () => {
+    expect(() => parseInlineUrls(["noequalssign"])).toThrow("Invalid --server-url format");
+    expect(() => parseInlineUrls(["noequalssign"])).toThrow("Use name=url");
+  });
+
+  it("parseInlineUrls throws when name is empty", () => {
+    expect(() => parseInlineUrls(["=http://localhost:3000"])).toThrow("Server name must not be empty");
+  });
+
+  it("parseInlineUrls throws when url is empty", () => {
+    expect(() => parseInlineUrls(["myserver="])).toThrow("URL must not be empty");
+  });
+
+  it("parseInlineUrls throws for invalid URL containing invalid port via catch path", () => {
+    // URL with invalid IPv6 that throws 'Invalid URL' but has port > 65535
+    expect(() =>
+      parseInlineUrls(["s1=http://[::invalid]:99999"]),
+    ).toThrow("Port must be 1–65535");
+  });
+
+  it("parseInlineUrls allows valid port range", () => {
+    expect(parseInlineUrls(["s1=http://localhost:1"])).toEqual([
+      { name: "s1", url: "http://localhost:1" },
+    ]);
+    expect(parseInlineUrls(["s1=http://localhost:65535"])).toEqual([
+      { name: "s1", url: "http://localhost:65535" },
+    ]);
+  });
 });

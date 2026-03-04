@@ -100,5 +100,17 @@ describe("registry client", () => {
         }),
       );
     });
+
+    it("throws on non-ok non-404 response (line 43)", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+      });
+
+      await expect(
+        getRegistryServer("some-id", baseUrl, token),
+      ).rejects.toThrow("Registry fetch failed: 500 Internal Server Error");
+    });
   });
 });

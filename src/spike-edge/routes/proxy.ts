@@ -65,14 +65,16 @@ proxy.post("/proxy/stripe", async (c) => {
     body: body.body ? JSON.stringify(body.body) : undefined,
   });
 
-  c.executionCtx.waitUntil(
-    getClientId(c.req.raw).then((clientId) =>
-      sendGA4Events(c.env, clientId, [{
-        name: "proxy_api_call",
-        params: { provider: "stripe", status: response.status, duration_ms: Date.now() - start },
-      }])
-    ),
-  );
+  try {
+    c.executionCtx.waitUntil(
+      getClientId(c.req.raw).then((clientId) =>
+        sendGA4Events(c.env, clientId, [{
+          name: "proxy_api_call",
+          params: { provider: "stripe", status: response.status, duration_ms: Date.now() - start },
+        }])
+      ),
+    );
+  } catch { /* no ExecutionContext in test environment */ }
 
   return new Response(response.body, {
     status: response.status,
@@ -116,14 +118,16 @@ proxy.post("/proxy/ai", async (c) => {
     body: body.body ? JSON.stringify(body.body) : undefined,
   });
 
-  c.executionCtx.waitUntil(
-    getClientId(c.req.raw).then((clientId) =>
-      sendGA4Events(c.env, clientId, [{
-        name: "proxy_api_call",
-        params: { provider: providerName, status: response.status, duration_ms: Date.now() - start },
-      }])
-    ),
-  );
+  try {
+    c.executionCtx.waitUntil(
+      getClientId(c.req.raw).then((clientId) =>
+        sendGA4Events(c.env, clientId, [{
+          name: "proxy_api_call",
+          params: { provider: providerName, status: response.status, duration_ms: Date.now() - start },
+        }])
+      ),
+    );
+  } catch { /* no ExecutionContext in test environment */ }
 
   return new Response(response.body, {
     status: response.status,
@@ -155,14 +159,16 @@ proxy.post("/proxy/github", async (c) => {
     body: body.body ? JSON.stringify(body.body) : undefined,
   });
 
-  c.executionCtx.waitUntil(
-    getClientId(c.req.raw).then((clientId) =>
-      sendGA4Events(c.env, clientId, [{
-        name: "proxy_api_call",
-        params: { provider: "github", status: response.status, duration_ms: Date.now() - start },
-      }])
-    ),
-  );
+  try {
+    c.executionCtx.waitUntil(
+      getClientId(c.req.raw).then((clientId) =>
+        sendGA4Events(c.env, clientId, [{
+          name: "proxy_api_call",
+          params: { provider: "github", status: response.status, duration_ms: Date.now() - start },
+        }])
+      ),
+    );
+  } catch { /* no ExecutionContext in test environment */ }
 
   return new Response(response.body, {
     status: response.status,

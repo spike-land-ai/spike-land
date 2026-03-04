@@ -169,4 +169,187 @@ describe("dep graph tools", () => {
       expect(result.content[0].text).toContain("manifest read fail");
     });
   });
+
+  describe("tree format — edge cases", () => {
+    it("shows (external) for deps not in manifest", async () => {
+      mockReadManifest.mockResolvedValue({
+        defaults: MOCK_MANIFEST.defaults,
+        packages: {
+          "my-pkg": {
+            kind: "library",
+            version: "1.0.0",
+            description: "My pkg",
+            entry: "src/index.ts",
+            deps: ["external-lib"],
+          },
+        },
+      } as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+
+      const result = await server.call("bazdmeg_dep_graph", {
+        packageName: "my-pkg",
+        format: "tree",
+      });
+      expect(result.content[0].text).toContain("(external)");
+    });
+
+    it("shows (circular) for circular deps in tree", async () => {
+      // Pre-populate visited to simulate circular
+      mockReadManifest.mockResolvedValue({
+        defaults: MOCK_MANIFEST.defaults,
+        packages: {
+          "pkg-a": {
+            kind: "library",
+            version: "1.0.0",
+            description: "A",
+            entry: "src/index.ts",
+            deps: ["pkg-b"],
+          },
+          "pkg-b": {
+            kind: "library",
+            version: "1.0.0",
+            description: "B",
+            entry: "src/index.ts",
+            deps: ["pkg-a"],
+          },
+        },
+      } as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+
+      // With circular deps, the tree should show one of them as circular
+      const result = await server.call("bazdmeg_dep_graph", {
+        packageName: "pkg-a",
+        format: "tree",
+      });
+      // pkg-b is a dep of pkg-a; pkg-a is already visited, so pkg-b's dep on pkg-a shows as circular
+      expect(result.content[0].text).toContain("pkg-b");
+    });
+
+    it("shows child deps in tree with multiple levels", async () => {
+      mockReadManifest.mockResolvedValue({
+        defaults: MOCK_MANIFEST.defaults,
+        packages: {
+          "spike-cli": {
+            kind: "cli",
+            version: "1.0.0",
+            description: "CLI",
+            entry: "src/index.ts",
+            deps: ["chess-engine"],
+          },
+          "chess-engine": {
+            kind: "library",
+            version: "1.0.0",
+            description: "Chess",
+            entry: "src/index.ts",
+            deps: ["shared"],
+          },
+          shared: {
+            kind: "library",
+            version: "1.0.0",
+            description: "Shared",
+            entry: "src/index.ts",
+          },
+        },
+      } as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+
+      const result = await server.call("bazdmeg_dep_graph", {
+        packageName: "spike-cli",
+        format: "tree",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("chess-engine");
+      expect(text).toContain("shared");
+    });
+  });
+
+  describe("mermaid format — transitive deps for rootPackage", () => {
+    it("includes transitive deps when filtering by root package", async () => {
+      mockReadManifest.mockResolvedValue({
+        defaults: MOCK_MANIFEST.defaults,
+        packages: {
+          "spike-cli": {
+            kind: "cli",
+            version: "1.0.0",
+            description: "CLI",
+            entry: "src/index.ts",
+            deps: ["chess-engine"],
+          },
+          "chess-engine": {
+            kind: "library",
+            version: "1.0.0",
+            description: "Chess",
+            entry: "src/index.ts",
+            deps: ["shared"],
+          },
+          shared: {
+            kind: "library",
+            version: "1.0.0",
+            description: "Shared",
+            entry: "src/index.ts",
+          },
+        },
+      } as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+
+      const result = await server.call("bazdmeg_dep_graph", {
+        packageName: "spike-cli",
+        format: "mermaid",
+      });
+      const text = result.content[0].text;
+      // Should include direct dep
+      expect(text).toContain("spike-cli --> chess-engine");
+      // Should include transitive dep
+      expect(text).toContain("chess-engine --> shared");
+    });
+
+    it("shows isolated nodes in mermaid (packages with no deps and not a dep)", async () => {
+      mockReadManifest.mockResolvedValue({
+        defaults: MOCK_MANIFEST.defaults,
+        packages: {
+          isolated: {
+            kind: "library",
+            version: "1.0.0",
+            description: "Isolated",
+            entry: "src/index.ts",
+          },
+        },
+      } as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+
+      const result = await server.call("bazdmeg_dep_graph", {
+        format: "mermaid",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("isolated");
+    });
+  });
+
+  describe("list format — error handling", () => {
+    it("handles circular dependency error in buildList", async () => {
+      // The topologicalSort function throws on circular deps, which buildList catches
+      mockReadManifest.mockResolvedValue({
+        defaults: MOCK_MANIFEST.defaults,
+        packages: {
+          "pkg-a": {
+            kind: "library",
+            version: "1.0.0",
+            description: "A",
+            entry: "src/index.ts",
+            deps: ["pkg-b"],
+          },
+          "pkg-b": {
+            kind: "library",
+            version: "1.0.0",
+            description: "B",
+            entry: "src/index.ts",
+            deps: ["pkg-a"],
+          },
+        },
+      } as ReturnType<typeof readManifest> extends Promise<infer T> ? T : never);
+
+      const result = await server.call("bazdmeg_dep_graph", {
+        format: "list",
+      });
+      const text = result.content[0].text;
+      // Should show error for circular deps
+      expect(text).toContain("ERROR");
+      expect(text).toContain("Circular");
+    });
+  });
 });

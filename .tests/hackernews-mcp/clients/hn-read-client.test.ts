@@ -66,7 +66,7 @@ describe("HNReadClient", () => {
       expect(user).toEqual(SAMPLE_USER);
     });
 
-    it("returns null for unknown user", async () => {
+    it("returns null for unknown user (404)", async () => {
       const fetch = createMockFetch([
         {
           url: `${HN_FIREBASE_BASE}/user/nobody.json`,
@@ -75,6 +75,18 @@ describe("HNReadClient", () => {
       ]);
       const client = new HNReadClient(fetch);
       const user = await client.getUser("nobody");
+      expect(user).toBeNull();
+    });
+
+    it("returns null on HTTP error (non-404)", async () => {
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/user/erroruser.json`,
+          response: { status: 500, body: {} },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const user = await client.getUser("erroruser");
       expect(user).toBeNull();
     });
   });

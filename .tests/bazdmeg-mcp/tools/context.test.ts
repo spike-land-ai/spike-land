@@ -153,4 +153,40 @@ describe("context tools", () => {
     });
     expect(result.content[0].text).toContain("Workspace: none");
   });
+
+  it("get_context logs dependency contexts when workspace has deps", async () => {
+    const mono = await createFakeMonorepo([
+      {
+        name: "main-pkg",
+        claudeMd: "# Main Package\nMain package.\n",
+        srcFiles: { "types.ts": "export interface Main {}\n" },
+        dependencies: { "@spike-land-ai/dep-pkg": "1.0.0" },
+      },
+      {
+        name: "dep-pkg",
+        claudeMd: "# Dep Package\nA dependency.\n",
+        srcFiles: { "index.ts": "export const dep = 1;\n" },
+      },
+    ]);
+    cleanup = mono.cleanup;
+
+    const originalCwd = process.cwd;
+    process.cwd = () => mono.root;
+
+    try {
+      await enterWorkspace({
+        packageName: "main-pkg",
+        packagePath: "packages/main-pkg/",
+        allowedPaths: ["packages/main-pkg/", "packages/dep-pkg/"],
+        dependencies: ["@spike-land-ai/dep-pkg"],
+        enteredAt: new Date().toISOString(),
+      });
+
+      const result = await server.call("bazdmeg_get_context", {});
+      expect(result.isError).toBeUndefined();
+      expect(result.content[0].text).toContain("Context Bundle: main-pkg");
+    } finally {
+      process.cwd = originalCwd;
+    }
+  });
 });

@@ -120,6 +120,29 @@ describe("executeToolCall", () => {
     expect(result.isError).toBe(true);
     expect(result.result).toBe("validation failed");
   });
+
+  it("uses JSON.stringify for non-text content block (line 92 ?? branch)", async () => {
+    const manager = {
+      callTool: vi.fn().mockResolvedValue({
+        content: [{ type: "image", data: "base64data" }], // no .text field
+        isError: false,
+      }),
+    } as unknown as ServerManager;
+
+    const result = await executeToolCall(manager, "tool", {});
+    expect(result.result).toContain("base64data");
+    expect(result.isError).toBe(false);
+  });
+
+  it("handles non-Error thrown in catch (line 95 String branch)", async () => {
+    const manager = {
+      callTool: vi.fn().mockRejectedValue("plain string error"),
+    } as unknown as ServerManager;
+
+    const result = await executeToolCall(manager, "tool", {});
+    expect(result.isError).toBe(true);
+    expect(result.result).toContain("plain string error");
+  });
 });
 
 describe("extractDefaults", () => {
@@ -220,6 +243,20 @@ describe("getRequiredParams", () => {
     };
 
     const params = getRequiredParams(schema);
+    expect(params).toEqual([{ name: "x", description: "", type: "string" }]);
+  });
+
+  it("uses empty object when required param is not in properties (line 71 ?? branch)", () => {
+    const schema = {
+      type: "object",
+      properties: {
+        y: { type: "string" },
+      },
+      required: ["x"], // "x" is required but not in properties
+    };
+
+    const params = getRequiredParams(schema);
+    // props["x"] is undefined → ?? {} → description: "" and type: "string"
     expect(params).toEqual([{ name: "x", description: "", type: "string" }]);
   });
 

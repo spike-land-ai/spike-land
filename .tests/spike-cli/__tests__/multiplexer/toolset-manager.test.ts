@@ -201,3 +201,44 @@ describe("ToolsetManager", () => {
     });
   });
 });
+
+describe("ToolsetManager — default toolCountFn (line 37)", () => {
+  it("uses default toolCountFn returning 0 when not provided", () => {
+    // Instantiate without toolCountFn to exercise the default parameter branch
+    const mgr = new ToolsetManager({
+      mytools: { servers: ["srv-a", "srv-b"] },
+    });
+    const result = mgr.loadToolset("mytools");
+    // Default fn returns 0 for each server, so total toolCount = 0
+    expect(result.toolCount).toBe(0);
+    expect(result.loaded).toEqual(["srv-a", "srv-b"]);
+  });
+});
+
+describe("ToolsetManager — listToolsets without description (line 72)", () => {
+  it("uses empty string when toolset has no description", () => {
+    const mgr = new ToolsetManager({
+      nodesc: { servers: ["srv"] }, // no description field
+    });
+    const list = mgr.listToolsets();
+    expect(list[0].description).toBe("");
+  });
+});
+
+describe("ToolsetManager — handleMetaTool non-Error catch (line 151)", () => {
+  it("formats non-Error value as String when load fails with non-Error", () => {
+    // Create a manager where loadToolset throws a non-Error
+    const mgr = new ToolsetManager({
+      badtools: { servers: ["srv"] },
+    });
+    // Patch loadToolset to throw a non-Error
+    vi.spyOn(mgr as unknown as { loadToolset: (n: string) => void }, "loadToolset").mockImplementation(() => {
+      const nonError: unknown = "string failure";
+      throw nonError;
+    });
+
+    const result = mgr.handleMetaTool("spike__load_toolset", { name: "badtools" });
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("string failure");
+  });
+});

@@ -1,12 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import { Suspense } from "react";
-import dynamic from "next/dynamic";
 import toolsManifest from "@/lib/docs/generated/tools-manifest.json";
 import "./globals.css";
 import { SessionProvider } from "@/components/auth/session-provider";
 import { AuthDialogProvider } from "@/components/auth/AuthDialogProvider";
 import { AuthDialogAutoOpen } from "@/components/auth/AuthDialogAutoOpen";
+import {
+  CommandPalette,
+  CookieConsent,
+  ConsoleCapture,
+  IframeErrorBridge,
+} from "@/components/client-only-providers";
 import { Footer } from "@/components/footer/Footer";
 import { SiteNav } from "@/components/navigation/SiteNav";
 import { SiteChatLazy as SiteChat } from "@/components/chat/SiteChatLazy";
@@ -18,33 +23,6 @@ import { SessionTracker } from "@/components/tracking/SessionTracker";
 import { Toaster } from "@/components/ui/sonner";
 import { getNonce } from "@/lib/security/csp-nonce-server";
 import { ViewTransitions } from "next-view-transitions";
-
-// CommandPalette only activates on Cmd+K — no need to hydrate it eagerly
-const CommandPalette = dynamic(
-  () =>
-    import("@/components/docs/CommandPalette").then((m) => ({ default: m.CommandPalette })),
-  { ssr: false },
-);
-
-// CookieConsent renders null until it checks localStorage — skip SSR
-const CookieConsent = dynamic(
-  () => import("@/components/CookieConsent").then((m) => ({ default: m.CookieConsent })),
-  { ssr: false },
-);
-
-// Browser-only error capture utilities — skip SSR entirely to reduce server bundle
-const ConsoleCapture = dynamic(
-  () => import("@/components/errors/ConsoleCapture").then((m) => ({ default: m.ConsoleCapture })),
-  { ssr: false },
-);
-
-const IframeErrorBridge = dynamic(
-  () =>
-    import("@/components/errors/IframeErrorBridge").then((m) => ({
-      default: m.IframeErrorBridge,
-    })),
-  { ssr: false },
-);
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

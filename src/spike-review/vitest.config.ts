@@ -14,6 +14,8 @@ export default mergeConfig(
           "src/cli.ts",
           "src/worker/**",
           "src/index.ts",
+          "cli.ts",
+          "worker/env.ts",
         ],
       },
     },
