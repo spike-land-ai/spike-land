@@ -282,7 +282,6 @@ const nextConfig: NextConfig = {
       { source: "/apps", destination: "/apps/store", permanent: true },
       { source: "/store", destination: "/apps/store", permanent: true },
       { source: "/albums", destination: "/apps/pixel", permanent: true },
-      { source: "/mcp", destination: "/apps/mcp-explorer", permanent: true },
       {
         source: "/admin/qa-studio",
         destination: "/apps/qa-studio",

@@ -6,6 +6,7 @@ export interface Env {
   DB: D1Database;
   LIMITERS: DurableObjectNamespace;
   AUTH_MCP: Fetcher;
+  MCP_SERVICE: Fetcher;
   STRIPE_SECRET_KEY: string;
   GEMINI_API_KEY: string;
   CLAUDE_OAUTH_TOKEN: string;

@@ -8173,12 +8173,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@spike-land-ai/qa-studio@workspace:src/qa-studio"
   dependencies:
+    "@modelcontextprotocol/sdk": "npm:1.27.1"
+    "@spike-land-ai/mcp-server-base": "npm:*"
     "@spike-land-ai/tsconfig": "npm:*"
     playwright: "npm:^1.58.2"
     typescript: "npm:5.9.3"
     vitest: "npm:^4.0.18"
+    zod: "npm:4.3.6"
   peerDependencies:
     playwright: ">=1.0.0"
+  bin:
+    qa-studio-mcp: ./dist/mcp-server.js
   languageName: unknown
   linkType: soft
 

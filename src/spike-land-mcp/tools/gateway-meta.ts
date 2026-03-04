@@ -39,6 +39,18 @@ export function registerGatewayMetaTools(
         },
       )
       .meta({ category: "gateway-meta", tier: "free" })
+      .examples([
+        {
+          name: "keyword_search",
+          input: { query: "code generation", limit: 5 },
+          description: "Search for code generation tools by keyword",
+        },
+        {
+          name: "semantic_search",
+          input: { query: "help me write tests", semantic: true },
+          description: "Find test-related tools using semantic search",
+        },
+      ])
       .handler(async ({ input }) => {
         const { query, limit, semantic } = input;
 
@@ -218,6 +230,13 @@ export function registerGatewayMetaTools(
         category: z.string().min(1).describe("Category name to activate"),
       })
       .meta({ category: "gateway-meta", tier: "free" })
+      .examples([
+        {
+          name: "enable_codegen",
+          input: { category: "codegen" },
+          description: "Activate all code generation tools",
+        },
+      ])
       .handler(async ({ input }) => {
         const { category } = input;
 

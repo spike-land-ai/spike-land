@@ -54,12 +54,21 @@ export type MiddlewareFn<TCtxIn, _TCtxOut extends TCtxIn> = (
 
 // ─── Tool metadata ───
 
+export interface ToolExample {
+  name: string;
+  input: Record<string, unknown>;
+  description: string;
+}
+
 export interface ToolMeta {
   category?: string;
   tier?: "free" | "workspace";
   complexity?: "primitive" | "composed" | "workflow";
   annotations?: Record<string, unknown>;
   alwaysEnabled?: boolean;
+  examples?: ToolExample[];
+  version?: string;
+  stability?: "stable" | "beta" | "experimental" | "deprecated";
 }
 
 // ─── Built tool (output of builder) ───

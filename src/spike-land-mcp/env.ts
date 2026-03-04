@@ -23,6 +23,9 @@ export interface Env {
   GA_MEASUREMENT_ID: string;
   GA_API_SECRET: string;
 
+  // Service bindings
+  SPIKE_EDGE: Fetcher; // Bugbook + ELO service
+
   // App config
   APP_ENV: string;
   SPIKE_LAND_URL: string; // https://spike.land

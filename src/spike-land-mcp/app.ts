@@ -7,6 +7,7 @@ import { authMiddleware } from "./auth/middleware";
 import { mcpRoute } from "./routes/mcp";
 import { oauthRoute } from "./routes/oauth";
 import { wellKnownRoute } from "./routes/well-known";
+import { publicToolsRoute } from "./routes/public-tools";
 
 export function createApp(): Hono<{ Bindings: Env; Variables: AuthVariables }> {
   const app = new Hono<{ Bindings: Env; Variables: AuthVariables }>();
@@ -26,6 +27,7 @@ export function createApp(): Hono<{ Bindings: Env; Variables: AuthVariables }> {
   // Public routes
   app.route("/.well-known", wellKnownRoute);
   app.route("/oauth", oauthRoute);
+  app.route("/tools", publicToolsRoute);
 
   // Authenticated MCP route
   app.use("/mcp/*", authMiddleware);

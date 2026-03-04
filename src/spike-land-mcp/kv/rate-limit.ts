@@ -15,12 +15,18 @@ interface RateLimitEntry {
   windowStart: number;
 }
 
+/**
+ * @param eloMultiplier - ELO-based rate limit multiplier (1x normal, 2x for low ELO, 4x for very low).
+ *   Higher multiplier = stricter limit. Effective max = maxRequests / eloMultiplier.
+ */
 export async function checkRateLimit(
   key: string,
   kv: KVNamespace,
   maxRequests = MAX_REQUESTS,
   windowMs = WINDOW_MS,
+  eloMultiplier = 1,
 ): Promise<{ isLimited: boolean; resetAt: number; remaining: number }> {
+  const effectiveMax = Math.max(1, Math.floor(maxRequests / eloMultiplier));
   const now = Date.now();
   const kvKey = `rl:${key}`;
 
@@ -43,8 +49,8 @@ export async function checkRateLimit(
 
   entry.count++;
   const resetAt = entry.windowStart + windowMs;
-  const isLimited = entry.count > maxRequests;
-  const remaining = Math.max(0, maxRequests - entry.count);
+  const isLimited = entry.count > effectiveMax;
+  const remaining = Math.max(0, effectiveMax - entry.count);
 
   // Await the put to reduce the TOCTOU window. KV is still eventually
   // consistent so this isn't fully atomic, but it's significantly better

@@ -11,7 +11,7 @@ export function LivePreview({ appId, edgeUrl = "https://edge.spike.land" }: Live
   const [fullscreen, setFullscreen] = useState(false);
   const [key, setKey] = useState(0);
 
-  const src = `${edgeUrl}/live/${appId}`;
+  const src = `${edgeUrl}/live/${appId}/index.html`;
 
   const handleRefresh = useCallback(() => {
     setLoading(true);

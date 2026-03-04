@@ -37,6 +37,10 @@ GA_MEASUREMENT_ID = "G-9WNEM9ZHE7"
 binding = "AUTH_MCP"
 service = "mcp-auth"
 
+[[services]]
+binding = "MCP_SERVICE"
+service = "spike-land-mcp"
+
 [[routes]]
 pattern = "edge.spike.land"
 custom_domain = true

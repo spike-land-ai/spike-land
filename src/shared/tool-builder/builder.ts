@@ -13,6 +13,7 @@ import type {
   HandlerParams,
   Middleware,
   MiddlewareParams,
+  ToolExample,
   ToolMeta,
 } from "./types.js";
 
@@ -55,6 +56,9 @@ export interface Procedure<TCtx> {
 export interface ToolBuilder<TInput, TCtx, TOutput> {
   /** Add metadata (category, tier, etc.) */
   meta(meta: ToolMeta): ToolBuilder<TInput, TCtx, TOutput>;
+
+  /** Add few-shot examples for LLM tool selection */
+  examples(examples: ToolExample[]): ToolBuilder<TInput, TCtx, TOutput>;
 
   /** Add output schema for runtime validation of handler return values */
   output<TNewOutput>(schema: z.ZodType<TNewOutput>): ToolBuilder<TInput, TCtx, TNewOutput>;
@@ -145,6 +149,18 @@ function createToolBuilderImpl<TInput, TCtx, TOutput>(
         fields,
         inputSchema,
         { ...toolMeta, ...newMeta },
+        outputSchema,
+      );
+    },
+
+    examples(newExamples: ToolExample[]): ToolBuilder<TInput, TCtx, TOutput> {
+      return createToolBuilderImpl(
+        middlewares,
+        name,
+        description,
+        fields,
+        inputSchema,
+        { ...toolMeta, examples: [...(toolMeta.examples ?? []), ...newExamples] },
         outputSchema,
       );
     },

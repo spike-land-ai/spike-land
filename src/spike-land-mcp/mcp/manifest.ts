@@ -87,6 +87,7 @@ import { registerCareerGrowthTools } from "../tools/career/growth";
 import { registerEsbuildTools } from "../tools/esbuild";
 import { registerBuildFromGithubTools } from "../tools/build-from-github";
 import { registerQuizTools } from "../tools/quiz";
+import { registerBugbookFeedbackTools } from "../tools/bugbook-feedback";
 
 /**
  * Register all tool modules.
@@ -456,5 +457,10 @@ export async function registerAllTools(
     (registerQuizTools as any)(registry, userId, db, env?.kv, env?.vaultSecret);
   } catch (err) {
     console.error("[MCP] Failed to register registerQuizTools:", err);
+  }
+  try {
+    (registerBugbookFeedbackTools as any)(registry, userId, db, env?.kv, env?.vaultSecret);
+  } catch (err) {
+    console.error("[MCP] Failed to register registerBugbookFeedbackTools:", err);
   }
 }

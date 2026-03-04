@@ -33,6 +33,10 @@ const ROUTE_META: Record<string, { title: string; description: string }> = {
     title: "Learn & Verify - spike.land",
     description: "Learn from any content and prove your understanding through interactive quizzes",
   },
+  "/bugbook": {
+    title: "Bugbook - spike.land",
+    description: "Public bug tracker with ELO ranking - report, track, and fix bugs",
+  },
   "/settings": {
     title: "Settings - spike.land",
     description: "Configure your spike.land account and preferences",
@@ -48,7 +52,6 @@ const ROUTE_META: Record<string, { title: string; description: string }> = {
 };
 
 const navItems = [
-  { to: "/", label: "Dashboard" },
   { to: "/blog", label: "Blog" },
   { to: "/tools", label: "Tools" },
   { to: "/apps", label: "Apps" },
@@ -56,6 +59,7 @@ const navItems = [
   { to: "/learn", label: "Learn" },
   { to: "/messages", label: "Messages" },
   { to: "/analytics", label: "Analytics" },
+  { to: "/bugbook", label: "Bugbook" },
   { to: "/dashboard/bazdmeg", label: "BAZDMEG" },
   { to: "/settings", label: "Settings" },
 ] as const;
@@ -132,7 +136,7 @@ export function RootLayout() {
         }`}
       >
         <div className="flex h-16 items-center gap-2 border-b px-6">
-          <span className="text-xl font-bold">Spike</span>
+          <Link to="/" className="text-xl font-bold hover:opacity-80">spike.land</Link>
         </div>
         <nav className="flex flex-col gap-1 p-4">
           {navItems.map((item) => (
@@ -164,7 +168,7 @@ export function RootLayout() {
               />
             </svg>
           </button>
-          <span className="ml-4 flex-1 text-lg font-bold">Spike</span>
+          <Link to="/" className="ml-4 flex-1 text-lg font-bold hover:opacity-80">spike.land</Link>
           <LoginButton />
         </header>
         <main className="flex-1 overflow-y-auto p-6">

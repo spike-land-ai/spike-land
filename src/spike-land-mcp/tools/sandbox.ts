@@ -93,7 +93,7 @@ export function registerSandboxTools(registry: ToolRegistry, userId: string, db:
             .describe("Default language for code execution"),
         },
       )
-      .meta({ category: "orchestration", tier: "free" })
+      .meta({ category: "orchestration", tier: "free", stability: "beta" })
       .handler(async ({ input }) => {
         const { name, language } = input;
 
@@ -143,7 +143,7 @@ export function registerSandboxTools(registry: ToolRegistry, userId: string, db:
             .describe("Language override (defaults to sandbox language)"),
         },
       )
-      .meta({ category: "orchestration", tier: "free" })
+      .meta({ category: "orchestration", tier: "free", stability: "beta" })
       .handler(async ({ input }) => {
         const { sandbox_id, code, language } = input;
 
@@ -191,7 +191,7 @@ export function registerSandboxTools(registry: ToolRegistry, userId: string, db:
         sandbox_id: z.string().min(1).describe("The sandbox ID"),
         file_path: z.string().min(1).describe("Path of the file to read"),
       })
-      .meta({ category: "orchestration", tier: "free" })
+      .meta({ category: "orchestration", tier: "free", stability: "beta" })
       .handler(async ({ input }) => {
         const { sandbox_id, file_path } = input;
 
@@ -225,7 +225,7 @@ export function registerSandboxTools(registry: ToolRegistry, userId: string, db:
         file_path: z.string().min(1).describe("Path of the file to write"),
         content: z.string().describe("File content to write"),
       })
-      .meta({ category: "orchestration", tier: "free" })
+      .meta({ category: "orchestration", tier: "free", stability: "beta" })
       .handler(async ({ input }) => {
         const { sandbox_id, file_path, content } = input;
 
@@ -300,7 +300,7 @@ export function registerSandboxTools(registry: ToolRegistry, userId: string, db:
           sandbox_id: z.string().min(1).describe("The sandbox ID to destroy"),
         },
       )
-      .meta({ category: "orchestration", tier: "free" })
+      .meta({ category: "orchestration", tier: "free", stability: "beta" })
       .handler(async ({ input }) => {
         const { sandbox_id } = input;
 

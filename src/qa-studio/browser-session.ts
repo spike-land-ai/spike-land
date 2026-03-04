@@ -3,8 +3,10 @@
  *
  * Singleton managing a headless Chromium instance via Playwright.
  * Lazy launch on first tool call, auto-cleanup after 5min idle.
- * Only available in development mode.
+ * Use `setBrowserConfig()` to override headless/slowMo before first launch.
  */
+
+import type { AccessibilityNode, BrowserConfig } from "./types.js";
 
 type PlaywrightBrowser = {
   newPage: () => Promise<PlaywrightPage>;
@@ -28,6 +30,23 @@ type PlaywrightPage = {
   locator: (selector: string) => {
     screenshot: (opts?: { encoding?: "base64" }) => Promise<string | Buffer>;
   };
+  accessibility: {
+    snapshot: (opts?: { interestingOnly?: boolean }) => Promise<AccessibilityNode | null>;
+  };
+  keyboard: {
+    press: (key: string) => Promise<void>;
+    type: (text: string) => Promise<void>;
+  };
+  getByRole: (role: string, opts?: { name?: string | RegExp }) => {
+    click: () => Promise<void>;
+    fill: (text: string) => Promise<void>;
+    selectOption: (value: string) => Promise<string[]>;
+    clear: () => Promise<void>;
+  };
+  mouse: {
+    wheel: (deltaX: number, deltaY: number) => Promise<void>;
+  };
+  viewportSize: () => { width: number; height: number } | null;
 };
 
 interface ConsoleMessage {
@@ -66,6 +85,7 @@ interface TabEntry {
 
 const IDLE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
+let browserConfig: BrowserConfig = { headless: true };
 let browser: PlaywrightBrowser | null = null;
 let launchPromise: Promise<PlaywrightBrowser> | null = null;
 let idleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -73,6 +93,14 @@ let idleTimer: ReturnType<typeof setTimeout> | null = null;
 const tabs = new Map<number, TabEntry>();
 let activeTabIndex = 0;
 let nextTabIndex = 0;
+
+/**
+ * Override browser launch options before first call.
+ * Call this before any `getOrCreateTab()` invocation.
+ */
+export function setBrowserConfig(config: BrowserConfig): void {
+  browserConfig = { ...browserConfig, ...config };
+}
 
 function resetIdleTimer(): void {
   if (idleTimer) clearTimeout(idleTimer);
@@ -82,10 +110,6 @@ function resetIdleTimer(): void {
 }
 
 async function ensureBrowser(): Promise<PlaywrightBrowser> {
-  if (process.env.NODE_ENV !== "development") {
-    throw new Error("Browser session is only available in development mode");
-  }
-
   if (browser && browser.isConnected()) {
     resetIdleTimer();
     return browser;
@@ -97,7 +121,10 @@ async function ensureBrowser(): Promise<PlaywrightBrowser> {
   launchPromise = (async () => {
     try {
       const pw = await import("playwright");
-      const b = await pw.chromium.launch({ headless: true });
+      const b = await pw.chromium.launch({
+        headless: browserConfig.headless ?? true,
+        slowMo: browserConfig.slowMo,
+      });
       browser = b as unknown as PlaywrightBrowser;
       resetIdleTimer();
       return browser;
@@ -223,4 +250,23 @@ export async function cleanup(): Promise<void> {
   }
   nextTabIndex = 0;
   activeTabIndex = 0;
+}
+
+/**
+ * Get the accessibility tree snapshot for the active tab's page.
+ * Returns null if no active tab exists.
+ */
+export async function getPageSnapshot(): Promise<{
+  tree: AccessibilityNode | null;
+  title: string;
+  url: string;
+  page: PlaywrightPage;
+} | null> {
+  const tab = getActiveTab();
+  if (!tab) return null;
+  const { page } = tab;
+  const tree = await page.accessibility.snapshot({ interestingOnly: false });
+  const title = await page.title();
+  const url = page.url();
+  return { tree, title, url, page };
 }

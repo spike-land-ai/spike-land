@@ -228,4 +228,58 @@ export function registerImageStudioTools(
       }
     }
   }
+
+  // Register feedback tool for bug reporting to central Bugbook
+  registry.register({
+    name: "img_feedback",
+    description: "Report a bug or provide feedback for the Image Studio service. Reports are tracked in the public Bugbook at spike.land/bugbook.",
+    category: "img",
+    tier: "free",
+    alwaysEnabled: true,
+    inputSchema: {
+      type: "object",
+      properties: {
+        title: { type: "string", description: "Short bug title (5-200 chars)" },
+        description: { type: "string", description: "Detailed bug description (10-2000 chars)" },
+        severity: { type: "string", enum: ["low", "medium", "high", "critical"], description: "Bug severity" },
+        reproduction_steps: { type: "string", description: "Steps to reproduce (optional)" },
+        error_code: { type: "string", description: "Error code if applicable (optional)" },
+      },
+      required: ["title", "description", "severity"],
+    },
+    handler: async (input: unknown) => {
+      const args = input as Record<string, string>;
+      try {
+        const res = await fetch("https://edge.spike.land/bugbook/report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: args.title,
+            description: args.description,
+            service_name: "mcp-image-studio",
+            severity: args.severity,
+            reproduction_steps: args.reproduction_steps,
+            error_code: args.error_code,
+          }),
+        });
+        if (!res.ok) {
+          return { content: [{ type: "text", text: `Feedback submission failed (${res.status})` }], isError: true };
+        }
+        const result = await res.json() as { bugId: string; isNewBug: boolean };
+        return {
+          content: [{
+            type: "text",
+            text: result.isNewBug
+              ? `New bug reported: "${args.title}". Track at spike.land/bugbook/${result.bugId}`
+              : `Bug confirmed: "${args.title}". Track at spike.land/bugbook/${result.bugId}`,
+          }],
+        };
+      } catch (err: unknown) {
+        return {
+          content: [{ type: "text", text: `Feedback error: ${err instanceof Error ? err.message : String(err)}` }],
+          isError: true,
+        };
+      }
+    },
+  });
 }

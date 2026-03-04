@@ -6,21 +6,12 @@ export function ToolsIndexPage() {
   const { data, isLoading, isError, error } = useMcpTools();
   const [search, setSearch] = useState("");
   
-  // Categorize dynamically based on tool name prefixes (e.g. fs_read -> Filesystem)
   const categorizedTools = useMemo(() => {
     if (!data?.tools) return [];
-    return data.tools.map(tool => {
-      let category = "General";
-      if (tool.name.startsWith("fs_") || tool.name.includes("file")) category = "Filesystem";
-      if (tool.name.startsWith("github_") || tool.name.includes("git")) category = "GitHub";
-      if (tool.name.includes("db_") || tool.name.includes("sql")) category = "Database";
-      if (tool.name.includes("chat") || tool.name.includes("ai")) category = "AI Gateway";
-      if (tool.name.startsWith("auth_")) category = "Authentication";
-      if (tool.name.startsWith("test_")) category = "Testing";
-      if (tool.name.startsWith("bazdmeg_")) category = "Bazdmeg Code Review";
-      
-      return { ...tool, category };
-    });
+    return data.tools.map(tool => ({
+      ...tool,
+      category: tool.category || "General",
+    }));
   }, [data?.tools]);
 
   const categories = ["All", ...Array.from(new Set(categorizedTools.map(t => t.category)))].sort();

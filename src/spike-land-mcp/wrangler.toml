@@ -16,6 +16,10 @@ database_name = "spike-land-mcp"
 database_id = "52b72b0a-c0f8-4d7f-aaec-4f014594d0c1"
 migrations_dir = "db/migrations"
 
+[[services]]
+binding = "SPIKE_EDGE"
+service = "spike-edge"
+
 [vars]
 APP_ENV = "development"
 GA_MEASUREMENT_ID = "G-9WNEM9ZHE7"

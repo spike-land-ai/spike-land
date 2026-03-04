@@ -16,5 +16,6 @@ export type {
   Middleware,
   MiddlewareFn,
   MiddlewareParams,
+  ToolExample,
   ToolMeta,
 } from "./types.js";

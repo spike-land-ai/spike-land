@@ -13,6 +13,7 @@ import type { CallToolResult, ToolAnnotations } from "@modelcontextprotocol/sdk/
 import type { z } from "zod";
 import type { BuiltTool } from "@spike-land-ai/shared/tool-builder";
 import { CATEGORY_DESCRIPTIONS } from "./categories";
+import { optimizeSchema } from "./schema-optimizer";
 import { ToolSearch } from "./search";
 
 // Re-export for consumers
@@ -36,7 +37,7 @@ export function validateSchemaDescriptions(inputSchema: z.ZodRawShape | undefine
 
 export type ToolComplexity = "primitive" | "composed" | "workflow";
 
-export type ToolStability = "stable" | "beta" | "experimental";
+export type ToolStability = "stable" | "beta" | "experimental" | "deprecated";
 
 /**
  * Tool dependency declarations for progressive tool activation.
@@ -54,11 +55,17 @@ export interface ToolExample {
   description: string;
 }
 
+export type EloTier = "free" | "pro" | "elite";
+
+const TIER_RANK: Record<EloTier, number> = { free: 0, pro: 1, elite: 2 };
+
 export interface ToolDefinition {
   name: string;
   description: string;
   category: string;
   tier: "free" | "workspace";
+  /** Minimum ELO tier required to use this tool. Undefined = no gating. */
+  requiredTier?: EloTier | undefined;
   complexity?: ToolComplexity | undefined;
   version?: string | undefined;
   stability?: ToolStability | undefined;
@@ -126,11 +133,16 @@ export class ToolRegistry {
     const version = def.version ?? "1.0.0";
     const stability = def.stability ?? "stable";
 
+    // Optimize inputSchema to reduce token usage in LLM tool selection
+    const optimizedInputSchema = def.inputSchema !== undefined
+      ? optimizeSchema(def.inputSchema) as z.ZodRawShape
+      : undefined;
+
     const registered = this.mcpServer.registerTool(
       def.name,
       {
         description: def.description,
-        ...(def.inputSchema !== undefined ? { inputSchema: def.inputSchema } : {}),
+        ...(optimizedInputSchema !== undefined ? { inputSchema: optimizedInputSchema } : {}),
         ...(def.annotations !== undefined ? { annotations: def.annotations } : {}),
         ...(def.examples !== undefined ? { examples: def.examples } : {}),
         _meta: { category: def.category, tier: def.tier, version, stability },
@@ -162,18 +174,12 @@ export class ToolRegistry {
       ...(built.meta.alwaysEnabled !== undefined
         ? { alwaysEnabled: built.meta.alwaysEnabled }
         : {}),
-      ...((built.meta as Record<string, unknown>).version
-        ? { version: (built.meta as Record<string, unknown>).version as string }
+      ...(built.meta.version ? { version: built.meta.version } : {}),
+      ...(built.meta.stability
+        ? { stability: built.meta.stability as ToolStability }
         : {}),
-      ...((built.meta as Record<string, unknown>).stability
-        ? {
-            stability: (built.meta as Record<string, unknown>).stability as ToolStability,
-          }
-        : {}),
-      ...((built.meta as Record<string, unknown>).examples
-        ? {
-            examples: (built.meta as Record<string, unknown>).examples as ToolExample[],
-          }
+      ...(built.meta.examples
+        ? { examples: built.meta.examples as ToolExample[] }
         : {}),
       inputSchema: built.inputSchema,
       handler: built.handler as unknown as ToolDefinition["handler"],
@@ -324,8 +330,13 @@ export class ToolRegistry {
   /**
    * Call a tool handler directly, bypassing MCP transport.
    * Used by InProcessToolProvider for Docker/production environments.
+   * @param userTier - caller's ELO tier for access gating (optional)
    */
-  async callToolDirect(name: string, input: Record<string, unknown>): Promise<CallToolResult> {
+  async callToolDirect(
+    name: string,
+    input: Record<string, unknown>,
+    userTier?: EloTier,
+  ): Promise<CallToolResult> {
     const tracked = this.tools.get(name);
     if (!tracked) {
       return {
@@ -339,7 +350,53 @@ export class ToolRegistry {
         isError: true,
       };
     }
+
+    // ELO tier gating
+    const required = tracked.definition.requiredTier;
+    if (required && userTier) {
+      if ((TIER_RANK[userTier] ?? 0) < (TIER_RANK[required] ?? 0)) {
+        return {
+          content: [{
+            type: "text",
+            text: `This tool requires ${required} tier (your tier: ${userTier}). Improve your ELO rating to unlock it.`,
+          }],
+          isError: true,
+        };
+      }
+    }
+
     return tracked.definition.handler(input as never);
+  }
+
+  /**
+   * Filter tool definitions by stability tag.
+   * Returns matching ToolDefinitions (without modifying enabled state).
+   */
+  filterByStability(stability: ToolStability): ToolDefinition[] {
+    const results: ToolDefinition[] = [];
+    for (const [, { definition }] of this.tools) {
+      const toolStability = definition.stability ?? "stable";
+      if (toolStability === stability) {
+        results.push(definition);
+      }
+    }
+    return results;
+  }
+
+  /**
+   * Enable all tools matching a given stability tag.
+   * Returns names of newly enabled tools.
+   */
+  enableByStability(stability: ToolStability): string[] {
+    const enabled: string[] = [];
+    for (const [, { definition, registered }] of this.tools) {
+      const toolStability = definition.stability ?? "stable";
+      if (toolStability === stability && !registered.enabled) {
+        registered.enable();
+        enabled.push(definition.name);
+      }
+    }
+    return enabled;
   }
 
   /**

@@ -101,7 +101,7 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
           node_count: z.number().int().min(2).max(10).describe("Number of nodes (2-10)."),
         },
       )
-      .meta({ category: "netsim", tier: "free" })
+      .meta({ category: "netsim", tier: "free", stability: "experimental" })
       .handler(async ({ input }) => {
         const id = generateId();
         const nodes = new Map<string, NetworkNode>();
@@ -156,7 +156,7 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
         latency_ms: z.number().int().min(0).optional().describe("Simulated latency in ms."),
         loss_rate: z.number().min(0).max(1).optional().describe("Packet loss probability 0..1."),
       })
-      .meta({ category: "netsim", tier: "free" })
+      .meta({ category: "netsim", tier: "free", stability: "experimental" })
       .handler(async ({ input }) => {
         const topo = getTopology(input.topology_id, userId);
         const key = linkKey(input.from, input.to);
@@ -179,7 +179,7 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
         topology_id: z.string().min(1).describe("ID of the network topology."),
         node_id: z.string().min(1).describe("Node ID to partition."),
       })
-      .meta({ category: "netsim", tier: "free" })
+      .meta({ category: "netsim", tier: "free", stability: "experimental" })
       .handler(async ({ input }) => {
         const topo = getTopology(input.topology_id, userId);
         const node = topo.nodes.get(input.node_id);
@@ -202,7 +202,7 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
         topology_id: z.string().min(1).describe("ID of the network topology."),
         node_id: z.string().min(1).describe("Node ID to heal."),
       })
-      .meta({ category: "netsim", tier: "free" })
+      .meta({ category: "netsim", tier: "free", stability: "experimental" })
       .handler(async ({ input }) => {
         const topo = getTopology(input.topology_id, userId);
         const node = topo.nodes.get(input.node_id);
@@ -237,7 +237,7 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
           payload: z.string().min(1).describe("Message payload."),
         },
       )
-      .meta({ category: "netsim", tier: "free" })
+      .meta({ category: "netsim", tier: "free", stability: "experimental" })
       .handler(async ({ input }) => {
         const topo = getTopology(input.topology_id, userId);
         if (!topo.nodes.has(input.from)) {
@@ -279,7 +279,7 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
             .describe("Number of rounds (default 1)."),
         },
       )
-      .meta({ category: "netsim", tier: "free" })
+      .meta({ category: "netsim", tier: "free", stability: "experimental" })
       .handler(async ({ input }) => {
         const topo = getTopology(input.topology_id, userId);
         const rounds = input.rounds ?? 1;

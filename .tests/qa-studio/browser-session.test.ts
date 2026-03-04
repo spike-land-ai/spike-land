@@ -7,6 +7,8 @@ const mockPageIsClosed = vi.fn().mockReturnValue(false);
 const mockPageUrl = vi.fn().mockReturnValue("about:blank");
 const mockPageTitle = vi.fn().mockResolvedValue("Blank");
 
+const mockAccessibilitySnapshot = vi.fn().mockResolvedValue({ role: "RootWebArea", name: "Test", children: [] });
+
 function makeMockPage() {
   return {
     goto: vi.fn().mockResolvedValue(null),
@@ -21,6 +23,11 @@ function makeMockPage() {
       screenshot: vi.fn().mockResolvedValue("locator-base64"),
     }),
     on: mockPageOn,
+    accessibility: { snapshot: mockAccessibilitySnapshot },
+    keyboard: { press: vi.fn(), type: vi.fn() },
+    getByRole: vi.fn().mockReturnValue({ click: vi.fn(), fill: vi.fn(), clear: vi.fn(), selectOption: vi.fn() }),
+    mouse: { wheel: vi.fn() },
+    viewportSize: vi.fn().mockReturnValue({ width: 1280, height: 720 }),
   };
 }
 
@@ -37,7 +44,7 @@ vi.mock("playwright", () => ({
 }));
 
 // Import after mocks
-import { cleanup, closeTab, getActiveTab, getOrCreateTab, listTabs } from "../../src/qa-studio/browser-session.js";
+import { cleanup, closeTab, getActiveTab, getOrCreateTab, getPageSnapshot, listTabs, setBrowserConfig } from "../../src/qa-studio/browser-session.js";
 
 // Reset all singleton state and re-configure mocks between tests
 async function resetAll() {
@@ -121,12 +128,20 @@ describe("browser-session", () => {
       expect(events).toContain("requestfinished");
     });
 
-    it("throws when not in development mode", async () => {
+    it("launches browser regardless of NODE_ENV", async () => {
       await cleanup();
       process.env.NODE_ENV = "production";
-      await expect(getOrCreateTab()).rejects.toThrow(
-        "Browser session is only available in development mode",
-      );
+
+      // Re-configure launch mock after cleanup
+      mockChromiumLaunch.mockResolvedValue({
+        newPage: mockBrowserNewPage,
+        close: mockBrowserClose,
+        isConnected: mockBrowserIsConnected,
+      });
+
+      const result = await getOrCreateTab();
+      expect(result.page).toBeDefined();
+      expect(mockChromiumLaunch).toHaveBeenCalled();
     });
 
     it("increments tab index for each new tab", async () => {

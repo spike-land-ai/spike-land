@@ -11,6 +11,9 @@ import { analytics } from "./routes/analytics.js";
 import { quizBadge } from "./routes/quiz-badge.js";
 import { version } from "./routes/version.js";
 import { blog } from "./routes/blog.js";
+import { errors } from "./routes/errors.js";
+import { bugbook } from "./routes/bugbook.js";
+import { blogComments } from "./routes/blog-comments.js";
 import { spa } from "./routes/spa.js";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -34,9 +37,13 @@ app.use("*", async (c, next) => {
 // Security headers middleware
 app.use("*", async (c, next) => {
   await next();
+  const isLive = c.req.path.startsWith("/live/");
+
   c.res.headers.set("X-Content-Type-Options", "nosniff");
   c.res.headers.set("X-XSS-Protection", "1; mode=block");
-  c.res.headers.set("X-Frame-Options", "DENY");
+  if (!isLive) {
+    c.res.headers.set("X-Frame-Options", "DENY");
+  }
   c.res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   c.res.headers.set(
     "Strict-Transport-Security",
@@ -52,11 +59,11 @@ app.use("*", async (c, next) => {
       "font-src 'self' data:",
       "connect-src 'self' https://edge.spike.land https://auth-mcp.spike.land https://mcp.spike.land wss://spike.land blob: data:",
       "worker-src 'self' blob:",
-      "frame-src 'self'",
+      "frame-src 'self' https://edge.spike.land",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
-      "frame-ancestors 'none'",
+      isLive ? "frame-ancestors https://spike.land" : "frame-ancestors 'none'",
       "upgrade-insecure-requests",
     ].join("; "),
   );
@@ -72,6 +79,11 @@ app.delete("/r2/*", authMiddleware);
 // Error handling middleware
 app.onError((err, c) => {
   console.error(`[spike-edge] ${c.req.method} ${c.req.path}:`, err.message);
+  // Fire-and-forget error log insertion
+  const logWork = c.env.DB.prepare(
+    "INSERT INTO error_logs (service_name, error_code, message, stack_trace, severity) VALUES (?, ?, ?, ?, ?)",
+  ).bind("spike-edge", "INTERNAL_ERROR", err.message, err.stack ?? null, "error").run().catch(() => {});
+  try { c.executionCtx.waitUntil(logWork); } catch { /* no ExecutionContext in tests */ }
   return c.json({ error: "Internal Server Error" }, 500);
 });
 
@@ -84,6 +96,36 @@ app.route("/", analytics);
 app.route("/", quizBadge);
 app.route("/", version);
 app.route("/", blog);
+app.route("/", errors);
+app.route("/", bugbook);
+app.route("/", blogComments);
+
+// MCP tools listing proxy (public, no auth required)
+app.get("/mcp/tools", async (c) => {
+  const url = new URL("https://mcp.spike.land/tools");
+  const response = await c.env.MCP_SERVICE.fetch(new Request(url.toString()));
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: new Headers(response.headers),
+  });
+});
+
+// MCP JSON-RPC proxy via service binding (requires auth)
+app.post("/mcp", async (c) => {
+  const url = new URL(c.req.url);
+  url.hostname = "mcp.spike.land";
+  url.port = "";
+  url.protocol = "https:";
+
+  const newRequest = new Request(url.toString(), c.req.raw);
+  const response = await c.env.MCP_SERVICE.fetch(newRequest);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: new Headers(response.headers),
+  });
+});
 
 // Better Auth proxy via service binding (sub-1ms internal call)
 app.all("/api/auth/*", async (c) => {

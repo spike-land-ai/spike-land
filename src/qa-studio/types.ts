@@ -75,3 +75,42 @@ export interface QaCoverageResult {
 export function isActionError(result: unknown): result is QaActionError {
   return typeof result === "object" && result !== null && "error" in result;
 }
+
+// ─── Web Reader Types ────────────────────────────────────────────────────────
+
+export interface AccessibilityNode {
+  role: string;
+  name?: string;
+  value?: string;
+  description?: string;
+  checked?: boolean | "mixed";
+  disabled?: boolean;
+  expanded?: boolean;
+  selected?: boolean;
+  pressed?: boolean | "mixed";
+  level?: number;
+  children?: AccessibilityNode[];
+}
+
+export interface NarratedElement {
+  ref?: number;
+  role: string;
+  name?: string;
+  value?: string;
+  states: string[];
+  level?: number;
+  depth: number;
+}
+
+export interface NarrationResult {
+  title: string;
+  url: string;
+  text: string;
+  elements: NarratedElement[];
+  refCount: number;
+}
+
+export interface BrowserConfig {
+  headless?: boolean;
+  slowMo?: number;
+}

@@ -3,7 +3,7 @@ import { BlogListView } from "./BlogList";
 
 export function LandingPage() {
   return (
-    <main className="bg-white min-h-[100dvh] text-zinc-900 font-sans selection:bg-zinc-900 selection:text-white">
+    <main className="text-zinc-900 font-sans selection:bg-zinc-900 selection:text-white">
       <LandingHero />
       
       <section 
