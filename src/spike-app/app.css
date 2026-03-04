@@ -5,5 +5,49 @@
 @theme {
   --font-sans: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-card: var(--card-bg);
+  --color-card-foreground: var(--card-fg);
+  --color-muted: var(--muted-bg);
+  --color-muted-foreground: var(--muted-fg);
+  --color-border: var(--border-color);
+  --color-primary: var(--primary-color);
+  --color-primary-foreground: var(--primary-fg);
+  --color-accent: var(--accent-bg);
+  --color-accent-foreground: var(--accent-fg);
+  --color-destructive: var(--destructive-color);
 }
 
+/* Light theme (default) */
+:root {
+  --bg: #f9fafb;
+  --fg: #111827;
+  --card-bg: #ffffff;
+  --card-fg: #111827;
+  --muted-bg: #f3f4f6;
+  --muted-fg: #6b7280;
+  --border-color: #e5e7eb;
+  --primary-color: #2563eb;
+  --primary-fg: #ffffff;
+  --accent-bg: #f0f9ff;
+  --accent-fg: #1e40af;
+  --destructive-color: #ef4444;
+}
+
+/* Dark theme */
+.dark {
+  --bg: #09090b;
+  --fg: #fafafa;
+  --card-bg: #18181b;
+  --card-fg: #fafafa;
+  --muted-bg: #27272a;
+  --muted-fg: #a1a1aa;
+  --border-color: #3f3f46;
+  --primary-color: #3b82f6;
+  --primary-fg: #ffffff;
+  --accent-bg: #1e293b;
+  --accent-fg: #93c5fd;
+  --destructive-color: #ef4444;
+}

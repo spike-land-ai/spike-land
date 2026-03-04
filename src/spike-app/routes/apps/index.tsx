@@ -52,7 +52,7 @@ export function AppsIndexPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">MCP Tools</h1>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Model Context Protocol tools you can use via terminal or API
           </p>
         </div>

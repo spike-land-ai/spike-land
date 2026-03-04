@@ -663,37 +663,37 @@
     "testHash": "68091f82aa47c7dd8732472af825c2a7e2a9a1b8e75738dec07611afb6aebfd9",
     "sourceHash": "e0d2f47a570f4710a284c735f24b6d04ea8a574ab491d693f96bc89aea728148",
     "coverage": 0,
-    "success": false
+    "success": true
   },
   ".tests/mcp-image-studio/tools/pipeline.test.ts": {
     "testHash": "306b143974e5f69a466c899707c3188c50c8cdce9edb8a8cb5f0ba3d9dedd90c",
     "sourceHash": "4465836f77b5e93fa4ffaa86b4fda6dd5d2100e1255708f6a74bcfd2321e329a",
     "coverage": 0,
-    "success": false
+    "success": true
   },
   ".tests/mcp-image-studio/tools/pipeline-save.test.ts": {
     "testHash": "1cbb0acdae0798492c1392574bb2795af295afaffbdab9432f9378e7636c5ca3",
     "sourceHash": "f10d5ba5728028ba393a5af8f868f00dac60ae41b6292f563cd7c78ec8bd07b5",
     "coverage": 0,
-    "success": false
+    "success": true
   },
   ".tests/mcp-image-studio/tools/pipeline-list.test.ts": {
     "testHash": "92173528efc0d49b7cc959bc70e7082f349d3bfc154e1327cce6f0bea7645bd5",
     "sourceHash": "76e0da41c4dcbb447e934728e3fb60e601fda597b303fc55b62ee34c510e89f2",
     "coverage": 0,
-    "success": false
+    "success": true
   },
   ".tests/mcp-image-studio/tools/pipeline-delete.test.ts": {
     "testHash": "16d05ebc3b437f50b53da72e96a9606410ee9463b61b2e568350639934af3979",
     "sourceHash": "95b15f9922be1339199cca8de500258ece417c43ee9a397a6f4cd0b762520c65",
     "coverage": 0,
-    "success": false
+    "success": true
   },
   ".tests/mcp-image-studio/tools/list.test.ts": {
     "testHash": "1c3868be5a97d67d5a4948c2b3f88197c70160f74d1cc80f731e7010a4c70a55",
     "sourceHash": "d0d8eb646e29c1a6c50102b40cfe7549efd4a29268182fedaacf97930c482710",
     "coverage": 0,
-    "success": false
+    "success": true
   },
   ".tests/mcp-image-studio/tools/job-status.test.ts": {
     "testHash": "e1d7c4d37c209b239c048d510def11c57eacb849d34723657cc4e04f2f94f089",

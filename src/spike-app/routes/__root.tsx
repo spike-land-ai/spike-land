@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { LoginButton } from "@/components/LoginButton";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 const DEFAULT_TITLE = "spike.land - AI Development Platform";
 const DEFAULT_DESCRIPTION =
@@ -68,7 +69,7 @@ const navItems = [
 export function RootLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   useAnalytics();
-  useDarkMode();
+  const { theme, setTheme } = useDarkMode();
 
   const location = useRouterState({ select: (s) => s.location });
   const { pathname, searchStr } = location;
@@ -122,7 +123,7 @@ export function RootLayout() {
   }, [pathname, searchStr]);
 
   return (
-    <div className="flex h-screen bg-gray-50 text-gray-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <div className="flex h-screen bg-background text-foreground">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -133,34 +134,35 @@ export function RootLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-white dark:bg-zinc-900 shadow-lg transition-transform lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-card shadow-lg transition-transform lg:static lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } dark:border-r dark:border-zinc-800`}
+        } border-r border-border`}
       >
-        <div className="flex h-16 items-center gap-2 border-b dark:border-zinc-800 px-6">
+        <div className="flex h-16 items-center justify-between border-b border-border px-6">
           <Link to="/" className="text-xl font-bold hover:opacity-80">spike.land</Link>
+          <ThemeSwitcher theme={theme} setTheme={setTheme} />
         </div>
         <nav className="flex flex-col gap-1 p-4">
           {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
-              className="rounded-lg px-4 py-2 text-sm font-medium hover:bg-gray-100 dark:hover:bg-zinc-800 [&.active]:bg-blue-50 dark:[&.active]:bg-blue-900/30 [&.active]:text-blue-700 dark:[&.active]:text-blue-400"
+              className="rounded-lg px-4 py-2 text-sm font-medium hover:bg-muted [&.active]:bg-accent [&.active]:text-primary"
               onClick={() => setSidebarOpen(false)}
             >
               {item.label}
             </Link>
           ))}
         </nav>
-        <div className="mt-auto border-t dark:border-zinc-800 p-4">
+        <div className="mt-auto border-t border-border p-4">
           <LoginButton />
         </div>
       </aside>
 
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 items-center border-b bg-white dark:bg-zinc-900 dark:border-zinc-800 px-6 lg:hidden">
-          <button onClick={() => setSidebarOpen(true)} className="rounded p-2 hover:bg-gray-100 dark:hover:bg-zinc-800" aria-label="Open navigation menu">
+        <header className="flex h-16 items-center border-b border-border bg-card px-6 lg:hidden">
+          <button onClick={() => setSidebarOpen(true)} className="rounded p-2 hover:bg-muted" aria-label="Open navigation menu">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path
                 strokeLinecap="round"
@@ -171,7 +173,10 @@ export function RootLayout() {
             </svg>
           </button>
           <Link to="/" className="ml-4 flex-1 text-lg font-bold hover:opacity-80">spike.land</Link>
-          <LoginButton />
+          <ThemeSwitcher theme={theme} setTheme={setTheme} />
+          <div className="ml-2">
+            <LoginButton />
+          </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />

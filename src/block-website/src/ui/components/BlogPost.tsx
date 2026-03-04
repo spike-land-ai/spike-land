@@ -103,7 +103,7 @@ export function BlogPostView({ slug, linkComponent }: { slug: string; linkCompon
 
   if (loading) {
     return (
-      <div className="max-w-5xl mx-auto py-16 px-4 sm:px-6 lg:px-8 animate-pulse">
+      <div className="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8 animate-pulse">
         <div className="text-center mb-12">
           <div className="h-4 bg-muted rounded w-1/4 mx-auto mb-6" />
           <div className="h-12 bg-muted rounded w-3/4 mx-auto mb-6" />
@@ -121,7 +121,7 @@ export function BlogPostView({ slug, linkComponent }: { slug: string; linkCompon
   if (error || !post) {
     const BackLink = linkComponent;
     return (
-      <div className="max-w-5xl mx-auto py-20 px-4 text-center">
+      <div className="max-w-3xl mx-auto py-20 px-4 text-center">
         <h1 className="text-4xl font-display font-bold text-foreground">Post not found</h1>
         <p className="mt-6 text-xl text-muted-foreground">The post you are looking for does not exist.</p>
         {BackLink ? (
@@ -138,8 +138,8 @@ export function BlogPostView({ slug, linkComponent }: { slug: string; linkCompon
   }
 
   return (
-    <article className="max-w-5xl mx-auto py-16 px-4 sm:px-6 lg:px-8 font-sans">
-      <header className="mb-16 text-center border-b border-border pb-12">
+    <article className="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8 font-sans">
+      <header className="mb-10 text-center border-b border-border pb-8">
         <div className="flex justify-center items-center gap-3 text-sm text-muted-foreground mb-6 font-medium tracking-wide uppercase">
           <time dateTime={post.date}>{new Date(post.date).toLocaleDateString()}</time>
           {post.category && (
@@ -149,19 +149,19 @@ export function BlogPostView({ slug, linkComponent }: { slug: string; linkCompon
             </>
           )}
         </div>
-        <h1 className="text-5xl sm:text-7xl font-display font-extrabold text-foreground tracking-tight leading-tight mb-8 drop-shadow-sm">
+        <h1 className="text-3xl sm:text-5xl font-display font-extrabold text-foreground tracking-tight leading-tight mb-6 drop-shadow-sm">
           {post.title}
         </h1>
         {post.description && (
-          <p className="text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
             {post.description}
           </p>
         )}
       </header>
 
-      <div className="prose prose-xl dark:prose-invert max-w-none
+      <div className="prose prose-lg dark:prose-invert max-w-none
         prose-headings:font-display prose-headings:font-bold prose-headings:text-foreground prose-headings:tracking-tight
-        prose-h1:text-5xl prose-h2:text-4xl prose-h3:text-3xl
+        prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
         prose-p:text-muted-foreground prose-p:leading-loose prose-p:font-sans
         prose-a:text-primary prose-a:no-underline hover:prose-a:underline hover:prose-a:opacity-80
         prose-strong:text-foreground prose-strong:font-semibold

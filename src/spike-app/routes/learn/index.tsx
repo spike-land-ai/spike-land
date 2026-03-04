@@ -80,21 +80,21 @@ export function LearnIndexPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Learn & Verify</h1>
-        <p className="mt-2 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-foreground">Learn & Verify</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           Paste a URL or content, read the article, then prove your understanding through a quiz.
           Earn a shareable badge when you master all concepts.
         </p>
       </div>
 
       {/* Input mode tabs */}
-      <div className="flex gap-1 rounded-lg border bg-gray-50 p-1">
+      <div className="flex gap-1 rounded-lg border border-border bg-muted p-1">
         <button
           onClick={() => setInputMode("url")}
           className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
             inputMode === "url"
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           URL
@@ -103,8 +103,8 @@ export function LearnIndexPage() {
           onClick={() => setInputMode("text")}
           className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
             inputMode === "text"
-              ? "bg-white text-gray-900 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+              ? "bg-card text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           Paste Text
@@ -112,41 +112,41 @@ export function LearnIndexPage() {
       </div>
 
       {/* Content input */}
-      <div className="rounded-xl border bg-white p-6 shadow-sm">
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
         {inputMode === "url" ? (
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">Content URL</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">Content URL</label>
             <input
               type="url"
               value={contentUrl}
               onChange={(e) => setContentUrl(e.target.value)}
               placeholder="https://en.wikipedia.org/wiki/..."
-              className="w-full rounded-lg border px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
         ) : (
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">Content Text</label>
+            <label className="mb-2 block text-sm font-medium text-foreground">Content Text</label>
             <textarea
               value={contentText}
               onChange={(e) => setContentText(e.target.value)}
               placeholder="Paste the article or content you want to learn from..."
               rows={10}
-              className="w-full resize-y rounded-lg border px-4 py-3 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full resize-y rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <p className="mt-1 text-xs text-gray-400">{contentText.length} characters</p>
+            <p className="mt-1 text-xs text-muted-foreground">{contentText.length} characters</p>
           </div>
         )}
 
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{error}</p>}
 
         <button
           onClick={handleStart}
           disabled={loading}
           className={`mt-4 w-full rounded-lg px-6 py-3 text-sm font-semibold transition-colors ${
             loading
-              ? "cursor-not-allowed bg-gray-200 text-gray-400"
-              : "bg-blue-600 text-white hover:bg-blue-700"
+              ? "cursor-not-allowed bg-muted text-muted-foreground"
+              : "bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
           }`}
         >
           {loading ? "Creating Quiz..." : "Start Quiz"}
@@ -154,31 +154,31 @@ export function LearnIndexPage() {
       </div>
 
       {/* How it works */}
-      <div className="rounded-xl border bg-gray-50 p-6">
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">
+      <div className="rounded-xl border border-border bg-muted/50 p-6">
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           How it works
         </h3>
-        <ol className="space-y-2 text-sm text-gray-600">
+        <ol className="space-y-2 text-sm text-muted-foreground">
           <li className="flex gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-xs font-bold text-blue-700 dark:text-blue-400">
               1
             </span>
             <span>Paste a URL or content to learn from</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-xs font-bold text-blue-700 dark:text-blue-400">
               2
             </span>
             <span>Read the generated article summary</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-xs font-bold text-blue-700 dark:text-blue-400">
               3
             </span>
             <span>Answer quiz rounds (3 questions each) to prove understanding</span>
           </li>
           <li className="flex gap-3">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-xs font-bold text-blue-700 dark:text-blue-400">
               4
             </span>
             <span>Master all concepts to earn a shareable badge</span>
