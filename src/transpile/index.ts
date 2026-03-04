@@ -61,19 +61,42 @@ const handleGetRequest = async (codeSpace: string, origin: string) => {
   }
 };
 
-const handlePostRequest = async (request: Request) => {
-  try {
-    const respText = await initAndTransform(
-      await request.text(),
-      request.headers.get("TR_ORIGIN") ?? "",
-    );
+async function hashCode(code: string): Promise<string> {
+  const data = new TextEncoder().encode(code);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
+}
 
-    return new Response(respText, {
+const handlePostRequest = async (request: Request, ctx?: ExecutionContext) => {
+  try {
+    const code = await request.text();
+    const origin = request.headers.get("TR_ORIGIN") ?? "";
+
+    // Content-addressed cache: same input always produces same output
+    const hash = await hashCode(code + origin);
+    const cacheKey = new Request(`https://transpile.internal/${hash}`, { method: "GET" });
+    const cache = caches.default;
+
+    const cached = await cache.match(cacheKey);
+    if (cached) return cached;
+
+    const respText = await initAndTransform(code, origin);
+
+    const response = new Response(respText, {
       headers: {
         ...getCorsHeaders(request.url),
         "Content-Type": "application/javascript",
+        "Cache-Control": "public, max-age=86400, immutable",
       },
     });
+
+    // Cache in background — deterministic output, safe to cache for 24h
+    try {
+      ctx?.waitUntil(cache.put(cacheKey, response.clone()));
+    } catch { /* waitUntil not available outside worker context */ }
+
+    return response;
   } catch (e) {
     const error = e instanceof Error ? e : new Error(String(e));
     return new Response(error.message || "Unknown error", { status: 500 });
@@ -81,7 +104,7 @@ const handlePostRequest = async (request: Request) => {
 };
 
 export default {
-  async fetch(request: Request) {
+  async fetch(request: Request, _env: unknown, ctx: ExecutionContext) {
     const url = new URL(request.url);
     const params = url.searchParams;
     const codeSpace = params.get("codeSpace") || "empty";
@@ -93,7 +116,7 @@ export default {
     }
 
     if (request.method === "POST") {
-      return handlePostRequest(request);
+      return handlePostRequest(request, ctx);
     }
 
     return new Response("Method not allowed. Try POST or GET.", {

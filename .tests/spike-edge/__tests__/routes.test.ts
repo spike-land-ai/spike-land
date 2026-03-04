@@ -60,6 +60,7 @@ function makeR2Object(content: string, contentType = "text/plain") {
     writeHttpMetadata: (h: Headers) => {
       h.set("content-type", contentType);
     },
+    text: () => Promise.resolve(content),
   };
 }
 
@@ -120,7 +121,7 @@ describe("r2 route — GET", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("etag")).toBe('"abc123"');
     expect(res.headers.get("content-type")).toBe("text/plain");
-    expect(res.headers.get("cache-control")).toBe("public, max-age=3600");
+    expect(res.headers.get("cache-control")).toBe("public, max-age=3600, stale-while-revalidate=3600");
   });
 
   it("handles nested key paths correctly", async () => {
@@ -796,8 +797,8 @@ describe("spa route", () => {
 
     const res = await app.request("/assets/styles.css", {}, env);
     expect(res.status).toBe(200);
-    // Non-hashed asset gets standard cache-control
-    expect(res.headers.get("cache-control")).toBe("public, max-age=3600");
+    // Non-hashed asset gets standard cache-control with stale-while-revalidate
+    expect(res.headers.get("cache-control")).toBe("public, max-age=3600, stale-while-revalidate=3600");
   });
 
   it("serves hashed asset with immutable cache headers", async () => {

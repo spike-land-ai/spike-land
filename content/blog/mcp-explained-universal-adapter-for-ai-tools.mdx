@@ -9,18 +9,16 @@ tags: ["mcp", "ai", "tools", "resources", "prompts", "protocol", "developer-tool
 featured: true
 ---
 
-{/* TL;DR Box */}
-<div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 mb-8">
-  <h3 className="text-lg font-semibold mb-3 text-slate-200">TL;DR</h3>
-  <ul className="space-y-2 text-slate-300">
-    <li>MCP has three primitives: **Tools** (actions), **Resources** (addressable content), and **Prompts** (reusable templates). Most implementations — including ours — only use Tools so far.</li>
-    <li>It is a **presentation layer**, not just a data transport. MCP defines how AI discovers, understands, and interacts with capabilities — not just how it shuttles JSON.</li>
-    <li>The full cycle: discover capabilities → call with typed params → get narrative, structured responses back.</li>
-    <li>**The context window problem:** an LLM presented with hundreds of tool descriptions wastes context parsing tools it will never use. Smaller, relevant toolsets mean sharper reasoning and lower cost.</li>
-    <li>spike-cli is an MCP multiplexer — one shell connecting spike-land (<ToolCount /> tools), vitest, and filesystem servers, all namespaced. **Lazy toolset loading** means agents see only the tools they request. Today that is 100% Tools. Resources and Prompts are next.</li>
-    <li>Try it: `npx @spike-land-ai/spike-cli shell`</li>
-  </ul>
-</div>
+<Tldr>
+
+- MCP has three primitives: **Tools** (actions), **Resources** (addressable content), and **Prompts** (reusable templates). Most implementations — including ours — only use Tools so far.
+- It is a **presentation layer**, not just a data transport. MCP defines how AI discovers, understands, and interacts with capabilities — not just how it shuttles JSON.
+- The full cycle: discover capabilities → call with typed params → get narrative, structured responses back.
+- **The context window problem:** an LLM presented with hundreds of tool descriptions wastes context parsing tools it will never use. Smaller, relevant toolsets mean sharper reasoning and lower cost.
+- spike-cli is an MCP multiplexer — one shell connecting spike-land (<ToolCount /> tools), vitest, and filesystem servers, all namespaced. **Lazy toolset loading** means agents see only the tools they request. Today that is 100% Tools. Resources and Prompts are next.
+- Try it: `npx @spike-land-ai/spike-cli shell`
+
+</Tldr>
 
 ## Connecting AI to Tools Shouldn't Require a Custom Integration Every Time
 

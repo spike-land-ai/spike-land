@@ -258,7 +258,7 @@ async function handlePublicRequest(codeSpace: string, path: string[], request: R
       const headers = new Headers();
       object.writeHttpMetadata(headers);
       headers.set("etag", object.httpEtag);
-      headers.set("Cache-Control", "public, max-age=3600"); // Cache for 1 hour
+      headers.set("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
 
       const reqOrigin = request.headers.get("Origin") || "";
       const isAllowed = reqOrigin.endsWith(".spike.land") || reqOrigin === "https://spike.land";

@@ -1,0 +1,65 @@
+{
+  "name": "@spike-land-ai/spike-cli",
+  "version": "0.1.2",
+  "description": "MCP multiplexer CLI with lazy toolset loading — aggregate MCP servers, load tool definitions on demand, keep AI context windows focused",
+  "type": "module",
+  "bin": {
+    "spike": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "prepack": "tsup cli.ts index.ts --format esm,cjs --dts --clean",
+    "build": "tsup cli.ts index.ts --format esm,cjs --dts --clean",
+    "dev": "tsx cli.ts",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "eslint --quiet .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.78.0",
+    "@google/genai": "^1.43.0",
+    "@modelcontextprotocol/sdk": "1.27.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "commander": "14.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "17.3.1",
+    "express": "^5.2.1",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.30.0",
+    "@types/node": "25.3.3",
+    "@vitest/coverage-v8": "4.0.18",
+    "eslint": "10.0.2",
+    "tsup": "8.5.1",
+    "tsx": "4.21.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.56.1",
+    "vitest": "4.0.18"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "source": "./index.ts"
+}

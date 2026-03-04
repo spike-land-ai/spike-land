@@ -11,15 +11,15 @@ featured: true
 
 ![The Architecture of Scale: AI Agents Build Their Own Tools — from 42 obsolete tools to autonomous composition](/blog/the-architecture-of-scale-building-tools/hero.jpeg)
 
-<Callout type="info">
-**TL;DR**
+<Tldr>
 
 - Google's Nano Banana 2 made my 42 image tools obsolete overnight — I had to rebuild, not patch
 - The old `ToolBuilder` class used `as unknown as` casts to track context through middleware — it worked, but agents could not safely extend it
 - I extracted a tRPC-style immutable builder (`@spike-land-ai/shared/tool-builder`) with phantom-branded middleware that carries context types without runtime cost
 - The `(input, ctx)` handler signature mirrors Cloudflare Workers and tRPC — no globals, pure functions, trivially testable
 - The result: autonomous agents can now write, test, and deploy new tools without touching framework code
-</Callout>
+
+</Tldr>
 
 ## The Catalyst: Nano Banana 2
 

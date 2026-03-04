@@ -1,5 +1,5 @@
 # spike-land-ai Central Package Manifest
-# All packages except spike.land (legacy, stays in packages/)
+# Package configs live in packages/, TypeScript source in src/.
 # Used by MCP tools for build, publish, deploy, and mirror operations.
 
 defaults:
@@ -9,32 +9,6 @@ defaults:
   type: module
 
 packages:
-  # ─── Shared Config ──────────────────────────────────────────────────────────
-  eslint-config:
-    kind: config
-    version: 3.0.0
-    description: Shared ESLint flat config for @spike-land-ai packages
-    entry: index.mjs
-    exports:
-      ".": ./index.mjs
-      "./react": ./react.mjs
-    publish:
-      registries: [github, npm]
-    mirror: spike-land-ai/eslint-config
-
-  tsconfig:
-    kind: config
-    version: 3.0.0
-    description: Shared TypeScript config presets
-    exports:
-      "./tsconfig.base.json": ./tsconfig.base.json
-      "./tsconfig.mcp.json": ./tsconfig.mcp.json
-      "./tsconfig.bundler.json": ./tsconfig.bundler.json
-      "./tsconfig.worker.json": ./tsconfig.worker.json
-    publish:
-      registries: [github, npm]
-    mirror: spike-land-ai/tsconfig
-
   # ─── Libraries ──────────────────────────────────────────────────────────────
   block-website:
     kind: library

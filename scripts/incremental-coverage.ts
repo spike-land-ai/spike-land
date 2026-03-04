@@ -12,15 +12,20 @@ const CACHE_PATH = "incremental-coverage.json";
 const REPORT_PATH = "docs/INCREMENTAL_COVERAGE_STATUS.md";
 
 async function main() {
-  const testFiles = await glob('.tests/**/*.test.ts');
+  const allTestFiles = await glob('.tests/**/*.test.ts');
   const cache = await loadCache(CACHE_PATH);
+  
+  // Group tests by their target source file
+  const sourceToTests: Record<string, string[]> = {};
+  for (const testFile of allTestFiles) {
+    const srcFile = mapTestToSource(testFile);
+    if (!sourceToTests[srcFile]) sourceToTests[srcFile] = [];
+    sourceToTests[srcFile].push(testFile);
+  }
+
   const results = [];
 
-  console.log(`Checking ${testFiles.length} test files...`);
-
-  for (const testFilePath of testFiles) {
-    const srcFilePath = mapTestToSource(testFilePath);
-    
+  for (const [srcFilePath, testFiles] of Object.entries(sourceToTests)) {
     // Check if source exists
     try {
       await fs.access(srcFilePath);
@@ -28,36 +33,38 @@ async function main() {
       continue; // Skip if source file doesn't exist
     }
 
-    const [testHash, srcHash] = await Promise.all([
-      getFileHash(testFilePath),
-      getFileHash(srcFilePath),
-    ]);
+    const srcHash = await getFileHash(srcFilePath);
+    const testHashes = await Promise.all(testFiles.map(f => getFileHash(f)));
+    const combinedTestHash = testHashes.join(',');
 
-    const existing = cache[testFilePath];
+    const existing = cache[srcFilePath];
     let coverage = 0;
     let success = false;
 
-    if (existing && existing.testHash === testHash && existing.sourceHash === srcHash && existing.success) {
+    if (existing && existing.sourceHash === srcHash && (existing as any).combinedTestHash === combinedTestHash && existing.success) {
       coverage = existing.coverage;
       success = existing.success;
-      console.log(`[CACHED] ${testFilePath}: ${coverage}%`);
+      console.log(`[CACHED] ${srcFilePath}: ${coverage}%`);
     } else {
-      console.log(`[RUNNING] ${testFilePath}...`);
-      const result = await runVitestWithCoverage(testFilePath, srcFilePath);
+      console.log(`[RUNNING] ${srcFilePath} (via ${testFiles.length} tests: ${testFiles.join(', ')})...`);
+      // Run all tests for this source combined
+      const testPattern = testFiles.join(' ');
+      const result = await runVitestWithCoverage(testPattern, srcFilePath);
       coverage = result.coverage;
       success = result.success;
       
-      cache[testFilePath] = {
-        testHash,
+      cache[srcFilePath] = {
         sourceHash: srcHash,
+        testHash: '', // legacy
+        combinedTestHash,
         coverage,
         success,
-      };
+      } as any;
       await saveCache(CACHE_PATH, cache);
-      console.log(`[RESULT] ${testFilePath}: ${coverage}% ${success ? "PASSED" : "FAILED"}`);
+      console.log(`[RESULT] ${srcFilePath}: ${coverage}% ${success ? "PASSED" : "FAILED"}`);
     }
 
-    results.push({ testFilePath, srcFilePath, coverage, success });
+    results.push({ testFiles, srcFilePath, coverage, success });
   }
 
   // Generate report
@@ -67,12 +74,12 @@ async function main() {
   let report = `# Incremental Coverage Report\n\n`;
   report += `## 100% Coverage ✅ (${fullyCovered.length})\n\n`;
   fullyCovered.forEach(r => {
-    report += `- [ ] ${r.srcFilePath} (via ${r.testFilePath})\n`;
+    report += `- [ ] ${r.srcFilePath} (via ${r.testFiles.join(', ')})\n`;
   });
 
   report += `\n## Progressing 🚧 (${others.length})\n\n`;
   others.sort((a, b) => b.coverage - a.coverage).forEach(r => {
-    report += `- [ ] ${r.srcFilePath}: ${r.coverage}% (via ${r.testFilePath})${!r.success ? " ❌" : ""}\n`;
+    report += `- [ ] ${r.srcFilePath}: ${r.coverage}% (via ${r.testFiles.join(', ')})${!r.success ? " ❌" : ""}\n`;
   });
 
   await fs.writeFile(REPORT_PATH, report);

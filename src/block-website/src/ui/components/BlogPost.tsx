@@ -61,9 +61,24 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
   paradigmguilttimeline: lazyDemo(interactiveImport, "ParadigmGuiltTimeline"),
   effortinversiondemo: lazyDemo(interactiveImport, "EffortInversionDemo"),
   contextlayerbuilderdemo: lazyDemo(interactiveImport, "ContextLayerBuilderDemo"),
+  whisper: lazyDemo(interactiveImport, "Whisper"),
+  crescendo: lazyDemo(interactiveImport, "Crescendo"),
+  scrollweight: lazyDemo(interactiveImport, "ScrollWeight"),
+  typereveal: lazyDemo(interactiveImport, "TypeReveal"),
+  glitchtext: lazyDemo(interactiveImport, "GlitchText"),
+  tldr: ({ children, title }: { children?: React.ReactNode; title?: string }) => (
+    <div className="bg-muted/50 border border-border rounded-xl p-6 mb-8">
+      <h3 className="text-lg font-semibold mb-3 text-foreground">{title ?? "TL;DR"}</h3>
+      <div className="text-muted-foreground space-y-2 [&>ul]:space-y-2 [&>ul]:list-none [&>ul]:pl-0 [&>p]:leading-relaxed">
+        {children}
+      </div>
+    </div>
+  ),
   callout: ({ children, type }: { children?: React.ReactNode; type?: string }) => (
     <div className={`p-4 my-6 rounded-xl border ${
       type === 'info' ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800 text-blue-900 dark:text-blue-100' :
+      type === 'success' ? 'bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-800 text-green-900 dark:text-green-100' :
+      type === 'warning' ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/30 dark:border-amber-800 text-amber-900 dark:text-amber-100' :
       'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700'
     }`}>
       {children}

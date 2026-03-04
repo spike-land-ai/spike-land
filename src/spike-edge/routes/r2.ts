@@ -1,16 +1,24 @@
 import { Hono } from "hono";
 import type { Env } from "../env.js";
 import { getClientId, sendGA4Events } from "../lib/ga4.js";
+import { safeCtx, withEdgeCache } from "../lib/edge-cache.js";
 
 const r2 = new Hono<{ Bindings: Env }>();
 
 r2.get("/r2/:key{.+}", async (c) => {
   const key = c.req.param("key");
-  const object = await c.env.R2.get(key);
 
-  if (!object) {
-    return c.json({ error: "Not found" }, 404);
-  }
+  const cached = await withEdgeCache(c.req.raw, safeCtx(c), async () => {
+    const object = await c.env.R2.get(key);
+    if (!object) return null;
+
+    const headers = new Headers();
+    object.writeHttpMetadata(headers);
+    headers.set("etag", object.httpEtag);
+    return new Response(object.body, { headers });
+  }, { ttl: 3600, swr: 3600 });
+
+  if (!cached) return c.json({ error: "Not found" }, 404);
 
   try {
     c.executionCtx.waitUntil(
@@ -23,12 +31,7 @@ r2.get("/r2/:key{.+}", async (c) => {
     );
   } catch { /* no ExecutionContext in test environment */ }
 
-  const headers = new Headers();
-  object.writeHttpMetadata(headers);
-  headers.set("etag", object.httpEtag);
-  headers.set("cache-control", "public, max-age=3600");
-
-  return new Response(object.body, { headers });
+  return cached;
 });
 
 r2.post("/r2/upload", async (c) => {

@@ -3,13 +3,13 @@
   "name": "spike-land-ai",
   "packageManager": "yarn@4.12.0",
   "workspaces": [
-    "src/*"
+    "packages/*"
   ],
   "scripts": {
     "build": "yarn workspaces foreach -Apt run build",
     "build:src": "npx tsx esbuild.config.ts --all",
-    "test": "yarn workspaces foreach -Ap run test",
-    "test:src": "vitest run --changed HEAD~1",
+    "test": "vitest run --config .tests/vitest.config.ts",
+    "test:src": "vitest run --config .tests/vitest.config.ts --changed HEAD~1",
     "typecheck": "tsc --noEmit --incremental",
     "typecheck:legacy": "yarn workspaces foreach -Apt run typecheck",
     "lint": "eslint --fix --cache src/ ",

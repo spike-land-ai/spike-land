@@ -42,5 +42,8 @@ publicToolsRoute.get("/", async (c) => {
     stability: t.stability,
   }));
 
-  return c.json({ tools });
+  const response = c.json({ tools });
+  // Tool definitions rarely change — cache aggressively
+  c.header("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+  return response;
 });

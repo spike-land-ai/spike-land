@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import type { Env } from "../env.js";
 import { getClientId, sendGA4Events } from "../lib/ga4.js";
+import { safeCtx, withEdgeCache } from "../lib/edge-cache.js";
 
 const spa = new Hono<{ Bindings: Env }>();
 
@@ -22,7 +23,27 @@ spa.get("/*", async (c) => {
     key = "index.html";
   }
 
-  const object = await c.env.SPA_ASSETS.get(key);
+  // For static assets (not index.html), use edge cache to avoid R2 reads
+  const hasExtension = key.includes(".") && key !== "index.html";
+  if (hasExtension) {
+    const ext = key.substring(key.lastIndexOf("."));
+    const isImmutable = IMMUTABLE_EXTENSIONS.has(ext) && isHashedAsset(key);
+    const ttl = isImmutable ? 31536000 : 3600;
+
+    const cached = await withEdgeCache(c.req.raw, safeCtx(c), async () => {
+      const object = await c.env.SPA_ASSETS.get(key);
+      if (!object) return null;
+
+      const headers = new Headers();
+      object.writeHttpMetadata(headers);
+      headers.set("etag", object.httpEtag);
+      return new Response(object.body, { headers });
+    }, { ttl, swr: isImmutable ? undefined : 3600, immutable: isImmutable });
+
+    if (cached) return cached;
+  }
+
+  const object = hasExtension ? null : await c.env.SPA_ASSETS.get(key);
 
   if (!object) {
     // SPA fallback: serve index.html for non-file paths
@@ -102,16 +123,11 @@ spa.get("/*", async (c) => {
     return response;
   }
 
+  // Non-extension path that matched an R2 object directly (rare)
   const headers = new Headers();
   object.writeHttpMetadata(headers);
   headers.set("etag", object.httpEtag);
-
-  const ext = key.substring(key.lastIndexOf("."));
-  if (IMMUTABLE_EXTENSIONS.has(ext) && isHashedAsset(key)) {
-    headers.set("cache-control", "public, max-age=31536000, immutable");
-  } else {
-    headers.set("cache-control", "public, max-age=3600");
-  }
+  headers.set("cache-control", "public, max-age=3600");
 
   return new Response(object.body, { headers });
 });

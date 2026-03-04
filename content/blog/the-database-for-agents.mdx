@@ -11,15 +11,15 @@ featured: true
 
 ![defineBlock(): a single function that packages schema, procedures, and MCP tools into a composable unit running on any runtime](/blog/the-database-for-agents/hero.jpeg)
 
-<Callout type="info">
-**TL;DR**
+<Tldr>
 
 - I tried SpacetimeDB, got excited, wrote a blog post about it — then deleted everything two days later
 - The patterns were right: tables = schema, reducers = API, `ctx.sender` = auth, subscriptions = real-time
 - I rebuilt those same patterns on Cloudflare Workers as `block-sdk` — a `defineBlock()` DSL that packages storage schema + business logic + MCP tools into composable units
 - `defineBlock()` runs on CF Workers (D1), in the browser (IndexedDB), or in Node.js (memory) — same code, three runtimes
 - The full migration from Next.js happened over a weekend: 29 packages, 80+ MCP tools, zero AWS
-</Callout>
+
+</Tldr>
 
 ## The Sequel
 

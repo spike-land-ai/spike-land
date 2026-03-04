@@ -1,0 +1,36 @@
+{
+  "name": "@spike-land-ai/transpile",
+  "description": "Cloudflare Worker providing on-demand JavaScript/TypeScript transpilation services using esbuild for the spike.land collaborative code editor.",
+  "version": "0.9.57",
+  "type": "module",
+  "main": "dist/index.js",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "dev:remote": "wrangler dev --remote",
+    "build:worker": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --format=esm --target=es2020 --external:esbuild-wasm --external:@spike-land-ai/code --external:@spike-land-ai/esbuild-wasm --loader:.wasm=file",
+    "deploy": "wrangler deploy --minify",
+    "w:deploy:prod": "wrangler deploy src/index.ts",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint --quiet src/",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.30.0",
+    "@cloudflare/vitest-pool-workers": "0.12.18",
+    "@cloudflare/workers-types": "4.20260305.0",
+    "@vitest/coverage-v8": "4.0.18",
+    "rimraf": "6.1.3",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18",
+    "wrangler": "4.69.0"
+  },
+  "dependencies": {
+    "@spike-land-ai/code": "*",
+    "@spike-land-ai/esbuild-wasm": "*"
+  },
+  "source": "./index.ts"
+}

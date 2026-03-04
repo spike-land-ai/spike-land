@@ -1,9 +1,0 @@
-{
-  "extends": "@spike-land-ai/tsconfig/tsconfig.worker.json",
-  "compilerOptions": {
-    "types": ["@cloudflare/workers-types"],
-    "outDir": "dist"
-  },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "vitest.config.ts"]
-}

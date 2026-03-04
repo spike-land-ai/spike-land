@@ -1,17 +1,24 @@
 import { Hono } from "hono";
 import type { Env } from "../env.js";
 import { getClientId, sendGA4Events } from "../lib/ga4.js";
+import { safeCtx, withEdgeCache } from "../lib/edge-cache.js";
 
 const live = new Hono<{ Bindings: Env }>();
 
 live.get("/live/:appId", async (c) => {
   const appId = c.req.param("appId");
-  const key = `apps/${appId}/bundle.js`;
-  const object = await c.env.R2.get(key);
 
-  if (!object) {
-    return c.json({ error: "App not found" }, 404);
-  }
+  const cached = await withEdgeCache(c.req.raw, safeCtx(c), async () => {
+    const key = `apps/${appId}/bundle.js`;
+    const object = await c.env.R2.get(key);
+    if (!object) return null;
+
+    return new Response(object.body, {
+      headers: { "content-type": "application/javascript; charset=utf-8" },
+    });
+  }, { ttl: 60 });
+
+  if (!cached) return c.json({ error: "App not found" }, 404);
 
   try {
     c.executionCtx.waitUntil(
@@ -24,12 +31,7 @@ live.get("/live/:appId", async (c) => {
     );
   } catch { /* no ExecutionContext in test environment */ }
 
-  return new Response(object.body, {
-    headers: {
-      "content-type": "application/javascript; charset=utf-8",
-      "cache-control": "public, max-age=60",
-    },
-  });
+  return cached;
 });
 
 live.get("/live/:appId/index.html", async (c) => {

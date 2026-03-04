@@ -70,7 +70,14 @@ describe('Incremental Test Logic', () => {
       
       (child_process.exec as any).mockImplementation((cmd, callback) => {
         // Mock success with output containing coverage info
-        callback(null, 'All tests passed\nLines : 100% (10/10)', '');
+        const table = `
+----------|---------|----------|---------|---------|-------------------
+File      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------|---------|----------|---------|---------|-------------------
+All files |   71.87 |       25 |     100 |   71.87 |                   
+ logic.ts |   71.87 |       25 |     100 |     100 | 
+----------|---------|----------|---------|---------|-------------------`;
+        callback(null, table, '');
       });
 
       const result = await runVitestWithCoverage(testPath, srcPath);

@@ -6,6 +6,7 @@ export const wellKnownRoute = new Hono<{ Bindings: Env }>();
 wellKnownRoute.get("/oauth-authorization-server", (c) => {
   const issuer = "https://mcp.spike.land";
 
+  c.header("Cache-Control", "public, max-age=86400");
   return c.json({
     issuer,
     authorization_endpoint: "https://spike.land/mcp/authorize",
@@ -21,6 +22,7 @@ wellKnownRoute.get("/oauth-authorization-server", (c) => {
 wellKnownRoute.get("/oauth-protected-resource/mcp", (c) => {
   const issuer = "https://mcp.spike.land";
 
+  c.header("Cache-Control", "public, max-age=86400");
   return c.json({
     resource: `${issuer}/mcp`,
     authorization_servers: [issuer],

@@ -3,31 +3,41 @@ import type { BlogPost } from "../../core/generated-posts";
 
 type BlogMeta = Omit<BlogPost, "content">;
 
-export function BlogListView({ linkComponent }: { linkComponent?: React.ComponentType<{ to: string; className?: string; children?: React.ReactNode }> }) {
+export function BlogListView({ linkComponent, limit, showHeader = true }: { linkComponent?: React.ComponentType<{ to: string; className?: string; children?: React.ReactNode }>; limit?: number; showHeader?: boolean }) {
   const [posts, setPosts] = useState<BlogMeta[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/blog")
       .then((r) => r.json() as Promise<BlogMeta[]>)
-      .then(setPosts)
+      .then((data) => {
+        if (limit) {
+          const featured = data.filter((p) => p.featured);
+          const rest = data.filter((p) => !p.featured);
+          setPosts([...featured, ...rest].slice(0, limit));
+        } else {
+          setPosts(data);
+        }
+      })
       .catch(() => setPosts([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [limit]);
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8 font-sans">
-        <div className="text-center max-w-2xl mx-auto mb-8">
-          <h1 className="text-2xl font-display font-extrabold text-foreground tracking-tight sm:text-3xl mb-3">
-            The Spike.land Blog
-          </h1>
-          <p className="text-base text-muted-foreground font-light">
-            Thoughts on AI agents, Cloudflare Workers, and the future of coding.
-          </p>
-        </div>
+      <div className={showHeader ? "max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8 font-sans" : "font-sans"}>
+        {showHeader && (
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <h1 className="text-2xl font-display font-extrabold text-foreground tracking-tight sm:text-3xl mb-3">
+              The Spike.land Blog
+            </h1>
+            <p className="text-base text-muted-foreground font-light">
+              Thoughts on AI agents, Cloudflare Workers, and the future of coding.
+            </p>
+          </div>
+        )}
         <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: limit ?? 4 }).map((_, i) => (
             <div key={i} className="animate-pulse bg-card p-4 sm:p-5 rounded-xl border border-border">
               <div className="h-3 bg-muted rounded w-1/4 mb-3" />
               <div className="h-6 bg-muted rounded w-3/4 mb-3" />
@@ -42,15 +52,17 @@ export function BlogListView({ linkComponent }: { linkComponent?: React.Componen
   const LinkComp = linkComponent ?? "a";
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="text-center max-w-2xl mx-auto mb-8">
-        <h1 className="text-4xl font-display font-extrabold text-foreground tracking-tight sm:text-5xl mb-6 drop-shadow-sm">
-          The Spike.land Blog
-        </h1>
-        <p className="text-xl text-muted-foreground font-light">
-          Thoughts on AI agents, Cloudflare Workers, and the future of coding.
-        </p>
-      </div>
+    <div className={showHeader ? "max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8 font-sans" : "font-sans"}>
+      {showHeader && (
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <h1 className="text-2xl font-display font-extrabold text-foreground tracking-tight sm:text-3xl mb-3">
+            The Spike.land Blog
+          </h1>
+          <p className="text-base text-muted-foreground font-light">
+            Thoughts on AI agents, Cloudflare Workers, and the future of coding.
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
         {posts.map((post) => (

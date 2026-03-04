@@ -21,3 +21,10 @@ export * from "./StackCollapseDemo";
 export * from "./AgentCoordinationDemo";
 export * from "./ConvergenceDemo";
 export * from "./DependencyCascadeDemo";
+
+// Kinetic typography components
+export { Whisper } from "../components/typography/Whisper";
+export { Crescendo } from "../components/typography/Crescendo";
+export { ScrollWeight } from "../components/typography/ScrollWeight";
+export { TypeReveal } from "../components/typography/TypeReveal";
+export { GlitchText } from "../components/typography/GlitchText";

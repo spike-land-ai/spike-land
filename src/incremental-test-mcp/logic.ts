@@ -3,10 +3,10 @@ import * as fs from 'node:fs/promises';
 import { exec } from 'node:child_process';
 
 export function mapTestToSource(testPath: string): string {
-  // Map .tests/PATH/TO/FILE.test.(ts|tsx) to src/PATH/TO/FILE.(ts|tsx)
+  // Map .tests/PATH/TO/FILE.test.(ts|tsx) or .tests/PATH/TO/FILE.coverage.test.ts to src/PATH/TO/FILE.(ts|tsx)
   return testPath
     .replace(/^\.tests\//, 'src/')
-    .replace(/\.test\.(tsx?)$/, '.$1');
+    .replace(/\.(coverage\.)?test\.(tsx?)$/, '.$2');
 }
 
 export async function getFileHash(filePath: string): Promise<string> {
@@ -91,10 +91,22 @@ export async function runVitestWithCoverage(testPath: string, srcPath: string): 
 }
 
 function parseCoverage(stdout: string): number {
-  // Basic parser for Vitest text coverage output
-  const linesMatch = stdout.match(/Lines\s*:\s*(\d+(\.\d+)?)%/);
-  if (linesMatch) {
-    return parseFloat(linesMatch[1]);
+  // Parser for Vitest table coverage output
+  // Example: logic.ts |   71.87 |       25 |     100 |   71.87 | 38,57-61,83-84,99 
+  const lines = stdout.split('\n');
+  for (const line of lines) {
+    if (line.includes('|') && !line.includes('All files') && !line.includes('% Lines')) {
+      const parts = line.split('|');
+      // The table has: File | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+      // Index 4 is % Lines
+      if (parts.length >= 5) {
+        const linesPercent = parts[4].trim();
+        const percent = parseFloat(linesPercent);
+        if (!isNaN(percent)) {
+          return percent;
+        }
+      }
+    }
   }
   return 0;
 }

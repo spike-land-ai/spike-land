@@ -1,0 +1,37 @@
+{
+  "name": "@spike-land-ai/spike-land-mcp",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --minify",
+    "deploy:staging": "wrangler deploy --minify --env staging",
+    "build": "echo 'CF Worker — no build step required'",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --quiet src/",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply spike-land-mcp --local",
+    "db:migrate:remote": "wrangler d1 migrations apply spike-land-mcp --remote"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "@spike-land-ai/mcp-server-base": "workspace:*",
+    "@spike-land-ai/shared": "*",
+    "drizzle-orm": "^0.45.1",
+    "hono": "^4.12.4",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20260305.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "drizzle-kit": "^0.31.9",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18",
+    "wrangler": "^4.69.0"
+  },
+  "source": "./index.ts"
+}

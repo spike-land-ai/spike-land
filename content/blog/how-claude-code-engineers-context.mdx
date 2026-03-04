@@ -9,19 +9,17 @@ tags: ["ai", "context-engineering", "claude", "claude-code", "developer-tools", 
 featured: true
 ---
 
-{/* TL;DR Box */}
-<div className="bg-slate-800/50 border border-slate-700 rounded-lg p-6 mb-8">
-  <h3 className="text-lg font-semibold mb-3 text-slate-200">TL;DR</h3>
-  <ul className="space-y-2 text-slate-300">
-    <li>Claude Code's plan mode is a context engineering machine — it explores, compresses, and outputs a briefing optimized for execution.</li>
-    <li>A plan file IS a context-engineered prompt: the 5-layer stack made concrete.</li>
-    <li>The KV cache is the physical mechanism — context engineering is the art of filling it correctly.</li>
-    <li>Irrelevant context does not just waste space — it actively degrades attention signal through dilution.</li>
-    <li>Multi-agent coordination is context isolation at scale — each subagent gets a clean, focused context window.</li>
-    <li>Prompt caching changes the economics: cached tokens cost 10x less, making stable context prefixes an economic imperative.</li>
-    <li>You can reverse-engineer Claude Code's techniques for your own prompts.</li>
-  </ul>
-</div>
+<Tldr>
+
+- Claude Code's plan mode is a context engineering machine — it explores, compresses, and outputs a briefing optimized for execution.
+- A plan file IS a context-engineered prompt: the 5-layer stack made concrete.
+- The KV cache is the physical mechanism — context engineering is the art of filling it correctly.
+- Irrelevant context does not just waste space — it actively degrades attention signal through dilution.
+- Multi-agent coordination is context isolation at scale — each subagent gets a clean, focused context window.
+- Prompt caching changes the economics: cached tokens cost 10x less, making stable context prefixes an economic imperative.
+- You can reverse-engineer Claude Code's techniques for your own prompts.
+
+</Tldr>
 
 ## The Tool That Practices What I Preach
 
