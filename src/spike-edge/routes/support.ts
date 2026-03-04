@@ -94,15 +94,16 @@ support.post("/api/support/donate", async (c) => {
     return c.json({ error: "Stripe not configured" }, 503);
   }
 
-  let body: { slug?: string; amount?: number };
+  let body: { slug?: string; amount?: number; clientId?: string };
   try {
-    body = (await c.req.json()) as { slug?: string; amount?: number };
+    body = (await c.req.json()) as { slug?: string; amount?: number; clientId?: string };
   } catch {
     return c.json({ error: "Invalid JSON" }, 400);
   }
 
   const slug = body.slug;
   const amount = body.amount;
+  const clientId = typeof body.clientId === "string" ? body.clientId.slice(0, 100) : "";
 
   if (!slug || typeof slug !== "string" || slug.length > 200) {
     return c.json({ error: "Invalid slug" }, 400);
@@ -127,6 +128,7 @@ support.post("/api/support/donate", async (c) => {
     "metadata[type]": "blog_support",
     "metadata[slug]": slug,
     "metadata[amount]": amount.toString(),
+    "metadata[client_id]": clientId,
   });
 
   const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {

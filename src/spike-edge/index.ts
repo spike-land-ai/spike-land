@@ -119,6 +119,9 @@ app.use("/api/keys", authMiddleware);
 app.use("/api/keys/*", authMiddleware);
 app.use("/api/cockpit/*", authMiddleware);
 
+// Auth middleware for experiment evaluation (mutates state — requires auth)
+app.post("/api/experiments/*/evaluate", authMiddleware);
+
 // Error handling middleware
 app.onError((err, c) => {
   console.error(`[spike-edge] ${c.req.method} ${c.req.path}:`, err.message);

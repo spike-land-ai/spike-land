@@ -552,6 +552,69 @@ experiments.get("/api/experiments/dashboard", async (c) => {
   });
 });
 
+// ─── GET /api/experiments/monitor ────────────────────────────────────────
+
+experiments.get("/api/experiments/monitor", async (c) => {
+  const hours = parseInt(c.req.query("hours") ?? "4", 10);
+  const windowMs = Math.min(Math.max(hours, 1), 168) * 60 * 60 * 1000; // 1h to 7d
+  const since = Date.now() - windowMs;
+
+  const db = c.env.DB;
+
+  const [eventCounts, activeExps] = await Promise.all([
+    db
+      .prepare(
+        `SELECT experiment_id, variant_id, event_type, COUNT(*) as cnt
+         FROM widget_events
+         WHERE created_at >= ? AND experiment_id IS NOT NULL
+         GROUP BY experiment_id, variant_id, event_type`,
+      )
+      .bind(since)
+      .all<{
+        experiment_id: string;
+        variant_id: string;
+        event_type: string;
+        cnt: number;
+      }>(),
+    db
+      .prepare("SELECT id, name, variants FROM experiments WHERE status = 'active'")
+      .all<{ id: string; name: string; variants: string }>(),
+  ]);
+
+  const counts = eventCounts.results ?? [];
+  const active = activeExps.results ?? [];
+
+  // Build per-experiment, per-variant impression set
+  const impressionSet = new Set<string>();
+  for (const row of counts) {
+    if (row.event_type === "widget_impression") {
+      impressionSet.add(`${row.experiment_id}:${row.variant_id}`);
+    }
+  }
+
+  // Check for anomalies: active variants with 0 impressions in window
+  const anomalies: Array<{ experimentId: string; variantId: string; issue: string }> = [];
+  for (const exp of active) {
+    const variants: Array<{ id: string }> = JSON.parse(exp.variants);
+    for (const v of variants) {
+      if (!impressionSet.has(`${exp.id}:${v.id}`)) {
+        anomalies.push({
+          experimentId: exp.id,
+          variantId: v.id,
+          issue: `Zero impressions in last ${hours}h`,
+        });
+      }
+    }
+  }
+
+  return c.json({
+    windowHours: hours,
+    events: counts,
+    anomalies,
+    activeExperiments: active.length,
+  });
+});
+
 // ─── Beta distribution sampling (Box-Muller + Gamma) ────────────────────────
 
 function sampleGamma(shape: number): number {

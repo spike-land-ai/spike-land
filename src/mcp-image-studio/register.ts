@@ -169,6 +169,7 @@ function createToolFromExport(
           "content" in result &&
           Array.isArray((result as unknown as Record<string, unknown>).content)
         ) {
+          if ((result as { isError?: boolean }).isError) outcome = "error";
           return result as CallToolResult;
         }
         return { content: [{ type: "text", text: JSON.stringify(result) }] };

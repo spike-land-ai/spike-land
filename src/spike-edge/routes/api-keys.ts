@@ -157,7 +157,7 @@ apiKeys.post("/api/keys/:id/test", async (c) => {
   if (row.provider.toLowerCase() === "gemini") {
     testUrl = `${testUrl}?key=${row.encrypted_key}`;
   } else {
-    testHeaders["Authorization"] = `Bearer ${row.encrypted_key}`;
+    testHeaders.Authorization = `Bearer ${row.encrypted_key}`;
   }
 
   const res = await fetch(testUrl, {

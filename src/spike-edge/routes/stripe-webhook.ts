@@ -182,6 +182,90 @@ stripeWebhook.post("/stripe/webhook", async (c) => {
               ).run();
             }
           }
+
+          // ── Experiment tracking: inject checkout_completed events ──────
+          try {
+            const metaClientId = session.metadata?.client_id;
+            const amountCents = amountStr ? Math.round(parseFloat(amountStr) * 100) : 0;
+            if (metaClientId && amountCents > 0) {
+              const assignmentRows = await db
+                .prepare(
+                  "SELECT experiment_id, variant_id FROM experiment_assignments WHERE client_id = ?",
+                )
+                .bind(metaClientId)
+                .all<{ experiment_id: string; variant_id: string }>();
+
+              const assignments = assignmentRows.results ?? [];
+              if (assignments.length > 0) {
+                const now = Date.now();
+                const trackingStmts: D1PreparedStatement[] = [];
+
+                for (const a of assignments) {
+                  // Insert checkout_completed event
+                  trackingStmts.push(
+                    db
+                      .prepare(
+                        "INSERT INTO widget_events (id, client_id, slug, event_type, event_data, experiment_id, variant_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                      )
+                      .bind(
+                        crypto.randomUUID(),
+                        metaClientId,
+                        slug ?? "",
+                        "checkout_completed",
+                        JSON.stringify({ amount: amountCents / 100 }),
+                        a.experiment_id,
+                        a.variant_id,
+                        now,
+                      ),
+                  );
+
+                  // Upsert revenue_cents metric
+                  trackingStmts.push(
+                    db
+                      .prepare(
+                        `INSERT INTO experiment_metrics (id, experiment_id, variant_id, metric_name, metric_value, sample_size, updated_at)
+                         VALUES (?, ?, ?, 'revenue_cents', ?, 1, ?)
+                         ON CONFLICT (experiment_id, variant_id, metric_name)
+                         DO UPDATE SET metric_value = metric_value + ?, sample_size = sample_size + 1, updated_at = ?`,
+                      )
+                      .bind(
+                        crypto.randomUUID(),
+                        a.experiment_id,
+                        a.variant_id,
+                        amountCents,
+                        now,
+                        amountCents,
+                        now,
+                      ),
+                  );
+
+                  // Upsert donations metric
+                  trackingStmts.push(
+                    db
+                      .prepare(
+                        `INSERT INTO experiment_metrics (id, experiment_id, variant_id, metric_name, metric_value, sample_size, updated_at)
+                         VALUES (?, ?, ?, 'donations', 1, 1, ?)
+                         ON CONFLICT (experiment_id, variant_id, metric_name)
+                         DO UPDATE SET metric_value = metric_value + 1, sample_size = sample_size + 1, updated_at = ?`,
+                      )
+                      .bind(
+                        crypto.randomUUID(),
+                        a.experiment_id,
+                        a.variant_id,
+                        now,
+                        now,
+                      ),
+                  );
+                }
+
+                await db.batch(trackingStmts);
+              }
+            }
+          } catch (trackingErr) {
+            const msg = trackingErr instanceof Error ? trackingErr.message : "Unknown";
+            console.error("[stripe-webhook] Experiment tracking failed (non-fatal):", msg);
+          }
+
           break;
         }
 

@@ -433,15 +433,14 @@ export class Code implements DurableObject {
 
   async initializeSession(url: URL, request?: Request) {
     if (this.initialized) return;
-    this.origin = url.origin;
-
-    // Initialize with backup session first to ensure we always have a valid state
-    this.session = this.backupSession;
 
     await this.state.blockConcurrencyWhile(async () => {
-      //   try {
       if (this.initialized) return;
       this.origin = url.origin;
+
+      // Initialize with backup session first to ensure we always have a valid state
+      this.session = this.backupSession;
+
       const codeSpace = this.getCodeSpace(url, request);
 
       // Attempt to load session parts (try new key first, then old key for migration)

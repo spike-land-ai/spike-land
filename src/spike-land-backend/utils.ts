@@ -1,6 +1,22 @@
+/**
+ * Checks if an origin is allowed and returns it, or returns a default.
+ */
+export function getAllowOrigin(request: Request): string {
+  const origin = request.headers.get("Origin");
+  if (!origin) return "https://spike.land";
+
+  if (
+    origin === "https://spike.land" ||
+    origin.endsWith(".spike.land") ||
+    origin.startsWith("http://localhost:")
+  ) {
+    return origin;
+  }
+  return "https://spike.land";
+}
+
 // CORS headers for API proxies
 export const API_CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 } as const;
@@ -25,18 +41,21 @@ export const PREFLIGHT_CORS_HEADERS: Record<string, string> = {
 /**
  * Creates a CORS preflight response for API proxies (OPTIONS requests)
  */
-export function createCorsPreflightResponse(): Response {
+export function createCorsPreflightResponse(request: Request): Response {
   return new Response(null, {
-    headers: API_CORS_HEADERS,
+    headers: {
+      ...API_CORS_HEADERS,
+      "Access-Control-Allow-Origin": getAllowOrigin(request),
+    },
   });
 }
 
 /**
  * Adds CORS headers to an existing Response
  */
-export function addCorsHeadersToResponse(response: Response): Response {
+export function addCorsHeadersToResponse(response: Response, request: Request): Response {
   const responseHeaders = new Headers(response.headers);
-  responseHeaders.set("Access-Control-Allow-Origin", "*");
+  responseHeaders.set("Access-Control-Allow-Origin", getAllowOrigin(request));
 
   return new Response(response.body, {
     status: response.status,
@@ -48,7 +67,12 @@ export function addCorsHeadersToResponse(response: Response): Response {
 /**
  * Creates a JSON error response with CORS headers
  */
-export function createCorsErrorResponse(error: string, details: string, status = 500): Response {
+export function createCorsErrorResponse(
+  error: string,
+  details: string,
+  request: Request,
+  status = 500,
+): Response {
   return new Response(
     JSON.stringify({
       error,
@@ -58,7 +82,7 @@ export function createCorsErrorResponse(error: string, details: string, status =
       status,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": getAllowOrigin(request),
       },
     },
   );
@@ -88,7 +112,7 @@ export function handleCORS(request: Request) {
   ) {
     return new Response(null, {
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": getAllowOrigin(request),
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },

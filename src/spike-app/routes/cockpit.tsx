@@ -237,6 +237,202 @@ function CockpitChat() {
   );
 }
 
+// ── Experiments Dashboard ──────────────────────────────────────────────
+
+interface DashboardExperiment {
+  id: string;
+  name: string;
+  dimension: string;
+  status: string;
+  winner: string | null;
+  trafficPct: number;
+  createdAt: number;
+}
+
+interface VariantMetric {
+  variantId: string;
+  impressions: number;
+  donations: number;
+  revenue: number;
+  fistbumps: number;
+  donateRate: number;
+  revenuePerImpression: number;
+  conversionRate: number;
+}
+
+interface ExperimentMetrics {
+  experimentId: string;
+  name: string;
+  status: string;
+  winner: string | null;
+  variants: VariantMetric[];
+}
+
+interface EvalResult {
+  ready: boolean;
+  reason?: string;
+  graduated?: boolean;
+  winner?: string | null;
+  probabilities?: Record<string, number>;
+  improvement?: number;
+  controlRate?: number;
+  winnerRate?: number;
+  runtimeHours?: number;
+}
+
+const STATUS_BADGE: Record<string, string> = {
+  active: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  graduated: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  paused: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+};
+
+function ExperimentCard({ exp }: { exp: DashboardExperiment }) {
+  const [metrics, setMetrics] = useState<ExperimentMetrics | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [evalResult, setEvalResult] = useState<EvalResult | null>(null);
+  const [evaluating, setEvaluating] = useState(false);
+
+  useEffect(() => {
+    if (!expanded) return;
+    fetch(`/api/experiments/${exp.id}/metrics`)
+      .then((r) => r.json() as Promise<ExperimentMetrics>)
+      .then(setMetrics)
+      .catch(() => {});
+  }, [expanded, exp.id]);
+
+  const runEvaluation = async () => {
+    setEvaluating(true);
+    try {
+      const res = await fetch(`/api/experiments/${exp.id}/evaluate`, { method: "POST" });
+      const data = (await res.json()) as EvalResult;
+      setEvalResult(data);
+    } catch {
+      setEvalResult({ ready: false, reason: "Request failed" });
+    } finally {
+      setEvaluating(false);
+    }
+  };
+
+  const runtimeDays = Math.round((Date.now() - exp.createdAt) / 86400000);
+
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+          <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_BADGE[exp.status] ?? "bg-muted text-muted-foreground"}`}>
+            {exp.status}
+          </span>
+          <div>
+            <p className="text-sm font-medium text-foreground">{exp.name}</p>
+            <p className="text-xs text-muted-foreground">{exp.dimension} — {runtimeDays}d running</p>
+          </div>
+        </div>
+        <span className="text-muted-foreground text-xs">{expanded ? "▲" : "▼"}</span>
+      </button>
+
+      {expanded && metrics && (
+        <div className="border-t border-border p-4 space-y-4">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-muted-foreground border-b border-border">
+                <th className="text-left py-1 pr-2">Variant</th>
+                <th className="text-right py-1 px-2">Impressions</th>
+                <th className="text-right py-1 px-2">Donations</th>
+                <th className="text-right py-1 px-2">Donate Rate</th>
+                <th className="text-right py-1 px-2">Revenue</th>
+                <th className="text-right py-1 pl-2">Fistbumps</th>
+              </tr>
+            </thead>
+            <tbody>
+              {metrics.variants.map((v) => (
+                <tr
+                  key={v.variantId}
+                  className={metrics.winner === v.variantId ? "bg-green-50 dark:bg-green-900/10" : ""}
+                >
+                  <td className="py-1.5 pr-2 font-medium text-foreground">
+                    {v.variantId}
+                    {metrics.winner === v.variantId && (
+                      <span className="ml-1 text-green-600 dark:text-green-400 text-[10px]">winner</span>
+                    )}
+                  </td>
+                  <td className="text-right py-1.5 px-2 text-muted-foreground">{v.impressions.toLocaleString()}</td>
+                  <td className="text-right py-1.5 px-2 text-muted-foreground">{v.donations}</td>
+                  <td className="text-right py-1.5 px-2 text-muted-foreground">{(v.donateRate * 100).toFixed(2)}%</td>
+                  <td className="text-right py-1.5 px-2 font-semibold text-foreground">${(v.revenue / 100).toFixed(2)}</td>
+                  <td className="text-right py-1.5 pl-2 text-muted-foreground">{v.fistbumps}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={runEvaluation}
+              disabled={evaluating || exp.status !== "active"}
+              className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            >
+              {evaluating ? "Evaluating..." : "Run Evaluation"}
+            </button>
+
+            {evalResult && (
+              <div className="text-xs text-muted-foreground">
+                {!evalResult.ready ? (
+                  <span>{evalResult.reason}</span>
+                ) : evalResult.graduated ? (
+                  <span className="text-green-600 dark:text-green-400 font-semibold">
+                    Graduated! Winner: {evalResult.winner} (+{evalResult.improvement}%)
+                  </span>
+                ) : (
+                  <span>
+                    P(best):{" "}
+                    {Object.entries(evalResult.probabilities ?? {})
+                      .map(([k, v]) => `${k}: ${(v * 100).toFixed(1)}%`)
+                      .join(", ")}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ExperimentsDashboard() {
+  const [data, setData] = useState<{ experiments: DashboardExperiment[]; revenue24h: number } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/experiments/dashboard")
+      .then((r) => r.json() as Promise<{ experiments: DashboardExperiment[]; revenue24h: number }>)
+      .then(setData)
+      .catch(() => {});
+  }, []);
+
+  if (!data) {
+    return <p className="text-sm text-muted-foreground">Loading experiments...</p>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-border bg-card p-4 flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">24h Experiment Revenue</p>
+          <p className="text-2xl font-bold text-foreground">${data.revenue24h.toFixed(2)}</p>
+        </div>
+        <span className="text-xs text-muted-foreground">{data.experiments.length} experiments</span>
+      </div>
+
+      {data.experiments.map((exp) => (
+        <ExperimentCard key={exp.id} exp={exp} />
+      ))}
+    </div>
+  );
+}
+
 // ── Dev Health ─────────────────────────────────────────────────────────────
 
 function DevHealth() {
@@ -329,6 +525,10 @@ export function CockpitPage() {
           Private
         </span>
       </div>
+
+      <Section title="Experiments">
+        <ExperimentsDashboard />
+      </Section>
 
       <Section title="Metrics Dashboard">
         <MetricsDashboard />

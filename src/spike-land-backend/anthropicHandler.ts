@@ -50,12 +50,16 @@ async function setLastGoodIdx(kv: KVNamespace, idx: number): Promise<void> {
 export async function handleAnthropicRequest(originalRequest: Request, env: Env) {
   // Handle CORS preflight
   if (originalRequest.method === "OPTIONS") {
-    return createCorsPreflightResponse();
+    return createCorsPreflightResponse(originalRequest);
   }
 
   const pool = getTokenPool(env);
   if (pool.length === 0) {
-    return createCorsErrorResponse("No auth tokens configured", "Missing CLAUDE_CODE_OAUTH_TOKEN");
+    return createCorsErrorResponse(
+      "No auth tokens configured",
+      "Missing CLAUDE_CODE_OAUTH_TOKEN",
+      originalRequest,
+    );
   }
 
   const debugMode = env.DEBUG_ANTHROPIC_PROXY === "true";
@@ -119,7 +123,7 @@ export async function handleAnthropicRequest(originalRequest: Request, env: Env)
           console.debug(`[Anthropic Proxy] Token fallback: switched to index ${idx}`);
           await setLastGoodIdx(env.KV, idx);
         }
-        return addCorsHeadersToResponse(response);
+        return addCorsHeadersToResponse(response, originalRequest);
       }
 
       if (response.status === 401) {
@@ -160,6 +164,7 @@ export async function handleAnthropicRequest(originalRequest: Request, env: Env)
     return createCorsErrorResponse(
       "Failed to process request",
       error instanceof Error ? error.message : "Unknown error",
+      originalRequest,
     );
   }
 }

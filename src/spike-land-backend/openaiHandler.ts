@@ -8,7 +8,7 @@ import {
 export async function handleGPT4Request(originalRequest: Request, env: Env) {
   // Handle CORS preflight
   if (originalRequest.method === "OPTIONS") {
-    return createCorsPreflightResponse();
+    return createCorsPreflightResponse(originalRequest);
   }
 
   try {
@@ -43,12 +43,13 @@ export async function handleGPT4Request(originalRequest: Request, env: Env) {
     }
 
     // Clone the response to add CORS headers
-    return addCorsHeadersToResponse(response);
+    return addCorsHeadersToResponse(response, originalRequest);
   } catch (error) {
     console.error("Error in handleGPT4Request:", error);
     return createCorsErrorResponse(
       "Failed to process request",
       error instanceof Error ? error.message : "Unknown error",
+      originalRequest,
     );
   }
 }

@@ -87,7 +87,7 @@ function writeCache(data: Record<string, ExperimentAssignment>): void {
 function mergeConfigs(
   assignments: Record<string, ExperimentAssignment>,
 ): WidgetVariantConfig {
-  let merged: WidgetVariantConfig = { ...DEFAULT_CONFIG };
+  const merged: WidgetVariantConfig = { ...DEFAULT_CONFIG };
 
   for (const assignment of Object.values(assignments)) {
     const cfg = assignment.config as Partial<WidgetVariantConfig>;

@@ -323,7 +323,7 @@ function SupportWidget({ post }: { post: BlogPost }) {
       const cleaned = window.location.pathname;
       window.history.replaceState({}, "", cleaned);
     }
-  }, []);
+  }, [track]);
 
   // Check if already bumped
   useEffect(() => {
@@ -365,7 +365,7 @@ function SupportWidget({ post }: { post: BlogPost }) {
     } catch {
       // Silent fail
     }
-  }, [bumped, slug]);
+  }, [bumped, slug, track]);
 
   const handleDonate = useCallback(async () => {
     const stop = SLIDER_STOPS[sliderIdx];
@@ -382,7 +382,7 @@ function SupportWidget({ post }: { post: BlogPost }) {
       const res = await fetch("/api/support/donate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, amount }),
+        body: JSON.stringify({ slug, amount, clientId: getClientId() }),
       });
       const data = await res.json() as { url?: string; error?: string };
       if (data.url) {
@@ -391,7 +391,7 @@ function SupportWidget({ post }: { post: BlogPost }) {
     } catch {
       setDonating(false);
     }
-  }, [sliderIdx, showCustom, customAmount, slug]);
+  }, [sliderIdx, showCustom, customAmount, slug, track]);
 
   const currentStop = SLIDER_STOPS[sliderIdx];
   const copy = getArticleCopy(post.category, post.tags);

@@ -1,5 +1,6 @@
 import { HTML } from "@spike-land-ai/code";
 import type Env from "./env";
+import { getAllowOrigin } from "./utils";
 
 /**
  * Validates a URL to prevent SSRF attacks.
@@ -87,7 +88,7 @@ export async function handleApiRequest(
           const id = env.CODE.newUniqueId();
           return new Response(id.toString(), {
             headers: {
-              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Origin": getAllowOrigin(request),
               "Cross-Origin-Embedder-Policy": "require-corp",
             },
           });
@@ -116,7 +117,7 @@ export async function handleApiRequest(
     case "": {
       const respText = await HTML;
       const headers = new Headers({
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": getAllowOrigin(request),
         "Cross-Origin-Embedder-Policy": "require-corp",
         "Cross-Origin-Resource-Policy": "cross-origin",
         "Cross-Origin-Opener-Policy": "same-origin",

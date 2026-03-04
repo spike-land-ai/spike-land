@@ -104,20 +104,28 @@ mcpRoute.post("/", async (c) => {
     let outcome: "success" | "error" = response.status >= 400 ? "error" : "success";
     let responseBody: string | null = null;
     if (isToolCall && outcome === "success") {
+      // Read body first — must succeed before we attempt to parse
       try {
         responseBody = await response.text();
-        const parsed = JSON.parse(responseBody) as Record<string, unknown>;
-        if ("error" in parsed) {
-          outcome = "error";
-        } else if (
-          parsed.result &&
-          typeof parsed.result === "object" &&
-          (parsed.result as Record<string, unknown>).isError
-        ) {
-          outcome = "error";
-        }
       } catch {
-        // Body parse failed — keep outcome as success
+        // Body read failed — responseBody stays null, response.body is consumed
+      }
+      // Parse separately so responseBody is always set if text() succeeded
+      if (responseBody) {
+        try {
+          const parsed = JSON.parse(responseBody) as Record<string, unknown>;
+          if ("error" in parsed) {
+            outcome = "error";
+          } else if (
+            parsed.result &&
+            typeof parsed.result === "object" &&
+            (parsed.result as Record<string, unknown>).isError
+          ) {
+            outcome = "error";
+          }
+        } catch {
+          // JSON parse failed — keep outcome as success
+        }
       }
     }
 
@@ -138,7 +146,9 @@ mcpRoute.post("/", async (c) => {
       });
     }
     c.executionCtx.waitUntil(
-      hashClientId(userId).then((clientId) => sendGA4Events(c.env, clientId, ga4Events)),
+      hashClientId(userId)
+        .then((clientId) => sendGA4Events(c.env, clientId, ga4Events))
+        .catch((err) => console.error("[GA4] Failed to send events:", err)),
     );
 
     // 2. Record skill call in D1 rollup tables
@@ -150,7 +160,7 @@ mcpRoute.post("/", async (c) => {
           serverName: "spike-land-mcp",
           outcome,
           durationMs,
-        }),
+        }).catch((err) => console.error("[skill-tracker] Failed to record:", err)),
       );
     }
 
