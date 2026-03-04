@@ -64,7 +64,8 @@ async function resolveByokKey(
     if (!res.ok) return null;
     const data = await res.json<{ key?: string }>();
     return data.key ?? null;
-  } catch {
+  } catch (err) {
+    console.error("[proxy] BYOK key resolution failed:", err);
     return null;
   }
 }

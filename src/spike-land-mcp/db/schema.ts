@@ -323,6 +323,35 @@ export const toolUserDaily = sqliteTable(
   }),
 );
 
+// ─── Credit Ledger ───────────────────────────────────────────────────────────
+
+export const creditLedger = sqliteTable(
+  "credit_ledger",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    amount: integer("amount").notNull(), // positive=credit, negative=debit
+    balanceAfter: integer("balance_after").notNull(),
+    type: text("type").notNull(), // 'daily_grant' | 'usage' | 'purchase' | 'refund'
+    description: text("description"),
+    referenceId: text("reference_id"), // e.g., proxy request ID or Stripe payment ID
+    createdAt: text("created_at"),
+  },
+  (t) => ({
+    userIdx: index("idx_credit_ledger_user").on(t.userId, t.createdAt),
+  }),
+);
+
+// ─── Credit Balances ─────────────────────────────────────────────────────────
+
+export const creditBalances = sqliteTable("credit_balances", {
+  userId: text("user_id").primaryKey(),
+  balance: integer("balance").notNull().default(0),
+  dailyLimit: integer("daily_limit").notNull().default(50),
+  lastDailyGrant: text("last_daily_grant"),
+  updatedAt: text("updated_at"),
+});
+
 // ─── Direct Messages ──────────────────────────────────────────────────────────
 
 export const directMessages = sqliteTable(

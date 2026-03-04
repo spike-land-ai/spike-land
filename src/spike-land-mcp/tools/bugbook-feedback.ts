@@ -15,6 +15,7 @@ export function registerBugbookFeedbackTools(
   userId: string,
   db: DrizzleDB,
   spikeEdge?: Fetcher,
+  mcpInternalSecret?: string,
 ): void {
   const t = freeTool(userId, db);
 
@@ -42,6 +43,7 @@ export function registerBugbookFeedbackTools(
             headers: {
               "Content-Type": "application/json",
               "X-User-Id": userId,
+              ...(mcpInternalSecret ? { "X-Internal-Secret": mcpInternalSecret } : {}),
             },
             body: JSON.stringify({
               title: input.title,

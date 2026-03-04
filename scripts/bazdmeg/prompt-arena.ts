@@ -18,6 +18,7 @@ import reviewerV3 from "./prompts/reviewer-v3.js";
 import reviewFixerV1 from "./prompts/review-fixer-v1.js";
 import reviewFixerV2 from "./prompts/review-fixer-v2.js";
 import reviewFixerV3 from "./prompts/review-fixer-v3.js";
+import reviewerPersona from "./prompts/reviewer-persona.js";
 
 const ALL_PROMPTS: PromptVariant[] = [
   fixerV1,
@@ -29,6 +30,7 @@ const ALL_PROMPTS: PromptVariant[] = [
   reviewFixerV1,
   reviewFixerV2,
   reviewFixerV3,
+  reviewerPersona,
 ];
 
 const DATA_DIR = join(process.cwd(), ".bazdmeg");

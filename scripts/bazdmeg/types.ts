@@ -35,6 +35,7 @@ export interface PromptContext {
   files?: string[];
   diffs?: string;
   feedback?: string;
+  persona?: { name: string; description: string };
 }
 
 export interface CheckResult {

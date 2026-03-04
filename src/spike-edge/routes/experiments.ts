@@ -88,7 +88,6 @@ const VALID_EVENT_TYPES = new Set([
   "share_click",
   "visibility_time",
   "checkout_started",
-  "checkout_completed",
   "thankyou_viewed",
 ]);
 
@@ -236,20 +235,10 @@ experiments.post("/api/experiments/track", async (c) => {
           metricName: "fistbumps",
           value: 1,
         });
-      } else if (event.eventType === "checkout_completed") {
-        const amount =
-          (event.eventData as Record<string, unknown> | undefined)?.amount;
-        if (typeof amount === "number") {
-          metricsUpdates.push({
-            experimentId: event.experimentId,
-            variantId: event.variantId,
-            metricName: "revenue_cents",
-            value: Math.round(amount * 100),
-          });
         }
-      }
-    }
-  }
+        }
+        }
+        }
 
   // Upsert metrics
   for (const m of metricsUpdates) {

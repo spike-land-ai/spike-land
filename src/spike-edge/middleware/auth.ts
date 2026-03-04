@@ -11,6 +11,19 @@ export async function authMiddleware(
 ): Promise<Response | void> {
   const cookie = c.req.header("cookie");
   const authHeader = c.req.header("authorization");
+  const internalSecret = c.req.header("x-internal-secret");
+  const requestedUserId = c.req.header("x-user-id");
+
+  // Trust X-User-Id from internal services with a valid secret (skip OAuth check)
+  if (
+    internalSecret &&
+    c.env.INTERNAL_SERVICE_SECRET &&
+    internalSecret === c.env.INTERNAL_SERVICE_SECRET &&
+    requestedUserId
+  ) {
+    c.set("userId" as never, requestedUserId as never);
+    return next();
+  }
 
   if (!cookie && !authHeader) {
     return c.json({ error: "Authentication required" }, 401);

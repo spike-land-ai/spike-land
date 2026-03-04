@@ -104,6 +104,22 @@ function mapStripePlanToTier(subscription: StripeSubscription): string {
   return "pro"; // default paid tier
 }
 
+/** Persist webhook handler errors to error_logs (fire-and-forget). */
+function logWebhookError(
+  db: D1Database,
+  ctx: ExecutionContext | undefined,
+  eventType: string,
+  message: string,
+  stack: string | null,
+) {
+  try {
+    const work = db.prepare(
+      "INSERT INTO error_logs (service_name, error_code, message, stack_trace, metadata, client_id, severity) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    ).bind("stripe-webhook", eventType, message, stack, null, null, "error").run().catch(() => {});
+    try { ctx?.waitUntil(work); } catch { /* no ctx in tests */ }
+  } catch { /* DB unavailable */ }
+}
+
 // ─── Webhook Route ──────────────────────────────────────────────────────────
 
 stripeWebhook.post("/stripe/webhook", async (c) => {
@@ -310,6 +326,7 @@ stripeWebhook.post("/stripe/webhook", async (c) => {
       } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";
         console.error("[stripe-webhook] Error handling checkout.session.completed:", msg);
+        logWebhookError(db, c.executionCtx, "checkout.session.completed", msg, error instanceof Error ? error.stack ?? null : null);
       }
       break;
     }
@@ -329,6 +346,7 @@ stripeWebhook.post("/stripe/webhook", async (c) => {
       } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";
         console.error("[stripe-webhook] Error handling customer.subscription.updated:", msg);
+        logWebhookError(db, c.executionCtx, "customer.subscription.updated", msg, error instanceof Error ? error.stack ?? null : null);
       }
       break;
     }
@@ -344,6 +362,7 @@ stripeWebhook.post("/stripe/webhook", async (c) => {
       } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";
         console.error("[stripe-webhook] Error handling customer.subscription.deleted:", msg);
+        logWebhookError(db, c.executionCtx, "customer.subscription.deleted", msg, error instanceof Error ? error.stack ?? null : null);
       }
       break;
     }
@@ -363,6 +382,7 @@ stripeWebhook.post("/stripe/webhook", async (c) => {
       } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";
         console.error("[stripe-webhook] Error handling invoice.paid:", msg);
+        logWebhookError(db, c.executionCtx, "invoice.paid", msg, error instanceof Error ? error.stack ?? null : null);
       }
       break;
     }
@@ -381,6 +401,7 @@ stripeWebhook.post("/stripe/webhook", async (c) => {
       } catch (error) {
         const msg = error instanceof Error ? error.message : "Unknown error";
         console.error("[stripe-webhook] Error handling invoice.payment_failed:", msg);
+        logWebhookError(db, c.executionCtx, "invoice.payment_failed", msg, error instanceof Error ? error.stack ?? null : null);
       }
       break;
     }

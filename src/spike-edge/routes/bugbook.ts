@@ -309,10 +309,14 @@ bugbook.get("/bugbook/my-reports", authMiddleware, async (c) => {
   });
 });
 
-// ── Internal Endpoints (service binding access) ──
+// ── Internal Endpoints (protected by x-internal-secret) ──
 
 /** GET /internal/elo/:userId — get user ELO + tier. */
 bugbook.get("/internal/elo/:userId", async (c) => {
+  const secret = c.req.header("x-internal-secret");
+  if (!secret || !c.env.INTERNAL_SERVICE_SECRET || secret !== c.env.INTERNAL_SERVICE_SECRET) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
   const userId = c.req.param("userId");
   const user = await ensureUserElo(c.env.DB, userId);
   return c.json({ elo: user.elo, tier: user.tier, eventCount: user.eventCount });
@@ -320,6 +324,10 @@ bugbook.get("/internal/elo/:userId", async (c) => {
 
 /** POST /internal/elo/event — record an ELO event. */
 bugbook.post("/internal/elo/event", async (c) => {
+  const secret = c.req.header("x-internal-secret");
+  if (!secret || !c.env.INTERNAL_SERVICE_SECRET || secret !== c.env.INTERNAL_SERVICE_SECRET) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
   const body = await c.req.json<{
     userId: string;
     eventType: string;

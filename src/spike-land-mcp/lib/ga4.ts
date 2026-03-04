@@ -29,7 +29,8 @@ function truncateStringParams(
 ): Record<string, string | number | boolean> {
   const result: Record<string, string | number | boolean> = {};
   for (const [key, value] of Object.entries(params)) {
-    result[key] = typeof value === "string"
+    const truncatedKey = key.slice(0, 40);
+    result[truncatedKey] = typeof value === "string"
       ? value.slice(0, MAX_STRING_PARAM_LENGTH)
       : value;
   }
@@ -50,7 +51,7 @@ export async function sendGA4Events(
 
   for (let i = 0; i < events.length; i += MAX_EVENTS_PER_BATCH) {
     const batch = events.slice(i, i + MAX_EVENTS_PER_BATCH).map((event) => ({
-      name: event.name,
+      name: event.name.slice(0, 40),
       params: truncateStringParams(event.params),
     }));
 
@@ -59,10 +60,13 @@ export async function sendGA4Events(
       events: batch,
     });
 
-    await fetch(url, {
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body,
     });
+    if (!response.ok) {
+      console.error(`[ga4] send failed: ${response.status} ${response.statusText}`);
+    }
   }
 }

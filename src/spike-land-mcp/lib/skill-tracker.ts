@@ -1,7 +1,8 @@
 /**
  * Records MCP tool call analytics into D1 rollup tables.
  *
- * Writes three rows atomically via db.batch():
+ * Writes three rows in a single batch via db.batch()
+ * (not transactional — partial writes possible on failure, acceptable for analytics):
  *  1. skill_usage_events  — raw event row
  *  2. tool_call_daily     — upsert rollup (call_count, error_count, total_ms)
  *  3. tool_user_daily     — INSERT OR IGNORE unique user-tool-day

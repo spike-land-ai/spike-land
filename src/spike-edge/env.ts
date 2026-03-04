@@ -17,6 +17,7 @@ export interface Env {
   GA_MEASUREMENT_ID: string;
   CACHE_VERSION: string;
   GA_API_SECRET: string;
+  INTERNAL_SERVICE_SECRET: string;
   WHATSAPP_APP_SECRET: string;
   WHATSAPP_ACCESS_TOKEN: string;
   WHATSAPP_PHONE_NUMBER_ID: string;

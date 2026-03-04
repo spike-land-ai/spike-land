@@ -10,6 +10,7 @@ import { wellKnownRoute } from "./routes/well-known";
 import { publicToolsRoute } from "./routes/public-tools";
 import { internalByokRoute } from "./routes/internal-byok";
 import { internalAnalytics } from "./routes/internal-analytics";
+import { internalAuthMiddleware } from "./middleware/internal-auth";
 
 export function createApp(): Hono<{ Bindings: Env; Variables: AuthVariables }> {
   const app = new Hono<{ Bindings: Env; Variables: AuthVariables }>();
@@ -18,7 +19,7 @@ export function createApp(): Hono<{ Bindings: Env; Variables: AuthVariables }> {
     "*",
     cors({
       origin: ["https://spike.land"],
-      allowHeaders: ["Authorization", "Content-Type"],
+      allowHeaders: ["Authorization", "Content-Type", "X-Internal-Secret"],
       allowMethods: ["GET", "POST", "DELETE", "OPTIONS"],
     }),
   );
@@ -26,7 +27,8 @@ export function createApp(): Hono<{ Bindings: Env; Variables: AuthVariables }> {
 
   app.get("/health", (c) => c.json({ ok: true, service: "spike-land-mcp" }));
 
-  // Internal routes (service-binding only, no auth)
+  // Internal routes (protected by x-internal-secret header)
+  app.use("/internal/*", internalAuthMiddleware);
   app.route("/internal", internalByokRoute);
   app.route("/internal", internalAnalytics);
 

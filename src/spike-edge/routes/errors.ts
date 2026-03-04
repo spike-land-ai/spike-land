@@ -3,7 +3,8 @@ import type { Env } from "../env.js";
 
 const errors = new Hono<{ Bindings: Env }>();
 
-// In-memory rate limiter for error ingestion
+// In-memory rate limiter for error ingestion (defense-in-depth: resets on isolate recycle,
+// but limits burst abuse within a single isolate lifetime)
 const rateLimitMap = new Map<string, { count: number; windowStart: number }>();
 const RATE_WINDOW_MS = 60_000;
 const RATE_MAX = 10;
@@ -105,6 +106,32 @@ errors.get("/errors", async (c) => {
 
   const result = await c.env.DB.prepare(query).bind(...params).all();
   return c.json(result.results);
+});
+
+/** GET /errors/summary — aggregated error stats for cockpit dashboard. */
+errors.get("/errors/summary", async (c) => {
+  const range = c.req.query("range") ?? "24h";
+  const rangeMs: Record<string, number> = {
+    "1h": 3_600_000,
+    "24h": 86_400_000,
+    "7d": 604_800_000,
+  };
+  const cutoff = Date.now() - (rangeMs[range] ?? 86_400_000);
+
+  const [countResult, topCodes] = await Promise.all([
+    c.env.DB.prepare(
+      "SELECT COUNT(*) as total FROM error_logs WHERE created_at >= ?",
+    ).bind(cutoff).first<{ total: number }>(),
+    c.env.DB.prepare(
+      "SELECT error_code, COUNT(*) as count FROM error_logs WHERE created_at >= ? GROUP BY error_code ORDER BY count DESC LIMIT 5",
+    ).bind(cutoff).all<{ error_code: string; count: number }>(),
+  ]);
+
+  return c.json({
+    total: countResult?.total ?? 0,
+    topCodes: topCodes.results ?? [],
+    range,
+  });
 });
 
 export { errors };

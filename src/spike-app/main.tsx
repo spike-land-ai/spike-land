@@ -5,7 +5,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { router } from "./router";
 import { ToastProvider } from "./components/Toast";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { reportError } from "./lib/reportError";
 import "./app.css";
+
+// Report unhandled promise rejections to backend
+window.addEventListener("unhandledrejection", (event) => {
+  const error = event.reason instanceof Error
+    ? event.reason
+    : new Error(String(event.reason ?? "Unhandled rejection"));
+  reportError(error, { code: "UNHANDLED_REJECTION" });
+});
 
 const queryClient = new QueryClient();
 

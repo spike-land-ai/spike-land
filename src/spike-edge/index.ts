@@ -119,6 +119,10 @@ app.use("/api/keys", authMiddleware);
 app.use("/api/keys/*", authMiddleware);
 app.use("/api/cockpit/*", authMiddleware);
 
+// Auth middleware for error log listing (BUG 3: protect stack traces)
+app.get("/errors", authMiddleware);
+app.get("/errors/summary", authMiddleware);
+
 // Auth middleware for experiment evaluation (mutates state — requires auth)
 app.post("/api/experiments/*/evaluate", authMiddleware);
 
@@ -126,9 +130,15 @@ app.post("/api/experiments/*/evaluate", authMiddleware);
 app.onError((err, c) => {
   console.error(`[spike-edge] ${c.req.method} ${c.req.path}:`, err.message);
   try {
+    const metadata = JSON.stringify({
+      method: c.req.method,
+      path: c.req.path,
+      requestId: c.req.header("x-request-id") ?? null,
+    });
+    const clientId = c.req.header("cf-connecting-ip") ?? null;
     const logWork = c.env.DB.prepare(
-      "INSERT INTO error_logs (service_name, error_code, message, stack_trace, severity) VALUES (?, ?, ?, ?, ?)",
-    ).bind("spike-edge", "INTERNAL_ERROR", err.message, err.stack ?? null, "error").run().catch(() => {});
+      "INSERT INTO error_logs (service_name, error_code, message, stack_trace, metadata, client_id, severity) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    ).bind("spike-edge", "INTERNAL_ERROR", err.message, err.stack ?? null, metadata, clientId, "error").run().catch((e) => console.error("[spike-edge] error_logs write failed:", e));
     try { c.executionCtx.waitUntil(logWork); } catch { /* no ExecutionContext in tests */ }
   } catch { /* DB unavailable — skip error logging to prevent double-error */ }
   return c.json({ error: "Internal Server Error" }, 500);

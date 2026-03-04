@@ -435,11 +435,38 @@ function ExperimentsDashboard() {
 
 // ── Dev Health ─────────────────────────────────────────────────────────────
 
+interface ErrorSummary {
+  total: number;
+  topCodes: Array<{ error_code: string; count: number }>;
+  range: string;
+}
+
 function DevHealth() {
+  const [errorSummary, setErrorSummary] = useState<ErrorSummary | null>(null);
+
+  useEffect(() => {
+    fetch("/errors/summary?range=24h")
+      .then((r) => {
+        if (!r.ok) return null;
+        return r.json() as Promise<ErrorSummary>;
+      })
+      .then((data) => { if (data) setErrorSummary(data); })
+      .catch(() => {});
+  }, []);
+
+  const errorCount = errorSummary?.total ?? "--";
+  const errorColor = errorSummary
+    ? errorSummary.total === 0 ? "bg-green-500" : errorSummary.total < 10 ? "bg-amber-500" : "bg-red-500"
+    : "bg-muted";
+  const topCode = errorSummary?.topCodes[0];
+  const errorNote = topCode
+    ? `Top: ${topCode.error_code} (${topCode.count})`
+    : errorSummary ? "No errors" : "Loading...";
+
   const panels = [
     { label: "CI Status", value: "--", note: "Last run: --", color: "bg-muted" },
     { label: "Recent Deploys", value: "--", note: "No recent deploys", color: "bg-muted" },
-    { label: "Error Rate (24h)", value: "--", note: "Will wire to /api/cockpit/health", color: "bg-muted" },
+    { label: "Errors (24h)", value: String(errorCount), note: errorNote, color: errorColor },
     { label: "Worker CPU p99", value: "--", note: "Cloudflare Analytics", color: "bg-muted" },
   ];
 

@@ -4,17 +4,27 @@ import type { Env } from "../env.js";
 const health = new Hono<{ Bindings: Env }>();
 
 health.get("/health", async (c) => {
+  let r2Status = "ok";
+  let d1Status = "ok";
+
   try {
-    // Verify R2 connectivity with a lightweight HEAD request
     await c.env.R2.head("__health_check__");
   } catch {
-    return c.json({ status: "degraded", timestamp: new Date().toISOString() }, 503);
+    r2Status = "degraded";
   }
 
-  return c.json({
-    status: "ok",
-    timestamp: new Date().toISOString(),
-  });
+  try {
+    await c.env.DB.prepare("SELECT 1").first();
+  } catch {
+    d1Status = "degraded";
+  }
+
+  const overall = r2Status === "ok" && d1Status === "ok" ? "ok" : "degraded";
+
+  return c.json(
+    { status: overall, r2: r2Status, d1: d1Status, timestamp: new Date().toISOString() },
+    overall === "ok" ? 200 : 503,
+  );
 });
 
 export { health };

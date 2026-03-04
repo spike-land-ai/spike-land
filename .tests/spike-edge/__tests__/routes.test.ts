@@ -25,6 +25,7 @@ function createMockEnv(): Env {
         bind: vi.fn().mockReturnThis(),
         all: vi.fn().mockResolvedValue({ results: [] }),
         run: vi.fn().mockResolvedValue({ success: true }),
+        first: vi.fn().mockResolvedValue({ "1": 1 }),
       }),
       batch: vi.fn().mockResolvedValue([]),
     } as unknown as D1Database,
@@ -67,7 +68,7 @@ function makeR2Object(content: string, contentType = "text/plain") {
 // ─── health route ────────────────────────────────────────────────────────────
 
 describe("health route", () => {
-  it("returns 200 with ok status when R2 is reachable", async () => {
+  it("returns 200 with ok status when R2 and D1 are reachable", async () => {
     const app = new Hono<{ Bindings: Env }>();
     app.route("/", health);
 
@@ -75,8 +76,10 @@ describe("health route", () => {
     const res = await app.request("/health", {}, env);
 
     expect(res.status).toBe(200);
-    const body = await res.json<{ status: string; timestamp: string }>();
+    const body = await res.json<{ status: string; r2: string; d1: string; timestamp: string }>();
     expect(body.status).toBe("ok");
+    expect(body.r2).toBe("ok");
+    expect(body.d1).toBe("ok");
     expect(typeof body.timestamp).toBe("string");
   });
 
@@ -89,9 +92,31 @@ describe("health route", () => {
 
     const res = await app.request("/health", {}, env);
     expect(res.status).toBe(503);
-    const body = await res.json<{ status: string; timestamp: string }>();
+    const body = await res.json<{ status: string; r2: string; d1: string; timestamp: string }>();
     expect(body.status).toBe("degraded");
-    expect(typeof body.timestamp).toBe("string");
+    expect(body.r2).toBe("degraded");
+    expect(body.d1).toBe("ok");
+  });
+
+  it("returns 503 with degraded status when D1 is unreachable", async () => {
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/", health);
+
+    const env = createMockEnv();
+    const mockPrepare = env.DB.prepare as ReturnType<typeof vi.fn>;
+    mockPrepare.mockReturnValue({
+      bind: vi.fn().mockReturnThis(),
+      all: vi.fn().mockResolvedValue({ results: [] }),
+      run: vi.fn().mockResolvedValue({ success: true }),
+      first: vi.fn().mockRejectedValue(new Error("D1 down")),
+    });
+
+    const res = await app.request("/health", {}, env);
+    expect(res.status).toBe(503);
+    const body = await res.json<{ status: string; r2: string; d1: string }>();
+    expect(body.status).toBe("degraded");
+    expect(body.r2).toBe("ok");
+    expect(body.d1).toBe("degraded");
   });
 });
 

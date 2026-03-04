@@ -12,6 +12,8 @@ import type { DrizzleDB } from "../db/index";
 export interface ToolRegistrationEnv {
   kv?: KVNamespace;
   vaultSecret?: string;
+  mcpInternalSecret?: string;
+  spikeEdge?: Fetcher;
 }
 
 // ─── Static Imports ───
@@ -187,6 +189,6 @@ export async function registerAllTools(
   safeRegister(registerEsbuildTools, "registerEsbuildTools", registry, userId, db);
   safeRegister(registerBuildFromGithubTools, "registerBuildFromGithubTools", registry, userId, db);
   safeRegister(registerQuizTools, "registerQuizTools", registry, userId, db, env);
-  safeRegister(registerBugbookFeedbackTools, "registerBugbookFeedbackTools", registry, userId, db);
+  safeRegister(registerBugbookFeedbackTools, "registerBugbookFeedbackTools", registry, userId, db, env?.spikeEdge, env?.mcpInternalSecret);
   safeRegister(registerByokTools, "registerByokTools", registry, userId, db, env?.kv, env?.vaultSecret);
 }
