@@ -123,7 +123,7 @@ export function RootLayout() {
   }, [pathname, searchStr]);
 
   return (
-    <div className="flex h-screen bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -132,14 +132,14 @@ export function RootLayout() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Mobile sidebar drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-card shadow-lg transition-transform lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-card shadow-lg transition-transform lg:hidden ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } border-r border-border`}
       >
         <div className="flex h-16 items-center justify-between border-b border-border px-6">
-          <Link to="/" className="text-xl font-bold hover:opacity-80">spike.land</Link>
+          <Link to="/" className="text-xl font-bold hover:opacity-80" onClick={() => setSidebarOpen(false)}>spike.land</Link>
           <ThemeSwitcher theme={theme} setTheme={setTheme} />
         </div>
         <nav className="flex flex-col gap-1 p-4">
@@ -159,29 +159,39 @@ export function RootLayout() {
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-16 items-center border-b border-border bg-card px-6 lg:hidden">
-          <button onClick={() => setSidebarOpen(true)} className="rounded p-2 hover:bg-muted" aria-label="Open navigation menu">
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-          <Link to="/" className="ml-4 flex-1 text-lg font-bold hover:opacity-80">spike.land</Link>
+      {/* Top header — always visible */}
+      <header className="sticky top-0 z-20 flex h-16 items-center border-b border-border bg-card px-6">
+        {/* Mobile hamburger */}
+        <button onClick={() => setSidebarOpen(true)} className="rounded p-2 hover:bg-muted lg:hidden" aria-label="Open navigation menu">
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <Link to="/" className="text-xl font-bold hover:opacity-80 lg:mr-8">spike.land</Link>
+
+        {/* Desktop nav links */}
+        <nav className="hidden items-center gap-1 lg:flex">
+          {navItems.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-muted [&.active]:bg-accent [&.active]:text-primary"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-2">
           <ThemeSwitcher theme={theme} setTheme={setTheme} />
-          <div className="ml-2">
-            <LoginButton />
-          </div>
-        </header>
-        <main className="flex-1 overflow-y-auto p-6">
-          <Outlet />
-        </main>
-      </div>
+          <LoginButton />
+        </div>
+      </header>
+
+      {/* Main content */}
+      <main className="flex-1 p-6">
+        <Outlet />
+      </main>
     </div>
   );
 }
