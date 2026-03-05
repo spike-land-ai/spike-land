@@ -4879,7 +4879,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@spike-land-ai/eslint-config@workspace:.github/packages/eslint-config":
+"@spike-land-ai/eslint-config@npm:*, @spike-land-ai/eslint-config@workspace:.github/packages/eslint-config":
   version: 0.0.0-use.local
   resolution: "@spike-land-ai/eslint-config@workspace:.github/packages/eslint-config"
   dependencies:
@@ -4977,6 +4977,8 @@ __metadata:
   dependencies:
     "@changesets/cli": "npm:2.30.0"
     "@modelcontextprotocol/sdk": "npm:1.27.1"
+    "@spike-land-ai/eslint-config": "npm:*"
+    "@spike-land-ai/tsconfig": "npm:*"
     "@types/node": "npm:25.3.3"
     "@vitest/coverage-v8": "npm:4.0.18"
     eslint: "npm:10.0.2"
@@ -5135,6 +5137,8 @@ __metadata:
     "@spike-land-ai/code": "npm:*"
     "@spike-land-ai/esbuild-wasm": "npm:*"
     "@spike-land-ai/esbuild-wasm-mcp": "npm:*"
+    "@spike-land-ai/eslint-config": "npm:*"
+    "@spike-land-ai/tsconfig": "npm:*"
     "@types/node": "npm:25.3.3"
     "@vitest/coverage-istanbul": "npm:4.0.18"
     "@vitest/coverage-v8": "npm:4.0.18"
@@ -5211,6 +5215,8 @@ __metadata:
     "@cloudflare/workers-types": "npm:4.20260305.0"
     "@spike-land-ai/code": "npm:*"
     "@spike-land-ai/esbuild-wasm": "npm:*"
+    "@spike-land-ai/eslint-config": "npm:*"
+    "@spike-land-ai/tsconfig": "npm:*"
     "@vitest/coverage-v8": "npm:4.0.18"
     rimraf: "npm:6.1.3"
     typescript: "npm:5.9.3"
@@ -5219,7 +5225,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@spike-land-ai/tsconfig@workspace:.github/packages/tsconfig":
+"@spike-land-ai/tsconfig@npm:*, @spike-land-ai/tsconfig@workspace:.github/packages/tsconfig":
   version: 0.0.0-use.local
   resolution: "@spike-land-ai/tsconfig@workspace:.github/packages/tsconfig"
   languageName: unknown
