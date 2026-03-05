@@ -13,10 +13,12 @@ const log = createLogger("spike-edge");
 
 const checkout = new Hono<{ Bindings: Env }>();
 
-const LOOKUP_KEYS: Record<string, string> = {
-  pro: "pro_monthly",
-  business: "business_monthly",
-};
+const VALID_LOOKUP_KEYS = new Set([
+  "pro_monthly",
+  "pro_annual",
+  "business_monthly",
+  "business_annual",
+]);
 
 async function stripePost(
   key: string,
@@ -60,9 +62,9 @@ checkout.post("/api/checkout", async (c) => {
     return c.json({ error: "Unauthorized" }, 401);
   }
 
-  let body: { tier?: string };
+  let body: { tier?: string; lookup_key?: string };
   try {
-    body = (await c.req.json()) as { tier?: string };
+    body = (await c.req.json()) as { tier?: string; lookup_key?: string };
   } catch {
     return c.json({ error: "Invalid JSON body" }, 400);
   }
@@ -72,7 +74,12 @@ checkout.post("/api/checkout", async (c) => {
     return c.json({ error: "Invalid tier. Must be 'pro' or 'business'." }, 400);
   }
 
-  const lookupKey = LOOKUP_KEYS[tier] as string;
+  // Use the provided lookup_key if valid, otherwise fall back to monthly
+  const requestedKey = body.lookup_key;
+  const lookupKey =
+    requestedKey && VALID_LOOKUP_KEYS.has(requestedKey) && requestedKey.startsWith(tier)
+      ? requestedKey
+      : `${tier}_monthly`;
 
   // Look up price by lookup_key
   const priceRes = await stripeGet(stripeKey, "/v1/prices", {
