@@ -29,6 +29,14 @@ const ALLOWED_CALLER_HEADERS = new Set([
   "x-request-id",
 ]);
 
+// S5: Per-route HTTP method allowlists — prevent callers from using arbitrary
+// methods (e.g. DELETE, PUT) against upstream APIs via the proxy.
+const ALLOWED_METHODS: Record<string, Set<string>> = {
+  stripe: new Set(["POST"]),
+  ai: new Set(["POST"]),
+  github: new Set(["GET", "POST"]),
+};
+
 function sanitizeCallerHeaders(
   raw: Record<string, string> | undefined,
 ): Record<string, string> {
@@ -83,9 +91,14 @@ proxy.post("/proxy/stripe", async (c) => {
     return c.json({ error: "Invalid Stripe API URL" }, 400);
   }
 
+  const method = (body.method ?? "POST").toUpperCase();
+  if (!ALLOWED_METHODS.stripe.has(method)) {
+    return c.json({ error: `Method ${method} not allowed for Stripe proxy` }, 405);
+  }
+
   const start = Date.now();
   const response = await fetch(body.url, {
-    method: body.method ?? "POST",
+    method,
     headers: {
       ...sanitizeCallerHeaders(body.headers),
       Authorization: `Bearer ${c.env.STRIPE_SECRET_KEY}`,
@@ -147,10 +160,15 @@ proxy.post("/proxy/ai", async (c) => {
       ? { "x-api-key": apiKey }
       : { Authorization: `Bearer ${apiKey}` };
 
+  const method = (body.method ?? "POST").toUpperCase();
+  if (!ALLOWED_METHODS.ai.has(method)) {
+    return c.json({ error: `Method ${method} not allowed for AI proxy` }, 405);
+  }
+
   const providerName = provider.byokProvider;
   const start = Date.now();
   const response = await fetch(body.url, {
-    method: body.method ?? "POST",
+    method,
     headers: {
       ...sanitizeCallerHeaders(body.headers),
       ...authHeaders,
@@ -188,9 +206,14 @@ proxy.post("/proxy/github", async (c) => {
     return c.json({ error: "Invalid GitHub API URL" }, 400);
   }
 
+  const method = (body.method ?? "GET").toUpperCase();
+  if (!ALLOWED_METHODS.github.has(method)) {
+    return c.json({ error: `Method ${method} not allowed for GitHub proxy` }, 405);
+  }
+
   const start = Date.now();
   const response = await fetch(body.url, {
-    method: body.method ?? "GET",
+    method,
     headers: {
       ...sanitizeCallerHeaders(body.headers),
       Authorization: `Bearer ${c.env.GITHUB_TOKEN}`,

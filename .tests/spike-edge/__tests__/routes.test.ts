@@ -955,7 +955,7 @@ describe("proxy route — body forwarding", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           url: "https://api.stripe.com/v1/charges",
-          method: "GET",
+          method: "POST",
           body: { amount: 1000, currency: "usd" },
         }),
       },
@@ -963,7 +963,7 @@ describe("proxy route — body forwarding", () => {
     );
 
     const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.method).toBe("GET");
+    expect(fetchCall[1]!.method).toBe("POST");
     expect(fetchCall[1]!.body).toBe(JSON.stringify({ amount: 1000, currency: "usd" }));
 
     vi.unstubAllGlobals();

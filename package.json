@@ -49,6 +49,9 @@
   "resolutions": {
     "eslint": "10.0.2",
     "typescript": "5.9.3",
-    "@modelcontextprotocol/sdk": "1.27.1"
+    "@modelcontextprotocol/sdk": "1.27.1",
+    "dompurify": ">=3.3.1",
+    "tar": ">=7.5.10",
+    "@hono/node-server": ">=1.19.11"
   }
 }
