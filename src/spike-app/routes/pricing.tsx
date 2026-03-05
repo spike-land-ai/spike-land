@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PricingFeature {
   text: string;
@@ -112,7 +113,11 @@ const FAQ_ITEMS = [
   },
 ];
 
-async function handleCheckout(tier: "pro" | "business", annual: boolean) {
+async function handleCheckout(tier: "pro" | "business", annual: boolean, isAuthenticated: boolean) {
+  if (!isAuthenticated) {
+    window.location.href = "/login";
+    return;
+  }
   const lookupKey = annual ? `${tier}_annual` : `${tier}_monthly`;
   const res = await fetch("/api/checkout", {
     method: "POST",
@@ -128,7 +133,7 @@ async function handleCheckout(tier: "pro" | "business", annual: boolean) {
   window.location.href = data.url;
 }
 
-function PlanCard({ plan, annual }: { plan: PricingPlan; annual: boolean }) {
+function PlanCard({ plan, annual, isAuthenticated }: { plan: PricingPlan; annual: boolean; isAuthenticated: boolean }) {
   const isFree = plan.name === "Free";
   const displayPrice = annual ? plan.annualPrice : plan.monthlyPrice;
 
@@ -191,7 +196,7 @@ function PlanCard({ plan, annual }: { plan: PricingPlan; annual: boolean }) {
       {plan.tier ? (
         <button
           type="button"
-          onClick={() => handleCheckout(plan.tier!, annual)}
+          onClick={() => handleCheckout(plan.tier!, annual, isAuthenticated)}
           className={buttonClass}
         >
           {plan.cta}
@@ -236,6 +241,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 
 export function PricingPage() {
   const [annual, setAnnual] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="mx-auto max-w-5xl space-y-12 px-4 py-10">
@@ -281,7 +287,7 @@ export function PricingPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {PLANS.map((plan) => (
-          <PlanCard key={plan.name} plan={plan} annual={annual} />
+          <PlanCard key={plan.name} plan={plan} annual={annual} isAuthenticated={isAuthenticated} />
         ))}
       </div>
 
