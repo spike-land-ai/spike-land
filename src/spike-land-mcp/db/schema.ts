@@ -61,6 +61,7 @@ export const oauthAccessTokens = sqliteTable(
     }),
     tokenHash: text("token_hash").notNull().unique(), // SHA-256 hex of "mcp_..." token
     scope: text("scope").notNull().default("mcp"),
+    revokedAt: integer("revoked_at", { mode: "number" }),
     expiresAt: integer("expires_at", { mode: "number" }).notNull(),
     createdAt: integer("created_at", { mode: "number" }).notNull(),
   },

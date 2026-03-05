@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 export function CookieConsent() {
   const { consentGiven, accept, reject } = useCookieConsent();
@@ -14,12 +15,17 @@ export function CookieConsent() {
     }
   }, [consentGiven]);
 
+  const isOpen = consentGiven === null && visible;
+  const onClose = useCallback(() => reject(), [reject]);
+  const trapRef = useFocusTrap(isOpen, onClose);
+
   if (consentGiven !== null) {
     return null;
   }
 
   return (
     <div
+      ref={trapRef}
       className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
       role="dialog"
       aria-modal="true"

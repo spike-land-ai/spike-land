@@ -170,22 +170,15 @@ describe("generate", () => {
     // TIER_1K cost (2) + text cost (1) = 3
   });
 
-  it("should return INSUFFICIENT_CREDITS for advanced path when balance is low", async () => {
+  it("should return BALANCE_ERROR when user balance is insufficient", async () => {
     const ctx: ToolContext = { userId, deps };
-    mocks.credits.consume.mockResolvedValue({
-      success: false,
-      error: "Insufficient credits",
-    });
-    mocks.generation.createAdvancedGenerationJob.mockResolvedValue({
-      success: false,
-      error: "Insufficient credits",
-      creditsCost: 2,
-    });
+    mocks.credits.hasEnough.mockResolvedValue(false);
 
     const result = await generate({ resolution: "4K", tier: "TIER_4K" }, ctx);
 
     expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain("GENERATION_FAILED");
+    expect(result.content[0].text).toContain("BALANCE_ERROR");
+    expect(result.content[0].text).toContain("Insufficient credits");
   });
 
   it("should return SUBJECT_NOT_FOUND when a subject ref is not in the user's library", async () => {
@@ -241,6 +234,87 @@ describe("generate", () => {
         }),
       }),
     );
+  });
+
+  it("should resolve subjects by ID and pass them to advanced job", async () => {
+    const ctx: ToolContext = { userId, deps };
+    mocks.db.subjectFindMany.mockResolvedValue([
+      {
+        id: "sub-123",
+        label: "warrior",
+        type: "character",
+        imageId: asImageId("img-warrior"),
+        userId,
+      },
+    ]);
+    mocks.generation.createAdvancedGenerationJob.mockResolvedValue({
+      success: true,
+      jobId: "adv-subj-id-job",
+      creditsCost: 3,
+    });
+
+    await generate({ subject_refs: ["sub-123"] }, ctx);
+
+    expect(mocks.generation.createAdvancedGenerationJob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({
+          subjects: [expect.objectContaining({ label: "warrior" })],
+        }),
+      }),
+    );
+  });
+
+  it("should skip subject resolution if subjectFindMany is undefined", async () => {
+    const ctx: ToolContext = { userId, deps };
+    deps.db.subjectFindMany = undefined as any;
+    mocks.generation.createAdvancedGenerationJob.mockResolvedValue({
+      success: true,
+      jobId: "adv-no-db-job",
+      creditsCost: 2,
+    });
+
+    const result = await generate({ subject_refs: ["hero"] }, ctx);
+
+    expect(result.isError).toBeUndefined();
+    expect(mocks.generation.createAdvancedGenerationJob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ subjects: undefined }),
+      }),
+    );
+  });
+
+  it("should pass model_preference to advanced generation path", async () => {
+    const ctx: ToolContext = { userId, deps };
+    mocks.generation.createAdvancedGenerationJob.mockResolvedValue({
+      success: true,
+      jobId: "adv-pref-job",
+      creditsCost: 2,
+    });
+
+    await generate({ prompt: "best", model_preference: "quality", resolution: "2K" }, ctx);
+
+    expect(mocks.generation.createAdvancedGenerationJob).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ modelPreference: "quality" }),
+      }),
+    );
+  });
+
+  it("should return IMAGE_NOT_FOUND when reference image is owned by different user", async () => {
+    const ctx: ToolContext = { userId, deps };
+    mocks.resolverMocks.resolveImage.mockResolvedValue(
+      mockImageRow({ id: asImageId("other-img"), userId: "other-user" }),
+    );
+
+    const result = await generate(
+      {
+        reference_images: [{ image_id: "other-img" }],
+      },
+      ctx,
+    );
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("IMAGE_NOT_FOUND");
   });
 
   it("should return GENERATION_FAILED when advanced job returns success:false", async () => {

@@ -161,7 +161,7 @@ export function StorePage() {
           <h2 className="text-lg font-semibold">Featured</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredData.featured.map((tool) => (
-              <Link key={tool.name} to="/tools" className="block">
+              <Link key={tool.name} to="/tools/$toolName" params={{ toolName: tool.name }} className="block">
                 <ToolCard tool={tool} featured />
               </Link>
             ))}
@@ -174,7 +174,7 @@ export function StorePage() {
           <h2 className="text-lg font-semibold capitalize">{cat.name}</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {cat.tools.map((tool) => (
-              <Link key={tool.name} to="/tools" className="block">
+              <Link key={tool.name} to="/tools/$toolName" params={{ toolName: tool.name }} className="block">
                 <ToolCard tool={tool} />
               </Link>
             ))}

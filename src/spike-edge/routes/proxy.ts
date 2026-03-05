@@ -104,7 +104,7 @@ proxy.post("/proxy/stripe", async (c) => {
       Authorization: `Bearer ${c.env.STRIPE_SECRET_KEY}`,
       "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: body.body ? JSON.stringify(body.body) : undefined,
+    body: body.body ? JSON.stringify(body.body) : null,
   });
 
   try {
@@ -174,7 +174,7 @@ proxy.post("/proxy/ai", async (c) => {
       ...authHeaders,
       "Content-Type": "application/json",
     },
-    body: body.body ? JSON.stringify(body.body) : undefined,
+    body: body.body ? JSON.stringify(body.body) : null,
   });
 
   try {
@@ -220,7 +220,7 @@ proxy.post("/proxy/github", async (c) => {
       Accept: "application/vnd.github+json",
       "User-Agent": "spike-edge",
     },
-    body: body.body ? JSON.stringify(body.body) : undefined,
+    body: body.body ? JSON.stringify(body.body) : null,
   });
 
   try {

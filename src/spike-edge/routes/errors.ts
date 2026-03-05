@@ -6,6 +6,11 @@ const errors = new Hono<{ Bindings: Env }>();
 
 const isRateLimited = createRateLimiter({ windowMs: 60_000, maxRequests: 10 });
 
+const MAX_STRING = 1024;
+const MAX_STACK = 8192;
+const MAX_METADATA = 4096;
+const MAX_BATCH = 50;
+
 interface ErrorLogEntry {
   service_name: string;
   error_code?: string;
@@ -18,7 +23,18 @@ interface ErrorLogEntry {
 function isValidErrorLog(e: unknown): e is ErrorLogEntry {
   if (typeof e !== "object" || e === null) return false;
   const obj = e as Record<string, unknown>;
-  return typeof obj.service_name === "string" && typeof obj.message === "string";
+  return (
+    typeof obj.service_name === "string" &&
+    obj.service_name.length <= MAX_STRING &&
+    typeof obj.message === "string" &&
+    obj.message.length <= MAX_STRING &&
+    (obj.error_code === undefined || (typeof obj.error_code === "string" && obj.error_code.length <= MAX_STRING)) &&
+    (obj.stack_trace === undefined || (typeof obj.stack_trace === "string" && obj.stack_trace.length <= MAX_STACK))
+  );
+}
+
+function truncate(value: string, max: number): string {
+  return value.length > max ? value.slice(0, max) : value;
 }
 
 const VALID_SEVERITIES = new Set(["warning", "error", "fatal"]);
@@ -35,6 +51,10 @@ errors.post("/errors/ingest", async (c) => {
     return c.json({ error: "Request body must be an array of error logs" }, 400);
   }
 
+  if (body.length > MAX_BATCH) {
+    return c.json({ error: `Batch size exceeds maximum of ${MAX_BATCH}` }, 400);
+  }
+
   const entries = body.filter(isValidErrorLog);
   if (entries.length === 0) {
     return c.json({ error: "No valid error logs in batch" }, 400);
@@ -44,17 +64,18 @@ errors.post("/errors/ingest", async (c) => {
     "INSERT INTO error_logs (service_name, error_code, message, stack_trace, metadata, client_id, severity) VALUES (?, ?, ?, ?, ?, ?, ?)",
   );
 
-  const batch = entries.map((e) =>
-    stmt.bind(
-      e.service_name,
-      e.error_code ?? null,
-      e.message,
-      e.stack_trace ?? null,
-      e.metadata ? JSON.stringify(e.metadata) : null,
+  const batch = entries.map((e) => {
+    const metadataStr = e.metadata ? truncate(JSON.stringify(e.metadata), MAX_METADATA) : null;
+    return stmt.bind(
+      truncate(e.service_name, MAX_STRING),
+      e.error_code ? truncate(e.error_code, MAX_STRING) : null,
+      truncate(e.message, MAX_STRING),
+      e.stack_trace ? truncate(e.stack_trace, MAX_STACK) : null,
+      metadataStr,
       clientIp,
       VALID_SEVERITIES.has(e.severity ?? "") ? e.severity! : "error",
-    ),
-  );
+    );
+  });
 
   const work = c.env.DB.batch(batch);
   try {

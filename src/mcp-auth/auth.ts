@@ -9,6 +9,7 @@ import * as schema from "./db/schema";
 export interface Env {
   AUTH_DB: D1Database;
   BETTER_AUTH_SECRET: string;
+  MCP_INTERNAL_SECRET: string;
   APP_URL?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;

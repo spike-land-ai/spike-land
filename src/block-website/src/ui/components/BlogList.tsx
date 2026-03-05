@@ -25,7 +25,7 @@ function CardImage({ post, className = "" }: { post: BlogMeta; className?: strin
       <div className={`overflow-hidden ${className}`}>
         <img
           src={post.heroImage}
-          alt=""
+          alt={post.title}
           loading="lazy"
           decoding="async"
           className="w-full h-auto transition-transform duration-300 group-hover:scale-105"
@@ -55,6 +55,7 @@ function FeaturedCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.Comp
           <time dateTime={post.date} className="text-muted-foreground/80">
             {new Date(post.date).toLocaleDateString()}
           </time>
+          {post.author && <><span className="text-muted-foreground/40">&middot;</span><span className="text-muted-foreground/80">{post.author}</span></>}
         </div>
         <h3 className="text-xl sm:text-2xl font-display font-bold leading-snug text-foreground group-hover:text-primary transition-colors mb-2">
           {post.title}
@@ -88,6 +89,7 @@ function BlogCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.Componen
           <time dateTime={post.date} className="text-muted-foreground/80">
             {new Date(post.date).toLocaleDateString()}
           </time>
+          {post.author && <><span className="text-muted-foreground/40">&middot;</span><span className="text-muted-foreground/80">{post.author}</span></>}
         </div>
         <h3 className="text-lg font-display font-bold leading-snug text-foreground group-hover:text-primary transition-colors mb-2 line-clamp-2">
           {post.title}

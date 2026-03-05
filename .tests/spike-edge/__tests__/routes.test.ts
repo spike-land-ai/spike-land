@@ -969,7 +969,7 @@ describe("proxy route — body forwarding", () => {
     vi.unstubAllGlobals();
   });
 
-  it("sends undefined body to Stripe when not provided", async () => {
+  it("sends null body to Stripe when not provided", async () => {
     const app = new Hono<{ Bindings: Env }>();
     app.route("/", proxy);
 
@@ -993,7 +993,7 @@ describe("proxy route — body forwarding", () => {
     );
 
     const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.body).toBeUndefined();
+    expect(fetchCall[1]!.body).toBeNull();
 
     vi.unstubAllGlobals();
   });
@@ -1032,7 +1032,7 @@ describe("proxy route — body forwarding", () => {
     vi.unstubAllGlobals();
   });
 
-  it("sends undefined body to GitHub when not provided", async () => {
+  it("sends null body to GitHub when not provided", async () => {
     const app = new Hono<{ Bindings: Env }>();
     app.route("/", proxy);
 
@@ -1056,7 +1056,7 @@ describe("proxy route — body forwarding", () => {
     );
 
     const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.body).toBeUndefined();
+    expect(fetchCall[1]!.body).toBeNull();
 
     vi.unstubAllGlobals();
   });

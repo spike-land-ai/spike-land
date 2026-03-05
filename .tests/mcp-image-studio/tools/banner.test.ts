@@ -562,4 +562,51 @@ describe("banner", () => {
     // Wait I just fixed avatar by writing 2. TIER_1K is 2.
     expect(data.creditsCost).toBe(2);
   });
+
+  it("should return INVALID_INPUT when preset is custom but custom_aspect_ratio is missing", async () => {
+    const ctx: ToolContext = { userId, deps };
+    const result = await banner({ preset: "custom", prompt: "test" }, ctx);
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("INVALID_INPUT");
+  });
+
+  it("should return GENERATION_FAILED with fallback message for advanced path failure", async () => {
+    const ctx: ToolContext = { userId, deps };
+    mocks.generation.createAdvancedGenerationJob.mockResolvedValue({
+      success: false,
+      // no error field
+    });
+
+    const result = await banner({ preset: "twitter_header", title: "Fail", prompt: "test" }, ctx);
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("Failed to create banner job");
+  });
+
+  it("should return GENERATION_FAILED with fallback message for basic path failure", async () => {
+    const ctx: ToolContext = { userId, deps };
+    mocks.generation.createGenerationJob.mockResolvedValue({
+      success: false,
+      // no error field
+    });
+
+    const result = await banner({ preset: "twitter_header", prompt: "test" }, ctx);
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("Failed to create banner job");
+  });
+
+  it("should return credit consumption error in basic path", async () => {
+    const ctx: ToolContext = { userId, deps };
+    mocks.generation.createGenerationJob.mockResolvedValue({
+      success: true,
+      jobId: "basic-job",
+    });
+    mocks.credits.consume.mockResolvedValue({
+      success: false,
+      error: "No money",
+    });
+
+    const result = await banner({ preset: "twitter_header", prompt: "test" }, ctx);
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("No money");
+  });
 });

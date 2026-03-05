@@ -309,11 +309,11 @@ function selectRoundQuestions(session: InterviewSession): InterviewRound {
     .map((s, i) => ({ state: s, index: i }))
     .filter((s) => !s.state.mastered);
 
-  // Round-robin: pick 3 unmastered concepts
+  // Round-robin: pick each unmastered concept at most once in first pass
   const selected: Array<{ conceptIndex: number; variantIndex: number }> = [];
   const roundOffset = session.roundNumber;
 
-  for (let i = 0; i < 3 && unmastered.length > 0; i++) {
+  for (let i = 0; i < Math.min(3, unmastered.length); i++) {
     const pickIdx = (roundOffset + i) % unmastered.length;
     const pick = unmastered[pickIdx]!;
     const concept = session.concepts[pick.index]!;
@@ -321,8 +321,9 @@ function selectRoundQuestions(session: InterviewSession): InterviewRound {
     selected.push({ conceptIndex: pick.index, variantIndex });
   }
 
-  // If fewer than 3 unmastered, cycle
+  // If fewer than 3 unmastered, cycle and pick different variants
   while (selected.length < 3 && unmastered.length > 0) {
+
     const pickIdx = selected.length % unmastered.length;
     const pick = unmastered[pickIdx]!;
     const concept = session.concepts[pick.index]!;

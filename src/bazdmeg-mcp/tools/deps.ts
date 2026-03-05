@@ -31,28 +31,14 @@ function buildTree(
       const childIndent = indent + (isLast ? "      " : "  │   ");
 
       if (packages[dep]) {
-        if (visited.has(dep)) {
-          output += `${indent}${prefix}${dep} (circular)\n`;
-        } else {
-          output += `${indent}${prefix}${dep}\n`;
-          const childPkg = packages[dep];
-          if (childPkg?.deps) {
-            for (let j = 0; j < childPkg.deps.length; j++) {
-              const childDep = childPkg.deps[j]!;
-              const childIsLast = j === childPkg.deps.length - 1;
-              const childPrefix = childIsLast ? "  └── " : "  ├── ";
-              output += `${childIndent}${childPrefix}${childDep}${
-                visited.has(childDep) ? " (circular)" : ""
-              }\n`;
-            }
-          }
-        }
+        output += `${indent}${prefix}${buildTree(dep, packages, childIndent, visited).trimStart()}`;
       } else {
         output += `${indent}${prefix}${dep} (external)\n`;
       }
     }
   }
 
+  visited.delete(name);
   return output;
 }
 

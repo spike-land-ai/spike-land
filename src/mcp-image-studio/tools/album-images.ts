@@ -29,10 +29,10 @@ export const albumImagesTool = imageProcedure
     if (input.action === "add") {
       const imageIds = input.image_ids.map((id) => asImageId(id));
       const imgRes = await tryCatch(deps.resolvers.resolveImages(imageIds));
-      /* v8 ignore next */
       if (!imgRes.ok || !imgRes.data || imgRes.data.length === 0) {
         return errorResult("IMAGES_NOT_FOUND", "One or more images not found or not owned by user");
       }
+
       const resolvedImages = imgRes.data;
 
       const maxSortResult = await tryCatch(deps.db.albumImageMaxSortOrder(album.id));

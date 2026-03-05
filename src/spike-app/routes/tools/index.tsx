@@ -7,11 +7,10 @@ export function ToolsIndexPage() {
   const [search, setSearch] = useState("");
 
   const categorizedTools = useMemo(() => {
-    // Gracefully handle both { tools: [...] } and direct array responses
-    const toolsArray = Array.isArray(data) ? data : data?.tools;
+    const toolsArray = data?.tools;
     if (!toolsArray || !Array.isArray(toolsArray)) return [];
-    
-    return toolsArray.map((tool: any) => ({
+
+    return toolsArray.map((tool) => ({
       ...tool,
       category: tool.category || "General",
       name: tool.name || "Unknown Tool",
@@ -46,23 +45,11 @@ export function ToolsIndexPage() {
         </div>
         <div className="rounded-xl border border-border bg-card p-8 text-center space-y-4">
           <p className="text-muted-foreground">
-            Unable to load live tool data. Here are some of our popular tools:
+            Unable to load tools. Please try again later.
           </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 text-left">
-            {[
-              { name: "QA Studio", desc: "Automated browser testing" },
-              { name: "Code Review", desc: "AI-powered code review" },
-              { name: "Image Studio", desc: "AI image generation" },
-              { name: "Chess Arena", desc: "Play chess against AI" },
-              { name: "State Machine", desc: "Visual workflow builder" },
-              { name: "HackerNews", desc: "Tech news reader" },
-            ].map((tool) => (
-              <div key={tool.name} className="rounded-xl border border-border p-4">
-                <h3 className="font-semibold text-foreground">{tool.name}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{tool.desc}</p>
-              </div>
-            ))}
-          </div>
+          <p className="text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : "An unexpected error occurred."}
+          </p>
           <button
             onClick={() => window.location.reload()}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"

@@ -85,8 +85,9 @@ export function PrivacyPage() {
           >
             Cloudflare
           </a>{" "}
-          infrastructure (Workers, D1, R2) distributed globally. Cloudflare operates data centres
-          in the EU and maintains SOC 2 Type II and ISO 27001 certifications.
+          infrastructure (Workers, D1, R2) distributed globally. Our infrastructure provider,
+          Cloudflare, maintains SOC 2 Type II and ISO 27001 certifications. These certifications apply
+          to Cloudflare's infrastructure, not to the spike.land application layer.
         </p>
         <p className="leading-relaxed text-foreground">
           We implement industry-standard security measures: HTTPS everywhere, session tokens stored
@@ -191,7 +192,52 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xl font-semibold">9. Children&rsquo;s Privacy</h2>
+        <h2 className="text-xl font-semibold">9. Breach Notification</h2>
+        <p className="leading-relaxed text-foreground">
+          In the event of a data breach affecting your personal data, we will notify affected users
+          within 72 hours in accordance with GDPR Article 33. We will also notify the relevant
+          supervisory authority where required. Notifications will include the nature of the breach,
+          likely consequences, and the measures taken to address it.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold">10. California Privacy Rights (CCPA/CPRA)</h2>
+        <p className="leading-relaxed text-foreground">
+          If you are a California resident, the California Consumer Privacy Act (CCPA) and California
+          Privacy Rights Act (CPRA) provide you with the following rights:
+        </p>
+        <ul className="list-inside list-disc space-y-2 text-foreground ml-4">
+          <li>
+            <strong>Right to Know</strong> — you may request that we disclose the categories and
+            specific pieces of personal information we have collected about you, the categories of
+            sources, the business purpose for collecting it, and the categories of third parties with
+            whom we share it
+          </li>
+          <li>
+            <strong>Right to Delete</strong> — you may request that we delete the personal information
+            we have collected from you, subject to certain exceptions
+          </li>
+          <li>
+            <strong>Right to Opt-Out</strong> — you have the right to opt out of the sale or sharing of
+            your personal information. We do not sell your personal information
+          </li>
+          <li>
+            <strong>Right to Non-Discrimination</strong> — we will not discriminate against you for
+            exercising any of your CCPA/CPRA rights
+          </li>
+        </ul>
+        <p className="leading-relaxed text-foreground">
+          To exercise any of these rights, contact us at{" "}
+          <a href="mailto:privacy@spike.land" className="text-primary underline hover:text-primary/80">
+            privacy@spike.land
+          </a>
+          . We will verify your identity before processing your request and respond within 45 days.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold">11. Children&rsquo;s Privacy</h2>
         <p className="leading-relaxed text-foreground">
           The Platform is not directed to children under 13. We do not knowingly collect personal
           data from children. If you believe a child has provided us with personal data, please
@@ -200,7 +246,7 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xl font-semibold">10. Changes to This Policy</h2>
+        <h2 className="text-xl font-semibold">12. Changes to This Policy</h2>
         <p className="leading-relaxed text-foreground">
           We may update this Privacy Policy periodically. We will notify you of significant changes
           via email or an in-app notice at least 14 days before they take effect.
@@ -208,7 +254,7 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xl font-semibold">11. Contact & Data Protection Officer</h2>
+        <h2 className="text-xl font-semibold">13. Contact & Data Protection Officer</h2>
         <p className="leading-relaxed text-foreground">
           For privacy questions or to exercise your rights, email our Data Protection Officer (DPO) at{" "}
           <a href="mailto:privacy@spike.land" className="text-primary underline hover:text-primary/80">
@@ -227,19 +273,6 @@ export function PrivacyPage() {
         </p>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-xl font-semibold">12. Impressum & Legal Notice</h2>
-        <p className="leading-relaxed text-foreground">
-          <strong>spike.land</strong> is operated by:<br />
-          spike.land AI Limited<br />
-          123 Tech Avenue, Innovation District<br />
-          London, E1 8FA, United Kingdom
-        </p>
-        <p className="leading-relaxed text-foreground">
-          <strong>Company Registration:</strong> 12345678 (England and Wales)<br />
-          <strong>Responsible Person:</strong> Jane Doe, CEO
-        </p>
-      </section>
     </div>
   );
 }

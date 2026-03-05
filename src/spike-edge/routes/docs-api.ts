@@ -12,7 +12,7 @@ interface DocEntry {
 
 // Static manifest of available docs — maps to files in docs/ directory
 const DOCS_MANIFEST: DocEntry[] = [
-  { slug: "getting-started", title: "Getting Started", category: "Guides", description: "Quick start guide for spike.land", filePath: "docs/develop/ONBOARDING.md" },
+  { slug: "getting-started", title: "Getting Started", category: "Guides", description: "Connect your MCP client to spike.land in minutes", filePath: "docs/guides/QUICK_START.md" },
   { slug: "mcp-overview", title: "MCP Overview", category: "MCP", description: "Introduction to Model Context Protocol", filePath: "docs/mcp/DEVELOPMENT_INDEX.md" },
   { slug: "mcp-tools", title: "MCP Tools Reference", category: "MCP", description: "Complete reference for all 80+ MCP tools", filePath: "docs/mcp/TOOL_GUIDELINES.md" },
   { slug: "api-reference", title: "API Reference", category: "API", description: "REST API documentation for spike.land edge services", filePath: "docs/api/API_REFERENCE.md" },

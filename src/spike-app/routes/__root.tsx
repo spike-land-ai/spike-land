@@ -1,8 +1,9 @@
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { useAuth } from "@/hooks/useAuth";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { LoginButton } from "@/components/LoginButton";
 import { AppFooter } from "@/components/AppFooter";
 import { CookieConsent } from "@/components/CookieConsent";
@@ -170,6 +171,9 @@ export function RootLayout() {
   useAuth();
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [searchToast, setSearchToast] = useState(false);
+  const closeMobileNav = useCallback(() => setMobileNavOpen(false), []);
+  const mobileNavRef = useFocusTrap(mobileNavOpen, closeMobileNav);
   const location = useRouterState({ select: (s) => s.location });
   const { pathname, searchStr } = location;
 
@@ -178,10 +182,19 @@ export function RootLayout() {
     setMobileNavOpen(false);
   }, [pathname]);
 
-  // Inject JSON-LD structured data once on mount
+  // Inject JSON-LD structured data and RSS link once on mount
   useEffect(() => {
     injectJsonLd("jsonld-organization", ORGANIZATION_JSON_LD);
     injectJsonLd("jsonld-webapp", WEB_APP_JSON_LD);
+
+    if (!document.querySelector('link[type="application/rss+xml"]')) {
+      const rssLink = document.createElement("link");
+      rssLink.rel = "alternate";
+      rssLink.type = "application/rss+xml";
+      rssLink.title = "spike.land Blog";
+      rssLink.href = "/api/blog/rss";
+      document.head.appendChild(rssLink);
+    }
   }, []);
 
   useEffect(() => {
@@ -270,7 +283,10 @@ export function RootLayout() {
                 type="button"
                 className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/50 border border-border rounded-md hover:bg-muted hover:text-foreground transition-all duration-200 active:scale-[0.98]"
                 aria-label="Search site"
-                onClick={() => alert("Search coming soon!")}
+                onClick={() => {
+                  setSearchToast(true);
+                  setTimeout(() => setSearchToast(false), 2000);
+                }}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 <span>Search...</span>
@@ -308,6 +324,7 @@ export function RootLayout() {
         {/* Mobile nav drawer */}
         {mobileNavOpen && (
           <div
+            ref={mobileNavRef}
             id="mobile-nav"
             className="md:hidden fixed inset-0 z-40 bg-background/95 backdrop-blur-sm flex flex-col pt-20 px-6 gap-4"
             role="dialog"
@@ -343,6 +360,15 @@ export function RootLayout() {
 
         <AppFooter />
         <CookieConsent />
+        {searchToast && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-lg bg-foreground text-background px-4 py-2 text-sm shadow-lg animate-in fade-in"
+          >
+            Search coming soon
+          </div>
+        )}
       </div>
     </div>
   );

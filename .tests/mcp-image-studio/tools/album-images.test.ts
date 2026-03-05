@@ -222,4 +222,58 @@ describe("albumImages", () => {
     expect(data.action).toBe("remove");
     expect(data.removed).toBe(0);
   });
+
+  it("should return IMAGES_NOT_FOUND when resolveImages returns no images", async () => {
+    const ctx: ToolContext = { userId, deps };
+    mocks.resolverMocks.resolveAlbum.mockResolvedValue(mockAlbumRow({ userId }));
+    mocks.resolverMocks.resolveImages.mockResolvedValue([]);
+
+    const result = await albumImages(
+      { album_handle: "my-album", action: "add", image_ids: ["img-1"] },
+      ctx,
+    );
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("IMAGES_NOT_FOUND");
+  });
+
+  it("should return IMAGES_NOT_FOUND when resolveImages fails", async () => {
+    const ctx: ToolContext = { userId, deps };
+    mocks.resolverMocks.resolveAlbum.mockResolvedValue(mockAlbumRow({ userId }));
+    mocks.resolverMocks.resolveImages.mockRejectedValue(new Error("Resolvers failed"));
+
+    const result = await albumImages(
+      { album_handle: "my-album", action: "add", image_ids: ["img-1"] },
+      ctx,
+    );
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain("IMAGES_NOT_FOUND");
+  });
+
+  it("should handle partial success when adding images", async () => {
+    const ctx: ToolContext = { userId, deps };
+    const albumRow = mockAlbumRow({ userId, handle: asAlbumHandle("partial") });
+    mocks.resolverMocks.resolveAlbum.mockResolvedValue(albumRow);
+    mocks.resolverMocks.resolveImages.mockResolvedValue([
+      mockImageRow({ id: asImageId("img-1"), userId }),
+      mockImageRow({ id: asImageId("img-2"), userId }),
+    ]);
+    
+    // Fail for img-1, succeed for img-2
+    mocks.db.albumImageAdd.mockImplementation((_aid, iid) => {
+      if (iid === "img-1") return Promise.resolve(null); // duplicate/fail
+      return Promise.resolve({ id: "added", albumId: _aid, imageId: iid, sortOrder: 1, addedAt: new Date() }); // succeed
+    });
+
+    const result = await albumImages(
+      { album_handle: "partial", action: "add", image_ids: ["img-1", "img-2"] },
+      ctx,
+    );
+
+    expect(result.isError).toBeUndefined();
+    const data = JSON.parse(result.content[0].text);
+    expect(data.added).toBe(1);
+    expect(data.skipped_duplicates).toBe(1);
+  });
 });

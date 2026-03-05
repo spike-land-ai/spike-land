@@ -175,4 +175,62 @@ describe("formatGateResults", () => {
     const output = formatGateResults(gates);
     expect(output).toContain("must be addressed");
   });
+
+  it("includes warning for YELLOW status", () => {
+    const gates: GateResult[] = [
+      {
+        name: "Warn",
+        status: "YELLOW",
+        detail: "Caution",
+      },
+    ];
+    const output = formatGateResults(gates);
+    expect(output).toContain("Proceed with caution");
+    expect(output).toContain("⚠️");
+  });
+});
+
+describe("Rule context edge cases", () => {
+  it("filters diff headers correctly in getAddedLines", () => {
+    const diff = "--- a/file.ts\n+++ b/file.ts\n@@ -1,1 +1,1 @@\n+new line";
+    const context = makeContext({ diff });
+    const rules = getBuiltinRules();
+    // Security patterns rule uses getAddedLines
+    const securityRule = rules.find(r => r.name === "Security Patterns");
+    expect(securityRule).toBeDefined();
+    const result = securityRule!.check(context);
+    expect(result.status).toBe("GREEN");
+  });
+
+  it("handles short PR descriptions", () => {
+    const context = makeContext({ prBody: "Too short" });
+    const rules = getBuiltinRules();
+    const rule = rules.find(r => r.name === "PR Description Quality");
+    const result = rule!.check(context);
+    expect(result.status).toBe("RED");
+    expect(result.detail).toContain("too short");
+  });
+
+  it("detects various security and quality patterns", () => {
+    const diff = [
+      "+const apiKey = '123';",
+      "+const secret = 'test-dummy-value';",
+      "+element.innerHTML = '<div>';",
+      "+// @ts-ignore",
+      "+let x = y as any;",
+    ].join("\n");
+    const context = makeContext({ diff });
+    const rules = getBuiltinRules();
+    
+    const securityResult = rules.find(r => r.name === "Security Patterns")!.check(context);
+    expect(securityResult.status).toBe("RED");
+    expect(securityResult.detail).toContain("Potential API key");
+    expect(securityResult.detail).toContain("Potential secret/token");
+    expect(securityResult.detail).toContain("innerHTML");
+
+    const complianceResult = rules.find(r => r.name === "TypeScript Strict Compliance")!.check(context);
+    expect(complianceResult.status).toBe("RED");
+    expect(complianceResult.detail).toContain("@ts-ignore");
+    expect(complianceResult.detail).toContain("`any` type detected");
+  });
 });

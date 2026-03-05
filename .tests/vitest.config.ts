@@ -336,6 +336,9 @@ export default defineConfig({
 
   // ── mcp-image-studio ─────────────────────────────────────
   {
+    resolve: {
+      alias: baseAliases,
+    },
     test: {
       name: "mcp-image-studio",
       ...forksPoolConfig,

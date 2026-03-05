@@ -559,4 +559,66 @@ describe("workflow tools", () => {
     });
     expect(result.content[0].text).toContain("already completed");
   });
+
+  it("selectRoundQuestions while loop when few unmastered concepts", async () => {
+    const firstResult = await server.call("bazdmeg_planning_interview", {
+      taskDescription: "Few concepts test",
+    });
+    const sessionId = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/)![1];
+    const session = getInterviewSession(sessionId)!;
+
+    // Manually master 5/6 concepts
+    for (let i = 0; i < 5; i++) {
+      session.conceptStates[i].mastered = true;
+    }
+
+    // Now only 1 concept is unmastered.
+    // Answering correctly to trigger NEXT round generation
+    const correctAnswers = session.currentRound.questions.map((q) => q.correctIndex) as [number, number, number];
+    const result = await server.call("bazdmeg_planning_interview", {
+      sessionId,
+      answers: correctAnswers,
+    });
+
+    // The new round should have been generated hitting the while loop
+    expect(result.content[0].text).toContain("Q1");
+    const newSession = getInterviewSession(sessionId)!;
+    // Round should have 3 questions, even if only 1 concept was unmastered (it repeats)
+    expect(newSession.currentRound.questions.length).toBe(3);
+  });
+
+  it("handles mastered concept in evaluation and unknown fallbacks", async () => {
+    const firstResult = await server.call("bazdmeg_planning_interview", {
+      taskDescription: "Mastered branch test",
+    });
+    const sessionId = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/)![1];
+    const session = getInterviewSession(sessionId)!;
+
+    // Manually master the concept used in Q1
+    const q1 = session.currentRound.questions[0];
+    session.conceptStates[q1.conceptIndex].mastered = true;
+    session.conceptStates[q1.conceptIndex].correctCount = 2;
+
+    // Trigger unknown fallbacks by clearing options for Q2
+    const q2 = session.currentRound.questions[1];
+    (q2 as any).options = []; // break it
+
+    const answers: [number, number, number] = [
+      q1.correctIndex, // Correct for mastered concept
+      (q2.correctIndex + 1) % 4, // Wrong for broken concept -> triggers conflict with empty options
+      session.currentRound.questions[2].correctIndex,
+    ];
+    
+    // Seed answerHistory for Q2 conflict
+    session.conceptStates[q2.conceptIndex].answerHistory.set(q2.variantIndex, q2.correctIndex);
+
+    const result = await server.call("bazdmeg_planning_interview", {
+      sessionId,
+      answers,
+    });
+
+    const text = result.content[0].text;
+    expect(text).toContain("CORRECT");
+    expect(text).toContain("unknown"); // From broken Q2 options
+  });
 });

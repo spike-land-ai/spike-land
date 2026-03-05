@@ -189,6 +189,18 @@ export default {
       return withCors(new Response("Not found", { status: 404 }), request);
     }
 
+    // Gate MCP endpoint with internal secret to prevent user enumeration
+    const internalSecret = request.headers.get("X-Internal-Secret");
+    if (!internalSecret || internalSecret !== env.MCP_INTERNAL_SECRET) {
+      return withCors(
+        new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }),
+        request,
+      );
+    }
+
     const transport = new WebStandardStreamableHTTPServerTransport({
       enableJsonResponse: true,
     });

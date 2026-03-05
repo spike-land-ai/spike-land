@@ -281,5 +281,50 @@ describe("manifest tools", () => {
       const result = await server.call("bazdmeg_manifest_validate", {});
       expect(result.isError).toBe(true);
     });
+
+    it("shows name filter in no-match message", async () => {
+      const result = await server.call("bazdmeg_manifest_query", {
+        packageName: "ghost",
+      });
+      expect(result.content[0].text).toContain("name=ghost");
+    });
+
+    it("handles missing fields in query results", async () => {
+      const result = await server.call("bazdmeg_manifest_query", {
+        field: "mirror",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("| shared | — |");
+    });
+
+    it("warns on non-worker with worker section", async () => {
+      mockReadManifest.mockResolvedValue({
+        defaults: MOCK_MANIFEST.defaults,
+        packages: {
+          "lib-oops": {
+            kind: "library",
+            version: "1.0.0",
+            description: "lib",
+            entry: "src/index.ts",
+            worker: { name: "oops" },
+          },
+        },
+      } as any);
+
+      const result = await server.call("bazdmeg_manifest_validate", {});
+      expect(result.content[0].text).toContain("has `worker` section but kind=library");
+    });
+
+    it("reports errors for missing defaults", async () => {
+      mockReadManifest.mockResolvedValue({
+        defaults: {},
+        packages: {},
+      } as any);
+
+      const result = await server.call("bazdmeg_manifest_validate", {});
+      expect(result.content[0].text).toContain("defaults: missing `scope`平衡".replace("平衡", ""));
+      expect(result.content[0].text).toContain("defaults: missing `registry`平衡".replace("平衡", ""));
+      expect(result.content[0].text).toContain("defaults: missing `license`平衡".replace("平衡", ""));
+    });
   });
 });

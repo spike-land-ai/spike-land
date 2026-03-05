@@ -138,34 +138,29 @@ export function registerManifestTools(server: McpServer): void {
       }
 
       // Check for circular deps
-      try {
-        const visited = new Set<string>();
-        const visiting = new Set<string>();
+      const visited = new Set<string>();
+      const visiting = new Set<string>();
 
-        function checkCycle(name: string): void {
-          if (visited.has(name)) return;
-          if (visiting.has(name)) {
-            errors.push(`Circular dependency detected involving: \`${name}\``);
-            return;
-          }
-          visiting.add(name);
-          const pkg = manifest.packages[name];
-          if (pkg?.deps) {
-            for (const dep of pkg.deps) {
-              if (allNames.has(dep)) checkCycle(dep);
-            }
-          }
-          visiting.delete(name);
-          visited.add(name);
+      function checkCycle(name: string): void {
+        if (visited.has(name)) return;
+        if (visiting.has(name)) {
+          errors.push(`Circular dependency detected involving: \`${name}\``);
+          return;
         }
-
-        for (const name of allNames) {
-          checkCycle(name);
+        visiting.add(name);
+        const pkg = manifest.packages[name];
+        if (pkg?.deps) {
+          for (const dep of pkg.deps) {
+            if (allNames.has(dep)) checkCycle(dep);
+          }
         }
-      } catch {
-        // Cycle detection already added to errors
+        visiting.delete(name);
+        visited.add(name);
       }
 
+      for (const name of allNames) {
+        checkCycle(name);
+      }
       // Check defaults
       if (!manifest.defaults.scope) errors.push("defaults: missing `scope`");
       if (!manifest.defaults.registry) {

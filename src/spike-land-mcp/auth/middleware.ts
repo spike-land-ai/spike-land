@@ -3,7 +3,7 @@ import type { Env } from "../env";
 import { createDb } from "../db/index";
 import { lookupApiKey } from "./api-key";
 import { oauthAccessTokens, users } from "../db/schema";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, isNull } from "drizzle-orm";
 
 async function hashToken(token: string): Promise<string> {
   const encoded = new TextEncoder().encode(token);
@@ -89,7 +89,13 @@ export const authMiddleware = createMiddleware<{
     const result = await db
       .select({ userId: oauthAccessTokens.userId })
       .from(oauthAccessTokens)
-      .where(and(eq(oauthAccessTokens.tokenHash, tokenHash), gt(oauthAccessTokens.expiresAt, now)))
+      .where(
+        and(
+          eq(oauthAccessTokens.tokenHash, tokenHash),
+          gt(oauthAccessTokens.expiresAt, now),
+          isNull(oauthAccessTokens.revokedAt),
+        ),
+      )
       .limit(1);
 
     userId = result[0]?.userId ?? null;

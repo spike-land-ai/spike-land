@@ -11,14 +11,19 @@ describe("Guard Expression Parser Coverage", () => {
   };
 
   describe("Operators and Branches", () => {
-    it("should cover all comparison operators", () => {
+    it("should cover all comparison operators and outcomes", () => {
       expect(evaluateExpression("1 >= 1", context)).toBe(true);
       expect(evaluateExpression("1 >= 0", context)).toBe(true);
+      expect(evaluateExpression("0 >= 1", context)).toBe(false);
       expect(evaluateExpression("1 <= 1", context)).toBe(true);
       expect(evaluateExpression("0 <= 1", context)).toBe(true);
+      expect(evaluateExpression("1 <= 0", context)).toBe(false);
       expect(evaluateExpression("2 != 1", context)).toBe(true);
+      expect(evaluateExpression("1 != 1", context)).toBe(false);
       expect(evaluateExpression("2 > 1", context)).toBe(true);
+      expect(evaluateExpression("1 > 2", context)).toBe(false);
       expect(evaluateExpression("1 < 2", context)).toBe(true);
+      expect(evaluateExpression("2 < 1", context)).toBe(false);
     });
 
     it("should cover logical operators branches", () => {
@@ -85,21 +90,35 @@ describe("Guard Expression Parser Coverage", () => {
 
     it("should throw on unterminated escape", () => {
       expect(() => evaluateExpression("'broken\\", context)).toThrow("unterminated string escape");
+      expect(() => evaluateExpression('"broken\\', context)).toThrow("unterminated string escape");
     });
   });
 
   describe("Error Handling", () => {
     it("should throw on unexpected character in primary", () => {
       expect(() => evaluateExpression("?", context)).toThrow("unexpected character");
+      expect(() => evaluateExpression("", context)).toThrow('unexpected character "EOF"');
     });
 
-    it("should throw on trailing content", () => {
+    it("should throw on unknown identifiers", () => {
+      expect(() => evaluateExpression("somethingElse", context)).toThrow('unknown identifier "somethingElse"');
+    });
+
+    it("should handle trailing whitespace in evaluateExpression", () => {
+      expect(evaluateExpression("  1  ", context)).toBe(1);
+    });
+
+    it("should throw on unexpected trailing content", () => {
       expect(() => evaluateExpression("1 + 1 extra", context)).toThrow("unexpected trailing content");
     });
 
     it("should handle resolvePath with non-objects", () => {
       expect(evaluateExpression("context.a.b", context)).toBeUndefined();
       expect(evaluateExpression("context.nested.missing.deep", context)).toBeUndefined();
+    });
+
+    it("should handle division", () => {
+      expect(evaluateExpression("10 / 2", context)).toBe(5);
     });
 
     it("should throw on division by zero", () => {

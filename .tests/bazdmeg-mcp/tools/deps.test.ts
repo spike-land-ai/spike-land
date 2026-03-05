@@ -7,18 +7,20 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { createMockServer } from "../__test-utils__/mock-server.js";
 
 vi.mock("../../../src/bazdmeg-mcp/manifest.js", async (importOriginal) => {
-  const actual = (await importOriginal()) as Record<string, unknown>;
+  const actual = (await importOriginal()) as any;
   return {
     ...actual,
-    readManifest: vi.fn(),
-    clearManifestCache: vi.fn(),
+    readManifest: vi.fn(actual.readManifest),
+    clearManifestCache: vi.fn(actual.clearManifestCache),
+    topologicalSort: vi.fn(actual.topologicalSort),
   };
 });
 
-import { readManifest } from "../../../src/bazdmeg-mcp/manifest.js";
+import { readManifest, topologicalSort } from "../../../src/bazdmeg-mcp/manifest.js";
 import { registerDepGraphTools } from "../../../src/bazdmeg-mcp/tools/deps.js";
 
 const mockReadManifest = vi.mocked(readManifest);
+const mockTopologicalSort = vi.mocked(topologicalSort);
 
 const MOCK_MANIFEST = {
   defaults: {
@@ -350,6 +352,103 @@ describe("dep graph tools", () => {
       // Should show error for circular deps
       expect(text).toContain("ERROR");
       expect(text).toContain("Circular");
+    });
+
+    it("handles non-Error objects in catch block of buildList", async () => {
+      // Mock topologicalSort to throw a string instead of an Error
+      mockTopologicalSort.mockImplementationOnce(() => {
+        throw "something went wrong as string";
+      });
+
+      const result = await server.call("bazdmeg_dep_graph", {
+        format: "list",
+      });
+      expect(result.content[0].text).toContain("something went wrong as string");
+    });
+
+    it("covers diamond dependency in buildList filter", async () => {
+      mockReadManifest.mockResolvedValue({
+        defaults: MOCK_MANIFEST.defaults,
+        packages: {
+          A: { kind: "library", version: "1.0.0", deps: ["B", "C"] },
+          B: { kind: "library", version: "1.0.0", deps: ["E"] },
+          C: { kind: "library", version: "1.0.0", deps: ["E"] },
+          E: { kind: "library", version: "1.0.0", deps: [] },
+          D: { kind: "library", version: "1.0.0", deps: [] },
+        },
+      } as any);
+
+      const result = await server.call("bazdmeg_dep_graph", {
+        packageName: "A",
+        format: "list",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("E");
+      expect(text).not.toContain("D");
+    });
+
+    it("covers package without kind in buildList", async () => {
+      mockReadManifest.mockResolvedValue({
+        defaults: MOCK_MANIFEST.defaults,
+        packages: {
+          "no-kind": { version: "1.0.0", deps: [] },
+        },
+      } as any);
+
+      const result = await server.call("bazdmeg_dep_graph", {
+        format: "list",
+      });
+      expect(result.content[0].text).toContain("?");
+    });
+  });
+
+  describe("misc edge cases", () => {
+    it("covers buildTree childIsLast branch and complex tree", async () => {
+      mockReadManifest.mockResolvedValue({
+        defaults: MOCK_MANIFEST.defaults,
+        packages: {
+          "root": { kind: "library", version: "1.0.0", deps: ["child"] },
+          "child": { kind: "library", version: "1.0.0", deps: ["dep1", "dep2"] },
+          "dep1": { kind: "library", version: "1.0.0" },
+          "dep2": { kind: "library", version: "1.0.0" },
+        },
+      } as any);
+
+      const result = await server.call("bazdmeg_dep_graph", {
+        packageName: "root",
+        format: "tree",
+      });
+      expect(result.content[0].text).toContain("dep1");
+      expect(result.content[0].text).toContain("dep2");
+    });
+
+    it("covers buildMermaid edge cases including duplicate and missing deps", async () => {
+      mockReadManifest.mockResolvedValue({
+        defaults: MOCK_MANIFEST.defaults,
+        packages: {
+          "pkg": { kind: "library", version: "1.0.0", deps: ["dep", "dep", "transitive"] },
+          "dep": { kind: "library", version: "1.0.0", deps: ["transitive", "transitive"] },
+          "transitive": { kind: "library", version: "1.0.0" },
+        },
+      } as any);
+
+      // This should hit !seen.has(edge) being false for both direct and transitive loops
+      const result = await server.call("bazdmeg_dep_graph", {
+        packageName: "pkg",
+        format: "mermaid",
+      });
+      const text = result.content[0].text;
+      // Should only appear once even though it's twice in manifest
+      const lines = text.split("\n").filter(l => l.includes("pkg --> dep"));
+      expect(lines.length).toBe(1);
+    });
+
+    it("covers default switch case for invalid format", async () => {
+      const result = await server.call("bazdmeg_dep_graph", {
+        packageName: "chess-engine",
+        format: "invalid",
+      });
+      expect(result.content[0].text).toContain("Dependency Tree");
     });
   });
 });

@@ -73,10 +73,9 @@ export const bannerTool = imageProcedure
       aspectRatio = input.custom_aspect_ratio as AspectRatio;
     } else {
       const presetInfo = PRESET_ASPECT_RATIOS[input.preset];
-      aspectRatio = presetInfo?.aspectRatio ?? "16:9";
-      recommendedSize = presetInfo?.recommended_size;
+      aspectRatio = presetInfo.aspectRatio;
+      recommendedSize = presetInfo.recommended_size;
     }
-
     const fullPrompt = input.title
       ? buildOgPrompt(input.title, input.subtitle, input.prompt)
       : `A banner image for ${input.preset.replace(/_/g, " ")}. ${input.prompt}`;
@@ -95,9 +94,9 @@ export const bannerTool = imageProcedure
       if (!jobRes.ok) {
         return errorResult("GENERATION_FAILED", jobRes.error.message, true);
       }
-      /* v8 ignore next */
       if (!jobRes.data?.success) {
         return errorResult(
+
           "GENERATION_FAILED",
           jobRes.data?.error ?? "Failed to create banner job",
           true,

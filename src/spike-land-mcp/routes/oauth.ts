@@ -2,8 +2,18 @@ import { Hono } from "hono";
 import type { Context } from "hono";
 import type { Env } from "../env";
 import { createDb } from "../db/index";
+import { oauthAccessTokens } from "../db/schema";
+import { eq } from "drizzle-orm";
 import { approveDeviceCode, createDeviceCode, exchangeDeviceCode } from "../auth/oauth-device";
 import { checkRateLimit } from "../kv/rate-limit";
+
+async function hashToken(token: string): Promise<string> {
+  const encoded = new TextEncoder().encode(token);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", encoded);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 /** Parse request body from either form-encoded or JSON, per OAuth RFC 6749 §2.3. */
 async function parseOAuthBody(c: Context): Promise<Record<string, unknown>> {
@@ -111,4 +121,26 @@ oauthRoute.post("/device/approve", async (c) => {
   }
 
   return c.json({ ok: true });
+});
+
+// POST /oauth/revoke — revoke an access token (RFC 7009)
+oauthRoute.post("/revoke", async (c) => {
+  const body = await parseOAuthBody(c);
+  const token = typeof body.token === "string" ? body.token : null;
+
+  if (!token) {
+    // RFC 7009: always return 200 even for invalid requests
+    return c.json({ active: false });
+  }
+
+  const tokenHash = await hashToken(token);
+  const db = createDb(c.env.DB);
+
+  await db
+    .update(oauthAccessTokens)
+    .set({ revokedAt: Date.now() })
+    .where(eq(oauthAccessTokens.tokenHash, tokenHash));
+
+  // RFC 7009: always return 200 regardless of whether token existed
+  return c.json({ active: false });
 });

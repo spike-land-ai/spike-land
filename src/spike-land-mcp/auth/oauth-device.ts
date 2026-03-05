@@ -118,7 +118,7 @@ export async function exchangeDeviceCode(
   // Generate access token
   const rawToken = generateCode("mcp_");
   const tokenHash = await hashToken(rawToken);
-  const expiresAt = Date.now() + 90 * 24 * 60 * 60 * 1000; // 90 days
+  const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
 
   await db.insert(oauthAccessTokens).values({
     id: crypto.randomUUID(),

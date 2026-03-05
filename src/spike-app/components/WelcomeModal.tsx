@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 const STORAGE_KEY = "spike_welcome_shown";
 
@@ -65,10 +66,12 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
     }
   }, []);
 
-  function dismiss() {
+  const dismiss = useCallback(() => {
     localStorage.setItem(STORAGE_KEY, "1");
     setOpen(false);
-  }
+  }, []);
+
+  const trapRef = useFocusTrap(open, dismiss);
 
   function toggleInterest(interest: string) {
     setSelected((prev) => {
@@ -91,6 +94,7 @@ export function WelcomeModal({ userName }: WelcomeModalProps) {
 
   return (
     <div
+      ref={trapRef}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"
