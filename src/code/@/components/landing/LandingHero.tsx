@@ -39,7 +39,7 @@ export function LandingHero() {
           <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/20 to-cyan-400/0 pointer-events-none" />
           <Sparkles className="w-4 h-4 relative text-cyan-500 dark:text-cyan-300 z-10" />
           <span className="font-bold tracking-[0.25em] uppercase text-xs sm:text-[11px] relative text-cyan-950 dark:text-cyan-50 z-10 drop-shadow-md">
-            MCP Multiplexer · Lazy Tool Loading
+            Open AI App Ecosystem · Instant Deploys
           </span>
         </motion.div>
 
@@ -66,8 +66,8 @@ export function LandingHero() {
           transition={{ duration: 1.0, delay: 0.6, ease: "easeOut" }}
           className="text-xl sm:text-3xl text-muted-foreground max-w-4xl mx-auto mb-16 font-light leading-relaxed drop-shadow-md"
         >
-          spike-cli lazy-loads MCP tools into on-demand toolsets. Your AI sees only what it needs —
-          less context waste, better responses.
+          Connect your AI agent to the tools it needs, on-demand. Only give your AI the context 
+          it requires—saving tokens and getting better responses.
         </motion.p>
 
         {/* CTA Buttons */}
@@ -120,8 +120,8 @@ export function LandingHero() {
           </div>
           <div className="w-px h-4 bg-border" />
           <div className="flex items-center gap-2">
-            <span className="text-foreground font-bold text-lg">Lazy Load</span>
-            <span>/ Save Context</span>
+            <span className="text-foreground font-bold text-lg">Save Context</span>
+            <span>/ Token Efficient</span>
           </div>
           <div className="w-px h-4 bg-border" />
           <div className="flex items-center gap-2">

@@ -25,7 +25,7 @@ const pillars = [
   {
     title: "App Marketplace",
     description:
-      "Hundreds of MCP tools, grouped into on-demand toolsets. spike-cli lazy-loads only what your agent needs — your context window carries signal, not noise.",
+      "Hundreds of MCP tools, grouped into on-demand toolsets. Your AI sees only what it needs — your context window carries signal, not noise.",
     icon: Blocks,
     cta: "Browse Toolsets",
     href: "/mcp",
