@@ -89,4 +89,5 @@ describe("cli", () => {
     // cleanup
     logger.setVerbose(false);
   });
+
 });

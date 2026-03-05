@@ -10,7 +10,12 @@ export default mergeConfig(
       exclude: ["node_modules", "dist"],
       coverage: {
         include: ["src/esbuild-wasm-mcp/**/*.ts"],
-        exclude: ["src/esbuild-wasm-mcp/dist/**", "src/esbuild-wasm-mcp/vitest.config.ts"],
+        exclude: [
+          "src/esbuild-wasm-mcp/dist/**",
+          "src/esbuild-wasm-mcp/vitest.config.ts",
+          // index.ts is the MCP server binary entrypoint (starts process, not library code)
+          "src/esbuild-wasm-mcp/index.ts",
+        ],
       },
     },
   }),

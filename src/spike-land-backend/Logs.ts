@@ -12,8 +12,8 @@ export class KVLogger {
     const kv = this.store;
     const isoString = timestamp.toISOString();
     const [datePart, timePart] = isoString.split("T");
-    const dateString = datePart ?? /* istanbul ignore next */ ""; // YYYY-MM-DD
-    const timeString = timePart?.split(".")[0] ?? /* istanbul ignore next */ ""; // HH:MM:SS
+    const dateString = datePart ?? ""; // YYYY-MM-DD
+    const timeString = timePart?.split(".")[0] ?? ""; // HH:MM:SS
     const key = `${this.prefix}:${dateString}:${timeString}`;
     const value = JSON.stringify({ level, message });
 

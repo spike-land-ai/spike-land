@@ -113,9 +113,7 @@ Sitemap: ${new URL(request.url).origin}/sitemap.xml
   }
 
   const firstPath = path[0];
-  /* istanbul ignore next */
   if (!firstPath) {
-    /* istanbul ignore next */
     return redirectToEsmCdn(request);
   }
 
@@ -333,7 +331,6 @@ async function handleRestApiRequest(path: string[], request: Request, env: Env):
 
   // Handle CORS preflight (unreachable via handleFetchApi which intercepts OPTIONS first,
   // but kept as a safety net if handleRestApiRequest is ever called directly)
-  /* istanbul ignore next 12 */
   if (request.method === "OPTIONS") {
     const reqOrigin = request.headers.get("Origin") || "";
     const isAllowed =
