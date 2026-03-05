@@ -168,12 +168,15 @@ describe("SessionSynchronizer", () => {
     });
 
     it("skips notification when session hash unchanged", () => {
-      const session = makeSession({ code: "same" });
+      // Use a session with explicit transpiled to avoid sanitizeSession defaulting it
+      const session = makeSession({ code: "same", transpiled: "export default () => null;" });
       const ss = new SessionSynchronizer("space", session);
+      // After construction, session is sanitized internally; get actual stored session
+      const storedSession = ss.getSession()!;
       const cb = vi.fn();
       ss.subscribe(cb);
-      // Broadcast the same session — hash should be equal, no notification
-      ss.broadcastSession({ ...session, sender: "user" });
+      // Broadcast the exact stored session — hash should be equal, no notification
+      ss.broadcastSession({ ...storedSession, sender: "user" });
       expect(cb).not.toHaveBeenCalled();
     });
 

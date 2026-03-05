@@ -1,37 +1,86 @@
 /**
  * Tests for routes/internal-byok.ts
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
 import type { Env } from "../../../src/spike-land-mcp/env";
-import { internalByokRoute } from "../../../src/spike-land-mcp/routes/internal-byok";
 
-function buildApp(dbResult: Record<string, unknown>[] = [], vaultSecret = "test-vault-secret") {
+// Control what the mocked db.select returns across tests
+let _mockDbRows: Record<string, unknown>[] = [];
+
+vi.mock("../../../src/spike-land-mcp/db/index", () => {
+  return {
+    createDb: () => ({
+      select: () => ({
+        from: () => ({
+          where: () => ({
+            limit: async () => _mockDbRows,
+          }),
+        }),
+      }),
+    }),
+  };
+});
+
+/**
+ * Encrypt a plaintext API key using the same algorithm as the production BYOK code.
+ * v=2: key = PBKDF2(vaultSecret:userId, salt)
+ */
+async function encryptByokKey(
+  userId: string,
+  plaintext: string,
+  vaultSecret: string,
+): Promise<string> {
+  const encoder = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+
+  const keyInput = `${vaultSecret}:${userId}`;
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(keyInput),
+    "PBKDF2",
+    false,
+    ["deriveKey"],
+  );
+  const cryptoKey = await crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt"],
+  );
+
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    cryptoKey,
+    encoder.encode(plaintext),
+  );
+
+  const toBase64 = (buf: ArrayBuffer | Uint8Array) => {
+    const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+    let str = "";
+    for (const b of bytes) str += String.fromCharCode(b);
+    return btoa(str);
+  };
+
+  const payload = JSON.stringify({
+    v: 2,
+    iv: toBase64(iv),
+    data: toBase64(encrypted),
+    salt: toBase64(salt),
+  });
+  return btoa(payload);
+}
+
+function buildApp(vaultSecret = "test-vault-secret") {
+  const { internalByokRoute } = require("../../../src/spike-land-mcp/routes/internal-byok") as { internalByokRoute: ReturnType<typeof import("hono")["Hono"]["prototype"]["route"]> };
   const app = new Hono<{ Bindings: Env }>();
-  app.route("/internal", internalByokRoute);
-
-  const mockDB = {
-    prepare: (sql: string) => {
-      let boundValues: unknown[] = [];
-      const stmt = {
-        bind: (...values: unknown[]) => {
-          boundValues = values;
-          return stmt;
-        },
-        all: async () => ({ results: dbResult, success: true, meta: {} }),
-        run: async () => ({ results: dbResult, success: true, meta: {} }),
-        first: async () => dbResult[0] ?? null,
-        raw: async () => dbResult,
-      };
-      return stmt;
-    },
-    batch: async () => [],
-    dump: async () => new ArrayBuffer(0),
-    exec: async () => ({ count: 0, duration: 0 }),
-  } as unknown as D1Database;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  app.route("/internal", internalByokRoute as any);
 
   const env = {
-    DB: mockDB,
+    DB: {} as D1Database,
     VAULT_SECRET: vaultSecret,
   } as unknown as Env;
 
@@ -40,7 +89,11 @@ function buildApp(dbResult: Record<string, unknown>[] = [], vaultSecret = "test-
 
 describe("internalByokRoute POST /byok/get", () => {
   it("returns 400 when userId is missing", async () => {
-    const { app, env } = buildApp();
+    _mockDbRows = [];
+    const { internalByokRoute } = await import("../../../src/spike-land-mcp/routes/internal-byok");
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/internal", internalByokRoute);
+    const env = { DB: {} as D1Database, VAULT_SECRET: "secret" } as unknown as Env;
 
     const res = await app.request(
       "/internal/byok/get",
@@ -58,7 +111,11 @@ describe("internalByokRoute POST /byok/get", () => {
   });
 
   it("returns 400 when provider is missing", async () => {
-    const { app, env } = buildApp();
+    _mockDbRows = [];
+    const { internalByokRoute } = await import("../../../src/spike-land-mcp/routes/internal-byok");
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/internal", internalByokRoute);
+    const env = { DB: {} as D1Database, VAULT_SECRET: "secret" } as unknown as Env;
 
     const res = await app.request(
       "/internal/byok/get",
@@ -76,7 +133,11 @@ describe("internalByokRoute POST /byok/get", () => {
   });
 
   it("returns null key when no vault record found", async () => {
-    const { app, env } = buildApp([]); // empty results
+    _mockDbRows = []; // empty — no record
+    const { internalByokRoute } = await import("../../../src/spike-land-mcp/routes/internal-byok");
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/internal", internalByokRoute);
+    const env = { DB: {} as D1Database, VAULT_SECRET: "secret" } as unknown as Env;
 
     const res = await app.request(
       "/internal/byok/get",
@@ -94,7 +155,7 @@ describe("internalByokRoute POST /byok/get", () => {
   });
 
   it("returns null key when decryption fails for invalid ciphertext", async () => {
-    // Provide a record with invalid base64 ciphertext
+    // Provide a record with invalid ciphertext (will fail AES-GCM decrypt)
     const invalidEncryptedKey = btoa(JSON.stringify({
       v: 2,
       iv: btoa("short"),
@@ -102,7 +163,11 @@ describe("internalByokRoute POST /byok/get", () => {
       salt: btoa("salt-value"),
     }));
 
-    const { app, env } = buildApp([{ encryptedKey: invalidEncryptedKey }]);
+    _mockDbRows = [{ encryptedKey: invalidEncryptedKey }];
+    const { internalByokRoute } = await import("../../../src/spike-land-mcp/routes/internal-byok");
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/internal", internalByokRoute);
+    const env = { DB: {} as D1Database, VAULT_SECRET: "secret" } as unknown as Env;
 
     const res = await app.request(
       "/internal/byok/get",
@@ -121,7 +186,11 @@ describe("internalByokRoute POST /byok/get", () => {
   });
 
   it("returns 400 when body is not valid JSON", async () => {
-    const { app, env } = buildApp();
+    _mockDbRows = [];
+    const { internalByokRoute } = await import("../../../src/spike-land-mcp/routes/internal-byok");
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/internal", internalByokRoute);
+    const env = { DB: {} as D1Database, VAULT_SECRET: "secret" } as unknown as Env;
 
     const res = await app.request(
       "/internal/byok/get",
@@ -135,5 +204,134 @@ describe("internalByokRoute POST /byok/get", () => {
 
     // Hono JSON parse error returns 400
     expect(res.status).toBeGreaterThanOrEqual(400);
+  });
+
+  it("decrypts and returns the key when encryption is valid (v=2)", async () => {
+    const userId = "user-byok-test";
+    const vaultSecret = "test-vault-secret-32chars-long!";
+    const originalKey = "sk-openai-my-real-api-key";
+
+    // Encrypt the key using the same algorithm as production
+    const encryptedKey = await encryptByokKey(userId, originalKey, vaultSecret);
+
+    // The mocked createDb returns this row directly from select().from().where().limit()
+    _mockDbRows = [{ encryptedKey }];
+
+    const { internalByokRoute } = await import("../../../src/spike-land-mcp/routes/internal-byok");
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/internal", internalByokRoute);
+    const env = { DB: {} as D1Database, VAULT_SECRET: vaultSecret } as unknown as Env;
+
+    const res = await app.request(
+      "/internal/byok/get",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, provider: "openai" }),
+      },
+      env,
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { key: string };
+    expect(body.key).toBe(originalKey);
+  });
+
+  it("uses empty string as VAULT_SECRET when env.VAULT_SECRET is undefined (line 77 branch)", async () => {
+    // With no VAULT_SECRET, the ?? "" fallback is used — decryption will fail (wrong key),
+    // returning { key: null } from the catch block. The important thing is the branch is covered.
+    const userId = "user-no-vault";
+    const vaultSecret = "correct-vault-secret-32chars!!";
+    const originalKey = "sk-some-key";
+    const encryptedKey = await encryptByokKey(userId, originalKey, vaultSecret);
+
+    _mockDbRows = [{ encryptedKey }];
+
+    const { internalByokRoute } = await import("../../../src/spike-land-mcp/routes/internal-byok");
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/internal", internalByokRoute);
+    // No VAULT_SECRET in env — triggers ?? "" branch on line 77
+    const env = { DB: {} as D1Database } as unknown as Env;
+
+    const res = await app.request(
+      "/internal/byok/get",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, provider: "openai" }),
+      },
+      env,
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { key: null };
+    // Decryption fails with wrong key → catch returns null
+    expect(body.key).toBeNull();
+  });
+
+  it("uses legacy key derivation (v!=2) when v field is absent", async () => {
+    // Legacy: keyInput = userId (no vaultSecret prefix)
+    const userId = "user-legacy";
+    const plaintext = "sk-legacy-key";
+
+    const encoder = new TextEncoder();
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+
+    const keyMaterial = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(userId),
+      "PBKDF2",
+      false,
+      ["deriveKey"],
+    );
+    const cryptoKey = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+      keyMaterial,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["encrypt"],
+    );
+    const encrypted = await crypto.subtle.encrypt(
+      { name: "AES-GCM", iv },
+      cryptoKey,
+      encoder.encode(plaintext),
+    );
+
+    const toBase64 = (buf: ArrayBuffer | Uint8Array) => {
+      const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+      let str = "";
+      for (const b of bytes) str += String.fromCharCode(b);
+      return btoa(str);
+    };
+
+    // No v field — triggers the legacy (v !== 2) branch in decryptByokKey
+    const payload = JSON.stringify({
+      iv: toBase64(iv),
+      data: toBase64(encrypted),
+      salt: toBase64(salt),
+    });
+    const encryptedKey = btoa(payload);
+
+    _mockDbRows = [{ encryptedKey }];
+
+    const { internalByokRoute } = await import("../../../src/spike-land-mcp/routes/internal-byok");
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/internal", internalByokRoute);
+    const env = { DB: {} as D1Database, VAULT_SECRET: "some-vault-secret" } as unknown as Env;
+
+    const res = await app.request(
+      "/internal/byok/get",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, provider: "openai" }),
+      },
+      env,
+    );
+
+    expect(res.status).toBe(200);
+    const body = await res.json() as { key: string };
+    expect(body.key).toBe(plaintext);
   });
 });

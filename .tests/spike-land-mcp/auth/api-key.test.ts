@@ -79,4 +79,23 @@ describe("lookupApiKey", () => {
     const result = await lookupApiKey("sk_test_future", db);
     expect(result).toEqual({ userId: "user-valid" });
   });
+
+  it("returns null when record is undefined despite non-empty array", async () => {
+    // This hits the `if (!record) return null` branch on line 25
+    // by returning an array where the first element is undefined
+    const mockLimit = vi.fn().mockResolvedValue([undefined]);
+    const mockWhere = vi.fn().mockReturnValue({ limit: mockLimit });
+    const mockFrom = vi.fn().mockReturnValue({ where: mockWhere });
+    const mockSelect = vi.fn().mockReturnValue({ from: mockFrom });
+
+    const db = {
+      select: mockSelect,
+      update: vi.fn().mockReturnValue({
+        set: vi.fn().mockReturnValue({ where: vi.fn().mockReturnValue({ run: vi.fn() }) }),
+      }),
+    } as unknown as Parameters<typeof lookupApiKey>[1];
+
+    const result = await lookupApiKey("sk_test_any", db);
+    expect(result).toBeNull();
+  });
 });

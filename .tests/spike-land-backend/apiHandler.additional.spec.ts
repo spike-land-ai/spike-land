@@ -125,6 +125,16 @@ describe("apiHandler additional coverage", () => {
       const response = await handleApiRequest(["server-fetch"], req, mockEnv as Env);
       expect(response.status).toBe(403);
     });
+
+    it("returns 403 for an invalid URL string that cannot be parsed (line 55 catch)", async () => {
+      const req = new Request("https://example.com/server-fetch", {
+        method: "POST",
+        body: JSON.stringify({ url: "not a valid url ::::", options: {} }),
+      });
+      const response = await handleApiRequest(["server-fetch"], req, mockEnv as Env);
+      expect(response.status).toBe(403);
+      expect(await response.text()).toBe("URL not allowed");
+    });
   });
 
   describe("server-fetch non-POST method", () => {

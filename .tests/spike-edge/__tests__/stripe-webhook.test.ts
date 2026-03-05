@@ -745,4 +745,205 @@ describe("POST /stripe/webhook", () => {
       expect(body.received).toBe(true);
     });
   });
+
+  describe("checkout.session.completed — blog_support donation", () => {
+    it("updates pending donation record when stripe_session_id matches", async () => {
+      const prepareCalls: string[] = [];
+      const runMock = vi.fn().mockResolvedValue({ success: true, meta: { changes: 1 } });
+      const mockPrepare = vi.fn().mockImplementation((sql: string) => {
+        prepareCalls.push(sql);
+        return {
+          bind: (..._args: unknown[]) => ({
+            first: vi.fn().mockResolvedValue(null),
+            run: runMock,
+            all: vi.fn().mockResolvedValue({ results: [] }),
+          }),
+          first: vi.fn().mockResolvedValue(null),
+          run: runMock,
+          all: vi.fn().mockResolvedValue({ results: [] }),
+        };
+      });
+      const db = { prepare: mockPrepare, batch: vi.fn().mockResolvedValue([]) } as unknown as D1Database;
+      const app = createApp({ STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET, DB: db });
+
+      const event = {
+        id: "evt_blog_support",
+        type: "checkout.session.completed",
+        data: {
+          object: {
+            id: "cs_test_session_1",
+            customer_email: "donor@example.com",
+            metadata: {
+              type: "blog_support",
+              slug: "my-post",
+              amount: "5.00",
+              client_id: "client-123",
+            },
+          },
+        },
+      };
+
+      const res = await postWebhook(app, event, { env: { DB: db } });
+      expect(res.status).toBe(200);
+      expect(prepareCalls.some((s) => s.includes("UPDATE support_donations"))).toBe(true);
+    });
+
+    it("inserts donation record when no existing pending record", async () => {
+      const prepareCalls: string[] = [];
+      const runMock = vi.fn().mockResolvedValue({ success: true, meta: { changes: 0 } });
+      const mockPrepare = vi.fn().mockImplementation((sql: string) => {
+        prepareCalls.push(sql);
+        return {
+          bind: (..._args: unknown[]) => ({
+            first: vi.fn().mockResolvedValue(null),
+            run: runMock,
+            all: vi.fn().mockResolvedValue({ results: [] }),
+          }),
+          first: vi.fn().mockResolvedValue(null),
+          run: runMock,
+          all: vi.fn().mockResolvedValue({ results: [] }),
+        };
+      });
+      const db = { prepare: mockPrepare, batch: vi.fn().mockResolvedValue([]) } as unknown as D1Database;
+      const app = createApp({ STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET, DB: db });
+
+      const event = {
+        id: "evt_blog_support_insert",
+        type: "checkout.session.completed",
+        data: {
+          object: {
+            id: "cs_test_no_pending",
+            metadata: {
+              type: "blog_support",
+              slug: "another-post",
+              amount: "10.00",
+            },
+          },
+        },
+      };
+
+      const res = await postWebhook(app, event, { env: { DB: db } });
+      expect(res.status).toBe(200);
+      expect(prepareCalls.some((s) => s.includes("INSERT INTO support_donations"))).toBe(true);
+    });
+
+    it("tracks experiment assignment when client_id and amount present", async () => {
+      const batchMock = vi.fn().mockResolvedValue([]);
+      const mockPrepare = vi.fn().mockImplementation((sql: string) => ({
+        bind: (..._args: unknown[]) => ({
+          first: vi.fn().mockResolvedValue(null),
+          run: vi.fn().mockResolvedValue({ success: true, meta: { changes: 1 } }),
+          all: vi.fn().mockResolvedValue({
+            results: sql.includes("experiment_assignments")
+              ? [{ experiment_id: "exp-1", variant_id: "control" }]
+              : [],
+          }),
+        }),
+        first: vi.fn().mockResolvedValue(null),
+        run: vi.fn().mockResolvedValue({ success: true, meta: { changes: 1 } }),
+        all: vi.fn().mockResolvedValue({
+          results: sql.includes("experiment_assignments")
+            ? [{ experiment_id: "exp-1", variant_id: "control" }]
+            : [],
+        }),
+      }));
+      const db = { prepare: mockPrepare, batch: batchMock } as unknown as D1Database;
+      const app = createApp({ STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET, DB: db });
+
+      const event = {
+        id: "evt_blog_exp_track",
+        type: "checkout.session.completed",
+        data: {
+          object: {
+            id: "cs_with_client",
+            metadata: {
+              type: "blog_support",
+              slug: "tracked-post",
+              amount: "25.00",
+              client_id: "client-with-exp",
+            },
+          },
+        },
+      };
+
+      const res = await postWebhook(app, event, { env: { DB: db } });
+      expect(res.status).toBe(200);
+      // batch should be called for experiment tracking metrics
+      expect(batchMock).toHaveBeenCalled();
+    });
+  });
+
+  describe("invoice.paid — error handling", () => {
+    it("handles invoice.paid when period_end is not a number", async () => {
+      const prepareCalls: string[] = [];
+      const runMock = vi.fn().mockResolvedValue({ success: true });
+      const mockPrepare = vi.fn().mockImplementation((sql: string) => {
+        prepareCalls.push(sql);
+        return {
+          bind: (..._args: unknown[]) => ({ first: vi.fn().mockResolvedValue(null), run: runMock }),
+          first: vi.fn().mockResolvedValue(null),
+          run: runMock,
+        };
+      });
+      const db = { prepare: mockPrepare } as unknown as D1Database;
+      const app = createApp({ STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET, DB: db });
+
+      const event = {
+        id: "evt_invoice_no_period",
+        type: "invoice.paid",
+        data: {
+          object: {
+            customer: "cus_test",
+            subscription: "sub_test",
+            // period_end is missing/not a number
+            period_end: "not-a-number",
+          },
+        },
+      };
+
+      const res = await postWebhook(app, event, { env: { DB: db } });
+      expect(res.status).toBe(200);
+      // Should still update but period_end becomes null
+      expect(prepareCalls.some((s) => s.includes("UPDATE subscriptions"))).toBe(true);
+    });
+  });
+
+  describe("signature format edge cases", () => {
+    it("returns 400 when stripe-signature has no timestamp (t= missing)", async () => {
+      const { db } = createMockDb();
+      const app = createApp({ STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET, DB: db });
+      const res = await app.request(
+        "/stripe/webhook",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "stripe-signature": "v1=abc123", // missing t=
+          },
+          body: "{}",
+        },
+        { STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET, DB: db } as unknown as Env,
+      );
+      expect(res.status).toBe(400);
+    });
+
+    it("returns 400 when signature length mismatch (covers constant-time compare)", async () => {
+      const { db } = createMockDb();
+      const app = createApp({ STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET, DB: db });
+      const ts = Math.floor(Date.now() / 1000);
+      const res = await app.request(
+        "/stripe/webhook",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "stripe-signature": `t=${ts},v1=abc`, // too short, different length
+          },
+          body: "{}",
+        },
+        { STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET, DB: db } as unknown as Env,
+      );
+      expect(res.status).toBe(400);
+    });
+  });
 });

@@ -61,16 +61,20 @@ sitemap.get("/sitemap.xml", async (c) => {
     }, { ttl: 3600, swr: 86400 });
   } catch {
     // Cache API unavailable — fall back to direct D1
-    const result = await c.env.DB.prepare(
-      "SELECT slug, date FROM blog_posts ORDER BY date DESC",
-    ).all<{ slug: string; date: string }>();
+    try {
+      const result = await c.env.DB.prepare(
+        "SELECT slug, date FROM blog_posts ORDER BY date DESC",
+      ).all<{ slug: string; date: string }>();
 
-    const posts = result.results ?? [];
-    const xml = buildSitemapXml(STATIC_ROUTES, posts);
+      const posts = result.results ?? [];
+      const xml = buildSitemapXml(STATIC_ROUTES, posts);
 
-    response = new Response(xml, {
-      headers: { "Content-Type": "application/xml; charset=utf-8" },
-    });
+      response = new Response(xml, {
+        headers: { "Content-Type": "application/xml; charset=utf-8" },
+      });
+    } catch {
+      // D1 query failed, response remains null
+    }
   }
 
   if (!response) {

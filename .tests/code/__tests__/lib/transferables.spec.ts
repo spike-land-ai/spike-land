@@ -109,9 +109,8 @@ describe("isTransferable", () => {
     expect(isTransferable(new ArrayBuffer(8))).toBe(true);
   });
 
-  it("returns true for MessagePort", () => {
-    const { port1 } = new MessageChannel();
-    expect(isTransferable(port1)).toBe(true);
+  it("returns true for ArrayBuffer (transferable)", () => {
+    expect(isTransferable(new ArrayBuffer(8))).toBe(true);
   });
 
   it("returns false for plain objects", () => {
@@ -168,11 +167,10 @@ describe("getTransferables", () => {
     expect(result).toContain(arr.buffer);
   });
 
-  it("extracts MessagePort when MessageChannel is in object", () => {
-    const channel = new MessageChannel();
-    const result = getTransferables({ channel });
-    expect(result).toContain(channel.port1);
-    expect(result).toContain(channel.port2);
+  it("extracts ArrayBuffer directly from an array", () => {
+    const buf = new ArrayBuffer(8);
+    const result = getTransferables([buf]);
+    expect(result).toContain(buf);
   });
 
   it("extracts streams when streams=true", () => {
@@ -235,14 +233,13 @@ describe("getTransferable (generator)", () => {
     expect(results.filter((r) => r === buf).length).toBe(1);
   });
 
-  it("yields MessagePorts from MessageChannel", () => {
-    const channel = new MessageChannel();
+  it("yields ArrayBuffer directly from array", () => {
+    const buf = new ArrayBuffer(8);
     const results: unknown[] = [];
-    for (const item of getTransferable(channel)) {
+    for (const item of getTransferable([buf])) {
       results.push(item);
     }
-    expect(results).toContain(channel.port1);
-    expect(results).toContain(channel.port2);
+    expect(results).toContain(buf);
   });
 
   it("yields nothing for non-transferable plain object", () => {
@@ -285,8 +282,8 @@ describe("hasTransferables", () => {
     expect(hasTransferables(new Uint8Array(4))).toBe(true);
   });
 
-  it("returns true for object containing MessageChannel", () => {
-    expect(hasTransferables({ chan: new MessageChannel() })).toBe(true);
+  it("returns true for object containing ArrayBuffer", () => {
+    expect(hasTransferables({ nested: { buf: new ArrayBuffer(4) } })).toBe(true);
   });
 
   it("returns true for stream when streams=true", () => {

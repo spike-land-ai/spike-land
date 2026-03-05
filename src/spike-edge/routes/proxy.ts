@@ -31,7 +31,7 @@ const ALLOWED_CALLER_HEADERS = new Set([
 
 // S5: Per-route HTTP method allowlists — prevent callers from using arbitrary
 // methods (e.g. DELETE, PUT) against upstream APIs via the proxy.
-const ALLOWED_METHODS: Record<string, Set<string>> = {
+const ALLOWED_METHODS: Record<"stripe" | "ai" | "github", Set<string>> = {
   stripe: new Set(["POST"]),
   ai: new Set(["POST"]),
   github: new Set(["GET", "POST"]),

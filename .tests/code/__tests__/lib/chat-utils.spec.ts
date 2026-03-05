@@ -144,8 +144,10 @@ aaa
 AAA
 >>>>>>> REPLACE`;
     const result = extractCodeModification(response);
-    // Should be sorted
-    expect(result[0]).toBeLessThanOrEqual(result[1] ?? result[0]);
+    expect(result.length).toBeGreaterThan(0);
+    // Verify output is sorted alphabetically
+    const sorted = [...result].sort();
+    expect(result).toEqual(sorted);
   });
 });
 

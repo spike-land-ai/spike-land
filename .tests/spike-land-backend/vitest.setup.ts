@@ -8,6 +8,8 @@ class MockWebSocket {
   close() {}
   addEventListener() {}
   removeEventListener() {}
+  serializeAttachment() {}
+  deserializeAttachment() { return null; }
 }
 
 globalThis.WebSocketPair = class WebSocketPair {

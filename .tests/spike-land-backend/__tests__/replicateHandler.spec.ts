@@ -649,4 +649,48 @@ describe("handleReplicateRequest", () => {
       expect(response.status).toBe(200);
     });
   });
+
+  describe("R2 storage error handling (lines 119-120)", () => {
+    it("logs error when R2.put throws an Error during background storage", async () => {
+      (mockEnv.R2.get as Mock).mockResolvedValue(null);
+      const r2PutError = new Error("R2 storage quota exceeded");
+      (mockEnv.R2.put as Mock).mockRejectedValue(r2PutError);
+
+      const mockReplicateInstance = {
+        run: vi.fn().mockResolvedValue(["https://replicate.delivery/image.webp"]),
+      };
+      (Replicate as unknown as Mock).mockImplementation(function () {
+        return mockReplicateInstance;
+      });
+
+      const mockImageData = new ArrayBuffer(100);
+      global.fetch = vi.fn().mockResolvedValue(
+        new Response(mockImageData, { status: 200, headers: { "Content-Type": "image/webp" } }),
+      );
+
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      // Capture the waitUntil promise so we can await it
+      let waitUntilPromise: Promise<unknown> | undefined;
+      (mockCtx.waitUntil as Mock).mockImplementation((p: Promise<unknown>) => {
+        waitUntilPromise = p;
+      });
+
+      const params = "prompt=r2 error test";
+      const base64Params = btoa(params);
+      const request = new Request(`https://example.com/replicate/${base64Params}.webp`);
+
+      await handleReplicateRequest(request, mockEnv as unknown as Env, mockCtx);
+
+      // Await the background task to ensure the catch block executes
+      if (waitUntilPromise) {
+        await waitUntilPromise;
+      }
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Failed to store image in R2:"),
+      );
+      consoleSpy.mockRestore();
+    });
+  });
 });

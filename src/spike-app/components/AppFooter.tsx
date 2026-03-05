@@ -18,9 +18,9 @@ export function AppFooter() {
           <div>
             <p className="font-semibold text-foreground mb-4">Platform</p>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/tools" className="text-muted-foreground hover:text-foreground transition-colors">App Registry</Link></li>
+              <li><Link to="/tools" className="text-muted-foreground hover:text-foreground transition-colors">Tools</Link></li>
               <li><Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">Pricing</Link></li>
-              <li><Link to="/store" className="text-muted-foreground hover:text-foreground transition-colors">App Store</Link></li>
+              <li><Link to="/store" className="text-muted-foreground hover:text-foreground transition-colors">Store</Link></li>
             </ul>
           </div>
           <div>

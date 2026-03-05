@@ -147,6 +147,7 @@ export function StorePage() {
       <input
         type="text"
         placeholder="Search tools by name or description..."
+        aria-label="Search tools"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground"

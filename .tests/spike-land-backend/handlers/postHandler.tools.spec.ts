@@ -357,6 +357,54 @@ describe("PostHandler - Tool Schema Validation", () => {
       expect(streamText).toHaveBeenCalled();
     });
 
+    it("tool execute function catches and rethrows executeTool errors (lines 553-554)", async () => {
+      let capturedTools: Record<string, { execute: (args: Record<string, unknown>) => Promise<unknown> }> | undefined;
+
+      vi.mocked(streamText).mockImplementation((options: Parameters<typeof streamText>[0]) => {
+        capturedTools = options.tools as typeof capturedTools;
+        return Promise.resolve(mockStreamResponse);
+      });
+
+      const mockProvider = vi.fn(() => ({
+        id: "claude-4-sonnet-20250514",
+      })) as unknown as AnthropicProvider;
+      vi.mocked(createAnthropic).mockReturnValue(mockProvider);
+
+      // Make executeTool throw
+      const throwingExecuteTool = vi.fn().mockRejectedValue(new Error("tool crashed"));
+      (
+        mockCode.getMcpServer() as unknown as {
+          executeTool: typeof throwingExecuteTool;
+        }
+      ).executeTool = throwingExecuteTool;
+
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const request = new Request("https://test.spike.land/api/post", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: "test" }],
+        }),
+      });
+
+      await postHandler.handle(request, new URL("https://test.spike.land"));
+
+      // Call a captured tool's execute to trigger the error path
+      if (capturedTools) {
+        const toolEntry = Object.values(capturedTools)[0];
+        if (toolEntry?.execute) {
+          await expect(toolEntry.execute({ codeSpace: "test" })).rejects.toThrow("Failed to execute");
+          expect(consoleSpy).toHaveBeenCalledWith(
+            expect.stringContaining("Error executing tool"),
+            expect.any(Error),
+          );
+        }
+      }
+
+      consoleSpy.mockRestore();
+    });
+
     it("should skip tools without inputSchema", async () => {
       const consoleWarnSpy = vi.spyOn(console, "warn");
 

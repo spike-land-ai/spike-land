@@ -58,7 +58,12 @@ export function DocPage() {
       if (line.startsWith("---")) return <hr key={i} className="my-8 border-border" />;
       if (line.trim() === "") return <br key={i} />;
       // Handle links in markdown [text](url)
-      const withLinks = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary underline hover:text-primary/80" target="_blank" rel="noopener noreferrer">$1</a>');
+      const withLinks = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+        // Sanitize URL to prevent XSS
+        const isSafe = url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/") || url.startsWith("mailto:");
+        const safeUrl = isSafe ? url : "about:blank";
+        return `<a href="${safeUrl}" class="text-primary underline hover:text-primary/80" target="_blank" rel="noopener noreferrer">${text}</a>`;
+      });
       return <p key={i} className="text-foreground leading-relaxed mb-2" dangerouslySetInnerHTML={{ __html: withLinks }} />;
     });
   };

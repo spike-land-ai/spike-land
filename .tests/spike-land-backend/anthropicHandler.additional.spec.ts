@@ -118,6 +118,25 @@ describe("anthropicHandler additional coverage", () => {
       );
       consoleSpy.mockRestore();
     });
+
+    it("logs 'Could not parse request body' when POST body is invalid JSON in debugMode=true (line 88)", async () => {
+      const consoleSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+      mockFetch.mockResolvedValue(new Response("ok", { status: 200 }));
+      const env = createDebugEnv(mockKV);
+
+      const request = new Request("https://api.example.com/anthropic/v1/messages", {
+        method: "POST",
+        body: "this is not valid json {{{",
+        headers: { "Content-Type": "text/plain" },
+        duplex: "half",
+      } as RequestInit);
+
+      await handleAnthropicRequest(request, env);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[Anthropic Proxy] Could not parse request body",
+      );
+      consoleSpy.mockRestore();
+    });
   });
 
   describe("path extraction", () => {

@@ -46,8 +46,11 @@ docsApi.get("/api/docs/:slug", (c) => {
     return c.json({ error: "Document not found" }, 404);
   }
 
-  // For MVP, return the manifest entry with placeholder content
-  // In future, this will fetch markdown from R2 or D1
+  // For MVP, return the manifest entry with placeholder content.
+  // TODO: Proxy actual markdown from GitHub docs directory instead of placeholder content.
+  // Note: The frontend renderer (docs/$slug.tsx) has basic XSS mitigations, but
+  // if serving user-generated or external content, ensure DOMPurify is used.
+  // In future, this will fetch markdown from R2, D1, or GitHub directly.
   const content = `# ${entry.title}\n\n${entry.description}\n\n---\n\nThis documentation page is coming soon. Check our [GitHub docs](https://github.com/spike-land-ai/spike-land-ai/tree/main/docs) for the latest content.`;
 
   c.header("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");

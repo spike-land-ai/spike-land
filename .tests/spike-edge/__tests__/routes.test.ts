@@ -1348,3 +1348,91 @@ describe("app middleware (index.ts)", () => {
     expect(body.error).toBe("Internal Server Error");
   });
 });
+
+import { sitemap } from "../../../src/spike-edge/routes/sitemap.js";
+
+describe("Sitemap & Robots", () => {
+  it("returns sitemap.xml with blog posts", async () => {
+    const env = createMockEnv();
+    (env.DB.prepare as any).mockReturnValue({
+      all: vi.fn().mockResolvedValue({
+        results: [{ slug: "test-post", date: "2024-01-01" }],
+      }),
+    });
+    // @ts-expect-error Mock execution context
+    const res = await sitemap.request("/sitemap.xml", undefined, env, { waitUntil: () => {} });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Type")).toContain("application/xml");
+    const text = await res.text();
+    expect(text).toContain("test-post");
+    expect(text).toContain("https://spike.land");
+  });
+
+  it("returns fallback sitemap.xml if DB fails", async () => {
+    const env = createMockEnv();
+    (env.DB.prepare as any).mockImplementation(() => {
+      throw new Error("DB Error");
+    });
+    // @ts-expect-error Mock execution context
+    const res = await sitemap.request("/sitemap.xml", undefined, env, { waitUntil: () => {} });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Type")).toContain("application/xml");
+    const text = await res.text();
+    expect(text).toContain("https://spike.land");
+  });
+});
+
+vi.mock("../../../src/spike-edge/lib/ga4.js", () => ({
+  getClientId: vi.fn().mockResolvedValue("mocked-client-id"),
+  sendGA4Events: vi.fn().mockResolvedValue(undefined),
+}));
+
+describe("SPA Cookie Consent", () => {
+  it("does not set tracking cookie without consent", async () => {
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/", spa);
+    const env = createMockEnv();
+    const mockR2 = vi.fn((key: string) => {
+      if (key === "index.html") return Promise.resolve(makeR2Object("<html><head></head><body></body></html>", "text/html"));
+      return Promise.resolve(null);
+    });
+    (env.SPA_ASSETS.get as any).mockImplementation(mockR2);
+    
+    const req = new Request("https://spike.land/about");
+    const res = await app.request(req, undefined, env);
+    expect(res.status).toBe(200);
+    const setCookie = res.headers.get("set-cookie") || "";
+    expect(setCookie).not.toContain("spike_client_id=");
+  });
+
+  it("sets tracking cookie with consent", async () => {
+    const app = new Hono<{ Bindings: Env }>();
+    app.route("/", spa);
+    const env = createMockEnv();
+    const mockR2 = vi.fn((key: string) => {
+      if (key === "index.html") return Promise.resolve(makeR2Object("<html><head></head><body></body></html>", "text/html"));
+      return Promise.resolve(null);
+    });
+    (env.SPA_ASSETS.get as any).mockImplementation(mockR2);
+    
+    const req = new Request("https://spike.land/about", {
+      headers: { cookie: "cookie_consent=accepted" }
+    });
+    const res = await app.request(req, undefined, env);
+    expect(res.status).toBe(200);
+    const setCookie = res.headers.get("set-cookie") || "";
+    expect(setCookie).toContain("spike_client_id=");
+  });
+});
+
+describe("API 404 Catch-all", () => {
+  it("returns JSON 404 for unknown /api/* routes", async () => {
+    const { default: appModule } = await import("../../../src/spike-edge/index.js");
+    const env = createMockEnv();
+    const res = await (appModule as any).fetch(new Request("https://spike.land/api/does-not-exist"), env, { waitUntil: () => {}, passThroughOnException: () => {} });
+    expect(res.status).toBe(404);
+    expect(res.headers.get("content-type")).toContain("application/json");
+    const data = await res.json() as any;
+    expect(data).toEqual({ error: "Not Found", path: "/api/does-not-exist" });
+  });
+});

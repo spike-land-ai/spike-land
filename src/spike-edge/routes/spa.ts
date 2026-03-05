@@ -210,19 +210,22 @@ spa.get("/*", async (c) => {
     const existingCookie = c.req.header("cookie") ?? "";
     // Only set tracking cookie if user has consented (GDPR compliance)
     const hasConsent = existingCookie.includes("cookie_consent=accepted");
-    if (hasConsent && !existingCookie.includes("spike_client_id=")) {
-      const clientId = await getClientId(c.req.raw);
-      response.headers.append(
-        "set-cookie",
-        `spike_client_id=${clientId}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax; Secure`,
-      );
-    }
+    let clientId = "anonymous";
 
     if (hasConsent) {
+      if (!existingCookie.includes("spike_client_id=")) {
+        clientId = await getClientId(c.req.raw);
+        response.headers.append(
+          "set-cookie",
+          `spike_client_id=${clientId}; Path=/; Max-Age=31536000; HttpOnly; SameSite=Lax; Secure`,
+        );
+      } else {
+        clientId = existingCookie.match(/spike_client_id=([^;]+)/)?.[1] || await getClientId(c.req.raw);
+      }
+
       try {
-        const cid = hasConsent ? await getClientId(c.req.raw) : "anonymous";
         c.executionCtx.waitUntil(
-          sendGA4Events(c.env, cid, [{
+          sendGA4Events(c.env, clientId, [{
             name: "page_view",
             params: {
               page_path: path,

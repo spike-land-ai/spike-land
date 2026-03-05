@@ -103,6 +103,34 @@ describe("PostHandler — branch coverage", () => {
       expect(hashClientId).toHaveBeenCalled();
       expect(sendGA4Events).toHaveBeenCalled();
     });
+
+    it("handles GA4 event failure gracefully when hashClientId rejects (line 177 catch)", async () => {
+      const { hashClientId } = await import("../../../src/spike-land-backend/lib/ga4.js");
+      (hashClientId as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("hash failure"));
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      const envWithGA = createMockEnv({
+        GA_MEASUREMENT_ID: "G-123",
+        GA_API_SECRET: "secret",
+      } as Partial<Env>);
+
+      const { streamText } = await import("ai");
+      const mockResult = {
+        toUIMessageStreamResponse: vi.fn().mockReturnValue(new Response("stream")),
+      };
+      (streamText as ReturnType<typeof vi.fn>).mockResolvedValue(mockResult);
+
+      const handler = new PostHandler(mockCode, envWithGA);
+      const request = makeRequest(makeValidBody());
+      const response = await handler.handle(request, new URL("https://example.com/messages"));
+
+      // The GA4 error should be caught silently — request still succeeds
+      expect(response.status).toBe(200);
+      // Give the fire-and-forget catch a tick to execute
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(consoleSpy).toHaveBeenCalledWith("Failed to send GA4 event:", expect.any(Error));
+      consoleSpy.mockRestore();
+    });
   });
 
   describe("catch block — non-Error thrown (line 209)", () => {
