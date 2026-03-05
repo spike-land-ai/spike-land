@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 interface StoreTool {
   name: string;
@@ -66,6 +67,7 @@ export function StorePage() {
   const [data, setData] = useState<StoreData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetch("/api/store/tools")
@@ -83,10 +85,28 @@ export function StorePage() {
       });
   }, []);
 
+  const filteredData = useMemo(() => {
+    if (!data || !search.trim()) return data;
+    const q = search.toLowerCase();
+    const filterTools = (tools: StoreTool[]) =>
+      tools.filter(
+        (t) =>
+          t.name.toLowerCase().includes(q) ||
+          (t.description?.toLowerCase().includes(q) ?? false),
+      );
+    return {
+      ...data,
+      featured: filterTools(data.featured),
+      categories: data.categories
+        .map((cat) => ({ ...cat, tools: filterTools(cat.tools) }))
+        .filter((cat) => cat.tools.length > 0),
+    };
+  }, [data, search]);
+
   if (loading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">MCP Tool Store</h1>
+        <h1 className="text-2xl font-bold">Tool Store</h1>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="h-32 rounded-xl border border-border bg-muted animate-pulse" />
@@ -99,44 +119,70 @@ export function StorePage() {
   if (error) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">MCP Tool Store</h1>
-        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-6 text-sm text-destructive">
-          {error}
+        <h1 className="text-2xl font-bold">Tool Store</h1>
+        <div className="rounded-xl border border-border bg-card p-8 text-center space-y-4">
+          <p className="text-muted-foreground">
+            We couldn't load the tool store right now. This might be a temporary issue.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Try again
+          </button>
         </div>
       </div>
     );
   }
 
-  if (!data) return null;
+  if (!filteredData) return null;
 
   return (
     <div className="space-y-8">
       <div className="flex items-baseline justify-between">
-        <h1 className="text-2xl font-bold">MCP Tool Store</h1>
-        <span className="text-sm text-muted-foreground">{data.total} tools</span>
+        <h1 className="text-2xl font-bold">Tool Store</h1>
+        <span className="text-sm text-muted-foreground">{data?.total} tools</span>
       </div>
 
-      {data.featured.length > 0 && (
+      <input
+        type="text"
+        placeholder="Search tools by name or description..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground"
+      />
+
+      {filteredData.featured.length > 0 && (
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Featured</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {data.featured.map((tool) => (
-              <ToolCard key={tool.name} tool={tool} featured />
+            {filteredData.featured.map((tool) => (
+              <Link key={tool.name} to="/tools" className="block">
+                <ToolCard tool={tool} featured />
+              </Link>
             ))}
           </div>
         </section>
       )}
 
-      {data.categories.map((cat) => (
+      {filteredData.categories.map((cat) => (
         <section key={cat.name} className="space-y-3">
           <h2 className="text-lg font-semibold capitalize">{cat.name}</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {cat.tools.map((tool) => (
-              <ToolCard key={tool.name} tool={tool} />
+              <Link key={tool.name} to="/tools" className="block">
+                <ToolCard tool={tool} />
+              </Link>
             ))}
           </div>
         </section>
       ))}
+
+      {filteredData.featured.length === 0 && filteredData.categories.length === 0 && (
+        <div className="rounded-xl border border-border border-dashed p-12 text-center text-muted-foreground">
+          No tools found matching your search.
+        </div>
+      )}
     </div>
   );
 }

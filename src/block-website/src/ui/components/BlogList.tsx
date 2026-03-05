@@ -113,6 +113,7 @@ function BlogCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.Componen
 export function BlogListView({ linkComponent, limit, showHeader = true }: { linkComponent?: React.ComponentType<{ to: string; className?: string; children?: React.ReactNode }>; limit?: number; showHeader?: boolean }) {
   const [posts, setPosts] = useState<BlogMeta[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     fetch("/api/blog")
@@ -126,7 +127,7 @@ export function BlogListView({ linkComponent, limit, showHeader = true }: { link
           setPosts(data);
         }
       })
-      .catch(() => setPosts([]))
+      .catch(() => { setPosts([]); setError(true); })
       .finally(() => setLoading(false));
   }, [limit]);
 
@@ -139,7 +140,7 @@ export function BlogListView({ linkComponent, limit, showHeader = true }: { link
               The Spike.land Blog
             </h1>
             <p className="text-lg text-muted-foreground font-light">
-              Thoughts on AI agents, Cloudflare Workers, and the future of coding.
+              Thoughts on AI agents, Cloudflare Workers, and the future of technology.
             </p>
           </div>
         )}
@@ -164,6 +165,19 @@ export function BlogListView({ linkComponent, limit, showHeader = true }: { link
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error && posts.length === 0) {
+    return (
+      <div className={showHeader ? "max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8 font-sans" : "font-sans"}>
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Unable to load blog posts right now.</p>
+          <button onClick={() => window.location.reload()} className="mt-4 text-sm text-primary hover:underline">
+            Try again
+          </button>
         </div>
       </div>
     );

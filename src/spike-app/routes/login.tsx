@@ -88,7 +88,7 @@ export function LoginPage() {
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground hover:underline">
             Continue as guest
           </Link>
-          <p className="mt-1 text-xs text-muted-foreground">Limited features</p>
+          <p className="mt-1 text-xs text-muted-foreground">Browse tools and pricing without signing in</p>
         </div>
       </div>
     </div>

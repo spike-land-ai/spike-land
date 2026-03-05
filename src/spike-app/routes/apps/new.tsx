@@ -123,6 +123,10 @@ export function AppsNewPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <div className="rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm text-warning-foreground">
+        <strong>Coming Soon</strong> — App creation is in preview. Your app won't be deployed yet, but you can explore the creation flow.
+      </div>
+
       <div className="flex items-center gap-3">
         <Link to="/apps" className="text-primary hover:underline">
           Apps
@@ -189,7 +193,7 @@ export function AppsNewPage() {
                 {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
               </div>
               <div>
-                <label htmlFor="slug" className="mb-1 block text-sm font-medium text-foreground">Slug</label>
+                <label htmlFor="slug" className="mb-1 block text-sm font-medium text-foreground">URL Path</label>
                 <input
                   id="slug"
                   type="text"
@@ -244,6 +248,18 @@ export function AppsNewPage() {
                 <p className="mb-2 text-sm text-muted-foreground">
                   Describe what you want your app to do. Be as specific as possible.
                 </p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {["Build a calculator app", "Create a to-do list", "Make a weather dashboard"].map((template) => (
+                    <button
+                      key={template}
+                      type="button"
+                      onClick={() => update("prompt", template)}
+                      className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                    >
+                      {template}
+                    </button>
+                  ))}
+                </div>
                 <textarea
                   id="prompt"
                   value={data.prompt}
