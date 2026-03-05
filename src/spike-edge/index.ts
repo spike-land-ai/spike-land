@@ -27,6 +27,7 @@ import { creditMeterMiddleware } from "./middleware/credit-meter.js";
 import { requestIdMiddleware } from "./middleware/request-id.js";
 import { support } from "./routes/support.js";
 import { experiments } from "./routes/experiments.js";
+import { chat } from "./routes/chat.js";
 import { spa } from "./routes/spa.js";
 import { wellKnown } from "./routes/well-known.js";
 import { sitemap } from "./routes/sitemap.js";
@@ -152,6 +153,10 @@ app.get("/errors/summary", authMiddleware);
 // Auth middleware for experiment evaluation (mutates state — requires auth)
 app.post("/api/experiments/*/evaluate", authMiddleware);
 
+// Auth and credit metering for AI chat endpoint
+app.use("/api/chat", authMiddleware);
+app.use("/api/chat", creditMeterMiddleware);
+
 // Error handling middleware
 app.onError((err, c) => {
   log.error(`${c.req.method} ${c.req.path}: ${err.message}`);
@@ -192,6 +197,7 @@ app.route("/", cockpit);
 app.route("/", credits);
 app.route("/", support);
 app.route("/", experiments);
+app.route("/", chat);
 
 // MCP tools listing proxy (public, no auth required)
 app.get("/mcp/tools", async (c) => {

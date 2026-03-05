@@ -7,6 +7,7 @@ import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { LoginButton } from "@/components/LoginButton";
 import { AppFooter } from "@/components/AppFooter";
 import { CookieConsent } from "@/components/CookieConsent";
+import { AiChatWidget } from "@/components/AiChatWidget";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 const DEFAULT_TITLE = "spike.land - MCP-First AI Development Platform";
@@ -358,6 +359,7 @@ export function RootLayout() {
 
         <AppFooter />
         <CookieConsent />
+        <AiChatWidget />
         {searchToast && (
           <div
             role="status"

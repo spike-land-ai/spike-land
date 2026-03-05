@@ -110,4 +110,30 @@
 
   --info-bg: #083344;
   --info-fg: #67e8f9;
+
+  /* Chat widget - mcp-image-studio aesthetic */
+  --chat-bg: #020203;
+  --chat-surface: #050507;
+  --chat-accent: #ffaa00;
+  --chat-success: #00ffaa;
+}
+
+/* Chat widget utilities */
+.glass-panel {
+  background: rgba(5, 5, 7, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.dark .nice-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.dark .nice-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark .nice-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
 }
