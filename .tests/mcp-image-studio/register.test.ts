@@ -349,6 +349,124 @@ describe("createToolFromFunction error handling within registerImageStudioTools"
     spy.mockRestore();
   });
 
+  describe("img_feedback tool", () => {
+    it("should report a new bug successfully", async () => {
+      const registry = createMockRegistry();
+      const { deps } = createMockImageStudioDeps();
+
+      const mockResponse = {
+        ok: true,
+        json: vi.fn().mockResolvedValue({ bugId: "bug-123", isNewBug: true }),
+      };
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+        mockResponse as unknown as Response,
+      );
+
+      registerImageStudioTools(registry, "test-user", deps);
+
+      const feedbackSpec = (registry.register as Mock).mock.calls.find(
+        (c: unknown[]) => (c[0] as { name: string }).name === "img_feedback",
+      )?.[0];
+      expect(feedbackSpec).toBeDefined();
+
+      const result = await feedbackSpec.handler({
+        title: "Test bug",
+        description: "Something broke",
+        severity: "high",
+      });
+
+      expect(result.isError).toBeUndefined();
+      expect(result.content[0].text).toContain("New bug reported");
+      expect(result.content[0].text).toContain("bug-123");
+      fetchSpy.mockRestore();
+    });
+
+    it("should confirm an existing bug successfully", async () => {
+      const registry = createMockRegistry();
+      const { deps } = createMockImageStudioDeps();
+
+      const mockResponse = {
+        ok: true,
+        json: vi.fn().mockResolvedValue({ bugId: "bug-456", isNewBug: false }),
+      };
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+        mockResponse as unknown as Response,
+      );
+
+      registerImageStudioTools(registry, "test-user", deps);
+
+      const feedbackSpec = (registry.register as Mock).mock.calls.find(
+        (c: unknown[]) => (c[0] as { name: string }).name === "img_feedback",
+      )?.[0];
+
+      const result = await feedbackSpec.handler({
+        title: "Known bug",
+        description: "Still broken",
+        severity: "medium",
+        reproduction_steps: "Step 1, Step 2",
+        error_code: "ERR_CODE_123",
+      });
+
+      expect(result.isError).toBeUndefined();
+      expect(result.content[0].text).toContain("Bug confirmed");
+      expect(result.content[0].text).toContain("bug-456");
+      fetchSpy.mockRestore();
+    });
+
+    it("should return error when fetch returns non-ok status", async () => {
+      const registry = createMockRegistry();
+      const { deps } = createMockImageStudioDeps();
+
+      const mockResponse = { ok: false, status: 500 };
+      const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+        mockResponse as unknown as Response,
+      );
+
+      registerImageStudioTools(registry, "test-user", deps);
+
+      const feedbackSpec = (registry.register as Mock).mock.calls.find(
+        (c: unknown[]) => (c[0] as { name: string }).name === "img_feedback",
+      )?.[0];
+
+      const result = await feedbackSpec.handler({
+        title: "Bad bug",
+        description: "Server error",
+        severity: "critical",
+      });
+
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain("Feedback submission failed");
+      expect(result.content[0].text).toContain("500");
+      fetchSpy.mockRestore();
+    });
+
+    it("should return error when fetch throws", async () => {
+      const registry = createMockRegistry();
+      const { deps } = createMockImageStudioDeps();
+
+      const fetchSpy = vi
+        .spyOn(globalThis, "fetch")
+        .mockRejectedValueOnce(new Error("Network error"));
+
+      registerImageStudioTools(registry, "test-user", deps);
+
+      const feedbackSpec = (registry.register as Mock).mock.calls.find(
+        (c: unknown[]) => (c[0] as { name: string }).name === "img_feedback",
+      )?.[0];
+
+      const result = await feedbackSpec.handler({
+        title: "Network fail",
+        description: "Can't connect",
+        severity: "low",
+      });
+
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain("Feedback error");
+      expect(result.content[0].text).toContain("Network error");
+      fetchSpy.mockRestore();
+    });
+  });
+
   it("should warn when module has no valid tool export in non-production", () => {
     const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const originalEnv = process.env.NODE_ENV;

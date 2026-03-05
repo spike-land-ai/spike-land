@@ -557,6 +557,39 @@ describe("HNWriteClient", () => {
     });
   });
 
+  describe("submitStory CSRF retry with text-only (no url)", () => {
+    it("retries CSRF and includes text in retry body when no url provided", async () => {
+      // Covers lines 113-114: if (url) / if (text) in the CSRF retry path
+      // url is falsy → line 113 false branch; text is truthy → line 114 true branch
+      session.login("testuser", "user=testuser");
+      let submitCallCount = 0;
+      const fetch = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+        const url =
+          typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+        const method = init?.method ?? "GET";
+
+        if (url.includes("/submit")) {
+          return new Response(SUBMIT_PAGE_HTML, { status: 200 });
+        }
+        if (url.includes("/r") && method === "POST") {
+          submitCallCount++;
+          if (submitCallCount === 1) {
+            return new Response("<html>Unknown or expired link.</html>", { status: 200 });
+          }
+          return new Response(SUBMIT_SUCCESS_HTML, { status: 200 });
+        }
+        return new Response("Not found", { status: 404 });
+      }) as unknown as typeof globalThis.fetch;
+
+      const client = new HNWriteClient(session, fetch);
+      // text-only (no url) → if (url) is false, if (text) is true
+      const result = await client.submitStory("Ask HN: test", undefined, "Some text body");
+
+      expect(result.success).toBe(true);
+      expect(submitCallCount).toBe(2);
+    });
+  });
+
   describe("postComment additional branches", () => {
     it("fails when retry hmac extraction fails", async () => {
       session.login("testuser", "user=testuser");

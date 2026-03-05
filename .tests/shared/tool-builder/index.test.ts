@@ -230,6 +230,30 @@ describe("ToolBuilder", () => {
     const result = await tool.handler({ x: "world" });
     expect(result.content[0]!.text).toBe("sync: world");
   });
+
+  it("examples sets examples on the built tool", () => {
+    const tool = baseProcedure
+      .tool("examples_tool", "With examples", { x: z.string() })
+      .examples([
+        { name: "basic", input: { x: "hello" }, description: "Basic usage" },
+      ])
+      .handler(async () => ({ content: [{ type: "text", text: "ok" }] }));
+
+    expect(tool.meta.examples).toHaveLength(1);
+    expect(tool.meta.examples![0]!.name).toBe("basic");
+  });
+
+  it("examples appends to existing examples from meta", () => {
+    const tool = baseProcedure
+      .tool("examples_merge_tool", "With merged examples", { x: z.string() })
+      .meta({ examples: [{ name: "first", input: { x: "a" }, description: "First" }] })
+      .examples([{ name: "second", input: { x: "b" }, description: "Second" }])
+      .handler(async () => ({ content: [{ type: "text", text: "ok" }] }));
+
+    expect(tool.meta.examples).toHaveLength(2);
+    expect(tool.meta.examples![0]!.name).toBe("first");
+    expect(tool.meta.examples![1]!.name).toBe("second");
+  });
 });
 
 // ---------------------------------------------------------------------------

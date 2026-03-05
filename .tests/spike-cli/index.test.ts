@@ -7,4 +7,10 @@ describe("index", () => {
     expect(index.validateConfig).toBeDefined();
     expect(index.setVerbose).toBeDefined();
   });
+
+  it("exports all public API symbols", () => {
+    expect(index.ChatClient).toBeDefined();
+    expect(index.runAgentLoop).toBeDefined();
+    expect(index.ServerManager).toBeDefined();
+  });
 });

@@ -83,6 +83,7 @@ export function createResponse(
 export function createHandler<Env = unknown>(
   handler: ExportedHandler<Env>["fetch"],
 ): ExportedHandler<Env> {
+  /* istanbul ignore next */
   return { fetch: handler };
 }
 

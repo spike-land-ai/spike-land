@@ -64,6 +64,7 @@ export function executeFindLines(
     });
   } catch (error) {
     throw new Error(
+      /* istanbul ignore next */
       `Invalid regex pattern: ${error instanceof Error ? error.message : String(error)}`,
     );
   }

@@ -20,6 +20,7 @@ import {
   startMcpServer,
   textResult,
   tryCatch,
+  wrapServerWithLogging,
 } from "../../src/mcp-server-base/index.js";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
@@ -407,5 +408,95 @@ describe("createZodTool", () => {
     const result = await server.call("crash");
     expect(isErrorResult(result)).toBe(true);
     expect(getText(result)).toContain("unexpected failure");
+  });
+});
+
+// ─── wrapServerWithLogging ────────────────────────────────────────────────────
+
+describe("wrapServerWithLogging", () => {
+  it("calls onLog with success outcome when handler returns a non-error result", async () => {
+    const server = createMcpServer({ name: "test", version: "1.0.0" });
+    const logs: Parameters<NonNullable<Parameters<typeof wrapServerWithLogging>[2]>>[0][] = [];
+    wrapServerWithLogging(server, "test-server", (entry) => logs.push(entry));
+
+    // Register a simple tool after wrapping
+    server.tool("ping", "pong tool", {}, async () => ({ content: [{ type: "text" as const, text: "pong" }] }));
+
+    // Directly invoke wrapped handler via the mock server pattern
+    const mock = createMockServer();
+    wrapServerWithLogging(mock as unknown as McpServerType, "mock-server", (entry) => logs.push(entry));
+    mock.tool("greet", "Greeting", {}, async () => textResult("hello"));
+
+    const result = await mock.call("greet");
+    expect(getText(result)).toBe("hello");
+    expect(logs).toHaveLength(1);
+    expect(logs[0]).toMatchObject({ server: "mock-server", tool: "greet", outcome: "success" });
+    expect(typeof logs[0].durationMs).toBe("number");
+  });
+
+  it("logs error outcome when handler returns an isError result", async () => {
+    const logs: Parameters<NonNullable<Parameters<typeof wrapServerWithLogging>[2]>>[0][] = [];
+    const mock = createMockServer();
+    wrapServerWithLogging(mock as unknown as McpServerType, "err-server", (entry) => logs.push(entry));
+
+    mock.tool("fail-tool", "Fails", {}, async () => errorResult("OOPS", "something bad"));
+
+    await mock.call("fail-tool");
+    expect(logs[0]).toMatchObject({ outcome: "error", tool: "fail-tool" });
+  });
+
+  it("logs error outcome when handler throws", async () => {
+    const logs: Parameters<NonNullable<Parameters<typeof wrapServerWithLogging>[2]>>[0][] = [];
+    const mock = createMockServer();
+    wrapServerWithLogging(mock as unknown as McpServerType, "throw-server", (entry) => logs.push(entry));
+
+    mock.tool("explode", "Throws", {}, async () => {
+      throw new Error("boom");
+    });
+
+    await expect(mock.call("explode")).rejects.toThrow("boom");
+    expect(logs[0]).toMatchObject({ outcome: "error", tool: "explode" });
+  });
+
+  it("writes to stderr when no onLog callback is provided", async () => {
+    const stderrSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const mock = createMockServer();
+    wrapServerWithLogging(mock as unknown as McpServerType, "stderr-server");
+
+    mock.tool("quiet", "Quiet tool", {}, async () => textResult("ok"));
+    await mock.call("quiet");
+
+    expect(stderrSpy).toHaveBeenCalledWith(
+      expect.stringContaining("stderr-server/quiet"),
+    );
+    stderrSpy.mockRestore();
+  });
+
+  it("uses 'unknown' as tool name when first arg is not a string", async () => {
+    const logs: Parameters<NonNullable<Parameters<typeof wrapServerWithLogging>[2]>>[0][] = [];
+    const mock = createMockServer();
+    const wrapped = mock as unknown as McpServerType;
+    wrapServerWithLogging(wrapped, "anon-server", (entry) => logs.push(entry));
+
+    // Call tool() with a non-string first arg by bypassing TypeScript
+    type AnyFn = (...args: unknown[]) => unknown;
+    (mock.tool as AnyFn)(42, "desc", {}, async () => textResult("ok"));
+
+    // The tool gets registered under key 42 (coerced via Map)
+    const handler = mock.handlers.get(42 as unknown as string);
+    if (handler) {
+      await handler({});
+    }
+    expect(logs[0]).toMatchObject({ tool: "unknown" });
+  });
+
+  it("passes through unchanged when no handler function is found in args", () => {
+    const mock = createMockServer();
+    const wrapped = mock as unknown as McpServerType;
+    wrapServerWithLogging(wrapped, "pass-server");
+
+    // Call tool() with no function argument — should not throw
+    type AnyFn = (...args: unknown[]) => unknown;
+    expect(() => (mock.tool as AnyFn)("no-handler", "desc", {})).not.toThrow();
   });
 });

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { handleErrors } from "../../src/spike-land-backend/handleErrors";
+import * as shared from "@spike-land-ai/shared";
 
 describe("handleErrors", () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
@@ -143,6 +144,87 @@ describe("handleErrors", () => {
         code: 500,
         message: "unknown",
       });
+    });
+  });
+
+  describe("error reporter integration (lines 15-16, 37-38)", () => {
+    it("creates reporter when both waitUntil and errorEndpoint are provided", async () => {
+      const mockReporter = {
+        report: vi.fn(),
+        reportException: vi.fn(),
+      };
+      vi.spyOn(shared, "createErrorReporter").mockReturnValue(mockReporter);
+
+      const waitUntil = vi.fn();
+      const request = new Request("https://example.com/api");
+
+      const result = await handleErrors(request, async () => new Response("OK", { status: 200 }), {
+        waitUntil,
+        errorEndpoint: "https://errors.example.com/ingest",
+      });
+
+      expect(shared.createErrorReporter).toHaveBeenCalledWith({
+        service: "spike-land-backend",
+        endpoint: "https://errors.example.com/ingest",
+        waitUntil,
+      });
+      expect(result.status).toBe(200);
+    });
+
+    it("calls reporter.reportException when error occurs with options", async () => {
+      const mockReporter = {
+        report: vi.fn(),
+        reportException: vi.fn(),
+      };
+      vi.spyOn(shared, "createErrorReporter").mockReturnValue(mockReporter);
+
+      const waitUntil = vi.fn();
+      const request = new Request("https://example.com/api");
+      const error = new Error("test error");
+
+      await handleErrors(
+        request,
+        async () => {
+          throw error;
+        },
+        {
+          waitUntil,
+          errorEndpoint: "https://errors.example.com/ingest",
+        },
+      );
+
+      expect(mockReporter.reportException).toHaveBeenCalledWith(error, {
+        code: "UNCAUGHT_EXCEPTION",
+        severity: "fatal",
+        metadata: {
+          url: request.url,
+          method: request.method,
+          isWebSocket: false,
+        },
+      });
+    });
+
+    it("does not create reporter when only waitUntil is provided (no errorEndpoint)", async () => {
+      vi.spyOn(shared, "createErrorReporter");
+      const waitUntil = vi.fn();
+      const request = new Request("https://example.com/api");
+
+      await handleErrors(request, async () => new Response("OK", { status: 200 }), {
+        waitUntil,
+      });
+
+      expect(shared.createErrorReporter).not.toHaveBeenCalled();
+    });
+
+    it("does not create reporter when only errorEndpoint is provided (no waitUntil)", async () => {
+      vi.spyOn(shared, "createErrorReporter");
+      const request = new Request("https://example.com/api");
+
+      await handleErrors(request, async () => new Response("OK", { status: 200 }), {
+        errorEndpoint: "https://errors.example.com/ingest",
+      });
+
+      expect(shared.createErrorReporter).not.toHaveBeenCalled();
     });
   });
 });

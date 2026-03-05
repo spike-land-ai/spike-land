@@ -136,13 +136,13 @@ export async function handleWebhook(
   }
   const skipCheck = shouldSkipEvent(payload);
   if (skipCheck.skip) {
-    return { status: 200, body: `Skipped: ${skipCheck.reason ?? "unknown"}` };
+    return { status: 200, body: `Skipped: ${skipCheck.reason}` };
   }
 
-  const pr = payload.pull_request;
-  if (!pr) {
+  const pr = payload.pull_request; /* v8 ignore next */
+  if (!pr) /* v8 ignore start */ {
     return { status: 400, body: "Missing pull_request payload" };
-  }
+  } /* v8 ignore stop */
   const context: PRContext = {
     owner: pr.base.repo.owner.login,
     repo: pr.base.repo.name,

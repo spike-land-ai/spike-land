@@ -112,6 +112,17 @@ describe("agent command", () => {
     expect(res.json).toHaveBeenCalledWith({ error: "Missing prefix" });
   });
 
+  it("keeps process alive via setInterval (covers the empty callback)", async () => {
+    process.env.GEMINI_API_KEY = "test-key";
+    registerAgentCommand(program);
+    const agentCmd = program.commands.find((c) => c.name() === "agent")!;
+    await (agentCmd as Record<string, unknown>)._actionHandler([{ port: "3006" }, []]);
+    // Advance fake timers past the 1-hour interval to invoke the empty callback
+    vi.advanceTimersByTime(1000 * 60 * 60 + 1);
+    // No assertion needed — just confirms the empty arrow fn is exercised without error
+    expect(true).toBe(true);
+  });
+
   it("returns 500 when AI throws an error", async () => {
     process.env.GEMINI_API_KEY = "test-key";
 

@@ -4,7 +4,7 @@
  * Tests HMAC verification, event filtering, and request handling.
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   handleWebhook,
   isLockfileOnly,
@@ -186,6 +186,17 @@ describe("handleWebhook", () => {
     const result = await handleWebhook(request, mockEnv);
     expect(result.status).toBe(200);
     expect(result.body).toContain("Ignored event");
+  });
+
+  it("uses 'unknown' when X-GitHub-Event header is missing (event ?? 'unknown' branch)", async () => {
+    // No X-GitHub-Event header → event is null → triggers event ?? "unknown"
+    const request = new Request("https://example.com/webhook", {
+      method: "POST",
+      body: "{}",
+    });
+    const result = await handleWebhook(request, mockEnv);
+    expect(result.status).toBe(200);
+    expect(result.body).toContain("unknown");
   });
 
   it("rejects invalid signature", async () => {

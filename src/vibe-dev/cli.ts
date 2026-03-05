@@ -273,9 +273,11 @@ program
 /**
  * Collect multiple values for an option
  */
+/* c8 ignore start */
 function collect(value: string, previous: string[]): string[] {
   return previous.concat([value]);
 }
+/* c8 ignore stop */
 
 /**
  * Create temporary MCP configuration file

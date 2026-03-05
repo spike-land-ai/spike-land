@@ -60,4 +60,16 @@ describe("common command helpers", () => {
       { name: "s1", url: "http://localhost:65535" },
     ]);
   });
+
+  it("parseInlineUrls throws for port 0 (line 62 throw, line 68 rethrow)", () => {
+    // new URL("http://localhost:0") succeeds; parseInt("0") = 0 < 1 → throws at line 62.
+    // The catch block re-throws at line 68 because err.message includes "Port must be".
+    expect(() => parseInlineUrls(["s=http://localhost:0"])).toThrow("Port must be 1–65535");
+  });
+
+  it("parseInlineUrls throws for invalid URL with port-like suffix via fallback path (lines 72-76)", () => {
+    // "http://bad host:99999" throws "Invalid URL" from new URL(), then the fallback
+    // path (lines 72-76) extracts port from the last ':' segment and throws.
+    expect(() => parseInlineUrls(["s=http://bad host:99999"])).toThrow("Port must be 1–65535");
+  });
 });

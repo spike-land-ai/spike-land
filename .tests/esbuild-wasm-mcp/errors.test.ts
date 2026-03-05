@@ -71,5 +71,17 @@ describe("errors", () => {
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed.errors[0].text).toContain("object");
     });
+
+    it("falls back to String(err) when esbuild error has no errors and no message", () => {
+      // isEsbuildError returns true for objects with 'errors' key (even if undefined)
+      // This covers the inner ?? on line 33 where message is also undefined
+      const err = Object.assign(new Error(), { errors: undefined, message: undefined }) as unknown as Error;
+      const result = formatEsbuildError(err);
+      const parsed = JSON.parse(result.content[0].text);
+      expect(parsed.isError).toBeUndefined();
+      expect(result.isError).toBe(true);
+      // Falls back to String(err) since message is undefined
+      expect(parsed.errors).toBeDefined();
+    });
   });
 });

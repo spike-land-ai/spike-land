@@ -508,4 +508,20 @@ describe("edit-tools", () => {
       expect(result.replacements).toBe(0);
     });
   });
+
+  describe("applyLineEdits — null guard in sorted loop (line 324)", () => {
+    it("handles normal 2-edit case (null guard is unreachable safety net)", () => {
+      // The null guard `if (!currentEdit || !previousEdit) continue` is a defensive
+      // check that can never fire because sortedEdits is a dense array. It is correct
+      // to mark it ignored. Here we verify the surrounding loop logic works correctly.
+      const code = "line1\nline2\nline3\nline4\nline5";
+      const edits = [
+        { startLine: 1, endLine: 1, newContent: "new1" },
+        { startLine: 3, endLine: 3, newContent: "new3" },
+      ];
+      const result = applyLineEdits(code, edits);
+      expect(result.newCode).toContain("new1");
+      expect(result.newCode).toContain("new3");
+    });
+  });
 });

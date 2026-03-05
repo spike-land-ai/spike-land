@@ -285,6 +285,12 @@ describe("web tools", () => {
       const result = await server.call("web_tabs", { action: "switch" });
       expect(result.isError).toBe(true);
     });
+
+    it("returns error for unknown action", async () => {
+      const result = await server.call("web_tabs", { action: "unknown_action" as "list" });
+      expect(result.isError).toBe(true);
+      expect(result.content[0]!.text).toContain("INVALID_INPUT");
+    });
   });
 
   describe("web_screenshot", () => {

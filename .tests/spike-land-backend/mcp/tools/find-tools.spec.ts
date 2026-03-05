@@ -139,6 +139,16 @@ describe("find-tools", () => {
 
         expect(result.totalMatches).toBe(0);
       });
+
+      it("throws with invalid regex pattern (line 66 catch)", () => {
+        // Passing an invalid regex causes new RegExp() to throw a SyntaxError (an Error),
+        // which hits the `error instanceof Error ? error.message` branch.
+        // The `String(error)` branch is unreachable (RegExp always throws Error) and is
+        // marked /* v8 ignore next */ in the source.
+        expect(() =>
+          executeFindLines(createMockSession("const x = 1;"), "test-space", "[invalid", true)
+        ).toThrow("Invalid regex pattern:");
+      });
     });
   });
 });

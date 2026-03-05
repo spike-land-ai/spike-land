@@ -131,6 +131,19 @@ describe("CliTransport", () => {
     };
     expect(result.message.content[0]?.text).toBe("(no response)");
   });
+
+  it("should reject when stdout is null (JSON.parse of empty string throws)", async () => {
+    const transport = new CliTransport();
+    vi.mocked(execFile).mockImplementation((_bin, _args, _opts, cb) => {
+      // Pass null for stdout → stdout ?? "" → "" → JSON.parse("") throws SyntaxError
+      (cb as Parameters<typeof execFile>[3])(null, null as unknown as string, "");
+      return {} as ReturnType<typeof execFile>;
+    });
+
+    await expect(transport.request("chat.send", { message: "hi" })).rejects.toThrow(
+      SyntaxError,
+    );
+  });
 });
 
 describe("main", () => {

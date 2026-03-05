@@ -151,6 +151,35 @@ describe("narrate", () => {
     expect(result.text).toContain('[navigation landmark "Primary"]');
   });
 
+  it("narrates named list elements with children", () => {
+    const tree = makeTree([
+      {
+        role: "list",
+        name: "Navigation",
+        children: [
+          { role: "listitem", name: "Item 1" },
+        ],
+      },
+    ]);
+    const result = narrate(tree, "Test", "https://test.com");
+    expect(result.text).toContain('[list] "Navigation"');
+    expect(result.text).toContain('[listitem] "Item 1"');
+  });
+
+  it("narrates unnamed non-interactive role with children but no label line", () => {
+    const tree = makeTree([
+      {
+        role: "group",
+        children: [
+          { role: "button", name: "Go" },
+        ],
+      },
+    ]);
+    const result = narrate(tree, "Test", "https://test.com");
+    expect(result.text).not.toContain("[group]");
+    expect(result.text).toContain("button ref=1");
+  });
+
   it("populates elements array with correct metadata", () => {
     const tree = makeTree([
       { role: "button", name: "Submit", disabled: true },

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { error, log, setVerbose, warn } from "../../../../src/spike-cli/util/logger.js";
+import { error, isVerbose, log, setVerbose, warn } from "../../../../src/spike-cli/util/logger.js";
 
 describe("logger", () => {
   let errorSpy: ReturnType<typeof vi.spyOn>;
@@ -63,6 +63,18 @@ describe("logger", () => {
     it("includes [spike ERROR] prefix", () => {
       error("something broke");
       expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining("[spike ERROR]"));
+    });
+  });
+
+  describe("isVerbose()", () => {
+    it("returns false when verbose is not set", () => {
+      setVerbose(false);
+      expect(isVerbose()).toBe(false);
+    });
+
+    it("returns true after setVerbose(true)", () => {
+      setVerbose(true);
+      expect(isVerbose()).toBe(true);
     });
   });
 });

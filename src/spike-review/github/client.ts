@@ -248,8 +248,10 @@ export function parseDiffHunks(patch: string): DiffHunk[] {
         hunks.push(currentHunk);
       }
       currentHunk = {
+        /* v8 ignore next */
         oldStart: parseInt(match[1] ?? "0", 10),
         oldLines: parseInt(match[2] ?? "1", 10),
+        /* v8 ignore next */
         newStart: parseInt(match[3] ?? "0", 10),
         newLines: parseInt(match[4] ?? "1", 10),
         lines: [line],

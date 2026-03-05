@@ -71,6 +71,19 @@ describe("parseDiffHunks", () => {
   it("returns empty array for empty patch", () => {
     expect(parseDiffHunks("")).toHaveLength(0);
   });
+
+  it("handles hunk with no new line count (match[4] undefined, defaults to 1)", () => {
+    // @@ -5,2 +5 @@ — newLines group is absent, should default to 1
+    const patch = `@@ -5,2 +5 @@
+ context line
+-removed`;
+
+    const hunks = parseDiffHunks(patch);
+    expect(hunks).toHaveLength(1);
+    expect(hunks[0]?.newStart).toBe(5);
+    expect(hunks[0]?.newLines).toBe(1);
+    expect(hunks[0]?.oldLines).toBe(2);
+  });
 });
 
 describe("GitHubClient", () => {

@@ -569,6 +569,23 @@ describe("spawnClaudeCode", () => {
     expect(result.codeUpdated).toBe(true);
   });
 
+  it("does not set codeUpdated for unrelated tool names", async () => {
+    const proc = makeMockProcess();
+    vi.mocked(spawn).mockReturnValue(proc as unknown as ChildProcess);
+
+    const promise = agent.spawnClaudeCode("prompt", "system", "/tmp/mcp.json");
+    const toolEvent = JSON.stringify({
+      type: "tool_use",
+      name: "some_other_tool",
+    });
+    (proc.stdout as EventEmitter).emit("data", Buffer.from(toolEvent + "\n"));
+    proc.emit("close", 0);
+
+    const result = await promise;
+    expect(result.codeUpdated).toBe(false);
+    expect(result.toolCalls).toContain("some_other_tool");
+  });
+
   it("ignores malformed JSON lines in stdout", async () => {
     const proc = makeMockProcess();
     vi.mocked(spawn).mockReturnValue(proc as unknown as ChildProcess);

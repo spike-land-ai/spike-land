@@ -99,6 +99,7 @@ function getAction(name: string): ActionFn {
   return fn as ActionFn;
 }
 
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -236,6 +237,31 @@ describe("CLI poll command", () => {
     spy.mockRestore();
   });
 
+  it("uses default interval of 2000 when interval is not a valid number", async () => {
+    vi.mocked(agentModule.poll).mockResolvedValue(0);
+    vi.useFakeTimers();
+    const sigintHandlers: (() => void)[] = [];
+    const onSpy = vi.spyOn(process, "on").mockImplementation((event, fn) => {
+      if (event === "SIGINT") sigintHandlers.push(fn as () => void);
+      return process;
+    });
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as () => never);
+
+    // Start poll action with invalid interval
+    getAction("poll")({ once: false, stats: false, interval: "not-a-number" });
+
+    // Let the poll loop run once
+    await vi.advanceTimersByTimeAsync(2001);
+
+    if (sigintHandlers.length > 0) sigintHandlers[0]!();
+
+    expect(agentModule.poll).toHaveBeenCalled();
+
+    vi.useRealTimers();
+    onSpy.mockRestore();
+    exitSpy.mockRestore();
+  });
+
   it("runs continuous polling loop", async () => {
     vi.useFakeTimers();
     vi.mocked(agentModule.poll).mockResolvedValue(0);
@@ -331,6 +357,25 @@ describe("CLI dev command", () => {
     spy.mockRestore();
   });
 
+  it("uses default debounce of 300 when debounce value is not a valid number", async () => {
+    const stopFn = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(watcherModule.startDevMode).mockResolvedValue({ stop: stopFn } as never);
+    const onSpy = vi.spyOn(process, "on").mockImplementation(() => process);
+    vi.spyOn(process, "exit").mockImplementation((() => {}) as () => never);
+
+    // Don't await - action hangs; just check startDevMode gets called with 300 debounce
+    getAction("dev")({ codespace: ["my-space"], debounce: "not-a-number" });
+
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(watcherModule.startDevMode).toHaveBeenCalledWith(
+      ["my-space"],
+      expect.objectContaining({ debounceMs: 300 }),
+    );
+    onSpy.mockRestore();
+    vi.restoreAllMocks();
+  });
+
   it("SIGINT handler calls stop and exits with 0", async () => {
     const stopFn = vi.fn().mockResolvedValue(undefined);
     vi.mocked(watcherModule.startDevMode).mockResolvedValue({ stop: stopFn } as never);
@@ -379,6 +424,37 @@ describe("CLI dev command", () => {
 
     onSpy.mockRestore();
     exitSpy.mockRestore();
+  });
+
+  it("onSync callback logs synced message", async () => {
+    let capturedOnSync: ((id: string) => void) | undefined;
+    const stopFn = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(watcherModule.startDevMode).mockImplementation(
+      async (_ids, opts) => {
+        capturedOnSync = opts?.onSync;
+        return { stop: stopFn } as never;
+      },
+    );
+
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const onSpy = vi.spyOn(process, "on").mockImplementation(() => process);
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as () => never);
+
+    // Start the action - it will hang at `await new Promise(() => {})`; do NOT await
+    getAction("dev")({ codespace: ["my-space"], debounce: "100" });
+
+    // Wait for startDevMode to resolve so capturedOnSync is set
+    await new Promise((r) => setTimeout(r, 10));
+
+    // Invoke the onSync callback directly
+    expect(capturedOnSync).toBeDefined();
+    capturedOnSync!("my-space");
+
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("my-space"));
+
+    onSpy.mockRestore();
+    exitSpy.mockRestore();
+    logSpy.mockRestore();
   });
 });
 
@@ -460,6 +536,29 @@ describe("CLI claude command", () => {
     const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as () => never);
     await getAction("claude")({ codespace: "my-space" }, { args: [] });
     expect(exitSpy).toHaveBeenCalledWith(1);
+    exitSpy.mockRestore();
+  });
+
+  it("uses empty array when command.args is null/falsy", async () => {
+    const mockProc = new EventEmitter();
+    vi.mocked(spawn).mockReturnValue(mockProc as unknown as ChildProcess);
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as () => never);
+
+    const exitCalled = new Promise<void>((resolve) => {
+      exitSpy.mockImplementation((() => resolve()) as () => never);
+    });
+
+    // Pass command with null args to exercise the `|| []` fallback
+    getAction("claude")({ prompt: "hi" }, { args: null });
+    await new Promise((r) => process.nextTick(r));
+    mockProc.emit("close", 0);
+    await exitCalled;
+
+    expect(spawn).toHaveBeenCalledWith(
+      "claude",
+      expect.any(Array),
+      expect.any(Object),
+    );
     exitSpy.mockRestore();
   });
 });

@@ -14,6 +14,16 @@ export default mergeConfig(
       name: "src-spike-edge",
       include: ["../../.tests/spike-edge/**/*.test.ts"],
       exclude: ["node_modules", "dist"],
+      coverage: {
+        include: ["src/spike-edge/**/*.ts"],
+        exclude: [
+          "src/spike-edge/__tests__/**",
+          "src/spike-edge/__mocks__/**",
+          "src/spike-edge/vitest.config.ts",
+          "**/*.test.ts",
+          "../../.tests/**",
+        ],
+      },
     },
   }),
 );

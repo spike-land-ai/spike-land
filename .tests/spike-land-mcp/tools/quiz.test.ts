@@ -16,6 +16,10 @@ import {
   type QuizSession,
   verifyBadgeToken,
 } from "../../../src/spike-land-mcp/tools/quiz";
+import type { Env } from "../../../src/spike-land-mcp/env";
+
+// Minimal mock env with no API key so tests use the deterministic heuristic path
+const mockEnvNoGemini = { GEMINI_API_KEY: "" } as unknown as Env;
 
 function createTestSession(overrides?: Partial<QuizSession>): QuizSession {
   const concepts: ConceptDefinition[] = [
@@ -119,7 +123,7 @@ describe("Quiz Engine", () => {
   });
 
   describe("generateConceptsFromContent", () => {
-    it("generates concepts from content text", () => {
+    it("generates concepts from content text", async () => {
       const content = [
         "TypeScript is a typed superset of JavaScript that compiles to plain JavaScript.",
         "",
@@ -128,7 +132,7 @@ describe("Quiz Engine", () => {
         "Node.js is a runtime environment that executes JavaScript outside the browser.",
       ].join("\n");
 
-      const concepts = generateConceptsFromContent(content);
+      const concepts = await generateConceptsFromContent(content, mockEnvNoGemini);
 
       expect(concepts.length).toBeGreaterThanOrEqual(3);
       for (const concept of concepts) {
@@ -142,15 +146,16 @@ describe("Quiz Engine", () => {
       }
     });
 
-    it("returns default concepts for empty content", () => {
-      const concepts = generateConceptsFromContent("");
+    it("returns default concepts for empty content", async () => {
+      const concepts = await generateConceptsFromContent("", mockEnvNoGemini);
       expect(concepts.length).toBe(3);
       expect(concepts[0]!.name).toBe("Core understanding");
     });
 
-    it("each variant has exactly 4 options", () => {
-      const concepts = generateConceptsFromContent(
+    it("each variant has exactly 4 options", async () => {
+      const concepts = await generateConceptsFromContent(
         "Some interesting content about machine learning algorithms and neural networks.",
+        mockEnvNoGemini,
       );
       for (const concept of concepts) {
         for (const variant of concept.variants) {

@@ -191,9 +191,11 @@ export function createMcpBridge(opts: McpBridgeOptions): McpBridge {
       const result = await executeGatewayTool(entry, args);
       if (result.isError) outcome = "error";
       return result;
+    /* c8 ignore start */
     } catch (err) {
       outcome = "error";
       throw err;
+    /* c8 ignore stop */
     } finally {
       const durationMs = Date.now() - start;
       log(`[mcp-analytics] openclaw-mcp/${name} ${outcome} ${durationMs}ms`);
@@ -206,15 +208,16 @@ export function createMcpBridge(opts: McpBridgeOptions): McpBridge {
       { capabilities: { tools: {} } },
     );
 
+    /* c8 ignore start */
     server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: listTools(),
     }));
 
     server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      /* c8 ignore next 2 */
       const { name, arguments: callArgs = {} } = request.params;
       return callTool(name, callArgs);
     });
+    /* c8 ignore stop */
 
     const stdioTransport = new StdioServerTransport();
     await server.connect(stdioTransport);

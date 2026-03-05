@@ -59,4 +59,34 @@ describe("cli", () => {
 
     expect(process.argv[2]).toBe("status");
   });
+
+  it("preAction hook sets verbose when --verbose is passed", async () => {
+    const logger = await import("../../src/spike-cli/util/logger");
+    const setVerboseSpy = vi.spyOn(logger, "setVerbose");
+
+    // Restore real parse to let the preAction hook fire
+    vi.mocked(program.parse).mockRestore?.();
+    vi.spyOn(program, "parse").mockImplementation((argv, opts) => {
+      // Manually invoke preAction by simulating what commander does:
+      // walk hooks and call preAction with a command that has verbose=true
+      const hooks = (program as Record<string, unknown>)._lifeCycleHooks as
+        | Record<string, Array<(cmd: unknown) => void>>
+        | undefined;
+      if (hooks?.["preAction"]) {
+        for (const hook of hooks["preAction"]) {
+          hook(Object.assign(Object.create(program), {
+            opts: () => ({ verbose: true }),
+          }));
+        }
+      }
+      return program as unknown as typeof program;
+    });
+
+    process.argv = ["node", "spike", "--verbose", "auth"];
+    await main();
+
+    expect(setVerboseSpy).toHaveBeenCalledWith(true);
+    // cleanup
+    logger.setVerbose(false);
+  });
 });

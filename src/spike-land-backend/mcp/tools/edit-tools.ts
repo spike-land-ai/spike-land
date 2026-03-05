@@ -321,6 +321,7 @@ export function applyLineEdits(
   for (let i = 1; i < sortedEdits.length; i++) {
     const currentEdit = sortedEdits[i];
     const previousEdit = sortedEdits[i - 1];
+    /* istanbul ignore next */
     if (!currentEdit || !previousEdit) continue;
 
     if (currentEdit.startLine <= previousEdit.endLine) {

@@ -459,5 +459,80 @@ describe("HNReadClient", () => {
       const updates = await client.getUpdates();
       expect(updates).toEqual({ items: [], profiles: [] });
     });
+
+    it("getStoryIds returns empty when Firebase returns null body", async () => {
+      // Trigger the (data as number[]) ?? [] right-hand branch
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/topstories.json`,
+          response: { body: null as unknown as Record<string, unknown> },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const ids = await client.getStoryIds("top");
+      expect(ids).toEqual([]);
+    });
+  });
+
+  describe("buildCommentTree branch coverage", () => {
+    it("filters null items inside buildCommentTree (if (!item) continue branch)", async () => {
+      // item at 12346 returns null — triggers if (!item) continue
+      const storyWithKid: typeof SAMPLE_STORY = { ...SAMPLE_STORY, kids: [12346] };
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/item/12345.json`,
+          response: { body: storyWithKid },
+        },
+        {
+          url: `${HN_FIREBASE_BASE}/item/12346.json`,
+          response: { body: null as unknown as Record<string, unknown> },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const result = await client.getItemWithComments(12345, 2);
+      expect(result).not.toBeNull();
+      expect(result!.comments).toHaveLength(0);
+    });
+
+    it("item without kids property uses ?? [] fallback in getItemWithComments", async () => {
+      // item.kids is undefined — triggers item.kids ?? [] on line 97
+      const storyNoKids: typeof SAMPLE_STORY = { ...SAMPLE_STORY };
+      delete (storyNoKids as Partial<typeof SAMPLE_STORY>).kids;
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/item/12345.json`,
+          response: { body: storyNoKids as unknown as Record<string, unknown> },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const result = await client.getItemWithComments(12345, 2);
+      expect(result).not.toBeNull();
+      expect(result!.comments).toHaveLength(0);
+    });
+
+    it("recursive buildCommentTree uses ?? [] when child item has no kids", async () => {
+      // depth=2: story -> comment -> nested comment (nested has no kids, triggers ?? [] at line 116)
+      const commentWithNoKids = { ...SAMPLE_COMMENT, kids: undefined as unknown as number[] };
+      const fetch = createMockFetch([
+        {
+          url: `${HN_FIREBASE_BASE}/item/12345.json`,
+          response: { body: SAMPLE_STORY },
+        },
+        {
+          url: `${HN_FIREBASE_BASE}/item/12346.json`,
+          response: { body: commentWithNoKids as unknown as Record<string, unknown> },
+        },
+        {
+          url: `${HN_FIREBASE_BASE}/item/12347.json`,
+          response: { body: { ...SAMPLE_COMMENT, id: 12347, kids: undefined } as unknown as Record<string, unknown> },
+        },
+      ]);
+      const client = new HNReadClient(fetch);
+      const result = await client.getItemWithComments(12345, 2);
+      expect(result).not.toBeNull();
+      expect(result!.comments).toHaveLength(2);
+      // kids undefined means no children fetched
+      expect(result!.comments[0].children).toHaveLength(0);
+    });
   });
 });

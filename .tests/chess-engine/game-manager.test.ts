@@ -642,6 +642,20 @@ describe("game-manager", () => {
 
       await expect(resignGame("nonexistent", "white-player")).rejects.toThrow("Game not found");
     });
+
+    it("handles null blackPlayerId gracefully when white resigns (winnerId is null)", async () => {
+      const game = makeGameRecord({ blackPlayerId: null });
+      mockPrisma.chessGame.findUnique.mockResolvedValueOnce(game).mockResolvedValueOnce(game);
+      mockPrisma.chessGame.update.mockResolvedValue({});
+      mockPrisma.chessPlayer.findUnique.mockResolvedValue(null);
+
+      await resignGame("game-1", "white-player");
+
+      expect(mockPrisma.chessGame.update).toHaveBeenCalledWith({
+        where: { id: "game-1" },
+        data: { status: "RESIGNED", winnerId: null },
+      });
+    });
   });
 
   describe("offerDraw", () => {
@@ -860,6 +874,20 @@ describe("game-manager", () => {
       await expect(handleTimeExpiry("nonexistent", "white-player")).rejects.toThrow(
         "Game not found",
       );
+    });
+
+    it("handles null blackPlayerId gracefully when white times out (winnerId is null)", async () => {
+      const game = makeGameRecord({ blackPlayerId: null });
+      mockPrisma.chessGame.findUnique.mockResolvedValueOnce(game).mockResolvedValueOnce(game);
+      mockPrisma.chessGame.update.mockResolvedValue({});
+      mockPrisma.chessPlayer.findUnique.mockResolvedValue(null);
+
+      await handleTimeExpiry("game-1", "white-player");
+
+      expect(mockPrisma.chessGame.update).toHaveBeenCalledWith({
+        where: { id: "game-1" },
+        data: { status: "RESIGNED", winnerId: null },
+      });
     });
   });
 

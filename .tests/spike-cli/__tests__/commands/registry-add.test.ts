@@ -226,6 +226,34 @@ describe("registry add command", () => {
     expect(content.mcpServers["new-server"]).toBeDefined();
   });
 
+  it("initializes mcpServers when config exists but lacks the key (line 77)", async () => {
+    // Pre-create a config file with valid JSON but without mcpServers key
+    const { writeFile } = await import("node:fs/promises");
+    const configPath = join(tempDir, ".mcp.json");
+    await writeFile(configPath, JSON.stringify({ other: "data" }), "utf-8");
+
+    mockLoadTokens.mockResolvedValue({
+      baseUrl: "https://spike.land",
+      accessToken: "tok",
+    });
+    mockGetRegistryServer.mockResolvedValue({
+      id: "chess",
+      name: "Chess",
+      description: "Chess MCP",
+      url: "https://spike.land/mcp/chess",
+      tags: [],
+    });
+
+    const program = makeProgram();
+    await program.parseAsync(["registry", "add", "chess"], { from: "user" });
+
+    const { readFile } = await import("node:fs/promises");
+    const content = JSON.parse(await readFile(configPath, "utf-8")) as {
+      mcpServers: Record<string, unknown>;
+    };
+    expect(content.mcpServers["chess"]).toBeDefined();
+  });
+
   it("handles a corrupt existing config file by starting fresh", async () => {
     const { writeFile } = await import("node:fs/promises");
     const configPath = join(tempDir, ".mcp.json");

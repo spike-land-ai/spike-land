@@ -293,6 +293,20 @@ describe("LargeValueStorage", () => {
       expect(mockR2.put).toHaveBeenCalledWith("do_test-do-id/over", overStr);
     });
   });
+
+  describe("get — invalid JSON in R2 (line 90)", () => {
+    it("throws when R2 returns invalid JSON for an object originalType", async () => {
+      mockStorage.get.mockResolvedValue({
+        __r2_ref: true,
+        key: "do_test-do-id/bad_key",
+        originalType: "object",
+      });
+      // R2 returns corrupt (non-JSON) text
+      mockR2.get.mockResolvedValue(makeR2Object("not valid json {{{"));
+
+      await expect(lvs.get("bad_key")).rejects.toThrow("Failed to parse stored value: invalid JSON");
+    });
+  });
 });
 
 // Expose threshold for edge case tests

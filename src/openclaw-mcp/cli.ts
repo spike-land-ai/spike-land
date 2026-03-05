@@ -97,7 +97,7 @@ export async function main() {
   await bridge.serve();
 }
 
-/* c8 ignore next 7 */
+/* c8 ignore start */
 const isDirectRun = process.argv[1]?.endsWith("/cli.ts") || process.argv[1]?.endsWith("/cli.js");
 if (isDirectRun) {
   main().catch((err: unknown) => {
@@ -105,3 +105,4 @@ if (isDirectRun) {
     process.exit(1);
   });
 }
+/* c8 ignore stop */

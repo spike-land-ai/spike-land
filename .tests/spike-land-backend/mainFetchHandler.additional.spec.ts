@@ -1,5 +1,5 @@
 /**
- * Additional mainFetchHandler tests for uncovered branches (lines 28, 46-55)
+ * Additional mainFetchHandler tests for uncovered branches
  */
 import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 import type Env from "../../src/spike-land-backend/env.js";
@@ -142,6 +142,93 @@ describe("mainFetchHandler additional coverage", () => {
       // When handleFetchApi returns null/undefined, fallback is "Not Found" 404
       // Since routes mock is empty, this hits line 88
       expect(response.status).toBe(404);
+    });
+  });
+
+  describe("health check endpoint (lines 79-110)", () => {
+    it("returns 200 with status ok for shallow health check", async () => {
+      const request = new Request("https://example.com/health");
+      const response = await handleMainFetch(request, mockEnv, mockCtx);
+
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as { status: string; service: string };
+      expect(body.status).toBe("ok");
+      expect(body.service).toBe("spike-land-backend");
+    });
+
+    it("does not include kv/r2 fields in shallow health check", async () => {
+      const request = new Request("https://example.com/health");
+      const response = await handleMainFetch(request, mockEnv, mockCtx);
+
+      const body = (await response.json()) as Record<string, unknown>;
+      expect(body).not.toHaveProperty("kv");
+      expect(body).not.toHaveProperty("r2");
+    });
+
+    it("returns 200 with kv and r2 fields for deep health check when both succeed", async () => {
+      const kvGet = vi.fn().mockResolvedValue(null);
+      const r2Head = vi.fn().mockResolvedValue(null);
+      const deepEnv = {
+        ...mockEnv,
+        KV: { get: kvGet },
+        R2: { head: r2Head },
+      } as unknown as Env;
+
+      const request = new Request("https://example.com/health?deep=true");
+      const response = await handleMainFetch(request, deepEnv, mockCtx);
+
+      expect(response.status).toBe(200);
+      const body = (await response.json()) as { status: string; kv: string; r2: string };
+      expect(body.status).toBe("ok");
+      expect(body.kv).toBe("ok");
+      expect(body.r2).toBe("ok");
+    });
+
+    it("returns 503 with degraded status when KV throws during deep health check", async () => {
+      const kvGet = vi.fn().mockRejectedValue(new Error("KV unavailable"));
+      const r2Head = vi.fn().mockResolvedValue(null);
+      const deepEnv = {
+        ...mockEnv,
+        KV: { get: kvGet },
+        R2: { head: r2Head },
+      } as unknown as Env;
+
+      const request = new Request("https://example.com/health?deep=true");
+      const response = await handleMainFetch(request, deepEnv, mockCtx);
+
+      expect(response.status).toBe(503);
+      const body = (await response.json()) as { status: string; kv: string; r2: string };
+      expect(body.status).toBe("degraded");
+      expect(body.kv).toBe("degraded");
+      expect(body.r2).toBe("ok");
+    });
+
+    it("returns 503 with degraded status when R2 throws during deep health check", async () => {
+      const kvGet = vi.fn().mockResolvedValue(null);
+      const r2Head = vi.fn().mockRejectedValue(new Error("R2 unavailable"));
+      const deepEnv = {
+        ...mockEnv,
+        KV: { get: kvGet },
+        R2: { head: r2Head },
+      } as unknown as Env;
+
+      const request = new Request("https://example.com/health?deep=true");
+      const response = await handleMainFetch(request, deepEnv, mockCtx);
+
+      expect(response.status).toBe(503);
+      const body = (await response.json()) as { status: string; kv: string; r2: string };
+      expect(body.status).toBe("degraded");
+      expect(body.kv).toBe("ok");
+      expect(body.r2).toBe("degraded");
+    });
+
+    it("ignores non-GET methods to /health endpoint", async () => {
+      vi.mocked(handleFetchApi).mockResolvedValue(new Response("Method Not Allowed", { status: 405 }));
+      const request = new Request("https://example.com/health", { method: "POST" });
+      const response = await handleMainFetch(request, mockEnv, mockCtx);
+
+      // POST to /health goes to normal routing, not health check
+      expect(response.status).toBe(405);
     });
   });
 });

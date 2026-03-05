@@ -933,4 +933,20 @@ describe("JsonSchemaToZodConverter", () => {
       expect(isMcpToolInputSchema("string")).toBe(false);
     });
   });
+
+  describe("convertEnum — empty enum (line 385)", () => {
+    it("returns z.unknown() for an empty enum array", () => {
+      const schema = { enum: [] };
+      const result = converter.convert(schema);
+      // z.unknown() accepts anything
+      expect(result.parse("anything")).toBe("anything");
+      expect(result.parse(42)).toBe(42);
+    });
+
+    it("returns z.unknown() when enum key is missing", () => {
+      const schema = {};
+      const result = converter.convert(schema);
+      expect(result.parse(null)).toBeNull();
+    });
+  });
 });
