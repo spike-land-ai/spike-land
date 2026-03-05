@@ -53,6 +53,27 @@ export default defineConfig({
   },
   test: {
     reporters: [path.join(root, "vitest-minimal-reporter.ts")],
+    coverage: {
+      exclude: [
+        // spike-land-backend: CF Workers runtime-specific paths and confirmed
+        // dead-code safety nets not exercisable in a Node.js test environment
+        src("spike-land-backend/types/cloudflare.ts"),
+        src("spike-land-backend/chatRoom.ts"),
+        src("spike-land-backend/chat.ts"),
+        src("spike-land-backend/anthropicHandler.ts"),
+        src("spike-land-backend/websocketHandler.ts"),
+        src("spike-land-backend/handlers/postHandler.ts"),
+        src("spike-land-backend/mcp/handler.ts"),
+        src("spike-land-backend/routes/apiRoutes.ts"),
+        src("spike-land-backend/replicateHandler.ts"),
+        src("spike-land-backend/Logs.ts"),
+        src("spike-land-backend/fetchHandler.ts"),
+        src("spike-land-backend/mainFetchHandler.ts"),
+        src("spike-land-backend/mcp/tools/edit-tools.ts"),
+        src("spike-land-backend/mcp/tools/find-tools.ts"),
+        src("spike-land-backend/utils/jsonSchemaToZod.ts"),
+      ],
+    },
     projects: [
   // ── bazdmeg-mcp ──────────────────────────────────────────
   {
@@ -546,23 +567,6 @@ export default defineConfig({
           "**/*.html",
           "**/*.wasm",
           "**/esbuild-defs.ts",
-          // CF Workers runtime-specific paths and confirmed dead-code safety nets
-          // that are not exercisable in a Node.js test environment
-          "**/types/cloudflare.ts",
-          "**/chatRoom.ts",
-          "**/chat.ts",
-          "**/anthropicHandler.ts",
-          "**/websocketHandler.ts",
-          "**/handlers/postHandler.ts",
-          "**/mcp/handler.ts",
-          "**/routes/apiRoutes.ts",
-          "**/replicateHandler.ts",
-          "**/Logs.ts",
-          "**/fetchHandler.ts",
-          "**/mainFetchHandler.ts",
-          "**/mcp/tools/edit-tools.ts",
-          "**/mcp/tools/find-tools.ts",
-          "**/utils/jsonSchemaToZod.ts",
         ],
         thresholds: tier3Thresholds,
       },

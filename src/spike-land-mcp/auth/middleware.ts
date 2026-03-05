@@ -15,12 +15,39 @@ async function hashToken(token: string): Promise<string> {
 
 import type { DrizzleDB } from "../db/index";
 
+const ANONYMOUS_TOOLS = new Set([
+  "search_tools",
+  "list_categories",
+  "get_status",
+  "get_tool_info",
+]);
+
 export type AuthVariables = { userId: string; db: DrizzleDB };
 
 export const authMiddleware = createMiddleware<{
   Bindings: Env;
   Variables: AuthVariables;
 }>(async (c, next) => {
+  const reqClone = c.req.raw.clone();
+  try {
+    const body = (await reqClone.json()) as any;
+    if (
+      c.req.method === "POST" &&
+      body &&
+      typeof body === "object" &&
+      body.method === "tools/call" &&
+      body.params &&
+      typeof body.params === "object" &&
+      ANONYMOUS_TOOLS.has(body.params.name)
+    ) {
+      c.set("userId", "anonymous");
+      c.set("db", createDb(c.env.DB));
+      return next();
+    }
+  } catch (e) {
+    // Ignore parse errors, let regular auth or downstream handle it
+  }
+
   const authHeader = c.req.header("Authorization");
 
   if (!authHeader?.startsWith("Bearer ")) {
