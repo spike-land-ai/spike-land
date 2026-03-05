@@ -71,7 +71,8 @@ Runtime theme objects for React.
 A model-agnostic coding agent and MCP multiplexer CLI.
 
 - **Package**: `@spike-land-ai/spike-cli` (external repo)
-- **Install**: `npx @spike-land-ai/spike-cli`
+- **Quick start**: `claude mcp add spike-land --transport http https://spike.land/mcp`
+- **Interactive CLI**: `npx @spike-land-ai/spike-cli shell`
 - **Transport**: stdio, SSE, HTTP
 
 ### Commands
