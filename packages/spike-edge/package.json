@@ -17,12 +17,12 @@
     "hono": "^4.12.5"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20260305.0",
+    "@cloudflare/workers-types": "4.20260305.1",
     "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^10.0.2",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18",
-    "wrangler": "^4.69.0"
+    "wrangler": "^4.70.0"
   },
   "source": "./index.ts"
 }

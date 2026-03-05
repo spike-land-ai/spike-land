@@ -96,8 +96,8 @@
     "@tailwindcss/browser": "4.2.1",
     "@tailwindcss/postcss": "4.2.1",
     "@tailwindcss/vite": "4.2.1",
-    "@tanstack/react-router": "1.163.3",
-    "@tanstack/router-plugin": "1.164.0",
+    "@tanstack/react-router": "1.166.2",
+    "@tanstack/router-plugin": "1.166.2",
     "@types/node": "25.3.3",
     "@typescript/ata": "0.9.8",
     "assert": "2.1.0",
@@ -113,12 +113,12 @@
     "esbuild-plugin-copy": "2.1.1",
     "events": "3.3.0",
     "fetch-retry": "6.0.0",
-    "framer-motion": "12.34.5",
+    "framer-motion": "12.35.0",
     "hono": "^4.12.5",
     "html2canvas-pro": "2.0.2",
     "immutable": "5.1.5",
     "jsondiffpatch": "0.7.3",
-    "lucide-react": "0.576.0",
+    "lucide-react": "0.577.0",
     "mime-types": "3.0.2",
     "monaco-editor": "0.55.1",
     "os-browserify": "0.3.0",
@@ -154,8 +154,8 @@
   },
   "devDependencies": {
     "@changesets/cli": "2.30.0",
-    "@cloudflare/vite-plugin": "^1.25.6",
-    "@cloudflare/workers-types": "4.20260305.0",
+    "@cloudflare/vite-plugin": "^1.26.0",
+    "@cloudflare/workers-types": "4.20260305.1",
     "@eslint/js": "10.0.1",
     "@spike-land-ai/esbuild-wasm-mcp": "*",
     "@spike-land-ai/eslint-config": "workspace:^",
@@ -188,6 +188,6 @@
     "vite": "7.3.1",
     "vite-plugin-top-level-await": "1.6.0",
     "vitest": "4.0.18",
-    "wrangler": "^4.69.0"
+    "wrangler": "^4.70.0"
   }
 }

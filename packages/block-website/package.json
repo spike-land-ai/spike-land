@@ -26,24 +26,24 @@
     "lint": "eslint --quiet ."
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.1.2",
+    "@radix-ui/react-slot": "^1.2.4",
     "@spike-land-ai/mcp-server-base": "workspace:*",
     "@spike-land-ai/shared": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.34.5",
-    "lucide-react": "^0.474.0",
-    "react-markdown": "^9.0.1",
+    "framer-motion": "^12.35.0",
+    "lucide-react": "^0.577.0",
+    "react-markdown": "^10.1.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
-    "tailwind-merge": "^3.0.1",
+    "tailwind-merge": "^3.5.0",
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@types/react": "^19.0.8",
+    "@types/react": "^19.2.14",
     "gray-matter": "^4.0.3",
     "react": "^19.2.4",
-    "tsx": "^4.19.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {

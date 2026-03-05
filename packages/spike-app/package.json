@@ -17,18 +17,18 @@
   "dependencies": {
     "@spike-land-ai/block-website": "workspace:*",
     "@tanstack/react-query": "^5.90.21",
-    "@tanstack/react-router": "^1.163.3",
+    "@tanstack/react-router": "^1.166.2",
     "@xterm/addon-fit": "^0.11.0",
     "@xterm/xterm": "^6.0.0",
-    "better-auth": "^1.5.2",
-    "framer-motion": "^12.34.5",
+    "better-auth": "^1.5.3",
+    "framer-motion": "^12.35.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.1",
-    "@tanstack/router-cli": "^1.164.0",
+    "@tanstack/router-cli": "^1.166.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@vitejs/plugin-react-swc": "^4.2.3",
@@ -41,7 +41,7 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.0.18",
-    "wrangler": "^4.69.0"
+    "wrangler": "^4.70.0"
   },
   "source": "./index.ts"
 }

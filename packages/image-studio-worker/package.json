@@ -22,10 +22,10 @@
     "@spike-land-ai/shared": "*"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20260305.0",
+    "@cloudflare/workers-types": "4.20260305.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18",
-    "wrangler": "^4.69.0"
+    "wrangler": "^4.70.0"
   },
   "source": "./index.ts"
 }
