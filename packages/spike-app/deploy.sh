@@ -50,10 +50,10 @@ fi
 
 if [ "$NEED_BUILD" = true ]; then
   echo "Building spike-app..."
-  "$VITE" build
+  $VITE build
   
   echo "Prerendering static HTML for SEO..."
-  "$TSX" scripts/prerender.ts
+  $TSX scripts/prerender.ts
 
   echo "$TREE_HASH" > "$CACHE_DIR/app.treehash"
 else
