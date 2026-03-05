@@ -21,8 +21,8 @@ export async function createMcpServer(
 
   const registry = new ToolRegistry(mcpServer, userId);
   await registerAllTools(registry, userId, db, {
-    kv: options?.kv,
-    vaultSecret: options?.vaultSecret,
+    ...(options?.kv !== undefined ? { kv: options.kv } : {}),
+    ...(options?.vaultSecret !== undefined ? { vaultSecret: options.vaultSecret } : {}),
   });
 
   if (options?.enabledCategories && options.enabledCategories.length > 0) {

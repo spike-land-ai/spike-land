@@ -30,7 +30,7 @@ export interface WorkerSyntheticEvent {
   shiftKey: boolean;
   altKey: boolean;
   metaKey: boolean;
-  targetValue?: string;
+  targetValue?: string | undefined;
   defaultPrevented: boolean;
   propagationStopped: boolean;
   preventDefault(): void;
@@ -63,7 +63,7 @@ function createSyntheticEvent(
     shiftKey: data.shiftKey ?? false,
     altKey: data.altKey ?? false,
     metaKey: data.metaKey ?? false,
-    targetValue: data.targetValue,
+    ...(data.targetValue !== undefined ? { targetValue: data.targetValue } : {}),
     defaultPrevented: false,
     propagationStopped: false,
     preventDefault() {

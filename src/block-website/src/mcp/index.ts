@@ -12,7 +12,7 @@ export const websiteTools = [
       category: z.string().optional().describe("Filter by category"),
       limit: z.number().optional().describe("Max number of posts to return")
     })
-    .handler(async ({ input }: { input: { tag?: string; category?: string; limit?: number } }) => {
+    .handler(async ({ input }: { input: { tag?: string | undefined; category?: string | undefined; limit?: number | undefined } }) => {
       const posts = (await getPosts(input)).map(p => ({
         slug: p.slug,
         title: p.title,

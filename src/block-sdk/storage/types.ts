@@ -42,7 +42,7 @@ export interface BlobAdapter {
 export interface StorageAdapter {
   kv: KVAdapter;
   sql: SQLAdapter;
-  blobs?: BlobAdapter;
+  blobs?: BlobAdapter | undefined;
 }
 
 /** Configuration for creating a storage adapter */

@@ -80,25 +80,25 @@ export function isActionError(result: unknown): result is QaActionError {
 
 export interface AccessibilityNode {
   role: string;
-  name?: string;
-  value?: string;
-  description?: string;
-  checked?: boolean | "mixed";
-  disabled?: boolean;
-  expanded?: boolean;
-  selected?: boolean;
-  pressed?: boolean | "mixed";
-  level?: number;
-  children?: AccessibilityNode[];
+  name?: string | undefined;
+  value?: string | undefined;
+  description?: string | undefined;
+  checked?: boolean | "mixed" | undefined;
+  disabled?: boolean | undefined;
+  expanded?: boolean | undefined;
+  selected?: boolean | undefined;
+  pressed?: boolean | "mixed" | undefined;
+  level?: number | undefined;
+  children?: AccessibilityNode[] | undefined;
 }
 
 export interface NarratedElement {
-  ref?: number;
+  ref?: number | undefined;
   role: string;
-  name?: string;
-  value?: string;
+  name?: string | undefined;
+  value?: string | undefined;
   states: string[];
-  level?: number;
+  level?: number | undefined;
   depth: number;
 }
 

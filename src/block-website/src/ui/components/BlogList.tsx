@@ -44,7 +44,7 @@ function CardImage({ post, className = "" }: { post: BlogMeta; className?: strin
   );
 }
 
-function FeaturedCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.ComponentType<{ to: string; className?: string; children?: React.ReactNode }> | "a" }) {
+function FeaturedCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.ComponentType<{ to: string; className?: string | undefined; children?: React.ReactNode | undefined }> | "a" }) {
   const content = (
     <>
       <CardImage post={post} className={post.heroImage ? "rounded-t-2xl" : "aspect-[21/9] rounded-t-2xl"} />
@@ -77,7 +77,7 @@ function FeaturedCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.Comp
   );
 }
 
-function BlogCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.ComponentType<{ to: string; className?: string; children?: React.ReactNode }> | "a" }) {
+function BlogCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.ComponentType<{ to: string; className?: string | undefined; children?: React.ReactNode | undefined }> | "a" }) {
   const content = (
     <>
       <CardImage post={post} className={post.heroImage ? "rounded-t-2xl" : "aspect-[16/9] rounded-t-2xl"} />
@@ -110,7 +110,7 @@ function BlogCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.Componen
   );
 }
 
-export function BlogListView({ linkComponent, limit, showHeader = true }: { linkComponent?: React.ComponentType<{ to: string; className?: string; children?: React.ReactNode }>; limit?: number; showHeader?: boolean }) {
+export function BlogListView({ linkComponent, limit, showHeader = true }: { linkComponent?: React.ComponentType<{ to: string; className?: string | undefined; children?: React.ReactNode | undefined }> | undefined; limit?: number | undefined; showHeader?: boolean | undefined }) {
   const [posts, setPosts] = useState<BlogMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

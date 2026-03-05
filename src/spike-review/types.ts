@@ -102,7 +102,7 @@ export interface FileDiffInfo {
   status: FileStatus;
   additions: number;
   deletions: number;
-  patch?: string;
+  patch?: string | undefined;
   hunks: DiffHunk[];
 }
 
@@ -149,8 +149,8 @@ export interface GateResult {
 
 export interface CommentTargetValidation {
   valid: boolean;
-  reason?: string;
-  nearestValidLine?: { line: number; side: DiffSide };
+  reason?: string | undefined;
+  nearestValidLine?: { line: number; side: DiffSide } | undefined;
 }
 
 export interface SpikeReviewConfig {

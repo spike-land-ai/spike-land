@@ -20,8 +20,8 @@ import { log } from "../util/logger";
 
 interface LoadedConfig {
   servers: Record<string, ServerConfig>;
-  toolsets?: Record<string, { servers: string[]; description?: string }>;
-  lazyLoading?: boolean;
+  toolsets?: Record<string, { servers: string[]; description?: string | undefined }> | undefined;
+  lazyLoading?: boolean | undefined;
 }
 
 async function loadConfigFile(path: string): Promise<LoadedConfig> {
@@ -31,9 +31,9 @@ async function loadConfigFile(path: string): Promise<LoadedConfig> {
     const validated = validateConfig(parsed);
     log(`Loaded config from ${path} (${Object.keys(validated.mcpServers).length} servers)`);
     return {
-      servers: validated.mcpServers,
-      toolsets: validated.toolsets,
-      lazyLoading: validated.lazyLoading,
+      servers: validated.mcpServers as Record<string, ServerConfig>,
+      ...(validated.toolsets !== undefined ? { toolsets: validated.toolsets as Record<string, { servers: string[]; description?: string }> } : {}),
+      ...(validated.lazyLoading !== undefined ? { lazyLoading: validated.lazyLoading } : {}),
     };
   } catch (err) {
     log(`Skipping config ${path}: ${err instanceof Error ? err.message : String(err)}`);
@@ -42,15 +42,15 @@ async function loadConfigFile(path: string): Promise<LoadedConfig> {
 }
 
 export interface DiscoveryOptions {
-  configPath?: string;
-  inlineServers?: Array<{ name: string; command: string }>;
-  inlineUrls?: Array<{ name: string; url: string }>;
+  configPath?: string | undefined;
+  inlineServers?: Array<{ name: string; command: string }> | undefined;
+  inlineUrls?: Array<{ name: string; url: string }> | undefined;
 }
 
 export async function discoverConfig(options: DiscoveryOptions = {}): Promise<ResolvedConfig> {
   const servers: Record<string, ServerConfig> = {};
   const configSources: string[] = [];
-  let toolsets: Record<string, { servers: string[]; description?: string }> | undefined;
+  let toolsets: Record<string, { servers: string[]; description?: string | undefined }> | undefined;
   let lazyLoading: boolean | undefined;
 
   // 1. Global config

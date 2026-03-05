@@ -13,7 +13,7 @@ export interface NamespacedTool {
   namespacedName: string;
   originalName: string;
   serverName: string;
-  description?: string;
+  description?: string | undefined;
   inputSchema: Record<string, unknown>;
 }
 
@@ -71,7 +71,7 @@ export class ServerManager {
     return client?.connected ?? false;
   }
 
-  getServerTools(serverName: string): Array<{ name: string; description?: string }> {
+  getServerTools(serverName: string): Array<{ name: string; description?: string | undefined }> {
     const client = this.clients.get(serverName);
     if (!client) return [];
     return client.getTools().map((t) => ({

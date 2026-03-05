@@ -10,6 +10,7 @@ import { randomUUID } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import type { NamespacedTool, ServerManager } from "../multiplexer/server-manager.js";
 
 export interface HttpServerOptions {
@@ -146,7 +147,7 @@ export async function startHttpServer(
           });
 
           const mcpServer = createMcpServer(manager);
-          await mcpServer.connect(transport);
+          await mcpServer.connect(transport as unknown as Transport);
           sessions.set(sessionId, transport);
 
           transport.onclose = () => {

@@ -126,7 +126,7 @@ async function ensureBrowser(): Promise<PlaywrightBrowser> {
       const pw = await import("playwright");
       const b = await pw.chromium.launch({
         headless: browserConfig.headless ?? true,
-        slowMo: browserConfig.slowMo,
+        ...(browserConfig.slowMo !== undefined ? { slowMo: browserConfig.slowMo } : {}),
       });
       browser = b as unknown as PlaywrightBrowser;
       resetIdleTimer();
@@ -299,10 +299,12 @@ function rebuildTree(nodes: CdpAxNode[]): AccessibilityNode | null {
   
   // Create all nodes first
   for (const cdpNode of nodes) {
+    const nodeName = cdpNode.name?.value;
+    const nodeValue = cdpNode.value?.value?.toString();
     const node: AccessibilityNode = {
       role: cdpNode.role?.value || "generic",
-      name: cdpNode.name?.value,
-      value: cdpNode.value?.value?.toString(),
+      ...(nodeName !== undefined ? { name: nodeName } : {}),
+      ...(nodeValue !== undefined ? { value: nodeValue } : {}),
     };
     
     // Map properties

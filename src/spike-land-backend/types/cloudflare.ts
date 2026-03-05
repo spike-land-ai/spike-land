@@ -74,14 +74,14 @@ export function createResponse(
     });
   }
   return new Response(body as BodyInit, {
-    status: init?.status,
-    statusText: init?.statusText,
+    ...(init?.status !== undefined ? { status: init.status } : {}),
+    ...(init?.statusText !== undefined ? { statusText: init.statusText } : {}),
     headers,
   });
 }
 
 export function createHandler<Env = unknown>(
-  handler: ExportedHandler<Env>["fetch"],
+  handler: NonNullable<ExportedHandler<Env>["fetch"]>,
 ): ExportedHandler<Env> {
   return { fetch: handler };
 }

@@ -190,7 +190,6 @@ export default {
     }
 
     const transport = new WebStandardStreamableHTTPServerTransport({
-      sessionIdGenerator: undefined,
       enableJsonResponse: true,
     });
 

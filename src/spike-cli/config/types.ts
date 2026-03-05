@@ -8,39 +8,39 @@ import type { ToolFilterConfig } from "../util/glob";
 export type { ToolFilterConfig };
 
 export interface StdioServerConfig {
-  type?: "stdio";
+  type?: "stdio" | undefined;
   command: string;
-  args?: string[];
-  env?: Record<string, string>;
-  tools?: ToolFilterConfig;
+  args?: string[] | undefined;
+  env?: Record<string, string> | undefined;
+  tools?: ToolFilterConfig | undefined;
 }
 
 export interface HttpServerConfig {
   type: "sse" | "url";
   url: string;
-  env?: Record<string, string>;
-  tools?: ToolFilterConfig;
+  env?: Record<string, string> | undefined;
+  tools?: ToolFilterConfig | undefined;
 }
 
 export type ServerConfig = StdioServerConfig | HttpServerConfig;
 
 export interface ToolsetConfig {
   servers: string[];
-  description?: string;
+  description?: string | undefined;
 }
 
 export interface McpConfigFile {
   mcpServers: Record<string, ServerConfig>;
-  toolsets?: Record<string, ToolsetConfig>;
-  lazyLoading?: boolean;
+  toolsets?: Record<string, ToolsetConfig> | undefined;
+  lazyLoading?: boolean | undefined;
 }
 
 export interface ResolvedConfig {
   servers: Record<string, ServerConfig>;
-  toolsets?: Record<string, ToolsetConfig>;
-  lazyLoading?: boolean;
+  toolsets?: Record<string, ToolsetConfig> | undefined;
+  lazyLoading?: boolean | undefined;
   /** Config file paths that were successfully loaded (for diagnostics). */
-  configSources?: string[];
+  configSources?: string[] | undefined;
 }
 
 export function isStdioConfig(config: ServerConfig): config is StdioServerConfig {

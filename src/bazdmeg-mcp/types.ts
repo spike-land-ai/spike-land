@@ -31,7 +31,7 @@ export interface RuleContext {
   prTitle: string;
   prBody: string | null;
   claudeMdRules: string[];
-  allowedPaths?: string[];
+  allowedPaths?: string[] | undefined;
 }
 
 // ── Workspace Types ─────────────────────────────────────────────────────────
@@ -91,7 +91,7 @@ export interface TelemetryEvent {
   workspace: string | null;
   metadata: Record<string, unknown>;
   timestamp: string;
-  durationMs?: number;
+  durationMs?: number | undefined;
 }
 
 // ── Stuck Signal Types ──────────────────────────────────────────────────────
@@ -100,7 +100,7 @@ export interface StuckSignal {
   packageName: string | null;
   reason: string;
   attemptedAction: string;
-  suggestedContext?: string;
+  suggestedContext?: string | undefined;
   timestamp: string;
   contextServed: string[];
   allowedPaths: string[];

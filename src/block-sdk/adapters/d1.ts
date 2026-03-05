@@ -57,8 +57,8 @@ export interface R2Bucket {
 /** Options for creating the D1 storage adapter */
 export interface D1AdapterOptions {
   db: D1Database;
-  kv?: KVNamespace;
-  r2?: R2Bucket;
+  kv?: KVNamespace | undefined;
+  r2?: R2Bucket | undefined;
 }
 
 function createD1KV(kvNs?: KVNamespace): KVAdapter {

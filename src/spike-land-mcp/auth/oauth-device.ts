@@ -32,7 +32,7 @@ async function hashToken(token: string): Promise<string> {
 
 export async function createDeviceCode(
   db: DrizzleDB,
-  options: { clientId?: string; scope?: string },
+  options: { clientId?: string | undefined; scope?: string | undefined },
 ): Promise<{ deviceCode: string; userCode: string; expiresIn: number }> {
   const deviceCode = generateCode("dc_");
   const userCode = generateUserCode();
@@ -83,7 +83,7 @@ export async function exchangeDeviceCode(
   deviceCode: string,
 ): Promise<
   | { accessToken: string; tokenType: string; scope: string }
-  | { error: string; errorDescription: string }
+  | { error: string; error_description: string }
 > {
   const now = Date.now();
 
@@ -96,7 +96,7 @@ export async function exchangeDeviceCode(
   if (result.length === 0) {
     return {
       error: "expired_token",
-      errorDescription: "Device code expired or not found",
+      error_description: "Device code expired or not found",
     };
   }
 
@@ -104,14 +104,14 @@ export async function exchangeDeviceCode(
   if (!code) {
     return {
       error: "expired_token",
-      errorDescription: "Device code not found",
+      error_description: "Device code not found",
     };
   }
 
   if (!code.approved || !code.userId) {
     return {
       error: "authorization_pending",
-      errorDescription: "User has not approved the device yet",
+      error_description: "User has not approved the device yet",
     };
   }
 

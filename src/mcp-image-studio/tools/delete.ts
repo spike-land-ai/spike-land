@@ -17,7 +17,7 @@ function createHandler() {
     ctx: {
       deps: ImageStudioDeps;
       entities: { image_id: ImageRow };
-      notify?: (event: ToolEvent) => void;
+      notify?: ((event: ToolEvent) => void) | undefined;
     };
   }) => {
     const image = ctx.entities.image_id;
@@ -59,7 +59,7 @@ export type DeleteInput = Parameters<typeof deleteImage>[0];
 export function createDeleteTool(
   userId: string,
   deps: ImageStudioDeps,
-  notify?: (event: ToolEvent) => void,
+  notify?: ((event: ToolEvent) => void) | undefined,
 ) {
   return createImageProcedure(userId, deps, notify)
     .use(withResolves({ image_id: "image" }))

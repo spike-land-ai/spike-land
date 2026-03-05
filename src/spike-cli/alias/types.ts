@@ -4,7 +4,7 @@
 
 export interface CompositeAlias {
   tool: string;
-  args?: Record<string, unknown>;
+  args?: Record<string, unknown> | undefined;
 }
 
 export interface AliasConfig {

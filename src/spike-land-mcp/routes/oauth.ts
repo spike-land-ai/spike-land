@@ -1,19 +1,37 @@
 import { Hono } from "hono";
+import type { Context } from "hono";
 import type { Env } from "../env";
 import { createDb } from "../db/index";
 import { approveDeviceCode, createDeviceCode, exchangeDeviceCode } from "../auth/oauth-device";
+import { checkRateLimit } from "../kv/rate-limit";
+
+/** Parse request body from either form-encoded or JSON, per OAuth RFC 6749 §2.3. */
+async function parseOAuthBody(c: Context): Promise<Record<string, unknown>> {
+  const contentType = c.req.header("content-type") ?? "";
+  if (contentType.includes("application/x-www-form-urlencoded")) {
+    return (await c.req.parseBody()) as Record<string, unknown>;
+  }
+  return (await c.req.json().catch(() => ({}))) as Record<string, unknown>;
+}
 
 export const oauthRoute = new Hono<{ Bindings: Env }>();
 
 // POST /oauth/device — initiate device authorization
 oauthRoute.post("/device", async (c) => {
-  const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>;
+  const clientIp = c.req.header("cf-connecting-ip") ?? "unknown";
+  const { isLimited, resetAt } = await checkRateLimit(`device:${clientIp}`, c.env.KV, 10, 300_000);
+  if (isLimited) {
+    c.header("Retry-After", String(Math.ceil((resetAt - Date.now()) / 1000)));
+    return c.json({ error: "slow_down", error_description: "Too many requests" }, 429);
+  }
+
+  const body = await parseOAuthBody(c);
   const clientId = typeof body.client_id === "string" ? body.client_id : undefined;
   const scope = typeof body.scope === "string" ? body.scope : "mcp";
 
   const db = createDb(c.env.DB);
   const { deviceCode, userCode, expiresIn } = await createDeviceCode(db, {
-    clientId,
+    ...(clientId !== undefined ? { clientId } : {}),
     scope,
   });
 
@@ -31,7 +49,14 @@ oauthRoute.post("/device", async (c) => {
 
 // POST /oauth/token — poll for access token (device grant)
 oauthRoute.post("/token", async (c) => {
-  const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>;
+  const clientIp = c.req.header("cf-connecting-ip") ?? "unknown";
+  const { isLimited, resetAt } = await checkRateLimit(`token:${clientIp}`, c.env.KV, 60, 300_000);
+  if (isLimited) {
+    c.header("Retry-After", String(Math.ceil((resetAt - Date.now()) / 1000)));
+    return c.json({ error: "slow_down", error_description: "Too many requests" }, 429);
+  }
+
+  const body = await parseOAuthBody(c);
 
   if (body.grant_type !== "urn:ietf:params:oauth:grant-type:device_code") {
     return c.json({ error: "unsupported_grant_type" }, 400);
@@ -70,7 +95,7 @@ oauthRoute.post("/device/approve", async (c) => {
     return c.json({ error: "Unauthorized" }, 401);
   }
 
-  const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>;
+  const body = await parseOAuthBody(c);
   const userCode = typeof body.user_code === "string" ? body.user_code : null;
   const userId = typeof body.user_id === "string" ? body.user_id : null;
 

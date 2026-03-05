@@ -40,7 +40,7 @@ spa.get("/*", async (c) => {
       object.writeHttpMetadata(headers);
       headers.set("etag", object.httpEtag);
       return new Response(object.body, { headers });
-    }, { ttl, swr: isImmutable ? undefined : 3600, immutable: isImmutable, cacheKey });
+    }, { ttl, ...(isImmutable ? {} : { swr: 3600 }), immutable: isImmutable, cacheKey });
 
     if (cached) return cached;
 
@@ -59,6 +59,12 @@ spa.get("/*", async (c) => {
     // 2. Second attempt: check reverse (some static generators output /about/index.html for /about)
     if (!fallback && !key.endsWith("/")) {
       fallback = await c.env.SPA_ASSETS.get(`${key}/index.html`);
+    }
+
+    // API-like prefixes must not serve SPA shell
+    const apiPrefixes = ["/mcp/", "/oauth/", "/api/"];
+    if (apiPrefixes.some(p => path.startsWith(p))) {
+      return c.json({ error: "Not Found", path }, 404);
     }
 
     // 3. Last fallback: the SPA generic index.html shell

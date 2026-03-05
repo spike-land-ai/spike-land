@@ -6,7 +6,7 @@ type AgentLoopDiagramProps = {
   /** How many states to reveal (0-7), animated over time */
   revealCount?: number;
   /** Currently active state index for glow effect */
-  activeState?: AgentState;
+  activeState?: AgentState | undefined;
   /** Show the loop arrow (fixing -> generating) */
   showLoop?: boolean;
   /** Scale factor */

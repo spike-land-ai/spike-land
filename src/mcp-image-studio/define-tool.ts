@@ -114,7 +114,7 @@ interface ResolvesConfig {
 interface CreditsConfig<InputType> {
   cost: (input: InputType, deps: ImageStudioDeps) => number;
   source: string;
-  sourceIdField?: keyof InputType & string;
+  sourceIdField?: (keyof InputType & string) | undefined;
 }
 
 interface JobConfig<InputType> {

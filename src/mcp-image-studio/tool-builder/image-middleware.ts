@@ -38,14 +38,14 @@ type ResolvedEntities<R extends Record<string, keyof EntityTypeMap>> = {
 function withToolContext(
   userId: string,
   deps: ImageStudioDeps,
-  notify?: (event: ToolEvent) => void,
+  notify?: ((event: ToolEvent) => void) | undefined,
 ) {
   return middleware<
     Record<string, unknown>,
     {
       userId: string;
       deps: ImageStudioDeps;
-      notify?: (event: ToolEvent) => void;
+      notify?: ((event: ToolEvent) => void) | undefined;
     }
   >(async ({ ctx, next }) => {
     return next({ ...ctx, userId, deps, notify });
@@ -142,7 +142,7 @@ function withOwnership<TFields extends string>(fieldKeys: TFields[]) {
 interface CreditsConfig {
   cost: (input: unknown, deps: ImageStudioDeps) => number;
   source: string;
-  sourceIdField?: string;
+  sourceIdField?: string | undefined;
 }
 
 /**
@@ -162,12 +162,12 @@ function withCredits(config: CreditsConfig) {
     {
       userId: string;
       deps: ImageStudioDeps;
-      notify?: (event: ToolEvent) => void;
+      notify?: ((event: ToolEvent) => void) | undefined;
     },
     {
       userId: string;
       deps: ImageStudioDeps;
-      notify?: (event: ToolEvent) => void;
+      notify?: ((event: ToolEvent) => void) | undefined;
       billing: { creditsCost: number };
     }
   >(async ({ input, ctx, next }) => {
@@ -219,14 +219,14 @@ function withJob(config: JobConfig) {
     {
       userId: string;
       deps: ImageStudioDeps;
-      notify?: (event: ToolEvent) => void;
-      billing?: { creditsCost: number };
+      notify?: ((event: ToolEvent) => void) | undefined;
+      billing?: { creditsCost: number } | undefined;
     },
     {
       userId: string;
       deps: ImageStudioDeps;
-      notify?: (event: ToolEvent) => void;
-      billing?: { creditsCost: number };
+      notify?: ((event: ToolEvent) => void) | undefined;
+      billing?: { creditsCost: number } | undefined;
       jobs: { currentJob: EnhancementJobRow };
     }
   >(async ({ input, ctx, next }) => {
@@ -284,7 +284,7 @@ function withJob(config: JobConfig) {
 export function createImageProcedure(
   userId: string,
   deps: ImageStudioDeps,
-  notify?: (event: ToolEvent) => void,
+  notify?: ((event: ToolEvent) => void) | undefined,
 ) {
   return createProcedure().use(withToolContext(userId, deps, notify));
 }

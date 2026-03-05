@@ -11,8 +11,8 @@ import { taskQueue } from "./index.js";
 
 interface Env {
   DB: D1Database;
-  KV?: KVNamespace;
-  BUCKET?: R2Bucket;
+  KV?: KVNamespace | undefined;
+  BUCKET?: R2Bucket | undefined;
 }
 
 export default {

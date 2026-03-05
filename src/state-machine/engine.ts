@@ -240,12 +240,12 @@ export function addState(
   const stateNode: StateNode = {
     id: state.id,
     type: state.type,
-    parent: state.parent,
+    ...(state.parent !== undefined ? { parent: state.parent } : {}),
     children: state.children ?? [],
-    initial: state.initial,
+    ...(state.initial !== undefined ? { initial: state.initial } : {}),
     entryActions: state.entryActions ?? [],
     exitActions: state.exitActions ?? [],
-    historyType: state.historyType,
+    ...(state.historyType !== undefined ? { historyType: state.historyType } : {}),
   };
 
   instance.definition.states[stateNode.id] = stateNode;
@@ -301,7 +301,7 @@ export function addTransition(
     source: transition.source,
     target: transition.target,
     event: transition.event,
-    guard: transition.guard,
+    ...(transition.guard !== undefined ? { guard: transition.guard } : {}),
     actions: transition.actions,
     internal: transition.internal,
     ...(transition.delayExpression !== undefined
@@ -470,7 +470,7 @@ export function sendEvent(
     toStates: [...instance.currentStates],
     beforeContext,
     afterContext: { ...instance.context },
-    guardEvaluated: guardExpression,
+    ...(guardExpression !== undefined ? { guardEvaluated: guardExpression } : {}),
     actionsExecuted: allActionsExecuted,
   };
 

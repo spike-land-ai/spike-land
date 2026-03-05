@@ -84,6 +84,10 @@ import {
   jsonResult,
   textResult,
 } from "@spike-land-ai/mcp-server-base";
+import {
+  ADVANCED_FEATURE_COSTS as _ADVANCED_FEATURE_COSTS,
+  ENHANCEMENT_COSTS as _ENHANCEMENT_COSTS,
+} from "@spike-land-ai/shared";
 
 export const ENHANCEMENT_TIER_VALUES = [
   "FREE",
@@ -303,33 +307,22 @@ export interface SubjectReference {
 }
 
 export interface AdvancedGenerationOptions {
-  modelPreference?: ModelPreference;
-  resolution?: GenerationResolution;
-  subjects?: SubjectReference[];
-  thinkingMode?: boolean;
-  googleSearchGrounding?: boolean;
-  textToRender?: string;
-  seed?: number;
-  outputFormat?: GenerationOutputFormat;
-  numImages?: number;
-  negativePrompt?: string;
-  aspectRatio?: AspectRatio;
+  modelPreference?: ModelPreference | undefined;
+  resolution?: GenerationResolution | undefined;
+  subjects?: SubjectReference[] | undefined;
+  thinkingMode?: boolean | undefined;
+  googleSearchGrounding?: boolean | undefined;
+  textToRender?: string | undefined;
+  seed?: number | undefined;
+  outputFormat?: GenerationOutputFormat | undefined;
+  numImages?: number | undefined;
+  negativePrompt?: string | undefined;
+  aspectRatio?: AspectRatio | undefined;
 }
 
-export const ADVANCED_FEATURE_COSTS = {
-  subjectRef: 1, // per ref
-  text: 1,
-  grounding: 2,
-  compare: 1,
-} as const;
+export const ADVANCED_FEATURE_COSTS = _ADVANCED_FEATURE_COSTS;
 
-export const ENHANCEMENT_COSTS: Record<EnhancementTier, number> = {
-  FREE: 0,
-  TIER_0_5K: 1,
-  TIER_1K: 2,
-  TIER_2K: 5,
-  TIER_4K: 10,
-};
+export const ENHANCEMENT_COSTS: Record<EnhancementTier, number> = _ENHANCEMENT_COSTS;
 
 export const MAX_BATCH_SIZE = 20;
 
@@ -468,7 +461,7 @@ export class ImageStudioResolverError extends Error {
 export interface ImageStudioResolvers {
   resolveImage(id: ImageId): Promise<ImageRow>;
   resolveAlbum(handle: AlbumHandle): Promise<AlbumRow>;
-  resolvePipeline(id: PipelineId, opts?: { requireOwnership?: boolean }): Promise<PipelineRow>;
+  resolvePipeline(id: PipelineId, opts?: { requireOwnership?: boolean | undefined } | undefined): Promise<PipelineRow>;
   resolveJob(id: JobId): Promise<EnhancementJobRow>;
   resolveGenerationJob(id: JobId): Promise<GenerationJobRow>;
   resolveImages(ids: ImageId[]): Promise<ImageRow[]>;
@@ -498,9 +491,9 @@ export interface ImageStudioDeps {
     imageFindById(id: ImageId): Promise<ImageRow | null>;
     imageFindMany(opts: {
       userId: string;
-      limit?: number;
-      cursor?: string;
-      search?: string;
+      limit?: number | undefined;
+      cursor?: string | undefined;
+      search?: string | undefined;
     }): Promise<ImageRow[]>;
     imageDelete(id: ImageId): Promise<void>;
     imageDeleteMany?(ids: ImageId[]): Promise<number>;
@@ -529,15 +522,15 @@ export interface ImageStudioDeps {
     ): Promise<EnhancementJobRow>;
     jobFindById(id: JobId): Promise<
       | (EnhancementJobRow & {
-          image?: Pick<ImageRow, "id" | "name" | "originalUrl">;
+          image?: Pick<ImageRow, "id" | "name" | "originalUrl"> | undefined;
         })
       | null
     >;
     jobFindMany(opts: {
       userId: string;
-      imageId?: ImageId;
-      status?: JobStatus;
-      limit?: number;
+      imageId?: ImageId | undefined;
+      status?: JobStatus | undefined;
+      limit?: number | undefined;
     }): Promise<EnhancementJobRow[]>;
     jobUpdate(
       id: JobId,
@@ -560,11 +553,11 @@ export interface ImageStudioDeps {
     albumCreate(data: Omit<AlbumRow, "id" | "createdAt" | "updatedAt">): Promise<AlbumRow>;
     albumFindByHandle(
       handle: AlbumHandle,
-    ): Promise<(AlbumRow & { _count?: { albumImages: number } }) | null>;
-    albumFindById(id: string): Promise<(AlbumRow & { _count?: { albumImages: number } }) | null>;
+    ): Promise<(AlbumRow & { _count?: { albumImages: number } | undefined }) | null>;
+    albumFindById(id: string): Promise<(AlbumRow & { _count?: { albumImages: number } | undefined }) | null>;
     albumFindMany(opts: {
       userId: string;
-      limit?: number;
+      limit?: number | undefined;
     }): Promise<(AlbumRow & { _count: { albumImages: number } })[]>;
     albumUpdate(handle: AlbumHandle, data: Partial<AlbumRow>): Promise<AlbumRow>;
     albumDelete(handle: AlbumHandle): Promise<void>;
@@ -591,8 +584,8 @@ export interface ImageStudioDeps {
     ): Promise<PipelineRow>;
     pipelineFindById(
       id: PipelineId,
-    ): Promise<(PipelineRow & { _count?: { albums: number } }) | null>;
-    pipelineFindMany(opts: { userId: string; limit?: number }): Promise<PipelineRow[]>;
+    ): Promise<(PipelineRow & { _count?: { albums: number } | undefined }) | null>;
+    pipelineFindMany(opts: { userId: string; limit?: number | undefined }): Promise<PipelineRow[]>;
     pipelineUpdate(id: PipelineId, data: Partial<PipelineRow>): Promise<PipelineRow>;
     pipelineDelete(id: PipelineId): Promise<void>;
 
@@ -634,18 +627,18 @@ export interface ImageStudioDeps {
       userId: string;
       amount: number;
       source: string;
-      sourceId?: string;
-    }): Promise<{ success: boolean; remaining: number; error?: string }>;
+      sourceId?: string | undefined;
+    }): Promise<{ success: boolean; remaining: number; error?: string | undefined }>;
     refund(userId: string, amount: number): Promise<boolean>;
     getBalance(userId: string): Promise<{ remaining: number } | null>;
     estimate(tier: EnhancementTier, count?: number): number;
     calculateGenerationCost(opts: {
       tier: EnhancementTier;
-      numImages?: number;
-      hasGrounding?: boolean;
-      hasTextRender?: boolean;
-      numSubjects?: number;
-      numReferences?: number;
+      numImages?: number | undefined;
+      hasGrounding?: boolean | undefined;
+      hasTextRender?: boolean | undefined;
+      numSubjects?: number | undefined;
+      numReferences?: number | undefined;
     }): number;
   };
 
@@ -665,64 +658,64 @@ export interface ImageStudioDeps {
       userId: string;
       prompt: string;
       tier: EnhancementTier;
-      negativePrompt?: string;
-      aspectRatio?: AspectRatio;
-      seed?: number;
-      outputFormat?: GenerationOutputFormat;
-      numImages?: number;
-    }): Promise<{ success: boolean; jobId?: string; creditsCost?: number; error?: string }>;
+      negativePrompt?: string | undefined;
+      aspectRatio?: AspectRatio | undefined;
+      seed?: number | undefined;
+      outputFormat?: GenerationOutputFormat | undefined;
+      numImages?: number | undefined;
+    }): Promise<{ success: boolean; jobId?: string | undefined; creditsCost?: number | undefined; error?: string | undefined }>;
     createModificationJob(opts: {
       userId: string;
       prompt: string;
       imageData: string;
       mimeType: string;
       tier: EnhancementTier;
-    }): Promise<{ success: boolean; jobId?: string; creditsCost?: number; error?: string }>;
+    }): Promise<{ success: boolean; jobId?: string | undefined; creditsCost?: number | undefined; error?: string | undefined }>;
     createAdvancedGenerationJob?(opts: {
       userId: string;
       prompt: string;
       tier: EnhancementTier;
       options: AdvancedGenerationOptions;
-    }): Promise<{ success: boolean; jobId?: string; creditsCost?: number; error?: string }>;
+    }): Promise<{ success: boolean; jobId?: string | undefined; creditsCost?: number | undefined; error?: string | undefined }>;
     createReferenceGenerationJob?(opts: {
       userId: string;
       prompt: string;
       tier: EnhancementTier;
       referenceImages: Array<{
-        imageId?: string;
-        url?: string;
-        base64?: string;
-        mimeType?: string;
+        imageId?: string | undefined;
+        url?: string | undefined;
+        base64?: string | undefined;
+        mimeType?: string | undefined;
         role: ReferenceRole;
       }>;
-      seed?: number;
-      outputFormat?: GenerationOutputFormat;
-      numImages?: number;
-    }): Promise<{ success: boolean; jobId?: string; creditsCost?: number; error?: string }>;
+      seed?: number | undefined;
+      outputFormat?: GenerationOutputFormat | undefined;
+      numImages?: number | undefined;
+    }): Promise<{ success: boolean; jobId?: string | undefined; creditsCost?: number | undefined; error?: string | undefined }>;
     describeImage?(opts: {
       userId: string;
       imageId: ImageId;
-    }): Promise<{ description: string; tags: string[]; error?: string }>;
+    }): Promise<{ description: string; tags: string[]; error?: string | undefined }>;
     extractPalette?(opts: {
       userId: string;
       imageId: ImageId;
-    }): Promise<{ palette: string[]; error?: string }>;
+    }): Promise<{ palette: string[]; error?: string | undefined }>;
     compareImages?(opts: {
       userId: string;
-      image1Id?: ImageId;
-      image2Id?: ImageId;
-      image1Url?: string;
-      image2Url?: string;
+      image1Id?: ImageId | undefined;
+      image2Id?: ImageId | undefined;
+      image1Url?: string | undefined;
+      image2Url?: string | undefined;
     }): Promise<{
       comparison: { similarity: number; differences: string[] };
-      error?: string;
+      error?: string | undefined;
     }>;
   };
 
   resolvers: ImageStudioResolvers;
 
   /** Generate a short random ID (for share tokens) */
-  nanoid(length?: number): string;
+  nanoid(length?: number | undefined): string;
 }
 
 // ─── Tool Registry Interface (subset of main app's ToolRegistry) ───
@@ -732,7 +725,7 @@ export type { CallToolResult };
 export interface JsonSchema {
   type: "object";
   properties: Record<string, Record<string, unknown>>;
-  required?: string[];
+  required?: string[] | undefined;
 }
 
 /**
@@ -745,9 +738,9 @@ export interface ToolDefinition<TInput = unknown> {
   category: string;
   tier: "free" | "workspace";
   inputSchema: Record<string, unknown>;
-  annotations?: Record<string, unknown>;
+  annotations?: Record<string, unknown> | undefined;
   handler: (input: TInput) => Promise<CallToolResult> | CallToolResult;
-  alwaysEnabled?: boolean;
+  alwaysEnabled?: boolean | undefined;
 }
 
 export const TOOL_EVENT_TYPES = [
@@ -776,14 +769,14 @@ export type ToolEventType = (typeof TOOL_EVENT_TYPES)[number];
 export interface ToolEvent {
   type: ToolEventType;
   entityId: string;
-  payload?: Record<string, unknown>;
+  payload?: Record<string, unknown> | undefined;
   timestamp: string;
 }
 
 export function toolEvent(
   type: ToolEventType,
   entityId: string,
-  payload?: Record<string, unknown>,
+  payload?: Record<string, unknown> | undefined,
 ): ToolEvent {
   return {
     type,
@@ -797,9 +790,9 @@ export interface ToolContext {
   userId: string;
   deps: ImageStudioDeps;
   /** Optional notification emitter for real-time widget updates */
-  notify?: (event: ToolEvent) => void;
+  notify?: ((event: ToolEvent) => void) | undefined;
   /** Optional progress reporter for long-running operations */
-  reportProgress?: (progress: number, total: number, message?: string) => void;
+  reportProgress?: ((progress: number, total: number, message?: string) => void) | undefined;
 }
 
 export interface ImageStudioToolRegistry {

@@ -90,11 +90,11 @@ export async function handleChatStream(
               config: {
                 systemInstruction: SYSTEM_PROMPT,
                 tools,
-                thinkingConfig: budget
-                  ? { includeThoughts: true, thinkingBudget: budget }
+                ...(budget
+                  ? { thinkingConfig: { includeThoughts: true as const, thinkingBudget: budget } }
                   : thinkingBudget && thinkingBudget !== "off"
-                    ? { includeThoughts: true }
-                    : undefined,
+                    ? { thinkingConfig: { includeThoughts: true as const } }
+                    : {}),
               },
             });
           } catch (err: unknown) {

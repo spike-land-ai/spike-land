@@ -34,7 +34,7 @@ export function red(text: string): string {
   return `${RED}${text}${RESET}`;
 }
 
-export function formatToolList(tools: Array<{ name: string; description?: string }>): string {
+export function formatToolList(tools: Array<{ name: string; description?: string | undefined }>): string {
   if (tools.length === 0) return dim("  (no tools)");
 
   const maxNameLen = Math.max(...tools.map((t) => t.name.length));

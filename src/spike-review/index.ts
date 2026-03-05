@@ -121,7 +121,7 @@ export function createServer(githubToken: string): McpServer {
         body,
         event,
         commitId: prDetails.headSha,
-        comments,
+        ...(comments !== undefined ? { comments } : {}),
       });
       return {
         content: [
@@ -183,9 +183,9 @@ export function createServer(githubToken: string): McpServer {
         name: "Spike Review",
         headSha,
         status,
-        conclusion,
+        ...(conclusion !== undefined ? { conclusion } : {}),
         summary,
-        details,
+        ...(details !== undefined ? { details } : {}),
       });
       return {
         content: [

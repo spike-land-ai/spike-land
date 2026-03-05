@@ -103,10 +103,11 @@ app.all("/api/auth/*", async (c) => {
   forwardHeaders.set("x-forwarded-proto", url.protocol.replace(":", ""));
 
   try {
+    const forwardBody = c.req.method !== "GET" && c.req.method !== "HEAD" ? c.req.raw.body : null;
     const res = await fetch(targetUrl, {
       method: c.req.method,
       headers: forwardHeaders,
-      body: c.req.method !== "GET" && c.req.method !== "HEAD" ? c.req.raw.body : undefined,
+      ...(forwardBody !== null ? { body: forwardBody } : {}),
       redirect: "manual",
     });
 
@@ -180,8 +181,8 @@ async function buildDeps(c: {
   const credits = createD1Credits(c.env);
   const storage = createR2Storage(c.env, baseUrl);
   const generation = createGeminiGeneration(c.env, db, credits, storage, {
-    userApiKey: userGeminiKey,
-    modelName: imageModel,
+    ...(userGeminiKey !== undefined ? { userApiKey: userGeminiKey } : {}),
+    ...(imageModel !== undefined ? { modelName: imageModel } : {}),
   });
   const resolvers = createResolvers(db, userId);
 
@@ -235,10 +236,10 @@ app.get("/api/gallery", async (c) => {
   const tag = c.req.query("tag");
 
   const result = await galleryRecentImages(c.env.IMAGE_DB, userId, {
-    cursor,
+    ...(cursor !== undefined ? { cursor } : {}),
     limit,
-    search,
-    tag,
+    ...(search !== undefined ? { search } : {}),
+    ...(tag !== undefined ? { tag } : {}),
   });
   const album = await getOrCreateDefaultAlbum(c.env.IMAGE_DB, userId);
 
@@ -436,10 +437,10 @@ app.patch("/api/gallery/album/:id", async (c) => {
   if (!album) return c.json({ error: "Album not found" }, 404);
 
   const updated = await deps.db.albumUpdate(album.handle as AlbumHandle, {
-    name: body.name,
-    description: body.description,
-    privacy: body.privacy as "PUBLIC" | "PRIVATE" | "UNLISTED" | undefined,
-    coverImageId: body.coverImageId as ImageId | null | undefined,
+    ...(body.name !== undefined ? { name: body.name } : {}),
+    ...(body.description !== undefined ? { description: body.description } : {}),
+    ...(body.privacy !== undefined ? { privacy: body.privacy as "PUBLIC" | "PRIVATE" | "UNLISTED" } : {}),
+    ...(body.coverImageId !== undefined ? { coverImageId: body.coverImageId as ImageId | null } : {}),
   });
 
   return c.json({ album: updated });
@@ -462,9 +463,9 @@ app.post("/api/chat", async (c) => {
     const thinkingBudget = c.req.header("X-Thinking-Budget");
 
     const stream = await handleChatStream(body, toolRegistry, c.env, {
-      userGeminiKey,
-      modelName: textModel,
-      thinkingBudget,
+      ...(userGeminiKey !== undefined ? { userGeminiKey } : {}),
+      ...(textModel !== undefined ? { modelName: textModel } : {}),
+      ...(thinkingBudget !== undefined ? { thinkingBudget } : {}),
     });
 
     return new Response(stream, {

@@ -15,8 +15,8 @@ export function matchesAnyGlob(name: string, patterns: string[]): boolean {
 }
 
 export interface ToolFilterConfig {
-  allowed?: string[];
-  blocked?: string[];
+  allowed?: string[] | undefined;
+  blocked?: string[] | undefined;
 }
 
 /**

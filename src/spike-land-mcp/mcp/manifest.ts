@@ -10,10 +10,10 @@ import type { ToolRegistry } from "./registry";
 import type { DrizzleDB } from "../db/index";
 
 export interface ToolRegistrationEnv {
-  kv?: KVNamespace;
-  vaultSecret?: string;
-  mcpInternalSecret?: string;
-  spikeEdge?: Fetcher;
+  kv?: KVNamespace | undefined;
+  vaultSecret?: string | undefined;
+  mcpInternalSecret?: string | undefined;
+  spikeEdge?: Fetcher | undefined;
 }
 
 // ─── Static Imports ───

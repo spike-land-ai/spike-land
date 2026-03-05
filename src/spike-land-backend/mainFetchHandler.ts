@@ -122,6 +122,6 @@ export async function handleMainFetch(
     return addSecurityHeaders(finalResponse);
   }, {
     waitUntil: (p) => ctx.waitUntil(p),
-    errorEndpoint: env.ERROR_INGEST_ENDPOINT,
+    ...(env.ERROR_INGEST_ENDPOINT !== undefined ? { errorEndpoint: env.ERROR_INGEST_ENDPOINT } : {}),
   });
 }

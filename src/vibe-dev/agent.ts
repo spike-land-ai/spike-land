@@ -198,8 +198,8 @@ interface SpawnResult {
   response: string;
   codeUpdated: boolean;
   toolCalls: string[];
-  codespaceId?: string;
-  error?: string;
+  codespaceId?: string | undefined;
+  error?: string | undefined;
 }
 
 /**
@@ -209,7 +209,7 @@ export function buildSystemPrompt(app: {
   name: string;
   codespaceId: string | null;
   codespaceUrl: string | null;
-  localFilePath?: string;
+  localFilePath?: string | undefined;
 }): string {
   const codespaceInfo = app.codespaceId
     ? `Current codespace ID: ${app.codespaceId}
@@ -436,7 +436,7 @@ export async function spawnClaudeCode(
         response: extractResponseText(output),
         codeUpdated,
         toolCalls,
-        codespaceId,
+        ...(codespaceId !== undefined ? { codespaceId } : {}),
       });
     });
 
@@ -459,10 +459,10 @@ export async function spawnClaudeCode(
 
 interface ProcessResult {
   success: boolean;
-  agentMessage?: string;
-  codeUpdated?: boolean;
-  codespaceId?: string;
-  error?: string;
+  agentMessage?: string | undefined;
+  codeUpdated?: boolean | undefined;
+  codespaceId?: string | undefined;
+  error?: string | undefined;
 }
 
 /**
@@ -515,7 +515,7 @@ export async function processMessage(
       success: true,
       agentMessage: testResult.response,
       codeUpdated: testResult.codeUpdated,
-      codespaceId: testResult.codespaceId,
+      ...(testResult.codespaceId !== undefined ? { codespaceId: testResult.codespaceId } : {}),
     };
   }
 
@@ -535,7 +535,7 @@ export async function processMessage(
     name: context.app.name,
     codespaceId: context.app.codespaceId,
     codespaceUrl: context.app.codespaceUrl,
-    localFilePath,
+    ...(localFilePath !== undefined ? { localFilePath } : {}),
   });
 
   const prompt = formatPromptWithHistory(context.chatHistory, {
@@ -580,7 +580,7 @@ export async function processMessage(
       success: true,
       agentMessage: result.response,
       codeUpdated: result.codeUpdated,
-      codespaceId: result.codespaceId,
+      ...(result.codespaceId !== undefined ? { codespaceId: result.codespaceId } : {}),
     };
   } finally {
     if (mcpConfigPath) {

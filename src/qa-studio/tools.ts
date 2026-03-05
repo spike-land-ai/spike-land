@@ -97,7 +97,7 @@ export function registerWebTools(server: McpServer): void {
       if (ref !== undefined) {
         const node = findElementByRef(data.tree, ref);
         if (!node) return errorResult("REF_NOT_FOUND", `No element with ref=${ref}. Re-read the page to get current refs.`);
-        const locator = data.page.getByRole(node.role, { name: node.name });
+        const locator = data.page.getByRole(node.role, node.name !== undefined ? { name: node.name } : undefined);
         await locator.click();
       } else if (role) {
         const opts = name ? { name } : undefined;
@@ -337,8 +337,8 @@ const FORM_ROLES = new Set([
 interface FormField {
   ref: number;
   role: string;
-  name?: string;
-  value?: string;
+  name?: string | undefined;
+  value?: string | undefined;
   states: string[];
 }
 
@@ -364,8 +364,8 @@ function collectFormFields(tree: AccessibilityNode): FormField[] {
         fields.push({
           ref,
           role: node.role,
-          name: node.name,
-          value: node.value,
+          ...(node.name !== undefined ? { name: node.name } : {}),
+          ...(node.value !== undefined ? { value: node.value } : {}),
           states,
         });
       }

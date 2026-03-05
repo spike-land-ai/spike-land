@@ -22,12 +22,12 @@ export interface StatusResult {
     name: string;
     connected: boolean;
     toolCount: number;
-    error?: string;
+    error?: string | undefined;
     latencyMs: number;
   }>;
   env: Record<string, boolean>;
-  configSources?: string[];
-  configPath?: string;
+  configSources?: string[] | undefined;
+  configPath?: string | undefined;
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
@@ -43,7 +43,7 @@ export async function collectStatus(
   configPath?: string,
   timeoutMs: number = DEFAULT_TIMEOUT_MS,
 ): Promise<StatusResult> {
-  const config = await discoverConfig({ configPath });
+  const config = await discoverConfig({ ...(configPath !== undefined ? { configPath } : {}) });
   const serverEntries = Object.entries(config.servers);
 
   const servers: StatusResult["servers"] = [];

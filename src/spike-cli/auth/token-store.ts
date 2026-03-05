@@ -10,8 +10,8 @@ import { homedir } from "node:os";
 export interface AuthTokens {
   clientId: string;
   accessToken: string;
-  refreshToken?: string;
-  expiresAt?: string; // ISO 8601
+  refreshToken?: string | undefined;
+  expiresAt?: string | undefined; // ISO 8601
   baseUrl: string;
 }
 

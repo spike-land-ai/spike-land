@@ -120,12 +120,16 @@ export class GitHubClient {
         commit_id: params.commitId,
         body: params.body,
         event: params.event,
-        comments: params.comments?.map((c) => ({
-          path: c.path,
-          line: c.line,
-          body: c.body,
-          side: c.side ?? "RIGHT",
-        })),
+        ...(params.comments !== undefined
+          ? {
+              comments: params.comments.map((c) => ({
+                path: c.path,
+                line: c.line,
+                body: c.body,
+                side: c.side ?? "RIGHT",
+              })),
+            }
+          : {}),
       });
 
       return { id: data.id };
@@ -153,11 +157,11 @@ export class GitHubClient {
         name: params.name,
         head_sha: params.headSha,
         status: params.status,
-        conclusion: params.conclusion,
+        ...(params.conclusion !== undefined ? { conclusion: params.conclusion } : {}),
         output: {
           title: params.name,
           summary: params.summary,
-          text: params.details,
+          ...(params.details !== undefined ? { text: params.details } : {}),
         },
       });
 
@@ -184,11 +188,11 @@ export class GitHubClient {
         repo,
         check_run_id: checkRunId,
         status: params.status,
-        conclusion: params.conclusion,
+        ...(params.conclusion !== undefined ? { conclusion: params.conclusion } : {}),
         output: {
           title: "Spike Review",
           summary: params.summary,
-          text: params.details,
+          ...(params.details !== undefined ? { text: params.details } : {}),
         },
       });
     } catch (err) {
@@ -224,11 +228,14 @@ export class GitHubClient {
       }
     }
 
-    return {
+    const result: CommentTargetValidation = {
       valid: false,
       reason: `Line ${targetLine} is not within any diff hunk`,
-      nearestValidLine: nearestLine ? { line: nearestLine, side } : undefined,
     };
+    if (nearestLine !== undefined) {
+      result.nearestValidLine = { line: nearestLine, side };
+    }
+    return result;
   }
 }
 

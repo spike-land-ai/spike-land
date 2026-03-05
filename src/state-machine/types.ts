@@ -55,29 +55,29 @@ export interface Transition {
   source: string;
   target: string;
   event: string;
-  guard?: Guard;
+  guard?: Guard | undefined;
   actions: Action[];
   /** Internal transitions don't exit/re-enter the source state. */
   internal: boolean;
   /** Delay in milliseconds before automatic transition. Evaluated as an expression. */
-  delayExpression?: string;
+  delayExpression?: string | undefined;
 }
 
 export interface StateNode {
   id: string;
   type: StateType;
   /** Parent state ID for nesting, undefined for top-level. */
-  parent?: string;
+  parent?: string | undefined;
   /** Child state IDs (for compound/parallel states). */
   children: string[];
   /** Initial child state ID (required for compound states). */
-  initial?: string;
+  initial?: string | undefined;
   /** Actions executed on entering this state. */
   entryActions: Action[];
   /** Actions executed on exiting this state. */
   exitActions: Action[];
   /** For history states only. */
-  historyType?: HistoryType;
+  historyType?: HistoryType | undefined;
 }
 
 export interface MachineDefinition {
@@ -102,7 +102,7 @@ export interface TransitionLogEntry {
   toStates: string[];
   beforeContext: Record<string, unknown>;
   afterContext: Record<string, unknown>;
-  guardEvaluated?: string;
+  guardEvaluated?: string | undefined;
   actionsExecuted: Action[];
 }
 

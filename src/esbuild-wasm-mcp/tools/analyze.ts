@@ -26,7 +26,7 @@ export function registerAnalyzeTool(server: McpServer): void {
         return errorResult("INVALID_INPUT", "Invalid JSON in metafile");
       }
 
-      const result = await tryCatch(esbuild.analyzeMetafile(metafile, { verbose: args.verbose }));
+      const result = await tryCatch(esbuild.analyzeMetafile(metafile, { ...(args.verbose !== undefined && { verbose: args.verbose }) }));
       if (!result.ok) return formatEsbuildError(result.error);
 
       return {

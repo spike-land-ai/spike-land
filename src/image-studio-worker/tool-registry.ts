@@ -20,12 +20,13 @@ export function createToolRegistry(userId: string, deps: ImageStudioDeps) {
   const registry: ImageStudioToolRegistry = {
     register(def) {
       const d = def as unknown as StoredTool;
+      const inputSchema = d.inputSchema as Record<string, unknown> | undefined;
       tools.set(d.name, {
         name: d.name,
         description: d.description,
         category: d.category ?? "general",
         tier: d.tier ?? "free",
-        inputSchema: d.inputSchema as Record<string, unknown> | undefined,
+        ...(inputSchema !== undefined ? { inputSchema } : {}),
         handler: d.handler as (input: unknown) => Promise<CallToolResult> | CallToolResult,
       });
     },

@@ -19,7 +19,7 @@ export type ContentBlock = Anthropic.ContentBlock;
 export class ChatClient {
   private client: Anthropic;
   readonly model: string;
-  readonly systemPrompt?: string;
+  readonly systemPrompt?: string | undefined;
 
   constructor(options: ChatClientOptions) {
     if (!options.apiKey && !options.authToken) {

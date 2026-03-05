@@ -101,7 +101,7 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
   ),
 };
 
-export function BlogPostView({ slug, linkComponent }: { slug: string; linkComponent?: React.ComponentType<{ to: string; className?: string; children?: React.ReactNode }> }) {
+export function BlogPostView({ slug, linkComponent }: { slug: string; linkComponent?: React.ComponentType<{ to: string; className?: string | undefined; children?: React.ReactNode | undefined }> | undefined }) {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

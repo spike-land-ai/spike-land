@@ -2,17 +2,17 @@ declare const process: any;
 
 export interface ErrorEntry {
   service_name: string;
-  error_code?: string;
+  error_code?: string | undefined;
   message: string;
-  stack_trace?: string;
-  severity?: "low" | "medium" | "high" | "critical";
-  metadata?: string;
+  stack_trace?: string | undefined;
+  severity?: "low" | "medium" | "high" | "critical" | undefined;
+  metadata?: string | undefined;
 }
 
 export interface ErrorShipperOptions {
-  baseUrl?: string;
-  batchSize?: number;
-  flushIntervalMs?: number;
+  baseUrl?: string | undefined;
+  batchSize?: number | undefined;
+  flushIntervalMs?: number | undefined;
 }
 
 export interface ErrorShipper {

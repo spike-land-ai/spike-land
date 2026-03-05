@@ -147,10 +147,10 @@ function narrateNode(
     state.elements.push({
       ref,
       role: node.role,
-      name: node.name,
-      value: node.value,
+      ...(node.name !== undefined ? { name: node.name } : {}),
+      ...(node.value !== undefined ? { value: node.value } : {}),
       states: getStates(node),
-      level: node.level,
+      ...(node.level !== undefined ? { level: node.level } : {}),
       depth,
     });
     lines.push(formatElement(node, ref, depth));

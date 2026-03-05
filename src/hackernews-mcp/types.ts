@@ -30,11 +30,11 @@ export interface HNItemWithComments extends HNItem {
 
 export interface HNCommentNode {
   id: number;
-  by?: string;
-  time?: number;
-  text?: string;
-  dead?: boolean;
-  deleted?: boolean;
+  by?: string | undefined;
+  time?: number | undefined;
+  text?: string | undefined;
+  dead?: boolean | undefined;
+  deleted?: boolean | undefined;
   children: HNCommentNode[];
 }
 
@@ -65,11 +65,11 @@ export const STORY_CATEGORY_ENDPOINTS: Record<StoryCategory, string> = {
 
 export interface AlgoliaSearchParams {
   query: string;
-  sortBy?: "relevance" | "date";
-  tags?: string;
-  page?: number;
-  hitsPerPage?: number;
-  numericFilters?: string;
+  sortBy?: "relevance" | "date" | undefined;
+  tags?: string | undefined;
+  page?: number | undefined;
+  hitsPerPage?: number | undefined;
+  numericFilters?: string | undefined;
 }
 
 export interface AlgoliaHit {

@@ -12,9 +12,9 @@ export interface ColumnDef {
   type: ColumnType;
   primary: boolean;
   optional: boolean;
-  enumValues?: string[];
-  defaultValue?: string | number | boolean;
-  foreignKey?: { table: string; column: string };
+  enumValues?: string[] | undefined;
+  defaultValue?: string | number | boolean | undefined;
+  foreignKey?: { table: string; column: string } | undefined;
 }
 
 /** Fluent column builder */
@@ -35,7 +35,7 @@ export interface ColumnBuilder {
 export interface IndexDef {
   name: string;
   columns: string[];
-  unique?: boolean;
+  unique?: boolean | undefined;
 }
 
 /** Table definition */

@@ -22,7 +22,7 @@ version.get("/api/version", async (c) => {
   let cursor: string | undefined;
 
   do {
-    const listing = await c.env.SPA_ASSETS.list({ cursor, limit: 1000 });
+    const listing = await c.env.SPA_ASSETS.list({ ...(cursor !== undefined ? { cursor } : {}), limit: 1000 });
     for (const obj of listing.objects) {
       assets.push({
         key: obj.key,
