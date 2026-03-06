@@ -1,4 +1,4 @@
-declare const process: any;
+declare const process: { on(event: string, listener: (...args: unknown[]) => void): void } | undefined;
 
 export interface ErrorEntry {
   service_name: string;

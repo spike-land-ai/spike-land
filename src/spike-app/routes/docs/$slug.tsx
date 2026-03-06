@@ -59,7 +59,7 @@ export function DocPage() {
       if (line.startsWith("---")) return <hr key={i} className="my-8 border-border" />;
       if (line.trim() === "") return <br key={i} />;
       // Handle links in markdown [text](url)
-      const withLinks = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+      const withLinks = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, text, url) => {
         // Sanitize URL to prevent XSS
         const isSafe = url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/") || url.startsWith("mailto:");
         const safeUrl = isSafe ? url : "about:blank";

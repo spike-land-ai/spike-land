@@ -402,9 +402,9 @@ export function registerGatewayMetaTools(
         if (def.inputSchema) {
           text += `**Input Schema:**\n`;
           for (const [key, field] of Object.entries(def.inputSchema)) {
-            const zField = field as any;
+            const zField = field as z.ZodTypeAny;
             const desc = zField.description || "No description";
-            const isOptional = zField.isOptional ? zField.isOptional() : false;
+            const isOptional = zField instanceof z.ZodOptional ? true : false;
             text += `- \`${key}\`${isOptional ? " (optional)" : ""}: ${desc}\n`;
           }
           text += "\n";
@@ -433,13 +433,13 @@ export function registerGatewayMetaTools(
       .meta({ category: "gateway-meta", tier: "free" })
       .handler(async ({ input }) => {
         const { stability, limit } = input;
-        const matching = registry.filterByStability(stability as any);
+        const matching = registry.filterByStability(stability);
         
         if (matching.length === 0) {
           return { content: [{ type: "text", text: `No tools found with stability: ${stability}` }] };
         }
         
-        registry.enableByStability(stability as any);
+        registry.enableByStability(stability);
         void saveEnabledCategories(userId, registry.getEnabledCategories(), kv);
         
         let text = `**Found and activated ${matching.length} tool(s) with stability: ${stability}**\n\n`;

@@ -69,7 +69,7 @@ export function reportError(
     service_name: "spike-app",
     error_code: extra?.code ?? "CLIENT_ERROR",
     message: msg,
-    stack_trace: stack,
+    ...(stack ? { stack_trace: stack } : {}),
     metadata: {
       url: window.location.href,
       userAgent: navigator.userAgent,

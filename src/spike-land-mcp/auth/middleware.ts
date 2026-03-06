@@ -32,7 +32,7 @@ export const authMiddleware = createMiddleware<{
 }>(async (c, next) => {
   const reqClone = c.req.raw.clone();
   try {
-    const body = (await reqClone.json()) as any;
+    const body = (await reqClone.json()) as Record<string, unknown>;
     if (
       c.req.method === "POST" &&
       body &&
@@ -40,7 +40,7 @@ export const authMiddleware = createMiddleware<{
       body.method === "tools/call" &&
       body.params &&
       typeof body.params === "object" &&
-      ANONYMOUS_TOOLS.has(body.params.name)
+      ANONYMOUS_TOOLS.has((body.params as Record<string, unknown>).name as string)
     ) {
       c.set("userId", "anonymous");
       c.set("db", createDb(c.env.DB));

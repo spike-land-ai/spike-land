@@ -94,7 +94,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 async function handleServiceCheckout(email: string, isAuthenticated: boolean) {
   const body: Record<string, string> = { service: "app_builder" };
   if (!isAuthenticated && email) {
-    body["email"] = email;
+    body.email = email;
   }
 
   const res = await fetch(apiUrl("/checkout/service"), {

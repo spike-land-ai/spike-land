@@ -121,7 +121,7 @@ function PackCard({ pack }: { pack: CreditPack }) {
 
       <Button
         onClick={handleBuy}
-        loading={loading}
+        disabled={loading}
         variant={pack.highlighted ? "default" : "outline"}
         className={cn(
           "w-full rounded-2xl h-12 font-black uppercase tracking-widest text-xs transition-transform active:scale-95 shadow-md",

@@ -28,6 +28,7 @@ export function useFocusTrap(active: boolean, onClose?: () => void) {
       if (els.length === 0) return;
       const firstEl = els[0];
       const lastEl = els[els.length - 1];
+      if (!firstEl || !lastEl) return;
 
       if (e.shiftKey && document.activeElement === firstEl) {
         e.preventDefault();

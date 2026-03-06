@@ -29,6 +29,6 @@ export async function createMcpServer(
     registry.restoreCategories(options.enabledCategories);
   }
 
-  (mcpServer as any).registry = registry;
+  (mcpServer as unknown as Record<string, unknown>).registry = registry;
   return mcpServer;
 }

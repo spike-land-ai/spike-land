@@ -38,7 +38,7 @@ export function extractExportedSymbols(source: string): string[] {
     const regex = new RegExp(pattern.source, pattern.flags);
     let match: RegExpExecArray | null;
     while ((match = regex.exec(source)) !== null) {
-      symbols.add(match[1]);
+      if (match[1]) symbols.add(match[1]);
     }
   }
 

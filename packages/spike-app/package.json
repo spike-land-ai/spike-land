@@ -15,6 +15,7 @@
     "deploy:force": "FORCE_DEPLOY=1 bash deploy.sh"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@spike-land-ai/block-website": "workspace:*",
     "@tanstack/react-query": "^5.90.21",
     "@tanstack/react-router": "^1.166.2",
@@ -22,6 +23,7 @@
     "@xterm/xterm": "^6.0.0",
     "better-auth": "^1.5.3",
     "framer-motion": "^12.35.0",
+    "monaco-editor": "^0.55.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },

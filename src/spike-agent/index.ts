@@ -17,9 +17,9 @@ interface ReviewState {
 }
 
 export class CodeReviewAgent extends Agent<Env, ReviewState> {
-  initialState: ReviewState = { reviews: [] };
+  override initialState: ReviewState = { reviews: [] };
 
-  async onRequest(request: Request): Promise<Response> {
+  override async onRequest(request: Request): Promise<Response> {
     const url = new URL(request.url);
 
     if (url.pathname === "/review" && request.method === "POST") {
@@ -53,19 +53,16 @@ export class CodeReviewAgent extends Agent<Env, ReviewState> {
       reviews: [...this.state.reviews, review],
     });
 
-    this.schedule(0, "runReview", { reviewId });
+    this.schedule(0, "runCodeReview", { reviewId });
 
     return Response.json({ reviewId, status: "pending" }, { status: 202 });
   }
 
-  async onAlarm(alarm: string | number, data?: unknown): Promise<void> {
-    if (typeof data === "object" && data !== null && "reviewId" in data) {
-      const { reviewId } = data as { reviewId: string };
-      await this.runCodeReview(reviewId);
-    }
+  override async onAlarm(): Promise<void> {
+    // Alarm-based review triggering handled via schedule() -> runCodeReview()
   }
 
-  private async runCodeReview(reviewId: string): Promise<void> {
+  async runCodeReview(reviewId: string): Promise<void> {
     const reviews = this.state.reviews.map((r) =>
       r.id === reviewId ? { ...r, status: "running" as const } : r,
     );

@@ -6,6 +6,36 @@
         "paths": {
             "@/*": [
                 "./*"
+            ],
+            "@spike-land-ai/shared/constants": [
+                "../shared/constants/index.ts"
+            ],
+            "@spike-land-ai/shared/types": [
+                "../shared/types/index.ts"
+            ],
+            "@spike-land-ai/shared/validations": [
+                "../shared/validations/index.ts"
+            ],
+            "@spike-land-ai/shared/utils": [
+                "../shared/utils/index.ts"
+            ],
+            "@spike-land-ai/shared/tool-builder": [
+                "../shared/tool-builder/index.ts"
+            ],
+            "@spike-land-ai/shared": [
+                "../shared/index.ts"
+            ],
+            "@spike-land-ai/block-website/ui": [
+                "../block-website/src/ui/index.ts"
+            ],
+            "@spike-land-ai/block-website/core": [
+                "../block-website/src/core/index.ts"
+            ],
+            "@spike-land-ai/block-website/mcp": [
+                "../block-website/src/mcp/index.ts"
+            ],
+            "@spike-land-ai/block-website": [
+                "../block-website/src/index.ts"
             ]
         }
     },

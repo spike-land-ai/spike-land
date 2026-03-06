@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import type { BlogPost } from "../../core/types";
-import { Calendar, User, Tag, ArrowRight, Clock, BookOpen } from "lucide-react";
-import { cn } from "@/shared/utils/cn";
+import { Calendar, Tag, ArrowRight, Clock, BookOpen } from "lucide-react";
+import { cn } from "@spike-land-ai/shared";
 
 type BlogMeta = Omit<BlogPost, "content">;
 
@@ -145,7 +145,7 @@ function BlogCard({ post, LinkComp }: { post: BlogMeta; LinkComp: React.Componen
   );
 }
 
-export function BlogListView({ linkComponent, limit, showHeader = true }: { linkComponent?: React.ComponentType<{ to: string; className?: string; children: React.ReactNode }> | "a"; limit?: number; showHeader?: boolean }) {
+export function BlogListView({ linkComponent, limit, showHeader = true }: { linkComponent?: React.ComponentType<{ to: string; className?: string; children: React.ReactNode }> | "a" | undefined; limit?: number | undefined; showHeader?: boolean | undefined }) {
   const [posts, setPosts] = useState<BlogMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

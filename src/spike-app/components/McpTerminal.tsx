@@ -3,7 +3,7 @@ import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 import { mcpUrl } from "@/lib/api";
-import { Terminal as TerminalIcon, Info, Copy, Check, List } from "lucide-react";
+import { Terminal as TerminalIcon, Copy, Check, List } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 
 interface McpTerminalProps {

@@ -7,7 +7,7 @@ interface McpToolEntry {
   name: string;
   description: string;
   status: AppStatus;
-  category: string;
+  category: "mcp" | "utility" | "game" | "tool" | "social" | "other";
   ownerName: string;
   createdAt: string;
   toolCount: number;

@@ -73,6 +73,7 @@ export const bannerTool = imageProcedure
       aspectRatio = input.custom_aspect_ratio as AspectRatio;
     } else {
       const presetInfo = PRESET_ASPECT_RATIOS[input.preset];
+      if (!presetInfo) throw new Error(`Unknown preset: ${input.preset}`);
       aspectRatio = presetInfo.aspectRatio;
       recommendedSize = presetInfo.recommended_size;
     }

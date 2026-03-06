@@ -1,6 +1,6 @@
 import { Shield, Zap, Layout, CheckCircle, Terminal, Package, Globe, Cpu, Github, ChevronRight } from "lucide-react";
 import { Button } from "@/shared/ui/button";
-import { cn } from "@/shared/utils/cn";
+
 import { Link } from "@tanstack/react-router";
 
 interface AppProductPageProps {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import type { HistoryItem } from "../../hooks/useQaStudioMcp";
 import { ChevronDown, ChevronUp, Terminal } from "lucide-react";
 

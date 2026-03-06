@@ -30,7 +30,7 @@ const auth = new GoogleAdsAuthClient({
   refreshToken: requireEnv("GOOGLE_REFRESH_TOKEN"),
   developerToken: requireEnv("GOOGLE_ADS_DEVELOPER_TOKEN"),
   customerId: requireEnv("GOOGLE_ADS_CUSTOMER_ID"),
-  ...(process.env["GOOGLE_ADS_LOGIN_CUSTOMER_ID"] ? { loginCustomerId: process.env["GOOGLE_ADS_LOGIN_CUSTOMER_ID"] } : {}),
+  ...(process.env.GOOGLE_ADS_LOGIN_CUSTOMER_ID ? { loginCustomerId: process.env.GOOGLE_ADS_LOGIN_CUSTOMER_ID } : {}),
 });
 
 const client = new GoogleAdsClient(auth);

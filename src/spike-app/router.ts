@@ -186,6 +186,12 @@ const bugbookLeaderboardRoute = createRoute({
   component: withSuspense(() => import("./routes/bugbook/leaderboard"), "BugbookLeaderboardPage"),
 });
 
+const bugbookMyReportsRoute = createRoute({
+  getParentRoute: () => bugbookRoute,
+  path: "my-reports",
+  component: withSuspense(() => import("./routes/bugbook/my-reports"), "MyReportsPage"),
+});
+
 // Dashboard routes
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -288,10 +294,17 @@ const cockpitRoute = createRoute({
   component: withSuspense(() => import("./routes/cockpit"), "CockpitPage"),
 });
 
+const bazdmegRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/bazdmeg",
+  component: withSuspense(() => import("./routes/bazdmeg"), "BazdmegPage"),
+});
+
 // Build route tree
 const routeTree = rootRoute.addChildren([
   indexRoute,
   cockpitRoute,
+  bazdmegRoute,
   aboutRoute,
   analyticsRoute,
   callbackRoute,
@@ -309,6 +322,7 @@ const routeTree = rootRoute.addChildren([
     bugbookIndexRoute,
     bugbookDetailRoute,
     bugbookLeaderboardRoute,
+    bugbookMyReportsRoute,
   ]),
   dashboardRoute.addChildren([dashboardIndexRoute, bazdmegDashboardRoute]),
   learnRoute.addChildren([learnIndexRoute, learnSessionRoute, learnBadgeRoute]),

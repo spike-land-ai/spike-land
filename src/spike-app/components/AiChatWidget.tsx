@@ -57,35 +57,28 @@ export function AiChatWidget() {
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          "fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] md:bottom-8 right-6 md:right-8 z-50 w-14 h-14 md:w-16 md:h-16 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-2xl transition-all duration-500 group",
+          "fixed bottom-6 right-6 z-50 w-14 h-14 md:w-16 md:h-16 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-2xl transition-all duration-500 group",
           open
             ? isDarkMode
-              ? "bg-zinc-800 hover:bg-zinc-700 rotate-90 scale-90"
+              ? "bg-white/10 backdrop-blur-xl border border-white/10 hover:bg-white/15 rotate-90 scale-90"
               : "bg-muted hover:bg-muted/80 rotate-90 scale-90"
-            : isDarkMode
-            ? "bg-[#ffaa00] hover:bg-[#ffaa00] shadow-[0_0_30px_rgba(255,170,0,0.4)] scale-100 hover:scale-110 active:scale-95"
-            : "bg-primary text-primary-foreground shadow-lg scale-100 hover:scale-110 active:scale-95",
+            : "bg-primary text-primary-foreground glow-primary scale-100 hover:scale-110 active:scale-95 animate-[pulse-teal_3s_ease-in-out_infinite]",
         )}
         aria-label={open ? "Close chat" : "Open AI chat"}
       >
         {open ? (
-          <X className={cn("w-5 h-5 md:w-6 md:h-6", isDarkMode ? "text-gray-300" : "text-foreground")} />
+          <X className={cn("w-5 h-5 md:w-6 md:h-6", isDarkMode ? "text-primary-light" : "text-foreground")} />
         ) : (
-          <MessageCircle
-            className={cn(
-              "w-6 h-6 md:w-7 md:h-7 stroke-[2.5]",
-              isDarkMode ? "text-[#020203]" : "text-primary-foreground",
-            )}
-          />
+          <MessageCircle className="w-6 h-6 md:w-7 md:h-7 stroke-[2.5]" />
         )}
       </button>
 
       {/* Chat panel */}
       <div
         className={cn(
-          "fixed bottom-[calc(9.5rem+env(safe-area-inset-bottom))] md:bottom-28 right-4 md:right-8 z-50 w-[calc(100vw-2rem)] sm:w-[440px] h-[600px] md:h-[650px] max-h-[65dvh] md:max-h-[85dvh] flex flex-col transition-all duration-500 origin-bottom-right",
+          "fixed bottom-24 right-4 md:right-6 z-50 w-[calc(100vw-2rem)] sm:w-[440px] h-[600px] md:h-[650px] max-h-[65dvh] md:max-h-[85dvh] flex flex-col transition-all duration-500 origin-bottom-right",
           isDarkMode
-            ? "glass-panel rounded-[2.5rem] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.8)]"
+            ? "bg-black/90 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-[0_30px_100px_rgba(0,0,0,0.9),0_0_60px_rgba(20,184,166,0.08)]"
             : "bg-card border border-border rounded-2xl shadow-lg",
           open ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-10 pointer-events-none",
         )}
@@ -93,9 +86,9 @@ export function AiChatWidget() {
         {/* Header */}
         <div
           className={cn(
-            "flex items-center justify-between px-8 py-6 border-b",
+            "flex items-center justify-between px-6 py-5 border-b rounded-t-[2rem]",
             isDarkMode
-              ? "bg-white/5 border-white/5 rounded-t-[2.5rem]"
+              ? "bg-gradient-to-r from-primary-foreground/60 via-black/40 to-primary-foreground/40 border-white/8 backdrop-blur-xl"
               : "bg-muted/50 border-border rounded-t-2xl",
           )}
         >
@@ -104,18 +97,18 @@ export function AiChatWidget() {
               <div
                 className={cn(
                   "w-3 h-3 rounded-full",
-                  isDarkMode ? "bg-[#00ffaa] animate-pulse" : "bg-success",
+                  isDarkMode ? "bg-primary animate-pulse shadow-[0_0_8px_var(--primary-glow)]" : "bg-success",
                 )}
               />
               {isDarkMode && (
-                <div className="absolute inset-0 w-3 h-3 rounded-full bg-[#00ffaa] animate-ping opacity-20" />
+                <div className="absolute inset-0 w-3 h-3 rounded-full bg-primary animate-ping opacity-30" />
               )}
             </div>
             <div className="flex flex-col">
               <span
                 className={cn(
                   "text-[10px] font-black uppercase tracking-widest",
-                  isDarkMode ? "text-gray-500" : "text-muted-foreground",
+                  isDarkMode ? "text-primary-light/60" : "text-muted-foreground",
                 )}
               >
                 {isDarkMode ? "Neural Partner" : "AI Assistant"}
@@ -126,7 +119,7 @@ export function AiChatWidget() {
                   isDarkMode ? "text-white" : "text-foreground",
                 )}
               >
-                spike.land {isDarkMode ? "Intelligence" : ""}
+                spike.land{isDarkMode && <> <span className="text-primary-light">Intelligence</span></>}
               </h3>
             </div>
           </div>
@@ -137,7 +130,7 @@ export function AiChatWidget() {
                 className={cn(
                   "p-2.5 rounded-xl transition-all active:scale-90",
                   isDarkMode
-                    ? "hover:bg-white/5 text-gray-500 hover:text-red-400"
+                    ? "hover:bg-white/8 text-white/30 hover:text-red-400"
                     : "hover:bg-muted text-muted-foreground hover:text-destructive",
                 )}
                 title="Clear conversation"
@@ -150,7 +143,7 @@ export function AiChatWidget() {
               className={cn(
                 "p-2.5 rounded-xl transition-all active:scale-90",
                 isDarkMode
-                  ? "hover:bg-white/5 text-gray-500 hover:text-white"
+                  ? "hover:bg-white/8 text-white/30 hover:text-white"
                   : "hover:bg-muted text-muted-foreground hover:text-foreground",
               )}
               aria-label="Close chat"
@@ -174,7 +167,7 @@ export function AiChatWidget() {
                 )}
               >
                 <Sparkles
-                  className={cn("w-8 h-8", isDarkMode ? "text-[#ffaa00]" : "text-primary")}
+                  className="w-8 h-8 text-primary"
                 />
               </div>
               <div className="space-y-2">
@@ -208,9 +201,9 @@ export function AiChatWidget() {
         {authWarning && (
           <div
             className={cn(
-              "mx-8 mb-4 px-4 py-3 rounded-2xl text-[11px] font-bold flex justify-between items-center gap-3",
+              "mx-6 mb-4 px-4 py-3 rounded-2xl text-[11px] font-bold flex justify-between items-center gap-3",
               isDarkMode
-                ? "bg-[#ffaa00]/10 border border-[#ffaa00]/20 text-[#ffaa00]"
+                ? "bg-primary/10 border border-primary/20 text-primary-light backdrop-blur-sm"
                 : "bg-warning border border-warning/30 text-warning-foreground",
             )}
           >
@@ -220,7 +213,7 @@ export function AiChatWidget() {
               className={cn(
                 "px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors",
                 isDarkMode
-                  ? "bg-[#ffaa00] text-[#020203] hover:bg-[#ffcc44]"
+                  ? "bg-primary text-primary-foreground hover:bg-primary-light shadow-[0_0_12px_var(--primary-glow)]"
                   : "bg-primary text-primary-foreground hover:bg-primary/90",
               )}
             >
@@ -233,9 +226,9 @@ export function AiChatWidget() {
         {error && (
           <div
             className={cn(
-              "mx-8 mb-4 px-4 py-3 rounded-2xl text-[11px] font-bold flex justify-between items-center",
+              "mx-6 mb-4 px-4 py-3 rounded-2xl text-[11px] font-bold flex justify-between items-center",
               isDarkMode
-                ? "bg-red-500/10 border border-red-500/20 text-red-400"
+                ? "bg-red-950/40 border border-red-500/20 text-red-400 backdrop-blur-sm"
                 : "bg-destructive border border-destructive/20 text-destructive-foreground",
             )}
           >
@@ -244,7 +237,7 @@ export function AiChatWidget() {
               onClick={clearError}
               className={cn(
                 "p-1.5 rounded-lg transition-colors",
-                isDarkMode ? "hover:bg-white/5" : "hover:bg-white/20",
+                isDarkMode ? "hover:bg-white/8" : "hover:bg-white/20",
               )}
             >
               <X className="w-3 h-3" />
@@ -255,15 +248,17 @@ export function AiChatWidget() {
         {/* Input area */}
         <div
           className={cn(
-            "p-6 border-t",
-            isDarkMode ? "border-white/5 bg-white/5 rounded-b-[2.5rem]" : "border-border bg-muted/30 rounded-b-2xl",
+            "p-5 border-t",
+            isDarkMode
+              ? "border-white/8 bg-primary-foreground/20 backdrop-blur-xl rounded-b-[2rem]"
+              : "border-border bg-muted/30 rounded-b-2xl",
           )}
         >
           <div
             className={cn(
               "relative flex items-end gap-3 rounded-2xl p-2 transition-all",
               isDarkMode
-                ? "glass-panel border border-white/10 focus-within:ring-1 ring-[#ffaa00]/30"
+                ? "bg-white/5 border border-white/10 focus-within:border-primary/50 focus-within:shadow-[0_0_20px_var(--primary-glow)] focus-within:ring-1 focus-within:ring-primary/20"
                 : "bg-card border border-border",
             )}
           >
@@ -275,8 +270,8 @@ export function AiChatWidget() {
               placeholder={isAuthenticated ? "Ask me anything..." : "Sign in to chat..."}
               rows={1}
               className={cn(
-                "flex-1 bg-transparent border-none outline-none px-4 py-3 text-sm resize-none max-h-32 font-medium placeholder:opacity-50",
-                isDarkMode ? "text-white placeholder:text-gray-600" : "text-foreground placeholder:text-muted-foreground",
+                "flex-1 bg-transparent border-none outline-none px-4 py-3 text-sm resize-none max-h-32 font-medium placeholder:opacity-40",
+                isDarkMode ? "text-white placeholder:text-primary-light/40" : "text-foreground placeholder:text-muted-foreground",
               )}
               style={{ minHeight: "44px" }}
             />
@@ -285,21 +280,12 @@ export function AiChatWidget() {
               disabled={!input.trim() || isStreaming}
               className={cn(
                 "p-3.5 rounded-xl transition-all active:scale-90 disabled:opacity-20 disabled:grayscale",
-                isDarkMode
-                  ? "bg-[#ffaa00] text-[#020203] shadow-[0_0_20px_rgba(255,170,0,0.2)]"
-                  : "bg-primary text-primary-foreground",
+                "bg-primary text-primary-foreground hover:bg-primary-light glow-primary disabled:shadow-none",
               )}
               aria-label="Send message"
             >
               {isStreaming ? (
-                <div
-                  className={cn(
-                    "w-4 h-4 border-2 rounded-full animate-spin",
-                    isDarkMode
-                      ? "border-[#020203]/20 border-t-[#020203]"
-                      : "border-primary-foreground/20 border-t-primary-foreground",
-                  )}
-                />
+                <div className="w-4 h-4 border-2 rounded-full animate-spin border-current/20 border-t-current" />
               ) : (
                 <Send className="w-4 h-4 stroke-[3]" />
               )}

@@ -85,7 +85,7 @@ export function registerRevenueTools(server: McpServer, client: StripeClient): v
         limit: String(args.limit ?? 10),
       };
       if (args.status) {
-        params["status"] = String(args.status);
+        params.status = String(args.status);
       }
 
       const result = await tryCatch(
@@ -122,7 +122,7 @@ export function registerRevenueTools(server: McpServer, client: StripeClient): v
     async handler(args) {
       const params: Record<string, string> = {};
       if (args.status) {
-        params["status"] = String(args.status);
+        params.status = String(args.status);
       }
 
       const result = await tryCatch(

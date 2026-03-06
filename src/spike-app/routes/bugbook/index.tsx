@@ -63,7 +63,7 @@ export function BugbookIndexPage() {
   const [search, setSearch] = useState("");
 
   const { data, isLoading, isError } = useBugbookList({
-    status: status === "All" ? undefined : status,
+    ...(status !== "All" && { status }),
     sort,
     limit: 100,
   });

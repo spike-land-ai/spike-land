@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Maximize2, Minimize2 } from "lucide-react";
 
 interface Props {

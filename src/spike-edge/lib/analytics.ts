@@ -12,8 +12,8 @@ export function writeAnalyticsEvent(env: Env, event: AnalyticsEvent): void {
   try {
     env.ANALYTICS.writeDataPoint({
       indexes: [event.index],
-      blobs: event.blobs ? [...event.blobs] : undefined,
-      doubles: event.doubles ? [...event.doubles] : undefined,
+      ...(event.blobs ? { blobs: [...event.blobs] } : {}),
+      ...(event.doubles ? { doubles: [...event.doubles] } : {}),
     });
   } catch {
     // Analytics is best-effort — never throw

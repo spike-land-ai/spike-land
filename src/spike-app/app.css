@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+@source "./**/*.{ts,tsx}";
 @source "../block-website/src/**/*.{ts,tsx}";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --font-sans: "Rubik", ui-sans-serif, system-ui, sans-serif;
@@ -20,6 +23,8 @@
   /* Primary (links, active items) */
   --color-primary: var(--primary-color);
   --color-primary-foreground: var(--primary-fg);
+  --color-primary-light: var(--primary-light);
+  --color-primary-glow: var(--primary-glow);
 
   /* Secondary (secondary buttons, badges) */
   --color-secondary: var(--secondary-bg);
@@ -58,6 +63,8 @@
 
   --primary-color: #2563eb;
   --primary-fg: #ffffff;
+  --primary-light: #60a5fa;
+  --primary-glow: rgba(37, 99, 235, 0.3);
 
   --secondary-bg: #f1f5f9;
   --secondary-fg: #475569;
@@ -80,24 +87,26 @@
 
 /* Dark theme */
 .dark {
-  --bg: #09090b;
-  --fg: #fafafa;
-  --card-bg: #18181b;
-  --card-fg: #fafafa;
-  --muted-bg: #27272a;
-  --muted-fg: #d4d4d8;
-  --border-color: #3f3f46;
-  --input-color: #3f3f46;
-  --ring-color: #3b82f6;
+  --bg: #0a0a0f;
+  --fg: #f8fafc;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-fg: #e2e8f0;
+  --muted-bg: rgba(255, 255, 255, 0.08);
+  --muted-fg: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --input-color: rgba(255, 255, 255, 0.12);
+  --ring-color: #f59e0b;
 
-  --primary-color: #3b82f6;
-  --primary-fg: #ffffff;
+  --primary-color: #f59e0b;
+  --primary-fg: #000000;
+  --primary-light: #fcd34d;
+  --primary-glow: rgba(245, 158, 11, 0.3);
 
-  --secondary-bg: #27272a;
-  --secondary-fg: #d4d4d8;
+  --secondary-bg: rgba(255, 255, 255, 0.08);
+  --secondary-fg: #cbd5e1;
 
-  --accent-bg: #1e293b;
-  --accent-fg: #93c5fd;
+  --accent-bg: rgba(245, 158, 11, 0.1);
+  --accent-fg: #fcd34d;
 
   --destructive-bg: #450a0a;
   --destructive-fg: #fca5a5;
@@ -111,18 +120,50 @@
   --info-bg: #083344;
   --info-fg: #67e8f9;
 
-  /* Chat widget - mcp-image-studio aesthetic */
+  /* Chat widget - image-studio glassmorphism aesthetic */
   --chat-bg: #020203;
   --chat-surface: #050507;
-  --chat-accent: #ffaa00;
-  --chat-success: #00ffaa;
+  --chat-accent: #f59e0b;
+  --chat-accent-light: #fcd34d;
+  --chat-success: #f59e0b;
+}
+
+/* Rich radial gradient background for dark mode */
+.dark body {
+  background: radial-gradient(ellipse at top left, #1a1a2e, #16213e, #0f3460, #0a0a0f);
+  min-height: 100vh;
 }
 
 /* Chat widget utilities */
 .glass-panel {
-  background: rgba(5, 5, 7, 0.6);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Primary pulse glow animation for the floating chat button */
+@keyframes pulse-teal {
+  0%, 100% {
+    box-shadow: 0 0 30px var(--primary-glow), 0 0 60px color-mix(in srgb, var(--primary-color) 20%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 40px var(--primary-glow), 0 0 80px color-mix(in srgb, var(--primary-color) 35%, transparent);
+  }
+}
+
+/* Utility: primary glow shadow */
+.glow-primary {
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+
+/* Glassmorphism card for dark mode */
+.dark .glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
 .dark .nice-scrollbar::-webkit-scrollbar {

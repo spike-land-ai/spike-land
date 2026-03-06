@@ -1,5 +1,5 @@
 import { Link } from "./ui/link";
-import { Github, Twitter, Mail, ExternalLink, ShieldCheck, Globe, Cpu, Zap } from "lucide-react";
+import { Github, Twitter, Mail, ShieldCheck, Globe, Cpu, Zap } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();

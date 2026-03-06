@@ -28,7 +28,7 @@ const server = new McpServer({
 
 const shipper = createErrorShipper();
 process.on('uncaughtException', (err) => shipper.shipError({ service_name: "hackernews-mcp", message: err.message, stack_trace: err.stack, severity: "high" }));
-process.on('unhandledRejection', (err: any) => shipper.shipError({ service_name: "hackernews-mcp", message: err?.message || String(err), stack_trace: err?.stack, severity: "high" }));
+process.on('unhandledRejection', (err: unknown) => shipper.shipError({ service_name: "hackernews-mcp", message: (err as Error)?.message || String(err), stack_trace: (err as Error)?.stack, severity: "high" }));
 
 wrapServerWithLogging(server, "hackernews-mcp");
 

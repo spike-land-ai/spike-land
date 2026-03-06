@@ -4,7 +4,7 @@ import { type AppStatus, StatusBadge } from "@/components/StatusBadge";
 import { ChatThread, type Message } from "@/components/ChatThread";
 import { type AppVersion, VersionHistory } from "@/components/VersionHistory";
 import { AppProductPage } from "@/components/AppProductPage";
-import { ScrollContainer } from "@spike-land-ai/shared";
+
 
 const McpTerminal = lazy(() =>
   import("@/components/McpTerminal").then((m) => ({ default: m.McpTerminal })),
@@ -150,7 +150,7 @@ export function AppDetailPage() {
       </div>
 
       {/* Tab content */}
-      <ScrollContainer className="rounded-xl border border-border bg-card">
+      <div className="flex-1 overflow-y-auto rounded-xl border border-border bg-card">
         {activeTab === "Overview" && <AppProductPage appId={appId ?? ""} />}
         {activeTab === "Terminal" && (
           <Suspense
@@ -160,7 +160,7 @@ export function AppDetailPage() {
               </div>
             }
           >
-            <McpTerminal appId={appId} />
+            <McpTerminal {...(appId ? { appId } : {})} />
           </Suspense>
         )}
         {activeTab === "Chat" && (
@@ -171,7 +171,7 @@ export function AppDetailPage() {
             <VersionHistory versions={placeholderVersions} />
           </div>
         )}
-      </ScrollContainer>
+      </div>
     </div>
   );
 }

@@ -73,7 +73,7 @@ interface ParseResult {
 
 function getIndent(line: string): number {
   const match = line.match(/^(\s*)/);
-  return match![1].length;
+  return match?.[1]?.length ?? 0;
 }
 
 function isComment(line: string): boolean {

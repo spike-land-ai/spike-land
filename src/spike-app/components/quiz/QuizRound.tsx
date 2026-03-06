@@ -67,7 +67,7 @@ export function QuizRound({
           selectedAnswer={answers[idx] ?? null}
           onSelect={handleSelect}
           result={results?.[idx] ?? null}
-          disabled={!!results || submitting}
+          {...(results || submitting ? { disabled: true } : {})}
         />
       ))}
 

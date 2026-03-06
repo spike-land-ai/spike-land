@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "path";
@@ -11,6 +11,11 @@ const hasLocalCerts = existsSync(certFile) && existsSync(keyFile);
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./vitest.setup.ts"],
+    globals: true,
+  },
   resolve: {
     alias: {
       "@": resolve(import.meta.dirname, "../../src/spike-app"),

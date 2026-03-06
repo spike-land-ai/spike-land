@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQaStudioMcp } from "../../hooks/useQaStudioMcp";
 import { ConnectionPanel } from "../../components/qa-studio/ConnectionPanel";
 import { BrowserBar } from "../../components/qa-studio/BrowserBar";
@@ -10,8 +10,8 @@ export function QaStudioPage() {
   const mcp = useQaStudioMcp();
   const [narrationText, setNarrationText] = useState("");
   const [screenshotData, setScreenshotData] = useState<string | undefined>();
-  const [tabsData, setTabsData] = useState<any>();
-  const [formsData, setFormsData] = useState<any>();
+  const [tabsData, setTabsData] = useState<unknown>();
+  const [formsData, setFormsData] = useState<unknown>();
 
   const handleNavigate = async (url: string) => {
     try {
@@ -34,7 +34,7 @@ export function QaStudioPage() {
   const handleScreenshot = async () => {
     try {
       const result = await mcp.callTool("web_screenshot", {});
-      const imgContent = result.content.find((c: any) => c.type === "image" || c.mimeType === "image/png" || c.data);
+      const imgContent = result.content.find((c) => c.type === "image" || c.mimeType === "image/png" || c.data);
       if (imgContent?.data) {
         setScreenshotData(imgContent.data);
       }
@@ -112,8 +112,8 @@ export function QaStudioPage() {
             </div>
             
             <div className="w-[40%] min-w-[300px]">
-              <SidePanel 
-                screenshotData={screenshotData}
+              <SidePanel
+                {...(screenshotData !== undefined && { screenshotData })}
                 tabsData={tabsData}
                 formsData={formsData}
               />

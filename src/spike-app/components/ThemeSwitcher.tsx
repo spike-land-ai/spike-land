@@ -15,25 +15,45 @@ const options: { value: ThemePreference; label: string; Icon: (props: { classNam
 
 export function ThemeSwitcher({ theme, setTheme }: ThemeSwitcherProps) {
   return (
-    <div className="rounded-lg p-0.5 flex gap-0.5 bg-muted" role="group" aria-label="Theme preference">
-      {options.map(({ value, label, Icon }) => (
-        <button
-          key={value}
-          type="button"
-          aria-label={`${label} theme`}
-          aria-pressed={theme === value}
-          title={`${label} mode`}
-          onClick={() => setTheme(value)}
-          className={[
-            "rounded-md p-1.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
-            theme === value
-              ? "bg-card shadow-sm text-foreground"
-              : "text-muted-foreground hover:text-foreground hover:bg-card/50",
-          ].join(" ")}
-        >
-          <Icon className="size-4" />
-        </button>
-      ))}
+    <div
+      className="rounded-lg p-0.5 flex gap-0.5 bg-muted dark:bg-white/5 dark:border dark:border-white/10 dark:backdrop-blur-sm"
+      role="group"
+      aria-label="Theme preference"
+    >
+      {options.map(({ value, label, Icon }) => {
+        const isActive = theme === value;
+        const isDarkOption = value === "dark";
+        return (
+          <button
+            key={value}
+            type="button"
+            aria-label={`${label} theme`}
+            aria-pressed={isActive}
+            title={`${label} mode`}
+            onClick={() => setTheme(value)}
+            className={[
+              "rounded-md p-1.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+              "tracking-wider text-[0.9rem]",
+              isActive
+                ? "dark:bg-primary dark:text-primary-foreground bg-card shadow-sm text-foreground"
+                : [
+                    "text-muted-foreground hover:text-foreground",
+                    "hover:bg-card/50 dark:hover:bg-white/10",
+                    "dark:hover:brightness-125",
+                  ].join(" "),
+            ].join(" ")}
+          >
+            <Icon
+              className={[
+                "size-4",
+                isActive && isDarkOption
+                  ? "dark:text-primary-light dark:drop-shadow-[0_0_6px_var(--primary-glow)]"
+                  : "",
+              ].join(" ")}
+            />
+          </button>
+        );
+      })}
     </div>
   );
 }

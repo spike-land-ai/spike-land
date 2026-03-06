@@ -8,7 +8,7 @@ export type ToolCallResult = {
 export type HistoryItem = {
   id: number;
   tool: string;
-  args: any;
+  args: Record<string, unknown>;
   result?: ToolCallResult;
   error?: string;
   timestamp: number;
@@ -23,7 +23,7 @@ export function useQaStudioMcp() {
 
   const eventSourceRef = useRef<EventSource | null>(null);
   const postUrlRef = useRef<string | null>(null);
-  const pendingRequestsRef = useRef<Map<number, { resolve: (val: any) => void; reject: (err: any) => void }>>(new Map());
+  const pendingRequestsRef = useRef<Map<number, { resolve: (val: ToolCallResult) => void; reject: (err: unknown) => void }>>(new Map());
   const nextIdRef = useRef(1);
 
   const disconnect = useCallback(() => {
@@ -65,7 +65,9 @@ export function useQaStudioMcp() {
         
         // Initialize MCP connection
         const initId = nextIdRef.current++;
-        fetch(postUrlRef.current, {
+        const postUrl = postUrlRef.current;
+        if (!postUrl) return;
+        fetch(postUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -83,7 +85,7 @@ export function useQaStudioMcp() {
         pendingRequestsRef.current.set(initId, {
           resolve: () => {
             // Once initialized, send initialized notification
-            fetch(postUrlRef.current!, {
+            fetch(postUrl, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -118,7 +120,7 @@ export function useQaStudioMcp() {
     }
   }, [disconnect]);
 
-  const callTool = useCallback(async (name: string, args: any): Promise<ToolCallResult> => {
+  const callTool = useCallback(async (name: string, args: Record<string, unknown>): Promise<ToolCallResult> => {
     if (!connected || !postUrlRef.current) {
       throw new Error("Not connected");
     }
@@ -140,23 +142,30 @@ export function useQaStudioMcp() {
       pendingRequestsRef.current.set(id, {
         resolve: (result) => {
           const duration = Date.now() - startTime;
-          setHistory(prev => prev.map(item => 
-            item.id === id ? { ...item, result, duration } : item
+          setHistory(prev => prev.map(item =>
+            item.id === id ? { ...item, result: result as ToolCallResult, duration } : item
           ));
           setIsCalling(false);
-          resolve(result);
+          resolve(result as ToolCallResult);
         },
         reject: (error) => {
           const duration = Date.now() - startTime;
           setHistory(prev => prev.map(item => 
-            item.id === id ? { ...item, error: typeof error === 'string' ? error : error.message || "Unknown error", duration } : item
+            item.id === id ? { ...item, error: typeof error === 'string' ? error : (error instanceof Error ? error.message : "Unknown error"), duration } : item
           ));
           setIsCalling(false);
           reject(error);
         }
       });
 
-      fetch(postUrlRef.current!, {
+      const postUrl = postUrlRef.current;
+      if (!postUrl) {
+        const p = pendingRequestsRef.current.get(id);
+        pendingRequestsRef.current.delete(id);
+        p?.reject(new Error("Not connected"));
+        return;
+      }
+      fetch(postUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -1,14 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useMyBugReports } from "../../hooks/useBugbook";
 import { Badge } from "../../components/ui/badge";
 import { Skeleton } from "../../components/ui/skeleton";
 import { Link } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/bugbook/my-reports")({
-  component: MyReportsPage,
-});
-
-function MyReportsPage() {
+export function MyReportsPage() {
   const { data, isLoading, error } = useMyBugReports();
 
   if (isLoading) {

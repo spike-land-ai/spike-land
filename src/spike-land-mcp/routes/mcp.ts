@@ -42,7 +42,7 @@ mcpRoute.post("/", async (c) => {
         headers: { "x-internal-secret": c.env.MCP_INTERNAL_SECRET },
       });
       if (res.ok) {
-        const data = await res.json() as any;
+        const data = await res.json() as { elo: number; tier: "free" | "pro" | "business" };
         callerElo = data.elo;
         callerTier = data.tier;
         isAgent = true;
@@ -52,7 +52,7 @@ mcpRoute.post("/", async (c) => {
         headers: { "x-internal-secret": c.env.MCP_INTERNAL_SECRET },
       });
       if (res.ok) {
-        const data = await res.json() as any;
+        const data = await res.json() as { elo: number; tier: "free" | "pro" | "business" };
         callerElo = data.elo;
         callerTier = data.tier;
       }
@@ -103,12 +103,14 @@ mcpRoute.post("/", async (c) => {
   });
   
   // Set caller ELO for tool gating
-  if ((mcpServer as any).registry) {
-    (mcpServer as any).registry.setCallerElo(callerElo, callerTier, isAgent);
+  const mcpWithRegistry = mcpServer as unknown as Record<string, unknown>;
+  if (mcpWithRegistry.registry) {
+    const reg = mcpWithRegistry.registry as { setCallerElo(elo: number, tier: string, isAgent: boolean): void; setCallerRole(role: string): void };
+    reg.setCallerElo(callerElo, callerTier, isAgent);
     // Set caller role for RBAC
     const userRole = (c.var as Record<string, unknown>).userRole as string | undefined;
     if (userRole) {
-      (mcpServer as any).registry.setCallerRole(userRole);
+      reg.setCallerRole(userRole);
     }
   }
 

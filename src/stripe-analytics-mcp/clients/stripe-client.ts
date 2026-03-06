@@ -46,7 +46,7 @@ export class StripeClient {
       }
 
       const lastItem = response.data[response.data.length - 1];
-      queryParams["starting_after"] = (lastItem as Record<string, unknown>)["id"] as string;
+      queryParams.starting_after = (lastItem as Record<string, unknown>).id as string;
     }
 
     return allItems;

@@ -459,22 +459,20 @@ export function BazdmegDashboardPage() {
         <MetricCard
           label="Active Workspaces"
           value={String(activeWorkspaces.size)}
-          subtitle={activeWorkspaces.size > 0 ? Array.from(activeWorkspaces).join(", ") : undefined}
+          {...(activeWorkspaces.size > 0 && { subtitle: Array.from(activeWorkspaces).join(", ") })}
         />
         <MetricCard label="Tool Calls" value={String(toolCalls.length)} subtitle={timeRange} />
         <MetricCard
           label="Gate Pass Rate"
           value={gatePassRate !== null ? `${gatePassRate}%` : "N/A"}
           subtitle={`${gateEvents.length} checks`}
-          color={
-            gatePassRate === null
-              ? undefined
-              : gatePassRate >= 80
-                ? "text-success-foreground"
-                : gatePassRate >= 50
-                  ? "text-warning-foreground"
-                  : "text-destructive"
-          }
+          {...(gatePassRate !== null && {
+            color: gatePassRate >= 80
+              ? "text-success-foreground"
+              : gatePassRate >= 50
+                ? "text-warning-foreground"
+                : "text-destructive",
+          })}
         />
         <MetricCard
           label="Stuck Signals"

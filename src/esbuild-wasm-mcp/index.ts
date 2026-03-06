@@ -15,7 +15,7 @@ const server = createMcpServer({
 
 const shipper = createErrorShipper();
 process.on('uncaughtException', (err) => shipper.shipError({ service_name: "esbuild-wasm-mcp", message: err.message, stack_trace: err.stack, severity: "high" }));
-process.on('unhandledRejection', (err: any) => shipper.shipError({ service_name: "esbuild-wasm-mcp", message: err?.message || String(err), stack_trace: err?.stack, severity: "high" }));
+process.on('unhandledRejection', (err: unknown) => shipper.shipError({ service_name: "esbuild-wasm-mcp", message: err instanceof Error ? err.message : String(err), stack_trace: err instanceof Error ? err.stack : undefined, severity: "high" }));
 
 wrapServerWithLogging(server, "esbuild-wasm-mcp");
 

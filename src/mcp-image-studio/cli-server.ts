@@ -8,7 +8,7 @@ import { createErrorShipper } from "@spike-land-ai/mcp-server-base";
 
 const shipper = createErrorShipper();
 process.on('uncaughtException', (err) => shipper.shipError({ service_name: "mcp-image-studio", message: err.message, stack_trace: err.stack, severity: "high" }));
-process.on('unhandledRejection', (err: any) => shipper.shipError({ service_name: "mcp-image-studio", message: err?.message || String(err), stack_trace: err?.stack, severity: "high" }));
+process.on('unhandledRejection', (err: unknown) => shipper.shipError({ service_name: "mcp-image-studio", message: (err as Error)?.message || String(err), stack_trace: (err as Error)?.stack, severity: "high" }));
 
 // --- 1. Mock the Dependencies so the tools can run without a real DB ---
 
@@ -252,23 +252,24 @@ tools.push({
     },
     required: ["title", "description"],
   },
-  handler: async (args: any) => {
+  handler: async (args: unknown) => {
+    const input = args as Record<string, unknown>;
     try {
       const response = await fetch("https://spike.land/api/bugbook/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           service_name: "mcp-image-studio",
-          title: args.title,
-          description: args.description,
-          severity: args.severity,
+          title: input.title,
+          description: input.description,
+          severity: input.severity,
         }),
       });
       if (!response.ok) throw new Error(await response.text());
       const data = await response.json();
       return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
-    } catch (err: any) {
-      return { content: [{ type: "text", text: `Error: ${err.message}` }], isError: true };
+    } catch (err: unknown) {
+      return { content: [{ type: "text", text: `Error: ${(err as Error).message}` }], isError: true };
     }
   },
 });

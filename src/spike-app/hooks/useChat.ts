@@ -171,7 +171,7 @@ export function useChat(): UseChatReturn {
                         ...m,
                         toolCalls: (m.toolCalls || []).map((tc) =>
                           tc.name === event.name && tc.status === "pending"
-                            ? { ...tc, result: event.result, status: "done" as const }
+                            ? { ...tc, ...(event.result !== undefined ? { result: event.result } : {}), status: "done" as const }
                             : tc,
                         ),
                       }

@@ -25,10 +25,10 @@ function CopyButton({ text, isUser }: { text: string; isUser: boolean }) {
         "p-1.5 rounded-lg transition-all",
         isDarkMode
           ? isUser
-            ? "hover:bg-black/10 text-[#020203]/50 hover:text-[#020203]"
-            : "hover:bg-white/5 text-gray-500 hover:text-gray-300"
+            ? "hover:bg-black/10 text-black/50 hover:text-black"
+            : "hover:bg-white/5 text-white/30 hover:text-white"
           : isUser
-          ? "hover:bg-black/10 text-primary-foreground/50 hover:text-primary-foreground"
+          ? "hover:bg-black/10 text-primary-foreground/60 hover:text-primary-foreground"
           : "hover:bg-muted text-muted-foreground hover:text-foreground",
       )}
     >
@@ -54,7 +54,7 @@ function ToolCallCard({
       className={cn(
         "mt-3 rounded-2xl border text-[11px] overflow-hidden transition-all",
         isDarkMode
-          ? "border-white/5 bg-[#020203]/50"
+          ? "border-primary/10 bg-primary/5 backdrop-blur-sm"
           : "bg-muted border-border",
       )}
     >
@@ -68,20 +68,20 @@ function ToolCallCard({
         <div
           className={cn(
             "w-6 h-6 rounded-lg flex items-center justify-center shrink-0",
-            isDarkMode ? "bg-emerald-500/10" : "bg-success/10",
+            isDarkMode ? "bg-primary/10" : "bg-success/10",
           )}
         >
           <Wrench
             className={cn(
               "w-3 h-3",
-              isDarkMode ? "text-emerald-400" : "text-success",
+              isDarkMode ? "text-primary" : "text-success",
             )}
           />
         </div>
         <span
           className={cn(
             "font-bold uppercase tracking-widest truncate",
-            isDarkMode ? "text-gray-400" : "text-muted-foreground",
+            isDarkMode ? "text-primary-light/60" : "text-muted-foreground",
           )}
         >
           {tc.name}
@@ -90,13 +90,13 @@ function ToolCallCard({
           <span
             className={cn(
               "ml-auto flex items-center gap-1.5 font-black uppercase tracking-tighter",
-              isDarkMode ? "text-[#ffaa00]" : "text-primary",
+              isDarkMode ? "text-primary-light" : "text-primary",
             )}
           >
             <span
               className={cn(
                 "w-1.5 h-1.5 rounded-full animate-pulse",
-                isDarkMode ? "bg-[#ffaa00]" : "bg-primary",
+                "bg-primary",
               )}
             />
             Active
@@ -108,9 +108,9 @@ function ToolCallCard({
         {tc.status === "done" && (
           <div className="ml-auto">
             {expanded ? (
-              <ChevronDown className={cn("w-3.5 h-3.5", isDarkMode ? "text-gray-600" : "text-muted-foreground")} />
+              <ChevronDown className={cn("w-3.5 h-3.5", isDarkMode ? "text-primary/50" : "text-muted-foreground")} />
             ) : (
-              <ChevronRight className={cn("w-3.5 h-3.5", isDarkMode ? "text-gray-600" : "text-muted-foreground")} />
+              <ChevronRight className={cn("w-3.5 h-3.5", isDarkMode ? "text-primary/50" : "text-muted-foreground")} />
             )}
           </div>
         )}
@@ -119,7 +119,7 @@ function ToolCallCard({
         <div
           className={cn(
             "px-4 py-4 border-t",
-            isDarkMode ? "border-white/5 bg-black/30" : "border-border bg-background/50",
+            isDarkMode ? "border-primary/10 bg-black/30" : "border-border bg-background/50",
           )}
         >
           {imageUrl && (
@@ -151,21 +151,21 @@ function LoadingDots({ isDarkMode }: { isDarkMode: boolean }) {
       <span
         className={cn(
           "w-1 h-1 rounded-full animate-bounce",
-          isDarkMode ? "bg-[#ffaa00]" : "bg-primary",
+          "bg-primary",
         )}
         style={{ animationDelay: "0ms" }}
       />
       <span
         className={cn(
           "w-1 h-1 rounded-full animate-bounce",
-          isDarkMode ? "bg-[#ffaa00]" : "bg-primary",
+          "bg-primary",
         )}
         style={{ animationDelay: "150ms" }}
       />
       <span
         className={cn(
           "w-1 h-1 rounded-full animate-bounce",
-          isDarkMode ? "bg-[#ffaa00]" : "bg-primary",
+          "bg-primary",
         )}
         style={{ animationDelay: "300ms" }}
       />
@@ -206,7 +206,7 @@ function SimpleMarkdown({ text, isUser, isDarkMode }: { text: string; isUser: bo
               className={cn(
                 "underline hover:opacity-80 transition-opacity",
                 isDarkMode
-                  ? isUser ? "text-[#020203]" : "text-[#ffaa00]"
+                  ? isUser ? "text-primary-foreground" : "text-primary-light"
                   : "text-primary",
               )}
             >
@@ -232,8 +232,8 @@ export function AiChatMessage({ message }: AiChatMessageProps) {
           "relative max-w-[90%] p-5",
           isDarkMode
             ? isUser
-              ? "bg-[#ffaa00] text-[#020203] rounded-3xl rounded-tr-lg shadow-[0_10px_30px_rgba(255,170,0,0.1)]"
-              : "glass-panel border border-white/10 text-gray-200 rounded-3xl rounded-tl-lg"
+              ? "bg-primary text-primary-foreground rounded-3xl rounded-tr-lg shadow-[0_10px_30px_var(--primary-glow)]"
+              : "bg-white/5 backdrop-blur-md border border-white/10 text-gray-200 rounded-3xl rounded-tl-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]"
             : isUser
             ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm"
             : "bg-card border border-border text-card-foreground rounded-2xl rounded-tl-sm",
@@ -268,8 +268,8 @@ export function AiChatMessage({ message }: AiChatMessageProps) {
           className={cn(
             "text-[9px] font-black uppercase tracking-widest mt-3 opacity-40",
             isUser
-              ? isDarkMode ? "text-[#020203] text-right" : "text-primary-foreground text-right"
-              : isDarkMode ? "text-gray-500" : "text-muted-foreground",
+              ? "text-primary-foreground/80 text-right"
+              : isDarkMode ? "text-primary-light/60" : "text-muted-foreground",
           )}
         >
           {new Date(message.timestamp).toLocaleTimeString([], {

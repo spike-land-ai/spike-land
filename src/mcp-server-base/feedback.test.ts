@@ -17,7 +17,7 @@ describe("registerFeedbackTool", () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ id: "bug-123" }),
-    } as any);
+    } as unknown as Response);
 
     const result = await mockServer.call("report_bug", {
       title: "Test bug",
@@ -46,7 +46,7 @@ describe("registerFeedbackTool", () => {
       ok: false,
       status: 500,
       text: async () => "Internal Server Error",
-    } as any);
+    } as unknown as Response);
 
     const result = await mockServer.call("report_bug", {
       title: "Test",

@@ -100,6 +100,7 @@ function generateMockSession(content: string): SessionState {
               "I understand",
               "I understand",
             ] as [string, string, string, string],
+            correctIndex: 0,
           },
         ],
       },

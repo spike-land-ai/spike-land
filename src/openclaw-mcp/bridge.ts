@@ -212,9 +212,9 @@ export function createMcpBridge(opts: McpBridgeOptions): McpBridge {
           if (!response.ok) throw new Error(await response.text());
           const data = await response.json();
           return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
-        } catch (err: any) {
+        } catch (err: unknown) {
           outcome = "error";
-          return { content: [{ type: "text", text: `Error: ${err.message}` }], isError: true };
+          return { content: [{ type: "text", text: `Error: ${(err as Error).message}` }], isError: true };
         }
       }
       const entry = toolRegistry.get(name);

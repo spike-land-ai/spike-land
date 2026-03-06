@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Search, RotateCcw, Camera, FormInput, AppWindow } from "lucide-react";
 
 interface Props {

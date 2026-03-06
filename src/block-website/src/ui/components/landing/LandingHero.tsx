@@ -19,8 +19,11 @@ export function LandingHero() {
             aria-labelledby="hero-heading"
             className="py-24 sm:py-32 px-4 sm:px-6 max-w-3xl mx-auto text-center font-sans"
         >
+            {/* Teal glow badge */}
             <div
-                className="mb-8 inline-block px-4 py-1.5 border border-border/50 rounded-full text-xs font-semibold text-muted-foreground tracking-widest bg-muted/30 hover:bg-muted/50 transition-colors shadow-sm backdrop-blur-sm"
+                className="mb-8 inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest backdrop-blur-sm transition-colors shadow-sm
+                           border border-border/50 bg-muted/30 text-muted-foreground hover:bg-muted/50
+                           dark:border-primary/30 dark:bg-primary/10 dark:text-primary-light dark:hover:bg-primary/20 glow-primary"
                 aria-label="Features: Open-Source AI App Ecosystem, Instant Deploys"
             >
                 OPEN-SOURCE AI APP ECOSYSTEM · INSTANT DEPLOYS
@@ -45,63 +48,65 @@ export function LandingHero() {
                 role="group"
                 aria-label="Primary actions"
             >
+                {/* Primary CTA — teal in dark mode */}
                 <Link
                     href="/tools"
-                    className="w-full sm:w-auto px-8 py-4 bg-foreground text-background text-lg font-medium rounded-xl hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground"
+                    className="w-full sm:w-auto px-8 py-4 text-lg font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
+                               bg-foreground text-background hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus:ring-foreground
+                               dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary-light glow-primary dark:focus:ring-primary"
                 >
                     I'm a developer
                 </Link>
+                {/* Secondary CTA — glass in dark mode */}
                 <Link
                     href="/store"
-                    className="w-full sm:w-auto px-8 py-4 bg-background border border-border/50 text-foreground text-lg font-medium rounded-xl hover:bg-muted/50 hover:border-border hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-foreground inline-flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto px-8 py-4 text-lg font-medium rounded-xl inline-flex items-center justify-center gap-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
+                               bg-background border border-border/50 text-foreground hover:bg-muted/50 hover:border-border hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus:ring-foreground
+                               dark:bg-white/10 dark:border-white/20 dark:text-white dark:hover:bg-white/15 dark:backdrop-blur-md dark:hover:-translate-y-0.5 dark:focus:ring-white/30"
                 >
                     I'm exploring
                 </Link>
             </div>
 
             <dl
-                className="mt-20 pt-10 border-t border-border flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 text-sm text-muted-foreground"
+                className="mt-20 pt-10 border-t border-border flex flex-wrap items-center justify-center gap-x-3 gap-y-4 text-sm text-muted-foreground"
                 aria-label="Platform Statistics"
             >
                 {stars != null && (
                     <>
-                        <div className="flex gap-2.5 items-center">
+                        <div className="flex items-baseline gap-1.5">
                             <dt className="sr-only">GitHub Stars</dt>
                             <dd className="font-semibold text-foreground text-base flex items-center gap-1.5">
                                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
                                 {stars.toLocaleString()}
                             </dd>
-                            <span>on GitHub</span>
+                            <dd>on GitHub</dd>
                         </div>
-                        <div className="hidden sm:block w-1.5 h-1.5 rounded-full bg-border" aria-hidden="true" />
+                        <div className="hidden sm:block w-1 h-1 rounded-full bg-border" aria-hidden="true" />
                     </>
                 )}
-                <div className="flex gap-2.5 items-center">
+                <div className="flex items-baseline gap-1.5">
                     <dt className="sr-only">Available Apps</dt>
                     <dd className="font-semibold text-foreground text-base">{TOTAL_TOOL_COUNT}+</dd>
-                    <span>Ready-to-use Apps</span>
+                    <dd>Ready-to-use Apps</dd>
                 </div>
-                <div className="hidden sm:block w-1.5 h-1.5 rounded-full bg-border" aria-hidden="true" />
-                <div className="flex gap-2.5 items-center">
+                <div className="hidden sm:block w-1 h-1 rounded-full bg-border" aria-hidden="true" />
+                <div className="flex items-baseline gap-1.5">
                     <dt className="sr-only">Performance</dt>
                     <dd className="font-semibold text-foreground text-base">Global</dd>
-                    <span>edge network</span>
+                    <dd>edge network</dd>
                 </div>
-                <div className="hidden sm:block w-1.5 h-1.5 rounded-full bg-border" aria-hidden="true" />
-                <div className="flex gap-2.5 items-center">
+                <div className="hidden sm:block w-1 h-1 rounded-full bg-border" aria-hidden="true" />
+                <div className="flex items-baseline gap-1.5">
                     <dt className="sr-only">Setup</dt>
                     <dd className="font-semibold text-foreground text-base">Zero</dd>
-                    <span>config required</span>
+                    <dd>config required</dd>
                 </div>
-                <div className="hidden sm:block w-1.5 h-1.5 rounded-full bg-border" aria-hidden="true" />
-                <div className="flex gap-2.5 items-center">
+                <div className="hidden sm:block w-1 h-1 rounded-full bg-border" aria-hidden="true" />
+                <div className="flex items-baseline gap-1.5">
                     <dt className="sr-only">Pricing</dt>
-                    <dd className="font-semibold text-foreground text-base">
-                        <Link href="/pricing" className="hover:text-foreground hover:underline transition-colors flex gap-2.5 items-center">
-                            <span>Free</span>
-                            <span>to start</span>
-                        </Link>
-                    </dd>
+                    <dd className="font-semibold text-foreground text-base">Free</dd>
+                    <dd><Link href="/pricing" className="hover:text-foreground hover:underline transition-colors">to start</Link></dd>
                 </div>
             </dl>
         </section>

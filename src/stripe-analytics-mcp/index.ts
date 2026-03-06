@@ -8,7 +8,7 @@ import { registerRevenueTools } from "./tools/revenue.js";
 import { registerSubscriptionTools } from "./tools/subscriptions.js";
 import { registerCustomerTools } from "./tools/customers.js";
 
-const apiKey = process.env["STRIPE_SECRET_KEY"];
+const apiKey = process.env.STRIPE_SECRET_KEY;
 if (!apiKey) {
   console.error("STRIPE_SECRET_KEY environment variable is required");
   process.exit(1);

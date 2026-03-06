@@ -5,10 +5,10 @@ export function AppFooter() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-card border-t border-border py-16 px-6 mt-32 overflow-hidden relative">
+    <footer className="bg-card/80 backdrop-blur-xl border-t border-border py-16 px-6 mt-32 overflow-hidden relative">
       {/* Decorative background element */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8">
           <div className="col-span-1 sm:col-span-2 lg:col-span-2 space-y-6">
@@ -26,7 +26,7 @@ export function AppFooter() {
                 href="https://github.com/spike-land-ai"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-full bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all"
+                className="p-2 rounded-full bg-muted dark:bg-white/5 border border-border dark:border-white/10 text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
                 aria-label="Visit our GitHub"
               >
                 <Github className="size-5" />
@@ -35,14 +35,14 @@ export function AppFooter() {
                 href="https://x.com/ai_spike_land"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-full bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all"
+                className="p-2 rounded-full bg-muted dark:bg-white/5 border border-border dark:border-white/10 text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
                 aria-label="Follow us on Twitter"
               >
                 <Twitter className="size-5" />
               </a>
               <a
                 href="mailto:hello@spike.land"
-                className="p-2 rounded-full bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all"
+                className="p-2 rounded-full bg-muted dark:bg-white/5 border border-border dark:border-white/10 text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
                 aria-label="Email us"
               >
                 <Mail className="size-5" />
@@ -51,7 +51,7 @@ export function AppFooter() {
           </div>
 
           <div className="space-y-6">
-            <p className="text-xs font-black uppercase tracking-widest text-foreground/40">Platform</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">Platform</p>
             <ul className="space-y-3 text-sm font-medium">
               <li><Link to="/tools" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">Tools <span className="text-[10px] bg-primary/10 px-1 rounded text-primary">New</span></Link></li>
               <li><Link to="/pricing" className="text-muted-foreground hover:text-primary transition-colors">Pricing</Link></li>
@@ -61,7 +61,7 @@ export function AppFooter() {
           </div>
 
           <div className="space-y-6">
-            <p className="text-xs font-black uppercase tracking-widest text-foreground/40">Resources</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">Resources</p>
             <ul className="space-y-3 text-sm font-medium">
               <li><Link to="/docs" className="text-muted-foreground hover:text-primary transition-colors">Documentation</Link></li>
               <li><Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link></li>
@@ -71,16 +71,16 @@ export function AppFooter() {
           </div>
 
           <div className="space-y-6">
-            <p className="text-xs font-black uppercase tracking-widest text-foreground/40">Legal</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">Legal</p>
             <ul className="space-y-3 text-sm font-medium">
               <li><Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
               <li><Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link></li>
-              <li><Link to="/security" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"><ShieldCheck className="size-3.5" /> Security</Link></li>
+              <li><a href="/security" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"><ShieldCheck className="size-3.5" /> Security</a></li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-20 pt-8 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="mt-20 pt-8 border-t border-border dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-1">
             <p className="text-[11px] font-bold text-muted-foreground/60 tracking-tight">
               &copy; {currentYear} spike.land. Built with passion on Cloudflare Workers.
@@ -89,13 +89,13 @@ export function AppFooter() {
               Handcrafted in Europe. Global reach via Edge Computing.
             </p>
           </div>
-          
+
           <div className="flex items-center gap-6">
             <a
               href="https://github.com/spike-land-ai/spike-land-ai/releases"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[11px] font-bold text-muted-foreground hover:text-foreground transition-all flex items-center gap-1.5 bg-muted px-3 py-1.5 rounded-full"
+              className="text-[11px] font-bold text-muted-foreground hover:text-primary transition-all flex items-center gap-1.5 bg-muted dark:bg-white/5 border border-border dark:border-white/10 px-3 py-1.5 rounded-full"
             >
               <ExternalLink className="size-3" />
               Changelog

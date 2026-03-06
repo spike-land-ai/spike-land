@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
@@ -24,8 +24,8 @@ import {
   AlertTriangle,
   Tag
 } from "lucide-react";
-import { Button } from "@/shared/ui/button";
-import { cn } from "@/shared/utils/cn";
+import { Button } from "./ui/button";
+import { cn } from "@spike-land-ai/shared";
 
 /**
  * Convert self-closing JSX/HTML tags for custom components to explicit
@@ -143,7 +143,7 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
   ),
 };
 
-export function BlogPostView({ slug, linkComponent }: { slug: string; linkComponent?: React.ComponentType<{ to: string; className?: string; children: React.ReactNode }> | "a" }) {
+export function BlogPostView({ slug, linkComponent }: { slug: string; linkComponent?: React.ComponentType<{ to: string; className?: string; children: React.ReactNode }> | "a" | undefined }) {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -324,7 +324,7 @@ const SLIDER_STOPS = [
   { amount: 100, label: "Legend Tier", sub: "We will name a variable after you.", icon: Gift },
 ] as const;
 
-function getArticleCopy(category: string, tags: string[]): string {
+function getArticleCopy(_category: string, _tags: string[]): string {
   return "Independent development is a labor of love. No VC funding, no bloated team—just code, mass-produced coffee, and a vision for an agentic future. If you find value in these tools, consider supporting the journey.";
 }
 
@@ -345,7 +345,7 @@ function SupportWidget({ post }: { post: BlogPost }) {
   const linkedInIntent = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
 
   const { assignments, config } = useExperiment();
-  const { widgetRef, track } = useWidgetTracking(slug, assignments);
+  const { widgetRef } = useWidgetTracking(slug, assignments);
 
   const [sliderIdx, setSliderIdx] = useState(config.defaultSliderIdx);
   const [customAmount, setCustomAmount] = useState("");
@@ -355,7 +355,6 @@ function SupportWidget({ post }: { post: BlogPost }) {
   const [supporters, setSupporters] = useState(0);
   const [bumpAnimating, setBumpAnimating] = useState(false);
   const [donating, setDonating] = useState(false);
-  const [thankYou, setThankYou] = useState(false);
   
   const currentStop = SLIDER_STOPS[sliderIdx] || SLIDER_STOPS[0];
   const Icon = currentStop.icon;

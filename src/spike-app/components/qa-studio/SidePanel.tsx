@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ScreenshotViewer } from "./ScreenshotViewer";
 
 interface Props {
   screenshotData?: string;
-  tabsData?: any;
-  formsData?: any;
+  tabsData?: unknown;
+  formsData?: unknown;
 }
 
 export function SidePanel({ screenshotData, tabsData, formsData }: Props) {
@@ -33,7 +33,7 @@ export function SidePanel({ screenshotData, tabsData, formsData }: Props) {
         </button>
       </div>
       <div className="flex-1 overflow-hidden">
-        {activeTab === "screenshot" && <ScreenshotViewer base64Data={screenshotData} />}
+        {activeTab === "screenshot" && <ScreenshotViewer {...(screenshotData !== undefined ? { base64Data: screenshotData } : {})} />}
         {activeTab === "forms" && (
           <div className="p-4 h-full overflow-auto bg-muted/10">
             {formsData ? (

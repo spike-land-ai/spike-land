@@ -1,6 +1,6 @@
 import { Link, useParams } from "@tanstack/react-router";
 import { useState } from "react";
-import { ScrollContainer } from "@spike-land-ai/shared";
+
 
 const placeholderMessages = [
   {
@@ -37,7 +37,7 @@ export function MessageThreadPage() {
         <h1 className="text-lg font-bold capitalize text-foreground">{userId}</h1>
       </div>
 
-      <ScrollContainer className="space-y-3 py-4">
+      <div className="flex-1 overflow-y-auto space-y-3 py-4">
         {placeholderMessages.map((msg) => (
           <div
             key={msg.id}
@@ -57,7 +57,7 @@ export function MessageThreadPage() {
             </div>
           </div>
         ))}
-      </ScrollContainer>
+      </div>
 
       <div className="flex gap-2 border-t border-border pt-4">
         <input
