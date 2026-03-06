@@ -102,6 +102,25 @@ resource "cloudflare_ruleset" "rate_limiting" {
       expression  = "(http.request.uri.path matches \"^/mcp\")"
       description = "Rate limit /mcp — 120 req/min per IP"
       enabled     = true
+    },
+    {
+      action = "block"
+      action_parameters = {
+        response = {
+          status_code  = 429
+          content_type = "application/json"
+          content      = "{\"error\":\"Too many requests\"}"
+        }
+      }
+      ratelimit = {
+        characteristics     = ["cf.colo.id", "ip.src"]
+        period              = 60
+        requests_per_period = 300
+        mitigation_timeout  = 60
+      }
+      expression  = "(http.host eq \"esm.spike.land\")"
+      description = "Rate limit esm.spike.land — 300 req/min per IP"
+      enabled     = true
     }
   ]
 }

@@ -31,7 +31,7 @@
     "drizzle-kit": "^0.31.9",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18",
-    "wrangler": "^4.70.0"
+    "wrangler": "^4.71.0"
   },
   "source": "./index.ts"
 }

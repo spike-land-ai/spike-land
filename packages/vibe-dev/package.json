@@ -36,7 +36,7 @@
     "@changesets/cli": "2.30.0",
     "@spike-land-ai/eslint-config": "workspace:^",
     "@spike-land-ai/tsconfig": "workspace:^",
-    "@types/node": "25.3.3",
+    "@types/node": "25.3.5",
     "eslint": "10.0.2",
     "tsup": "8.5.1",
     "tsx": "4.21.0",

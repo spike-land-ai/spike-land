@@ -300,11 +300,18 @@ const bazdmegRoute = createRoute({
   component: withSuspense(() => import("./routes/bazdmeg"), "BazdmegPage"),
 });
 
+const whatWeDoRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/what-we-do",
+  component: withSuspense(() => import("./routes/what-we-do"), "WhatWeDoPage"),
+});
+
 // Build route tree
 const routeTree = rootRoute.addChildren([
   indexRoute,
   cockpitRoute,
   bazdmegRoute,
+  whatWeDoRoute,
   aboutRoute,
   analyticsRoute,
   callbackRoute,

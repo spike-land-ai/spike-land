@@ -38,17 +38,17 @@
     "mcp:http": "node dist/mcp-server.js --http --port 3100"
   },
   "dependencies": {
-    "@cloudflare/puppeteer": "^0.0.15",
+    "@cloudflare/puppeteer": "^1.0.6",
     "@modelcontextprotocol/sdk": "1.27.1",
     "@spike-land-ai/mcp-server-base": "*",
-    "hono": "^4.7.10",
+    "hono": "^4.12.5",
     "zod": "4.3.6"
   },
   "devDependencies": {
     "playwright": "^1.58.2",
     "typescript": "5.9.3",
     "vitest": "^4.0.18",
-    "wrangler": "^4.20.0"
+    "wrangler": "^4.71.0"
   },
   "peerDependencies": {
     "playwright": ">=1.0.0"

@@ -17,9 +17,9 @@
     "lint": "eslint --quiet ."
   },
   "dependencies": {
-    "@better-auth/drizzle-adapter": "^1.5.3",
+    "@better-auth/drizzle-adapter": "^1.5.4",
     "@modelcontextprotocol/sdk": "^1.27.1",
-    "better-auth": "^1.5.3",
+    "better-auth": "^1.5.4",
     "drizzle-orm": "^0.45.1"
   },
   "devDependencies": {
@@ -28,7 +28,7 @@
     "drizzle-kit": "^0.31.9",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18",
-    "wrangler": "^4.70.0"
+    "wrangler": "^4.71.0"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

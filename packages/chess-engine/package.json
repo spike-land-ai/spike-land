@@ -21,7 +21,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@types/node": "25.3.3",
+    "@types/node": "25.3.5",
     "@vitest/coverage-v8": "4.0.18",
     "chess.js": "^1.4.0",
     "typescript": "5.9.3",

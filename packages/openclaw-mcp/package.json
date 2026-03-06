@@ -42,7 +42,7 @@
     "@modelcontextprotocol/sdk": "1.27.1",
     "@spike-land-ai/eslint-config": "workspace:^",
     "@spike-land-ai/tsconfig": "workspace:^",
-    "@types/node": "25.3.3",
+    "@types/node": "25.3.5",
     "eslint": "10.0.2",
     "typescript": "5.9.3",
     "typescript-eslint": "8.56.1",

@@ -43,12 +43,43 @@ export interface VibeCoderProps {
 
 type MobilePanel = "chat" | "code" | "preview";
 
-const DEFAULT_CODE = `import React from "react";
+const DEFAULT_CODE = `import React, { useState } from "react";
 
 export default function App() {
+  const [hovered, setHovered] = useState(false);
+  const [clicks, setClicks] = useState(0);
+
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-slate-900 to-slate-700">
-      <h1 className="text-4xl font-bold text-white">Hello, world!</h1>
+    <div className="flex items-center justify-center h-screen bg-[#0a0a0f]">
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onClick={() => setClicks(c => c + 1)}
+        className="relative cursor-pointer select-none rounded-2xl p-px"
+        style={{
+          background: hovered
+            ? "linear-gradient(135deg, #6366f1, #a855f7, #ec4899)"
+            : "linear-gradient(135deg, #334155, #475569)",
+          boxShadow: hovered
+            ? "0 0 40px 8px rgba(168,85,247,0.45)"
+            : "0 0 0px 0px transparent",
+          transition: "all 0.35s ease",
+        }}
+      >
+        <div className="rounded-2xl bg-[#0f0f1a]/90 backdrop-blur-xl px-10 py-8 text-center">
+          <div
+            className="text-5xl mb-3"
+            style={{ filter: hovered ? "drop-shadow(0 0 12px #a855f7)" : "none", transition: "filter 0.35s" }}
+          >
+            ✦
+          </div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">VibeCoder</h1>
+          <p className="text-sm text-slate-400 mt-1 mb-4">Edit me. I react to you.</p>
+          <div className="inline-block rounded-full bg-white/5 border border-white/10 px-4 py-1 text-xs text-slate-300">
+            {clicks === 0 ? "hover · click · vibe" : \`clicked \${clicks}×\`}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -100,7 +131,7 @@ function ResizeDivider({ onDrag, isDarkMode }: DividerProps) {
       className={cn(
         "hidden md:flex w-1.5 shrink-0 cursor-col-resize items-center justify-center transition-colors group select-none",
         isDarkMode
-          ? "bg-white/5 hover:bg-white/10 active:bg-[#ffaa00]/30"
+          ? "bg-white/5 hover:bg-white/10 active:bg-primary/30"
           : "bg-border hover:bg-border/70 active:bg-primary/20",
       )}
     >
@@ -121,18 +152,25 @@ function ResizeDivider({ onDrag, isDarkMode }: DividerProps) {
 interface ChatPanelProps {
   isDarkMode: boolean;
   className?: string;
+  onStreamingChange?: (streaming: boolean) => void;
 }
 
-function ChatPanel({ isDarkMode, className }: ChatPanelProps) {
+function ChatPanel({ isDarkMode, className, onStreamingChange }: ChatPanelProps) {
   const { isAuthenticated, login } = useAuth();
   const router = useRouter();
   const { messages, sendMessage, isStreaming, error, clearError, clearMessages, submitBrowserResult } = useChat();
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [input, setInput] = useState("");
   const [authWarning, setAuthWarning] = useState(false);
 
   useBrowserBridge({ messages, onResult: submitBrowserResult, router });
+
+  // Notify parent when streaming state changes so other panels can react
+  useEffect(() => {
+    onStreamingChange?.(isStreaming);
+  }, [isStreaming, onStreamingChange]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -165,7 +203,7 @@ function ChatPanel({ isDarkMode, className }: ChatPanelProps) {
     <div
       className={cn(
         "flex flex-col h-full overflow-hidden",
-        isDarkMode ? "bg-[#0a0a0b]" : "bg-card",
+        isDarkMode ? "bg-background" : "bg-card",
         className,
       )}
     >
@@ -181,11 +219,11 @@ function ChatPanel({ isDarkMode, className }: ChatPanelProps) {
             <div
               className={cn(
                 "w-2 h-2 rounded-full",
-                isDarkMode ? "bg-[#00ffaa] animate-pulse" : "bg-green-500",
+                isDarkMode ? "bg-success-foreground animate-pulse" : "bg-green-500",
               )}
             />
             {isDarkMode && (
-              <div className="absolute inset-0 w-2 h-2 rounded-full bg-[#00ffaa] animate-ping opacity-30" />
+              <div className="absolute inset-0 w-2 h-2 rounded-full bg-success-foreground animate-ping opacity-30" />
             )}
           </div>
           <span
@@ -228,7 +266,7 @@ function ChatPanel({ isDarkMode, className }: ChatPanelProps) {
               )}
             >
               <Sparkles
-                className={cn("w-7 h-7", isDarkMode ? "text-[#ffaa00]" : "text-primary")}
+                className="w-7 h-7 text-primary"
               />
             </div>
             <div className="space-y-1.5">
@@ -264,7 +302,7 @@ function ChatPanel({ isDarkMode, className }: ChatPanelProps) {
           className={cn(
             "mx-4 mb-3 px-3 py-2.5 rounded-xl text-xs font-semibold flex justify-between items-center gap-3 shrink-0",
             isDarkMode
-              ? "bg-[#ffaa00]/10 border border-[#ffaa00]/20 text-[#ffaa00]"
+              ? "bg-primary/10 border border-primary/20 text-primary"
               : "bg-amber-50 border border-amber-200 text-amber-800",
           )}
         >
@@ -274,7 +312,7 @@ function ChatPanel({ isDarkMode, className }: ChatPanelProps) {
             className={cn(
               "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors shrink-0",
               isDarkMode
-                ? "bg-[#ffaa00] text-[#020203] hover:bg-[#ffcc44]"
+                ? "bg-primary text-primary-foreground hover:bg-primary-light"
                 : "bg-amber-500 text-white hover:bg-amber-600",
             )}
           >
@@ -318,7 +356,7 @@ function ChatPanel({ isDarkMode, className }: ChatPanelProps) {
           className={cn(
             "flex items-end gap-2 rounded-xl p-2 transition-all",
             isDarkMode
-              ? "bg-white/5 border border-white/10 focus-within:ring-1 ring-[#ffaa00]/30"
+              ? "bg-white/5 border border-white/10 focus-within:ring-1 ring-primary/30"
               : "bg-background border border-border focus-within:ring-2 focus-within:ring-ring/30",
           )}
         >
@@ -342,30 +380,39 @@ function ChatPanel({ isDarkMode, className }: ChatPanelProps) {
             )}
             style={{ minHeight: "40px" }}
           />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isStreaming}
-            aria-label="Send message"
-            className={cn(
-              "p-2.5 rounded-lg transition-all active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed shrink-0",
-              isDarkMode
-                ? "bg-[#ffaa00] text-[#020203]"
-                : "bg-primary text-primary-foreground",
-            )}
-          >
-            {isStreaming ? (
-              <div
+          <div className="flex flex-col items-center gap-1 shrink-0">
+            <button
+              onClick={handleSend}
+              disabled={!input.trim() || isStreaming}
+              aria-label="Send message"
+              className={cn(
+                "p-2.5 rounded-lg transition-all active:scale-90 disabled:opacity-25 disabled:cursor-not-allowed",
+                "bg-primary text-primary-foreground",
+              )}
+            >
+              {isStreaming ? (
+                <div
+                  className="w-4 h-4 border-2 rounded-full animate-spin border-primary-foreground/20 border-t-primary-foreground"
+                />
+              ) : (
+                <Send className="w-4 h-4 stroke-[2.5]" />
+              )}
+            </button>
+            {/* Keyboard shortcut hint — visible only when there is content to send */}
+            {input.trim() && !isStreaming && (
+              <span
                 className={cn(
-                  "w-4 h-4 border-2 rounded-full animate-spin",
+                  "text-[9px] font-bold uppercase tracking-wider leading-none px-1 py-0.5 rounded border select-none",
                   isDarkMode
-                    ? "border-[#020203]/20 border-t-[#020203]"
-                    : "border-primary-foreground/20 border-t-primary-foreground",
+                    ? "text-gray-600 border-white/10 bg-white/5"
+                    : "text-muted-foreground border-border bg-muted",
                 )}
-              />
-            ) : (
-              <Send className="w-4 h-4 stroke-[2.5]" />
+                aria-hidden="true"
+              >
+                Enter
+              </span>
             )}
-          </button>
+          </div>
         </div>
       </div>
     </div>
@@ -380,15 +427,16 @@ interface CodePanelProps {
   code: string;
   onChange: (value: string) => void;
   isDarkMode: boolean;
+  isStreaming?: boolean;
   className?: string;
 }
 
-function CodePanel({ code, onChange, isDarkMode, className }: CodePanelProps) {
+function CodePanel({ code, onChange, isDarkMode, isStreaming = false, className }: CodePanelProps) {
   return (
     <div
       className={cn(
         "flex flex-col h-full overflow-hidden",
-        isDarkMode ? "bg-[#0d0d0e]" : "bg-background",
+        "bg-background",
         className,
       )}
     >
@@ -400,7 +448,7 @@ function CodePanel({ code, onChange, isDarkMode, className }: CodePanelProps) {
         )}
       >
         <Code2
-          className={cn("w-3.5 h-3.5", isDarkMode ? "text-[#ffaa00]" : "text-primary")}
+          className="w-3.5 h-3.5 text-primary"
         />
         <span
           className={cn(
@@ -410,6 +458,20 @@ function CodePanel({ code, onChange, isDarkMode, className }: CodePanelProps) {
         >
           Code Editor
         </span>
+        {/* AI generating indicator */}
+        {isStreaming && (
+          <span
+            className={cn(
+              "flex items-center gap-1.5 ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider",
+              isDarkMode
+                ? "bg-primary/15 text-primary border border-primary/20"
+                : "bg-primary/10 text-primary border border-primary/20",
+            )}
+          >
+            <Loader2 className="w-2.5 h-2.5 animate-spin" />
+            Generating
+          </span>
+        )}
         <span
           className={cn(
             "ml-auto text-[10px] font-medium uppercase tracking-widest",
@@ -426,10 +488,7 @@ function CodePanel({ code, onChange, isDarkMode, className }: CodePanelProps) {
           fallback={
             <div className="h-full flex items-center justify-center gap-3">
               <Loader2
-                className={cn(
-                  "w-5 h-5 animate-spin",
-                  isDarkMode ? "text-[#ffaa00]" : "text-primary",
-                )}
+                className="w-5 h-5 animate-spin text-primary"
               />
               <span
                 className={cn(
@@ -485,7 +544,7 @@ function PreviewPanel({ appId, code, isDarkMode, className }: PreviewPanelProps)
     <div
       className={cn(
         "flex flex-col h-full overflow-hidden",
-        isDarkMode ? "bg-[#0a0a0b]" : "bg-background",
+        "bg-background",
         className,
       )}
     >
@@ -497,7 +556,7 @@ function PreviewPanel({ appId, code, isDarkMode, className }: PreviewPanelProps)
         )}
       >
         <Eye
-          className={cn("w-3.5 h-3.5", isDarkMode ? "text-[#00ffaa]" : "text-green-600")}
+          className="w-3.5 h-3.5 text-success-foreground"
         />
         <span
           className={cn(
@@ -524,7 +583,7 @@ function PreviewPanel({ appId, code, isDarkMode, className }: PreviewPanelProps)
       {/* Content */}
       <div className="flex-1 overflow-hidden">
         {appId ? (
-          <LivePreview appId={appId} />
+          <LivePreview appId={appId} isDarkMode={isDarkMode} />
         ) : code.trim() ? (
           // Inline sandboxed preview of the raw source (useful before a run)
           <iframe
@@ -534,34 +593,57 @@ function PreviewPanel({ appId, code, isDarkMode, className }: PreviewPanelProps)
             className="w-full h-full border-0 bg-white"
           />
         ) : (
-          <div className="h-full flex flex-col items-center justify-center gap-4 opacity-50 px-6 text-center">
-            <div
-              className={cn(
-                "w-14 h-14 rounded-2xl flex items-center justify-center",
-                isDarkMode ? "bg-white/5" : "bg-muted",
+          <div className="h-full flex flex-col items-center justify-center gap-5 px-8 text-center">
+            {/* Glowing icon container */}
+            <div className="relative">
+              <div
+                className={cn(
+                  "w-20 h-20 rounded-3xl flex items-center justify-center",
+                  isDarkMode
+                    ? "bg-success-foreground/10 ring-1 ring-success-foreground/20"
+                    : "bg-green-50 ring-1 ring-green-200",
+                )}
+              >
+                <MonitorPlay
+                  className="w-10 h-10 text-success-foreground"
+                />
+              </div>
+              {/* Ambient glow — dark mode only */}
+              {isDarkMode && (
+                <div className="absolute inset-0 w-20 h-20 rounded-3xl bg-success-foreground/10 blur-xl -z-10" />
               )}
-            >
-              <MonitorPlay
-                className={cn("w-7 h-7", isDarkMode ? "text-[#00ffaa]" : "text-green-600")}
-              />
             </div>
-            <div className="space-y-1.5">
+
+            <div className="space-y-2">
               <p
                 className={cn(
                   "text-sm font-bold",
                   isDarkMode ? "text-white" : "text-foreground",
                 )}
               >
-                No preview yet
+                Your app appears here
               </p>
               <p
                 className={cn(
-                  "text-xs leading-relaxed max-w-[220px]",
+                  "text-xs leading-relaxed max-w-[200px]",
                   isDarkMode ? "text-gray-500" : "text-muted-foreground",
                 )}
               >
-                Write some code or chat with the AI agent to see a live preview here.
+                Describe what you want to build in the Chat panel and the AI will generate a live preview instantly.
               </p>
+            </div>
+
+            {/* CTA hint */}
+            <div
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-semibold",
+                isDarkMode
+                  ? "bg-success-foreground/8 border border-success-foreground/15 text-success-foreground/70"
+                  : "bg-green-50 border border-green-200 text-green-700",
+              )}
+            >
+              <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+              Try: &ldquo;Build a todo list app&rdquo;
             </div>
           </div>
         )}
@@ -593,7 +675,7 @@ function MobileTabBar({ active, onChange, isDarkMode }: MobileTabBarProps) {
       aria-label="VibeCoder panels"
       className={cn(
         "flex md:hidden border-b shrink-0",
-        isDarkMode ? "bg-[#0a0a0b] border-white/5" : "bg-card border-border",
+        isDarkMode ? "bg-background border-white/5" : "bg-card border-border",
       )}
     >
       {MOBILE_TABS.map(({ id, label, Icon }) => {
@@ -605,18 +687,18 @@ function MobileTabBar({ active, onChange, isDarkMode }: MobileTabBarProps) {
             aria-selected={isActive}
             aria-controls={`vibecoder-panel-${id}`}
             onClick={() => onChange(id)}
+            // min-h-[52px] gives a comfortable 52 px hit target (WCAG 2.5.8 recommends 24 px minimum,
+            // Apple HIG recommends 44 px). py-4 + gap-2 + larger icon naturally fills this.
             className={cn(
-              "flex-1 flex items-center justify-center gap-1.5 py-3 text-xs font-bold transition-colors",
+              "flex-1 flex flex-col items-center justify-center gap-1.5 py-4 min-h-[52px] text-xs font-bold transition-colors select-none",
               isActive
-                ? isDarkMode
-                  ? "text-[#ffaa00] border-b-2 border-[#ffaa00]"
-                  : "text-primary border-b-2 border-primary"
+                ? "text-primary border-b-2 border-primary"
                 : isDarkMode
-                ? "text-gray-500 hover:text-gray-300"
-                : "text-muted-foreground hover:text-foreground",
+                ? "text-gray-500 active:text-gray-300"
+                : "text-muted-foreground active:text-foreground",
             )}
           >
-            <Icon className="w-3.5 h-3.5" />
+            <Icon className="w-5 h-5" />
             {label}
           </button>
         );
@@ -655,35 +737,35 @@ function PanelToggleBar({
     <div
       className={cn(
         "hidden md:flex items-center gap-1 px-3 py-2 border-b shrink-0",
-        isDarkMode ? "bg-[#070708] border-white/5" : "bg-muted/30 border-border",
+        isDarkMode ? "bg-background border-white/5" : "bg-muted/30 border-border",
       )}
     >
       <Button
         variant="ghost"
         size="sm"
-        onClick={onToggleChat}
+        onClick={onTogglePreview}
         className={cn(btnBase, "gap-1.5 h-7 px-2.5 text-xs")}
-        title={chatVisible ? "Hide chat panel" : "Show chat panel"}
+        title={previewVisible ? "Hide preview panel" : "Show preview panel"}
       >
-        {chatVisible ? (
+        {previewVisible ? (
           <PanelLeftClose className="w-3.5 h-3.5" />
         ) : (
-          <MessageSquare className="w-3.5 h-3.5" />
+          <Eye className="w-3.5 h-3.5" />
         )}
-        Chat
+        Preview
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        onClick={onTogglePreview}
+        onClick={onToggleChat}
         className={cn(btnBase, "ml-auto gap-1.5 h-7 px-2.5 text-xs")}
-        title={previewVisible ? "Hide preview panel" : "Show preview panel"}
+        title={chatVisible ? "Hide chat panel" : "Show chat panel"}
       >
-        Preview
-        {previewVisible ? (
+        Chat
+        {chatVisible ? (
           <PanelRightClose className="w-3.5 h-3.5" />
         ) : (
-          <Eye className="w-3.5 h-3.5" />
+          <MessageSquare className="w-3.5 h-3.5" />
         )}
       </Button>
     </div>
@@ -704,6 +786,8 @@ export function VibeCoder({ initialCode = DEFAULT_CODE, appId }: VibeCoderProps)
   const [activePanel, setActivePanel] = useState<MobilePanel>("chat");
   const [chatVisible, setChatVisible] = useState(true);
   const [previewVisible, setPreviewVisible] = useState(true);
+  // Lifted from ChatPanel so CodePanel can show a generating indicator
+  const [isStreaming, setIsStreaming] = useState(false);
 
   // Panel widths controlled by drag (desktop only)
   const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
@@ -711,8 +795,9 @@ export function VibeCoder({ initialCode = DEFAULT_CODE, appId }: VibeCoderProps)
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Chat is on the right: dragging the divider LEFT (negative delta) grows chat
   const handleChatDrag = useCallback((deltaX: number) => {
-    setChatWidth((w) => Math.max(MIN_PANEL_WIDTH, w + deltaX));
+    setChatWidth((w) => Math.max(MIN_PANEL_WIDTH, w - deltaX));
   }, []);
 
   const handlePreviewDrag = useCallback((deltaX: number) => {
@@ -728,7 +813,7 @@ export function VibeCoder({ initialCode = DEFAULT_CODE, appId }: VibeCoderProps)
       ref={containerRef}
       className={cn(
         "flex flex-col h-full w-full overflow-hidden",
-        isDarkMode ? "bg-[#070708] text-gray-100" : "bg-background text-foreground",
+        isDarkMode ? "bg-background text-gray-100" : "bg-background text-foreground",
       )}
     >
       {/* Desktop panel toggle toolbar */}
@@ -743,31 +828,9 @@ export function VibeCoder({ initialCode = DEFAULT_CODE, appId }: VibeCoderProps)
       {/* Mobile tab switcher */}
       <MobileTabBar active={activePanel} onChange={setActivePanel} isDarkMode={isDarkMode} />
 
-      {/* Panel area */}
+      {/* Panel area — layout: Code | Preview | Chat (chat on right) */}
       <div className="flex flex-1 overflow-hidden">
-        {/* ---- CHAT PANEL (desktop: left sidebar) ---- */}
-        {chatVisible && (
-          <>
-            <div
-              id="vibecoder-panel-chat"
-              role="tabpanel"
-              aria-label="Chat panel"
-              style={{ width: chatWidth, minWidth: MIN_PANEL_WIDTH }}
-              className={cn(
-                "shrink-0 overflow-hidden border-r",
-                // On mobile show only when activePanel === "chat"
-                activePanel === "chat" ? "flex flex-col flex-1 md:flex-none" : "hidden md:flex md:flex-col",
-                isDarkMode ? "border-white/5" : "border-border",
-              )}
-            >
-              <ChatPanel isDarkMode={isDarkMode} className="h-full" />
-            </div>
-            {/* Divider between chat and code */}
-            <ResizeDivider onDrag={handleChatDrag} isDarkMode={isDarkMode} />
-          </>
-        )}
-
-        {/* ---- CODE PANEL (center) ---- */}
+        {/* ---- CODE PANEL (left, flex-1) ---- */}
         <div
           id="vibecoder-panel-code"
           role="tabpanel"
@@ -777,18 +840,26 @@ export function VibeCoder({ initialCode = DEFAULT_CODE, appId }: VibeCoderProps)
             activePanel === "code" ? "flex flex-col" : "hidden md:flex md:flex-col",
           )}
         >
-          <CodePanel
-            code={code}
-            onChange={handleCodeChange}
-            isDarkMode={isDarkMode}
-            className="h-full"
-          />
+          <div
+            key={`code-${activePanel === "code" ? "active" : "bg"}`}
+            className={cn(
+              "h-full flex flex-col",
+              activePanel === "code" && "animate-in fade-in duration-200",
+            )}
+          >
+            <CodePanel
+              code={code}
+              onChange={handleCodeChange}
+              isDarkMode={isDarkMode}
+              isStreaming={isStreaming}
+              className="h-full"
+            />
+          </div>
         </div>
 
-        {/* ---- PREVIEW PANEL (desktop: right sidebar) ---- */}
+        {/* ---- PREVIEW PANEL (center-right) ---- */}
         {previewVisible && (
           <>
-            {/* Divider between code and preview */}
             <ResizeDivider onDrag={handlePreviewDrag} isDarkMode={isDarkMode} />
             <div
               id="vibecoder-panel-preview"
@@ -801,12 +872,48 @@ export function VibeCoder({ initialCode = DEFAULT_CODE, appId }: VibeCoderProps)
                 isDarkMode ? "border-white/5" : "border-border",
               )}
             >
-              <PreviewPanel
-                {...(appId != null ? { appId } : {})}
-                code={code}
-                isDarkMode={isDarkMode}
-                className="h-full"
-              />
+              <div
+                key={`preview-${activePanel === "preview" ? "active" : "bg"}`}
+                className={cn(
+                  "h-full",
+                  activePanel === "preview" && "animate-in fade-in duration-200",
+                )}
+              >
+                <PreviewPanel
+                  {...(appId != null ? { appId } : {})}
+                  code={code}
+                  isDarkMode={isDarkMode}
+                  className="h-full"
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ---- CHAT PANEL (desktop: right sidebar) ---- */}
+        {chatVisible && (
+          <>
+            <ResizeDivider onDrag={handleChatDrag} isDarkMode={isDarkMode} />
+            <div
+              id="vibecoder-panel-chat"
+              role="tabpanel"
+              aria-label="Chat panel"
+              style={{ width: chatWidth, minWidth: MIN_PANEL_WIDTH }}
+              className={cn(
+                "shrink-0 overflow-hidden border-l",
+                activePanel === "chat" ? "flex flex-col flex-1 md:flex-none" : "hidden md:flex md:flex-col",
+                isDarkMode ? "border-white/5" : "border-border",
+              )}
+            >
+              <div
+                key={`chat-${activePanel === "chat" ? "active" : "bg"}`}
+                className={cn(
+                  "h-full",
+                  activePanel === "chat" && "animate-in fade-in duration-200",
+                )}
+              >
+                <ChatPanel isDarkMode={isDarkMode} className="h-full" onStreamingChange={setIsStreaming} />
+              </div>
             </div>
           </>
         )}

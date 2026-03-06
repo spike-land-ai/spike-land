@@ -1,4 +1,4 @@
-import { defineConfig } from "vitest/config";
+import { defineConfig, type Plugin } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "path";
@@ -9,8 +9,51 @@ const certFile = resolve(certDir, "local.spike.land.pem");
 const keyFile = resolve(certDir, "local.spike.land-key.pem");
 const hasLocalCerts = existsSync(certFile) && existsSync(keyFile);
 
+const ESM_CDN = "https://esm.spike.land";
+
+// Read dependency versions from package.json for pinned CDN URLs
+const pkg = JSON.parse(readFileSync(resolve(import.meta.dirname, "package.json"), "utf-8"));
+const allDeps: Record<string, string> = { ...pkg.dependencies, ...pkg.devDependencies };
+
+function getVersionedSpecifier(bare: string): string {
+  // Find the top-level package name (@scope/pkg or pkg)
+  const topPkg = bare.startsWith("@") ? bare.split("/").slice(0, 2).join("/") : bare.split("/")[0];
+  const version = allDeps[topPkg]?.replace(/^[\^~>=<]/, "");
+  const pinned = version ? `${topPkg}@${version}` : topPkg;
+  // Append subpath if present
+  const subpath = bare.slice(topPkg.length);
+  return `${pinned}${subpath}`;
+}
+
+/**
+ * Vite plugin that rewrites bare npm imports to esm.spike.land URLs in dev mode.
+ * Local source files (@/, @spike-land-ai/*) are still transpiled locally.
+ */
+function esmCdnPlugin(): Plugin {
+  return {
+    name: "esm-cdn-resolve",
+    enforce: "pre",
+    apply: "serve",
+    resolveId(source) {
+      // Skip relative imports, absolute paths, virtual modules, and local aliases
+      if (
+        source.startsWith(".") ||
+        source.startsWith("/") ||
+        source.startsWith("\0") ||
+        source.startsWith("@/") ||
+        source.startsWith("@spike-land-ai/")
+      ) {
+        return null;
+      }
+      // Rewrite bare npm specifiers to CDN URL
+      const specifier = getVersionedSpecifier(source);
+      return { id: `${ESM_CDN}/${specifier}`, external: true };
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [esmCdnPlugin(), react(), tailwindcss()],
   test: {
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
@@ -37,7 +80,8 @@ export default defineConfig({
     },
     ...(hasLocalCerts
       ? {
-          host: "local.spike.land",
+          host: "0.0.0.0",
+          port: 5173,
           https: {
             key: readFileSync(keyFile),
             cert: readFileSync(certFile),
@@ -61,6 +105,9 @@ export default defineConfig({
         secure: true,
       },
     },
+  },
+  optimizeDeps: {
+    noDiscovery: true,
   },
   build: {
     outDir: "dist",

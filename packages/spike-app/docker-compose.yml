@@ -1,0 +1,11 @@
+services:
+  dev:
+    image: node:24-alpine
+    working_dir: /app/packages/spike-app
+    command: sh -c "corepack enable && yarn dev"
+    ports:
+      - "443:443"
+    volumes:
+      - ../..:/app
+    environment:
+      - NODE_ENV=development

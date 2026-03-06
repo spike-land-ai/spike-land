@@ -7,7 +7,7 @@ import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { LoginButton } from "@/components/LoginButton";
 import { AppFooter } from "@/components/AppFooter";
 import { CookieConsent } from "@/components/CookieConsent";
-import { AiChatWidget } from "@/components/AiChatWidget";
+import { AiChatWidget, CHAT_SIDEBAR_WIDTH } from "@/components/AiChatWidget";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 const DEFAULT_TITLE = "spike.land - MCP-First AI Development Platform";
@@ -105,6 +105,10 @@ const ROUTE_META: Record<string, { title: string; description: string; ogImage?:
     title: "Vibe Coder - spike.land",
     description: "Vibe code with AI agents. Chat, edit code in Monaco editor, and see live preview - all in one place.",
   },
+  "/what-we-do": {
+    title: "What We Do - spike.land | MCP-First AI Platform",
+    description: "Explore spike.land's 80+ MCP tools across 11 domains. Code intelligence, image studio, analytics, authentication, and more — all edge-deployed.",
+  },
 };
 
 const ORGANIZATION_JSON_LD = JSON.stringify({
@@ -178,14 +182,20 @@ export function RootLayout() {
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [searchToast, setSearchToast] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), []);
   const mobileNavRef = useFocusTrap(mobileNavOpen, closeMobileNav);
   const location = useRouterState({ select: (s) => s.location });
   const { pathname, searchStr } = location;
 
-  // Close mobile nav on route change
+  // Pages with their own integrated chat panel — hide global chat sidebar
+  const hasPageChat = pathname === "/bazdmeg";
+  const showGlobalChat = !hasPageChat;
+
+  // Close mobile nav and chat sidebar on route change
   useEffect(() => {
     setMobileNavOpen(false);
+    if (pathname === "/bazdmeg") setChatOpen(false);
   }, [pathname]);
 
   // Inject JSON-LD structured data and RSS link once on mount
@@ -257,7 +267,7 @@ export function RootLayout() {
   }, [pathname, searchStr]);
 
   return (
-    <div className="app-shell flex min-h-screen bg-background text-foreground">
+    <div className="app-shell flex min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Skip to main content link for keyboard/screen reader users */}
       <a
         href="#main-content"
@@ -266,7 +276,10 @@ export function RootLayout() {
         Skip to main content
       </a>
 
-      <div className="flex flex-1 flex-col min-w-0">
+      <div
+        className="flex flex-1 flex-col min-w-0 transition-[margin-right] duration-300 ease-in-out"
+        style={{ marginRight: showGlobalChat && chatOpen ? CHAT_SIDEBAR_WIDTH : 0 }}
+      >
         <header className="sticky top-0 z-30 flex h-16 items-center border-b border-border bg-card/80 backdrop-blur-xl px-6">
           <div className="flex flex-1 items-center justify-between">
             <div className="flex items-center gap-8">
@@ -364,7 +377,9 @@ export function RootLayout() {
 
         <AppFooter />
         <CookieConsent />
-        <AiChatWidget />
+        {showGlobalChat && (
+          <AiChatWidget open={chatOpen} onToggle={() => setChatOpen((v) => !v)} />
+        )}
         {searchToast && (
           <div
             role="status"

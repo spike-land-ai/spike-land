@@ -1,10 +1,55 @@
-import { lazy, Suspense, useState, useCallback } from "react";
+import { lazy, Suspense, useState, useCallback, useMemo } from "react";
+import type { OnMount } from "@monaco-editor/react";
 import { Copy, Check, FileCode } from "lucide-react";
 import { cn } from "@/shared/utils/cn";
 import { useDarkMode } from "@/hooks/useDarkMode";
 
+// Configure Monaco web workers to load from esm.spike.land (CSP-safe).
+if (typeof globalThis !== "undefined") {
+  (globalThis as Record<string, unknown>).MonacoEnvironment = {
+    getWorkerUrl(_moduleId: string, label: string) {
+      const base = "https://esm.spike.land/monaco-editor@0.55.1/min/vs";
+      if (label === "typescript" || label === "javascript") return `${base}/language/typescript/ts.worker.js`;
+      if (label === "json") return `${base}/language/json/json.worker.js`;
+      if (label === "css" || label === "scss" || label === "less") return `${base}/language/css/css.worker.js`;
+      if (label === "html" || label === "handlebars" || label === "razor") return `${base}/language/html/html.worker.js`;
+      return `${base}/editor/editor.worker.js`;
+    },
+  };
+}
+
 // Lazy-load the heavy Monaco bundle so it doesn't block initial page load.
 const Editor = lazy(() => import("@monaco-editor/react"));
+
+/** Map file extensions to Monaco language identifiers. */
+const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
+  ts: "typescript",
+  tsx: "typescriptreact",
+  js: "javascript",
+  jsx: "javascriptreact",
+  css: "css",
+  scss: "scss",
+  less: "less",
+  json: "json",
+  html: "html",
+  xml: "xml",
+  md: "markdown",
+  mdx: "markdown",
+  yaml: "yaml",
+  yml: "yaml",
+  sh: "shell",
+  bash: "shell",
+  py: "python",
+  go: "go",
+  rs: "rust",
+  sql: "sql",
+};
+
+function detectLanguage(fileName: string | undefined, fallback: string): string {
+  if (!fileName) return fallback;
+  const ext = fileName.split(".").pop()?.toLowerCase();
+  return (ext && EXTENSION_LANGUAGE_MAP[ext]) ?? fallback;
+}
 
 export interface CodeEditorProps {
   value: string;
@@ -39,6 +84,18 @@ export function CodeEditor({
   // Derive Monaco theme: explicit prop overrides auto-detection.
   const monacoTheme = theme ?? (isDarkMode ? "vs-dark" : "light");
 
+  // Auto-detect language from fileName extension; fall back to the prop.
+  const resolvedLanguage = useMemo(
+    () => detectLanguage(fileName, language),
+    [fileName, language],
+  );
+
+  // Derive line count from current value for the toolbar badge.
+  const lineCount = useMemo(
+    () => value.split("\n").length,
+    [value],
+  );
+
   const handleChange = useCallback(
     (newValue: string | undefined) => {
       onChange(newValue ?? "");
@@ -55,6 +112,11 @@ export function CodeEditor({
       // Clipboard API may be unavailable in some contexts — fail silently.
     }
   }, [value]);
+
+  // Focus the editor as soon as it mounts so users can type immediately.
+  const handleMount = useCallback<OnMount>((editor) => {
+    editor.focus();
+  }, []);
 
   return (
     <div
@@ -79,7 +141,15 @@ export function CodeEditor({
               "bg-primary/10 text-primary",
             )}
           >
-            {language}
+            {resolvedLanguage}
+          </span>
+          <span
+            className={cn(
+              "rounded-full px-2 py-0.5 text-xs font-medium",
+              "bg-muted text-muted-foreground",
+            )}
+          >
+            {lineCount} {lineCount === 1 ? "line" : "lines"}
           </span>
         </div>
 
@@ -113,10 +183,11 @@ export function CodeEditor({
         <Suspense fallback={<LoadingSpinner />}>
           <Editor
             height="100%"
-            language={language}
+            language={resolvedLanguage}
             theme={monacoTheme}
             value={value}
             onChange={handleChange}
+            onMount={handleMount}
             options={{
               readOnly,
               minimap: { enabled: false },
@@ -132,6 +203,9 @@ export function CodeEditor({
               smoothScrolling: true,
               cursorBlinking: "smooth",
               padding: { top: 12, bottom: 12 },
+              bracketPairColorization: { enabled: true },
+              guides: { bracketPairs: true },
+              suggest: { showKeywords: true },
             }}
           />
         </Suspense>

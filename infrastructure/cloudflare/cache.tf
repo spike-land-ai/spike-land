@@ -8,6 +8,24 @@ resource "cloudflare_ruleset" "cache_rules" {
 
   rules = [
     {
+      # Rule 0: esm.spike.land versioned packages — 1 year immutable cache
+      action = "set_cache_settings"
+      action_parameters = {
+        cache = true
+        edge_ttl = {
+          mode    = "override_origin"
+          default = 31536000
+        }
+        browser_ttl = {
+          mode    = "override_origin"
+          default = 31536000
+        }
+      }
+      expression  = "(http.host eq \"esm.spike.land\" and http.request.uri.path contains \"@\")"
+      description = "esm.spike.land versioned packages — 1 year immutable cache"
+      enabled     = true
+    },
+    {
       # Rule 1: Hashed assets — long-lived cache
       action = "set_cache_settings"
       action_parameters = {

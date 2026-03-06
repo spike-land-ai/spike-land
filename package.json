@@ -27,15 +27,15 @@
     "seed:blog:remote": "npx tsx scripts/seed-blog.ts --remote"
   },
   "dependencies": {
-    "agents": "^0.0.95",
+    "agents": "^0.7.5",
     "rehype-raw": "^7.0.0",
     "yaml": "^2.8.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.5",
+    "@biomejs/biome": "^2.4.6",
     "@changesets/cli": "2.30.0",
     "@google/genai": "^1.44.0",
-    "@types/node": "25.3.3",
+    "@types/node": "25.3.5",
     "@vitest/coverage-v8": "4.0.18",
     "agent-browser": "^0.16.3",
     "esbuild": "^0.27.3",
@@ -46,7 +46,120 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.56.1",
     "vitest": "4.0.18",
-    "wrangler": "^4.70.0"
+    "wrangler": "^4.71.0"
+  },
+  "dependenciesMeta": {
+    "@biomejs/biome": {
+      "unplugged": true
+    },
+    "@biomejs/cli-darwin-arm64": {
+      "unplugged": true
+    },
+    "@biomejs/cli-darwin-x64": {
+      "unplugged": true
+    },
+    "@biomejs/cli-linux-arm64": {
+      "unplugged": true
+    },
+    "@biomejs/cli-linux-arm64-musl": {
+      "unplugged": true
+    },
+    "@biomejs/cli-linux-x64": {
+      "unplugged": true
+    },
+    "@biomejs/cli-linux-x64-musl": {
+      "unplugged": true
+    },
+    "@rollup/rollup-darwin-arm64": {
+      "unplugged": true
+    },
+    "@rollup/rollup-darwin-x64": {
+      "unplugged": true
+    },
+    "@rollup/rollup-linux-arm64-gnu": {
+      "unplugged": true
+    },
+    "@rollup/rollup-linux-arm64-musl": {
+      "unplugged": true
+    },
+    "@rollup/rollup-linux-x64-gnu": {
+      "unplugged": true
+    },
+    "@rollup/rollup-linux-x64-musl": {
+      "unplugged": true
+    },
+    "@rspack/binding-darwin-arm64": {
+      "unplugged": true
+    },
+    "@rspack/binding-darwin-x64": {
+      "unplugged": true
+    },
+    "@rspack/binding-linux-arm64-gnu": {
+      "unplugged": true
+    },
+    "@rspack/binding-linux-arm64-musl": {
+      "unplugged": true
+    },
+    "@rspack/binding-linux-x64-gnu": {
+      "unplugged": true
+    },
+    "@rspack/binding-linux-x64-musl": {
+      "unplugged": true
+    },
+    "@swc/core": {
+      "unplugged": true
+    },
+    "@swc/core-darwin-arm64": {
+      "unplugged": true
+    },
+    "@swc/core-darwin-x64": {
+      "unplugged": true
+    },
+    "@swc/core-linux-arm64-gnu": {
+      "unplugged": true
+    },
+    "@swc/core-linux-arm64-musl": {
+      "unplugged": true
+    },
+    "@swc/core-linux-x64-gnu": {
+      "unplugged": true
+    },
+    "@swc/core-linux-x64-musl": {
+      "unplugged": true
+    },
+    "@tailwindcss/oxide-darwin-arm64": {
+      "unplugged": true
+    },
+    "@tailwindcss/oxide-darwin-x64": {
+      "unplugged": true
+    },
+    "@tailwindcss/oxide-linux-arm64-gnu": {
+      "unplugged": true
+    },
+    "@tailwindcss/oxide-linux-arm64-musl": {
+      "unplugged": true
+    },
+    "@tailwindcss/oxide-linux-x64-gnu": {
+      "unplugged": true
+    },
+    "@tailwindcss/oxide-linux-x64-musl": {
+      "unplugged": true
+    },
+    "better-sqlite3": {
+      "unplugged": true
+    },
+    "esbuild": {
+      "unplugged": true
+    },
+    "lightningcss": {
+      "unplugged": true
+    },
+    "playwright": {
+      "unplugged": true
+    },
+    "sharp": {
+      "unplugged": true
+    }
   },
   "resolutions": {
     "eslint": "10.0.2",

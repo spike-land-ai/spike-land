@@ -137,6 +137,11 @@ const packages: Record<string, PkgConfig> = {
     reportsDirectory: path.join(root, "coverage/code"),
   },
 
+  "esm-cdn": {
+    tier: 3,
+    includeTests: [src("esm-cdn/**/*.spec.ts")],
+    coverageExclude: [],
+  },
   "esbuild-wasm-mcp": { tier: 2, pool: "forks" },
   "google-analytics-mcp": { tier: 2, pool: "forks" },
   "google-ads-mcp": { tier: 2, pool: "forks" },
