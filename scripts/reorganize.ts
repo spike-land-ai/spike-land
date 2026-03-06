@@ -91,7 +91,7 @@ async function discoverFiles(): Promise<FileNode[]> {
 
     for (const match of matches) {
       const importPath = match[1];
-      if (importPath.startsWith("http") || importPath.endsWith(".css") || importPath.endsWith(".json")) continue;
+      if (importPath.startsWith("http") || importPath.endsWith(".css") || importPath.endsWith(".json") || importPath.includes("${")) continue;
 
       if (importPath.startsWith(".") || importPath.startsWith("/")) {
         // Resolve relative to absolute
@@ -214,7 +214,7 @@ function rewriteImports(content: string, oldPath: string, newPath: string, pathM
 }
 
 function rewriteSingleImport(match: string, p1: string, oldPath: string, newDir: string, pathMapping: Map<string, string>): string {
-  if (p1.startsWith("http") || (!p1.startsWith(".") && !p1.startsWith("/") && !p1.startsWith("@/"))) {
+  if (p1.startsWith("http") || (!p1.startsWith(".") && !p1.startsWith("/") && !p1.startsWith("@/")) || p1.includes("${")) {
     return match;
   }
   
