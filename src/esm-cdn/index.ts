@@ -41,17 +41,11 @@ export default {
     }
 
     if (url.pathname === "/health") {
-      return Response.json(
-        { status: "ok", service: "esm-cdn" },
-        { headers: cors },
-      );
+      return Response.json({ status: "ok", service: "esm-cdn" }, { headers: cors });
     }
 
     if (request.method !== "GET") {
-      return Response.json(
-        { error: "Method not allowed" },
-        { status: 405, headers: cors },
-      );
+      return Response.json({ error: "Method not allowed" }, { status: 405, headers: cors });
     }
 
     if (url.pathname.includes("modulepreload-polyfill")) {
