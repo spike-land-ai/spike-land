@@ -336,7 +336,9 @@ function ApiKeysTab() {
       <div className="rounded-lg border border-border bg-background p-4 space-y-3">
         <p className="text-sm font-medium text-foreground">Add API Key</p>
         <div className="flex gap-2">
+          <label htmlFor="apiKeyProvider" className="sr-only">Provider</label>
           <select
+            id="apiKeyProvider"
             value={selectedProvider}
             onChange={(e) => setSelectedProvider(e.target.value as Provider)}
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
@@ -347,7 +349,9 @@ function ApiKeysTab() {
               </option>
             ))}
           </select>
+          <label htmlFor="apiKeyValue" className="sr-only">API Key</label>
           <input
+            id="apiKeyValue"
             type="password"
             value={newKeyValue}
             onChange={(e) => setNewKeyValue(e.target.value)}

@@ -256,6 +256,14 @@ export function RootLayout() {
 
     const ogUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
     if (ogUrl) ogUrl.content = canonicalUrl;
+
+    let ogLocale = document.querySelector<HTMLMetaElement>('meta[property="og:locale"]');
+    if (!ogLocale) {
+      ogLocale = document.createElement("meta");
+      ogLocale.setAttribute("property", "og:locale");
+      ogLocale.content = "en_US";
+      document.head.appendChild(ogLocale);
+    }
   }, [pathname, searchStr]);
 
   return (

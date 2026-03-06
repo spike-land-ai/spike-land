@@ -1,0 +1,60 @@
+import { useEffect } from "react";
+import { Link } from "@tanstack/react-router";
+
+export function NotFoundPage() {
+  useEffect(() => {
+    const existing = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    if (existing) {
+      existing.content = "noindex";
+    } else {
+      const meta = document.createElement("meta");
+      meta.name = "robots";
+      meta.content = "noindex";
+      document.head.appendChild(meta);
+    }
+    return () => {
+      const el = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
+      if (el) el.content = "index, follow";
+    };
+  }, []);
+
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center px-6 py-32 text-center">
+      <p className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground/50 mb-4">
+        404
+      </p>
+      <h1 className="text-5xl sm:text-7xl font-black text-foreground tracking-tighter leading-[0.9] mb-6">
+        Page Not Found
+      </h1>
+      <p className="text-lg text-muted-foreground font-medium max-w-md mb-12 leading-relaxed">
+        The page you are looking for does not exist or has been moved. Try one of the links below.
+      </p>
+      <nav className="flex flex-wrap items-center justify-center gap-3" aria-label="Helpful links">
+        <Link
+          to="/"
+          className="rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity"
+        >
+          Home
+        </Link>
+        <Link
+          to="/tools"
+          className="rounded-2xl border border-border bg-card px-6 py-3 text-sm font-bold text-foreground hover:border-primary/30 transition-colors"
+        >
+          Tools
+        </Link>
+        <Link
+          to="/blog"
+          className="rounded-2xl border border-border bg-card px-6 py-3 text-sm font-bold text-foreground hover:border-primary/30 transition-colors"
+        >
+          Blog
+        </Link>
+        <Link
+          to="/store"
+          className="rounded-2xl border border-border bg-card px-6 py-3 text-sm font-bold text-foreground hover:border-primary/30 transition-colors"
+        >
+          Store
+        </Link>
+      </nav>
+    </div>
+  );
+}

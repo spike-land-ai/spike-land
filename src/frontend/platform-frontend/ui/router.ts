@@ -6,6 +6,7 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import { RootLayout } from "./routes/__root";
+import { NotFoundPage } from "./routes/not-found";
 
 function withSuspense(load: () => Promise<{ [key: string]: React.ComponentType }>, exportName: string) {
   const LazyComponent = lazy(() =>
@@ -29,7 +30,7 @@ function withSuspense(load: () => Promise<{ [key: string]: React.ComponentType }
   };
 }
 
-const rootRoute = createRootRoute({ component: RootLayout });
+const rootRoute = createRootRoute({ component: RootLayout, notFoundComponent: NotFoundPage });
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,

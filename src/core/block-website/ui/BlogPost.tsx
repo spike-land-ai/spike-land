@@ -244,6 +244,8 @@ export function BlogPostView({ slug, linkComponent }: { slug: string; linkCompon
             <img
               src={post.heroImage}
               alt={post.title}
+              width={1200}
+              height={514}
               loading="eager"
               decoding="async"
               className="w-full aspect-[21/9] object-cover"
@@ -259,7 +261,7 @@ export function BlogPostView({ slug, linkComponent }: { slug: string; linkCompon
             </div>
             <div className="flex items-center gap-1.5">
               <Clock size={12} />
-              <span>{new Date(post.date).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+              <time dateTime={post.date}>{new Date(post.date).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })}</time>
             </div>
           </div>
           

@@ -1,7 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { useMcpTools, useMcpToolCall } from "../../src/hooks/useMcp";
 import { JsonSchemaForm } from "../../src/components/tools/JsonSchemaForm";
+
+const SITE_URL = "https://spike.land";
+
+function injectJsonLd(id: string, content: string) {
+  let el = document.getElementById(id) as HTMLScriptElement | null;
+  if (!el) {
+    el = document.createElement("script");
+    el.id = id;
+    el.type = "application/ld+json";
+    document.head.appendChild(el);
+  }
+  el.textContent = content;
+}
 
 export function ToolsCategoryPage() {
   const { toolName } = useParams({ strict: false }) as { toolName: string };
@@ -12,6 +25,22 @@ export function ToolsCategoryPage() {
   const [result, setResult] = useState<{ success: true; data: unknown } | { success: false; error: string } | null>(null);
 
   const tool = toolsData?.tools?.find((t) => t.name === toolName);
+
+  useEffect(() => {
+    if (!tool) return;
+    injectJsonLd(
+      "jsonld-breadcrumbs",
+      JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Tools", item: `${SITE_URL}/tools` },
+          { "@type": "ListItem", position: 3, name: tool.name, item: `${SITE_URL}/tools/${tool.name}` },
+        ],
+      }),
+    );
+  }, [tool]);
 
   const handleExecute = () => {
     executeTool.mutate(

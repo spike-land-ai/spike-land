@@ -5,6 +5,19 @@ import { ChatThread, type Message } from "../../components/ChatThread";
 import { type AppVersion, VersionHistory } from "../../components/VersionHistory";
 import { AppProductPage } from "../../components/AppProductPage";
 
+const SITE_URL = "https://spike.land";
+
+function injectJsonLd(id: string, content: string) {
+  let el = document.getElementById(id) as HTMLScriptElement | null;
+  if (!el) {
+    el = document.createElement("script");
+    el.id = id;
+    el.type = "application/ld+json";
+    document.head.appendChild(el);
+  }
+  el.textContent = content;
+}
+
 
 const McpTerminal = lazy(() =>
   import("../../../cli-ui/McpTerminal").then((m) => ({ default: m.McpTerminal })),
@@ -57,6 +70,23 @@ export function AppDetailPage() {
     window.addEventListener("change-tab", handleTabChange);
     return () => window.removeEventListener("change-tab", handleTabChange);
   }, [setActiveTab]);
+
+  useEffect(() => {
+    if (!appId) return;
+    const appName = appId.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+    injectJsonLd(
+      "jsonld-breadcrumbs",
+      JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Store", item: `${SITE_URL}/store` },
+          { "@type": "ListItem", position: 3, name: appName, item: `${SITE_URL}/apps/${appId}` },
+        ],
+      }),
+    );
+  }, [appId]);
 
   const handleSendMessage = useCallback(
     (content: string) => {

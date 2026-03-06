@@ -2,6 +2,19 @@ import { Link, useParams } from "@tanstack/react-router";
 import { apiUrl } from "../../../core-logic/api";
 import { useEffect, useState } from "react";
 
+const SITE_URL = "https://spike.land";
+
+function injectJsonLd(id: string, content: string) {
+  let el = document.getElementById(id) as HTMLScriptElement | null;
+  if (!el) {
+    el = document.createElement("script");
+    el.id = id;
+    el.type = "application/ld+json";
+    document.head.appendChild(el);
+  }
+  el.textContent = content;
+}
+
 interface DocDetail {
   slug: string;
   title: string;
@@ -31,6 +44,22 @@ export function DocPage() {
         setLoading(false);
       });
   }, [slug]);
+
+  useEffect(() => {
+    if (!doc) return;
+    injectJsonLd(
+      "jsonld-breadcrumbs",
+      JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Docs", item: `${SITE_URL}/docs` },
+          { "@type": "ListItem", position: 3, name: doc.title, item: `${SITE_URL}/docs/${slug}` },
+        ],
+      }),
+    );
+  }, [doc, slug]);
 
   if (loading) {
     return (

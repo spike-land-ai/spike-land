@@ -158,6 +158,7 @@ spa.get("/*", async (c) => {
             description: row.description,
             image: postImage,
             datePublished: row.date,
+            dateModified: row.updated_at ?? row.date,
             author: { "@type": "Person", name: row.author },
             publisher: { "@type": "Organization", name: "spike.land" },
             url: postUrl,

@@ -28,6 +28,8 @@ function CardImage({ post, className = "" }: { post: BlogMeta; className?: strin
         <img
           src={post.heroImage}
           alt={post.title}
+          width={800}
+          height={500}
           loading="lazy"
           decoding="async"
           className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110"

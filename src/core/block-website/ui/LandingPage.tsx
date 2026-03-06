@@ -73,7 +73,7 @@ export function LandingPage() {
                              dark:bg-white/5 dark:border-white/10 dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)] dark:backdrop-blur-[16px] dark:hover:border-primary/40 dark:hover:shadow-[0_20px_60px_rgba(0,0,0,0.5),0_0_30px_rgba(20,184,166,0.1)]"
                 >
                   <div className={cn("size-14 rounded-2xl bg-muted dark:bg-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform", feature.color)}>
-                    <feature.icon size={28} />
+                    <feature.icon size={28} aria-hidden="true" />
                   </div>
                   <h3 className="text-xl font-black mb-4 tracking-tight">{feature.title}</h3>
                   <p className="text-muted-foreground leading-relaxed font-medium text-sm">
@@ -89,7 +89,7 @@ export function LandingPage() {
                             dark:bg-white/5 dark:border-white/10 dark:backdrop-blur-[16px] dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
               <div className="flex items-center gap-4">
                 <div className="size-12 rounded-full bg-primary flex items-center justify-center text-primary-foreground glow-primary">
-                  <Zap size={20} fill="currentColor" />
+                  <Zap size={20} fill="currentColor" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="font-black text-foreground">Ready to start building?</p>
@@ -128,7 +128,7 @@ export function LandingPage() {
                 className="hidden sm:flex items-center gap-2 text-sm font-black uppercase tracking-widest text-primary hover:gap-4 transition-all"
               >
                 View Archive
-                <ArrowRight size={16} />
+                <ArrowRight size={16} aria-hidden="true" />
               </Link>
             </header>
 
@@ -141,7 +141,7 @@ export function LandingPage() {
                            bg-muted dark:bg-white/10 dark:border dark:border-white/10 dark:backdrop-blur-[16px]"
               >
                 View Archive
-                <ArrowRight size={16} />
+                <ArrowRight size={16} aria-hidden="true" />
               </Link>
             </div>
           </div>
