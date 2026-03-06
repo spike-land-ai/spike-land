@@ -21,10 +21,21 @@ binaryen/
 coverage/
 .claude/
 .bazdmeg/
-packages/my-spacetime-app/
 *.log
 out/
+
+# One-off scripts and debug artifacts
+fix-*.js
+fix-*.ts
+test-*.js
+test-*.ts
+parse-check.js
+transform-manifest.js
 generate-images.ts
+find-missing-images.ts
+update_mcp*.py
+coverage_output.txt
+incremental-coverage.json
 # Terraform
 .terraform/
 *.tfstate

@@ -186,15 +186,9 @@ function createHtmlResponseHeaders(): Headers {
 }
 
 async function handleHtmlResponse(session: ICodeSession) {
-  // Fetch index.html content
-  // const htmlResponse = await fetch("/index.html");
-  // if (!htmlResponse.ok) {
-  //   return new Response("Failed to fetch base HTML", { status: 500 });
-  // }
   const baseHtml = HTML;
 
   const { codeSpace, html, css } = session;
-  // Use fetched baseHtml instead of the imported variable
   const respText = baseHtml
     .replace("// IMPORTMAP", JSON.stringify(importMap))
     .replaceAll("${codeSpace}", codeSpace)

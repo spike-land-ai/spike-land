@@ -1,7 +1,9 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { useAnalytics } from "../hooks/useAnalytics";
 import { useToast } from "../components/Toast";
+import { usePricing } from "../hooks/usePricing";
 import { apiUrl } from "../../core-logic/api";
 import { UI_ANIMATIONS } from "@spike-land-ai/shared/constants";
 
@@ -398,6 +400,8 @@ const planColors: Record<Plan, string> = {
 
 function BillingTab() {
   const { showToast } = useToast();
+  const { trackEvent } = useAnalytics();
+  const { pricing } = usePricing();
   const search = useSearch({ strict: false }) as { success?: string; canceled?: string };
 
   const [billing, setBilling] = useState<BillingStatus | null>(null);
@@ -426,12 +430,13 @@ function BillingTab() {
     if (toastShownRef.current) return;
     if (search.success === "1") {
       toastShownRef.current = true;
+      trackEvent("checkout_success", { source: "stripe_redirect" });
       showToast("Subscription activated!", "success");
     } else if (search.canceled === "1") {
       toastShownRef.current = true;
       showToast("Checkout canceled", "info");
     }
-  }, [search.success, search.canceled, showToast]);
+  }, [search.success, search.canceled, showToast, trackEvent]);
 
   async function handleUpgrade(tier: "pro" | "business") {
     setUpgrading(true);
@@ -456,7 +461,7 @@ function BillingTab() {
   async function handleManageSubscription() {
     setManagingPortal(true);
     try {
-      const res = await fetch(apiUrl("/billing/cancel"), { method: "POST" });
+      const res = await fetch(apiUrl("/billing/portal"), { method: "POST" });
       if (!res.ok) {
         const err = (await res.json()) as { error?: string };
         showToast(err.error ?? "Failed to open billing portal", "error");
@@ -570,7 +575,7 @@ function BillingTab() {
               disabled={upgrading}
               className="flex-1 rounded-lg bg-blue-600 px-6 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              {upgrading ? "Redirecting..." : "Upgrade to Pro — $29/mo"}
+              {upgrading ? "Redirecting..." : `Upgrade to Pro — ${pricing.pro.monthly}/mo`}
             </button>
           )}
           {plan !== "business" && (
@@ -580,7 +585,7 @@ function BillingTab() {
               disabled={upgrading}
               className="flex-1 rounded-lg bg-purple-600 px-6 py-2.5 text-center text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
             >
-              {upgrading ? "Redirecting..." : "Upgrade to Business — $99/mo"}
+              {upgrading ? "Redirecting..." : `Upgrade to Business — ${pricing.business.monthly}/mo`}
             </button>
           )}
         </div>

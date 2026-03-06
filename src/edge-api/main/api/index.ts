@@ -26,6 +26,7 @@ import { credits } from "./routes/credits.js";
 import { creditMeterMiddleware } from "./middleware/credit-meter.js";
 import { requestIdMiddleware } from "./middleware/request-id.js";
 import { support } from "./routes/support.js";
+import { pricingApi } from "./routes/pricing-api.js";
 import { experiments } from "./routes/experiments.js";
 import { cachePurge } from "./routes/cache-purge.js";
 import { chat } from "./routes/chat.js";
@@ -186,6 +187,7 @@ app.onError((err, c) => {
 });
 
 // Mount routes (order matters — specific routes before SPA catch-all)
+app.route("/", pricingApi);
 app.route("/", health);
 app.route("/", r2);
 app.route("/", proxy);

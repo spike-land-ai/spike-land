@@ -398,7 +398,7 @@ function SupportWidget({ post }: { post: BlogPost }) {
       setBumpCount(data.count);
       setBumped(true);
       localStorage.setItem(`spike_bumped_${slug}`, "1");
-    } catch {}
+    } catch { /* best-effort — fistbump is non-critical */ }
   }, [bumped, slug]);
 
   const handleDonate = useCallback(async () => {
