@@ -5,6 +5,7 @@ import { glob } from "glob";
 import { parseArgs } from "node:util";
 import { execSync } from "node:child_process";
 import * as yaml from "yaml";
+import { Project, SyntaxKind, StringLiteral, NoSubstitutionTemplateLiteral } from "ts-morph";
 import {
   excludedDeps,
   categoryRules,
@@ -13,11 +14,6 @@ import {
   excludeGlobs,
   getDependencyGroupName,
 } from "./reorganize-config.js";
-
-// Multi-pattern regexes for parsing imports
-const staticImportRe = /\bimport\s+(?:type\s+)?(?:[a-zA-Z0-9_{},\s\*]+)\s+from\s+["']([^"'\n]+)["']/g;
-const sideEffectRe = /\bimport\s+["']([^"'\n]+)["']/g;
-const dynamicRe = /\bimport\(\s*["']([^"'\n]+)["']\s*\)/g;
 
 interface FileNode {
   absPath: string;
@@ -67,40 +63,46 @@ async function readPackagesYaml(): Promise<Record<string, ManifestPkg>> {
 
 // ─── PHASE 2: DISCOVERY ───────────────────────────────────────────────
 
-async function discoverFiles(): Promise<FileNode[]> {
+async function discoverFiles(project: Project): Promise<FileNode[]> {
   const root = path.resolve(process.cwd(), "src");
-  const files = await glob("**/*.{ts,tsx}", {
-    cwd: root,
-    ignore: excludeGlobs,
-    absolute: true,
-  });
-
   const nodes: FileNode[] = [];
-  for (const absPath of files) {
+  
+  for (const sourceFile of project.getSourceFiles()) {
+    const absPath = sourceFile.getFilePath();
+    if (!absPath.includes("/src/")) continue;
+    
     const relPath = path.relative(root, absPath);
-    const packageName = relPath.split(path.sep)[0]; // assumed standard
-
-    const content = await fs.readFile(absPath, "utf-8");
+    const packageName = relPath.split(path.sep)[0];
+    
     const externalDeps = new Set<string>();
     const relativeImports = new Set<string>();
+    
+    const imports = sourceFile.getImportDeclarations();
+    const exports = sourceFile.getExportDeclarations();
+    const dynamicImports = sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression)
+      .filter(c => c.getExpression().getText() === "import");
 
-    const matches = [
-      ...content.matchAll(staticImportRe),
-      ...content.matchAll(sideEffectRe),
-      ...content.matchAll(dynamicRe),
-    ];
-
-    for (const match of matches) {
-      const importPath = match[1];
+    const specs = [
+        ...imports.map(i => i.getModuleSpecifierValue()).filter(Boolean),
+        ...exports.map(e => e.getModuleSpecifierValue()).filter(Boolean),
+        ...dynamicImports.map(d => {
+            const arg = d.getArguments()[0];
+            if (arg && (arg.getKind() === SyntaxKind.StringLiteral || arg.getKind() === SyntaxKind.NoSubstitutionTemplateLiteral)) {
+                return (arg as StringLiteral | NoSubstitutionTemplateLiteral).getLiteralText();
+            }
+            return null;
+        }).filter(Boolean)
+    ] as string[];
+    
+    for (const importPath of specs) {
       if (importPath.startsWith("http") || importPath.endsWith(".css") || importPath.endsWith(".json") || importPath.includes("${")) continue;
-
+      
       if (importPath.startsWith(".") || importPath.startsWith("/")) {
-        // Resolve relative to absolute
         const dir = path.dirname(absPath);
         const resolved = path.resolve(dir, importPath);
-        relativeImports.add(resolved); // Note: we don't resolve exact extension here yet
+        relativeImports.add(resolved);
       } else if (importPath.startsWith("@/")) {
-        // Path alias logic could go here, treating as internal
+        // Alias, treat as internal
       } else {
         const rootPkg = extractRootPackage(importPath);
         if (rootPkg && !excludedDeps.has(rootPkg)) {
@@ -108,7 +110,7 @@ async function discoverFiles(): Promise<FileNode[]> {
         }
       }
     }
-
+    
     nodes.push({ absPath, relPath, packageName, externalDeps, relativeImports });
   }
   return nodes;
@@ -117,14 +119,11 @@ async function discoverFiles(): Promise<FileNode[]> {
 // ─── PHASE 3: GROUPING ────────────────────────────────────────────────
 
 function resolveZeroImportFiles(nodes: FileNode[]) {
-  // Build reverse map
   const reverseMap = new Map<string, FileNode[]>();
-  // Approximate resolution matching
   const nodesByAbsNoExt = new Map<string, FileNode>();
   for (const n of nodes) {
     const noExt = n.absPath.replace(/\.(tsx|ts|js|jsx)$/, "");
     nodesByAbsNoExt.set(noExt, n);
-    // Also store index variants
     if (noExt.endsWith("/index")) {
       nodesByAbsNoExt.set(noExt.slice(0, -6), n);
     }
@@ -146,7 +145,6 @@ function resolveZeroImportFiles(nodes: FileNode[]) {
     }
   }
 
-  // Iterate to propagate deps
   for (const n of nodes) {
     n.resolvedDeps = new Set(n.externalDeps);
   }
@@ -184,7 +182,6 @@ function flattenFilename(relPath: string, packageName: string): string {
   const fileName = parts.pop()!;
   
   if (fileName === "index.ts" || fileName === "index.tsx") {
-    // Prefix with parent dir unless parent is the package root
     if (parts.length > 1) {
       const parent = parts[parts.length - 1];
       return `${parent}-${fileName}`;
@@ -195,65 +192,218 @@ function flattenFilename(relPath: string, packageName: string): string {
 
 // ─── EXECUTION ────────────────────────────────────────────────────────
 
-function rewriteImports(content: string, oldPath: string, newPath: string, pathMapping: Map<string, string>): string {
-  const newDir = path.dirname(newPath);
-  
-  return content.replace(staticImportRe, (match, p1) => {
-    return rewriteSingleImport(match, p1, oldPath, newDir, pathMapping);
-  })
-  .replace(sideEffectRe, (match, p1) => {
-    return rewriteSingleImport(match, p1, oldPath, newDir, pathMapping);
-  })
-  .replace(dynamicRe, (match, p1) => {
-    return rewriteSingleImport(match, p1, oldPath, newDir, pathMapping);
-  });
-}
-
-function rewriteSingleImport(match: string, p1: string, oldPath: string, newDir: string, pathMapping: Map<string, string>): string {
+function rewriteSingleImport(p1: string, oldPath: string, newDir: string, pathMapping: Map<string, string>): string {
   if (p1.startsWith("http") || (!p1.startsWith(".") && !p1.startsWith("/") && !p1.startsWith("@/")) || p1.includes("${")) {
-    return match;
+    return p1;
   }
   
-  // Note: path aliases (@/) would need special handling if their resolution changes
   if (p1.startsWith("@/")) {
-    return match; // assuming aliases still resolve to src root
+    return p1;
   }
 
   const oldDir = path.dirname(oldPath);
   let resolvedAbs = path.resolve(oldDir, p1);
   
-  // Try to find the mapped file
   let mapped = pathMapping.get(resolvedAbs);
   if (!mapped) {
-    // Try adding extension
     if (pathMapping.has(resolvedAbs + ".ts")) mapped = pathMapping.get(resolvedAbs + ".ts");
     else if (pathMapping.has(resolvedAbs + ".tsx")) mapped = pathMapping.get(resolvedAbs + ".tsx");
     else if (pathMapping.has(resolvedAbs.replace(/\.js$/, ".ts"))) mapped = pathMapping.get(resolvedAbs.replace(/\.js$/, ".ts"));
     else if (pathMapping.has(resolvedAbs.replace(/\.js$/, ".tsx"))) mapped = pathMapping.get(resolvedAbs.replace(/\.js$/, ".tsx"));
-    
-    // Try index
     else if (pathMapping.has(resolvedAbs + "/index.ts")) mapped = pathMapping.get(resolvedAbs + "/index.ts");
+    else if (pathMapping.has(resolvedAbs + "/index.tsx")) mapped = pathMapping.get(resolvedAbs + "/index.tsx");
   }
 
   if (mapped) {
     let newRel = path.relative(newDir, mapped);
     if (!newRel.startsWith(".")) newRel = "./" + newRel;
-    // Restore .js convention if used
+    
     if (p1.endsWith(".js")) {
       newRel = newRel.replace(/\.tsx?$/, ".js");
     } else {
-       // if we mapped to an index, and original didn't specify index
-       if (mapped.endsWith("index.ts") && !p1.endsWith("index.ts") && !p1.endsWith("index.js")) {
+       if ((mapped.endsWith("index.ts") || mapped.endsWith("index.tsx")) && !p1.endsWith("index.ts") && !p1.endsWith("index.tsx") && !p1.endsWith("index.js")) {
           newRel = newRel.replace(/\/index\.tsx?$/, "");
           if (newRel === "") newRel = ".";
        } else {
           newRel = newRel.replace(/\.tsx?$/, "");
        }
     }
-    return match.replace(p1, newRel);
+    return newRel;
   }
   
-  return match;
+  return p1;
+}
+
+function rewriteImports(project: Project, oldPath: string, newPath: string, pathMapping: Map<string, string>): string {
+  const sourceFile = project.getSourceFileOrThrow(oldPath);
+  const newDir = path.dirname(newPath);
+  
+  const processSpecifier = (spec: string) => {
+    return rewriteSingleImport(spec, oldPath, newDir, pathMapping);
+  };
+  
+  for (const imp of sourceFile.getImportDeclarations()) {
+     const spec = imp.getModuleSpecifierValue();
+     if (spec) {
+       const newSpec = processSpecifier(spec);
+       if (newSpec !== spec) imp.setModuleSpecifier(newSpec);
+     }
+  }
+  for (const exp of sourceFile.getExportDeclarations()) {
+     if (exp.hasModuleSpecifier()) {
+       const spec = exp.getModuleSpecifierValue();
+       if (spec) {
+         const newSpec = processSpecifier(spec);
+         if (newSpec !== spec) exp.setModuleSpecifier(newSpec);
+       }
+     }
+  }
+  for (const call of sourceFile.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+    if (call.getExpression().getText() === "import") {
+      const arg = call.getArguments()[0];
+      if (arg && (arg.getKind() === SyntaxKind.StringLiteral || arg.getKind() === SyntaxKind.NoSubstitutionTemplateLiteral)) {
+         const spec = (arg as StringLiteral | NoSubstitutionTemplateLiteral).getLiteralText();
+         const newSpec = processSpecifier(spec);
+         if (newSpec !== spec) {
+           call.removeArgument(0);
+           call.insertArgument(0, `"${newSpec}"`);
+         }
+      }
+    }
+  }
+  
+  return sourceFile.getFullText();
+}
+
+async function updateTsConfigPaths(pathMapping: Map<string, string>) {
+  const tsConfigPath = path.resolve(process.cwd(), "tsconfig.json");
+  const content = await fs.readFile(tsConfigPath, "utf-8");
+  const tsconfig = JSON.parse(content);
+  
+  if (!tsconfig.compilerOptions || !tsconfig.compilerOptions.paths) return;
+  
+  let changed = false;
+  for (const [alias, locations] of Object.entries<string[]>(tsconfig.compilerOptions.paths)) {
+    const newLocs = locations.map(loc => {
+      if (loc.endsWith("/*")) {
+         const baseLoc = loc.slice(0, -2); // remove /*
+         const absBase = path.resolve(process.cwd(), baseLoc);
+         
+         for (const [oldAbs, newAbs] of pathMapping.entries()) {
+             if (oldAbs.startsWith(absBase + path.sep) || oldAbs.startsWith(absBase + "/")) {
+                 const oldRel = oldAbs.slice(absBase.length + 1);
+                 const newBase = newAbs.slice(0, newAbs.length - oldRel.length - 1);
+                 const relativeToRoot = path.relative(process.cwd(), newBase);
+                 return "./" + relativeToRoot.replace("src-reorganized", "src") + "/*";
+             }
+         }
+         return loc;
+      } else {
+         const absLoc = path.resolve(process.cwd(), loc);
+         let mapped = pathMapping.get(absLoc);
+         if (!mapped) mapped = pathMapping.get(absLoc + ".ts");
+         if (!mapped) mapped = pathMapping.get(absLoc + ".tsx");
+         if (!mapped) mapped = pathMapping.get(absLoc.replace(/\.js$/, ".ts"));
+         if (!mapped) mapped = pathMapping.get(absLoc + "/index.ts");
+         
+         if (mapped) {
+             const relativeToRoot = path.relative(process.cwd(), mapped);
+             return "./" + relativeToRoot.replace("src-reorganized", "src");
+         }
+      }
+      return loc;
+    });
+    
+    if (JSON.stringify(newLocs) !== JSON.stringify(locations)) {
+      tsconfig.compilerOptions.paths[alias] = newLocs;
+      changed = true;
+    }
+  }
+  
+  if (changed) {
+    await fs.writeFile(tsConfigPath, JSON.stringify(tsconfig, null, 2) + "\n");
+    console.log("Updated tsconfig.json paths");
+  }
+}
+
+async function updatePackagesConfigs(pathMapping: Map<string, string>) {
+  const rootDir = process.cwd();
+  const packagesDir = path.join(rootDir, "packages");
+  const entries = await fs.readdir(packagesDir, { withFileTypes: true }).catch(() => []);
+  
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const pkgPath = path.join(packagesDir, entry.name);
+    
+    // package.json
+    const pkgJsonPath = path.join(pkgPath, "package.json");
+    try {
+      const content = await fs.readFile(pkgJsonPath, "utf-8");
+      const pkg = JSON.parse(content);
+      let changed = false;
+      
+      const updatePath = (p: string) => {
+         if (!p.includes("src/")) return p;
+         const absLoc = path.resolve(pkgPath, p);
+         for (const [oldAbs, newAbs] of pathMapping.entries()) {
+             if (absLoc === oldAbs || absLoc === oldAbs.replace(/\.ts$/, ".js") || absLoc.replace(/\.js$/, ".ts") === oldAbs || absLoc === oldAbs.replace(/\.ts$/, ".d.ts")) {
+                 const rel = path.relative(pkgPath, newAbs).replace("src-reorganized", "src");
+                 let newP = rel.startsWith(".") ? rel : "./" + rel;
+                 if (p.endsWith(".js") && newP.endsWith(".ts")) newP = newP.replace(/\.ts$/, ".js");
+                 if (p.endsWith(".d.ts") && newP.endsWith(".ts")) newP = newP.replace(/\.ts$/, ".d.ts");
+                 return newP;
+             }
+         }
+         return p;
+      };
+      
+      if (pkg.main) { const n = updatePath(pkg.main); if (n !== pkg.main) { pkg.main = n; changed = true; } }
+      if (pkg.types) { const n = updatePath(pkg.types); if (n !== pkg.types) { pkg.types = n; changed = true; } }
+      if (pkg.exports) {
+         const traverse = (obj: any) => {
+            for (const key in obj) {
+               if (typeof obj[key] === "string") {
+                  const n = updatePath(obj[key]);
+                  if (n !== obj[key]) { obj[key] = n; changed = true; }
+               } else if (typeof obj[key] === "object") {
+                  traverse(obj[key]);
+               }
+            }
+         };
+         traverse(pkg.exports);
+      }
+      
+      if (changed) {
+         await fs.writeFile(pkgJsonPath, JSON.stringify(pkg, null, 2) + "\n");
+         console.log(`Updated ${path.relative(rootDir, pkgJsonPath)}`);
+      }
+    } catch (e) {}
+    
+    // wrangler.toml
+    const wranglerPath = path.join(pkgPath, "wrangler.toml");
+    try {
+      let content = await fs.readFile(wranglerPath, "utf-8");
+      let changed = false;
+      
+      content = content.replace(/(?:main|entry)\s*=\s*["']([^"']+)["']/g, (match, p1) => {
+          if (p1.includes("src/")) {
+             const absLoc = path.resolve(pkgPath, p1);
+             for (const [oldAbs, newAbs] of pathMapping.entries()) {
+                 if (absLoc === oldAbs || absLoc === oldAbs.replace(/\.ts$/, ".js") || absLoc.replace(/\.js$/, ".ts") === oldAbs) {
+                     const rel = path.relative(pkgPath, newAbs).replace("src-reorganized", "src");
+                     changed = true;
+                     return match.replace(p1, rel.startsWith(".") ? rel : "./" + rel);
+                 }
+             }
+          }
+          return match;
+      });
+      if (changed) {
+         await fs.writeFile(wranglerPath, content);
+         console.log(`Updated ${path.relative(rootDir, wranglerPath)}`);
+      }
+    } catch (e) {}
+  }
 }
 
 async function updatePackageJsonWorkspaces(outputDir: string) {
@@ -271,6 +421,36 @@ async function updatePackageJsonWorkspaces(outputDir: string) {
     }
   } catch (e) {
     console.error("Failed to update package.json workspaces", e);
+  }
+}
+
+async function generateManifests(plans: MovePlan[], outputDir: string) {
+  const appMap = new Map<string, { files: string[], deps: Set<string> }>();
+  
+  for (const p of plans) {
+    const parts = p.targetDir.split(path.sep);
+    const appFolder = parts.slice(0, 2).join(path.sep);
+    
+    if (!appMap.has(appFolder)) {
+      appMap.set(appFolder, { files: [], deps: new Set() });
+    }
+    const appData = appMap.get(appFolder)!;
+    appData.files.push(path.relative(appFolder, p.targetRelPath));
+    for (const d of p.fileNode.externalDeps) {
+      appData.deps.add(d);
+    }
+  }
+  
+  for (const [appFolder, data] of appMap.entries()) {
+    const manifestPath = path.resolve(outputDir, appFolder, "manifest.json");
+    const manifest = {
+       name: path.basename(appFolder),
+       category: path.dirname(appFolder),
+       dependencies: Array.from(data.deps).sort(),
+       files: data.files.sort()
+    };
+    await fs.mkdir(path.dirname(manifestPath), { recursive: true });
+    await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf-8");
   }
 }
 
@@ -298,7 +478,19 @@ async function main() {
   }
 
   const packagesYaml = await readPackagesYaml();
-  const nodes = await discoverFiles();
+  
+  const project = new Project({
+    tsConfigFilePath: path.resolve(process.cwd(), "tsconfig.json"),
+    skipAddingFilesFromTsConfig: true,
+  });
+  const files = await glob("**/*.{ts,tsx}", {
+    cwd: srcDir,
+    ignore: excludeGlobs,
+    absolute: true,
+  });
+  project.addSourceFilesAtPaths(files);
+
+  const nodes = await discoverFiles(project);
   resolveZeroImportFiles(nodes);
 
   const plans: MovePlan[] = [];
@@ -318,13 +510,11 @@ async function main() {
     const appName = resolveAppName(n.packageName);
     const targetDir = path.join(category, appName, depGroupName);
     
-    // Handle tests directory
-    let isTest = n.relPath.includes("__tests__") || n.absPath.endsWith(".test.ts") || n.absPath.endsWith(".test.tsx");
-    const finalDir = isTest ? path.join(targetDir, "__tests__") : targetDir;
+    // Colocate tests, do not use __tests__ directory
+    const finalDir = targetDir;
     
     let fileName = flattenFilename(n.relPath, n.packageName);
     
-    // Collision detection
     const fullTargetDir = path.join(outputDir, finalDir);
     const targetPath = path.join(fullTargetDir, fileName);
     let disambigName = fileName;
@@ -360,7 +550,6 @@ async function main() {
     return;
   }
 
-  // Execution
   console.log(`\nApplying changes to ${values.output}...`);
   await fs.rm(outputDir, { recursive: true, force: true });
   await fs.mkdir(outputDir, { recursive: true });
@@ -375,12 +564,10 @@ async function main() {
     const absNewPath = path.resolve(outputDir, p.targetRelPath);
     await fs.mkdir(path.dirname(absNewPath), { recursive: true });
     
-    const content = await fs.readFile(p.fileNode.absPath, "utf-8");
-    const newContent = rewriteImports(content, p.fileNode.absPath, absNewPath, pathMapping);
+    const newContent = rewriteImports(project, p.fileNode.absPath, absNewPath, pathMapping);
     await fs.writeFile(absNewPath, newContent, "utf-8");
   }
 
-  // Generate barrels (naive implementation for intermediate dirs)
   const dirSet = new Set<string>();
   for (const p of plans) {
     let d = path.dirname(p.targetRelPath);
@@ -390,35 +577,59 @@ async function main() {
     }
   }
   
-  // Sort descending by length to do bottom-up
   const sortedDirs = Array.from(dirSet).sort((a, b) => b.length - a.length);
+  const barrelProject = new Project({ useInMemoryFileSystem: true });
+  
   for (const d of sortedDirs) {
-    // Skip test dirs
-    if (d.includes("__tests__")) continue;
+    if (d.includes("__tests__") || d.endsWith(".test") || path.basename(d) === "__tests__") continue;
     
     const absD = path.resolve(outputDir, d);
     const entries = await fs.readdir(absD, { withFileTypes: true });
     let barrelContent = "";
+    
     for (const entry of entries) {
       if (entry.name === "index.ts" || entry.name === "index.tsx") continue;
-      const baseName = entry.isDirectory() ? entry.name : path.basename(entry.name, path.extname(entry.name));
-      // In a real implementation we'd check if it's exportable, etc. 
-      // This is a naive barrel.
-      barrelContent += `export * from "./${baseName}";\n`;
+      if (entry.name.startsWith("_")) continue;
+      if (entry.name === "utils.ts" || entry.name === "utils.tsx") continue;
+      if (entry.name.endsWith(".test.ts") || entry.name.endsWith(".test.tsx") || entry.name.includes(".spec.")) continue;
+      
+      const filePath = path.join(absD, entry.name);
+      
+      if (entry.isDirectory()) {
+         const children = await fs.readdir(filePath).catch(() => []);
+         if (children.some(f => f === "index.ts" || f === "index.tsx")) {
+           barrelContent += `export * from "./${entry.name}";\n`;
+         }
+      } else {
+         if (!entry.name.endsWith(".ts") && !entry.name.endsWith(".tsx")) continue;
+         
+         const fileContent = await fs.readFile(filePath, "utf-8");
+         const sf = barrelProject.createSourceFile(filePath, fileContent, { overwrite: true });
+         
+         const exports = sf.getExportDeclarations();
+         const exportedDecs = sf.getExportedDeclarations();
+         
+         if (exports.length > 0 || exportedDecs.size > 0) {
+           const baseName = path.basename(entry.name, path.extname(entry.name));
+           barrelContent += `export * from "./${baseName}";\n`;
+         }
+      }
     }
+    
     if (barrelContent) {
        await fs.writeFile(path.join(absD, "index.ts"), barrelContent, "utf-8");
     }
   }
 
+  await updateTsConfigPaths(pathMapping);
+  await updatePackagesConfigs(pathMapping);
   await updatePackageJsonWorkspaces(outputDir);
+  await generateManifests(plans, outputDir);
 
   if (values.verify) {
     console.log("\nVerifying...");
     try {
       console.log("Running TSC...");
-      // This will fail if tsconfig doesn't include the new dir yet, 
-      // but for completeness we include the requested command.
       execSync("npx tsc --noEmit", { stdio: "inherit" });
       console.log("Running ESLint...");
       execSync("npx eslint " + values.output, { stdio: "inherit" });
