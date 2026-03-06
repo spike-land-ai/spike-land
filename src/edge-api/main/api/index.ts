@@ -112,7 +112,10 @@ app.use("*", async (c, next) => {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://static.cloudflareinsights.com https://esm.spike.land",
+      // 'strict-dynamic' causes modern browsers to ignore 'unsafe-inline', hardening against XSS.
+      // 'unsafe-inline' is retained for backward compatibility with older browsers and Vite dev.
+      // TODO: migrate to per-request nonces to drop 'unsafe-inline' entirely.
+      "script-src 'self' 'strict-dynamic' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://static.cloudflareinsights.com https://esm.spike.land",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://esm.spike.land",
       "img-src 'self' https://*.r2.dev https://*.r2.cloudflarestorage.com https://avatars.githubusercontent.com https://*.googleusercontent.com data: blob:",
       "font-src 'self' https://fonts.gstatic.com https://esm.spike.land data:",
@@ -141,8 +144,9 @@ app.delete("/r2/*", authMiddleware);
 // Auth middleware for WhatsApp linking API (not webhook — that uses HMAC)
 app.use("/whatsapp/link/*", authMiddleware);
 
-// Auth middleware for checkout
+// Auth middleware for checkout (covers /api/checkout and /api/checkout/*)
 app.use("/api/checkout", authMiddleware);
+app.use("/api/checkout/*", authMiddleware);
 
 // Auth middleware for credits routes
 app.use("/api/credits/*", authMiddleware);
@@ -270,7 +274,7 @@ app.get("/api/store/tools", async (c) => {
 // --- MCP Gateway ---
 
 // Helper: proxy request to MCP service binding
-async function mcpProxy(c: import("hono").Context<{ Bindings: Env }>) {
+async function mcpProxy(c: import("hono").Context<{ Bindings: Env; Variables: Variables }>) {
   const url = new URL(c.req.url);
   url.hostname = "mcp.spike.land";
   url.port = "";

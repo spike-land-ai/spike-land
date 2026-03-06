@@ -100,6 +100,11 @@ export default defineConfig(() => ({
         changeOrigin: true,
         secure: true,
       },
+      "/transpile": {
+        target: "https://js.spike.land",
+        changeOrigin: true,
+        secure: true,
+      },
     },
   },
   define: {

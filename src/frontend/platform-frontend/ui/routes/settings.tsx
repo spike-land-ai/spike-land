@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useAnalytics } from "../hooks/useAnalytics";
 import { useToast } from "../components/Toast";
 import { usePricing } from "../hooks/usePricing";
+import { AuthGuard } from "../components/AuthGuard";
 import { apiUrl } from "../../core-logic/api";
 import { UI_ANIMATIONS } from "@spike-land-ai/shared/constants";
 
@@ -39,16 +40,17 @@ function ProfileTab() {
   const [error, setError] = useState<string | null>(null);
 
   async function handleSave() {
+    const name = nameRef.current?.value.trim() ?? "";
+    const email = emailRef.current?.value.trim() ?? "";
+    if (!name) { setError("Display name is required."); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("A valid email is required."); return; }
     setSaving(true);
     setError(null);
     try {
       const res = await fetch(apiUrl("/user/profile"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: nameRef.current?.value,
-          email: emailRef.current?.value,
-        }),
+        body: JSON.stringify({ name, email }),
       });
       if (!res.ok) throw new Error(`Failed to save: ${res.status}`);
       setSaved(true);
@@ -105,18 +107,37 @@ function ProfileTab() {
 
 // ---------- WhatsApp Tab ----------
 
+const OTP_TTL_SECONDS = 300;
+
 function WhatsAppTab() {
   const [linked, setLinked] = useState(false);
   const [phone] = useState("+1 *** *** 4291");
   const [otp, setOtp] = useState<string | null>(null);
+  const [otpSecondsLeft, setOtpSecondsLeft] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!otp) return;
+    setOtpSecondsLeft(OTP_TTL_SECONDS);
+    const interval = setInterval(() => {
+      setOtpSecondsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(interval);
+          setOtp(null);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [otp]);
 
   async function handleLink() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/whatsapp/link/initiate", { method: "POST" });
+      const res = await fetch(apiUrl("/whatsapp/link/initiate"), { method: "POST" });
       if (!res.ok) throw new Error(`Request failed: ${res.status}`);
       const data = await res.json() as { otp: string };
       setOtp(data.otp);
@@ -131,7 +152,7 @@ function WhatsAppTab() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/whatsapp/link", { method: "DELETE" });
+      const res = await fetch(apiUrl("/whatsapp/link"), { method: "DELETE" });
       if (!res.ok) throw new Error(`Request failed: ${res.status}`);
       setLinked(false);
       setOtp(null);
@@ -166,7 +187,12 @@ function WhatsAppTab() {
 
       {otp && (
         <div className="rounded-lg border border-border bg-muted p-4">
-          <p className="mb-1 text-sm font-medium text-foreground">Your OTP Code</p>
+          <div className="mb-1 flex items-center justify-between">
+            <p className="text-sm font-medium text-foreground">Your OTP Code</p>
+            <span className="text-xs text-muted-foreground">
+              Expires in {Math.floor(otpSecondsLeft / 60)}:{String(otpSecondsLeft % 60).padStart(2, "0")}
+            </span>
+          </div>
           <p className="font-mono text-2xl tracking-widest text-primary">{otp}</p>
           <p className="mt-2 text-xs text-muted-foreground">
             Text this code to the spike.land bot on WhatsApp to complete linking.
@@ -218,7 +244,7 @@ function ApiKeysTab() {
         const res = await fetch(apiUrl("/keys"));
         if (!res.ok) return;
         const data = await res.json() as { keys: ApiKey[] };
-        setKeys(data.keys);
+        setKeys(data.keys.map((k) => ({ ...k, key: "****" })));
       } catch {
         // silently ignore
       } finally {
@@ -236,7 +262,7 @@ function ApiKeysTab() {
       const res = await fetch(apiUrl("/keys"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ provider: selectedProvider, encryptedKey: newKeyValue }),
+        body: JSON.stringify({ provider: selectedProvider, apiKey: newKeyValue }),
       });
       if (!res.ok) throw new Error(`Failed to save: ${res.status}`);
       const data = await res.json() as { id: string; provider: string; createdAt: string };
@@ -270,15 +296,16 @@ function ApiKeysTab() {
 
   async function handleDelete(id: string) {
     try {
-      await fetch(apiUrl(`/keys/${id}`), { method: "DELETE" });
+      const res = await fetch(apiUrl(`/keys/${id}`), { method: "DELETE" });
+      if (!res.ok) throw new Error(`Failed to delete: ${res.status}`);
       setKeys((prev) => prev.filter((k) => k.id !== id));
       setTestResults((prev) => {
         const next = { ...prev };
         delete next[id];
         return next;
       });
-    } catch {
-      // silently ignore
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete key");
     }
   }
 
@@ -713,34 +740,45 @@ export function SettingsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+    <AuthGuard>
+      <div className="mx-auto max-w-3xl space-y-6">
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
 
-      {/* Tab bar */}
-      <div className="flex gap-1 border-b border-border overflow-x-auto">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setTab(tab.id)}
-            className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition ${
-              activeTab === tab.id
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+        {/* Tab bar */}
+        <div role="tablist" aria-label="Settings sections" className="flex gap-1 border-b border-border overflow-x-auto">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={`settings-panel-${tab.id}`}
+              id={`settings-tab-${tab.id}`}
+              onClick={() => setTab(tab.id)}
+              className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition ${
+                activeTab === tab.id
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-      {/* Tab content */}
-      <div className="rounded-2xl border border-border bg-card dark:glass-card p-6 shadow-sm">
-        {activeTab === "profile" && <ProfileTab />}
-        {activeTab === "whatsapp" && <WhatsAppTab />}
-        {activeTab === "keys" && <ApiKeysTab />}
-        {activeTab === "billing" && <BillingTab />}
-        {activeTab === "access" && <AccessTab />}
+        {/* Tab content */}
+        <div
+          role="tabpanel"
+          id={`settings-panel-${activeTab}`}
+          aria-labelledby={`settings-tab-${activeTab}`}
+          className="rounded-2xl border border-border bg-card dark:glass-card p-6 shadow-sm"
+        >
+          {activeTab === "profile" && <ProfileTab />}
+          {activeTab === "whatsapp" && <WhatsAppTab />}
+          {activeTab === "keys" && <ApiKeysTab />}
+          {activeTab === "billing" && <BillingTab />}
+          {activeTab === "access" && <AccessTab />}
+        </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }

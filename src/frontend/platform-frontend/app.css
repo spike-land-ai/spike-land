@@ -81,6 +81,7 @@
   body {
     -webkit-font-smoothing: antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    background-color: var(--bg);
   }
 
   /* Fluid typography map using clamp

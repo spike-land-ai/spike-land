@@ -66,7 +66,7 @@ export function ToolsCategoryPage() {
         <h2 className="text-lg font-bold">Tool Not Found</h2>
         <p className="mt-2">The tool "{toolName}" does not exist in the current MCP registry.</p>
         <Link to="/tools" className="mt-4 inline-block text-destructive hover:underline">
-          &larr; Back to Tools
+          <span aria-hidden="true">&larr;</span> Back to Tools
         </Link>
       </div>
     );

@@ -58,7 +58,7 @@ export const REGIONAL_PRICES: Record<string, RegionalPriceSet> = {
 };
 
 // Currencies where fraction digits should be 0
-const ZERO_DECIMAL_CURRENCIES = new Set(["HUF", "JPY", "KRW", "TWD", "CZK"]);
+const ZERO_DECIMAL_CURRENCIES = new Set(["HUF", "JPY", "KRW", "TWD"]);
 
 export function formatPrice(amount: number, currency: string): string {
   return new Intl.NumberFormat("en", {

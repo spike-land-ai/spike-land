@@ -117,7 +117,7 @@ export function DocPage() {
       {/* Back link */}
       <div className="pt-8 border-t border-border">
         <Link to="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-          &larr; Back to Documentation
+          <span aria-hidden="true">&larr;</span> Back to Documentation
         </Link>
       </div>
     </div>

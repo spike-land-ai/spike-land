@@ -53,7 +53,7 @@ export function AppFooter() {
           <div className="space-y-6">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">Platform</p>
             <ul className="space-y-3 text-sm font-medium">
-              <li><Link to="/tools" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">Tools <span className="text-[10px] bg-primary/10 px-1 rounded text-primary">New</span></Link></li>
+              <li><Link to="/tools" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">Tools <span className="text-xs bg-primary/10 px-1 rounded text-primary">New</span></Link></li>
               <li><Link to="/pricing" className="text-muted-foreground hover:text-primary transition-colors">Pricing</Link></li>
               <li><Link to="/store" className="text-muted-foreground hover:text-primary transition-colors">Store</Link></li>
               <li><Link to="/apps" className="text-muted-foreground hover:text-primary transition-colors">Registry</Link></li>
@@ -82,10 +82,10 @@ export function AppFooter() {
 
         <div className="mt-20 pt-8 border-t border-border dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-1">
-            <p className="text-[11px] font-bold text-muted-foreground/60 tracking-tight">
+            <p className="text-xs font-bold text-muted-foreground/60 tracking-tight">
               &copy; {currentYear} spike.land. Built with passion on Cloudflare Workers.
             </p>
-            <p className="text-[10px] text-muted-foreground/40">
+            <p className="text-xs text-muted-foreground/40">
               Handcrafted in Europe. Global reach via Edge Computing.
             </p>
           </div>
@@ -95,7 +95,7 @@ export function AppFooter() {
               href="https://github.com/spike-land-ai/spike-land-ai/releases"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[11px] font-bold text-muted-foreground hover:text-primary transition-all flex items-center gap-1.5 bg-muted dark:bg-white/5 border border-border dark:border-white/10 px-3 py-1.5 rounded-full"
+              className="text-xs font-bold text-muted-foreground hover:text-primary transition-all flex items-center gap-1.5 bg-muted dark:bg-white/5 border border-border dark:border-white/10 px-3 py-1.5 rounded-full"
             >
               <ExternalLink className="size-3" />
               Changelog
@@ -105,7 +105,7 @@ export function AppFooter() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success/40 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
               </span>
-              <span className="text-[11px] font-bold text-success dark:text-success uppercase tracking-tighter">All Systems Live</span>
+              <span className="text-xs font-bold text-success dark:text-success uppercase tracking-tighter">All Systems Live</span>
             </div>
           </div>
         </div>

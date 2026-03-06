@@ -28,8 +28,8 @@ const ROUTE_META: Record<string, { title: string; description: string; ogImage?:
     description: "Browse 80+ MCP tools on spike.land. Find tools for code review, image generation, data analysis, and more.",
   },
   "/apps": {
-    title: "MCP Tools - spike.land",
-    description: "Browse and interact with Model Context Protocol tools on spike.land. Connect AI agents to real-world data and actions.",
+    title: "Apps - spike.land",
+    description: "Browse and interact with AI-powered applications on spike.land. Connect AI agents to real-world data and actions.",
   },
   "/store": {
     title: "App Store - spike.land",
@@ -282,7 +282,7 @@ export function RootLayout() {
           <div className="flex flex-1 items-center justify-between">
             <div className="flex items-center gap-8">
               <Link to="/" className="text-xl font-bold">spike.land</Link>
-              <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
+              <nav className="hidden lg:flex items-center gap-6" aria-label="Main navigation">
                 {NAV_LINKS.map(({ to, label }) => (
                   <Link
                     key={to}
@@ -297,7 +297,7 @@ export function RootLayout() {
               </nav>
               <button
                 type="button"
-                className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/50 dark:bg-white/5 border border-border rounded-md hover:bg-muted hover:text-foreground transition-all duration-200 active:scale-[0.98]"
+                className="hidden lg:flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/50 dark:bg-white/5 border border-border rounded-md hover:bg-muted hover:text-foreground transition-all duration-200 active:scale-[0.98]"
                 aria-label="Search site"
                 onClick={() => {
                   setSearchToast(true);
@@ -316,7 +316,7 @@ export function RootLayout() {
               {showGlobalChat && (
                 <button
                   onClick={() => setChatOpen((v) => !v)}
-                  className="rounded-lg p-1.5 transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-muted dark:hover:bg-white/10"
+                  className="rounded-lg p-2.5 transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-muted dark:hover:bg-white/10"
                   aria-label={chatOpen ? "Close chat" : "Open chat"}
                 >
                   <MessageCircle className="size-4" />
@@ -326,7 +326,7 @@ export function RootLayout() {
               {/* Mobile hamburger */}
               <button
                 type="button"
-                className="md:hidden flex items-center justify-center rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                className="lg:hidden flex items-center justify-center rounded-md p-3 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 aria-label={mobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
                 aria-expanded={mobileNavOpen}
                 aria-controls="mobile-nav"
@@ -351,7 +351,7 @@ export function RootLayout() {
           <div
             ref={mobileNavRef}
             id="mobile-nav"
-            className="md:hidden fixed inset-0 z-40 bg-background/95 backdrop-blur-xl flex flex-col pt-20 px-6 gap-4"
+            className="lg:hidden fixed inset-0 z-40 bg-background/95 backdrop-blur-xl flex flex-col pt-20 px-6 gap-4"
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation"

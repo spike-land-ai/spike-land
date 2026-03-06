@@ -258,6 +258,7 @@ function PlanCard({ plan, annual, isAuthenticated, trackEvent }: { plan: Pricing
 
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
+  const panelId = `faq-${question.slice(0, 20).replace(/\W+/g, "-").toLowerCase()}`;
 
   return (
     <div className="border-b border-border py-4">
@@ -266,6 +267,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
         onClick={() => setOpen(!open)}
         className="flex w-full items-start justify-between text-left gap-4"
         aria-expanded={open}
+        aria-controls={panelId}
       >
         <span className="text-sm font-semibold text-foreground">{question}</span>
         <svg
@@ -279,7 +281,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
         </svg>
       </button>
       {open && (
-        <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{answer}</p>
+        <p id={panelId} className="mt-3 text-sm text-muted-foreground leading-relaxed">{answer}</p>
       )}
     </div>
   );
@@ -308,11 +310,16 @@ export function PricingPage() {
           role="radiogroup"
           aria-label="Billing frequency"
           className="mt-6 inline-flex items-center gap-3 rounded-full border border-border bg-muted p-1"
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft" || e.key === "ArrowUp") { e.preventDefault(); setAnnual(false); }
+            if (e.key === "ArrowRight" || e.key === "ArrowDown") { e.preventDefault(); setAnnual(true); }
+          }}
         >
           <button
             type="button"
             role="radio"
             aria-checked={!annual}
+            tabIndex={!annual ? 0 : -1}
             onClick={() => setAnnual(false)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               !annual ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
@@ -324,6 +331,7 @@ export function PricingPage() {
             type="button"
             role="radio"
             aria-checked={annual}
+            tabIndex={annual ? 0 : -1}
             onClick={() => setAnnual(true)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
               annual ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"

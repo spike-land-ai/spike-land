@@ -9,10 +9,12 @@ pricingApi.get("/api/pricing", (c) => {
   const { currency, prices, formatted } = getRegionalPricing(country);
 
   c.header("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+  c.header("Vary", "CF-IPCountry");
 
   return c.json({
     currency,
     billedInUsd: currency !== "USD",
+    free: formatted.free,
     pro: {
       monthly: prices.pro.monthly,
       monthlyFormatted: formatted.pro.monthly,

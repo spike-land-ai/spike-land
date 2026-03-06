@@ -831,7 +831,7 @@ export function VibeCoder({ initialCode = DEFAULT_CODE, appId }: VibeCoderProps)
         {/* ---- CODE PANEL (left, flex-1) ---- */}
         <div
           id="vibecoder-panel-code"
-          role="tabpanel"
+          role="region"
           aria-label="Code editor panel"
           className={cn(
             "flex-1 overflow-hidden min-w-0",
@@ -861,7 +861,7 @@ export function VibeCoder({ initialCode = DEFAULT_CODE, appId }: VibeCoderProps)
             <ResizeDivider onDrag={handlePreviewDrag} isDarkMode={isDarkMode} />
             <div
               id="vibecoder-panel-preview"
-              role="tabpanel"
+              role="region"
               aria-label="Live preview panel"
               style={{ width: previewWidth, minWidth: MIN_PANEL_WIDTH }}
               className={cn(
@@ -894,7 +894,7 @@ export function VibeCoder({ initialCode = DEFAULT_CODE, appId }: VibeCoderProps)
             <ResizeDivider onDrag={handleChatDrag} isDarkMode={isDarkMode} />
             <div
               id="vibecoder-panel-chat"
-              role="tabpanel"
+              role="region"
               aria-label="Chat panel"
               style={{ width: chatWidth, minWidth: MIN_PANEL_WIDTH }}
               className={cn(
