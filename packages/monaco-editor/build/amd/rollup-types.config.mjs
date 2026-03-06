@@ -11,6 +11,19 @@ import { defineConfig } from 'rollup';
 import { dts } from 'rollup-plugin-dts';
 import { dtsDeprecationWarning, mapModuleId } from '../shared.mjs';
 
+/** Strip `declare global { ... }` blocks that rollup misinterprets as named exports. */
+function stripDeclareGlobal() {
+	return {
+		name: 'strip-declare-global',
+		transform(code, id) {
+			if (id.endsWith('.d.ts') && code.includes('declare global')) {
+				return code.replace(/declare\s+global\s*\{[^}]*\}/gs, '/* declare global stripped */');
+			}
+			return null;
+		}
+	};
+}
+
 export default defineConfig({
 	input: {
 		types: join(import.meta.dirname, './src/types.ts')
@@ -32,6 +45,7 @@ export default defineConfig({
 	},
 	external: [/.*\.css/],
 	plugins: [
+		stripDeclareGlobal(),
 		nodeResolve(),
 		dts({
 			compilerOptions: {

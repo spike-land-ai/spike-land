@@ -1,5 +1,5 @@
 name = "mcp-auth"
-main = "../../src/mcp-auth/index.ts"
+main = "../../src/edge-api/auth/db-auth/index.ts"
 compatibility_date = "2025-02-28"
 compatibility_flags = ["nodejs_compat"]
 

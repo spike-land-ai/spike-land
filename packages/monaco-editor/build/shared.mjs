@@ -95,9 +95,12 @@ export function getEntryPoints(includeFeatures = false, includeDeprecated = true
 	return result;
 }
 
+const monacoCorePkgDir = dirname(fileURLToPath(import.meta.resolve('monaco-editor-core/package.json')));
+const resolvedNodeModules = dirname(monacoCorePkgDir) + '/';
+
 const mappedPaths = {
-	[join(root, 'node_modules/monaco-editor-core/esm/')]: '.',
-	[join(root, 'node_modules/')]: 'external/',
+	[join(monacoCorePkgDir, 'esm/')]: '.',
+	[resolvedNodeModules]: 'external/',
 	[join(root, 'monaco-lsp-client/')]: 'external/monaco-lsp-client/',
 	[join(root, 'src/deprecated')]: 'vs/',
 	[join(root, 'src/')]: 'vs/'
@@ -129,8 +132,8 @@ export function mapModuleId(moduleId, newExt) {
  * @returns {string | undefined}
  */
 const mappedPathsAmd = {
-	[join(root, 'node_modules/monaco-editor-core/esm/')]: '.',
-	[join(root, 'node_modules/')]: 'external/',
+	[join(monacoCorePkgDir, 'esm/')]: '.',
+	[resolvedNodeModules]: 'external/',
 	[join(root, 'monaco-lsp-client/')]: 'external/monaco-lsp-client/',
 	[join(root, 'src/deprecated')]: '.',
 	[join(root, 'src/')]: '.'

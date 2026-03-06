@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { FileNode } from "../reorganize.js";
+import type { FileNode } from "../../reorganize/types.js";
 import {
   buildNodeLookup,
   propagateDeps,
   computePackageCategories,
   resolveAppName,
-} from "../reorganize.js";
+} from "../../reorganize/grouping.js";
 import {
   getDependencyGroupName,
   deduplicateDepGroup,
-} from "../reorganize-config.js";
+} from "../../reorganize-config.js";
 
 // ─── Helper to create FileNode objects ──────────────────────────────
 

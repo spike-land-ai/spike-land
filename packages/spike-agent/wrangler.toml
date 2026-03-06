@@ -1,5 +1,5 @@
 name = "spike-agent"
-main = "../../src/spike-agent/index.ts"
+main = "../../src/edge-api/spike-agent/api/index.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true

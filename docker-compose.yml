@@ -4,8 +4,8 @@ services:
     working_dir: /app/packages/spike-app
     command: sh -c "corepack enable && yarn dev"
     ports:
-      - "5173:5173"
+      - "401:5173"
     volumes:
-      - ../..:/app
+      - .:/app
     environment:
       - NODE_ENV=development

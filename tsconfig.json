@@ -22,46 +22,125 @@
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
     "jsx": "react-jsx",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/code/@/*"],
-      "@spike-land-ai/shared": ["./src/shared/index.ts"],
-      "@spike-land-ai/shared/*": ["./src/shared/*"],
-      "@spike-land-ai/mcp-server-base": ["./src/mcp-server-base/index.ts"],
-      "@spike-land-ai/block-sdk": ["./src/block-sdk/index.ts"],
-      "@spike-land-ai/block-sdk/storage": ["./src/block-sdk/storage/index.ts"],
-      "@spike-land-ai/block-sdk/adapters/d1": ["./src/block-sdk/adapters/d1.ts"],
-      "@spike-land-ai/block-sdk/adapters/idb": ["./src/block-sdk/adapters/idb.ts"],
-      "@spike-land-ai/block-sdk/react": ["./src/block-sdk/react/index.ts"],
-      "@spike-land-ai/block-sdk/mcp": ["./src/block-sdk/mcp/index.ts"],
-      "@spike-land-ai/block-tasks": ["./src/block-tasks/index.ts"],
-      "@spike-land-ai/esbuild-wasm": ["./packages/esbuild-wasm/lib/main.d.ts"],
-      "@spike-land-ai/esbuild-wasm-mcp": ["./src/esbuild-wasm-mcp/index.ts"],
-      "@spike-land-ai/react-ts-worker": ["./src/react-ts-worker/react/index.ts"],
-      "@spike-land-ai/react-ts-worker/*": ["./src/react-ts-worker/*"],
-      "@spike-land-ai/code": ["./src/code/modules.ts"],
-      "@spike-land-ai/code/src/@/*": ["./src/code/@/*"],
-      "@spike-land-ai/code/*": ["./src/code/*"],
-      "@spike-land-ai/spike-cli": ["./src/spike-cli/index.ts"],
-      "@spike-land-ai/spike-review": ["./src/spike-review/index.ts"],
-      "@spike-land-ai/spike-review/*": ["./src/spike-review/*"],
-      "@spike-land-ai/hackernews-mcp": ["./src/hackernews-mcp/index.ts"],
-      "@spike-land-ai/mcp-image-studio": ["./src/mcp-image-studio/index.ts"],
-      "@spike-land-ai/mcp-image-studio/*": ["./src/mcp-image-studio/*"],
-      "@spike-land-ai/openclaw-mcp": ["./src/openclaw-mcp/index.ts"],
-      "@spike-land-ai/bazdmeg-mcp": ["./src/bazdmeg-mcp/index.ts"],
-      "@spike-land-ai/chess-engine": ["./src/chess-engine/index.ts"],
-      "@spike-land-ai/qa-studio": ["./src/qa-studio/index.ts"],
-      "@spike-land-ai/state-machine": ["./src/state-machine/index.ts"],
-      "@spike-land-ai/state-machine/*": ["./src/state-machine/*"],
-      "@spike-land-ai/vibe-dev": ["./src/vibe-dev/cli.ts"],
-      "@spike-land-ai/video": ["./src/video/index.ts"],
-      "@spike-land-ai/image-studio-worker": ["./src/image-studio-worker/index.ts"]
+      "@/*": [
+        "./src/frontend/monaco-/*"
+      ],
+      "@spike-land-ai/shared": [
+        "./src/core/shared-utils/ui/index.ts"
+      ],
+      "@spike-land-ai/shared/*": [
+        "./src/core/shared-utils/ui/*"
+      ],
+      "@spike-land-ai/mcp-server-base": [
+        "./src/core/server-base/core-logic/index.ts"
+      ],
+      "@spike-land-ai/block-sdk": [
+        "./src/core/block-sdk/misc/index.ts"
+      ],
+      "@spike-land-ai/block-sdk/storage": [
+        "./src/core/block-sdk/core-logic/storage-index.ts"
+      ],
+      "@spike-land-ai/block-sdk/adapters/d1": [
+        "./src/core/block-sdk/core-logic/d1.ts"
+      ],
+      "@spike-land-ai/block-sdk/adapters/idb": [
+        "./src/core/block-sdk/db/idb.ts"
+      ],
+      "@spike-land-ai/block-sdk/react": [
+        "./src/core/block-sdk/ui/react-index.ts"
+      ],
+      "@spike-land-ai/block-sdk/mcp": [
+        "./src/core/block-sdk/misc/mcp-index.ts"
+      ],
+      "@spike-land-ai/block-tasks": [
+        "./src/core/block-tasks/misc/index.ts"
+      ],
+      "@spike-land-ai/esbuild-wasm": [
+        "./packages/esbuild-wasm/lib/main.d.ts"
+      ],
+      "@spike-land-ai/esbuild-wasm-mcp": [
+        "./src/mcp-tools/esbuild-wasm/mcp/index.ts"
+      ],
+      "@spike-land-ai/react-ts-worker": [
+        "./src/core/react-engine/core-logic/react-index.ts"
+      ],
+      "@spike-land-ai/react-ts-worker/*": [
+        "./src/core/react-engin/*"
+      ],
+      "@spike-land-ai/code": [
+        "./src/frontend/monaco-editor/core-logic/modules.ts"
+      ],
+      "@spike-land-ai/code/src/@/*": [
+        "./src/frontend/monaco-/*"
+      ],
+      "@spike-land-ai/code/*": [
+        "./src/frontend/monaco-editor/animation-ui/*"
+      ],
+      "@spike-land-ai/spike-cli": [
+        "./src/cli/spike-cli/ai/index.ts"
+      ],
+      "@spike-land-ai/spike-review": [
+        "./src/mcp-tools/code-review/mcp/index.ts"
+      ],
+      "@spike-land-ai/spike-review/*": [
+        "./src/mcp-tools/code-review/mcp/*"
+      ],
+      "@spike-land-ai/hackernews-mcp": [
+        "./src/mcp-tools/hackernews/mcp/index.ts"
+      ],
+      "@spike-land-ai/mcp-image-studio": [
+        "./src/mcp-tools/image-studio/mcp/index.ts"
+      ],
+      "@spike-land-ai/mcp-image-studio/*": [
+        "./src/mcp-tools/image-studio/mcp/*"
+      ],
+      "@spike-land-ai/openclaw-mcp": [
+        "./src/mcp-tools/openclaw/core-logic/index.ts"
+      ],
+      "@spike-land-ai/bazdmeg-mcp": [
+        "./src/mcp-tools/bazdmeg/mcp/index.ts"
+      ],
+      "@spike-land-ai/chess-engine": [
+        "./src/core/chess/chess-core/index.ts"
+      ],
+      "@spike-land-ai/qa-studio": [
+        "./src/core/browser-automation/testing-mcp-edge/index.ts"
+      ],
+      "@spike-land-ai/state-machine": [
+        "./src/core/statecharts/node-sys/index.ts"
+      ],
+      "@spike-land-ai/state-machine/*": [
+        "./src/core/statecharts/cli/*"
+      ],
+      "@spike-land-ai/vibe-dev": [
+        "./src/cli/docker-dev/core-logic/cli.ts"
+      ],
+      "@spike-land-ai/video": [
+        "./src/frontend/educational-videos/video/index.ts"
+      ],
+      "@spike-land-ai/image-studio-worker": [
+        "./src/edge-api/image-studio-worker/ai-api-mcp/index.ts"
+      ],
+      "monaco-editor": [
+        "./packages/monaco-editor/src/index.ts"
+      ],
+      "monaco-editor/*": [
+        "./packages/monaco-editor/*"
+      ]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
   "exclude": [
     "node_modules",
     "dist",

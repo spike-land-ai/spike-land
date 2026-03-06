@@ -5,7 +5,8 @@
 
 // @ts-check
 
-import { join, relative } from 'path';
+import { dirname, join, relative } from 'path';
+import { fileURLToPath } from 'url';
 import { defineConfig } from 'rollup';
 import esbuild from 'rollup-plugin-esbuild';
 //import { urlToEsmPlugin } from '../rollup-url-to-module-plugin/index.mjs';
@@ -18,6 +19,7 @@ import { readFileSync } from 'fs';
 
 const root = join(import.meta.dirname, '../../');
 const outDir = join(root, './out/monaco-editor/esm');
+const monacoCorePath = dirname(fileURLToPath(import.meta.resolve('monaco-editor-core/package.json')));
 
 export default defineConfig({
 	input: {
@@ -53,8 +55,8 @@ export default defineConfig({
 					fileName: 'vs/base/browser/ui/codicons/codicon/codicon.ttf',
 					source: readFileSync(
 						join(
-							root,
-							'node_modules/monaco-editor-core/esm/vs/base/browser/ui/codicons/codicon/codicon.ttf'
+							monacoCorePath,
+							'esm/vs/base/browser/ui/codicons/codicon/codicon.ttf'
 						)
 					)
 				});

@@ -5008,7 +5008,6 @@ __metadata:
     jsondiffpatch: "npm:0.7.3"
     lucide-react: "npm:0.577.0"
     mime-types: "npm:3.0.2"
-    monaco-editor: "npm:0.55.1"
     os-browserify: "npm:0.3.0"
     path-browserify: "npm:1.0.1"
     postcss: "npm:8.5.8"
@@ -5296,7 +5295,6 @@ __metadata:
     framer-motion: "npm:^12.35.0"
     gray-matter: "npm:^4.0.3"
     lucide-react: "npm:^0.577.0"
-    monaco-editor: "npm:^0.55.1"
     playwright: "npm:^1.58.2"
     react: "npm:^19.2.4"
     react-dom: "npm:^19.2.4"
@@ -6959,14 +6957,14 @@ __metadata:
 
 "@vscode/monaco-lsp-client@file:./monaco-lsp-client::locator=monaco-editor%40workspace%3Apackages%2Fmonaco-editor":
   version: 0.1.0
-  resolution: "@vscode/monaco-lsp-client@file:./monaco-lsp-client#./monaco-lsp-client::hash=cb7743&locator=monaco-editor%40workspace%3Apackages%2Fmonaco-editor"
+  resolution: "@vscode/monaco-lsp-client@file:./monaco-lsp-client#./monaco-lsp-client::hash=d49b8f&locator=monaco-editor%40workspace%3Apackages%2Fmonaco-editor"
   dependencies:
     "@hediet/json-rpc": "npm:^0.5.0"
     "@hediet/json-rpc-browser": "npm:^0.5.1"
     "@hediet/json-rpc-websocket": "npm:^0.5.1"
   peerDependencies:
     monaco-editor-core: "*"
-  checksum: 10c0/4c76e89a26485b11263b558e90790a07b928f24153f6f2d44a3cd39ab27948ef4544424bfbcb99280db83fab9100677da7bc4dbd5d996515be7a7c5a8c647d5a
+  checksum: 10c0/6f6a56ab2556bc7e7a7594f049dca9a21e9d4cef6c78bbb42c8a79a8f466cb9b80c4b2a1a3611760a07378f5c35f3a81a145f8d5e1b8164cc8b12260c4f26d97
   languageName: node
   linkType: hard
 
@@ -15003,16 +15001,6 @@ __metadata:
     dompurify: "npm:3.2.7"
     marked: "npm:14.0.0"
   checksum: 10c0/38cdc9fec414d07367cf7d7353e14042a778953219fd614624909a8e7e71225aca5bf239a34b25cec4cea61ab64960a34dad66522979706bbc2872c43347efb8
-  languageName: node
-  linkType: hard
-
-"monaco-editor@npm:0.55.1, monaco-editor@npm:^0.55.1":
-  version: 0.55.1
-  resolution: "monaco-editor@npm:0.55.1"
-  dependencies:
-    dompurify: "npm:3.2.7"
-    marked: "npm:14.0.0"
-  checksum: 10c0/c1a0cf887657b42c8996518bc5ee96bbd39c977f862d2a2b2018427c45f14b0dd25d1452278202056f6b1ead97981282ccacd7d7ad918d8f0ef084159f974a25
   languageName: node
   linkType: hard
 

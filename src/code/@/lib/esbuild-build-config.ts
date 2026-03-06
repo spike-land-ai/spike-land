@@ -52,6 +52,8 @@ export const buildOptions: BuildOptions = {
     "/swVersion.js",
 
     "__STATIC_CONTENT_MANIFEST",
+    "monaco-editor",
+    "monaco-editor/package.json",
   ],
   legalComments: "none",
   resolveExtensions: [

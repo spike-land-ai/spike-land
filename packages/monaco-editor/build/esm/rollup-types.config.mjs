@@ -13,6 +13,19 @@ import { dtsDeprecationWarning, getEntryPoints, mapModuleId } from '../shared.mj
 
 const root = join(import.meta.dirname, '../../');
 
+/** Strip `declare global { ... }` blocks that rollup misinterprets as named exports. */
+function stripDeclareGlobal() {
+	return {
+		name: 'strip-declare-global',
+		transform(code, id) {
+			if (id.endsWith('.d.ts') && code.includes('declare global')) {
+				return code.replace(/declare\s+global\s*\{[^}]*\}/gs, '/* declare global stripped */');
+			}
+			return null;
+		}
+	};
+}
+
 export default defineConfig({
 	input: {
 		...getEntryPoints(true, false)
@@ -37,6 +50,7 @@ export default defineConfig({
 	},
 	external: [/.*\.css/],
 	plugins: [
+		stripDeclareGlobal(),
 		nodeResolve(),
 		dts({
 			compilerOptions: {

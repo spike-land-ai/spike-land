@@ -10,13 +10,13 @@ import { REPO_ROOT } from './utils';
 import { ensureDir } from './fs';
 
 function getBasicLanguages(): { label: string; entry: string }[] {
-	const files = glob.sync('./out/monaco-editor/esm/vs/languages/definitions/*/register.js', {
+	const files = glob.sync('out/monaco-editor/esm/vs/languages/definitions/*/register.js', {
 		cwd: path.dirname(__dirname)
 	});
 
 	return files.map((file) => {
 		const label = file
-			.substring('./out/monaco-editor/esm/vs/languages/definitions/'.length)
+			.substring('out/monaco-editor/esm/vs/languages/definitions/'.length)
 			.replace('/register.js', '');
 		const entry = `vs/languages/definitions/${label}/register`;
 		return {
@@ -26,52 +26,35 @@ function getBasicLanguages(): { label: string; entry: string }[] {
 	});
 }
 
-function readAdvancedLanguages(): Promise<string[]> {
-	return new Promise((resolve, reject) => {
-		glob(
-			'./out/monaco-editor/esm/vs/languages/features/*/register.js',
-			{ cwd: path.dirname(__dirname) },
-			(err, files) => {
-				if (err) {
-					reject(err);
-					return;
-				}
-
-				resolve(
-					files
-						.map((file) =>
-							file.substring('./out/monaco-editor/esm/vs/languages/features/'.length)
-						)
-						.map((file) => file.substring(0, file.length - '/register.js'.length))
-				);
-			}
-		);
+function readAdvancedLanguages(): string[] {
+	const files = glob.sync('out/monaco-editor/esm/vs/languages/features/*/register.js', {
+		cwd: path.dirname(__dirname)
 	});
+	return files
+		.map((file) => file.substring('out/monaco-editor/esm/vs/languages/features/'.length))
+		.map((file) => file.substring(0, file.length - '/register.js'.length));
 }
 
-function getAdvancedLanguages(): Promise<
-	{ label: string; entry: string; worker: { id: string; entry: string } }[]
-> {
-	return readAdvancedLanguages().then((languages) => {
-		let result = [];
-		for (const lang of languages) {
-			let shortLang = lang === 'typescript' ? 'ts' : lang;
-			const entry = `vs/languages/features/${lang}/register`;
-			checkFileExists(entry);
-			const workerId = `vs/languages/features/${lang}/${shortLang}Worker`;
-			const workerEntry = `vs/languages/features/${lang}/${shortLang}.worker`;
-			checkFileExists(workerEntry);
-			result.push({
-				label: lang,
-				entry: entry,
-				worker: {
-					id: workerId,
-					entry: workerEntry
-				}
-			});
-		}
-		return result;
-	});
+function getAdvancedLanguages(): { label: string; entry: string; worker: { id: string; entry: string } }[] {
+	const languages = readAdvancedLanguages();
+	let result = [];
+	for (const lang of languages) {
+		let shortLang = lang === 'typescript' ? 'ts' : lang;
+		const entry = `vs/languages/features/${lang}/register`;
+		checkFileExists(entry);
+		const workerId = `vs/languages/features/${lang}/${shortLang}Worker`;
+		const workerEntry = `vs/languages/features/${lang}/${shortLang}.worker`;
+		checkFileExists(workerEntry);
+		result.push({
+			label: lang,
+			entry: entry,
+			worker: {
+				id: workerId,
+				entry: workerEntry
+			}
+		});
+	}
+	return result;
 
 	function checkFileExists(moduleName) {
 		const filePath = path.join(REPO_ROOT, 'out/monaco-editor/esm', `${moduleName}.js`);
@@ -191,13 +174,13 @@ function strcmp(a: string, b: string) {
 }
 
 function getFeatures(): { label: string; entry: string | string[] }[] {
-	const featureFiles = glob.sync('./out/monaco-editor/esm/vs/features/*/register.js', {
+	const featureFiles = glob.sync('out/monaco-editor/esm/vs/features/*/register.js', {
 		cwd: path.dirname(__dirname)
 	});
 
 	return featureFiles.map((file) => {
 		const featureName = file
-			.substring('./out/monaco-editor/esm/vs/features/'.length)
+			.substring('out/monaco-editor/esm/vs/features/'.length)
 			.replace('/register.js', '');
 		const entry = `vs/features/${featureName}/register`;
 		return {

@@ -33,7 +33,6 @@ const getWasmFile = async () => {
 
 async function main() {
   try {
-    await buildWorkers();
     await buildMainScripts();
     await buildWasm();
     await buildServiceWorker();

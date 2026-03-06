@@ -1,5 +1,5 @@
 name = "image-studio-mcp"
-main = "../../src/image-studio-worker/index.ts"
+main = "../../src/edge-api/image-studio-worker/ai-api-mcp/index.ts"
 compatibility_date = "2025-02-28"
 compatibility_flags = ["nodejs_compat"]
 

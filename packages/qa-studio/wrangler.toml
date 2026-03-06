@@ -1,5 +1,5 @@
 name = "qa-studio"
-main = "../../src/qa-studio/worker-entry.ts"
+main = "../../src/core/browser-automation/api-edge/worker-entry.ts"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 

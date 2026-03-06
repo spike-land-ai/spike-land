@@ -11,6 +11,8 @@ import { buildESM } from './esm/build.script';
 import { buildAmdMinDev } from './amd/build.script';
 import { rm } from 'fs/promises';
 
+const monacoCorePath = path.dirname(require.resolve('monaco-editor-core/package.json'));
+
 async function run() {
 	await rm(path.join(REPO_ROOT, './out/monaco-editor'), { recursive: true, force: true });
 
@@ -45,11 +47,10 @@ async function run() {
 
 		otherFiles = otherFiles.concat(readFiles('README.md', { base: '' }));
 		otherFiles = otherFiles.concat(readFiles('CHANGELOG.md', { base: '' }));
-		otherFiles = otherFiles.concat(
-			readFiles('node_modules/monaco-editor-core/LICENSE', {
-				base: 'node_modules/monaco-editor-core/'
-			})
-		);
+		otherFiles.push({
+			path: 'LICENSE',
+			contents: fs.readFileSync(path.join(monacoCorePath, 'LICENSE'))
+		});
 
 		writeFiles(otherFiles, `out/monaco-editor`);
 	})();
@@ -60,11 +61,7 @@ async function run() {
  * - append ThirdPartyNotices.txt from plugins
  */
 function createThirdPartyNoticesDotTxt() {
-	const tpn = readFiles('node_modules/monaco-editor-core/ThirdPartyNotices.txt', {
-		base: 'node_modules/monaco-editor-core'
-	})[0];
-
-	let contents = tpn.contents.toString();
+	let contents = fs.readFileSync(path.join(monacoCorePath, 'ThirdPartyNotices.txt'), 'utf8');
 
 	console.log('ADDING ThirdPartyNotices from ./ThirdPartyNotices.txt');
 	let thirdPartyNoticeContent = fs
@@ -73,9 +70,11 @@ function createThirdPartyNoticesDotTxt() {
 	thirdPartyNoticeContent = thirdPartyNoticeContent.split('\n').slice(8).join('\n');
 
 	contents += '\n' + thirdPartyNoticeContent;
-	tpn.contents = Buffer.from(contents);
 
-	writeFiles([tpn], `out/monaco-editor`);
+	const destPath = path.join(REPO_ROOT, 'out/monaco-editor/ThirdPartyNotices.txt');
+	const { ensureDir } = require('./fs');
+	ensureDir(path.dirname(destPath));
+	fs.writeFileSync(destPath, contents);
 }
 
 run();

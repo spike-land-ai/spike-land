@@ -63,6 +63,7 @@ export const kindToCategory: Record<string, string> = {
   "mcp-server": "mcp-tools",
   worker: "edge-api",
   browser: "frontend",
+  video: "media",
   cli: "cli",
   library: "core",
   block: "core",
@@ -70,7 +71,7 @@ export const kindToCategory: Record<string, string> = {
 
 export const nameOverrides: Record<string, string> = {
   "spike-app": "platform-frontend",
-  "spike-edge": "edge-api",
+  "spike-edge": "main", // Avoid edge-api/edge-api stutter
   "spike-land-backend": "backend",
   code: "monaco-editor",
   "react-ts-worker": "react-engine",
@@ -203,8 +204,8 @@ export function getDependencyGroupName(deps: Set<string>): string {
     return [...semanticNames].sort().slice(0, 2).join("-");
   }
 
-  // Last resort: use "misc" bucket instead of raw dep names
-  return "misc";
+  // Last resort: use "lazy-imports" bucket instead of raw dep names
+  return "lazy-imports";
 }
 
 // When dep-group name matches category name, collapse to avoid stutter

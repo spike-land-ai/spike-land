@@ -1,24 +1,24 @@
 export { editor, languages, Range, typescript, Uri } from "monaco-editor";
-export { version } from "monaco-editor/package.json";
-const baseUrl = "/";
+export const version = "0.55.1";
+const baseUrl = "https://esm.spike.land/monaco-editor@0.55.1/min/vs";
 
 const MonacoEnvironment = {
   baseUrl,
 
-  getWorkerUrl: (_moduleId: string, _label: string) => {
-    if (_label === "typescript" || _label === "javascript") {
-      return baseUrl + `@/workers/monaco/ts.worker.js`;
+  getWorkerUrl: (_moduleId: string, label: string) => {
+    if (label === "typescript" || label === "javascript") {
+      return `${baseUrl}/language/typescript/ts.worker.js`;
     }
-    if (_label === "json") {
-      return baseUrl + `@/workers/monaco/json.worker.js`;
+    if (label === "json") {
+      return `${baseUrl}/language/json/json.worker.js`;
     }
-    if (_label === "css") {
-      return baseUrl + `@/workers/monaco/css.worker.js`;
+    if (label === "css" || label === "scss" || label === "less") {
+      return `${baseUrl}/language/css/css.worker.js`;
     }
-    if (_label === "html") {
-      return baseUrl + `@/workers/monaco/html.worker.js`;
+    if (label === "html" || label === "handlebars" || label === "razor") {
+      return `${baseUrl}/language/html/html.worker.js`;
     }
-    return baseUrl + `@/workers/monaco/editor.worker.js`;
+    return `${baseUrl}/editor/editor.worker.js`;
   },
 };
 

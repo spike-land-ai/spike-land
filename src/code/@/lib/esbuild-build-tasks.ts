@@ -56,43 +56,6 @@ const createEntryPoints = async (dir: string): Promise<string[]> => {
   return result;
 };
 
-const buildWorkerEntryPoint = async (entry: string): Promise<void> => {
-  await build({
-    ...getCommonBuildOptions(environment),
-    entryPoints: [`monaco-editor/esm/${entry}`],
-    bundle: true,
-    outExtension: { ".js": ".js" },
-    minifyIdentifiers: true,
-    minifySyntax: true,
-    minifyWhitespace: true,
-    treeShaking: true,
-    legalComments: "none",
-    sourcemap: false,
-    keepNames: false,
-    mangleProps: /_$/,
-    mangleCache: { _: false },
-    mangleQuoted: true,
-    ignoreAnnotations: false,
-    platform: "browser",
-    target: "es2024",
-    format: "iife",
-    outdir: "dist/@/workers/monaco",
-    minify: true,
-  });
-};
-
-export async function buildWorkers(): Promise<void> {
-  const workerEntryPoints = [
-    "vs/language/json/json.worker.js",
-    "vs/language/css/css.worker.js",
-    "vs/language/html/html.worker.js",
-    "vs/language/typescript/ts.worker.js",
-    "vs/editor/editor.worker.js",
-  ];
-
-  await Promise.all(workerEntryPoints.map(buildWorkerEntryPoint));
-}
-
 export async function buildMainScripts(): Promise<void> {
   const workerFiles = await createEntryPoints("workers");
 
