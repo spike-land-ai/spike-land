@@ -14,9 +14,9 @@ import {
 } from "./reorganize-config.js";
 
 // Multi-pattern regexes for parsing imports
-const staticImportRe = /import\s+(?:type\s+)?(?:[\s\S]*?)\s+from\s+["']([^"']+)["']/g;
-const sideEffectRe = /import\s+["']([^"']+)["']/g;
-const dynamicRe = /import\(\s*["']([^"']+)["']\s*\)/g;
+const staticImportRe = /\bimport\s+(?:type\s+)?(?:[a-zA-Z0-9_{},\s\*]+)\s+from\s+["']([^"'\n]+)["']/g;
+const sideEffectRe = /\bimport\s+["']([^"'\n]+)["']/g;
+const dynamicRe = /\bimport\(\s*["']([^"'\n]+)["']\s*\)/g;
 
 interface FileNode {
   absPath: string;
@@ -202,13 +202,13 @@ function flattenFilename(relPath: string, packageName: string): string {
 function rewriteImports(content: string, oldPath: string, newPath: string, pathMapping: Map<string, string>): string {
   const newDir = path.dirname(newPath);
   
-  return content.replace(/import\s+(?:type\s+)?(?:[\s\S]*?)\s+from\s+["']([^"']+)["']/g, (match, p1) => {
+  return content.replace(staticImportRe, (match, p1) => {
     return rewriteSingleImport(match, p1, oldPath, newDir, pathMapping);
   })
-  .replace(/import\s+["']([^"']+)["']/g, (match, p1) => {
+  .replace(sideEffectRe, (match, p1) => {
     return rewriteSingleImport(match, p1, oldPath, newDir, pathMapping);
   })
-  .replace(/import\(\s*["']([^"']+)["']\s*\)/g, (match, p1) => {
+  .replace(dynamicRe, (match, p1) => {
     return rewriteSingleImport(match, p1, oldPath, newDir, pathMapping);
   });
 }

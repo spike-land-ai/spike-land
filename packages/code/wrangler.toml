@@ -1,5 +1,5 @@
 name = "spike-land-frontend"
-main = "worker.ts"
+main = "index.ts"
 compatibility_date = "2025-11-11"
 
 route = { pattern = "testing.spike.land", custom_domain = true }
