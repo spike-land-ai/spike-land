@@ -1,0 +1,238 @@
+---
+title: "Why Your Claude Agent Is Wasting 70% of Its Context Window on Tool Descriptions"
+slug: "why-your-claude-agent-wastes-context-on-tool-descriptions"
+description: "Adding more MCP tools to your Claude agent can make it worse, not better. Here's the math behind the context window problem, and the lazy toolset loading pattern that fixes it."
+date: "2026-03-06"
+author: "Zoltan Erdos"
+category: "Developer Experience"
+tags: ["mcp", "claude", "context-window", "performance", "ai-agents", "spike-cli", "lazy-loading", "tool-calling"]
+featured: false
+primer: "More tools, worse agent. Here's why — and how to fix it."
+heroImage: "/blog/why-your-claude-agent-wastes-context-on-tool-descriptions/hero.png"
+---
+
+You connected five MCP servers to your Claude agent. Added 80 tools. Now it
+hallucinates tool names, calls the wrong server, and generally reasons worse
+than it did with three tools.
+
+This is not a bug in your tools. It is a predictable consequence of how context
+windows work — and it has a known fix.
+
+## The Problem Is Not Your Tools
+
+When you connect an MCP server to Claude, the client loads the full description
+of every tool before your first message. Every tool has a name, a description,
+and an input schema. Those descriptions are there so Claude knows what each tool
+does.
+
+The problem is that all of them load at once.
+
+A single tool description is roughly 100-600 tokens depending on how complex the
+schema is. Multiply that by 80 tools:
+
+| Tool count | Approximate token cost | Context budget spent before you say anything |
+|---|---|---|
+| 5 tools | ~400 tokens | Less than 1% of a 200K context |
+| 20 tools | ~2,000 tokens | ~1% |
+| 80 tools | ~15,000-47,000 tokens | 7-24% of a 200K context |
+| 200+ tools | ~100,000+ tokens | 50%+ — catastrophic |
+
+That last number is not hypothetical. Phil Schmid measured it: 47,000 tokens
+consumed by tool descriptions alone in a production MCP setup, before the model
+processed a single user message.
+
+But raw token count is not even the real problem. The real problem is
+**attention dilution**.
+
+## Why More Tool Descriptions Make Reasoning Worse
+
+Transformer models don't read context the way you read a document. Attention is
+distributed across every token in the window. When you load 80 tool descriptions
+into context, the model's attention is spread across all of them — including the
+60 tools it will never call for this particular task.
+
+The effect is measurable:
+
+- The model is more likely to confuse similar tool names (is it `chess_get_board`
+  or `board_chess_get`?).
+- It is more likely to hallucinate a tool that does not exist but sounds like
+  it should, based on patterns it sees in the descriptions.
+- It reasons less precisely about the tools it *does* need, because they compete
+  for attention with tools it does not.
+
+Benchmarks from kumak.dev showed a 33% improvement in task accuracy when using
+CLI tools instead of loading 200 MCP descriptions at once. The difference was
+not the tools — it was how many descriptions the model had to hold in working
+memory simultaneously.
+
+## The Warehouse vs. The Shelf
+
+Think of your MCP toolset as a warehouse. Everything you could ever need is
+in there. The problem with giving an AI agent access to a warehouse is that
+it spends cognitive overhead navigating the inventory rather than doing the work.
+
+The fix is a shelf. A curated subset of exactly the tools needed for the
+current task.
+
+This is the insight behind lazy toolset loading: instead of loading all tool
+descriptions upfront, expose only a small set of "gateway" tools at connection
+time. The gateway tools let the agent discover and load toolsets on demand.
+
+```
+spike> toolsets
+  TOOLSET      TOOLS   STATUS
+  chess           6    available
+  codespace       5    available
+  qa-studio       8    available
+  image-studio    9    available
+
+spike> load chess
+  Loaded toolset "chess" (6 tools from spike-land)
+```
+
+The agent starts with 5 gateway tools in context. It asks what toolsets are
+available, loads the one it needs, and now has 6 chess tools in context
+instead of 80 miscellaneous tools.
+
+Token cost: ~400 tokens instead of ~47,000.
+Attention budget: 100% on the task, not 7% diluted across irrelevant tools.
+
+Phil Schmid's implementation of this pattern reduced context consumption from
+47,000 tokens to 400 — a 99% reduction — with no degradation in task performance.
+
+## The Three-Step Pattern That Scales
+
+The lazy loading pattern has three steps. You can implement it in any MCP server.
+
+**Step 1: Expose a `list_toolsets` tool at connection time.**
+
+This tool returns the names and descriptions of available toolsets. It costs
+~50 tokens in context. The agent calls it when it needs to figure out what
+capabilities are available.
+
+**Step 2: Expose a `load_toolset` tool that registers tools on demand.**
+
+When the agent calls `load_toolset("chess")`, the server registers the 6 chess
+tools and returns their descriptions. The agent now has those tools in context.
+
+```typescript
+registry.register({
+  name: "load_toolset",
+  description: "Load a toolset to make its tools available. Call list_toolsets first to see what is available.",
+  inputSchema: {
+    toolset: z.string().describe("Name of the toolset to load"),
+  },
+  handler: async ({ toolset }) => {
+    const tools = await loadToolset(toolset);
+    return {
+      content: [{
+        type: "text",
+        text: `Loaded toolset "${toolset}" (${tools.length} tools): ${tools.map(t => t.name).join(", ")}`,
+      }],
+    };
+  },
+});
+```
+
+**Step 3: Namespace every tool.**
+
+When you aggregate multiple servers, tool names collide. `get_board` could
+come from chess, from a kanban app, or from a whiteboard tool. Namespace
+prevents confusion:
+
+- `spike-land__chess_get_board`
+- `vitest__run_tests`
+- `filesystem__read_file`
+
+The agent knows exactly which server owns each tool. No guessing.
+
+## What This Looks Like in Practice
+
+With spike-cli, the entire multiplexing and lazy loading layer is handled for
+you. Connect once, get the gateway, load what you need:
+
+```bash
+# One command to connect spike.land (80+ tools) to Claude
+claude mcp add spike-land --transport http https://spike.land/mcp
+```
+
+Or use the interactive shell:
+
+```bash
+npx @spike-land-ai/spike-cli shell
+```
+
+From the shell:
+
+```
+spike> toolsets
+  TOOLSET        TOOLS   STATUS
+  chess              6   available
+  qa-studio          8   available
+  image-studio       9   available
+  state-machine     14   available
+  code-review        7   available
+
+spike> load qa-studio
+  Loaded toolset "qa-studio" (8 tools from spike-land)
+
+spike> call spike-land__qa_run_audit url="https://example.com" checks="wcag,performance"
+  Running WCAG 2.1 AA + performance audit on example.com...
+  [results]
+```
+
+The agent sees 5 tools at connection time. Loads 8 when it needs browser
+automation. Total context cost: ~1,000 tokens. The rest of the 200K context
+window is available for actual reasoning.
+
+## When to Use Full Tool Loading
+
+Lazy loading is not always the right choice.
+
+If you have fewer than 10 tools, just load them all. The overhead is
+negligible and the complexity of lazy loading is not worth it.
+
+If your agent's tasks are unpredictable — it might need any tool at any
+moment — lazy loading adds latency. The agent has to call `list_toolsets`
+and `load_toolset` before it can act, which adds one to two round trips.
+
+The sweet spot for lazy loading is when you have 20+ tools and your agent
+typically uses a focused subset per task. Development workflows, chess games,
+image pipelines — these all have clear toolset boundaries.
+
+## The Broader Principle
+
+The context window is not free. Every token you spend on tool descriptions
+is a token not available for user data, conversation history, or reasoning.
+
+This matters more as your MCP setup grows. Adding your fifth server is not
+neutral — it has a real cost in agent quality unless you manage it deliberately.
+
+Lazy toolset loading is one pattern. Others include:
+
+- **Semantic tool search** — expose a `search_tools` meta-tool that returns
+  relevant tool descriptions based on a query. The agent searches before loading.
+- **Task-scoped sessions** — create a new MCP session per task type, each
+  pre-loaded with only the relevant toolset.
+- **Tool description compression** — write shorter tool descriptions. Every
+  word in a description costs tokens. Cut anything the model does not need to
+  make a correct call decision.
+
+The best MCP implementations are not the ones with the most tools. They are
+the ones where the model spends its context budget on the task, not on the
+toolbox.
+
+---
+
+## Try It
+
+```bash
+claude mcp add spike-land --transport http https://spike.land/mcp
+```
+
+This connects spike.land's 80+ tools to your Claude agent with lazy toolset
+loading built in. Five gateway tools visible at startup. Load what you need.
+
+- [MCP specification](https://modelcontextprotocol.io) — tool, resource, and prompt primitives
+- [spike-cli on npm](https://www.npmjs.com/package/@spike-land-ai/spike-cli) — the MCP multiplexer CLI
+- [Phil Schmid's lazy loading research](https://www.philschmid.de/mcp-cli) — 47K → 400 token measurement
