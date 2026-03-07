@@ -100,48 +100,53 @@ export default defineConfig(() => ({
     },
     ...(hasLocalCerts
       ? {
-          host: "0.0.0.0",
-          port: 5173,
-          hmr: {
-            host: "local.spike.land",
-            protocol: "wss",
-          },
-          https: {
-            key: readFileSync(keyFile),
-            cert: readFileSync(certFile),
-          },
-        }
+        host: "0.0.0.0",
+        port: 5173,
+        hmr: {
+          host: "local.spike.land",
+          protocol: "wss",
+        },
+        https: {
+          key: readFileSync(keyFile),
+          cert: readFileSync(certFile),
+        },
+      }
       : {}),
     proxy: {
       "/api": {
-        target: "https://api.spike.land",
+        target: "https://local.spike.land:8787",
         changeOrigin: true,
-        secure: true,
+        secure: false,
       },
       "/errors": {
-        target: "https://api.spike.land",
+        target: "https://local.spike.land:8787",
         changeOrigin: true,
-        secure: true,
+        secure: false,
       },
       "/analytics": {
-        target: "https://spike.land",
+        target: "https://local.spike.land:8787",
         changeOrigin: true,
-        secure: true,
+        secure: false,
       },
       "/mcp": {
-        target: "https://spike.land",
+        target: "https://local.spike.land:8787",
         changeOrigin: true,
-        secure: true,
+        secure: false,
       },
       "/oauth": {
-        target: "https://spike.land",
+        target: "https://local.spike.land:8787",
         changeOrigin: true,
-        secure: true,
+        secure: false,
       },
       "/transpile": {
-        target: "https://js.spike.land",
+        target: "https://local.spike.land:8787",
         changeOrigin: true,
-        secure: true,
+        secure: false,
+      },
+      "^/blog/.+/.+\\.(png|jpe?g|gif|webp|svg|avif)$": {
+        target: "https://local.spike.land:8787",
+        changeOrigin: true,
+        secure: false,
       },
     },
   },

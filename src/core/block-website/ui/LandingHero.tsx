@@ -4,6 +4,7 @@ import { apiUrl } from "../core-logic/api";
 import { useDevMode } from "../core-logic/dev-mode";
 import { triggerViewTransition } from "../core-logic/view-transition";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Code2, Globe2, Sparkles, TerminalSquare } from "lucide-react";
 
 export const TOTAL_TOOL_COUNT = 80;
 
@@ -60,187 +61,268 @@ export function LandingHero() {
   return (
     <section
       aria-labelledby="hero-heading"
-      className="py-24 sm:py-32 px-4 sm:px-6 max-w-3xl mx-auto text-center font-sans relative flex flex-col items-center"
+      className="relative overflow-hidden px-4 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14 font-sans"
     >
-      {/* Badge */}
-      <div className="relative h-8 mb-8 flex justify-center items-center w-full">
-        <AnimatePresence mode="wait">
-          {isDeveloper ? (
-            <motion.div
-              key="dev-badge"
-              initial={{ opacity: 0, y: -10, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -10, filter: "blur(4px)", position: "absolute" }}
-              transition={{ duration: 0.4 }}
-              className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest backdrop-blur-sm transition-colors shadow-sm border border-primary/30 bg-primary/10 text-primary-light glow-primary"
-            >
-              DEVELOPER MODE ACTIVE
-            </motion.div>
-          ) : (
-            <motion.div
-              key="default-badge"
-              initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: 10, filter: "blur(4px)", position: "absolute" }}
-              transition={{ duration: 0.4 }}
-              className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest backdrop-blur-sm transition-colors shadow-sm border border-border/50 bg-muted/30 text-muted-foreground"
-            >
-              OPEN-SOURCE AI APP ECOSYSTEM · INSTANT DEPLOYS
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-0 h-[24rem] w-[24rem] -translate-x-1/2 rounded-full bg-primary/12 blur-3xl" />
+        <div className="absolute right-0 top-24 h-48 w-48 rounded-full bg-primary/8 blur-3xl" />
+        <div className="absolute left-0 top-40 h-40 w-40 rounded-full bg-foreground/6 blur-3xl" />
       </div>
 
-      {/* Heading */}
-      <div className="relative mb-8 min-h-[140px] sm:min-h-[160px] flex justify-center items-center w-full">
-        <AnimatePresence mode="wait">
-          {isDeveloper ? (
-            <motion.h1
-              key="dev-heading"
-              initial={{ opacity: 0, scale: 0.95, filter: "blur(8px)" }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, scale: 1.05, filter: "blur(8px)", position: "absolute" }}
-              transition={{ duration: 0.5, type: "spring", bounce: 0.2 }}
-              id="hero-heading-dev"
-              className="text-fluid-h1 text-balance w-full"
-              style={{ fontVariationSettings: `"wght" 700`, letterSpacing: "-0.03em" }}
-            >
-              <span className="text-foreground">Build powerful MCP servers</span>
-              <br />
-              <span className="text-primary-light">at the edge.</span>
-            </motion.h1>
-          ) : (
-            <motion.h1
-              key="default-heading"
-              initial={{ opacity: 0, scale: 1.05, filter: "blur(8px)" }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, scale: 0.95, filter: "blur(8px)", position: "absolute" }}
-              transition={{ duration: 0.5, type: "spring", bounce: 0.2 }}
-              id="hero-heading"
-              className="text-fluid-h1 text-balance w-full"
-              style={{ fontVariationSettings: `"wght" 400`, letterSpacing: "-0.02em" }}
-            >
-              <span className="text-muted-foreground">Give your AI agents</span>
-              <br />
-              <span className="text-foreground">the power to act.</span>
-            </motion.h1>
-          )}
-        </AnimatePresence>
-      </div>
+      <div className="relative mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+        <div className="flex flex-col items-start text-left">
+          <div className="relative mb-6 h-8 w-full">
+            <AnimatePresence mode="wait">
+              {isDeveloper ? (
+                <motion.div
+                  key="dev-badge"
+                  initial={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: -10, filter: "blur(4px)", position: "absolute" }}
+                  transition={{ duration: 0.4 }}
+                  className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-black tracking-[0.22em] text-primary-light glow-primary"
+                >
+                  <Sparkles className="size-3.5" />
+                  DEVELOPER MODE ACTIVE
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="default-badge"
+                  initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: 10, filter: "blur(4px)", position: "absolute" }}
+                  transition={{ duration: 0.4 }}
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/80 px-4 py-1.5 text-xs font-black tracking-[0.22em] text-muted-foreground backdrop-blur-sm"
+                >
+                  <Globe2 className="size-3.5" />
+                  OPEN MCP PLATFORM
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-      {/* Description */}
-      <div className="relative mb-10 min-h-[120px] flex justify-center items-center w-full">
-        <AnimatePresence mode="wait">
-          {isDeveloper ? (
-            <motion.p
-              key="dev-desc"
-              initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -10, filter: "blur(4px)", position: "absolute" }}
-              transition={{ duration: 0.4, delay: 0.05 }}
-              className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto leading-[1.6] text-balance w-full"
-            >
-              Deploy typescript tools instantly with HMR, zero-config caching, and global edge
-              network distribution.
-              <br />
-              <br />
-              <span className="text-lg leading-[1.6] text-primary-light/80">
-                Stop worrying about infrastructure. Start building agent capabilities.
-              </span>
-            </motion.p>
-          ) : (
-            <motion.p
-              key="default-desc"
-              initial={{ opacity: 0, y: -10, filter: "blur(4px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: 10, filter: "blur(4px)", position: "absolute" }}
-              transition={{ duration: 0.4, delay: 0.05 }}
-              className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto leading-[1.6] text-balance w-full"
-            >
-              spike.land connects your AI assistant to real-world tools using the Model Context
-              Protocol (MCP).
-              <br />
-              <br />
-              <span className="text-lg leading-[1.6]">
-                MCP lets AI assistants use databases, APIs, and code editors through a single
-                standard interface.
-              </span>
-            </motion.p>
-          )}
-        </AnimatePresence>
-      </div>
+          <div className="relative mb-4 min-h-[112px] w-full sm:min-h-[144px]">
+            <AnimatePresence mode="wait">
+              {isDeveloper ? (
+                <motion.h1
+                  key="dev-heading"
+                  initial={{ opacity: 0, scale: 0.95, filter: "blur(8px)" }}
+                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, scale: 1.05, filter: "blur(8px)", position: "absolute" }}
+                  transition={{ duration: 0.5, type: "spring", bounce: 0.2 }}
+                  id="hero-heading-dev"
+                  className="text-fluid-h1 max-w-4xl text-balance"
+                  style={{ fontVariationSettings: `"wght" 760`, letterSpacing: "-0.04em" }}
+                >
+                  Ship MCP servers with the feel of a design tool and the reach of the edge.
+                </motion.h1>
+              ) : (
+                <motion.h1
+                  key="default-heading"
+                  initial={{ opacity: 0, scale: 1.05, filter: "blur(8px)" }}
+                  animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, scale: 0.95, filter: "blur(8px)", position: "absolute" }}
+                  transition={{ duration: 0.5, type: "spring", bounce: 0.2 }}
+                  id="hero-heading"
+                  className="text-fluid-h1 max-w-4xl text-balance"
+                  style={{ fontVariationSettings: `"wght" 700`, letterSpacing: "-0.04em" }}
+                >
+                  Give your AI agents a real operating surface, not just another prompt box.
+                </motion.h1>
+              )}
+            </AnimatePresence>
+          </div>
 
-      <motion.div
-        layout
-        className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mt-4 relative z-10 w-full"
-        role="group"
-        aria-label="Primary actions"
-      >
+          <div className="relative mb-7 min-h-[88px] w-full sm:min-h-[104px]">
+            <AnimatePresence mode="wait">
+              {isDeveloper ? (
+                <motion.p
+                  key="dev-desc"
+                  initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: -10, filter: "blur(4px)", position: "absolute" }}
+                  transition={{ duration: 0.4, delay: 0.05 }}
+                  className="max-w-2xl text-balance text-lg leading-8 text-muted-foreground sm:text-xl"
+                >
+                  Deploy TypeScript tools instantly with hot reload, hosted auth, and global edge
+                  delivery. Focus on capability design while spike.land handles the runtime.
+                </motion.p>
+              ) : (
+                <motion.p
+                  key="default-desc"
+                  initial={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: 10, filter: "blur(4px)", position: "absolute" }}
+                  transition={{ duration: 0.4, delay: 0.05 }}
+                  className="max-w-2xl text-balance text-lg leading-8 text-muted-foreground sm:text-xl"
+                >
+                  spike.land connects AI assistants to real tools through MCP, so models can
+                  browse data, run workflows, and take action inside a system built for production.
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <motion.div
+            layout
+            className="flex w-full flex-col items-stretch gap-4 sm:w-auto sm:flex-row sm:items-center"
+            role="group"
+            aria-label="Primary actions"
+          >
         {/* Dev mode toggle */}
-        <motion.button
-          layout
-          ref={devButtonRef}
-          onClick={handleDevToggle}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`w-full sm:w-auto px-8 py-4 text-lg font-medium rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2
+            <motion.button
+              layout
+              ref={devButtonRef}
+              onClick={handleDevToggle}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`w-full rounded-2xl px-8 py-4 text-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto
                         ${
                           isDeveloper
-                            ? "bg-primary text-primary-foreground hover:bg-primary-light glow-primary focus:ring-primary ring-2 ring-primary/30"
-                            : "bg-foreground text-background hover:opacity-90 hover:shadow-lg focus:ring-foreground dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary-light glow-primary dark:focus:ring-primary"
+                            ? "ring-2 ring-primary/30 bg-primary text-primary-foreground hover:bg-primary-light focus:ring-primary glow-primary"
+                            : "bg-foreground text-background hover:opacity-90 hover:shadow-lg focus:ring-foreground dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary-light dark:focus:ring-primary glow-primary"
                         }`}
-          aria-pressed={isDeveloper}
-        >
-          I'm a developer
-        </motion.button>
+              aria-pressed={isDeveloper}
+            >
+              I&apos;m a developer
+            </motion.button>
 
-        {/* Secondary CTA: crossfade between "I'm exploring" and "Vibe Code Online Now" */}
-        <motion.div layout className="w-full sm:w-auto relative" style={{ minHeight: "3.5rem" }}>
-          <AnimatePresence mode="wait">
-            {!showVibeButton ? (
-              <motion.div
-                key="btn-exploring"
-                initial={{ opacity: 0, scale: 0.9, filter: "blur(4px)" }}
-                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                exit={{ opacity: 0, scale: 0.9, filter: "blur(4px)", position: "absolute" }}
-                transition={{ duration: 0.2 }}
-                className="w-full inset-0"
-              >
-                <Link
-                  href="/blog"
-                  onClick={() => setThemeDirectly("light")}
-                  className="block w-full sm:w-auto px-8 py-4 text-lg font-medium rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2
+            <motion.div layout className="relative w-full sm:w-auto" style={{ minHeight: "3.5rem" }}>
+              <AnimatePresence mode="wait">
+                {!showVibeButton ? (
+                  <motion.div
+                    key="btn-exploring"
+                    initial={{ opacity: 0, scale: 0.9, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, scale: 0.9, filter: "blur(4px)", position: "absolute" }}
+                    transition={{ duration: 0.2 }}
+                    className="inset-0 w-full"
+                  >
+                    <Link
+                      href="/blog"
+                      onClick={() => setThemeDirectly("light")}
+                      className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border/70 bg-background px-8 py-4 text-lg font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-muted/50 hover:border-border hover:shadow-sm focus:ring-foreground sm:w-auto
                                         bg-background border border-border/50 text-foreground hover:bg-muted/50 hover:border-border hover:shadow-sm focus:ring-foreground
                                         dark:bg-white/10 dark:border-white/20 dark:text-white dark:hover:bg-white/15 dark:backdrop-blur-md dark:focus:ring-white/30"
-                >
-                  I'm exploring
-                </Link>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="btn-vibe"
-                initial={{ opacity: 0, scale: 0.9, filter: "blur(4px)" }}
-                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                exit={{ opacity: 0, scale: 0.9, filter: "blur(4px)", position: "absolute" }}
-                transition={{ duration: 0.2 }}
-                className="w-full inset-0"
-              >
-                <Link
-                  href="/vibe-code"
-                  className="block w-full sm:w-auto px-8 py-4 text-lg font-extrabold rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2
+                    >
+                      I&apos;m exploring
+                      <ArrowRight className="size-4" />
+                    </Link>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="btn-vibe"
+                    initial={{ opacity: 0, scale: 0.9, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, scale: 0.9, filter: "blur(4px)", position: "absolute" }}
+                    transition={{ duration: 0.2 }}
+                    className="inset-0 w-full"
+                  >
+                    <Link
+                      href="/vibe-code"
+                      className="block w-full rounded-2xl px-8 py-4 text-center text-lg font-extrabold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:shadow-lg hover:shadow-primary/20 focus:ring-primary sm:w-auto
                                         bg-primary text-primary-foreground hover:bg-primary-light glow-primary focus:ring-primary hover:shadow-lg hover:shadow-primary/20"
-                  style={{ fontVariationSettings: '"wght" 800' }}
-                >
-                  Vibe Code Online Now
-                </Link>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </motion.div>
+                      style={{ fontVariationSettings: '"wght" 800' }}
+                    >
+                      Vibe Code Online Now
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </motion.div>
+
+          <div className="mt-10 grid gap-3 sm:grid-cols-3">
+            {[
+              { icon: TerminalSquare, label: "Command-first setup", value: "1 command to connect" },
+              { icon: Code2, label: "Custom tools", value: "Build or generate your own" },
+              { icon: Globe2, label: "Edge runtime", value: "Deploy globally by default" },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-2xl border border-border/60 bg-card/80 p-4 backdrop-blur-sm"
+              >
+                <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <item.icon className="size-4" />
+                </div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">
+                  {item.label}
+                </p>
+                <p className="mt-2 text-sm font-medium text-foreground">{item.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative">
+          <div className="absolute inset-6 rounded-[2rem] bg-primary/10 blur-3xl" />
+          <div className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-card/80 p-6 shadow-2xl backdrop-blur-xl">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">
+                  Live surface
+                </p>
+                <p className="mt-2 text-2xl font-black tracking-tight">Agent system console</p>
+              </div>
+              <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                MCP online
+              </div>
+            </div>
+
+            <div className="grid gap-4">
+              <div className="rounded-[1.5rem] border border-border/50 bg-background/80 p-4">
+                <div className="mb-3 flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">
+                  <span className="size-2 rounded-full bg-emerald-400" />
+                  Runtime
+                </div>
+                <div className="space-y-3 font-mono text-sm text-foreground">
+                  <div className="flex items-center justify-between rounded-xl bg-muted/60 px-3 py-2">
+                    <span>registry.connect()</span>
+                    <span className="text-primary">ready</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl bg-muted/60 px-3 py-2">
+                    <span>edge.deploy()</span>
+                    <span className="text-primary">4 regions</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-xl bg-muted/60 px-3 py-2">
+                    <span>agent.invoke("qa-studio")</span>
+                    <span className="text-primary">live</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-[1.5rem] border border-border/50 bg-muted/40 p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">
+                    Tool inventory
+                  </p>
+                  <p className="mt-3 text-4xl font-black tracking-tight text-foreground">
+                    {TOTAL_TOOL_COUNT}+
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Ready-to-run capabilities across coding, media, research, auth, and ops.
+                  </p>
+                </div>
+
+                <div className="rounded-[1.5rem] border border-border/50 bg-muted/40 p-4">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">
+                    Dev mode
+                  </p>
+                  <p className="mt-3 text-lg font-bold text-foreground">
+                    {isDeveloper ? "Enabled for builder workflows" : "Toggle for deeper product surface"}
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    One page that speaks to explorers and builders without fragmenting the brand.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <dl
-        className="mt-20 pt-10 border-t border-border flex flex-wrap items-center justify-center gap-x-3 gap-y-4 text-sm text-muted-foreground"
+        className="relative mx-auto mt-16 flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-4 border-t border-border/60 pt-8 text-sm text-muted-foreground"
         aria-label="Platform Statistics"
       >
         {stars != null && (

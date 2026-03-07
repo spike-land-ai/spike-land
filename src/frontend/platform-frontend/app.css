@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @source "./**/*.{ts,tsx}";
-@source "../../core/block-website/src/**/*.{ts,tsx}";
+@source "../../core/block-website/**/*.{ts,tsx}";
 
 @custom-variant dark (&:where(.dark, .dark *));
 

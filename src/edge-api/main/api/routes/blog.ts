@@ -193,20 +193,44 @@ const CONTENT_TYPES: Record<string, string> = {
   avif: "image/avif",
 };
 
+async function serveBlogImage(
+  spaAssets: R2Bucket,
+  slug: string,
+  filename: string,
+): Promise<Response | null> {
+  const ext = filename.split(".").pop()?.toLowerCase() ?? "";
+  const key = `blog-images/${slug}/${filename}`;
+
+  const obj = await spaAssets.get(key);
+  if (obj) {
+    const contentType = CONTENT_TYPES[ext] || "application/octet-stream";
+    return new Response(obj.body, {
+      headers: {
+        "Content-Type": contentType,
+        "Cache-Control": "public, max-age=31536000, immutable",
+      },
+    });
+  }
+
+  // Fallback to production for local dev (R2 bucket is empty locally)
+  const prodUrl = `https://spike.land/api/blog-images/${slug}/${filename}`;
+  const upstream = await fetch(prodUrl);
+  if (upstream.ok) {
+    return new Response(upstream.body, {
+      headers: {
+        "Content-Type": upstream.headers.get("Content-Type") || "application/octet-stream",
+        "Cache-Control": "public, max-age=3600",
+      },
+    });
+  }
+
+  return null;
+}
+
 blog.get("/api/blog-images/:slug/:filename", async (c) => {
   const { slug, filename } = c.req.param();
-  const ext = filename.split(".").pop()?.toLowerCase() ?? "";
-
-  const obj = await c.env.SPA_ASSETS.get(`blog-images/${slug}/${filename}`);
-  if (!obj) return c.notFound();
-
-  const contentType = CONTENT_TYPES[ext] || "application/octet-stream";
-  return new Response(obj.body, {
-    headers: {
-      "Content-Type": contentType,
-      "Cache-Control": "public, max-age=31536000, immutable",
-    },
-  });
+  const resp = await serveBlogImage(c.env.SPA_ASSETS, slug, filename);
+  return resp ?? c.notFound();
 });
 
 // Backward-compatible: serve /blog/{slug}/{filename} for inline MDX images
@@ -216,16 +240,8 @@ blog.get("/blog/:slug/:filename", async (c, next) => {
 
   if (!IMAGE_EXTS.has(ext)) return next();
 
-  const obj = await c.env.SPA_ASSETS.get(`blog-images/${slug}/${filename}`);
-  if (!obj) return next();
-
-  const contentType = CONTENT_TYPES[ext] || "application/octet-stream";
-  return new Response(obj.body, {
-    headers: {
-      "Content-Type": contentType,
-      "Cache-Control": "public, max-age=31536000, immutable",
-    },
-  });
+  const resp = await serveBlogImage(c.env.SPA_ASSETS, slug, filename);
+  return resp ?? next();
 });
 
 /** Fetch a single blog post row from D1 (no caching, for SSR injection). */

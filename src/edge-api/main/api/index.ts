@@ -236,15 +236,42 @@ app.route("/", fixer);
 app.route("/", chat);
 app.route("/", cachePurge);
 
+/** Track whether MCP_SERVICE binding is functional (avoids repeated failures in local dev). */
+let mcpServiceAvailable = true;
+
+/**
+ * Fetch from MCP_SERVICE binding with fallback to production URL.
+ * In local dev, the service binding may not be available if spike-land-mcp isn't running.
+ * After the first 503, skips the binding entirely to avoid repeated failures.
+ */
+async function fetchMcpWithFallback(
+  env: Env,
+  url: string,
+  init?: RequestInit,
+): Promise<Response> {
+  if (mcpServiceAvailable) {
+    try {
+      const response = await env.MCP_SERVICE.fetch(new Request(url, init));
+      // 503 = service binding can't find the target worker (local dev without spike-land-mcp)
+      if (response.status === 503) {
+        mcpServiceAvailable = false;
+      } else {
+        return response;
+      }
+    } catch {
+      mcpServiceAvailable = false;
+    }
+  }
+  // Fall back to direct production fetch
+  return fetch(url, init);
+}
+
 // MCP tools listing proxy (public, no auth required)
 app.get("/mcp/tools", async (c) => {
-  const url = new URL("https://mcp.spike.land/tools");
-  const requestId = c.get("requestId");
-  const response = await c.env.MCP_SERVICE.fetch(
-    new Request(url.toString(), {
-      headers: { "X-Request-Id": requestId },
-    }),
-  );
+  const url = "https://mcp.spike.land/tools";
+  const response = await fetchMcpWithFallback(c.env, url, {
+    headers: { "X-Request-Id": c.get("requestId") },
+  });
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -253,13 +280,10 @@ app.get("/mcp/tools", async (c) => {
 });
 
 app.get("/api/apps", async (c) => {
-  const url = new URL("https://mcp.spike.land/apps");
-  const requestId = c.get("requestId");
-  const response = await c.env.MCP_SERVICE.fetch(
-    new Request(url.toString(), {
-      headers: { "X-Request-Id": requestId },
-    }),
-  );
+  const url = "https://mcp.spike.land/apps";
+  const response = await fetchMcpWithFallback(c.env, url, {
+    headers: { "X-Request-Id": c.get("requestId") },
+  });
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -269,13 +293,10 @@ app.get("/api/apps", async (c) => {
 
 app.get("/api/apps/:slug", async (c) => {
   const slug = c.req.param("slug");
-  const url = new URL(`https://mcp.spike.land/apps/${slug}`);
-  const requestId = c.get("requestId");
-  const response = await c.env.MCP_SERVICE.fetch(
-    new Request(url.toString(), {
-      headers: { "X-Request-Id": requestId },
-    }),
-  );
+  const url = `https://mcp.spike.land/apps/${slug}`;
+  const response = await fetchMcpWithFallback(c.env, url, {
+    headers: { "X-Request-Id": c.get("requestId") },
+  });
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -286,11 +307,9 @@ app.get("/api/apps/:slug", async (c) => {
 // Store tools endpoint — groups MCP registry tools by category for the store UI
 app.get("/api/store/tools", async (c) => {
   const requestId = c.get("requestId");
-  const response = await c.env.MCP_SERVICE.fetch(
-    new Request("https://mcp.spike.land/tools", {
-      headers: { "X-Request-Id": requestId },
-    }),
-  );
+  const response = await fetchMcpWithFallback(c.env, "https://mcp.spike.land/tools", {
+    headers: { "X-Request-Id": requestId },
+  });
   if (!response.ok) {
     return c.json({ error: "Failed to fetch tools" }, 502);
   }
@@ -334,7 +353,7 @@ app.get("/api/store/tools", async (c) => {
 
 // --- MCP Gateway ---
 
-// Helper: proxy request to MCP service binding
+// Helper: proxy request to MCP service binding (with fallback for local dev)
 async function mcpProxy(c: import("hono").Context<{ Bindings: Env; Variables: Variables }>) {
   const url = new URL(c.req.url);
   url.hostname = "mcp.spike.land";
@@ -343,7 +362,13 @@ async function mcpProxy(c: import("hono").Context<{ Bindings: Env; Variables: Va
 
   const newRequest = new Request(url.toString(), c.req.raw);
   newRequest.headers.set("X-Request-Id", c.get("requestId"));
-  const response = await c.env.MCP_SERVICE.fetch(newRequest);
+  const response = await fetchMcpWithFallback(c.env, newRequest.url, {
+    method: newRequest.method,
+    headers: Object.fromEntries(newRequest.headers.entries()),
+    body: newRequest.method !== "GET" && newRequest.method !== "HEAD" ? newRequest.body : undefined,
+    // @ts-expect-error duplex needed for streaming request bodies
+    duplex: "half",
+  });
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,

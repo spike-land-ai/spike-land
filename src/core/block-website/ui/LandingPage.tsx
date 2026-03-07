@@ -4,17 +4,73 @@ import { TryItNow } from "./TryItNow";
 import { TryItCta } from "./TryItCta";
 import { BlogListView } from "./BlogList";
 import { Link } from "../lazy-imports/link";
-import { Search, Globe, Code2, ArrowRight, Zap } from "lucide-react";
+import { Search, Globe, Code2, ArrowRight, Zap, Layers3, Workflow, ShieldCheck } from "lucide-react";
 import { cn } from "@spike-land-ai/shared";
 
 export function LandingPage() {
   return (
-    <div className="text-foreground font-sans selection:bg-primary selection:text-primary-foreground dark:selection:bg-primary/40 dark:selection:text-primary-light">
+    <div className="font-sans text-foreground selection:bg-primary selection:text-primary-foreground dark:selection:bg-primary/40 dark:selection:text-primary-light">
       <LandingHero />
 
-      <div className="space-y-32 sm:space-y-48 pb-32">
+      <div className="space-y-24 pb-32 sm:space-y-36">
         <section className="relative">
           <TryItNow />
+        </section>
+
+        <section
+          aria-labelledby="platform-rhythm-heading"
+          className="relative overflow-hidden px-4 sm:px-6"
+        >
+          <div className="absolute inset-x-8 top-8 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="rounded-[2rem] border border-border/60 bg-card/80 p-8 backdrop-blur-sm">
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">
+                Platform rhythm
+              </p>
+              <h2
+                id="platform-rhythm-heading"
+                className="mt-4 max-w-xl text-4xl font-black tracking-tight sm:text-5xl"
+              >
+                A homepage that explains the system before it asks for trust.
+              </h2>
+              <p className="mt-5 max-w-xl text-lg leading-8 text-muted-foreground">
+                spike.land is strongest when it feels like one coherent operating layer for agentic
+                work. This section turns the message into a simple sequence: connect, compose,
+                deploy.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              {[
+                {
+                  icon: Search,
+                  title: "Connect",
+                  copy: "Attach Claude, Cursor, or VS Code to a single MCP endpoint.",
+                },
+                {
+                  icon: Workflow,
+                  title: "Compose",
+                  copy: "Mix built-in tools, custom logic, and generated flows without glue code.",
+                },
+                {
+                  icon: Layers3,
+                  title: "Deploy",
+                  copy: "Ship globally with edge-native hosting, auth, and runtime primitives.",
+                },
+              ].map((step) => (
+                <div
+                  key={step.title}
+                  className="rounded-[2rem] border border-border/60 bg-muted/30 p-6"
+                >
+                  <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <step.icon className="size-5" />
+                  </div>
+                  <h3 className="mt-5 text-xl font-black tracking-tight">{step.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-muted-foreground">{step.copy}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section className="relative overflow-hidden">
@@ -34,7 +90,7 @@ export function LandingPage() {
           {/* Decorative glow orb */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 dark:bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
 
-          <div className="max-w-5xl mx-auto px-6 relative z-10">
+          <div className="relative z-10 mx-auto max-w-5xl px-6">
             <div className="text-center max-w-3xl mx-auto mb-20 space-y-4">
               <h2
                 id="features-heading"
@@ -90,6 +146,34 @@ export function LandingPage() {
                   <p className="text-muted-foreground leading-relaxed font-medium text-sm">
                     {feature.desc}
                   </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10 grid gap-4 md:grid-cols-2">
+              {[
+                {
+                  icon: ShieldCheck,
+                  title: "Hosted security posture",
+                  desc: "Account flows, auth boundaries, and platform runtime concerns are already part of the product surface.",
+                },
+                {
+                  icon: Globe,
+                  title: "Portable by design",
+                  desc: "The core value proposition stays legible whether someone arrives from open-source, app discovery, or enterprise deployment.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-[1.75rem] border border-border/50 bg-card/70 p-6 shadow-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <item.icon className="size-4" />
+                    </div>
+                    <h3 className="text-lg font-black tracking-tight">{item.title}</h3>
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-muted-foreground">{item.desc}</p>
                 </div>
               ))}
             </div>

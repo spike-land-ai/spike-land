@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-const API_BASE = import.meta.env.DEV ? "http://localhost:8787/api" : "https://spike.land/api";
+const API_BASE = import.meta.env.DEV ? "https://local.spike.land:8787/api" : "https://spike.land/api";
 
 export interface McpAppSummary {
   slug: string;
