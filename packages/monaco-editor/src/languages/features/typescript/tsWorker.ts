@@ -155,6 +155,7 @@ export class TypeScriptWorker implements ts.LanguageServiceHost, ITypeScriptWork
 			case 99 /* ESNext */:
 				const esnext = 'lib.esnext.full.d.ts';
 				if (esnext in libFileMap || esnext in this._extraLibs) return esnext;
+				return this.getDefaultLibFileName({ ...options, target: 7 /* ES2020 */ });
 			case 7 /* ES2020 */:
 			case 6 /* ES2019 */:
 			case 5 /* ES2018 */:
