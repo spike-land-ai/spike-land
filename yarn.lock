@@ -13207,6 +13207,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mitata@npm:^1.0.34":
+  version: 1.0.34
+  resolution: "mitata@npm:1.0.34"
+  checksum: 10c0/a78a0dd18203e47f444915e64e900e9686d5b6c53c461105f79a6b4795983a2f1fa573ce6fea697ebb29c31ff31b2e7e4f0ce072e0611e0313ebef274a0a5811
+  languageName: node
+  linkType: hard
+
 "mkdirp-classic@npm:^0.5.2, mkdirp-classic@npm:^0.5.3":
   version: 0.5.3
   resolution: "mkdirp-classic@npm:0.5.3"
@@ -15854,6 +15861,7 @@ __metadata:
     eslint-plugin-react-hooks: "npm:7.0.1"
     framer-motion: "npm:^12.35.0"
     lucide-react: "npm:^0.577.0"
+    mitata: "npm:^1.0.34"
     react: "npm:^19.2.4"
     react-dom: "npm:^19.2.4"
     react-markdown: "npm:^10.1.0"
