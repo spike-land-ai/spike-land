@@ -68,7 +68,8 @@ function generatePackageJson(name, pkg, defaults) {
     },
     repository: {
       type: "git",
-      url: `https://github.com/spike-land-ai/${name}.git`,
+      url: `https://github.com/spike-land-ai/spike-land-ai.git`,
+      directory: `src/${name}`,
     },
   };
 
@@ -117,6 +118,8 @@ async function main() {
 
   console.log(`${toPublish.length} package(s) to publish:\n`);
 
+  const failures = [];
+
   for (const { name, fullName, pkg, remoteVersion } of toPublish) {
     console.log(`  ${fullName}: ${remoteVersion ?? "(new)"} → ${pkg.version}`);
 
@@ -150,8 +153,13 @@ async function main() {
       console.log(`  ✓ Published ${fullName}@${pkg.version}`);
     } catch (err) {
       console.error(`  ✗ Failed to publish ${fullName}: ${err.message}`);
-      process.exit(1);
+      failures.push(fullName);
     }
+  }
+
+  if (failures.length > 0) {
+    console.error(`\n${failures.length} package(s) failed to publish: ${failures.join(", ")}`);
+    process.exit(1);
   }
 
   if (dryRun) {

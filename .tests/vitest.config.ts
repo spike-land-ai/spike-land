@@ -79,6 +79,7 @@ const baseAliases: Record<string, string> = {
   "@spike-land-ai/block-sdk": src("core/block-sdk/core-logic/index.ts"),
   "@spike-land-ai/block-tasks": src("core/block-tasks/lazy-imports/index.ts"),
   "@spike-land-ai/mcp-server-base": src("core/server-base/core-logic/index.ts"),
+  "@spike-land-ai/mcp-image-studio": src("mcp-tools/image-studio/core-logic/index.ts"),
 };
 
 // ── Per-package config type ────────────────────────────────────────

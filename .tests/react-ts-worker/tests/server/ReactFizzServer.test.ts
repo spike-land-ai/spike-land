@@ -191,12 +191,8 @@ describe("renderToString", () => {
       render() {
         return createElement("div", null, `class:${this.props.value}`);
       }
-      static prototype = { isReactComponent: {} };
     }
-    MyClass.prototype = Object.assign(Object.create(Object.prototype), {
-      isReactComponent: {},
-      render: MyClass.prototype.render,
-    });
+    Object.assign(MyClass.prototype, { isReactComponent: {} });
     const html = renderToString(createElement(MyClass as unknown as Parameters<typeof createElement>[0], { value: "test" }));
     expect(html).toContain("class:test");
   });
