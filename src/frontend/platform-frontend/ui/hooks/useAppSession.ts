@@ -95,8 +95,8 @@ export function useAppSession(slug: string, graph: Record<string, unknown>, tool
                 if (parsed && typeof parsed === "object" && outKey in parsed) {
                   valToSave = parsed[outKey];
                 }
-              } catch {
-                // Not JSON, ignore
+              } catch (e) {
+                console.warn(`Failed to parse JSON from text block for tool ${toolName}`, e);
               }
             }
           }
