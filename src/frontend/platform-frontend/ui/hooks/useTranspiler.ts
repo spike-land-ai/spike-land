@@ -68,7 +68,7 @@ function buildPreviewHtml(transpiledCode: string): string {
     }
   }
   </script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, -apple-system, sans-serif; }

@@ -1,9 +1,10 @@
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAnalytics } from "../hooks/useAnalytics";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { useAuth } from "../hooks/useAuth";
 import { useFocusTrap } from "../hooks/useFocusTrap";
+import { useDevMode } from "@spike-land-ai/block-website/core";
 import { LoginButton } from "../components/LoginButton";
 import { AppFooter } from "../components/AppFooter";
 import { CookieConsent } from "../components/CookieConsent";
@@ -156,8 +157,7 @@ function injectJsonLd(id: string, content: string) {
   el.textContent = content;
 }
 
-const ALL_NAV_LINKS = [
-  { to: "/vibe-code", label: "Vibe", localOnly: true },
+const BASE_NAV_LINKS = [
   { to: "/tools", label: "Tools" },
   { to: "/store", label: "Store" },
   { to: "/pricing", label: "Pricing" },
@@ -166,13 +166,18 @@ const ALL_NAV_LINKS = [
   { to: "/about", label: "About" },
 ] as const;
 
-const isLocalDev = typeof window !== "undefined" && window.location.hostname === "local.spike.land";
-const NAV_LINKS = ALL_NAV_LINKS.filter((link) => !("localOnly" in link && link.localOnly) || isLocalDev);
+const VIBE_NAV_LINK = { to: "/vibe-code", label: "Vibe" } as const;
 
 export function RootLayout() {
   useAnalytics();
   const { theme, setTheme } = useDarkMode();
   useAuth();
+  const { isDeveloper } = useDevMode();
+
+  const navLinks = useMemo(() =>
+    isDeveloper ? [VIBE_NAV_LINK, ...BASE_NAV_LINKS] : [...BASE_NAV_LINKS],
+    [isDeveloper],
+  );
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [searchToast, setSearchToast] = useState(false);
@@ -285,7 +290,7 @@ export function RootLayout() {
             <div className="flex items-center gap-8">
               <Link to="/" className="text-xl font-bold">spike.land</Link>
               <nav className="hidden lg:flex items-center gap-6" aria-label="Main navigation">
-                {NAV_LINKS.map(({ to, label }) => (
+                {navLinks.map(({ to, label }) => (
                   <Link
                     key={to}
                     to={to}
@@ -314,7 +319,7 @@ export function RootLayout() {
               </button>
             </div>
             <div className="flex items-center gap-3">
-              <ThemeSwitcher theme={theme} setTheme={setTheme} />
+              {isDeveloper && <ThemeSwitcher theme={theme} setTheme={setTheme} />}
               {showGlobalChat && (
                 <button
                   onClick={() => setChatOpen((v) => !v)}
@@ -359,7 +364,7 @@ export function RootLayout() {
             aria-label="Mobile navigation"
           >
             <nav aria-label="Mobile navigation links">
-              {NAV_LINKS.map(({ to, label }) => (
+              {navLinks.map(({ to, label }) => (
                 <Link
                   key={to}
                   to={to}

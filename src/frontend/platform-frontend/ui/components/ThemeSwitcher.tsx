@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { flushSync } from "react-dom";
 import { useReducedMotion } from "framer-motion";
+import { triggerViewTransition } from "@spike-land-ai/block-website/core";
 import type { ThemePreference } from "../hooks/useDarkMode";
 
 // ─── Custom Spring physics from user's inspiration ───────────────────────────
@@ -39,50 +39,6 @@ function useSpring(target: number, k?: number, b?: number, m?: number) {
   }, [target, stiffness, damping, mass]);
 
   return val;
-}
-
-// ─── View Transition (full-page circular reveal) ─────────────────────────────
-
-function triggerViewTransition(
-  buttonRef: React.RefObject<HTMLElement | null>,
-  callback: () => void,
-) {
-  const doc = document as Document & {
-    startViewTransition?: (cb: () => void) => { ready: Promise<void> };
-  };
-
-  if (!doc.startViewTransition || !buttonRef.current) {
-    callback();
-    return;
-  }
-
-  const { top, left, width, height } = buttonRef.current.getBoundingClientRect();
-  const x = left + width / 2;
-  const y = top + height / 2;
-  const maxRadius = Math.hypot(
-    Math.max(x, window.innerWidth - x),
-    Math.max(y, window.innerHeight - y),
-  );
-
-  const transition = doc.startViewTransition(() => {
-    flushSync(callback);
-  });
-
-  transition.ready.then(() => {
-    document.documentElement.animate(
-      {
-        clipPath: [
-          `circle(0px at ${x}px ${y}px)`,
-          `circle(${maxRadius}px at ${x}px ${y}px)`,
-        ],
-      },
-      {
-        duration: 450,
-        easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-        pseudoElement: "::view-transition-new(root)",
-      },
-    );
-  });
 }
 
 // ─── SVGs from user's inspiration ───────────────────────────────────────────

@@ -72,7 +72,7 @@ function getWorker(descriptor: {
 			const workerUrl = monacoEnvironment.getWorkerUrl('workerMain.js', label);
 			return new Worker(
 				ttPolicy ? (ttPolicy.createScriptURL(workerUrl) as unknown as string) : workerUrl,
-				{ name: label, type: 'module' }
+				{ name: label }
 			);
 		}
 	}

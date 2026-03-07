@@ -5,8 +5,6 @@ import { useDarkMode } from "../ui/hooks/useDarkMode";
 import { useMonacoTypeAcquisition } from "../ui/hooks/useMonacoTypeAcquisition";
 import { MonacoCover } from "./monaco-cover/MonacoCover";
 
-// Configure Monaco web workers to load from esm.spike.land (CSP-safe).
-// We use a Blob with importScripts to bypass the cross-origin worker restriction.
 if (typeof globalThis !== "undefined") {
   (globalThis as Record<string, unknown>).MonacoEnvironment = {
     getWorkerUrl(_moduleId: string, label: string) {
@@ -22,9 +20,7 @@ if (typeof globalThis !== "undefined") {
         path = `${base}/language/html/html.worker.js`;
       }
       
-      // Monaco internally instantiates the worker with { type: 'module' }.
-      // importScripts is illegal in module workers, so we must use a dynamic or static import.
-      const blob = new Blob([`import '${path}';`], { type: 'application/javascript' });
+      const blob = new Blob([`importScripts('${path}');`], { type: 'application/javascript' });
       return URL.createObjectURL(blob);
     },
   };

@@ -16,7 +16,7 @@ const MonacoEnvironment = {
     } else if (label === "html" || label === "handlebars" || label === "razor") {
       path = `${baseUrl}/language/html/html.worker.js`;
     }
-    const blob = new Blob([`import '${path}';`], { type: 'application/javascript' });
+    const blob = new Blob([`importScripts('${path}');`], { type: 'application/javascript' });
     return URL.createObjectURL(blob);
   },
 };

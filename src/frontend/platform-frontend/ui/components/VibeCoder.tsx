@@ -100,6 +100,11 @@ function ResizeDivider({ onDrag, isDarkMode }: DividerProps) {
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     dragging.current = true;
     lastX.current = e.clientX;
+    // Prevent iframes from swallowing mouse up/move events
+    const iframes = document.querySelectorAll("iframe");
+    iframes.forEach((iframe) => {
+      iframe.style.pointerEvents = "none";
+    });
     e.preventDefault();
   }, []);
 
@@ -111,7 +116,14 @@ function ResizeDivider({ onDrag, isDarkMode }: DividerProps) {
       onDrag(delta);
     };
     const onMouseUp = () => {
-      dragging.current = false;
+      if (dragging.current) {
+        dragging.current = false;
+        // Restore iframe pointer events
+        const iframes = document.querySelectorAll("iframe");
+        iframes.forEach((iframe) => {
+          iframe.style.pointerEvents = "";
+        });
+      }
     };
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
@@ -601,7 +613,7 @@ function PreviewPanel({ appId, code, isDarkMode, className }: PreviewPanelProps)
           <iframe
             title="Live preview"
             srcDoc={html}
-            sandbox="allow-scripts allow-same-origin"
+            sandbox="allow-scripts"
             className="w-full h-full border-0"
           />
         ) : code.trim() ? (
