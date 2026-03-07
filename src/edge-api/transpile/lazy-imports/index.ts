@@ -122,6 +122,24 @@ export default {
     const originParam = params.get("origin");
     const origin = originParam === "testing" ? "https://testing.spike.land" : "https://spike.land";
 
+    if (request.method === "OPTIONS") {
+      const requestOrigin = request.headers.get("Origin");
+      let allowOrigin = "https://spike.land";
+      if (requestOrigin && (requestOrigin.endsWith(".spike.land") || requestOrigin.startsWith("http://localhost:") || requestOrigin.startsWith("https://localhost:") || requestOrigin.startsWith("http://127.0.0.1:") || requestOrigin.startsWith("https://127.0.0.1:"))) {
+        allowOrigin = requestOrigin;
+      }
+
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": allowOrigin,
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "cache-control": "no-cache",
+        },
+      });
+    }
+
     if (request.method === "GET") {
       return handleGetRequest(codeSpace, origin);
     }
