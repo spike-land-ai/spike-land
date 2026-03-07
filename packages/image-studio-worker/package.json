@@ -9,7 +9,7 @@
     "dev": "npm run build:frontend && wrangler dev",
     "dev:all": "npm run build:frontend & wrangler dev",
     "build": "npm run build:frontend && echo 'Worker uses [assets] directive — frontend/dist is ready'",
-    "build:frontend": "cd frontend && npm ci && npm run build",
+    "build:frontend": "cd frontend && npm install --no-audit --no-fund && npm run build",
     "db:migrate": "wrangler d1 migrations apply IMAGE_DB --remote",
     "deploy": "bash deploy.sh",
     "deploy:force": "FORCE_DEPLOY=1 bash deploy.sh",
