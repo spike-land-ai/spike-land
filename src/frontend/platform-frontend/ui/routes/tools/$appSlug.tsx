@@ -95,7 +95,7 @@ export function AppSessionPage() {
                   {Object.entries(session.outputs).map(([key, val]) => (
                     <div key={key} className="bg-muted/50 p-2 rounded-lg border border-border/50">
                       <div className="text-[10px] font-mono font-bold text-primary mb-1 break-all">{key}</div>
-                      <div className="text-xs font-mono text-muted-foreground truncate" title={String(val)}>
+                      <div className="text-xs font-mono text-muted-foreground truncate" title={typeof val === 'object' ? JSON.stringify(val) : String(val)}>
                         {typeof val === 'object' ? JSON.stringify(val) : String(val)}
                       </div>
                     </div>
