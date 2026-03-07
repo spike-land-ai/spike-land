@@ -1,6 +1,6 @@
 import { chromium, type Page } from "playwright";
 
-const BASE_URL = "https://local.spike.land:5173";
+const BASE_URL = "https://127.0.0.1:5173";
 
 async function runTest() {
   const browser = await chromium.launch({ headless: true });
