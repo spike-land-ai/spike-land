@@ -189,7 +189,7 @@ jobs:
           (cd packages/spike-land-backend && npm run deploy) &
           PID_BACKEND=$!
           SHORT_SHA=$(git rev-parse --short HEAD)
-          (cd packages/spike-edge && npx wrangler deploy --minify --var CACHE_VERSION:"$SHORT_SHA") &
+          (cd packages/spike-edge && npx wrangler deploy --minify) &
           PID_EDGE=$!
 
           wait $PID_BACKEND || { echo "FATAL: spike-land-backend deploy failed"; exit 1; }

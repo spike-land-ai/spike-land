@@ -4,6 +4,7 @@ import { getClientId, sendGA4Events } from "../../lazy-imports/ga4.js";
 import { safeCtx, withEdgeCache } from "../lib/edge-cache.js";
 import { getBlogPostRow } from "./blog.js";
 import { trackPageView } from "../../core-logic/analytics.js";
+import { getCacheVersion } from "../lib/cache-version.js";
 
 const spa = new Hono<{ Bindings: Env }>();
 
@@ -32,7 +33,8 @@ spa.get("/*", async (c) => {
     const isImmutable = IMMUTABLE_EXTENSIONS.has(ext) && isHashedAsset(key);
     const ttl = isImmutable ? 31536000 : 3600;
 
-    const cacheKey = `${c.req.url}?_cv=${c.env.CACHE_VERSION ?? "v1"}`;
+    const cv = await getCacheVersion(c.env.SPA_ASSETS);
+    const cacheKey = `${c.req.url}?_cv=${cv}`;
     const cached = await withEdgeCache(c.req.raw, safeCtx(c), async () => {
       const object = await c.env.SPA_ASSETS.get(key);
       if (!object) return null;
@@ -220,7 +222,7 @@ spa.get("/*", async (c) => {
         <meta name="twitter:description" content="${escapeHtml(meta.description)}" />
         <meta name="twitter:site" content="@ai_spike_land" />`;
         html = html.replace("</head>", `${ogTags}\n</head>`);
-        
+
         if (meta.ssrContent) {
           html = html.replace("</body>", `<div id="ssr-content" style="display:none">${meta.ssrContent}</div>\n</body>`);
         }
