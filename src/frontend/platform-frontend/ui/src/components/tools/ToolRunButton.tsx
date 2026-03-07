@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, Lock, Unlock } from "lucide-react";
-import { JsonSchemaForm } from "./JsonSchemaForm";
+import { JsonSchemaForm, type JsonSchema } from "./JsonSchemaForm";
 import { ToolResultInline } from "./ToolResultInline";
 import { useMcpToolCall, useMcpTools } from "../../hooks/useMcp";
 
@@ -86,7 +86,7 @@ export function ToolRunButton({
       {expanded && isAvailable && (
         <div className="p-4 border-t border-border bg-background">
           <JsonSchemaForm
-            schema={toolSchema as unknown as { type: "object"; properties?: Record<string, any> }}
+            schema={toolSchema as JsonSchema}
             onChange={setFormData}
             onSubmit={() => handleSubmit(formData)}
             isPending={isPending}

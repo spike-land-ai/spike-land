@@ -9,7 +9,7 @@ interface JsonSchemaProperty {
   items?: JsonSchemaProperty; // For arrays
 }
 
-interface JsonSchema {
+export interface JsonSchema {
   type: "object";
   properties?: Record<string, JsonSchemaProperty>;
   required?: string[];
