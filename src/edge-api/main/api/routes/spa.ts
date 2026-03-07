@@ -231,7 +231,7 @@ spa.get("/*", async (c) => {
       status: isKnownRoute ? 200 : 404,
       headers: {
         "content-type": "text/html; charset=utf-8",
-        "cache-control": "no-cache",
+        "cache-control": "private, no-cache, no-store, must-revalidate",
       },
     });
 
