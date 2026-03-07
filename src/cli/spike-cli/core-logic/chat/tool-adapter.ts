@@ -6,6 +6,8 @@
 import type { NamespacedTool, ServerManager } from "../multiplexer/server-manager";
 import type { Tool } from "../../ai/client";
 import { log } from "../util/logger";
+import { createToolPipeline, type ToolExecutorOptions, type ToolCallCtx, type ToolExecResult } from "./tool-pipeline";
+import { buildNotFoundError, buildUpstreamError, formatToolError } from "./tool-errors";
 
 /**
  * Ensure input schema has `type: "object"` at top level,
@@ -92,7 +94,39 @@ export async function executeToolCall(
     const text = callResult.content.map((c) => c.text ?? JSON.stringify(c)).join("\n");
     return { result: text, isError: callResult.isError ?? false };
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return { result: `Tool error: ${message}`, isError: true };
+    const structured = buildUpstreamError(name, err);
+    return { result: formatToolError(structured), isError: true };
   }
+}
+
+/**
+ * Create a pipeline-wrapped tool executor that routes through ServerManager.
+ * Adds validation, timeout, retry, caching, and logging middleware.
+ */
+export function createToolExecutor(
+  manager: ServerManager,
+  options?: ToolExecutorOptions,
+): { execute: (name: string, input: Record<string, unknown>, schema?: Record<string, unknown>) => Promise<ToolExecResult> } {
+  const baseHandler = async (ctx: ToolCallCtx): Promise<ToolExecResult> => {
+    try {
+      const callResult = await manager.callTool(ctx.toolName, ctx.input);
+      const text = callResult.content.map((c) => c.text ?? JSON.stringify(c)).join("\n");
+      return { result: text, isError: callResult.isError ?? false };
+    } catch (err) {
+      const allTools = manager.getAllTools();
+      // Check if tool not found
+      const toolExists = allTools.some((t) => t.namespacedName === ctx.toolName);
+      if (!toolExists) {
+        return { result: formatToolError(buildNotFoundError(ctx.toolName, allTools)), isError: true };
+      }
+      return { result: formatToolError(buildUpstreamError(ctx.toolName, err)), isError: true };
+    }
+  };
+
+  const pipeline = createToolPipeline(baseHandler, options);
+
+  return {
+    execute: (name: string, input: Record<string, unknown>, schema?: Record<string, unknown>) =>
+      pipeline({ toolName: name, input, inputSchema: schema }),
+  };
 }

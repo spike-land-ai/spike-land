@@ -47,6 +47,20 @@ function Button({
     asChild?: boolean | undefined;
     loading?: boolean;
   }) {
+  if (asChild && !React.isValidElement(children)) {
+    return (
+      <button
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        disabled={disabled || loading}
+        aria-busy={loading}
+        {...props}
+      >
+        {children}
+      </button>
+    );
+  }
+
   const Comp = asChild ? Slot : "button";
 
   return (

@@ -39,7 +39,7 @@ export class ChatClient {
     this.systemPrompt = options.systemPrompt;
   }
 
-  createStream(messages: Message[], tools?: Tool[]) {
+  createStream(messages: Message[], tools?: Tool[], systemPromptOverride?: string) {
     log(`Sending ${messages.length} messages to ${this.model}`);
 
     const params: Anthropic.MessageCreateParamsStreaming = {
@@ -49,8 +49,9 @@ export class ChatClient {
       stream: true,
     };
 
-    if (this.systemPrompt) {
-      params.system = this.systemPrompt;
+    const system = systemPromptOverride ?? this.systemPrompt;
+    if (system) {
+      params.system = system;
     }
 
     if (tools && tools.length > 0) {
