@@ -9,7 +9,11 @@ import { apiUrl } from "../core-logic/api";
 
 function MonacoEditorWrapper({ value, onChange }: { value: string, onChange: (v: string) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<{ getValue(): string; dispose(): void; onDidChangeModelContent(cb: () => void): void } | null>(null);
+  const onChangeRef = useRef(onChange);
+  const valueRef = useRef(value);
+  onChangeRef.current = onChange;
+  valueRef.current = value;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -18,7 +22,7 @@ function MonacoEditorWrapper({ value, onChange }: { value: string, onChange: (v:
     import("monaco-editor").then((monaco) => {
       if (!isMounted) return;
       editorRef.current = monaco.editor.create(containerRef.current!, {
-        value,
+        value: valueRef.current,
         language: "markdown",
         theme: "vs-dark",
         minimap: { enabled: false },
@@ -30,9 +34,9 @@ function MonacoEditorWrapper({ value, onChange }: { value: string, onChange: (v:
       });
 
       editorRef.current.onDidChangeModelContent(() => {
-        onChange(editorRef.current.getValue());
+        onChangeRef.current(editorRef.current!.getValue());
       });
-    }).catch(err => {
+    }).catch((err: unknown) => {
       console.error("Failed to load monaco-editor", err);
     });
 
@@ -42,7 +46,7 @@ function MonacoEditorWrapper({ value, onChange }: { value: string, onChange: (v:
         editorRef.current.dispose();
       }
     };
-  }, []); // Run once on mount
+  }, []);
 
   return <div ref={containerRef} className="w-full h-full" />;
 }

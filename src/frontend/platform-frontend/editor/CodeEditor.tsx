@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { Suspense, useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Copy, Check, FileCode } from "lucide-react";
 import { cn } from "../styling/cn";
 import { useDarkMode } from "../ui/hooks/useDarkMode";
@@ -23,6 +23,46 @@ if (typeof globalThis !== "undefined") {
   };
 }
 
+interface LocalMonacoEditorProps {
+  value: string;
+  language?: string;
+  theme?: string;
+  fileName?: string;
+  onChange?: (value: string) => void;
+  options?: Record<string, unknown>;
+  onMount?: (editor: MonacoEditorInstance, monaco: MonacoModule) => void;
+  beforeMount?: (monaco: MonacoModule) => void;
+}
+
+interface MonacoEditorInstance {
+  getValue(): string;
+  setValue(value: string): void;
+  dispose(): void;
+  focus(): void;
+  getModel(): { uri: { path: string } } | null;
+  onDidChangeModelContent(cb: () => void): void;
+  updateOptions(options: Record<string, unknown>): void;
+}
+
+interface MonacoModule {
+  editor: {
+    create(element: HTMLElement, options: Record<string, unknown>): MonacoEditorInstance;
+    createModel(value: string, language?: string, uri?: unknown): unknown;
+    setTheme(theme: string): void;
+  };
+  Uri: { parse(uri: string): unknown };
+  languages?: { typescript?: MonacoTypescript };
+  typescript?: MonacoTypescript;
+}
+
+interface MonacoTypescript {
+  typescriptDefaults?: {
+    setCompilerOptions(options: Record<string, unknown>): void;
+    setDiagnosticsOptions(options: Record<string, unknown>): void;
+    setEagerModelSync(value: boolean): void;
+  };
+}
+
 function LocalMonacoEditor({
   value,
   language,
@@ -32,44 +72,41 @@ function LocalMonacoEditor({
   options,
   onMount,
   beforeMount,
-}: any) {
+}: LocalMonacoEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<MonacoEditorInstance | null>(null);
+  const propsRef = useRef({ value, language, theme, fileName, onChange, options, onMount, beforeMount });
+  propsRef.current = { value, language, theme, fileName, onChange, options, onMount, beforeMount };
 
   useEffect(() => {
     if (!containerRef.current) return;
     let isMounted = true;
+    const props = propsRef.current;
 
-    import("monaco-editor").then((monaco) => {
+    import("monaco-editor").then((monaco: MonacoModule) => {
       if (!isMounted) return;
 
-      if (beforeMount) {
-        beforeMount(monaco);
+      if (props.beforeMount) {
+        props.beforeMount(monaco);
       }
 
-      const uri = monaco.Uri.parse(`file:///${fileName || 'file.tsx'}`);
-      let model = monaco.editor.getModel(uri);
-      if (!model) {
-        model = monaco.editor.createModel(value, language, uri);
-      } else {
-        model.setValue(value);
-        monaco.editor.setModelLanguage(model, language);
-      }
+      const uri = monaco.Uri.parse(`file:///${props.fileName || 'file.tsx'}`);
+      const model = monaco.editor.createModel(props.value, props.language, uri);
 
       editorRef.current = monaco.editor.create(containerRef.current!, {
         model,
-        theme,
-        ...options,
+        theme: props.theme,
+        ...props.options,
       });
 
-      if (onMount) {
-        onMount(editorRef.current, monaco);
+      if (props.onMount) {
+        props.onMount(editorRef.current, monaco);
       }
 
       editorRef.current.onDidChangeModelContent(() => {
-        onChange(editorRef.current.getValue());
+        propsRef.current.onChange?.(editorRef.current!.getValue());
       });
-    }).catch(err => {
+    }).catch((err: unknown) => {
       console.error("Failed to load monaco-editor", err);
     });
 
@@ -201,7 +238,7 @@ export function CodeEditor({
     }
   }, [value]);
 
-  const handleBeforeMount = useCallback((monaco: any) => {
+  const handleBeforeMount = useCallback((monaco: MonacoModule) => {
     // Local monaco package exports typescript directly on the root object
     const typescript = monaco?.typescript || monaco?.languages?.typescript;
     if (!typescript) return;
@@ -238,7 +275,7 @@ export function CodeEditor({
   }, []);
 
   // Focus the editor as soon as it mounts so users can type immediately.
-  const handleMount = useCallback((editor: any, monaco: any) => {
+  const handleMount = useCallback((editor: MonacoEditorInstance, monaco: MonacoModule) => {
     editor.focus();
     setMonacoInstance(monaco);
   }, []);
