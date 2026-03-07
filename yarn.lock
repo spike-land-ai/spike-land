@@ -14497,7 +14497,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^18.2.0, react-dom@npm:^18.3.1":
+"react-dom@npm:^18.2.0":
   version: 18.3.1
   resolution: "react-dom@npm:18.3.1"
   dependencies:
@@ -14712,7 +14712,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^18.2.0, react@npm:^18.3.1":
+"react@npm:^18.2.0":
   version: 18.3.1
   resolution: "react@npm:18.3.1"
   dependencies:
@@ -15898,8 +15898,8 @@ __metadata:
     eslint-plugin-react-hooks: "npm:7.0.1"
     framer-motion: "npm:^12.35.0"
     lucide-react: "npm:^0.577.0"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
+    react: "npm:^19.2.4"
+    react-dom: "npm:^19.2.4"
     react-markdown: "npm:^10.1.0"
     remotion: "npm:^4.0.100"
     tailwind-merge: "npm:^3.5.0"
