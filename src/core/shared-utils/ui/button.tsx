@@ -71,7 +71,6 @@ function Button({
       aria-busy={loading}
       {...props}
     >
-<<<<<<< HEAD
       {asChild ? (
         children
       ) : (
@@ -80,16 +79,6 @@ function Button({
           {children}
         </>
       )}
-=======
-      {asChild
-        ? children
-        : (
-          <>
-            {loading && <Loader2 className="animate-spin" aria-hidden="true" />}
-            {children}
-          </>
-        )}
->>>>>>> fix/button-aschild-crash
     </Comp>
   );
 }
