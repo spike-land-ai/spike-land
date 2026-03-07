@@ -89,8 +89,12 @@ async function main() {
   console.log(`Generated monaco-editor bundle hash: ${finalHash}`);
 
   let oldHash = "";
-  if (fs.existsSync(CACHE_FILE)) {
-    oldHash = fs.readFileSync(CACHE_FILE, "utf-8").trim();
+  try {
+    oldHash = (await fs.promises.readFile(CACHE_FILE, "utf-8")).trim();
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
   }
 
   const R2_BUCKET = "spike-app-assets";
