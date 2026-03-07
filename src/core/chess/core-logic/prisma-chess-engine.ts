@@ -164,86 +164,65 @@ export interface UpdateManyResult {
   count: number;
 }
 
-// ---- Where clause types ----
-
-interface WhereUniqueId {
-  id: string;
-}
-
-interface WhereUniqueIdUserId {
-  id: string;
-  userId: string;
-}
-
-// ---- Model delegate types ----
-
-interface ChessGameDelegate {
-  create(args: { data: ChessGameCreateInput }): Promise<ChessGameRecord>;
-  findUnique(args: {
-    where: WhereUniqueId;
-    include?: { moves?: boolean };
-  }): Promise<ChessGameRecord | null>;
-  update(args: { where: WhereUniqueId; data: ChessGameUpdateInput }): Promise<ChessGameRecord>;
-  findMany(args: {
-    where?: Record<string, unknown>;
-    select?: Record<string, boolean>;
-    orderBy?: Record<string, string>;
-  }): Promise<ChessGameRecord[]>;
-  updateMany(args: {
-    where: Record<string, unknown>;
-    data: Record<string, unknown>;
-  }): Promise<UpdateManyResult>;
-}
-
-interface ChessPlayerDelegate {
-  create(args: { data: ChessPlayerCreateInput }): Promise<ChessPlayerRecord>;
-  findUnique(args: { where: WhereUniqueId }): Promise<ChessPlayerRecord | null>;
-  update(args: {
-    where: WhereUniqueId | WhereUniqueIdUserId;
-    data: ChessPlayerUpdateInput;
-  }): Promise<ChessPlayerRecord>;
-  findMany(args: {
-    where?: Record<string, unknown>;
-    select?: Record<string, boolean>;
-  }): Promise<ChessPlayerRecord[]>;
-  delete(args: { where: WhereUniqueIdUserId }): Promise<ChessPlayerRecord>;
-}
-
-interface ChessMoveDelegate {
-  create(args: { data: ChessMoveCreateInput }): Promise<ChessMoveRecord>;
-  findMany(args: {
-    where?: Record<string, unknown>;
-    orderBy?: Record<string, string>;
-  }): Promise<ChessMoveRecord[]>;
-}
-
-interface ChessChallengeDelegate {
-  create(args: { data: ChessChallengeCreateInput }): Promise<ChessChallengeRecord>;
-  findUnique(args: { where: WhereUniqueId }): Promise<ChessChallengeRecord | null>;
-  update(args: {
-    where: WhereUniqueId;
-    data: ChessChallengeUpdateInput;
-  }): Promise<ChessChallengeRecord>;
-  findMany(args: {
-    where?: Record<string, unknown>;
-    select?: Record<string, boolean>;
-  }): Promise<ChessChallengeRecord[]>;
-  updateMany(args: {
-    where: Record<string, unknown>;
-    data: Record<string, unknown>;
-  }): Promise<UpdateManyResult>;
-}
-
-interface NotificationDelegate {
-  create(args: { data: NotificationCreateInput }): Promise<NotificationRecord>;
-}
+// ---- PrismaClient interface ----
 
 export interface PrismaClientLike {
-  chessGame: ChessGameDelegate;
-  chessPlayer: ChessPlayerDelegate;
-  chessMove: ChessMoveDelegate;
-  chessChallenge: ChessChallengeDelegate;
-  notification: NotificationDelegate;
+  chessGame: {
+    create(args: { data: ChessGameCreateInput }): Promise<ChessGameRecord>;
+    findUnique(args: {
+      where: { id: string };
+      include?: { moves?: boolean };
+    }): Promise<ChessGameRecord | null>;
+    update(args: { where: { id: string }; data: ChessGameUpdateInput }): Promise<ChessGameRecord>;
+    findMany(args: {
+      where?: Record<string, unknown>;
+      select?: Record<string, boolean>;
+      orderBy?: Record<string, string>;
+    }): Promise<ChessGameRecord[]>;
+    updateMany(args: {
+      where: Record<string, unknown>;
+      data: Record<string, unknown>;
+    }): Promise<UpdateManyResult>;
+  };
+  chessPlayer: {
+    create(args: { data: ChessPlayerCreateInput }): Promise<ChessPlayerRecord>;
+    findUnique(args: { where: { id: string } }): Promise<ChessPlayerRecord | null>;
+    update(args: {
+      where: { id: string } | { id: string; userId: string };
+      data: ChessPlayerUpdateInput;
+    }): Promise<ChessPlayerRecord>;
+    findMany(args: {
+      where?: Record<string, unknown>;
+      select?: Record<string, boolean>;
+    }): Promise<ChessPlayerRecord[]>;
+    delete(args: { where: { id: string; userId: string } }): Promise<ChessPlayerRecord>;
+  };
+  chessMove: {
+    create(args: { data: ChessMoveCreateInput }): Promise<ChessMoveRecord>;
+    findMany(args: {
+      where?: Record<string, unknown>;
+      orderBy?: Record<string, string>;
+    }): Promise<ChessMoveRecord[]>;
+  };
+  chessChallenge: {
+    create(args: { data: ChessChallengeCreateInput }): Promise<ChessChallengeRecord>;
+    findUnique(args: { where: { id: string } }): Promise<ChessChallengeRecord | null>;
+    update(args: {
+      where: { id: string };
+      data: ChessChallengeUpdateInput;
+    }): Promise<ChessChallengeRecord>;
+    findMany(args: {
+      where?: Record<string, unknown>;
+      select?: Record<string, boolean>;
+    }): Promise<ChessChallengeRecord[]>;
+    updateMany(args: {
+      where: Record<string, unknown>;
+      data: Record<string, unknown>;
+    }): Promise<UpdateManyResult>;
+  };
+  notification: {
+    create(args: { data: NotificationCreateInput }): Promise<NotificationRecord>;
+  };
   $executeRaw(strings: TemplateStringsArray, ...values: unknown[]): Promise<number>;
 }
 
@@ -258,45 +237,35 @@ const notConfigured = (model: string, method: string) => (): never => {
   );
 };
 
-const makeGameStub = (): ChessGameDelegate => ({
-  create: notConfigured("chessGame", "create"),
-  findUnique: notConfigured("chessGame", "findUnique"),
-  update: notConfigured("chessGame", "update"),
-  findMany: notConfigured("chessGame", "findMany"),
-  updateMany: notConfigured("chessGame", "updateMany"),
-});
-
-const makePlayerStub = (): ChessPlayerDelegate => ({
-  create: notConfigured("chessPlayer", "create"),
-  findUnique: notConfigured("chessPlayer", "findUnique"),
-  update: notConfigured("chessPlayer", "update"),
-  findMany: notConfigured("chessPlayer", "findMany"),
-  delete: notConfigured("chessPlayer", "delete"),
-});
-
-const makeMoveStub = (): ChessMoveDelegate => ({
-  create: notConfigured("chessMove", "create"),
-  findMany: notConfigured("chessMove", "findMany"),
-});
-
-const makeChallengeStub = (): ChessChallengeDelegate => ({
-  create: notConfigured("chessChallenge", "create"),
-  findUnique: notConfigured("chessChallenge", "findUnique"),
-  update: notConfigured("chessChallenge", "update"),
-  findMany: notConfigured("chessChallenge", "findMany"),
-  updateMany: notConfigured("chessChallenge", "updateMany"),
-});
-
-const makeNotificationStub = (): NotificationDelegate => ({
-  create: notConfigured("notification", "create"),
-});
-
 const prismaStub: PrismaClientLike = {
-  chessGame: makeGameStub(),
-  chessPlayer: makePlayerStub(),
-  chessMove: makeMoveStub(),
-  chessChallenge: makeChallengeStub(),
-  notification: makeNotificationStub(),
+  chessGame: {
+    create: notConfigured("chessGame", "create"),
+    findUnique: notConfigured("chessGame", "findUnique"),
+    update: notConfigured("chessGame", "update"),
+    findMany: notConfigured("chessGame", "findMany"),
+    updateMany: notConfigured("chessGame", "updateMany"),
+  },
+  chessPlayer: {
+    create: notConfigured("chessPlayer", "create"),
+    findUnique: notConfigured("chessPlayer", "findUnique"),
+    update: notConfigured("chessPlayer", "update"),
+    findMany: notConfigured("chessPlayer", "findMany"),
+    delete: notConfigured("chessPlayer", "delete"),
+  },
+  chessMove: {
+    create: notConfigured("chessMove", "create"),
+    findMany: notConfigured("chessMove", "findMany"),
+  },
+  chessChallenge: {
+    create: notConfigured("chessChallenge", "create"),
+    findUnique: notConfigured("chessChallenge", "findUnique"),
+    update: notConfigured("chessChallenge", "update"),
+    findMany: notConfigured("chessChallenge", "findMany"),
+    updateMany: notConfigured("chessChallenge", "updateMany"),
+  },
+  notification: {
+    create: notConfigured("notification", "create"),
+  },
   $executeRaw: notConfigured("$executeRaw", "call"),
 };
 

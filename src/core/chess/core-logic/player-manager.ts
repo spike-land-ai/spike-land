@@ -1,20 +1,4 @@
-interface ChessPlayer {
-  id: string;
-  userId: string;
-  name: string;
-  avatar: string | null;
-  elo: number;
-  bestElo: number;
-  wins: number;
-  losses: number;
-  draws: number;
-  streak: number;
-  soundEnabled: boolean;
-  isOnline: boolean;
-  lastSeenAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import type { ChessPlayerRecord } from "./prisma-chess-engine";
 
 interface PlayerStats {
   elo: number;
@@ -31,7 +15,7 @@ export async function createPlayer(
   userId: string,
   name: string,
   avatar?: string,
-): Promise<ChessPlayer> {
+): Promise<ChessPlayerRecord> {
   const prisma = (await import("./prisma-chess-engine")).default;
   return prisma.chessPlayer.create({
     data: {
@@ -42,12 +26,12 @@ export async function createPlayer(
   });
 }
 
-export async function getPlayer(playerId: string): Promise<ChessPlayer | null> {
+export async function getPlayer(playerId: string): Promise<ChessPlayerRecord | null> {
   const prisma = (await import("./prisma-chess-engine")).default;
   return prisma.chessPlayer.findUnique({ where: { id: playerId } });
 }
 
-export async function getPlayersByUser(userId: string): Promise<ChessPlayer[]> {
+export async function getPlayersByUser(userId: string): Promise<ChessPlayerRecord[]> {
   const prisma = (await import("./prisma-chess-engine")).default;
   return prisma.chessPlayer.findMany({
     where: { userId },
@@ -75,7 +59,7 @@ export async function updatePlayer(
   playerId: string,
   userId: string,
   data: { name?: string; avatar?: string; soundEnabled?: boolean },
-): Promise<ChessPlayer> {
+): Promise<ChessPlayerRecord> {
   const prisma = (await import("./prisma-chess-engine")).default;
   try {
     return await prisma.chessPlayer.update({
@@ -107,7 +91,7 @@ export async function setPlayerOnline(playerId: string, isOnline: boolean): Prom
   });
 }
 
-export async function listOnlinePlayers(): Promise<ChessPlayer[]> {
+export async function listOnlinePlayers(): Promise<ChessPlayerRecord[]> {
   const prisma = (await import("./prisma-chess-engine")).default;
   return prisma.chessPlayer.findMany({
     where: { isOnline: true },

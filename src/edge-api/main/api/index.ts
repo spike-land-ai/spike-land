@@ -112,10 +112,7 @@ app.use("*", async (c, next) => {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      // 'strict-dynamic' causes modern browsers to ignore 'unsafe-inline', hardening against XSS.
-      // 'unsafe-inline' is retained for backward compatibility with older browsers and Vite dev.
-      // TODO: migrate to per-request nonces to drop 'unsafe-inline' entirely.
-      "script-src 'self' 'strict-dynamic' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://static.cloudflareinsights.com https://esm.spike.land",
+      "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob: https://static.cloudflareinsights.com https://esm.spike.land",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://esm.spike.land",
       "img-src 'self' https://*.r2.dev https://*.r2.cloudflarestorage.com https://avatars.githubusercontent.com https://*.googleusercontent.com data: blob:",
       "font-src 'self' https://fonts.gstatic.com https://esm.spike.land data:",

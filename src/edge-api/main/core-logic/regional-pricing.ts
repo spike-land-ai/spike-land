@@ -85,7 +85,7 @@ export function getRegionalPricing(countryCode: string): {
 } {
   const cc = (countryCode ?? "").toUpperCase();
   const currency = COUNTRY_TO_CURRENCY[cc] ?? "USD";
-  const prices = REGIONAL_PRICES[currency] ?? REGIONAL_PRICES["USD"];
+  const prices = REGIONAL_PRICES[currency] ?? REGIONAL_PRICES.USD;
   const fmt = (n: number) => formatPrice(n, prices.currency);
 
   const proAnnualPerMonth = Math.round(prices.pro.annual / 12);

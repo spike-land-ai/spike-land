@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
@@ -6,16 +6,6 @@ import { Pencil, X, GitPullRequest } from "lucide-react";
 import { Button } from "../lazy-imports/button";
 import { cn } from "@spike-land-ai/shared";
 import { apiUrl } from "../core-logic/api";
-
-// Lazy-load Monaco if available; falls back to textarea
-type LazyMod = { default: React.ComponentType<Record<string, unknown>> };
-const FallbackEditor: React.FC<Record<string, unknown>> = () => null;
-const MonacoEditor = lazy(
-  (): Promise<LazyMod> =>
-    (import("@monaco-editor/react") as Promise<LazyMod>).catch(
-      (): LazyMod => ({ default: FallbackEditor }),
-    ),
-);
 
 function isDevMode(): boolean {
   if (typeof window === "undefined") return false;
@@ -42,7 +32,6 @@ export function ContentCreatorMode({
   const [content, setContent] = useState(initialContent);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
-  const [monacoFailed, setMonacoFailed] = useState(false);
 
   const showToast = useCallback((message: string, type: "success" | "error") => {
     setToast({ message, type });
@@ -132,31 +121,12 @@ export function ContentCreatorMode({
             </span>
           </div>
           <div className="flex-1 overflow-hidden">
-            {!monacoFailed ? (
-              <Suspense
-                fallback={
-                  <textarea
-                    className="w-full h-full resize-none bg-background font-mono text-sm p-4 focus:outline-none"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    spellCheck={false}
-                  />
-                }
-              >
-                <MonacoEditorWrapper
-                  value={content}
-                  onChange={setContent}
-                  onError={() => setMonacoFailed(true)}
-                />
-              </Suspense>
-            ) : (
-              <textarea
-                className="w-full h-full resize-none bg-background font-mono text-sm p-4 focus:outline-none"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                spellCheck={false}
-              />
-            )}
+            <textarea
+              className="w-full h-full resize-none bg-background font-mono text-sm p-4 focus:outline-none"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              spellCheck={false}
+            />
           </div>
         </div>
 
@@ -186,40 +156,6 @@ export function ContentCreatorMode({
         </div>
       </div>
     </div>
-  );
-}
-
-interface MonacoEditorWrapperProps {
-  value: string;
-  onChange: (value: string) => void;
-  onError: () => void;
-}
-
-function MonacoEditorWrapper({ value, onChange, onError }: MonacoEditorWrapperProps) {
-  return (
-    <Suspense fallback={null}>
-      <MonacoEditorInner value={value} onChange={onChange} onError={onError} />
-    </Suspense>
-  );
-}
-
-function MonacoEditorInner({ value, onChange }: MonacoEditorWrapperProps) {
-  return (
-    <MonacoEditor
-      height="100%"
-      language="markdown"
-      value={value}
-      onChange={(v: string | undefined) => onChange(v ?? "")}
-      theme="vs-dark"
-      options={{
-        minimap: { enabled: false },
-        wordWrap: "on",
-        fontSize: 13,
-        lineNumbers: "on",
-        scrollBeyondLastLine: false,
-        automaticLayout: true,
-      }}
-    />
   );
 }
 

@@ -14,7 +14,6 @@
     "deploy:force": "FORCE_DEPLOY=1 bash deploy.sh"
   },
   "dependencies": {
-    "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@spike-land-ai/block-website": "workspace:*",
     "@tanstack/react-query": "^5.90.21",

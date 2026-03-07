@@ -32,12 +32,9 @@
     "noEmit": true,
     "paths": {
       "@/*": [
-        "./src/frontend/monaco-/*"
+        "./src/frontend/monaco-editor/*"
       ],
-      "@/generated/prisma": [
-        "./src/core/chess/core-logic/prisma.ts"
-      ],
-      "@spike-land-ai/shared": [
+"@spike-land-ai/shared": [
         "./src/core/shared-utils/core-logic/index.ts"
       ],
       "@spike-land-ai/shared/*": [
