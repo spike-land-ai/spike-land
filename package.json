@@ -25,6 +25,8 @@
     "bazdmeg:verbose": "npx tsx scripts/bazdmeg.ts --verbose",
     "COVERAGE:INCREMENTAL": "npx tsx scripts/incremental-coverage.ts",
     "generate:apple-secret": "npx tsx scripts/generate-apple-secret.ts",
+    "seed:apps": "npx tsx scripts/seed-apps.ts",
+    "seed:apps:remote": "npx tsx scripts/seed-apps.ts --remote",
     "seed:blog": "npx tsx scripts/seed-blog.ts",
     "seed:blog:remote": "npx tsx scripts/seed-blog.ts --remote",
     "reorganize": "npx tsx scripts/reorganize.ts",

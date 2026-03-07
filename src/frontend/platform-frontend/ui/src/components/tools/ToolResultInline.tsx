@@ -50,9 +50,13 @@ export function ToolResultInline({ result, error }: ToolResultInlineProps) {
       <div className="space-y-3">
         {content.map((block: Record<string, unknown>, idx: number) => {
           if (block.type === "text") {
+            const textContent = typeof block.text === "object"
+              ? JSON.stringify(block.text, null, 2)
+              : String(block.text);
+
             return (
               <div key={idx} className="font-mono text-xs whitespace-pre-wrap break-words bg-background p-2 rounded border border-border">
-                {String(block.text)}
+                {textContent}
               </div>
             );
           }
@@ -64,14 +68,14 @@ export function ToolResultInline({ result, error }: ToolResultInlineProps) {
             );
           }
           if (block.type === "resource") {
-             const res = block.resource as { uri?: string; text?: string } | undefined;
-             return (
-               <div key={idx} className="font-mono text-xs whitespace-pre-wrap break-words bg-background p-2 rounded border border-border">
-                 <strong>{String(res?.uri || "Unknown")}</strong>
-                 <br />
-                 {String(res?.text || "")}
-               </div>
-             )
+            const res = block.resource as { uri?: string; text?: string } | undefined;
+            return (
+              <div key={idx} className="font-mono text-xs whitespace-pre-wrap break-words bg-background p-2 rounded border border-border">
+                <strong>{String(res?.uri || "Unknown")}</strong>
+                <br />
+                {String(res?.text || "")}
+              </div>
+            )
           }
           return null;
         })}

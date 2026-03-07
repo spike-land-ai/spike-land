@@ -21,8 +21,8 @@ export function useAppSession(slug: string, graph: Record<string, unknown>, tool
     try {
       const stored = sessionStorage.getItem(sessionKey);
       if (stored) return JSON.parse(stored);
-    } catch {
-      // ignore
+    } catch (e) {
+      console.error("Failed to parse session storage:", e);
     }
     return {
       appSlug: slug,
@@ -80,7 +80,7 @@ export function useAppSession(slug: string, graph: Record<string, unknown>, tool
         // E.g. { "set_id": "string" }
         // If result is object, we extract it.
         const resObj = typeof result === "string" ? { text: result } : (result as Record<string, unknown> || {});
-        
+
         for (const outKey of Object.keys(toolGraph.outputs)) {
           // Attempt to find the output either in raw JSON or by assuming the result has it
           let valToSave = undefined;
@@ -95,8 +95,8 @@ export function useAppSession(slug: string, graph: Record<string, unknown>, tool
                 if (parsed && typeof parsed === "object" && outKey in parsed) {
                   valToSave = parsed[outKey];
                 }
-              } catch {
-                // Not JSON, ignore
+              } catch (e) {
+                console.error("Failed to parse tool result as JSON for key extraction:", e);
               }
             }
           }

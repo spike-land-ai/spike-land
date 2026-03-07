@@ -48,9 +48,12 @@ export function generateSQL(apps: McpApp[]): string {
   const statements: string[] = [];
 
   for (const app of apps) {
+    const safeToolCount = parseInt(String(app.tool_count), 10) || 0;
+    const safeSortOrder = parseInt(String(app.sort_order), 10) || 0;
+
     statements.push(
       `INSERT OR REPLACE INTO mcp_apps (slug, name, description, emoji, status, tools, graph, markdown, tool_count, sort_order, created_at, updated_at)
-VALUES ('${escapeSQL(app.slug)}', '${escapeSQL(app.name)}', '${escapeSQL(app.description)}', '${escapeSQL(app.emoji)}', '${escapeSQL(app.status)}', '${escapeSQL(JSON.stringify(app.tools))}', '${escapeSQL(JSON.stringify(app.graph))}', '${escapeSQL(app.markdown)}', ${app.tool_count}, ${app.sort_order}, unixepoch(), unixepoch());`
+VALUES ('${escapeSQL(app.slug)}', '${escapeSQL(app.name)}', '${escapeSQL(app.description)}', '${escapeSQL(app.emoji)}', '${escapeSQL(app.status)}', '${escapeSQL(JSON.stringify(app.tools))}', '${escapeSQL(JSON.stringify(app.graph))}', '${escapeSQL(app.markdown)}', ${safeToolCount}, ${safeSortOrder}, unixepoch(), unixepoch());`
     );
   }
 

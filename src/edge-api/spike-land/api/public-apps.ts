@@ -14,9 +14,8 @@ publicAppsRoute.get("/", async (c) => {
 
   const apps = result.results ?? [];
 
-  const response = c.json({ apps });
   c.header("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
-  return response;
+  return c.json({ apps });
 });
 
 publicAppsRoute.get("/:slug", async (c) => {
@@ -34,9 +33,9 @@ publicAppsRoute.get("/:slug", async (c) => {
 
   let tools = [];
   let graph = {};
-  
-  try { tools = JSON.parse(row.tools as string); } catch { /* ignore */ }
-  try { graph = JSON.parse(row.graph as string); } catch { /* ignore */ }
+
+  try { tools = JSON.parse(row.tools as string); } catch (e) { console.error("Failed to parse tools:", e); }
+  try { graph = JSON.parse(row.graph as string); } catch (e) { console.error("Failed to parse graph:", e); }
 
   const app = {
     slug: row.slug,
@@ -47,11 +46,10 @@ publicAppsRoute.get("/:slug", async (c) => {
     tools,
     graph,
     markdown: row.markdown,
-    toolCount: row.tool_count,
-    sortOrder: row.sort_order,
+    tool_count: row.tool_count,
+    sort_order: row.sort_order,
   };
 
-  const response = c.json(app);
   c.header("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
-  return response;
+  return c.json(app);
 });

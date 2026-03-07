@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ChevronDown, ChevronRight, Lock, Unlock } from "lucide-react";
 import { JsonSchemaForm } from "./JsonSchemaForm";
 import { ToolResultInline } from "./ToolResultInline";
-import { useMcpToolCall } from "../../hooks/useMcp";
+import { useMcpToolCall, useMcpTools } from "../../hooks/useMcp";
 
 interface ToolRunButtonProps {
   toolName: string;
@@ -22,9 +22,13 @@ export function ToolRunButton({
 }: ToolRunButtonProps) {
   const [expanded, setExpanded] = useState(false);
   const [formData, setFormData] = useState<Record<string, unknown>>({});
-  
+
   const { mutate: callTool, isPending, data: result, error } = useMcpToolCall();
+  const { data: toolsData } = useMcpTools();
   const [lastResult, setLastResult] = useState<unknown>(null);
+
+  const toolDefinition = toolsData?.tools?.find(t => t.name === toolName);
+  const toolSchema = toolDefinition?.inputSchema || { type: "object" };
 
   // Pre-fill inputs based on session
   useEffect(() => {
@@ -60,9 +64,8 @@ export function ToolRunButton({
       <button
         onClick={() => isAvailable && setExpanded(!expanded)}
         disabled={!isAvailable}
-        className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${
-          isAvailable ? "hover:bg-muted/50 cursor-pointer" : "opacity-60 cursor-not-allowed bg-muted/20"
-        }`}
+        className={`w-full flex items-center justify-between px-4 py-3 text-left transition-colors ${isAvailable ? "hover:bg-muted/50 cursor-pointer" : "opacity-60 cursor-not-allowed bg-muted/20"
+          }`}
       >
         <div className="flex items-center gap-3">
           <div className={`p-1.5 rounded-md ${isAvailable ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
@@ -83,13 +86,13 @@ export function ToolRunButton({
       {expanded && isAvailable && (
         <div className="p-4 border-t border-border bg-background">
           <JsonSchemaForm
-            schema={{ type: "object" }}
+            schema={toolSchema as unknown as any}
             onChange={setFormData}
             onSubmit={() => handleSubmit(formData)}
             isPending={isPending}
             initialData={formData}
           />
-          
+
           {(lastResult || error) && (
             <div className="mt-4 pt-4 border-t border-border">
               <ToolResultInline result={lastResult} error={error} />
