@@ -38,7 +38,7 @@ export function useApps() {
         allTools.push(...data.tools);
       }
       
-      return allTools.map((t: any, i: number) => ({
+      return allTools.map((t: Record<string, unknown>, i: number) => ({
         slug: t.name,
         name: t.name,
         description: t.description || "",
@@ -62,15 +62,15 @@ export function useApp(slug: string) {
       let foundTool = null;
       if (data.categories) {
         for (const cat of data.categories) {
-          const t = cat.tools?.find((x: any) => x.name === slug);
+          const t = cat.tools?.find((x: Record<string, unknown>) => x.name === slug);
           if (t) foundTool = t;
         }
       }
       if (!foundTool && data.featured) {
-        foundTool = data.featured.find((x: any) => x.name === slug);
+        foundTool = data.featured.find((x: Record<string, unknown>) => x.name === slug);
       }
       if (!foundTool && data.tools) {
-        foundTool = data.tools.find((x: any) => x.name === slug);
+        foundTool = data.tools.find((x: Record<string, unknown>) => x.name === slug);
       }
       
       if (!foundTool) throw new Error("Tool not found");
