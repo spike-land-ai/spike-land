@@ -20,6 +20,7 @@ export function BrowserBar({ onNavigate, onRefresh, onScreenshot, onGetForms, on
           disabled={true}
           className="p-1.5 rounded-md text-muted-foreground opacity-50 cursor-not-allowed"
           title="Back (disabled)"
+          aria-label="Back"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
@@ -27,6 +28,7 @@ export function BrowserBar({ onNavigate, onRefresh, onScreenshot, onGetForms, on
           disabled={true}
           className="p-1.5 rounded-md text-muted-foreground opacity-50 cursor-not-allowed"
           title="Forward (disabled)"
+          aria-label="Forward"
         >
           <ArrowRight className="w-4 h-4" />
         </button>
@@ -35,6 +37,7 @@ export function BrowserBar({ onNavigate, onRefresh, onScreenshot, onGetForms, on
           disabled={isCalling}
           className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
           title="Refresh"
+          aria-label="Refresh"
         >
           <RotateCcw className="w-4 h-4" />
         </button>
@@ -69,6 +72,7 @@ export function BrowserBar({ onNavigate, onRefresh, onScreenshot, onGetForms, on
           disabled={isCalling} 
           className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
           title="Take Screenshot"
+          aria-label="Take Screenshot"
         >
           <Camera className="w-4 h-4" />
         </button>
@@ -77,6 +81,7 @@ export function BrowserBar({ onNavigate, onRefresh, onScreenshot, onGetForms, on
           disabled={isCalling} 
           className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
           title="Get Forms"
+          aria-label="Get Forms"
         >
           <FormInput className="w-4 h-4" />
         </button>
@@ -85,6 +90,7 @@ export function BrowserBar({ onNavigate, onRefresh, onScreenshot, onGetForms, on
           disabled={isCalling} 
           className="p-1.5 hover:bg-muted rounded-md text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
           title="Get Tabs"
+          aria-label="Get Tabs"
         >
           <AppWindow className="w-4 h-4" />
         </button>
