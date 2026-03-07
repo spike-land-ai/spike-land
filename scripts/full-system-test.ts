@@ -24,22 +24,29 @@ async function runTest() {
 
   async function checkPage(path: string, expectedText?: string) {
     console.log(`Checking ${path}...`);
-    const response = await page.goto(`${BASE_URL}${path}`, { waitUntil: "networkidle" });
-    
-    if (!response || response.status() >= 400) {
-      errors.push(`Failed to load ${path}: HTTP ${response?.status()}`);
-    }
-
-    if (expectedText) {
-      const content = await page.textContent("body");
-      if (!content?.includes(expectedText)) {
-        errors.push(`Missing expected text "${expectedText}" on ${path}`);
+    try {
+      const response = await page.goto(`${BASE_URL}${path}`, { waitUntil: "load", timeout: 10000 });
+      
+      if (!response || response.status() >= 400) {
+        errors.push(`Failed to load ${path}: HTTP ${response?.status()}`);
       }
-    }
 
-    // Capture screenshot for debugging
-    const filename = `screenshot-${path.replace(/\//g, "_") || "root"}.png`;
-    await page.screenshot({ path: filename });
+      if (expectedText) {
+        // Wait for content to appear if it's dynamic
+        await page.waitForTimeout(1000); 
+        const content = await page.textContent("body");
+        if (!content?.includes(expectedText)) {
+          errors.push(`Missing expected text "${expectedText}" on ${path}`);
+        }
+      }
+
+      // Capture screenshot for debugging
+      const filename = `screenshot-${path.replace(/\//g, "_") || "root"}.png`;
+      await page.screenshot({ path: filename });
+      console.log(`  Successfully checked ${path}, screenshot saved to ${filename}`);
+    } catch (e) {
+      errors.push(`Failed to check ${path}: ${(e as Error).message}`);
+    }
   }
 
   try {
