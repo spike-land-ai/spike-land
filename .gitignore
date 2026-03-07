@@ -13,6 +13,7 @@ dist/
 *.tsbuildinfo
 .env
 .env.local
+.dev.vars
 .github-private
 binaryen/
 .eslintcache
