@@ -5,23 +5,20 @@ import { useDarkMode } from "../ui/hooks/useDarkMode";
 import { useMonacoTypeAcquisition } from "../ui/hooks/useMonacoTypeAcquisition";
 import { MonacoCover } from "./monaco-cover/MonacoCover";
 
+import EditorWorker from "../../../monaco-editor/src/deprecated/editor/editor.worker?worker";
+import TsWorker from "../../../monaco-editor/src/languages/features/typescript/ts.worker?worker";
+import JsonWorker from "../../../monaco-editor/src/languages/features/json/json.worker?worker";
+import CssWorker from "../../../monaco-editor/src/languages/features/css/css.worker?worker";
+import HtmlWorker from "../../../monaco-editor/src/languages/features/html/html.worker?worker";
+
 if (typeof globalThis !== "undefined") {
   (globalThis as Record<string, unknown>).MonacoEnvironment = {
-    getWorkerUrl(_moduleId: string, label: string) {
-      const base = "https://esm.spike.land/monaco-editor@0.55.1/min/vs";
-      let path = `${base}/editor/editor.worker.js`;
-      if (label === "typescript" || label === "javascript") {
-        path = `${base}/language/typescript/ts.worker.js`;
-      } else if (label === "json") {
-        path = `${base}/language/json/json.worker.js`;
-      } else if (label === "css" || label === "scss" || label === "less") {
-        path = `${base}/language/css/css.worker.js`;
-      } else if (label === "html" || label === "handlebars" || label === "razor") {
-        path = `${base}/language/html/html.worker.js`;
-      }
-      
-      const blob = new Blob([`importScripts('${path}');`], { type: 'application/javascript' });
-      return URL.createObjectURL(blob);
+    getWorker(_moduleId: string, label: string) {
+      if (label === "typescript" || label === "javascript") return new TsWorker();
+      if (label === "json") return new JsonWorker();
+      if (label === "css" || label === "scss" || label === "less") return new CssWorker();
+      if (label === "html" || label === "handlebars" || label === "razor") return new HtmlWorker();
+      return new EditorWorker();
     },
   };
 }
