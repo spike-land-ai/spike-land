@@ -1,36 +1,72 @@
 import type { ExtractedLink, LinkValidationResult, ParsedGitHubUrl } from "./types.js";
 
-const GITHUB_URL_RE =
-  /github\.com\/([^/]+)\/([^/]+?)(?:\.git)?(?:\/(blob|tree)\/([^/]+)\/(.+))?(?:[?#].*)?$/;
-const RAW_GH_RE = /raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/;
+const RAW_GH_RE = /^\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/;
 const SHIELDS_WORKFLOW_RE =
   /img\.shields\.io\/github\/actions\/workflow\/status\/([^/]+)\/([^/]+)\/([^?]+)/;
 
-export function parseGitHubUrl(url: string): ParsedGitHubUrl | null {
-  // Try raw.githubusercontent.com first
-  const rawMatch = RAW_GH_RE.exec(url);
-  if (rawMatch) {
-    return {
-      org: rawMatch[1]!,
-      repo: rawMatch[2]!,
-      type: "raw",
-      branch: rawMatch[3],
-      path: rawMatch[4],
-      url,
-    };
+export function parseGitHubUrl(urlStr: string): ParsedGitHubUrl | null {
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(urlStr);
+  } catch {
+    // If it's not a valid URL, return null
+    return null;
   }
 
-  const match = GITHUB_URL_RE.exec(url);
-  if (!match) return null;
+  // Try raw.githubusercontent.com first
+  if (parsedUrl.hostname === "raw.githubusercontent.com") {
+    const rawMatch = RAW_GH_RE.exec(parsedUrl.pathname);
+    if (rawMatch) {
+      return {
+        org: rawMatch[1]!,
+        repo: rawMatch[2]!,
+        type: "raw",
+        branch: rawMatch[3],
+        path: rawMatch[4],
+        url: urlStr,
+      };
+    }
+    return null;
+  }
 
-  const [, org, repo, pathType, branch, path] = match;
-  if (!org || !repo) return null;
+  if (parsedUrl.hostname !== "github.com" && parsedUrl.hostname !== "www.github.com") {
+    return null;
+  }
 
-  let type: ParsedGitHubUrl["type"] = "repo";
-  if (pathType === "blob") type = "file";
-  else if (pathType === "tree") type = "tree";
+  // Remove trailing .git if present
+  let pathname = parsedUrl.pathname;
+  if (pathname.endsWith(".git")) {
+    pathname = pathname.slice(0, -4);
+  }
 
-  return { org, repo, type, branch, path, url };
+  // Split path into segments, filtering out empty ones
+  const parts = pathname.split("/").filter(Boolean);
+
+  if (parts.length < 2) return null;
+
+  const org = parts[0]!;
+  const repo = parts[1]!;
+
+  if (parts.length === 2) {
+    return { org, repo, type: "repo", url: urlStr };
+  }
+
+  // Path has more than org/repo, check if it's blob/tree
+  const pathType = parts[2]!;
+
+  if (pathType === "blob" || pathType === "tree") {
+    if (parts.length < 4) return { org, repo, type: "repo", url: urlStr }; // Invalid blob/tree url, fallback to repo
+
+    const type: ParsedGitHubUrl["type"] = pathType === "blob" ? "file" : "tree";
+    const branch = parts[3]!;
+    // The rest of the parts make up the path
+    const path = parts.slice(4).join("/") || undefined;
+
+    return { org, repo, type, branch, path, url: urlStr };
+  }
+
+  // Unknown path format, just return as repo to be safe
+  return { org, repo, type: "repo", url: urlStr };
 }
 
 export function parseShieldsBadge(url: string): ParsedGitHubUrl | null {
