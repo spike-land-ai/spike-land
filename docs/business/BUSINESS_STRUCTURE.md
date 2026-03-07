@@ -1,19 +1,19 @@
 # Spike Land - Business Structure Documentation
 
-> **Last Updated**: February 2026 **Decision**: Form UK Limited Company
+> **Last Updated**: March 2026 **Decision**: Form UK Limited Company
 > **Company Name**: SPIKE LAND LTD (Company #16906682)
 
 ---
 
 ## Decision Summary
 
-| Factor                    | Status                       |
-| ------------------------- | ---------------------------- |
-| **Current Structure**     | Sole Trader (default)        |
-| **Recommended Structure** | UK Limited Company           |
-| **Revenue Level**         | >£10k/year                   |
-| **Formation Cost**        | £12 (Companies House online) |
-| **Timeline**              | 1-2 days for incorporation   |
+| Factor | Status |
+| ------------------------- | ---------------------------------------- |
+| **Current Structure** | UK Limited Company (incorporated) |
+| **Commercial Status** | Pre-revenue public beta |
+| **Funding Readiness** | Seeking SEIS Advance Assurance |
+| **Formation Cost** | £12 (Companies House online) |
+| **Incorporation Date** | 12 December 2025 |
 
 ---
 
@@ -49,7 +49,7 @@
 | **Company Number**            | 16906682                                    |
 | **Application Reference**     | 112-184507                                  |
 | **Corporation Tax Reference** | BRCT00003618256                             |
-| **Registered Office**         | _TBD_                                       |
+| **Registered Office**         | 42 Mighell Street, Apartment 70, Brighton BN2 0AU |
 | **Director(s)**               | Zoltan Erdos                                |
 | **Shareholder(s)**            | Zoltan Erdos (100%)                         |
 | **SIC Codes**                 | 62090 (IT consultancy), 63120 (Web portals) |
@@ -74,7 +74,7 @@
 - [x] Corporation Tax registration submitted (Reference: BRCT00003618256)
 - [x] Receive Certificate of Incorporation (12 December 2025)
 
-### Phase 2: Post-Formation Setup (Days 3-7) ✅ COMPLETE
+### Phase 2: Post-Formation Priorities
 
 - [x] Open business bank account (Monzo Business)
 - [ ] Register for Corporation Tax with HMRC (within 3 months of incorporation)
@@ -134,7 +134,7 @@ Optimal strategy (consult accountant for your situation):
 
 ## Comparison: Sole Trader vs Ltd
 
-### Sole Trader (Current State)
+### Sole Trader (Prior Default)
 
 **Pros:**
 
@@ -200,10 +200,10 @@ As a company director, you must:
 
 **Context:**
 
-- Platform live at spike.land with Stripe payments
-- Token-based economy operational (£2.99-£69.99 packages)
+- Public beta live at spike.land
+- Billing and onboarding work in progress ahead of commercial launch
 - User data stored (images, accounts)
-- Revenue >£10k/year
+- Pre-revenue position maintained for the current platform
 
 **Decision:** Form UK Limited Company
 
@@ -211,7 +211,7 @@ As a company director, you must:
 
 1. Personal liability protection worth more than £12 formation cost
 2. GDPR compliance requires professional structure
-3. Tax efficiency becomes relevant at current revenue
+3. Tax efficiency becomes relevant as revenue begins
 4. Professional credibility for user trust
 
 ---

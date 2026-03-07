@@ -1,6 +1,6 @@
 # SEIS Advance Assurance — SPIKE LAND LTD
 
-Comprehensive guide to obtaining SEIS Advance Assurance from HMRC for SPIKE LAND LTD (Company #16906682).
+Working guide for preparing a SEIS Advance Assurance application for SPIKE LAND LTD (Company #16906682). Advance Assurance remains subject to HMRC review and the final terms of any share issue.
 
 ---
 
@@ -17,7 +17,7 @@ Comprehensive guide to obtaining SEIS Advance Assurance from HMRC for SPIKE LAND
 | 5 | Gross assets | Total gross assets must not exceed £350,000 immediately before the share issue | PASS — Minimal assets (no significant capital) |
 | 6 | Number of employees | Fewer than 25 full-time equivalent employees | PASS — 0 employees, sole director only |
 | 7 | Age of company | Must be less than 3 years old at date of share issue (from first "commercial sale") | PASS — Incorporated Dec 2025, no commercial sales yet |
-| 8 | New qualifying trade | Company must be carrying on (or preparing to carry on) a new qualifying trade | ASSESS — Platform in development, preparing to trade |
+| 8 | New qualifying trade | Company must be carrying on (or preparing to carry on) a new qualifying trade | ASSESS — Public beta is live; company is preparing for paid commercial launch |
 | 9 | No previous EIS/SEIS/VCT investment | No prior risk finance investment (or within limits) | PASS — No prior investment received |
 | 10 | Spending requirement | 70% of SEIS money must be spent before EIS/VCT funding can be raised | NOTE — Applies post-investment |
 | 11 | No disqualifying arrangements | Investment must not be part of a tax avoidance scheme | PASS — Genuine commercial purpose |
@@ -95,7 +95,7 @@ The SEIS1 form has the following sections:
 
 | Field | Guidance |
 |-------|----------|
-| SIC code | 62012 — Business and domestic software development |
+| SIC code | 62012 — Business and domestic software development (form-guidance classification; registered SIC codes remain 62090 and 63120) |
 | Description of trade | See Part 3 for draft narrative |
 | Date trading commenced (or expected) | [Enter date — e.g., "Preparing to trade, expected Q3 2026"] |
 | Previous trading activity | None |
@@ -170,7 +170,7 @@ Standard declarations confirming:
 
 ---
 
-SPIKE LAND LTD is a technology company developing a cloud-based software platform for developers and businesses.
+SPIKE LAND LTD is a technology company preparing to commercialize a cloud-based software platform for developers and businesses.
 
 **What the platform does**
 
@@ -200,11 +200,11 @@ Target customers are:
 
 **Trade history**
 
-The company was incorporated in December 2025. It is currently in the pre-revenue, development phase:
-- Platform architecture is built and operational (running on Cloudflare Workers)
+The company was incorporated in December 2025. It is currently in a pre-revenue commercialization phase:
+- Public beta infrastructure is live and operating on Cloudflare Workers
 - Core features (code editor, real-time sync, MCP registry) are functional
-- Revenue generation has not yet commenced at scale (minimal/testing revenue only)
-- The company is preparing to trade and expects to begin generating meaningful revenue in 2026
+- Paid recurring subscriptions have not yet launched
+- Billing, onboarding, and metering workflows are being completed ahead of commercial launch expected in 2026
 
 **Why the trade qualifies**
 

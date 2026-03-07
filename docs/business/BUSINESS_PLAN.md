@@ -3,7 +3,7 @@
 > **Company**: SPIKE LAND LTD (UK Company #16906682)
 > **Date**: March 2026
 > **Classification**: Confidential — For Investor & HMRC Use
-> **Stage**: Pre-Revenue, Commercial Launch Stage
+> **Stage**: Pre-Revenue, Public Beta / Commercialization Stage
 > **Prepared For**: SEIS Advance Assurance (Part 5, Item 3)
 > **Currency**: GBP Primary (USD Secondary at £1 = $1.27)
 
@@ -11,15 +11,15 @@
 
 ## 1. Executive Summary
 
-SPIKE LAND LTD is a UK-incorporated technology company building a managed MCP (Model Context Protocol) platform. The platform enables developers and AI-native teams to discover, run, and manage AI tools through one hosted system rather than stitching together separate MCP servers and services. 
+SPIKE LAND LTD is a UK-incorporated technology company building a managed MCP (Model Context Protocol) platform. The platform enables developers and AI-native teams to discover, run, and manage AI tools through one hosted system rather than stitching together separate MCP servers and services.
 
-The product is live in beta at spike.land, featuring a working CLI (`spike-cli`), a web dashboard, and a managed hosted tool layer deployed on a global edge network. The company is pre-revenue, with Stripe integration near completion and a full commercial launch planned following product hardening. 
+The product is live in public beta at spike.land, featuring a working CLI (`spike-cli`), a web dashboard, and a managed hosted tool layer deployed on a global edge network. The company remains pre-revenue while it completes billing, onboarding, and commercialization workflows ahead of full launch.
 
 The SEIS raise of up to £250,000 will be used to accelerate go-to-market, expand the hosted tool ecosystem, and fund early hiring in growth and customer success.
 
 *\*Note: The beta platform currently includes 86 natively hosted MCP tools, with broader access to additional third-party tools through a multiplexer architecture.*
 
-**The company is SEIS-eligible: incorporated December 2025, no prior investment, fewer than 25 employees, gross assets under £350,000, carrying on a qualifying software development trade.**
+**Based on the company's current facts, management believes it appears to meet the core SEIS conditions: incorporated December 2025, no prior risk-finance investment, fewer than 25 employees, gross assets under £350,000, and carrying on or preparing to carry on a qualifying software development trade. Advance Assurance is being sought on that basis.**
 
 ---
 
@@ -44,13 +44,13 @@ The SEIS raise of up to £250,000 will be used to accelerate go-to-market, expan
 
 ## 3. Product Readiness & Technical Status
 
-While the company is pre-revenue and focusing strictly on product completion before launching community growth initiatives, it has heavily de-risked the technical execution model.
+While the company is pre-revenue and still completing commercialization work, the technical execution model is materially de-risked relative to a typical first-time infrastructure startup.
 
-- **Product Status**: Public beta launched in March 2026. Core infrastructure and edge database are 100% operational and ready to scale.
+- **Product Status**: Public beta launched in March 2026. Core infrastructure and the edge database are operational in beta; current work is focused on product hardening, onboarding, billing workflows, and enterprise controls ahead of commercial launch.
 - **Tool Ecosystem**: 86 natively hosted MCP tools are integrated and functional on the platform, with multiplexer support extending access to 450+ third-party tools (533+ total tools reachable across the ecosystem).
 - **Access Channels**: `spike-cli` is published and functional; web dashboard is live.
 - **Open Source Foundation**: Selected core platform components and architecture are open-sourced to support developer adoption, transparency, and ecosystem trust. The company retains ownership of its commercial platform, product integration layer, hosting infrastructure, billing workflows, and go-to-market execution.
-- **Commercial Readiness**: Stripe billing infrastructure is near completion (Subscription checkout complete, webhook provisioning in progress).
+- **Commercial Readiness**: Stripe subscription checkout is implemented; webhook provisioning, metering, and self-serve onboarding are being completed ahead of commercial launch.
 
 ---
 
@@ -75,8 +75,8 @@ Spike Land provides a unified platform to solve this:
 
 ## 5. Market Opportunity
 
-Our initial Year 1-2 go-to-market is validated by a focused **bottom-up milestone**:
-Targeting a niche of 5,000 highly active AI agent developers and indie hackers. Converting 5% (250 users) to a blended paid plan of ~£35/month generates an initial ARR milestone of ~£105,000, establishing clear product-market fit.
+Our initial Year 1-2 go-to-market is built around a focused **bottom-up milestone**:
+Targeting a niche of 5,000 highly active AI agent developers and indie hackers. Converting 5% (250 users) to a blended paid plan of ~£35/month implies an ARR milestone of ~£105,000 once the paid base is fully ramped. This is used here as a product-market-fit milestone, not as recognized Year 1 revenue.
 
 ---
 
@@ -99,8 +99,8 @@ The commercial model focuses on subscription recurring revenue (SaaS) and usage-
 
 | Revenue Stream | Status | Timing |
 |---|---|---|
-| **Platform Subscriptions** | Active at commercial launch | Y1 |
-| **API Add-ons (PRO / SCALE)** | Active at commercial launch | Y1 |
+| **Platform Subscriptions** | Planned for commercial launch | Y1 |
+| **API Add-ons (PRO / SCALE)** | Planned for commercial launch | Y1 |
 | **Credit Overages** | Planned after initial usage baseline | Y1 H2 |
 | **Marketplace Take Rate (30%)** | Planned | Y2 |
 | **App Builder Services** | Opportunistic / Founder-led | As needed |
@@ -110,8 +110,8 @@ The commercial model focuses on subscription recurring revenue (SaaS) and usage-
 | Tier | Price | Deployments | AI Credits/mo | Team Members |
 |------|-------|-------------|---------------|--------------|
 | FREE | $0/mo | 3 | 100 | 1 |
-| PRO | $29/mo | 10 | 2,000 | 3 |
-| BUSINESS | $99/mo | Unlimited | 10,000 | 10 |
+| PRO | $29/mo | 10 | 1,000 | 3 |
+| BUSINESS | $99/mo | Unlimited | 5,000 | 10 |
 
 *\*Note: All USD prices convert at £1 = $1.27. The financial model conservatively assumes a blended ARPU of ~£33/mo.*
 
@@ -138,17 +138,20 @@ As a developer-first tool, acquisition relies heavily on Product-Led Growth (PLG
 
 ## 9. Competitive Landscape
 
-The company believes its current combination of hosted MCP tooling, CLI access, and edge-native infrastructure is differentiated from existing point solutions and directories. The market currently appears underserved by managed MCP platforms that combine hosted tools, authentication, rate limiting, and billing in one offering.
+The company believes its current combination of hosted MCP tooling, CLI access, and edge-native infrastructure is differentiated from existing point solutions and directories. The market remains underserved by managed MCP platforms that combine hosted tools, authentication, rate limiting, and billing in one offering.
+
+Anthropic's March 2026 launch of Claude Marketplace and OpenAI's expanding app ecosystem, including the ChatGPT app directory update on 18 December 2025, validate the broader thesis that AI tool and application marketplaces are becoming an established category. However, these offerings remain distinct from Spike Land's position: Anthropic is targeting enterprise procurement of partner-built Claude applications, while OpenAI's ecosystem is model-specific. Spike Land is focused on granular, programmatic, model-agnostic MCP tool access for developers and small teams.
 
 | Competitor | Core Focus | Managed MCP Hosting? | CLI Access? | Tool Marketplace? |
 |------------|-------------|------|------|--------------|
 | **Vercel** | Web deployment | No | Yes | No |
 | **Replit** | Cloud IDE | No | No | Limited |
 | **Smithery/Glama** | MCP Directories | Directory only (No hosting) | No | No |
+| **Anthropic Claude Marketplace** | Enterprise AI app procurement | No (apps, not MCP tools) | No | Yes (enterprise procurement layer) |
 | **Self-Hosted MCP (DIY)** | Infrastructure | No | No | No |
 | **spike.land** | **MCP-first AI platform** | **Yes (86 native, 533+ total)** | **Yes (`spike-cli`)** | **Yes (70/30 rev share)** |
 
-**Potential Defensibility**: The tool marketplace is designed to introduce **Network Effects**. A rich library of tools attracts developers, which in turn attracts more tool authors seeking distribution and monetization. This creates a "cold start" barrier that can deter established platforms from easily cloning the ecosystem.
+**Potential Defensibility**: Spike Land's differentiation is audience and access model. Developers and small teams can onboard via CLI and API in minutes, invoke granular tools rather than buy complete SaaS suites, and avoid model lock-in. The planned marketplace is designed to introduce **network effects**: a rich library of tools attracts developers, which in turn attracts more tool authors seeking distribution and monetization.
 
 ---
 
@@ -157,8 +160,8 @@ The company believes its current combination of hosted MCP tooling, CLI access, 
 ### 10.1 Key Assumptions
 - Year 1 focuses on controlled growth, product hardening, and establishing baseline retention.
 - Core hosting infrastructure uses Cloudflare, offering a highly capital-efficient baseline with predictable scaling costs as usage grows.
-- **Important Note on Capital Use**: The £250,000 SEIS raise is explicitly intended to *accelerate growth*. While baseline infrastructure costs are lean, the P&L reflects strategic burn as capital is deployed into Go-To-Market campaigns and key hires (Growth Lead, CS/Eng) starting mid-Year 1. Approximately £103k of SEIS capital is projected to be deployed in Year 1, with the remaining ~£147k carried into Year 2 to fund the second phase of hiring and marketplace expansion.
-- **Sensitivity / Downside Scenario**: If paid conversion reaches only 2.5% (125 users) instead of the targeted 5%, Year 1 revenue would be approximately £21k. Even in this scenario, the company's capitalized runway would effortlessly extend well through Year 2, providing ample time to iterate on product-market fit without existential risk.
+- **Important Note on Capital Use**: The £250,000 SEIS raise is explicitly intended to *accelerate growth*. The Year 1 model assumes approximately £102.7k of gross cash outflows (COGS plus OpEx), primarily into product hardening, GTM, and early hires. After £42.8k of forecast revenue, year-end cash is forecast at approximately £190.1k, leaving roughly £147.3k of undeployed raise capital plus revenue-generated cash available entering Year 2.
+- **Sensitivity / Downside Scenario**: If customer acquisition tracks at roughly half the base case, ending Year 1 at approximately 114 paying customers rather than 228, Year 1 revenue would be roughly £21k-22k. In that case the company would still retain material runway into Year 2 to continue iterating on product-market fit.
 
 ### 10.2 Year 1 Profit & Loss — Monthly Detail (M1-M12)
 
@@ -173,7 +176,7 @@ The company believes its current combination of hosted MCP tooling, CLI access, 
 | M7 | 110 | 3,630 | 653 | 2,977 | 8,500 | -5,523 |
 | M8 | 140 | 4,900 | 882 | 4,018 | 9,000 | -4,982 |
 | M9 | 160 | 5,600 | 1,008 | 4,592 | 11,500 | -6,908 |
-| M10 | 185 | 6,475 | 1,166 | 5,310 | 11,500 | -6,190 |
+| M10 | 185 | 6,475 | 1,166 | 5,309 | 11,500 | -6,191 |
 | M11 | 210 | 7,350 | 1,323 | 6,027 | 12,000 | -5,973 |
 | M12 | 228 | 7,980 | 1,436 | 6,544 | 12,000 | -5,456 |
 | **Total**| | **£42,832** | **£7,710** | **£35,122** | **£95,000** | **-£59,878** |
@@ -198,18 +201,18 @@ To demonstrate the path from SEIS-funded strategic burn to eventual profitabilit
 
 | Item | Year 1 | Year 2 (Forecast) | Year 3 (Forecast) |
 |------|--------|-------------------|-------------------|
-| **Cash at Bank** | £190,122 | £200,122 | £330,122 |
+| **Cash at Bank** | £190,123 | £200,123 | £330,123 |
 | Other Assets | £3,000 | £10,000 | £28,000 |
-| **Total Assets** | **£193,122** | **£210,122** | **£358,122** |
+| **Total Assets** | **£193,123** | **£210,123** | **£358,123** |
 | | | | |
 | Liabilities* | £3,000 | £10,000 | £8,000 |
-| **Net Assets** | **£190,122** | **£200,122** | **£350,122** |
+| **Net Assets** | **£190,123** | **£200,123** | **£350,123** |
 | | | | |
 | **Equity** | | | |
 | Share Capital | £1 | £1 | £1 |
 | Share Premium | £250,000 | £250,000 | £250,000 |
-| Retained Earnings | -£59,879 | -£49,879 | £100,121 |
-| **Total Equity** | **£190,122** | **£200,122** | **£350,122** |
+| Retained Earnings | -£59,878 | -£49,878 | £100,122 |
+| **Total Equity** | **£190,123** | **£200,123** | **£350,123** |
 
 *\*Note: Liabilities consist primarily of accrued expenses and short-term trade creditors. Share Premium figure represents the forecast position post-SEIS raise.*
 
@@ -233,7 +236,7 @@ The maximum £250,000 SEIS raise will be deployed over 18-24 months for qualifyi
 
 ## 12. SEIS Risk-to-Capital Statement
 
-The company explicitly meets the HMRC Risk-to-Capital condition:
+The company is structured to satisfy the HMRC Risk-to-Capital condition:
 - **Long-term growth:** SPIKE LAND LTD is a genuine commercial software business seeking to build long-term value, increase its customer base, and expand its team.
 - **Capital at Risk:** The company is pre-revenue. Success is highly uncertain in a competitive and rapidly evolving AI market.
 - **No capital protection:** There are no asset backings, downside protections, or capital preservation arrangements in place. 
@@ -243,10 +246,11 @@ The company explicitly meets the HMRC Risk-to-Capital condition:
 
 ## 13. Risk Factors
 
-1. **Market Risk (MCP Adoption):** The Model Context Protocol may not achieve widespread industry adoption. *Mitigation:* MCP is backed by Anthropic and OpenAI. Furthermore, platform tools work independently of MCP via standard API channels.
-2. **Competition Risk:** Established platforms (Vercel, Replit) could add managed MCP registries. *Mitigation:* Building early network effects via the tool marketplace to create a "cold start" barrier for competitors.
-3. **Concentration Risk (AI Providers):** Core user workflows depend heavily on Anthropic/OpenAI/Google APIs. Pricing or policy changes by these providers could affect margins or product behavior. *Mitigation:* The platform architecture is model-agnostic, allowing developers to route requests to alternative open-source or proprietary LLMs.
-4. **Execution Risk:** A single founder creates a key-person dependency. *Mitigation:* AI-assisted development enables the founder to ship quickly and operate efficiently at the current stage, while the raise provides capital to reduce single-founder execution risk through targeted hiring (Growth Lead and CS support in Y1 H2).
+1. **Market Risk (MCP Adoption):** The Model Context Protocol may not achieve widespread industry adoption. *Mitigation:* MCP is backed by major ecosystem participants, and platform tools can also be exposed through standard API channels rather than relying exclusively on one protocol surface.*
+2. **Competition Risk (Developer Platforms):** Established platforms such as Vercel, Replit, or hosted MCP providers could add overlapping managed-tool functionality. *Mitigation:* Spike Land is targeting a narrow initial wedge, using CLI-led developer distribution and tool-level workflows rather than generic hosting positioning.*
+3. **Platform Marketplace Risk (Model Providers):** Major model providers are beginning to launch proprietary app marketplaces, including Anthropic's March 2026 Claude Marketplace and OpenAI's expanding app ecosystem. *Mitigation:* Spike Land is model-agnostic, focused on granular tool access rather than full SaaS procurement, and oriented toward developers and small teams rather than enterprise committed-spend budgets.*
+4. **Concentration Risk (AI Providers):** Core user workflows depend heavily on Anthropic/OpenAI/Google APIs. Pricing or policy changes by these providers could affect margins or product behavior. *Mitigation:* The platform architecture is model-agnostic, allowing developers to route requests to alternative open-source or proprietary LLMs.*
+5. **Execution Risk:** A single founder creates a key-person dependency. *Mitigation:* AI-assisted development enables the founder to ship quickly and operate efficiently at the current stage, while the raise provides capital to reduce single-founder execution risk through targeted hiring (Growth Lead and CS support in Y1 H2).*
 
 ---
 
@@ -262,5 +266,5 @@ Rather than engineering speculative exit scenarios at this pre-revenue stage, th
 6. **ARR Target:** Reach a baseline of £105k+ ARR to establish strong momentum for a potential Series A or secondary EIS round.
 
 ---
-*Document Version: 2.1 (SEIS Advance Assurance Edition)*
+*Document Version: 2.2 (SEIS Advance Assurance Edition)*
 *Prepared: March 2026*

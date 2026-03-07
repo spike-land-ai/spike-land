@@ -79,7 +79,9 @@ small teams
 
 ## Monetization Strategy
 
-### Tier 1: Platform Subscriptions (Live)
+### Tier 1: Platform Subscriptions (Commercial Launch)
+
+Public beta access is live. Paid subscriptions and recurring billing activate at commercial launch.
 
 | Tier     | Price | Deployments | AI Credits/mo | Team Members |
 | -------- | ----- | ----------- | ------------- | ------------ |
@@ -112,8 +114,8 @@ Merge all credits into "Spike Credits":
 | Tier     | Included Credits | Overage Rate  |
 | -------- | ---------------- | ------------- |
 | FREE     | 100              | N/A           |
-| PRO      | 2,000            | $0.008/credit |
-| BUSINESS | 10,000           | $0.006/credit |
+| PRO      | 1,000            | $0.008/credit |
+| BUSINESS | 5,000            | $0.006/credit |
 | SCALE    | 50,000           | $0.004/credit |
 
 ---
