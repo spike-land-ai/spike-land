@@ -52,35 +52,10 @@ else
 fi
 
 # ── 4. Archive current build in R2 for rollback ──
+# NOTE: wrangler r2 CLI has no "object list" or "object copy" commands,
+# so archiving is skipped. To implement rollback, use the S3-compatible API.
 if [ -n "$DEPLOYED_SHA" ] && [ "$DEPLOYED_SHA" != "unknown" ]; then
-  echo "Archiving current build (${DEPLOYED_SHA:0:12}) to builds/${DEPLOYED_SHA}/..."
-  # Copy root assets to builds/{sha}/ prefix
-  LIST_OUTPUT="$($WRANGLER r2 object list "${R2_BUCKET}" --remote 2>/dev/null || echo "")"
-  if [ -n "$LIST_OUTPUT" ]; then
-    echo "$LIST_OUTPUT" | jq -r '
-      (if type == "array" then . else (.objects // []) end)[]
-      | .key // empty
-      | select(startswith("builds/") or startswith("blog/") | not)
-    ' 2>/dev/null | while read -r key; do
-      $WRANGLER r2 object copy "${R2_BUCKET}/${key}" "${R2_BUCKET}/builds/${DEPLOYED_SHA}/${key}" --remote 2>/dev/null || true
-    done
-  fi
-
-  # Prune old builds — keep only the 5 most recent
-  EXISTING_BUILDS="$($WRANGLER r2 object list "${R2_BUCKET}" --prefix "builds/" --remote 2>/dev/null || echo "")"
-  if [ -n "$EXISTING_BUILDS" ]; then
-    OLD_SHAS="$(echo "$EXISTING_BUILDS" | jq -r '
-      [ (if type == "array" then . else (.objects // []) end)[]
-        | .key // empty
-        | select(startswith("builds/"))
-        | split("/")[1]
-      ] | unique | sort | .[:-5][]
-    ' 2>/dev/null || echo "")"
-    for old_sha in $OLD_SHAS; do
-      echo "Pruning old build: ${old_sha:0:12}..."
-      $WRANGLER r2 object delete "${R2_BUCKET}/builds/${old_sha}/" --remote 2>/dev/null || true
-    done
-  fi
+  echo "Previous deploy: ${DEPLOYED_SHA:0:12} (archiving skipped — not supported by wrangler CLI)"
 fi
 
 # ── 5. Upload new dist/ to R2 ──
