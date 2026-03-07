@@ -1,7 +1,7 @@
 import { Link, useParams } from "@tanstack/react-router";
 import { apiUrl } from "../../../core-logic/api";
 import { useEffect, useState } from "react";
-import { sanitizeUrl, escapeHtml } from "../../../core-logic/lib/security";
+import { sanitizeUrl } from "../../../core-logic/lib/security";
 
 const SITE_URL = "https://spike.land";
 
@@ -107,18 +107,45 @@ export function DocPage() {
         );
       if (line.startsWith("---")) return <hr key={i} className="my-8 border-border" />;
       if (line.trim() === "") return <br key={i} />;
-      // Handle links in markdown [text](url)
-      const withLinks = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, text, url) => {
+
+      // Handle links in markdown [text](url) safely by splitting the string into an array of React elements
+      const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+      const parts: (string | JSX.Element)[] = [];
+      let lastIndex = 0;
+      let match;
+
+      while ((match = linkRegex.exec(line)) !== null) {
+        if (match.index > lastIndex) {
+          parts.push(line.substring(lastIndex, match.index));
+        }
+
+        const text = match[1];
+        const url = match[2];
         const safeUrl = sanitizeUrl(url);
-        const safeText = escapeHtml(text);
-        return `<a href="${safeUrl}" class="text-primary underline hover:text-primary/80" target="_blank" rel="noopener noreferrer">${safeText}</a>`;
-      });
+
+        parts.push(
+          <a
+            key={`${i}-${match.index}`}
+            href={safeUrl}
+            className="text-primary underline hover:text-primary/80"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {text}
+          </a>,
+        );
+
+        lastIndex = linkRegex.lastIndex;
+      }
+
+      if (lastIndex < line.length) {
+        parts.push(line.substring(lastIndex));
+      }
+
       return (
-        <p
-          key={i}
-          className="text-foreground leading-relaxed mb-2"
-          dangerouslySetInnerHTML={{ __html: withLinks }}
-        />
+        <p key={i} className="text-foreground leading-relaxed mb-2">
+          {parts.length > 0 ? parts : line}
+        </p>
       );
     });
   };
