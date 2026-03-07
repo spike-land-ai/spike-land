@@ -6,15 +6,26 @@ import { useMonacoTypeAcquisition } from "../ui/hooks/useMonacoTypeAcquisition";
 import { MonacoCover } from "./monaco-cover/MonacoCover";
 
 // Configure Monaco web workers to load from esm.spike.land (CSP-safe).
+// We use a Blob with importScripts to bypass the cross-origin worker restriction.
 if (typeof globalThis !== "undefined") {
   (globalThis as Record<string, unknown>).MonacoEnvironment = {
     getWorkerUrl(_moduleId: string, label: string) {
       const base = "https://esm.spike.land/monaco-editor@0.55.1/min/vs";
-      if (label === "typescript" || label === "javascript") return `${base}/language/typescript/ts.worker.js`;
-      if (label === "json") return `${base}/language/json/json.worker.js`;
-      if (label === "css" || label === "scss" || label === "less") return `${base}/language/css/css.worker.js`;
-      if (label === "html" || label === "handlebars" || label === "razor") return `${base}/language/html/html.worker.js`;
-      return `${base}/editor/editor.worker.js`;
+      let path = `${base}/editor/editor.worker.js`;
+      if (label === "typescript" || label === "javascript") {
+        path = `${base}/language/typescript/ts.worker.js`;
+      } else if (label === "json") {
+        path = `${base}/language/json/json.worker.js`;
+      } else if (label === "css" || label === "scss" || label === "less") {
+        path = `${base}/language/css/css.worker.js`;
+      } else if (label === "html" || label === "handlebars" || label === "razor") {
+        path = `${base}/language/html/html.worker.js`;
+      }
+      
+      // Monaco internally instantiates the worker with { type: 'module' }.
+      // importScripts is illegal in module workers, so we must use a dynamic or static import.
+      const blob = new Blob([`import '${path}';`], { type: 'application/javascript' });
+      return URL.createObjectURL(blob);
     },
   };
 }

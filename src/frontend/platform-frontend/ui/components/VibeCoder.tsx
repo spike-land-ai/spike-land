@@ -59,17 +59,17 @@ export default function App() {
         className="relative cursor-pointer select-none rounded-2xl p-px transition-all duration-300"
         style={{
           background: hovered
-            ? "var(--primary-color)"
-            : "var(--muted-fg)",
+            ? "hsl(var(--primary))"
+            : "hsl(var(--muted-foreground) / 0.3)",
           boxShadow: hovered
-            ? "0 0 40px 8px var(--primary-glow)"
+            ? "0 0 40px 8px hsl(var(--primary) / 0.4)"
             : "none",
         }}
       >
         <div className="rounded-2xl bg-card/90 backdrop-blur-xl px-10 py-8 text-center border border-border">
           <div
             className="text-5xl mb-3 transition-all duration-300 text-primary"
-            style={{ filter: hovered ? "drop-shadow(0 0 12px var(--primary-color))" : "none" }}
+            style={{ filter: hovered ? "drop-shadow(0 0 12px hsl(var(--primary) / 0.8))" : "none" }}
           >
             ✦
           </div>
@@ -696,8 +696,8 @@ function MobileTabBar({ active, onChange, isDarkMode }: MobileTabBarProps) {
               isActive
                 ? "text-primary border-b-2 border-primary"
                 : isDarkMode
-                ? "text-gray-500 active:text-gray-300"
-                : "text-muted-foreground active:text-foreground",
+                  ? "text-gray-500 active:text-gray-300"
+                  : "text-muted-foreground active:text-foreground",
             )}
           >
             <Icon className="w-5 h-5" />
