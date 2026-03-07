@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { ChevronDown, ChevronRight, Wrench, AlertCircle, Copy, Check } from "lucide-react";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { cn } from "../../styling/cn";
@@ -426,7 +426,10 @@ function MessageContent({
 // Main export
 // ---------------------------------------------------------------------------
 
-export function AiChatMessage({ message, isStreaming }: AiChatMessageProps) {
+export const AiChatMessage = memo(function AiChatMessage({
+  message,
+  isStreaming,
+}: AiChatMessageProps) {
   const { isDarkMode } = useDarkMode();
   const isUser = message.role === "user";
   const isEmpty =
@@ -501,4 +504,4 @@ export function AiChatMessage({ message, isStreaming }: AiChatMessageProps) {
       </div>
     </div>
   );
-}
+});
