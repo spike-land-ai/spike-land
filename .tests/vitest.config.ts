@@ -55,6 +55,7 @@ const packagePathMap: Record<string, string> = {
   "spike-app": "frontend/platform-frontend",
   "spike-cli": "cli/spike-cli",
   "spike-edge": "edge-api/main",
+  "spike-chat": "edge-api/spike-chat",
   "spike-land-backend": "edge-api/backend",
   "spike-land-mcp": "edge-api/spike-land",
   "spike-review": "mcp-tools/code-review",
@@ -269,6 +270,11 @@ const packages: Record<string, PkgConfig> = {
     tier: 2,
     coverageReporter: ["text"],
     coverageExclude: ["**/dist/**", "**/cli.ts", "**/*.d.ts"],
+  },
+
+  "spike-chat": {
+    tier: 1,
+    coverageExclude: [],
   },
 
   "spike-edge": {
