@@ -424,8 +424,8 @@ function buildProject(name: string, cfg: PkgConfig) {
   const thresholds = cfg.thresholds ?? tierThresholds;
 
   const mappedPath = packagePathMap[name] ?? name;
-  const _defaultIncludeTests = [tests(`${name}/**/*.test.ts`)];
-  const _defaultIncludeSrc = [src(`${mappedPath}/**/*.ts`)];
+  const defaultIncludeTests = [tests(`${name}/**/*.test.ts`)];
+  const defaultIncludeSrc = [src(`${mappedPath}/**/*.ts`)];
   const _defaultCoverageExclude = [...commonCoverageExclude, "**/index.ts"];
 
   const coverageExclude =
