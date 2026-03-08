@@ -1,6 +1,12 @@
+import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { pipelineTools } from "./tools/pipeline.js";
 
-export function registerPipelineCategory(server: any) {
+// Define a minimal interface that matches the expected `addTool` method
+interface MinimalServer {
+  addTool(tool: Tool): void;
+}
+
+export function registerPipelineCategory(server: MinimalServer) {
   for (const tool of pipelineTools) {
     server.addTool(tool);
   }
