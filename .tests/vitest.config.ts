@@ -198,11 +198,15 @@ const packages: Record<string, PkgConfig> = {
 
   "image-studio-worker": {
     tier: 2,
+<<<<<<< HEAD
     env: "jsdom",
     includeTests: [tests("image-studio-worker/**/*.test.ts"), tests("image-studio-worker/**/*.test.tsx")],
     aliases: {
       "@/": pkg("image-studio-worker/frontend/src/"),
     },
+=======
+    includeTests: [tests("image-studio-worker/**/*.test.ts"), tests("image-studio-worker/**/*.test.tsx")],
+>>>>>>> main
     coverageExclude: [
       "**/frontend/**",
       "**/migrations/**",
