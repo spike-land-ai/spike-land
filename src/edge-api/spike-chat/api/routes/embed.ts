@@ -102,8 +102,15 @@ embedRouter.get("/:workspace/:channel", async (c) => {
           messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
+        if (!guestAccess) {
+          input.placeholder = 'Sign in to send messages';
+          input.disabled = true;
+          document.querySelector('#chat-form button').disabled = true;
+        }
+
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
+          if (!guestAccess) return;
           const text = input.value.trim();
           if (!text || channelId === "unknown") return;
           
