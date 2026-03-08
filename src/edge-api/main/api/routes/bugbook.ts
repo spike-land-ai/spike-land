@@ -29,8 +29,10 @@ const bugbook = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 // ── Public Endpoints ──
 
-/** GET /bugbook — list bugs, paginated + filterable. */
-bugbook.get("/bugbook", async (c) => {
+const BUGBOOK_API_BASE = "/api/bugbook";
+
+/** GET /api/bugbook — list bugs, paginated + filterable. */
+bugbook.get(BUGBOOK_API_BASE, async (c) => {
   const status = c.req.query("status");
   const category = c.req.query("category");
   const sort = c.req.query("sort") ?? "elo";
@@ -57,8 +59,8 @@ bugbook.get("/bugbook", async (c) => {
   });
 });
 
-/** GET /bugbook/leaderboard — bugs ranked by ELO. */
-bugbook.get("/bugbook/leaderboard", async (c) => {
+/** GET /api/bugbook/leaderboard — bugs ranked by ELO. */
+bugbook.get(`${BUGBOOK_API_BASE}/leaderboard`, async (c) => {
   const limit = Math.min(parseInt(c.req.query("limit") ?? "25", 10), 100);
 
   const [bugs, reporters] = await Promise.all([
@@ -80,8 +82,8 @@ bugbook.get("/bugbook/leaderboard", async (c) => {
   });
 });
 
-/** GET /bugbook/reporters — top bug reporters by user ELO. */
-bugbook.get("/bugbook/reporters", async (c) => {
+/** GET /api/bugbook/reporters — top bug reporters by user ELO. */
+bugbook.get(`${BUGBOOK_API_BASE}/reporters`, async (c) => {
   const limit = Math.min(parseInt(c.req.query("limit") ?? "25", 10), 100);
   const result = await c.env.DB.prepare(
     "SELECT user_id, elo, tier, event_count FROM user_elo ORDER BY elo DESC LIMIT ?",
@@ -91,8 +93,8 @@ bugbook.get("/bugbook/reporters", async (c) => {
   return c.json(result.results);
 });
 
-/** GET /bugbook/:id — single bug detail with report history. */
-bugbook.get("/bugbook/:id", async (c) => {
+/** GET /api/bugbook/:id — single bug detail with report history. */
+bugbook.get(`${BUGBOOK_API_BASE}/:id`, async (c) => {
   const bugId = c.req.param("id");
 
   const [bug, reports, eloHistory] = await Promise.all([
@@ -122,8 +124,8 @@ bugbook.get("/bugbook/:id", async (c) => {
 
 // ── Authenticated Endpoints ──
 
-/** POST /bugbook/report — submit a bug report. */
-bugbook.post("/bugbook/report", authMiddleware, eloThrottleMiddleware, async (c) => {
+/** POST /api/bugbook/report — submit a bug report. */
+bugbook.post(`${BUGBOOK_API_BASE}/report`, authMiddleware, eloThrottleMiddleware, async (c) => {
   const userId = c.get("userId");
 
   const body = await c.req.json<{
@@ -267,43 +269,48 @@ bugbook.post("/bugbook/report", authMiddleware, eloThrottleMiddleware, async (c)
   );
 });
 
-/** POST /bugbook/:id/confirm — confirm an existing bug. */
-bugbook.post("/bugbook/:id/confirm", authMiddleware, eloThrottleMiddleware, async (c) => {
-  const userId = c.get("userId");
-  const bugId = c.req.param("id");
+/** POST /api/bugbook/:id/confirm — confirm an existing bug. */
+bugbook.post(
+  `${BUGBOOK_API_BASE}/:id/confirm`,
+  authMiddleware,
+  eloThrottleMiddleware,
+  async (c) => {
+    const userId = c.get("userId");
+    const bugId = c.req.param("id");
 
-  const bug = await c.env.DB.prepare("SELECT * FROM bugs WHERE id = ?").bind(bugId).first();
-  if (!bug) {
-    return c.json({ error: "Bug not found" }, 404);
-  }
+    const bug = await c.env.DB.prepare("SELECT * FROM bugs WHERE id = ?").bind(bugId).first();
+    if (!bug) {
+      return c.json({ error: "Bug not found" }, 404);
+    }
 
-  // Check if user already reported this bug
-  const existing = await c.env.DB.prepare(
-    "SELECT id FROM bug_reports WHERE bug_id = ? AND reporter_id = ? LIMIT 1",
-  )
-    .bind(bugId, userId)
-    .first();
+    // Check if user already reported this bug
+    const existing = await c.env.DB.prepare(
+      "SELECT id FROM bug_reports WHERE bug_id = ? AND reporter_id = ? LIMIT 1",
+    )
+      .bind(bugId, userId)
+      .first();
 
-  if (existing) {
-    return c.json({ error: "You have already reported this bug" }, 409);
-  }
+    if (existing) {
+      return c.json({ error: "You have already reported this bug" }, 409);
+    }
 
-  const now = Date.now();
-  const bumpQ = buildBumpBugReportCount(now, bugId);
-  await c.env.DB.batch([
-    c.env.DB.prepare(bumpQ.sql).bind(...bumpQ.params),
-    c.env.DB.prepare(
-      "INSERT INTO bug_reports (bug_id, reporter_id, service_name, description, severity) VALUES (?, ?, ?, 'Confirmed by user', ?)",
-    ).bind(bugId, userId, bug.category as string, bug.severity as string),
-  ]);
+    const now = Date.now();
+    const bumpQ = buildBumpBugReportCount(now, bugId);
+    await c.env.DB.batch([
+      c.env.DB.prepare(bumpQ.sql).bind(...bumpQ.params),
+      c.env.DB.prepare(
+        "INSERT INTO bug_reports (bug_id, reporter_id, service_name, description, severity) VALUES (?, ?, ?, 'Confirmed by user', ?)",
+      ).bind(bugId, userId, bug.category as string, bug.severity as string),
+    ]);
 
-  const eloResult = await recordEloEvent(c.env.DB, userId, "bug_confirmed", bugId);
+    const eloResult = await recordEloEvent(c.env.DB, userId, "bug_confirmed", bugId);
 
-  return c.json({
-    bugId,
-    userElo: { newElo: eloResult.newElo, delta: eloResult.delta, tier: eloResult.tier },
-  });
-});
+    return c.json({
+      bugId,
+      userElo: { newElo: eloResult.newElo, delta: eloResult.delta, tier: eloResult.tier },
+    });
+  },
+);
 
 /** PATCH /bugbook/:id/fix — mark bug as fixed (admin only for now). */
 bugbook.patch("/bugbook/:id/fix", authMiddleware, async (c) => {
@@ -322,8 +329,8 @@ bugbook.patch("/bugbook/:id/fix", authMiddleware, async (c) => {
   return c.json({ bugId, status: "FIXED" });
 });
 
-/** GET /bugbook/my-reports — user's own reports. */
-bugbook.get("/bugbook/my-reports", authMiddleware, async (c) => {
+/** GET /api/bugbook/my-reports — user's own reports. */
+bugbook.get(`${BUGBOOK_API_BASE}/my-reports`, authMiddleware, async (c) => {
   const userId = c.get("userId");
   const limit = Math.min(parseInt(c.req.query("limit") ?? "50", 10), 200);
 

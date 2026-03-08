@@ -68,6 +68,11 @@ const ROUTE_META: Record<string, { title: string; description: string; ogImage?:
     description:
       "Learn about spike.land — who we are, our mission, and how we're building an open platform for AI tools.",
   },
+  "/security": {
+    title: "Security - spike.land",
+    description:
+      "Security practices, disclosure policy, and platform hardening details for spike.land.",
+  },
   "/terms": {
     title: "Terms of Service - spike.land",
     description:
@@ -193,7 +198,6 @@ export function RootLayout() {
   const navLinks = useMemo(() => [...BASE_NAV_LINKS], []);
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [searchToast, setSearchToast] = useState(false);
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), []);
   const mobileNavRef = useFocusTrap(mobileNavOpen, closeMobileNav);
   const location = useRouterState({ select: (s) => s.location });
@@ -359,28 +363,6 @@ export function RootLayout() {
                   </Link>
                 ))}
               </nav>
-              <button
-                type="button"
-                className="hidden lg:flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground bg-muted/50 dark:bg-white/5 border border-border rounded-md hover:bg-muted hover:text-foreground transition-all duration-200 active:scale-[0.98]"
-                aria-label="Search site"
-                onClick={() => {
-                  setSearchToast(true);
-                  setTimeout(() => setSearchToast(false), 2000);
-                }}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-                <span>Search...</span>
-                <kbd className="hidden lg:inline-flex items-center gap-1 font-sans text-[10px] bg-background border border-border rounded px-1.5 py-0.5 opacity-70">
-                  ⌘K
-                </kbd>
-              </button>
             </div>
             <div className="flex items-center gap-3">
               {isDeveloper && <ThemeSwitcher theme={theme} setTheme={setTheme} />}
@@ -472,15 +454,6 @@ export function RootLayout() {
 
         <AppFooter />
         <CookieConsent />
-        {searchToast && (
-          <div
-            role="status"
-            aria-live="polite"
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-lg bg-foreground text-background px-4 py-2 text-sm shadow-lg animate-in fade-in"
-          >
-            Search coming soon
-          </div>
-        )}
       </div>
     </div>
   );

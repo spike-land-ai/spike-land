@@ -26,7 +26,7 @@ fi
 case "$1" in
   worker)
     WORKER_NAME="$2"
-    WORKER_DIR="${ROOT}/src/${WORKER_NAME}"
+    WORKER_DIR="${ROOT}/packages/${WORKER_NAME}"
     if [ ! -d "$WORKER_DIR" ]; then
       echo "Error: Worker directory not found: ${WORKER_DIR}"
       exit 1
@@ -34,6 +34,7 @@ case "$1" in
     echo "Rolling back worker: ${WORKER_NAME}..."
     cd "$WORKER_DIR" && npx wrangler rollback
     echo "Worker ${WORKER_NAME} rolled back."
+    bash "${ROOT}/scripts/purge-cache.sh"
     ;;
 
   spa)
@@ -42,7 +43,7 @@ case "$1" in
         echo "Available SPA rollback builds:"
         echo ""
         # List builds/ prefix in R2 and extract unique SHAs
-        LIST_OUTPUT="$(cd "${ROOT}/src/spike-app" && yarn wrangler r2 object list "${R2_BUCKET}" --prefix "builds/" --remote 2>/dev/null || echo "")"
+        LIST_OUTPUT="$(cd "${ROOT}/packages/spike-app" && yarn wrangler r2 object list "${R2_BUCKET}" --prefix "builds/" --remote 2>/dev/null || echo "")"
         if [ -z "$LIST_OUTPUT" ]; then
           echo "  (none found)"
           exit 0
@@ -71,7 +72,7 @@ except Exception as e:
         echo "Rolling back SPA to build: ${SHA:0:12}..."
 
         # Verify the build exists
-        cd "${ROOT}/src/spike-app"
+        cd "${ROOT}/packages/spike-app"
         VERIFY="$(yarn wrangler r2 object list "${R2_BUCKET}" --prefix "builds/${SHA}/" --remote 2>/dev/null || echo "")"
         FOUND="$(echo "$VERIFY" | python3 -c "
 import sys, json
@@ -109,6 +110,7 @@ except: pass
         done
 
         echo "SPA rolled back to ${SHA:0:12}."
+        bash "${ROOT}/scripts/purge-cache.sh"
         ;;
     esac
     ;;

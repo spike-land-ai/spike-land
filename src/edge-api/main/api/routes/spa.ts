@@ -69,31 +69,24 @@ spa.get("/*", async (c) => {
       fallback = await c.env.SPA_ASSETS.get(`${key}/index.html`);
     }
 
-    // API-like prefixes must not serve SPA shell
-    const apiPrefixes = ["/mcp/", "/oauth/", "/api/"];
-    if (apiPrefixes.some((p) => path.startsWith(p))) {
-      return c.json({ error: "Not Found", path }, 404);
-    }
-
-    // Known SPA route prefixes — any path NOT matching these is a soft 404
-    const knownSpaRoutes = [
+    const exactSpaRoutes = new Set([
       "/",
       "/about",
       "/analytics",
-      "/apps",
-      "/blog",
-      "/bugbook",
       "/build",
       "/callback",
       "/cockpit",
       "/dashboard",
-      "/docs",
       "/learn",
       "/login",
-      "/messages",
       "/mcp",
+      "/mcp/authorize",
+      "/packages",
+      "/packages/new",
+      "/packages/qa-studio/ui",
       "/pricing",
       "/privacy",
+      "/security",
       "/settings",
       "/store",
       "/terms",
@@ -102,10 +95,28 @@ spa.get("/*", async (c) => {
       "/vibe-code",
       "/what-we-do",
       "/bazdmeg",
+      "/agency/portfolio",
+    ]);
+    const prefixedSpaRoutes = [
+      "/apps",
+      "/blog",
+      "/bugbook",
+      "/dashboard",
+      "/docs",
+      "/learn",
+      "/messages",
+      "/packages",
     ];
-    const isKnownRoute = knownSpaRoutes.some((r) =>
-      r === "/" ? path === "/" : path === r || path.startsWith(r + "/"),
-    );
+    const isKnownRoute =
+      exactSpaRoutes.has(path) ||
+      prefixedSpaRoutes.some((prefix) => path.startsWith(`${prefix}/`));
+
+    // API-like prefixes must not serve SPA shell unless they are explicit product pages.
+    const apiPrefixes = ["/oauth/", "/api/"];
+    const isApiLikePath = path.startsWith("/mcp/") || apiPrefixes.some((p) => path.startsWith(p));
+    if (isApiLikePath && !isKnownRoute) {
+      return c.json({ error: "Not Found", path }, 404);
+    }
 
     // 3. Last fallback: the SPA generic index.html shell
     if (!fallback) {
@@ -462,7 +473,13 @@ spa.get("/*", async (c) => {
   const headers = new Headers();
   object.writeHttpMetadata(headers);
   headers.set("etag", object.httpEtag);
-  headers.set("cache-control", "public, max-age=3600");
+  const contentType = headers.get("content-type") ?? "";
+  const isHtmlResponse =
+    key === "index.html" || key.endsWith(".html") || contentType.includes("text/html");
+  headers.set(
+    "cache-control",
+    isHtmlResponse ? "private, no-cache, no-store, must-revalidate" : "public, max-age=3600",
+  );
 
   return new Response(object.body, { headers });
 });

@@ -195,14 +195,15 @@ const packages: Record<string, PkgConfig> = {
   "google-ads-mcp": { tier: 2, pool: "forks" },
   "hackernews-mcp": { tier: 2, pool: "forks" },
   "iwd-spotlight-mcp": { tier: 2, pool: "forks" },
-"image-studio-worker": {
-  tier: 2,
-  env: "jsdom",
-  includeTests: [tests("image-studio-worker/**/*.test.ts"), tests("image-studio-worker/**/*.test.tsx")],
-  aliases: {
-    "@/": pkg("image-studio-worker/frontend/src/"),
-  },
-  coverageExclude: [
+
+  "image-studio-worker": {
+    tier: 2,
+    env: "jsdom",
+    includeTests: [tests("image-studio-worker/**/*.test.ts"), tests("image-studio-worker/**/*.test.tsx")],
+    aliases: {
+      "@/": pkg("image-studio-worker/frontend/src/"),
+    },
+    coverageExclude: [
       "**/frontend/**",
       "**/migrations/**",
       "**/deps/nanoid.ts",

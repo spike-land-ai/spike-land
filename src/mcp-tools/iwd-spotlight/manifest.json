@@ -1,0 +1,16 @@
+{
+  "name": "iwd-spotlight",
+  "category": "mcp-tools",
+  "dependencies": ["@spike-land-ai/mcp-server-base"],
+  "files": [
+    "core-logic/tool-client.ts",
+    "core-logic/spotlight.ts",
+    "core-logic/campaign.ts",
+    "core-logic/amplifier.ts",
+    "core-logic/storytelling.ts",
+    "core-logic/dashboard.ts",
+    "core-logic/contributors.ts",
+    "mcp/index.ts",
+    "mcp/types.ts"
+  ]
+}

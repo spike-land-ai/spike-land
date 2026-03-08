@@ -159,12 +159,12 @@ export function AppFooter() {
                 </Link>
               </li>
               <li>
-                <a
-                  href="/security"
+                <Link
+                  to="/security"
                   className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
                 >
                   <ShieldCheck className="size-3.5" /> Security
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

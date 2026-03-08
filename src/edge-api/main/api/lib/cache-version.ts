@@ -1,6 +1,6 @@
 let cachedVersion: string | null = null;
 let expiresAt = 0;
-const TTL_MS = 5 * 60 * 1000; // 5 minutes
+const TTL_MS = 60 * 1000; // 1 minute
 
 export function resetCacheVersionForTesting() {
   cachedVersion = null;
@@ -22,7 +22,7 @@ export async function getCacheVersion(spaAssets: R2Bucket): Promise<string> {
     }
   }
 
-  // Fallback: timestamp-based (changes every 5 min at worst)
+  // Fallback: timestamp-based (changes every minute at worst)
   const bucket = Math.floor(now / TTL_MS);
   cachedVersion = bucket.toString(36);
   expiresAt = (bucket + 1) * TTL_MS;

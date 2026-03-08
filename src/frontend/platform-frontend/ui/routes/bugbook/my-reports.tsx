@@ -2,8 +2,17 @@ import { useMyBugReports } from "../../hooks/useBugbook";
 import { Badge } from "../../../core-logic/badge";
 import { Skeleton } from "../../../core-logic/skeleton";
 import { Link } from "@tanstack/react-router";
+import { AuthGuard } from "../../components/AuthGuard";
 
 export function MyReportsPage() {
+  return (
+    <AuthGuard>
+      <MyReportsContent />
+    </AuthGuard>
+  );
+}
+
+function MyReportsContent() {
   const { data, isLoading, error } = useMyBugReports();
 
   if (isLoading) {

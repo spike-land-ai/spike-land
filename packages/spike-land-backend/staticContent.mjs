@@ -6,14 +6,4 @@ export { ASSET_MANIFEST };
 
 const f = JSON.parse(ASSET_MANIFEST);
 export const ASSET_HASH = md5(ASSET_MANIFEST);
-
-const dynamicFiles = ["swVersion.mjs"];
-dynamicFiles.forEach((file) => {
-  const fileParts = file.split(".");
-  const ext = fileParts.pop();
-  fileParts.push(ASSET_HASH);
-  fileParts.push(ext);
-  const newFile = fileParts.join(".");
-  f[file] = newFile;
-});
 export const files = f;
