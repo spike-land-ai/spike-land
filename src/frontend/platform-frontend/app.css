@@ -162,6 +162,12 @@
 
   --info-bg: #ecfeff;
   --info-fg: #0891b2;
+
+  --chat-bg: #fffaf0;
+  --chat-surface: #ffffff;
+  --chat-accent: #f0a500;
+  --chat-accent-light: #f6c453;
+  --chat-success: #16a34a;
 }
 
 /* Dark theme mapped to Obsidian & Amber Neon */
