@@ -235,6 +235,8 @@ spa.get("/*", async (c) => {
           "/store": {
             title: "Tool Store - spike.land",
             description: "Discover and install AI-powered tools from the spike.land store.",
+            ssrContent:
+              "<h1>Tool Store</h1><p>Discover and install AI-powered tools from the spike.land store.</p>",
           },
           "/pricing": {
             title: "Pricing - spike.land",
@@ -271,11 +273,15 @@ spa.get("/*", async (c) => {
             title: "Learn &amp; Verify - spike.land",
             description:
               "Learn from any content and prove your understanding through AI-powered quizzes.",
+            ssrContent:
+              "<h1>Learn &amp; Verify</h1><p>Learn from any content and prove your understanding through interactive AI-powered quizzes. Earn verifiable badges.</p>",
           },
           "/blog": {
             title: "Blog - spike.land",
             description:
               "Articles and tutorials from the spike.land team about AI, MCP, and edge computing.",
+            ssrContent:
+              "<h1>Blog</h1><p>Articles, tutorials, and engineering insights from the spike.land team.</p>",
           },
           "/mcp": {
             title: "MCP Registry - spike.land",
@@ -287,6 +293,8 @@ spa.get("/*", async (c) => {
           "/apps": {
             title: "MCP Tools & Apps - spike.land",
             description: "Browse and interact with AI-powered applications on spike.land.",
+            ssrContent:
+              "<h1>MCP Tools &amp; Apps</h1><p>Browse and interact with AI-powered applications on spike.land.</p>",
           },
           "/bugbook": {
             title: "Bugbook - spike.land",
@@ -301,6 +309,15 @@ spa.get("/*", async (c) => {
           "/version": {
             title: "Version - spike.land",
             description: "View the current spike.land build version and deployed assets.",
+            ssrContent:
+              "<h1>Version</h1><p>View the current spike.land build version and deployed assets.</p>",
+          },
+          "/docs": {
+            title: "Documentation - spike.land",
+            description:
+              "Technical documentation, API reference, MCP tools guide, and architecture overview for spike.land.",
+            ssrContent:
+              "<h1>Documentation</h1><p>Technical documentation, API reference, MCP tools guide, and architecture overview for spike.land.</p>",
           },
         };
       const meta = routeMeta[path];
@@ -325,7 +342,62 @@ spa.get("/*", async (c) => {
             `<div id="ssr-content" style="display:none">${meta.ssrContent}</div>\n</body>`,
           );
         }
+
+        // FAQPage structured data for /pricing
+        if (path === "/pricing") {
+          const faqJsonLd = JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "What is included in the free plan?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "The free plan includes 50 requests per day, access to free-tier tools, bug reporting, and community support.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "What does the Pro plan cost?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "The Pro plan costs $29/month and includes 500 requests per day, pro tools, BYOK support, natural language chat, and priority bug reporting.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "What is the Business plan?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "The Business plan costs $99/month and includes unlimited requests, all tools, priority support, early access to new features, and bug bounty eligibility.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Can I bring my own API keys?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Yes, the Pro and Business plans support BYOK (Bring Your Own Key) for AI providers like Anthropic, OpenAI, and Google.",
+                },
+              },
+            ],
+          });
+          html = html.replace(
+            "</head>",
+            `<script type="application/ld+json">${faqJsonLd}</script>\n</head>`,
+          );
+        }
       }
+    }
+
+    // Inject noindex for utility pages that shouldn't appear in search results
+    const noindexPaths = ["/callback", "/settings", "/login"];
+    if (noindexPaths.includes(path)) {
+      html = html.replace(
+        "</head>",
+        `<meta name="robots" content="noindex, nofollow" />\n</head>`,
+      );
     }
 
     const response = new Response(html, {

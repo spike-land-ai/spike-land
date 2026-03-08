@@ -107,10 +107,10 @@ const versionRoute = createRoute({
   component: withSuspense(() => import("./routes/version"), "VersionPage"),
 });
 
-// Apps routes
+// Package routes
 const appsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/apps",
+  path: "/packages",
 });
 
 const appsIndexRoute = createRoute({
@@ -127,7 +127,7 @@ const appsNewRoute = createRoute({
 
 const appsQaStudioRoute = createRoute({
   getParentRoute: () => appsRoute,
-  path: "qa-studio",
+  path: "qa-studio/ui",
   component: withSuspense(() => import("./routes/apps/qa-studio"), "QaStudioPage"),
 });
 
@@ -268,10 +268,10 @@ const messageThreadRoute = createRoute({
   component: withSuspense(() => import("./routes/messages/$userId"), "MessageThreadPage"),
 });
 
-// Tools routes
+// MCP app routes
 const toolsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/tools",
+  path: "/apps",
 });
 
 const toolsIndexRoute = createRoute({
@@ -284,6 +284,22 @@ const appSessionRoute = createRoute({
   getParentRoute: () => toolsRoute,
   path: "$appSlug",
   component: withSuspense(() => import("./routes/tools/$appSlug"), "AppSessionPage"),
+});
+
+const legacyToolsIndexRedirectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tools",
+  beforeLoad: ({ search }) => {
+    throw redirect({ to: "/apps", search });
+  },
+});
+
+const legacyToolDetailRedirectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tools/$appSlug",
+  beforeLoad: ({ params, search }) => {
+    throw redirect({ to: "/apps/$appSlug", params, search });
+  },
 });
 
 // Agency routes
@@ -322,12 +338,6 @@ const cockpitRoute = createRoute({
   component: withSuspense(() => import("./routes/cockpit"), "CockpitPage"),
 });
 
-const vibeCodeRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/vibe-code",
-  component: withSuspense(() => import("../core-logic/vibe-code"), "VibeCodePage"),
-});
-
 // BAZDMEG Method Presentation
 const bazdmegRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -344,7 +354,15 @@ const whatWeDoRoute = createRoute({
 const buildRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/build",
-  component: withSuspense(() => import("./routes/build"), "BuildPage"),
+  beforeLoad: () => {
+    throw redirect({ to: "/vibe-code" });
+  },
+});
+
+const vibeCodeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/vibe-code",
+  component: withSuspense(() => import("./routes/vibe-code"), "VibeCodePage"),
 });
 
 const startChecklistRoute = createRoute({
@@ -369,10 +387,12 @@ const startChecklistRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   cockpitRoute,
-  vibeCodeRoute,
   bazdmegRoute,
   whatWeDoRoute,
+  vibeCodeRoute,
   buildRoute,
+  legacyToolDetailRedirectRoute,
+  legacyToolsIndexRedirectRoute,
   startChecklistRoute,
   aboutRoute,
   analyticsRoute,

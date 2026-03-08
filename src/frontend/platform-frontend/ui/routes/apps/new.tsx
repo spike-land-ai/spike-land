@@ -8,11 +8,11 @@ export function AppsNewPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link to="/apps" className="text-primary hover:underline">
-          Apps
+        <Link to="/packages" className="text-primary hover:underline">
+          Packages
         </Link>
         <span className="text-muted-foreground">/</span>
-        <h1 className="text-2xl font-bold text-foreground">Create App</h1>
+        <h1 className="text-2xl font-bold text-foreground">Create Package</h1>
       </div>
 
       <div className="rounded-2xl border border-border bg-card dark:glass-card p-8 text-center space-y-6">
@@ -23,7 +23,7 @@ export function AppsNewPage() {
         </div>
 
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-foreground">App Creation is Coming Soon</h2>
+          <h2 className="text-2xl font-bold text-foreground">Package Creation is Coming Soon</h2>
           <p className="text-muted-foreground max-w-md mx-auto">
             We're building a seamless experience for deploying AI apps directly to the edge. Join
             the waitlist to get early access.

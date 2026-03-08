@@ -50,7 +50,7 @@ export function AppCard({
 
   return (
     <Link
-      to="/apps/$appId"
+      to="/packages/$appId"
       params={{ appId: id }}
       search={{ tab: "Overview" }}
       className="group block relative rounded-2xl border border-border bg-card dark:glass-card p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:scale-[1.01] hover:border-primary/30 hover:shadow-primary/10"

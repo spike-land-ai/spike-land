@@ -68,6 +68,56 @@ function extractSentences(text: string): string[] {
     .filter((s) => s.length > 20 && !s.startsWith("http"));
 }
 
+/**
+ * Build a question where the correct option is the actual sentence for that
+ * concept, and the three distractors are other sentences from the source pool.
+ * This makes it impossible to identify the correct answer by generic phrasing.
+ */
+function buildQuestion(
+  conceptIndex: number,
+  conceptSentence: string,
+  sourcePool: string[],
+  questionTemplate: (name: string) => string,
+): QuizQuestion {
+  const correctText = conceptSentence.slice(0, 120);
+
+  // Pick 3 distractor sentences that are different from the correct one
+  const distractors: string[] = [];
+  const shuffledPool = [...sourcePool].sort(() => Math.random() - 0.5);
+  for (const s of shuffledPool) {
+    if (distractors.length >= 3) break;
+    if (s.slice(0, 120) !== correctText) {
+      distractors.push(s.slice(0, 120));
+    }
+  }
+  // Pad with generic fallbacks only if the article has fewer than 4 sentences
+  const fallbacks = [
+    "This concept is not discussed in the article.",
+    "The article does not support this claim.",
+    "This contradicts what the article states.",
+  ];
+  while (distractors.length < 3) {
+    distractors.push(fallbacks[distractors.length]!);
+  }
+
+  const correctIndex = Math.floor(Math.random() * 4);
+  const opts: [string, string, string, string] = [
+    distractors[0]!,
+    distractors[1]!,
+    distractors[2]!,
+    correctText,
+  ];
+  // Move correct answer to the chosen index
+  [opts[3], opts[correctIndex]] = [opts[correctIndex]!, opts[3]!];
+
+  return {
+    conceptIndex,
+    question: questionTemplate(conceptSentence.slice(0, 60)),
+    options: opts,
+    correctIndex,
+  };
+}
+
 function generateMockSession(content: string): SessionState {
   // Split into paragraphs, filtering out very short ones and bare URLs
   const paragraphs = content
@@ -94,7 +144,7 @@ function generateMockSession(content: string): SessionState {
             conceptIndex: 0,
             question:
               "Not enough content was provided to generate a quiz. Please go back and paste article text.",
-            options: ["I understand", "I understand", "I understand", "I understand"] as [
+            options: ["I understand", "OK", "Got it", "Noted"] as [
               string,
               string,
               string,
@@ -122,24 +172,14 @@ function generateMockSession(content: string): SessionState {
     concepts.push(raw.slice(0, 80));
   }
 
-  const questions: QuizQuestion[] = concepts.slice(0, 3).map((name, idx) => {
-    const correctIndex = Math.floor(Math.random() * 4);
-    const opts: [string, string, string, string] = [
-      "This accurately reflects the concept",
-      "This contradicts the concept",
-      "This is unrelated to the concept",
-      "This oversimplifies the concept",
-    ];
-    if (correctIndex !== 0) {
-      [opts[0], opts[correctIndex]] = [opts[correctIndex]!, opts[0]!];
-    }
-    return {
-      conceptIndex: idx,
-      question: `Which statement about "${name.slice(0, 60)}" is correct?`,
-      options: opts,
-      correctIndex,
-    };
-  });
+  const questions: QuizQuestion[] = concepts.slice(0, 3).map((name, idx) =>
+    buildQuestion(
+      idx,
+      sourcePool[idx % sourcePool.length] ?? name,
+      sourcePool,
+      (n) => `Which of the following best describes: "${n}..."?`,
+    )
+  );
 
   return {
     article: content,
@@ -224,26 +264,31 @@ function evaluateMockAnswers(
     .filter(({ p }) => !p.mastered)
     .map(({ i }) => i);
 
+  // Rebuild source pool from the article so distractors are content-based
+  const articleSentences = extractSentences(state.article);
+  const articleParagraphs = state.article
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter((p) => p.length > 20 && !p.match(/^https?:\/\/\S+$/));
+  const sourcePool =
+    articleSentences.length >= 3
+      ? articleSentences
+      : articleParagraphs.length >= 1
+        ? articleParagraphs
+        : state.concepts;
+
   const nextQuestions: QuizQuestion[] = [];
   for (let i = 0; i < 3; i++) {
     const idx = unmasteredIndices[i % unmasteredIndices.length] ?? i;
-    const name = state.concepts[idx] ?? `Concept ${idx}`;
-    const correctIndex = Math.floor(Math.random() * 4);
-    const opts: [string, string, string, string] = [
-      "This accurately reflects the concept",
-      "This contradicts the concept",
-      "This is unrelated to the concept",
-      "This oversimplifies the concept",
-    ];
-    if (correctIndex !== 0) {
-      [opts[0], opts[correctIndex]] = [opts[correctIndex]!, opts[0]!];
-    }
-    nextQuestions.push({
-      conceptIndex: idx,
-      question: `Regarding "${name.slice(0, 60)}", which is true?`,
-      options: opts,
-      correctIndex,
-    });
+    const conceptSentence = sourcePool[idx % sourcePool.length] ?? state.concepts[idx] ?? `Concept ${idx}`;
+    nextQuestions.push(
+      buildQuestion(
+        idx,
+        conceptSentence,
+        sourcePool,
+        (n) => `Regarding "${n}...", which statement is accurate?`,
+      ),
+    );
   }
 
   return {

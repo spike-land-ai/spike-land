@@ -12,7 +12,18 @@ export async function authMiddleware(
 ): Promise<Response | void> {
   const cookie = c.req.header("cookie");
   const authHeader = c.req.header("authorization");
-  
+
+  // API key auth for bots/agents (Bearer <AGENT_API_KEY>)
+  if (authHeader?.startsWith("Bearer ") && c.env.AGENT_API_KEY) {
+    const token = authHeader.slice(7);
+    if (token === c.env.AGENT_API_KEY) {
+      const agentId = c.req.header("x-agent-id") || "agent-system";
+      c.set("userId", agentId);
+      c.set("isGuest", false);
+      return next();
+    }
+  }
+
   if (!cookie && !authHeader) {
     // Check if it's a guest request (we can use anonymous ID or something similar later)
     const isGuest = c.req.header("x-guest-access") === "true";

@@ -36,7 +36,12 @@
     "docker:setup": "bash docker/scripts/setup-certs.sh && bash docker/scripts/setup-dns.sh",
     "docker:dev": "docker compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up -d",
     "docker:down": "docker compose -f docker/docker-compose.yml down",
-    "review": "bash scripts/gemini-review.sh"
+    "review": "bash scripts/gemini-review.sh",
+    "test:changed": "bash scripts/test-changed.sh",
+    "test:changed:ci": "bash scripts/test-changed.sh --base origin/main",
+    "test:docker": "bash scripts/docker-test.sh",
+    "test:docker:all": "bash scripts/docker-test.sh --all",
+    "test:docker:ci": "bash scripts/docker-test.sh --base origin/main"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",

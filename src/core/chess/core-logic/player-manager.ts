@@ -1,3 +1,5 @@
+import prisma from "../lib/prisma";
+
 interface ChessPlayer {
   id: string;
   userId: string;
@@ -32,7 +34,6 @@ export async function createPlayer(
   name: string,
   avatar?: string,
 ): Promise<ChessPlayer> {
-  const prisma = (await import("./prisma")).default;
   return prisma.chessPlayer.create({
     data: {
       userId,
@@ -43,12 +44,10 @@ export async function createPlayer(
 }
 
 export async function getPlayer(playerId: string): Promise<ChessPlayer | null> {
-  const prisma = (await import("./prisma")).default;
   return prisma.chessPlayer.findUnique({ where: { id: playerId } });
 }
 
 export async function getPlayersByUser(userId: string): Promise<ChessPlayer[]> {
-  const prisma = (await import("./prisma")).default;
   return prisma.chessPlayer.findMany({
     where: { userId },
     select: {
@@ -76,7 +75,6 @@ export async function updatePlayer(
   userId: string,
   data: { name?: string; avatar?: string; soundEnabled?: boolean },
 ): Promise<ChessPlayer> {
-  const prisma = (await import("./prisma")).default;
   try {
     return await prisma.chessPlayer.update({
       where: { id: playerId, userId },
@@ -88,7 +86,6 @@ export async function updatePlayer(
 }
 
 export async function deletePlayer(playerId: string, userId: string): Promise<void> {
-  const prisma = (await import("./prisma")).default;
   try {
     await prisma.chessPlayer.delete({ where: { id: playerId, userId } });
   } catch {
@@ -96,19 +93,25 @@ export async function deletePlayer(playerId: string, userId: string): Promise<vo
   }
 }
 
-export async function setPlayerOnline(playerId: string, isOnline: boolean): Promise<void> {
-  const prisma = (await import("./prisma")).default;
-  await prisma.chessPlayer.update({
-    where: { id: playerId },
-    data: {
-      isOnline,
-      lastSeenAt: new Date(),
-    },
-  });
+export async function setPlayerOnline(
+  playerId: string,
+  userId: string,
+  isOnline: boolean,
+): Promise<void> {
+  try {
+    await prisma.chessPlayer.update({
+      where: { id: playerId, userId },
+      data: {
+        isOnline,
+        lastSeenAt: new Date(),
+      },
+    });
+  } catch {
+    throw new Error("Not authorized to update this player");
+  }
 }
 
 export async function listOnlinePlayers(): Promise<ChessPlayer[]> {
-  const prisma = (await import("./prisma")).default;
   return prisma.chessPlayer.findMany({
     where: { isOnline: true },
     select: {
@@ -132,7 +135,6 @@ export async function listOnlinePlayers(): Promise<ChessPlayer[]> {
 }
 
 export async function getPlayerStats(playerId: string): Promise<PlayerStats> {
-  const prisma = (await import("./prisma")).default;
   const player = await prisma.chessPlayer.findUnique({
     where: { id: playerId },
   });
@@ -158,7 +160,6 @@ export async function updatePlayerElo(
   newElo: number,
   result: "win" | "loss" | "draw",
 ): Promise<void> {
-  const prisma = (await import("./prisma")).default;
 
   const winIncrement = result === "win" ? 1 : 0;
   const lossIncrement = result === "loss" ? 1 : 0;

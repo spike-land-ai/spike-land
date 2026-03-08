@@ -8,8 +8,6 @@ import { useDevMode } from "@spike-land-ai/block-website/core";
 import { LoginButton } from "../components/LoginButton";
 import { AppFooter } from "../components/AppFooter";
 import { CookieConsent } from "../components/CookieConsent";
-import { MessageCircle } from "lucide-react";
-import { AiChatWidget } from "../components/AiChatWidget";
 import { ThemeSwitcher } from "../components/ThemeSwitcher";
 import { apiUrl } from "../../core-logic/api";
 import { initGoogleAds } from "../../core-logic/google-ads";
@@ -25,15 +23,15 @@ const ROUTE_META: Record<string, { title: string; description: string; ogImage?:
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
   },
-  "/tools": {
-    title: "AI Tools Registry - spike.land",
-    description:
-      "Browse 80+ MCP tools on spike.land. Find tools for code review, image generation, data analysis, and more.",
-  },
   "/apps": {
-    title: "Apps - spike.land",
+    title: "MCP Apps - spike.land",
     description:
-      "Browse and interact with AI-powered applications on spike.land. Connect AI agents to real-world data and actions.",
+      "Browse MCP apps on spike.land by category. Open each app in chat, terminal, MDX, or overview mode.",
+  },
+  "/packages": {
+    title: "MCP Packages - spike.land",
+    description:
+      "Inspect MCP package details, terminals, and implementation surfaces behind spike.land apps.",
   },
   "/store": {
     title: "App Store - spike.land",
@@ -95,9 +93,14 @@ const ROUTE_META: Record<string, { title: string; description: string; ogImage?:
     description: "Configure your spike.land account, billing, API keys, and preferences.",
   },
   "/build": {
-    title: "AI App Builder — We Build Your App in 48 Hours | spike.land",
+    title: "vibe-code - Chat-Native MCP App Builder | spike.land",
     description:
-      "Get a working 3-screen MVP built in 48 hours for £1,997. MCP-first development with AI agents. Source code included.",
+      "See how vibe-code turns every MCP app into a chat-native product surface with spike-chat, terminal execution, MDX app views, and MCP server editing.",
+  },
+  "/vibe-code": {
+    title: "vibe-code - Chat-Native MCP App Builder | spike.land",
+    description:
+      "See how vibe-code turns every MCP app into a chat-native product surface with spike-chat, terminal execution, MDX app views, and MCP server editing.",
   },
   "/login": {
     title: "Sign In - spike.land",
@@ -107,11 +110,6 @@ const ROUTE_META: Record<string, { title: string; description: string; ogImage?:
   "/version": {
     title: "Version - spike.land",
     description: "View build version, deployed assets, and download links for spike.land.",
-  },
-  "/vibe-code": {
-    title: "Vibe Coder - spike.land",
-    description:
-      "Vibe code with AI agents. Chat, edit code in Monaco editor, and see live preview - all in one place.",
   },
   "/what-we-do": {
     title: "What We Do - spike.land | MCP-First AI Platform",
@@ -177,7 +175,8 @@ function injectJsonLd(id: string, content: string) {
 }
 
 const BASE_NAV_LINKS = [
-  { to: "/tools", label: "Tools" },
+  { to: "/apps", label: "Apps" },
+  { to: "/vibe-code", label: "Vibe Code" },
   { to: "/store", label: "Store" },
   { to: "/pricing", label: "Pricing" },
   { to: "/docs", label: "Docs" },
@@ -185,35 +184,24 @@ const BASE_NAV_LINKS = [
   { to: "/about", label: "About" },
 ] as const;
 
-const VIBE_NAV_LINK = { to: "/vibe-code", label: "Vibe" } as const;
-
 export function RootLayout() {
   useAnalytics();
   const { theme, setTheme } = useDarkMode();
   useAuth();
   const { isDeveloper } = useDevMode();
 
-  const navLinks = useMemo(
-    () => (isDeveloper ? [VIBE_NAV_LINK, ...BASE_NAV_LINKS] : [...BASE_NAV_LINKS]),
-    [isDeveloper],
-  );
+  const navLinks = useMemo(() => [...BASE_NAV_LINKS], []);
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [searchToast, setSearchToast] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), []);
   const mobileNavRef = useFocusTrap(mobileNavOpen, closeMobileNav);
   const location = useRouterState({ select: (s) => s.location });
   const { pathname, searchStr } = location;
 
-  // Pages with their own integrated chat panel — hide global chat sidebar
-  const hasPageChat = pathname === "/vibe-code";
-  const showGlobalChat = !hasPageChat;
-
-  // Close mobile nav and chat sidebar on route change
+  // Close mobile nav on route change
   useEffect(() => {
     setMobileNavOpen(false);
-    if (pathname === "/vibe-code") setChatOpen(false);
   }, [pathname]);
 
   // Inject JSON-LD structured data and RSS link once on mount
@@ -240,22 +228,39 @@ export function RootLayout() {
         description: DEFAULT_DESCRIPTION,
       };
 
-    // Special handling for dynamic app pages
-    if (pathname.startsWith("/apps/") && pathname !== "/apps/new") {
+    // Special handling for dynamic MCP app pages
+    if (pathname.startsWith("/apps/")) {
+      const appId = pathname.split("/")[2];
+      const search = new URLSearchParams(searchStr);
+      const surface = search.get("surface") || "overview";
+      const appName = appId
+        ? appId.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+        : "App";
+      meta = {
+        title: `${appName} (${surface}) — spike.land`,
+        description: `Open ${appName} as a categorized MCP app on spike.land across chat, terminal, MDX, and overview surfaces.`,
+      };
+    }
+
+    if (
+      pathname.startsWith("/packages/") &&
+      pathname !== "/packages/new" &&
+      pathname !== "/packages/qa-studio/ui"
+    ) {
       const appId = pathname.split("/")[2];
       const search = new URLSearchParams(searchStr);
       const tab = search.get("tab") || "Overview";
       const appName = appId
         ? appId.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
-        : "Tool";
+        : "Package";
       meta = {
-        title: `${appName} (${tab}) — spike.land`,
-        description: `Explore ${appName} on spike.land — the MCP-first AI development platform.`,
+        title: `${appName} Package (${tab}) — spike.land`,
+        description: `Inspect the ${appName} MCP package on spike.land — package details, terminal access, and implementation context.`,
       };
     }
 
     const ogImage = meta.ogImage ?? DEFAULT_OG_IMAGE;
-    const canonicalUrl = `${SITE_URL}${pathname === "/" ? "" : pathname}${searchStr}`;
+    const canonicalUrl = `${SITE_URL}${pathname === "/" ? "" : pathname}`;
 
     document.title = meta.title;
 
@@ -292,6 +297,32 @@ export function RootLayout() {
       ogLocale.setAttribute("property", "og:locale");
       ogLocale.content = "en_US";
       document.head.appendChild(ogLocale);
+    }
+
+    // BreadcrumbList structured data
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments.length > 0) {
+      const breadcrumbItems = [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        ...segments.map((seg, i) => ({
+          "@type": "ListItem",
+          position: i + 2,
+          name: seg.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+          item: `${SITE_URL}/${segments.slice(0, i + 1).join("/")}`,
+        })),
+      ];
+      injectJsonLd(
+        "jsonld-breadcrumb",
+        JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: breadcrumbItems,
+        }),
+      );
+    } else {
+      // Homepage — remove breadcrumb if present
+      const existing = document.getElementById("jsonld-breadcrumb");
+      if (existing) existing.remove();
     }
   }, [pathname, searchStr]);
 
@@ -353,15 +384,6 @@ export function RootLayout() {
             </div>
             <div className="flex items-center gap-3">
               {isDeveloper && <ThemeSwitcher theme={theme} setTheme={setTheme} />}
-              {showGlobalChat && (
-                <button
-                  onClick={() => setChatOpen((v) => !v)}
-                  className="rounded-lg p-2.5 transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-muted dark:hover:bg-white/10"
-                  aria-label={chatOpen ? "Close chat" : "Open chat"}
-                >
-                  <MessageCircle className="size-4" />
-                </button>
-              )}
               <LoginButton />
               {/* Mobile hamburger */}
               <button
@@ -450,7 +472,6 @@ export function RootLayout() {
 
         <AppFooter />
         <CookieConsent />
-        {showGlobalChat && <AiChatWidget open={chatOpen} onToggle={() => setChatOpen((v) => !v)} />}
         {searchToast && (
           <div
             role="status"

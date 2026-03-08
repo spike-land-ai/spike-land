@@ -43,7 +43,7 @@ const placeholderVersions: AppVersion[] = [
 
 export function AppDetailPage() {
   const { appId } = useParams({ strict: false });
-  const search = useSearch({ from: "/apps/$appId" }) as { tab?: Tab };
+  const search = useSearch({ from: "/packages/$appId" }) as { tab?: Tab };
   const navigate = useNavigate();
 
   const activeTab = tabs.includes(search.tab as Tab) ? (search.tab as Tab) : "Overview";
@@ -54,7 +54,7 @@ export function AppDetailPage() {
   const setActiveTab = useCallback(
     (tab: Tab) => {
       navigate({
-        to: "/apps/$appId",
+        to: "/packages/$appId",
         params: { appId: appId ?? "" },
         search: (prev) => ({ ...prev, tab }),
       });
@@ -83,8 +83,8 @@ export function AppDetailPage() {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-          { "@type": "ListItem", position: 2, name: "Store", item: `${SITE_URL}/store` },
-          { "@type": "ListItem", position: 3, name: appName, item: `${SITE_URL}/apps/${appId}` },
+          { "@type": "ListItem", position: 2, name: "Packages", item: `${SITE_URL}/packages` },
+          { "@type": "ListItem", position: 3, name: appName, item: `${SITE_URL}/packages/${appId}` },
         ],
       }),
     );
@@ -125,8 +125,8 @@ export function AppDetailPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/apps" className="text-primary hover:underline">
-            MCP Tools
+          <Link to="/packages" className="text-primary hover:underline">
+            MCP Packages
           </Link>
           <span className="text-muted-foreground">/</span>
           <h1 className="text-2xl font-bold text-foreground">{appId}</h1>

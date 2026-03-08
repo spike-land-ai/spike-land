@@ -1,0 +1,285 @@
+# syntax=docker/dockerfile:1.4
+# ─────────────────────────────────────────────────────────────────────────────
+# Dockerfile.test — per-package test stages with BuildKit layer caching
+#
+# Usage:
+#   docker build --target test-chess-engine -f docker/Dockerfile.test .
+#   docker build --target test-all         -f docker/Dockerfile.test .
+#
+# Each per-package stage is independent from the config stage, so an unchanged
+# package's test RUN layer is served from cache even when other packages change.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Stage 0: base — Node 24 + Yarn 4 install ─────────────────────────────────
+FROM node:24-alpine AS base
+
+# Install build tools needed by some native addons (e.g. canvas, better-sqlite3)
+RUN apk add --no-cache python3 make g++ git
+
+WORKDIR /app
+
+# Copy only the files that affect dependency resolution.
+# These layers are invalidated only when yarn.lock / .yarnrc.yml / package.json changes.
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn/ .yarn/
+
+# Copy all workspace package.json files so Yarn can build the dep graph.
+# We use a glob-friendly approach: copy every package.json under src/ and packages/.
+# Changing a package's package.json does NOT invalidate the global install layer
+# as long as yarn.lock stays the same.
+COPY packages/ packages/
+
+# Copy per-workspace package manifests (src/*/*/package.json) without source.
+# We shell-find them to avoid a massive COPY invalidation for every source edit.
+# BuildKit --mount=from lets us do this cleanly.
+RUN --mount=type=bind,target=/src-bind,source=src \
+    find /src-bind -maxdepth 3 -name "package.json" | while read f; do \
+      rel="${f#/src-bind/}"; \
+      dir="src/$(dirname "$rel")"; \
+      mkdir -p "$dir"; \
+      cp "$f" "src/$rel"; \
+    done
+
+# Install ALL dependencies (workspaces + root) with Yarn cache mount.
+RUN --mount=type=cache,target=/root/.yarn/cache \
+    yarn install --immutable --immutable-cache 2>/dev/null || \
+    yarn install --no-immutable
+
+# ── Stage 1: config — shared test infrastructure ──────────────────────────────
+FROM base AS config
+
+# Copy the vitest config, reporter, and root tsconfig — everything that,
+# when changed, should bust all package test layers.
+COPY .tests/vitest.config.ts          .tests/vitest.config.ts
+COPY vitest-minimal-reporter.ts        ./
+COPY tsconfig.json                     ./
+COPY biome.json                        ./
+
+# Copy the thin vitest.config.ts shim at the root (used by some IDEs).
+COPY vitest.config.ts                  ./
+
+# Copy any per-package test helper directories (setup files, fixtures).
+# These are shared across multiple stages and rarely change.
+COPY .tests/                           .tests/
+
+# ── Helpers for test execution ─────────────────────────────────────────────────
+# We run vitest via the root-level script so it picks up the correct config.
+# Each RUN below uses set -e so any test failure causes a non-zero exit,
+# which fails the docker build layer (and propagates to the CI pipeline).
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Per-package test stages
+#
+# Pattern:
+#   FROM config AS test-<name>
+#   COPY src/<mappedPath>/  src/<mappedPath>/
+#   COPY <extra deps...>
+#   RUN set -e && yarn vitest run --project=<name> --coverage=false
+#
+# Only COPY the source directories that the package actually imports.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── test-chess-engine ────────────────────────────────────────────────────────
+# Deps: src/core/chess/ only (self-contained, alias @/ → src/core/chess/)
+FROM config AS test-chess-engine
+COPY src/core/chess/ src/core/chess/
+RUN set -e && yarn vitest run --project=chess-engine --coverage=false
+
+# ── test-shared ──────────────────────────────────────────────────────────────
+# Deps: src/core/shared-utils/ only
+FROM config AS test-shared
+COPY src/core/shared-utils/ src/core/shared-utils/
+RUN set -e && yarn vitest run --project=shared --coverage=false
+
+# ── test-mcp-server-base ─────────────────────────────────────────────────────
+# Deps: src/core/server-base/
+FROM config AS test-mcp-server-base
+COPY src/core/shared-utils/ src/core/shared-utils/
+COPY src/core/server-base/  src/core/server-base/
+RUN set -e && yarn vitest run --project=mcp-server-base --coverage=false
+
+# ── test-state-machine ───────────────────────────────────────────────────────
+# Deps: src/core/statecharts/
+FROM config AS test-state-machine
+COPY src/core/statecharts/ src/core/statecharts/
+RUN set -e && yarn vitest run --project=state-machine --coverage=false
+
+# ── test-block-sdk ───────────────────────────────────────────────────────────
+# Deps: block-sdk + block-tasks (lazy-imports) + shared-utils + server-base
+FROM config AS test-block-sdk
+COPY src/core/shared-utils/  src/core/shared-utils/
+COPY src/core/server-base/   src/core/server-base/
+COPY src/core/block-tasks/   src/core/block-tasks/
+COPY src/core/block-sdk/     src/core/block-sdk/
+RUN set -e && yarn vitest run --project=block-sdk --coverage=false
+
+# ── test-block-tasks ─────────────────────────────────────────────────────────
+FROM config AS test-block-tasks
+COPY src/core/shared-utils/ src/core/shared-utils/
+COPY src/core/server-base/  src/core/server-base/
+COPY src/core/block-sdk/    src/core/block-sdk/
+COPY src/core/block-tasks/  src/core/block-tasks/
+RUN set -e && yarn vitest run --project=block-tasks --coverage=false
+
+# ── test-react-ts-worker ─────────────────────────────────────────────────────
+# Deps: src/core/react-engine/ only (self-aliased)
+FROM config AS test-react-ts-worker
+COPY src/core/react-engine/ src/core/react-engine/
+RUN set -e && yarn vitest run --project=react-ts-worker --coverage=false
+
+# ── test-spike-chat ──────────────────────────────────────────────────────────
+# Deps: src/edge-api/spike-chat/ + cloudflare-workers stub from edge-api/main
+FROM config AS test-spike-chat
+COPY src/edge-api/main/core-logic/cloudflare-workers.ts \
+     src/edge-api/main/core-logic/cloudflare-workers.ts
+COPY src/edge-api/spike-chat/ src/edge-api/spike-chat/
+RUN set -e && yarn vitest run --project=spike-chat --coverage=false
+
+# ── test-spike-edge ──────────────────────────────────────────────────────────
+# Deps: src/edge-api/main/ + cloudflare-workers stub (self-referential)
+FROM config AS test-spike-edge
+COPY src/edge-api/main/ src/edge-api/main/
+RUN set -e && yarn vitest run --project=spike-edge --coverage=false
+
+# ── test-mcp-auth ────────────────────────────────────────────────────────────
+# Deps: src/edge-api/auth/
+FROM config AS test-mcp-auth
+COPY src/edge-api/auth/ src/edge-api/auth/
+RUN set -e && yarn vitest run --project=mcp-auth --coverage=false
+
+# ── test-spike-land-mcp ──────────────────────────────────────────────────────
+# Deps: src/edge-api/spike-land/ + shared-utils + server-base
+FROM config AS test-spike-land-mcp
+COPY src/core/shared-utils/    src/core/shared-utils/
+COPY src/core/server-base/     src/core/server-base/
+COPY src/edge-api/spike-land/  src/edge-api/spike-land/
+RUN set -e && yarn vitest run --project=spike-land-mcp --coverage=false
+
+# ── test-bazdmeg-mcp ─────────────────────────────────────────────────────────
+# Deps: src/mcp-tools/bazdmeg/ (forks pool — self-contained)
+FROM config AS test-bazdmeg-mcp
+COPY src/mcp-tools/bazdmeg/ src/mcp-tools/bazdmeg/
+RUN set -e && yarn vitest run --project=bazdmeg-mcp --coverage=false
+
+# ── test-hackernews-mcp ──────────────────────────────────────────────────────
+FROM config AS test-hackernews-mcp
+COPY src/mcp-tools/hackernews/ src/mcp-tools/hackernews/
+RUN set -e && yarn vitest run --project=hackernews-mcp --coverage=false
+
+# ── test-openclaw-mcp ────────────────────────────────────────────────────────
+FROM config AS test-openclaw-mcp
+COPY src/mcp-tools/openclaw/ src/mcp-tools/openclaw/
+RUN set -e && yarn vitest run --project=openclaw-mcp --coverage=false
+
+# ── test-esbuild-wasm-mcp ────────────────────────────────────────────────────
+FROM config AS test-esbuild-wasm-mcp
+COPY src/mcp-tools/esbuild-wasm/ src/mcp-tools/esbuild-wasm/
+RUN set -e && yarn vitest run --project=esbuild-wasm-mcp --coverage=false
+
+# ── test-mcp-image-studio ────────────────────────────────────────────────────
+# Uses baseAliases: shared-utils, block-sdk, block-tasks, server-base, react-engine
+FROM config AS test-mcp-image-studio
+COPY src/core/shared-utils/       src/core/shared-utils/
+COPY src/core/server-base/        src/core/server-base/
+COPY src/core/block-sdk/          src/core/block-sdk/
+COPY src/core/block-tasks/        src/core/block-tasks/
+COPY src/core/react-engine/       src/core/react-engine/
+COPY src/mcp-tools/image-studio/  src/mcp-tools/image-studio/
+RUN set -e && yarn vitest run --project=mcp-image-studio --coverage=false
+
+# ── test-stripe-analytics-mcp ────────────────────────────────────────────────
+# Uses baseAliases (same set as mcp-image-studio)
+FROM config AS test-stripe-analytics-mcp
+COPY src/core/shared-utils/              src/core/shared-utils/
+COPY src/core/server-base/               src/core/server-base/
+COPY src/core/block-sdk/                 src/core/block-sdk/
+COPY src/core/block-tasks/               src/core/block-tasks/
+COPY src/core/react-engine/              src/core/react-engine/
+COPY src/mcp-tools/stripe-analytics/     src/mcp-tools/stripe-analytics/
+RUN set -e && yarn vitest run --project=stripe-analytics-mcp --coverage=false
+
+# ── test-google-analytics-mcp ────────────────────────────────────────────────
+FROM config AS test-google-analytics-mcp
+COPY src/mcp-tools/google-analytics/ src/mcp-tools/google-analytics/
+RUN set -e && yarn vitest run --project=google-analytics-mcp --coverage=false
+
+# ── test-google-ads-mcp ──────────────────────────────────────────────────────
+FROM config AS test-google-ads-mcp
+COPY src/mcp-tools/google-ads/ src/mcp-tools/google-ads/
+RUN set -e && yarn vitest run --project=google-ads-mcp --coverage=false
+
+# ── test-spike-cli ───────────────────────────────────────────────────────────
+FROM config AS test-spike-cli
+COPY src/cli/spike-cli/ src/cli/spike-cli/
+RUN set -e && yarn vitest run --project=spike-cli --coverage=false
+
+# ── test-spike-review ────────────────────────────────────────────────────────
+FROM config AS test-spike-review
+COPY src/mcp-tools/code-review/ src/mcp-tools/code-review/
+RUN set -e && yarn vitest run --project=spike-review --coverage=false
+
+# ── test-vibe-dev ────────────────────────────────────────────────────────────
+FROM config AS test-vibe-dev
+COPY src/cli/docker-dev/ src/cli/docker-dev/
+RUN set -e && yarn vitest run --project=vibe-dev --coverage=false
+
+# ── test-qa-studio ───────────────────────────────────────────────────────────
+FROM config AS test-qa-studio
+COPY src/core/browser-automation/ src/core/browser-automation/
+RUN set -e && yarn vitest run --project=qa-studio --coverage=false
+
+# ── test-whatsapp-mcp ────────────────────────────────────────────────────────
+FROM config AS test-whatsapp-mcp
+COPY src/utilities/whatsapp/ src/utilities/whatsapp/
+RUN set -e && yarn vitest run --project=whatsapp-mcp --coverage=false
+
+# ── test-image-studio-worker ─────────────────────────────────────────────────
+FROM config AS test-image-studio-worker
+COPY src/edge-api/image-studio-worker/ src/edge-api/image-studio-worker/
+RUN set -e && yarn vitest run --project=image-studio-worker --coverage=false
+
+# ── test-transpile ───────────────────────────────────────────────────────────
+FROM config AS test-transpile
+COPY src/edge-api/transpile/ src/edge-api/transpile/
+RUN set -e && yarn vitest run --project=transpile --coverage=false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# test-all: aggregate stage — depends on every per-package stage.
+# Build this target to run the full suite while still benefiting from
+# per-package layer caching (only changed packages re-run).
+#
+# Usage:
+#   DOCKER_BUILDKIT=1 docker build \
+#     --target test-all \
+#     --cache-from type=registry,ref=ghcr.io/spike-land-ai/test-cache \
+#     --cache-to   type=registry,ref=ghcr.io/spike-land-ai/test-cache,mode=max \
+#     -f docker/Dockerfile.test .
+# ─────────────────────────────────────────────────────────────────────────────
+FROM scratch AS test-all
+# Pull sentinel files from every test stage so BuildKit is forced to execute them.
+COPY --from=test-chess-engine        /dev/null /chess-engine.ok
+COPY --from=test-shared              /dev/null /shared.ok
+COPY --from=test-mcp-server-base     /dev/null /mcp-server-base.ok
+COPY --from=test-state-machine       /dev/null /state-machine.ok
+COPY --from=test-block-sdk           /dev/null /block-sdk.ok
+COPY --from=test-block-tasks         /dev/null /block-tasks.ok
+COPY --from=test-react-ts-worker     /dev/null /react-ts-worker.ok
+COPY --from=test-spike-chat          /dev/null /spike-chat.ok
+COPY --from=test-spike-edge          /dev/null /spike-edge.ok
+COPY --from=test-mcp-auth            /dev/null /mcp-auth.ok
+COPY --from=test-spike-land-mcp      /dev/null /spike-land-mcp.ok
+COPY --from=test-bazdmeg-mcp         /dev/null /bazdmeg-mcp.ok
+COPY --from=test-hackernews-mcp      /dev/null /hackernews-mcp.ok
+COPY --from=test-openclaw-mcp        /dev/null /openclaw-mcp.ok
+COPY --from=test-esbuild-wasm-mcp    /dev/null /esbuild-wasm-mcp.ok
+COPY --from=test-mcp-image-studio    /dev/null /mcp-image-studio.ok
+COPY --from=test-stripe-analytics-mcp /dev/null /stripe-analytics-mcp.ok
+COPY --from=test-google-analytics-mcp /dev/null /google-analytics-mcp.ok
+COPY --from=test-google-ads-mcp      /dev/null /google-ads-mcp.ok
+COPY --from=test-spike-cli           /dev/null /spike-cli.ok
+COPY --from=test-spike-review        /dev/null /spike-review.ok
+COPY --from=test-vibe-dev            /dev/null /vibe-dev.ok
+COPY --from=test-qa-studio           /dev/null /qa-studio.ok
+COPY --from=test-whatsapp-mcp        /dev/null /whatsapp-mcp.ok
+COPY --from=test-image-studio-worker /dev/null /image-studio-worker.ok
+COPY --from=test-transpile           /dev/null /transpile.ok

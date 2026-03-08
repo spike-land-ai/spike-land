@@ -494,7 +494,7 @@ export function WhatWeDoPage() {
           )}
         >
           <a
-            href="/tools"
+            href="/apps"
             className={cn(
               "inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3 text-sm font-bold text-primary-foreground",
               "hover:bg-primary/90 active:scale-[0.97] transition-all duration-200 shadow-lg",
@@ -502,17 +502,7 @@ export function WhatWeDoPage() {
             )}
           >
             <Zap className="h-4 w-4" aria-hidden="true" />
-            Explore All Tools
-          </a>
-          <a
-            href="/vibe-code"
-            className={cn(
-              "inline-flex items-center gap-2 rounded-xl border border-border bg-card/60 px-7 py-3 text-sm font-semibold text-foreground",
-              "hover:bg-muted hover:border-primary/40 active:scale-[0.97] transition-all duration-200 backdrop-blur-sm",
-            )}
-          >
-            <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
-            Try VibeCoder
+            Explore All Apps
           </a>
         </div>
 
@@ -688,13 +678,13 @@ export function WhatWeDoPage() {
             ?
           </h2>
           <p className="relative mt-4 text-muted-foreground max-w-lg mx-auto">
-            Browse every tool in the registry, or jump straight into VibeCoder and start building
+            Browse every tool in the registry and start building
             AI-assisted apps in seconds.
           </p>
 
           <div className="relative mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
-              href="/tools"
+              href="/apps"
               className={cn(
                 "inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-3.5 text-sm font-bold text-primary-foreground",
                 "hover:bg-primary/90 active:scale-[0.97] transition-all duration-200 shadow-lg",
@@ -702,18 +692,8 @@ export function WhatWeDoPage() {
               )}
             >
               <Layers className="h-4 w-4" aria-hidden="true" />
-              Browse All Tools
+              Browse All Apps
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </a>
-            <a
-              href="/vibe-code"
-              className={cn(
-                "inline-flex items-center gap-2 rounded-xl border border-border bg-background px-8 py-3.5 text-sm font-semibold text-foreground",
-                "hover:bg-muted hover:border-primary/40 active:scale-[0.97] transition-all duration-200",
-              )}
-            >
-              <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
-              Try VibeCoder Free
             </a>
           </div>
 

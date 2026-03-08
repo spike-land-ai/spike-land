@@ -64,10 +64,10 @@ export function AppFooter() {
             <ul className="space-y-3 text-sm font-medium">
               <li>
                 <Link
-                  to="/tools"
+                  to="/apps"
                   className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2"
                 >
-                  Tools <span className="text-xs bg-primary/10 px-1 rounded text-primary">New</span>
+                  Apps <span className="text-xs bg-primary/10 px-1 rounded text-primary">New</span>
                 </Link>
               </li>
               <li>
@@ -88,10 +88,10 @@ export function AppFooter() {
               </li>
               <li>
                 <Link
-                  to="/apps"
+                  to="/packages"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Registry
+                  Packages
                 </Link>
               </li>
             </ul>

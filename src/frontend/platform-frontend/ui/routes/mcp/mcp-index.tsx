@@ -55,10 +55,10 @@ export function McpPage() {
           </p>
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
-              to="/tools"
+              to="/apps"
               className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              Browse All Tools
+              Browse All Apps
             </Link>
             <Link
               to="/store"
@@ -100,8 +100,8 @@ export function McpPage() {
       <section className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-foreground">Tool Categories</h2>
-          <Link to="/tools" className="text-sm font-medium text-primary hover:underline">
-            View all <span aria-hidden="true">→</span>
+          <Link to="/apps" className="text-sm font-medium text-primary hover:underline">
+            View app categories <span aria-hidden="true">→</span>
           </Link>
         </div>
 
@@ -117,8 +117,8 @@ export function McpPage() {
         ) : isError ? (
           <div className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
             Unable to load categories.{" "}
-            <Link to="/tools" className="text-primary hover:underline">
-              Browse tools directly
+            <Link to="/apps" className="text-primary hover:underline">
+              Browse apps directly
             </Link>
             .
           </div>
@@ -128,6 +128,7 @@ export function McpPage() {
               <Link
                 key={category}
                 to="/tools"
+                to="/apps"
                 className="group flex items-center gap-4 rounded-2xl border border-border bg-card dark:glass-card p-5 shadow-sm transition hover:shadow-md hover:scale-[1.01] hover:border-primary/30"
               >
                 <span className="text-2xl" aria-hidden="true">
@@ -147,8 +148,8 @@ export function McpPage() {
         ) : (
           <div className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">
             Unable to load categories.{" "}
-            <Link to="/tools" className="text-primary hover:underline">
-              Browse tools directly
+            <Link to="/apps" className="text-primary hover:underline">
+              Browse apps directly
             </Link>
             .
           </div>

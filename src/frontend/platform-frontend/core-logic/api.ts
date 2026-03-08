@@ -2,6 +2,7 @@ const isDev = import.meta.env.DEV;
 
 export const API_BASE = isDev ? "" : "https://api.spike.land";
 export const MCP_BASE = isDev ? "" : "https://mcp.spike.land";
+export const CHAT_BASE = isDev ? "" : "https://chat.spike.land";
 
 export function apiUrl(path: string): string {
   return `${API_BASE}/api${path.startsWith("/") ? path : `/${path}`}`;
@@ -34,4 +35,21 @@ export function mcpUrl(path: string): string {
     return `/mcp${normalized}`;
   }
   return `${MCP_BASE}${normalized}`;
+}
+
+/** Build a URL for the spike-chat service. */
+export function chatUrl(path: string): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  if (isDev) return `/chat${normalized}`;
+  return `${CHAT_BASE}${normalized}`;
+}
+
+/** Build a WebSocket URL for the spike-chat service. */
+export function chatWsUrl(path: string): string {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  if (isDev) {
+    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${proto}//${window.location.host}/chat${normalized}`;
+  }
+  return `wss://chat.spike.land${normalized}`;
 }
