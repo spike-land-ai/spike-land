@@ -19,8 +19,12 @@ jobs:
       - id: detect
         run: |
           pkgs=$(bash scripts/detect-changed-packages.sh --base origin/main --head HEAD)
-          if [ "$pkgs" = "ALL" ] || [ -z "$pkgs" ]; then
-            echo "run_all=true" >> $GITHUB_OUTPUT
+          if [ "$pkgs" = "ALL" ] || [ -z "$pkgs" ] || [ "$pkgs" = "NO_CHANGES" ]; then
+            if [ "$pkgs" = "ALL" ]; then
+              echo "run_all=true" >> $GITHUB_OUTPUT
+            else
+              echo "run_all=false" >> $GITHUB_OUTPUT
+            fi
             echo "packages=[]" >> $GITHUB_OUTPUT
           else
             json=$(echo "$pkgs" | jq -R . | jq -sc .)
