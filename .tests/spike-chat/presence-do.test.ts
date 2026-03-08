@@ -81,11 +81,14 @@ describe("PresenceDurableObject", () => {
     expect(mockWs.send).toHaveBeenCalledWith(JSON.stringify({ type: "pong" }));
   });
 
-  it("handles WS presence_set", async () => {
+  it("handles WS presence_set and same status heartbeat", async () => {
     const mockWs = { deserializeAttachment: vi.fn().mockReturnValue({ userId: "u1" }), send: vi.fn() };
     mockState.getWebSockets.mockReturnValue([mockWs]);
     await doInstance.webSocketMessage(mockWs as any, JSON.stringify({ type: "presence_set", status: "away" }));
     expect(mockWs.send).toHaveBeenCalled();
+    
+    // Send same status again to cover the else branch (existing.lastSeen = now)
+    await doInstance.webSocketMessage(mockWs as any, JSON.stringify({ type: "presence_set", status: "away" }));
   });
 
   it("ignores non-string or invalid WS messages", async () => {
