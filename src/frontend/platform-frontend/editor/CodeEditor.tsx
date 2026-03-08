@@ -148,7 +148,6 @@ function LocalMonacoEditor({
 
     return () => {
       isMounted = false;
-      setIsReady(false);
       if (editorRef.current) {
         editorRef.current.dispose();
       }
@@ -325,8 +324,8 @@ export function CodeEditor({
     tsDefaults.setEagerModelSync(true);
   }, [isDarkMode, monacoTheme]);
 
-  // Focus the editor as soon as it mounts so users can type immediately.
-  const handleMount = useCallback((editor: MonacoEditorInstance, monaco: MonacoModule) => {
+  // Capture Monaco so type acquisition can attach once the editor is ready.
+  const handleMount = useCallback((_editor: MonacoEditorInstance, monaco: MonacoModule) => {
     setMonacoInstance(monaco);
   }, []);
 
