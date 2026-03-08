@@ -240,6 +240,7 @@ RUN set -e && yarn vitest run --project=image-studio-worker --coverage=false && 
 
 # ── test-transpile ───────────────────────────────────────────────────────────
 FROM config AS test-transpile
+COPY src/frontend/monaco-editor/ src/frontend/monaco-editor/
 COPY src/edge-api/transpile/ src/edge-api/transpile/
 RUN set -e && yarn vitest run --project=transpile --coverage=false && touch /.ok
 
