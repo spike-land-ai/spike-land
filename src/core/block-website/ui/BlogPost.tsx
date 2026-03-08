@@ -122,11 +122,11 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
         className={cn(
           "p-6 my-10 rounded-2xl border-l-4 shadow-sm",
           isInfo &&
-            "bg-blue-500/[0.03] border-l-blue-500 border-y border-r border-blue-500/10 text-blue-900 dark:text-blue-100",
+          "bg-blue-500/[0.03] border-l-blue-500 border-y border-r border-blue-500/10 text-blue-900 dark:text-blue-100",
           isSuccess &&
-            "bg-emerald-500/[0.03] border-l-emerald-500 border-y border-r border-emerald-500/10 text-emerald-900 dark:text-emerald-100",
+          "bg-emerald-500/[0.03] border-l-emerald-500 border-y border-r border-emerald-500/10 text-emerald-900 dark:text-emerald-100",
           isWarning &&
-            "bg-amber-500/[0.03] border-l-amber-500 border-y border-r border-amber-500/10 text-amber-900 dark:text-amber-100",
+          "bg-amber-500/[0.03] border-l-amber-500 border-y border-r border-amber-500/10 text-amber-900 dark:text-amber-100",
         )}
       >
         <div className="flex gap-4">
@@ -170,9 +170,9 @@ export function BlogPostView({
 }: {
   slug: string;
   linkComponent?:
-    | React.ComponentType<{ to: string; className?: string; children: React.ReactNode }>
-    | "a"
-    | undefined;
+  | React.ComponentType<{ to: string; className?: string; children: React.ReactNode }>
+  | "a"
+  | undefined;
 }) {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
@@ -287,7 +287,7 @@ export function BlogPostView({
           <>
             <motion.div
               layoutId={`hero-image-${slug}`}
-              className="mb-16 rounded-[3rem] overflow-hidden shadow-2xl ring-1 ring-border/5 cursor-zoom-in"
+              className="mb-16 rounded-[3rem] overflow-hidden shadow-2xl ring-1 ring-border/5 cursor-zoom-in group"
               onClick={() => setIsHeroExpanded(true)}
             >
               <motion.img
@@ -297,7 +297,19 @@ export function BlogPostView({
                 height={514}
                 loading="eager"
                 decoding="async"
-                className="w-full aspect-[21/9] object-cover"
+                className="w-full aspect-[21/9] object-cover hidden dark:block"
+              />
+              <motion.img
+                src={post.heroImage.replace(/\.(png|jpe?g|webp|avif)$/i, '-light.$1')}
+                alt={post.title}
+                width={1200}
+                height={514}
+                loading="eager"
+                decoding="async"
+                className="w-full aspect-[21/9] object-cover dark:hidden block"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = post.heroImage!;
+                }}
               />
             </motion.div>
             <AnimatePresence>
@@ -313,7 +325,16 @@ export function BlogPostView({
                     layoutId={`hero-image-${slug}`}
                     src={post.heroImage}
                     alt={post.title}
-                    className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain"
+                    className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain hidden dark:block"
+                  />
+                  <motion.img
+                    layoutId={`hero-image-${slug}-light`}
+                    src={post.heroImage.replace(/\.(png|jpe?g|webp|avif)$/i, '-light.$1')}
+                    alt={post.title}
+                    className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain dark:hidden block"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = post.heroImage!;
+                    }}
                   />
                 </motion.div>
               )}
@@ -464,7 +485,7 @@ function SupportWidget({ post }: { post: BlogPost }) {
           setSupporters(data.supporters);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [slug]);
 
   const handleBump = useCallback(async () => {
