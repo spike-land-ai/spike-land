@@ -9,21 +9,18 @@ Object.assign(globalThis, {
   },
 });
 
-const getCorsHeaders = (requestUrl?: string) => {
+const getCorsHeaders = (requestOrigin?: string | null) => {
   let allowOrigin = "https://spike.land";
-  if (requestUrl) {
-    const origin = new URL(requestUrl).origin;
-    if (
-      origin.endsWith(".spike.land") ||
-      origin.startsWith("http://localhost:") ||
-      origin.startsWith("https://localhost:") ||
-      origin.startsWith("http://127.0.0.1:") ||
-      origin.startsWith("https://local.spike.land") ||
-      origin.startsWith("https://local.spike.land:") ||
-      origin.startsWith("https://127.0.0.1:")
-    ) {
-      allowOrigin = origin;
-    }
+  if (
+    requestOrigin &&
+    (requestOrigin.endsWith(".spike.land") ||
+      requestOrigin.startsWith("http://localhost:") ||
+      requestOrigin.startsWith("https://localhost:") ||
+      requestOrigin.startsWith("http://127.0.0.1:") ||
+      requestOrigin.startsWith("https://local.spike.land") ||
+      requestOrigin.startsWith("https://127.0.0.1:"))
+  ) {
+    allowOrigin = requestOrigin;
   }
 
   return {
@@ -93,13 +90,19 @@ const handlePostRequest = async (request: Request, ctx?: ExecutionContext) => {
     const cache = (caches as unknown as { default: Cache }).default;
 
     const cached = await cache.match(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+      const corsHeaders = getCorsHeaders(request.headers.get("Origin"));
+      const headers = new Headers(cached.headers);
+      headers.set("Access-Control-Allow-Origin", corsHeaders["Access-Control-Allow-Origin"]);
+      headers.set("Access-Control-Allow-Headers", corsHeaders["Access-Control-Allow-Headers"]);
+      return new Response(cached.body, { status: cached.status, statusText: cached.statusText, headers });
+    }
 
     const respText = await initAndTransform(code, origin);
 
     const response = new Response(respText, {
       headers: {
-        ...getCorsHeaders(request.url),
+        ...getCorsHeaders(request.headers.get("Origin")),
         "Content-Type": "application/javascript",
         "Cache-Control": "public, max-age=86400, immutable",
       },
@@ -173,7 +176,7 @@ export default {
     return new Response("Method not allowed. Try POST or GET.", {
       status: 405,
       headers: {
-        ...getCorsHeaders(request.url),
+        ...getCorsHeaders(request.headers.get("Origin")),
       },
     });
   },

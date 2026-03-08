@@ -121,7 +121,7 @@ app.use("*", async (c, next) => {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://esm.spike.land",
       "img-src 'self' https://*.r2.dev https://*.r2.cloudflarestorage.com https://avatars.githubusercontent.com https://*.googleusercontent.com data: blob:",
       "font-src 'self' https://fonts.gstatic.com https://esm.spike.land data:",
-      "connect-src 'self' https://api.spike.land https://edge.spike.land https://auth-mcp.spike.land https://mcp.spike.land https://checkout.stripe.com wss://spike.land https://esm.spike.land https://local.spike.land:5173 https://www.google-analytics.com https://www.googletagmanager.com blob: data:",
+      "connect-src 'self' https://api.spike.land https://edge.spike.land https://auth-mcp.spike.land https://mcp.spike.land https://js.spike.land https://checkout.stripe.com wss://spike.land https://esm.spike.land https://local.spike.land:5173 https://www.google-analytics.com https://www.googletagmanager.com blob: data:",
       "worker-src 'self' blob: https://esm.spike.land",
       "frame-src 'self' https://edge.spike.land",
       "object-src 'none'",
@@ -431,8 +431,17 @@ app.post("/oauth/device/approve", authMiddleware, async (c) => {
   });
 });
 
-// MCP Streamable HTTP proxy — POST, GET, DELETE (all methods)
-app.all("/mcp", mcpProxy);
+// MCP Streamable HTTP proxy — POST and DELETE always; GET only for SSE (not browser nav)
+app.post("/mcp", mcpProxy);
+app.delete("/mcp", mcpProxy);
+app.get("/mcp", async (c, next) => {
+  const accept = c.req.header("accept") ?? "";
+  if (accept.includes("text/event-stream")) {
+    return mcpProxy(c);
+  }
+  // Browser navigation (text/html) — fall through to SPA catch-all
+  return next();
+});
 
 /** Track whether AUTH_MCP binding is functional (avoids repeated failures in local dev). */
 let authServiceAvailable = true;

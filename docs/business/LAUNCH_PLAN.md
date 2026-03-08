@@ -26,19 +26,19 @@ stability:
 #### Primary Goals
 
 - Achieve 99.9% uptime in first 30 days
-- Process 100+ image enhancements without critical failures
-- Onboard 50+ users successfully
+- Process 1,000+ MCP tool calls without critical failures
+- Onboard 50+ developers successfully
 - Zero critical security incidents
 
 #### Secondary Goals
 
 - Average API response time < 500ms (p95)
-- Image enhancement success rate > 95%
+- MCP tool call success rate > 95%
 - User retention > 60% (returning within 7 days)
 - Positive user feedback (NPS > 40)
 - Publish spike-cli (`@spike-land-ai/spike-cli`) to npm registry
 - Submit spike-cli to MCP registry listings (Smithery, mcp.run, Glama)
-- Validate that all 455+ MCP tools (147 tool files, 150 test files) are
+- Validate that all 533+ MCP tools (147 tool files, 150 test files) are
   accessible via both web dashboard and spike-cli CLI
 
 ---
@@ -98,7 +98,7 @@ stability:
 
 - Error rates and types
 - User sign-up conversion rate
-- Image enhancement success rate
+- MCP tool call success rate
 - Database and storage usage
 
 **Success Criteria:**
@@ -172,10 +172,10 @@ stability:
 **Monitoring Priorities:**
 
 - Authentication success rate
-- Image enhancement completion rate
+- MCP tool call completion rate
 - API error rates (especially 500s)
-- Database connection pool usage
-- R2 storage access
+- D1 database query latency
+- KV/R2 storage access
 
 #### Afternoon (Active Monitoring)
 
@@ -192,7 +192,7 @@ stability:
 - Error rate < 2% on critical endpoints
 - No production incidents requiring rollback
 - Positive user feedback (if any received)
-- All enhancements completing successfully
+- All tool calls completing successfully
 
 #### Evening (Reduced Monitoring)
 
@@ -226,7 +226,7 @@ stability:
 **Metrics to Track:**
 
 - Total users signed up
-- Total images enhanced
+- Total MCP tool calls
 - Error rate (target: < 2%)
 - Average response time (target: < 500ms p95)
 
@@ -248,7 +248,7 @@ stability:
 **Week 1 Focus Areas:**
 
 - User onboarding experience
-- Image enhancement reliability
+- MCP tool call reliability
 - Performance optimization opportunities
 - User feedback themes
 
@@ -260,8 +260,9 @@ stability:
 
 #### Primary Monitoring Tools
 
-1. **AWS CloudWatch Dashboard**
-   - Monitor: ECS service health, task status, ALB metrics, bandwidth
+1. **Cloudflare Workers Analytics**
+   - Monitor: Worker invocations, CPU time, errors, latency
+   - D1 database metrics, KV operations
    - Check frequency: Every 15-30 minutes during launch day
 
 2. **Error Tracking (CloudWatch Logs + Structured Logging)**
@@ -276,8 +277,8 @@ stability:
    - Storage usage
    - Check frequency: Hourly
 
-4. **Application Logs (AWS CloudWatch Logs)**
-   - Access via AWS Console or `aws logs` CLI
+4. **Cloudflare Workers Logs (wrangler tail)**
+   - Real-time log streaming via `wrangler tail`
    - Filter by: Error, Warning
    - Check frequency: Every 30 minutes during launch day
 
@@ -289,7 +290,7 @@ stability:
 | ------------------------ | ------- | --------------- | -------- |
 | API Response Time (p95)  | < 500ms | > 1000ms        | HIGH     |
 | Error Rate               | < 2%    | > 5%            | CRITICAL |
-| Database Connection Pool | < 80%   | > 90%           | HIGH     |
+| D1 Database Query Latency | < 50ms  | > 200ms         | HIGH     |
 | R2 Storage Latency       | < 200ms | > 500ms         | MEDIUM   |
 | Workflow Success Rate    | > 95%   | < 85%           | HIGH     |
 
@@ -298,8 +299,8 @@ stability:
 | Metric                   | Target (Week 1) | Monitor |
 | ------------------------ | --------------- | ------- |
 | User Sign-ups            | 50+             | Daily   |
-| Image Enhancements       | 100+            | Daily   |
-| Enhancement Success Rate | > 95%           | Hourly  |
+| MCP Tool Calls           | 1,000+          | Daily   |
+| Tool Call Success Rate   | > 95%           | Hourly  |
 | User Retention (7-day)   | > 60%           | Weekly  |
 | Average Session Duration | > 5 min         | Daily   |
 
@@ -330,7 +331,7 @@ stability:
 
 - [ ] Error rate > 5% for 15 minutes
 - [ ] Response time p95 > 2000ms for 10 minutes
-- [ ] Enhancement failure rate > 20% for 1 hour
+- [ ] Tool call failure rate > 20% for 1 hour
 - [ ] Storage nearly full (> 90% capacity)
 - [ ] Rate limit violations spike (> 500/hour)
 
@@ -338,7 +339,7 @@ stability:
 
 **Send To:** Email **Response Time:** < 4 hours
 
-- [ ] Enhancement failure rate > 10% for 4 hours
+- [ ] Tool call failure rate > 10% for 4 hours
 - [ ] Database query performance degraded
 - [ ] User sign-up conversion rate drops below 50%
 - [ ] Unusual traffic pattern detected
@@ -389,7 +390,7 @@ stability:
 **Evaluate Rollback:**
 
 - Error rate > 10% for > 15 minutes
-- Enhancement failure rate > 50%
+- Tool call failure rate > 50%
 - Significant performance degradation
 - Multiple critical bugs reported
 
@@ -400,9 +401,9 @@ stability:
 **Option 1: Revert to Previous Deployment (Fastest)**
 
 ```bash
-# Via AWS ECS — update service to previous task definition revision
-aws ecs update-service --cluster spike-land --service spike-land \
-  --task-definition spike-land:<previous-revision>
+# Via Cloudflare — rollback to previous Worker version
+wrangler rollback --name spike-edge
+wrangler rollback --name spike-land-mcp
 # Verify production URL loads successfully
 ```
 
@@ -419,19 +420,14 @@ git push origin main
 **WARNING:** Only if migration caused the issue
 
 ```bash
-# Step 1: Connect to database
-psql $DATABASE_URL
+# Step 1: Check D1 database state
+wrangler d1 execute spike-land-mcp-db --command 'SELECT * FROM drizzle_migrations ORDER BY created_at DESC LIMIT 5;'
 
-# Step 2: Check migration history
-SELECT * FROM _prisma_migrations ORDER BY finished_at DESC LIMIT 5;
+# Step 2: Apply reverse migration if needed
+# D1 migrations are managed via Drizzle — create and apply a rollback migration
 
-# Step 3: Rollback migration (create reverse migration)
-# This is manual - requires understanding of schema changes
-
-# Step 4: Apply reverse migration
-yarn prisma migrate deploy
-
-# Step 5: Verify database state
+# Step 3: Verify database state
+wrangler d1 execute spike-land-mcp-db --command 'SELECT count(*) FROM users;'
 ```
 
 **IMPORTANT:** Database rollbacks are risky. Prefer rolling forward with fixes.
@@ -494,7 +490,7 @@ yarn prisma migrate deploy
 
 **Examples:**
 
-- Major feature broken (image enhancement failure)
+- Major feature broken (MCP tool call failure)
 - Significant performance degradation
 - Authentication issues affecting multiple users
 - Database connection issues
@@ -510,7 +506,7 @@ yarn prisma migrate deploy
 
 **Examples:**
 
-- Minor feature broken (album sorting not working)
+- Minor feature broken (toolset loading not working)
 - Intermittent errors affecting < 10% users
 - Non-critical performance issues
 - Email delivery delays
@@ -653,14 +649,14 @@ Support Email (support@spike.land)
 - [ ] **Uptime:** 99%+ availability (< 1.7 hours downtime)
 - [ ] **Error Rate:** < 5% average error rate
 - [ ] **Users:** 50+ sign-ups
-- [ ] **Enhancements:** 100+ completed image enhancements
+- [ ] **Tool Calls:** 1,000+ completed MCP tool calls
 - [ ] **Security:** Zero security incidents
 - [ ] **Critical Bugs:** Zero P0 incidents, < 3 P1 incidents
 
 #### Nice-to-Have (Stretch goals)
 
 - [ ] **Performance:** p95 response time < 500ms
-- [ ] **Conversion:** 80%+ of sign-ups complete at least 1 enhancement
+- [ ] **Conversion:** 80%+ of sign-ups complete at least 1 tool call
 - [ ] **Retention:** 60%+ of users return within 7 days
 - [ ] **Satisfaction:** Positive feedback from > 80% of users who respond
 
@@ -670,7 +666,7 @@ Support Email (support@spike.land)
 
 - **Users:** 200+ total sign-ups
 - **Active Users:** 100+ MAU (Monthly Active Users)
-- **Engagement:** Average 3+ enhancements per active user
+- **Engagement:** Average 10+ tool calls per active user
 - **Retention:** 50%+ 30-day retention
 
 #### Technical Metrics
@@ -678,7 +674,7 @@ Support Email (support@spike.land)
 - **Uptime:** 99.5%+ availability
 - **Performance:** p95 response time < 500ms
 - **Error Rate:** < 2% average
-- **Enhancement Success Rate:** > 95%
+- **Tool Call Success Rate:** > 95%
 
 #### Business Metrics (Future)
 
@@ -761,7 +757,6 @@ Support Email (support@spike.land)
 
 | Service           | Support URL                        | Emergency Contact |
 | ----------------- | ---------------------------------- | ----------------- |
-| AWS               | https://aws.amazon.com/support     | [Email]           |
 | Database Provider | [Support Link]                     | [Emergency Phone] |
 | Cloudflare        | https://www.cloudflare.com/support | [Email]           |
 | Stripe (future)   | https://stripe.com/support         | [Email]           |
@@ -775,7 +770,7 @@ Support Email (support@spike.land)
 **Slack #general:**
 
 ```
-🚀 **SPIKE LAND IS LIVE!** 🚀
+**SPIKE LAND IS LIVE!**
 
 We've officially launched Spike Land to the public!
 
@@ -783,7 +778,7 @@ Platform: https://spike.land
 Status: All systems operational
 
 Everyone, please monitor #incidents for any issues.
-Let's make this launch a success! 💪
+Let's make this launch a success!
 
 Next check-in: 10:00 AM (1 hour from now)
 ```
@@ -793,17 +788,18 @@ Next check-in: 10:00 AM (1 hour from now)
 **Twitter:**
 
 ```
-🚀 Introducing Spike Land!
+Introducing Spike Land!
 
-AI-powered image enhancement platform, now live at https://spike.land
+The MCP Multiplexer platform for AI agents and developers, now live at https://spike.land
 
-✨ Enhance images to 1K, 2K, or 4K resolution
-🎨 Create albums and share your work
-🔗 Referral program with token rewards
+- 533+ MCP tools accessible via CLI, web, and API
+- 100x token efficiency for AI agents
+- Build, deploy, and manage apps with AI assistance
+- Free tier available — try spike-cli today
 
-Join us and enhance your images today! 🎉
+Join us: npm install -g @spike-land-ai/spike-cli
 
-#AI #ImageEnhancement #Launch
+#MCP #AIAgents #DeveloperTools #Launch
 ```
 
 **Product Hunt (T+1, Optional):**
@@ -823,6 +819,7 @@ _Submit product listing with:_
 | ------- | ------------ | -------------------------------------------------------------------------------------------------------------------- | -------------------- |
 | 1.0     | Dec 10, 2025 | Initial launch plan                                                                                                  | Security Audit Agent |
 | 1.1     | Feb 26, 2026 | Updated metrics, completed features (error boundaries, storybooks, CSS XSS fix, EC2 provisioning, dead code removal) | Claude Code Agent    |
+| 2.0     | Mar 08, 2026 | Modernized for Cloudflare-only infrastructure, MCP Multiplexer positioning, removed AWS references | Claude Code Agent |
 
 ---
 

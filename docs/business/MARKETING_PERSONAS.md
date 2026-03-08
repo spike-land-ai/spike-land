@@ -85,21 +85,21 @@ spike-cli, MCP API, code editor, image studio, chess engine, QA studio
 
 **Messaging**
 
-- **Hero**: "80+ MCP tools. One `claude mcp add`. Done."
+- **Hero**: "533+ MCP tools. One `claude mcp add`. Done."
 - **Pain amplification**: "Stop building auth, rate limiting, and billing for
   every MCP server."
 - **Differentiator**: "The only managed MCP registry — hosted, metered, billed."
 
 **Ad Copy Variations**
 
-- "Your AI agent can now use 80+ tools. One line to connect."
+- "Your AI agent can now use 533+ tools. One line to connect."
 - "Building an AI agent? Skip the plumbing. `npx spike --help`"
-- "80+ MCP tools for developers. Open source CLI. Managed registry."
+- "533+ MCP tools for developers. Open source CLI. Managed registry."
 - "The MCP registry that runs the tools — not just lists them."
 
 **Content Strategy**
 
-- Show HN: "spike.land — 80+ MCP tools in Claude with one line"
+- Show HN: "spike.land — 533+ MCP tools in Claude with one line"
 - Tutorial: "Build a Claude-powered agent with spike-cli in 10 minutes"
 - GitHub README with quickstart, tool catalog, and asciinema recording
 - Blog: "Why managed MCP is the future of AI agent infrastructure"
@@ -155,7 +155,7 @@ Vibe coding, managed deployments, image studio, QA automation, templates
 
 - **Hero**: "Build, deploy, and manage your SaaS with one platform."
 - **Pain amplification**: "Stop paying for 8 tools. Start shipping."
-- **Differentiator**: "AI-first deployment with 80+ tools at $29/mo."
+- **Differentiator**: "AI-first deployment with 533+ tools at $29/mo."
 
 **Ad Copy Variations**
 
@@ -1120,9 +1120,9 @@ methodology.
 | **Replit** | Cloud IDE, no managed MCP, no marketplace | No | No |
 | **Smithery** | MCP directory only — lists tools, doesn't host them | Directory | No |
 | **Glama** | MCP directory only — no hosting, billing, or auth | Directory | No |
-| **spike.land** | **Managed MCP registry + deployment + marketplace** | **80+ hosted** | **spike-cli** |
+| **spike.land** | **Managed MCP registry + deployment + marketplace** | **533+ hosted** | **spike-cli** |
 
-**Single-sentence positioning**: "The only MCP registry where 80+ tools work in
+**Single-sentence positioning**: "The only MCP registry where 533+ tools work in
 Claude, in your terminal, and soon in WhatsApp — without stitching anything
 together."
 

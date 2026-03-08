@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "@tanstack/react-router";
 import { cn } from "../../styling/cn";
-import { useChat } from "../hooks/useChat";
+import { useChat, type ChatMessage } from "../hooks/useChat";
 import { useBrowserBridge } from "../hooks/useBrowserBridge";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { useAuth } from "../hooks/useAuth";
@@ -164,9 +164,10 @@ interface ChatPanelProps {
   isDarkMode: boolean;
   className?: string;
   onStreamingChange?: (streaming: boolean) => void;
+  onMessagesChange?: (messages: ChatMessage[]) => void;
 }
 
-function ChatPanel({ isDarkMode, className, onStreamingChange }: ChatPanelProps) {
+function ChatPanel({ isDarkMode, className, onStreamingChange, onMessagesChange }: ChatPanelProps) {
   const { isAuthenticated, login } = useAuth();
   const router = useRouter();
   const {
@@ -190,6 +191,11 @@ function ChatPanel({ isDarkMode, className, onStreamingChange }: ChatPanelProps)
   useEffect(() => {
     onStreamingChange?.(isStreaming);
   }, [isStreaming, onStreamingChange]);
+
+  // Notify parent when messages change so code can be auto-applied
+  useEffect(() => {
+    onMessagesChange?.(messages);
+  }, [messages, onMessagesChange]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -808,6 +814,33 @@ export function VibeCoder({ initialCode = DEFAULT_CODE, appId }: VibeCoderProps)
   // Lifted from ChatPanel so CodePanel can show a generating indicator
   const [isStreaming, setIsStreaming] = useState(false);
 
+  // Track which assistant message we last applied to avoid re-application
+  const lastAppliedMsgRef = useRef<string | null>(null);
+
+  const handleMessagesChange = useCallback((messages: ChatMessage[]) => {
+    // Find latest assistant message with content
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.role !== "assistant" || !msg.content) continue;
+      if (msg.id === lastAppliedMsgRef.current) break; // already applied this version
+
+      // Extract fenced code blocks
+      const codeBlockRegex = /```(?:tsx?|jsx?|typescript|javascript)?\s*\n([\s\S]*?)```/g;
+      const blocks: string[] = [];
+      let match;
+      while ((match = codeBlockRegex.exec(msg.content)) !== null) {
+        blocks.push(match[1].trim());
+      }
+
+      if (blocks.length > 0) {
+        // Apply the last (most complete) code block
+        setCode(blocks[blocks.length - 1]);
+        lastAppliedMsgRef.current = msg.id;
+      }
+      break;
+    }
+  }, []);
+
   // Panel widths controlled by drag (desktop only)
   const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
   const [previewWidth, setPreviewWidth] = useState(DEFAULT_PREVIEW_WIDTH);
@@ -936,6 +969,7 @@ export function VibeCoder({ initialCode = DEFAULT_CODE, appId }: VibeCoderProps)
                   isDarkMode={isDarkMode}
                   className="h-full"
                   onStreamingChange={setIsStreaming}
+                  onMessagesChange={handleMessagesChange}
                 />
               </div>
             </div>

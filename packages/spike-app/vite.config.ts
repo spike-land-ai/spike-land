@@ -143,6 +143,16 @@ export default defineConfig(() => ({
         changeOrigin: true,
         secure: false,
       },
+      "^/blog/.+/comments": {
+        target: "https://local.spike.land:8787",
+        changeOrigin: true,
+        secure: false,
+      },
+      "^/blog/comments/": {
+        target: "https://local.spike.land:8787",
+        changeOrigin: true,
+        secure: false,
+      },
       "^/blog/.+/.+\\.(png|jpe?g|gif|webp|svg|avif)$": {
         target: "https://local.spike.land:8787",
         changeOrigin: true,

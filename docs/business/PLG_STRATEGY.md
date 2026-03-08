@@ -13,7 +13,7 @@ Before prescribing tactics, these are the facts that shape this strategy:
 - Platform is built and live. Stripe is 75% wired. spike-cli is on npm.
 - Zero paid customers today. Pre-revenue. Friends/family testing phase.
 - Solo founder. First hires are growth lead and customer success.
-- The core moat is real and defensible: MCP-native + multi-channel + 80+ tools. No competitor has this combination.
+- The core moat is real and defensible: MCP-native + multi-channel + 533+ tools. No competitor has this combination.
 - The analytics infrastructure exists (D1 tables, GA4 forwarding) but the cockpit dashboard shows placeholder zeros. Blind flying until that gets wired.
 - Personas are documented but the developer / AI agent builder is the one who will actually drive early organic growth. The social media manager personas are legacy positioning from an earlier product direction. Treat them as secondary for now.
 
@@ -222,7 +222,7 @@ To accelerate: identify 10-15 popular open-source MCP tools that exist in the ec
 
 The ROADMAP.md positioning is correct but too long to be memorable. The single-sentence version:
 
-**"The only MCP registry where 80+ tools work in Claude, in your terminal, and soon in WhatsApp — without stitching anything together."**
+**"The only MCP registry where 533+ tools work in Claude, in your terminal, and soon in WhatsApp — without stitching anything together."**
 
 The "without stitching anything together" is the key phrase. Every developer who has tried to build with MCP knows the pain of connection management, auth flows, and toolset bloat. spike-cli solves all of it. Lead with that solution.
 
@@ -285,7 +285,7 @@ These are sequenced so each one unblocks the next. Do not run paid acquisition u
 claude mcp add spike-land --transport http https://spike.land/mcp
 ```
 
-Below that: "What just happened? You now have 80+ MCP tools in Claude. Try one."
+Below that: "What just happened? You now have 533+ MCP tools in Claude. Try one."
 
 Then a list of three example tool calls they can paste into Claude immediately.
 
@@ -299,7 +299,7 @@ Then a list of three example tool calls they can paste into Claude immediately.
 
 ### Experiment 3: The "Show HN" Post (Days 7-14)
 
-**What**: Post to Hacker News Show HN with the title: "Show HN: spike.land — 80+ MCP tools in Claude with one line"
+**What**: Post to Hacker News Show HN with the title: "Show HN: spike.land — 533+ MCP tools in Claude with one line"
 
 The post body should be two paragraphs: what the one-liner does, and what makes spike-cli's multiplexer approach different from running individual MCP servers.
 
@@ -362,7 +362,7 @@ Body:
 **Email 1 — Immediate post-signup**
 
 Subject A: "Your spike.land account is ready — here's the one line you need"
-Subject B: "80+ MCP tools, one line to connect them"
+Subject B: "533+ MCP tools, one line to connect them"
 
 Body:
 
@@ -376,7 +376,7 @@ Body:
 > claude mcp add spike-land --transport http https://spike.land/mcp
 > ```
 >
-> Paste that into your terminal. If you use Claude Code, run it there. You'll be connected to 80+ MCP tools in under 60 seconds.
+> Paste that into your terminal. If you use Claude Code, run it there. You'll be connected to 533+ MCP tools in under 60 seconds.
 >
 > Not using Claude Code? Here's the npx path:
 >
@@ -483,7 +483,7 @@ Body:
 >
 > I came across [tool_name] on GitHub — solid implementation of [specific thing you noticed about it].
 >
-> I'm building spike.land, an MCP registry with 80+ tools. We're opening a third-party marketplace in Q2 2026 where tool authors keep 70% of revenue.
+> I'm building spike.land, an MCP registry with 533+ tools. We're opening a third-party marketplace in Q2 2026 where tool authors keep 70% of revenue.
 >
 > If you've thought about monetizing [tool_name] without managing billing, auth, or rate limiting yourself, this might fit. We handle all of that — you just submit the tool and we host it.
 >
@@ -516,8 +516,8 @@ Run each test for 200 sends minimum before calling a winner.
 
 | Week | Segment | Variant A | Variant B | Metric |
 |---|---|---|---|---|
-| 1 | Activation email 1 | "Your spike.land account is ready" | "80+ MCP tools, one line to connect" | Open rate, click to install |
-| 2 | Activation email 1 | Winner from week 1 | "The one-liner that connects Claude to 80 tools" | Click to install |
+| 1 | Activation email 1 | "Your spike.land account is ready" | "533+ MCP tools, one line to connect" | Open rate, click to install |
+| 2 | Activation email 1 | Winner from week 1 | "The one-liner that connects Claude to 533 tools" | Click to install |
 | 3 | Upgrade trigger | "You hit the daily limit" | "Credits empty — here's what Pro gives you" | Upgrade conversion |
 | 4 | Day-7 engagement | "You've been using spike.land for a week" | "Quick check-in after your first week" | Reply rate |
 
@@ -568,11 +568,11 @@ These are for the founder's personal reply emails and eventual CSM use.
 
 **"I already have my own MCP server setup"**
 
-> Makes sense. spike-cli is designed to work alongside your existing servers — you can add spike.land as one server in your multiplexer config without replacing anything. The value is the 80+ hosted tools you don't have to build or maintain. What tools are you running in your current setup?
+> Makes sense. spike-cli is designed to work alongside your existing servers — you can add spike.land as one server in your multiplexer config without replacing anything. The value is the 533+ hosted tools you don't have to build or maintain. What tools are you running in your current setup?
 
 **"How is this different from just using the MCP protocol directly?"**
 
-> You can absolutely use MCP directly — it's a standard and we expose the same HTTP endpoint. spike.land adds auth, rate limiting, toolset organization, BYOK key management, and 80+ pre-built tools you'd otherwise have to build yourself. If you want to build all of that, the raw protocol is the right call. If you want to call a chess engine or image enhancer today without writing a server, spike.land is faster.
+> You can absolutely use MCP directly — it's a standard and we expose the same HTTP endpoint. spike.land adds auth, rate limiting, toolset organization, BYOK key management, and 533+ pre-built tools you'd otherwise have to build yourself. If you want to build all of that, the raw protocol is the right call. If you want to call a chess engine or image enhancer today without writing a server, spike.land is faster.
 
 **"I'm worried about being dependent on a new platform"**
 

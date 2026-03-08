@@ -59,7 +59,7 @@ tooling
 
 **Multi-Channel Platform**:
 
-- **spike-cli** (CLI): MCP multiplexer for agents and developers -- 455+ tools,
+- **spike-cli** (CLI): MCP multiplexer with lazy-loading access to 533+ tools --
   scriptable, automatable, open-source on npm
 - **Web Dashboard**: Visual management for deployments, apps, and AI operations
 - **WhatsApp/Telegram** (coming soon): Manage your apps from your phone
@@ -68,7 +68,7 @@ tooling
 
 1. **Vibe Coding** - Build full-stack apps with AI assistance
 2. **Managed Deployments** - One-command deploy from spike-cli
-3. **MCP Registry** - 455+ tools accessible by any AI agent
+3. **MCP Registry** - 533+ tools accessible by any AI agent
 4. **Multi-Channel** - CLI, web, WhatsApp, Telegram access
 5. **App Store** - 19 first-party apps, 18 store listings, tool marketplace
 6. **AI Assistant (Spike)** - Your personalized AI with full platform access
@@ -98,13 +98,13 @@ highlight the dual-interface advantage.
 
 ### Slide 5: Market Size (TAM/SAM/SOM)
 
-**Headline**: $50B+ Developer Tools & Cloud Platform Market
+**Headline**: $100B+ AI Developer Tools & Cloud Infrastructure Market
 
-| Metric  | Value | Definition                               |
-| ------- | ----- | ---------------------------------------- |
-| **TAM** | $50B+ | Global developer tools & cloud platforms |
-| **SAM** | $10B  | AI-powered developer platforms           |
-| **SOM** | $200M | MCP-native deployment platforms          |
+| Metric  | Value  | Definition                                        |
+| ------- | ------ | ------------------------------------------------- |
+| **TAM** | $100B+ | Global AI developer tools + cloud infrastructure  |
+| **SAM** | $25B   | AI-powered development platforms & orchestration   |
+| **SOM** | $1B    | MCP-native efficiency platforms                    |
 
 **Growth**: 25-30% CAGR for AI developer tools through 2030
 
@@ -139,7 +139,7 @@ revenue share
 **What's Built**:
 
 - [x] Full platform live at spike.land
-- [x] 455+ MCP tools implemented (147 tool files, 150 test files)
+- [x] 533+ MCP tools implemented (147 tool files, 150 test files)
 - [x] Stripe payments integrated
 - [x] spike-cli published on npm
 - [x] UK Ltd company incorporated (Dec 2025)
@@ -215,7 +215,7 @@ GTM support."
 
 | Feature           | Vercel | Railway | Replit  | **Spike Land**                  |
 | ----------------- | ------ | ------- | ------- | ------------------------------- |
-| MCP Tools         | No     | No      | No      | **455+**                        |
+| MCP Tools         | No     | No      | No      | **533+**                        |
 | AI Assistant      | No     | No      | Limited | **Full (Spike)**                |
 | CLI               | Yes    | Yes     | No      | **spike-cli (MCP multiplexer)** |
 | WhatsApp/Telegram | No     | No      | No      | **Yes (planned)**               |
@@ -279,7 +279,7 @@ For accelerators requiring video applications:
 ### Section 1: Hook (15 seconds)
 
 "I'm Zoltan, founder of Spike Land. I built a managed deployment platform with
-455+ MCP tools as a solo founder using AI-assisted development. The product is
+533+ MCP tools as a solo founder using AI-assisted development. The product is
 live, and I'm looking for accelerator support to find our first 1,000
 customers."
 
@@ -294,7 +294,7 @@ operate autonomously."
 
 "Spike Land gives developers a managed deployment platform with an AI assistant
 called Spike. [Show product] You can vibe code an app, deploy it, and manage it
--- all from spike-cli or our web dashboard. 455+ MCP tools mean any AI agent can
+-- all from spike-cli or our web dashboard. 533+ MCP tools mean any AI agent can
 interact with the platform. And soon, you'll be able to manage your deployments
 from WhatsApp and Telegram too. No other platform offers MCP-native deployment
 with multi-channel access."
@@ -382,6 +382,7 @@ and discuss how [Accelerator Name] can help Spike Land grow. Thank you."
 | [ACCELERATOR_ROADMAP.md](./ACCELERATOR_ROADMAP.md) | Application strategy |
 | [APPLICATION_TRACKER.md](./APPLICATION_TRACKER.md) | Track submissions    |
 | [FEATURES.md](./FEATURES.md)                       | Product details      |
+| [INVESTEC_PITCH.md](./INVESTEC_PITCH.md)           | Investec growth projections |
 
 ---
 

@@ -1,7 +1,7 @@
 # spike.land Content & Community Growth Strategy
 > Last updated: 2026-03-06
 > Owner: Growth / Marketing
-> Context: MCP registry platform, 80+ tools, Cloudflare-edge stack, freemium SaaS
+> Context: MCP registry platform, 533+ tools, Cloudflare-edge stack, freemium SaaS
 
 ---
 
@@ -51,12 +51,12 @@ Top-of-funnel. Drives links and shares from other developers.
 - "The MCP tool registry landscape in 2026 — what exists and what's missing"
 - "MCP vs REST APIs for AI agents — when to use each"
 - "How Anthropic's MCP changed how I think about software architecture"
-- "80+ MCP tools, one endpoint: how we built spike.land's registry"
+- "533+ MCP tools, one endpoint: how we built spike.land's registry"
 
 **Cluster D: "spike.land vs X" — Comparison pages**
 High commercial intent. See Section 3 (SEO Opportunities).
 
-### How to Leverage 80+ Tools for SEO
+### How to Leverage 533+ Tools for SEO
 
 **Individual tool landing pages** are the highest-ROI SEO investment available.
 Each tool is a keyword-bearing page that can rank for long-tail searches.
@@ -72,7 +72,7 @@ Pattern per tool page:
   - CTA: "Add to your Claude agent in 30 seconds"
 ```
 
-80 tools = 80 SEO landing pages. This is how npm and RapidAPI built their moats.
+533 tools = 533 SEO landing pages. This is how npm and RapidAPI built their moats.
 
 **Tool category pages** aggregate tools and rank for broader terms:
 - `/tools/browser-automation` (qa-studio tools)
@@ -202,7 +202,7 @@ a direct channel to the highest-signal developer community.
 
 **Tactical uses:**
 
-1. **Show HN post** — "Show HN: spike.land — MCP registry with 80+ tools,
+1. **Show HN post** — "Show HN: spike.land — MCP registry with 533+ tools,
    multiplexer CLI, and a tool marketplace launching in Q2"
    This needs to be timed with a real product milestone (marketplace beta).
 
@@ -273,7 +273,7 @@ on their specific topic. Quality over volume at this stage.
   relevant blog post.
 
 - **Canonical URLs for tools**: Every tool at `/tools/{tool-name}` needs
-  a proper canonical, meta description, and H1. This is 80 pages of SEO
+  a proper canonical, meta description, and H1. This is 533 pages of SEO
   that can be templated.
 
 - **Sitemap**: Ensure the tool pages, blog posts, and docs are all in the
@@ -351,7 +351,7 @@ having reasons to share their published tools.
    This is the `npm package of the week` moment.
 
 5. **CLI install virality** — the spike-cli installation flow should print a
-   shareable summary: "Connected to spike.land: 80 tools available. Most used
+   shareable summary: "Connected to spike.land: 533 tools available. Most used
    this week: chess_new_game (2,341 calls)." This is shareable content in
    developer screens shared on social.
 
@@ -360,7 +360,7 @@ having reasons to share their published tools.
 The early-stage playbook from Clerk/Supabase: manufacture credibility through
 specificity, not vagueness.
 
-- "80+ tools" is weaker than "83 tools across 15 categories"
+- "533+ tools" is weaker than "83 tools across 15 categories"
 - "Fast" is weaker than "P95 latency: 42ms on Cloudflare's global edge"
 - "Used by developers" is weaker than "2,341 chess tool calls this week"
 
@@ -387,7 +387,7 @@ specificity, not vagueness.
 
 **Outline:**
 1. Hook: You added 10 MCP tools to your agent. It got worse. Here's why.
-2. The math: show token cost of 80 tool descriptions vs. 5.
+2. The math: show token cost of 533 tool descriptions vs. 5.
 3. The pattern: lazy toolset loading explained with the warehouse/shelf analogy
    (already in the MCP explainer — extract and expand).
 4. The solution: how spike-cli solves it (5 gateway tools, `load <toolset>`).
@@ -405,7 +405,7 @@ implement it in under 30 lines of TypeScript."
 Not because the tools are bad. Because tool descriptions eat context before
 your agent does any actual work.
 
-80 tools = ~47K tokens of descriptions.
+533 tools = ~47K tokens of descriptions.
 5 tools = ~400 tokens.
 
 Here's how to fix it: [link]"
@@ -520,7 +520,7 @@ Here's how the architecture works — and why narrative responses beat raw FEN:
 
 | Feature | spike.land | Smithery | Glama | Official MCP Registry |
 |---|---|---|---|---|
-| Tool count | 80+ | ~500 (3rd party) | ~200 | 1,800+ (metadata only) |
+| Tool count | 533+ | ~500 (3rd party) | ~200 | 1,800+ (metadata only) |
 | First-party tools | Yes | No | No | No |
 | Multiplexer CLI | Yes (spike-cli) | No | No | No |
 | Lazy toolset loading | Yes | No | No | No |
@@ -634,7 +634,7 @@ These are distribution actions that require zero new content:
 | Month | Actions | Expected Outcome |
 |---|---|---|
 | March 2026 | 3 blog posts, quickstart page, Smithery/Glama listings | 50-200 organic sessions/week |
-| April 2026 | Tool landing pages (80 pages templated), comparison page, HN Show HN | 500-1,500 organic sessions/week |
+| April 2026 | Tool landing pages (533 pages templated), comparison page, HN Show HN | 500-1,500 organic sessions/week |
 | May 2026 | Marketplace launch content, tool author guides, contributor tutorials | 2,000-5,000 organic sessions/week |
 
 These estimates assume consistent publication cadence and that tool landing pages

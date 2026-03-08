@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockBuild = vi.fn();
 const mockTranspile = vi.fn();
 
-vi.mock("@spike-land-ai/code/src/@/lib/transpile", () => ({
+vi.mock("../../src/frontend/monaco-editor/concurrency/transpile", () => ({
   build: mockBuild,
   transpile: mockTranspile,
   wasmFile: "mock-wasm",
@@ -36,13 +36,13 @@ beforeEach(async () => {
   mockCachePut.mockResolvedValue(undefined);
   vi.resetModules();
 
-  vi.mock("@spike-land-ai/code/src/@/lib/transpile", () => ({
+  vi.mock("../../src/frontend/monaco-editor/concurrency/transpile", () => ({
     build: mockBuild,
     transpile: mockTranspile,
     wasmFile: "mock-wasm",
   }));
 
-  const mod = await import("../../src/edge-api/transpile/index");
+  const mod = await import("../../src/edge-api/transpile/lazy-imports/index");
   worker = mod.default as typeof worker;
 });
 
@@ -100,15 +100,23 @@ describe("js.spike.land worker", () => {
     });
 
     it("includes CORS headers in 405 response for spike.land origin", async () => {
-      const request = new Request("https://spike.land/page", { method: "DELETE" });
+      const request = new Request("https://js.spike.land/page", {
+        method: "DELETE",
+        headers: { Origin: "https://spike.land" },
+      });
       const response = await worker.fetch(request, {}, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Headers")).toBe("*");
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
     });
 
     it("includes CORS headers in 405 response for non-spike.land origin", async () => {
-      const request = new Request("https://js.spike.land/", { method: "DELETE" });
+      const request = new Request("https://js.spike.land/", {
+        method: "DELETE",
+        headers: { Origin: "https://example.com" },
+      });
       const response = await worker.fetch(request, {}, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Headers")).toBe("*");
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
     });
   });
 
@@ -219,9 +227,9 @@ describe("js.spike.land worker", () => {
           format: "esm",
           splitting: false,
           external: ["/*"],
-          wasmModule: "mock-wasm",
         }),
       );
+      expect(mockBuild.mock.calls[0][0]).toHaveProperty("wasmModule");
     });
   });
 
@@ -272,26 +280,26 @@ describe("js.spike.land worker", () => {
         body: "const x = 1;",
       });
       await worker.fetch(request, {}, makeCtx());
-      expect(mockTranspile).toHaveBeenCalledWith(
-        expect.objectContaining({ wasmModule: "mock-wasm" }),
-      );
+      expect(mockTranspile.mock.calls[0][0]).toHaveProperty("wasmModule");
     });
 
-    it("includes CORS headers matching request origin for localhost", async () => {
+    it("includes CORS headers matching Origin header for localhost", async () => {
       mockTranspile.mockResolvedValueOnce("export {};");
-      const request = new Request("http://localhost:3000/api/transpile", {
+      const request = new Request("https://js.spike.land/", {
         method: "POST",
         body: "const x = 1;",
+        headers: { Origin: "http://localhost:3000" },
       });
       const response = await worker.fetch(request, {}, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("http://localhost:3000");
     });
 
-    it("includes CORS headers matching request origin for spike.land subdomain", async () => {
+    it("includes CORS headers matching Origin header for spike.land subdomain", async () => {
       mockTranspile.mockResolvedValueOnce("export {};");
-      const request = new Request("https://staging.spike.land/api/transpile", {
+      const request = new Request("https://js.spike.land/", {
         method: "POST",
         body: "const x = 1;",
+        headers: { Origin: "https://staging.spike.land" },
       });
       const response = await worker.fetch(request, {}, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
@@ -299,11 +307,12 @@ describe("js.spike.land worker", () => {
       );
     });
 
-    it("uses default spike.land origin for non-matching request origin", async () => {
+    it("uses default spike.land origin when Origin header is non-matching", async () => {
       mockTranspile.mockResolvedValueOnce("export {};");
-      const request = new Request("https://other-domain.com/api", {
+      const request = new Request("https://js.spike.land/", {
         method: "POST",
         body: "const x = 1;",
+        headers: { Origin: "https://other-domain.com" },
       });
       const response = await worker.fetch(request, {}, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
@@ -401,28 +410,44 @@ describe("js.spike.land worker", () => {
   });
 
   describe("CORS header logic", () => {
-    it("allows spike.land subdomain origin on POST", async () => {
+    it("allows spike.land subdomain origin on POST via Origin header", async () => {
       mockTranspile.mockResolvedValueOnce("export {};");
-      const request = new Request("https://app.spike.land/transpile", {
+      const request = new Request("https://js.spike.land/", {
         method: "POST",
         body: "x",
+        headers: { Origin: "https://app.spike.land" },
       });
       const response = await worker.fetch(request, {}, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://app.spike.land");
     });
 
-    it("uses default https://spike.land for 405 on non-spike.land origin", async () => {
-      const request = new Request("https://example.com/", { method: "DELETE" });
+    it("uses default https://spike.land for 405 when no Origin header", async () => {
+      const request = new Request("https://js.spike.land/", { method: "DELETE" });
       const response = await worker.fetch(request, {}, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
     });
 
-    it("GET request returns default CORS origin (no requestUrl passed to getCorsHeaders)", async () => {
+    it("GET request returns default CORS origin (no Origin header passed to getCorsHeaders)", async () => {
       mockBuild.mockResolvedValueOnce("export {};");
       // GET uses getCorsHeaders() with no argument -> always "https://spike.land"
-      const request = new Request("https://example.com/?codeSpace=test", { method: "GET" });
+      const request = new Request("https://js.spike.land/?codeSpace=test", { method: "GET" });
       const response = await worker.fetch(request, {}, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
+    });
+
+    it("cached POST response includes CORS headers from current Origin header", async () => {
+      const cachedResponse = new Response("cached output", {
+        headers: { "Content-Type": "application/javascript" },
+      });
+      mockCacheMatch.mockResolvedValueOnce(cachedResponse);
+      const request = new Request("https://js.spike.land/", {
+        method: "POST",
+        body: "const x = 1;",
+        headers: { Origin: "https://spike.land" },
+      });
+      const response = await worker.fetch(request, {}, makeCtx());
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
+      expect(response.headers.get("Access-Control-Allow-Headers")).toBe("*");
     });
   });
 

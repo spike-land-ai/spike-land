@@ -3,7 +3,7 @@
 ## Context
 
 Zoltan Erdos is a solo UK founder (SPIKE LAND LTD, Dec 2025) building a managed
-deployment platform with MCP registry (Spike Land) featuring 455+ MCP tools, 18
+deployment platform with MCP registry (Spike Land) featuring 533+ MCP tools, 18
 apps, real-time code editor on Cloudflare Workers/Durable Objects, and an app
 marketplace. Pre-revenue, pre-launch, bootstrapped. His self-identified
 struggles: **too many features / no PMF** and **distribution / getting
@@ -214,7 +214,7 @@ These people work with the same tech stack. Validate your choices.
 ### Pattern 1: "Coding is easy, marketing is hard"
 
 This is the single most repeated phrase across all successful founders. Uku
-(Plausible) called doing both "an impossible task." You have 455+ MCP tools and
+(Plausible) called doing both "an impossible task." You have 533+ MCP tools and
 18 apps but zero paying users.
 
 ### Pattern 2: The winners built ONE thing
@@ -255,7 +255,7 @@ generation + page builder + state machine engine...
 
 You said you want a **technical milestone** in the next 2 weeks. Every person on
 this list would tell you: **that's the wrong goal**. You've been doing technical
-milestones for months. You have 455+ MCP tools, 19 apps, ~557 routes, and zero
+milestones for months. You have 533+ MCP tools, 19 apps, ~557 routes, and zero
 revenue.
 
 But I respect your answer. Here's a compromise:

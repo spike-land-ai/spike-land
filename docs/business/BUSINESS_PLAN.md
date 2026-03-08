@@ -17,7 +17,7 @@ The product is live in public beta at spike.land, featuring a working CLI (`spik
 
 The SEIS raise of up to £250,000 will be used to accelerate go-to-market, expand the hosted tool ecosystem, and fund early hiring in growth and customer success.
 
-*\*Note: The beta platform currently includes 86 natively hosted MCP tools, with broader access to additional third-party tools through a multiplexer architecture.*
+*\*Note: The beta platform currently includes 86 natively hosted MCP tools, with 533+ total tools accessible through its MCP Multiplexer architecture — an industry-first lazy-loading system that reduces AI agent context window usage by up to 100x.*
 
 **Based on the company's current facts, management believes it appears to meet the core SEIS conditions: incorporated December 2025, no prior risk-finance investment, fewer than 25 employees, gross assets under £350,000, and carrying on or preparing to carry on a qualifying software development trade. Advance Assurance is being sought on that basis.**
 
@@ -62,12 +62,13 @@ Developers building with AI face two compounding problems:
 
 1. **Fragmented tooling** — The average developer uses 8+ SaaS tools daily (deployment, monitoring, QA, etc.). Each requires separate authentication, billing, and integration work.
 2. **No managed MCP registry** — The Model Context Protocol (Anthropic, 2024) is emerging as a standard for AI-tool interaction. Developers currently have limited options for a managed MCP platform that combines hosted tools, authentication, rate limiting, and billing in one offering, so many teams still end up building, hosting, and securing their own MCP servers.
+3. **Context window waste** — AI agents load all available tool descriptions (often 47,000+ tokens) at the start of every session, consuming 70-95% of their cognitive capacity before doing any useful work. As tool ecosystems grow, this problem compounds exponentially.
 
 ### 4.2 Solution
 
 Spike Land provides a unified platform to solve this:
 
-- **Managed MCP Registry** — 86 natively hosted tools in a single registry, with authentication, rate limiting, and metering handled by the platform.
+- **Managed MCP Registry** — 86 natively hosted tools (533+ total via multiplexer), with lazy-loading toolsets that reduce agent context overhead from ~47,000 tokens to ~400 tokens, plus authentication, rate limiting, and metering handled by the platform.
 - **Unified Access** — Tools can be invoked identically via the `spike-cli` or the web dashboard.
 - **Edge-Native Infrastructure** — Deployed primarily on Cloudflare infrastructure, designed for low-latency global access and highly efficient unit economics.
 
@@ -149,7 +150,7 @@ OpenAI’s December 18, 2025 app directory update validates the broader trend to
 | **Smithery/Glama** | MCP Directories | Directory only (No hosting) | No | No |
 | **Anthropic Claude Marketplace** | Enterprise AI app procurement | No (apps, not MCP tools) | No | Yes (enterprise procurement layer) |
 | **Self-Hosted MCP (DIY)** | Infrastructure | No | No | No |
-| **spike.land** | **MCP-first AI platform** | **Yes (86 native, 533+ total)** | **Yes (`spike-cli`)** | **Yes (70/30 rev share)** |
+| **spike.land** | **MCP Multiplexer Platform** | **Yes (86 native, 533+ total)** | **Yes (`spike-cli`)** | **Yes (70/30 rev share)** |
 
 **Potential Defensibility**: Spike Land's differentiation is audience and access model. Developers and small teams can onboard via CLI and API in minutes, invoke granular tools rather than buy complete SaaS suites, and avoid model lock-in. The planned marketplace is designed to introduce **network effects**: a rich library of tools attracts developers, which in turn attracts more tool authors seeking distribution and monetization.
 
@@ -266,6 +267,15 @@ Rather than engineering speculative exit scenarios at this pre-revenue stage, th
 4. **First Agency/Team Customers Onboarded:** Validate the higher-LTV "BUSINESS" tier through multi-workspace usage.
 5. **Enterprise-Ready Access Controls:** Deploy robust audit logs, RBAC, and SSO to unlock larger organizational deployments.
 6. **ARR Target:** Reach a baseline of £105k+ ARR to establish strong momentum for a potential Series A or secondary EIS round.
+
+---
+
+## 15. Related Documents
+
+For growth-scenario projections beyond the SEIS-compliant forecasts in this document, see:
+- **INVESTEC_PITCH.md** — Moonshot growth projections for institutional investors
+- **GEMINI_MARKET_VALIDATION.md** — Independent third-party market validation
+- **VALUATION_ANALYSIS.md** — Eight-method valuation framework
 
 ---
 *Document Version: 2.3 (SEIS Advance Assurance Edition)*

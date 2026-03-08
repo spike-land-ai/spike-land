@@ -69,7 +69,7 @@ function TimeRangeSelector({
   );
 }
 
-const API_BASE = "/api/analytics";
+const API_BASE = "/analytics";
 
 export function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState<TimeRange>("24h");

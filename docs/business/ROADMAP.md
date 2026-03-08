@@ -10,7 +10,7 @@
 
 **Spike Land is a managed deployment platform where developers vibe code
 full-stack apps and deploy them instantly -- powered by Spike, your personalized
-AI assistant with 455+ tools accessible via CLI, web chat, WhatsApp, and
+AI assistant with 533+ tools accessible via CLI, web chat, WhatsApp, and
 Telegram.**
 
 spike-cli lets you build, deploy, and manage applications from the command line.
@@ -20,7 +20,7 @@ Protocol.
 
 **The moat is three things no competitor has together:**
 
-1. **MCP-native architecture with multi-channel access** - 455+ tools callable
+1. **MCP-native architecture with multi-channel access** - 533+ tools callable
    by any AI agent via standard protocol, accessible through spike-cli (CLI),
    web chat, WhatsApp, and Telegram. No competitor offers this breadth of access
    channels.
@@ -71,7 +71,7 @@ small teams
 
 - 29 packages in `src/` (monorepo)
 - 8 Cloudflare Workers (spike-edge, spike-land-mcp, mcp-auth, spike-land-backend, transpile, code, spike-review, image-studio-worker)
-- 80+ MCP tools
+- 533+ MCP tools (86 native + multiplexer ecosystem)
 - D1 database with 17 tables in spike-land-mcp (Drizzle-managed)
 - block-sdk for composable storage blocks
 
@@ -246,6 +246,36 @@ documented. Third-party developers can submit tools.
 **Exit criteria**: Users can deploy full-stack apps from spike-cli with
 `spike deploy`.
 
+#### Phase 15: MCP Multiplexer Expansion (Q4 2026)
+
+**Goal**: Scale the multiplexer ecosystem to 1,000+ community tools
+
+| Task | Priority | Status |
+|------|----------|--------|
+| Community tool submission pipeline | Critical | Planned |
+| Automated tool testing and validation | Critical | Planned |
+| Tool versioning and dependency management | High | Planned |
+| Community tool author dashboard | High | Planned |
+| Tool usage analytics for authors | Medium | Planned |
+| Curated toolset collections | Medium | Planned |
+
+**Exit criteria**: 1,000+ tools in the registry, 100+ community-contributed tools, automated quality gates for submissions.
+
+#### Phase 16: Enterprise & Self-Extending Agents (Q1 2027)
+
+**Goal**: Enable AI agents to discover, create, and publish tools autonomously
+
+| Task | Priority | Status |
+|------|----------|--------|
+| Agent-driven tool creation workflow | Critical | Planned |
+| Enterprise SSO and RBAC | Critical | Planned |
+| Private tool registries for organizations | High | Planned |
+| Cross-organization tool sharing | High | Planned |
+| Agent session state persistence | Medium | Planned |
+| Compliance and audit logging | Medium | Planned |
+
+**Exit criteria**: Enterprise customers with private registries, AI agents autonomously publishing tools, SOC 2 Type II compliance.
+
 ---
 
 ## Revenue Projections
@@ -277,12 +307,12 @@ documented. Third-party developers can submit tools.
 | Competitor     | Price    | MCP?    | CLI?                | Multi-Channel?               | Our Advantage             |
 | -------------- | -------- | ------- | ------------------- | ---------------------------- | ------------------------- |
 | Vercel         | $20+/mo  | No      | Yes                 | No                           | MCP-native + AI assistant |
-| Railway        | $5+/mo   | No      | Yes                 | No                           | 455+ tools + vibe coding  |
+| Railway        | $5+/mo   | No      | Yes                 | No                           | 533+ tools + vibe coding  |
 | Render         | $7+/mo   | No      | Yes                 | No                           | AI-first deployment       |
 | Replit         | $25+/mo  | No      | No                  | No                           | MCP registry + CLI        |
 | **Spike Land** | $0-99/mo | **Yes** | **Yes (spike-cli)** | **Yes (WhatsApp, Telegram)** | Full platform             |
 
-**No deployment platform offers a programmable AI agent with 455+ MCP tools
+**No deployment platform offers a programmable AI agent with 533+ MCP tools
 accessible via CLI, web, WhatsApp, and Telegram.** This is the differentiator.
 
 ---

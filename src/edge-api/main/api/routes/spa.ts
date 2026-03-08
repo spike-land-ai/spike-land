@@ -277,6 +277,13 @@ spa.get("/*", async (c) => {
             description:
               "Articles and tutorials from the spike.land team about AI, MCP, and edge computing.",
           },
+          "/mcp": {
+            title: "MCP Registry - spike.land",
+            description:
+              "Browse 80+ MCP tools on spike.land. Connect your AI agent to real-world capabilities.",
+            ssrContent:
+              "<h1>MCP Registry</h1><p>Browse and connect 80+ Model Context Protocol tools.</p>",
+          },
           "/apps": {
             title: "MCP Tools & Apps - spike.land",
             description: "Browse and interact with AI-powered applications on spike.land.",
@@ -284,6 +291,8 @@ spa.get("/*", async (c) => {
           "/bugbook": {
             title: "Bugbook - spike.land",
             description: "Public bug tracker with ELO-based prioritization on spike.land.",
+            ssrContent:
+              "<h1>Bugbook</h1><p>Public bug tracker with ELO-based prioritization.</p>",
           },
           "/settings": {
             title: "Settings - spike.land",

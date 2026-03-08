@@ -33,7 +33,7 @@
 | Aspect         | Status                                                                                                                |
 | -------------- | --------------------------------------------------------------------------------------------------------------------- |
 | Product        | Live at spike.land (web dashboard) + spike-cli on npm (CLI)                                                           |
-| Features       | Full platform with 455+ MCP tools, managed deployments, vibe coding, AI assistant + CLI/agent interface via spike-cli |
+| Features       | Full platform with 533+ MCP tools, managed deployments, vibe coding, AI assistant + CLI/agent interface via spike-cli |
 | Infrastructure | Production-ready, 99.9% uptime target                                                                                 |
 | Users          | Pre-launch (friends/family testing)                                                                                   |
 | Revenue        | Pre-revenue                                                                                                           |
@@ -56,7 +56,7 @@
 
 > "I built Spike Land as a solo founder using AI-assisted development. In 2
 > months, I shipped what typically requires a team of 5-10 engineers: a managed
-> deployment platform with 455+ MCP tools, an AI assistant, and a CLI that lets
+> deployment platform with 533+ MCP tools, an AI assistant, and a CLI that lets
 > any AI agent deploy and manage apps through a standard protocol.
 >
 > The product is live, tested, and ready for users. What I need now is cloud
@@ -70,7 +70,7 @@
 | ------------------------ | ------------------------------------------------------- | -------------------------------------------------- |
 | Technical execution      | Full-featured platform live                             | Can ship without large team                        |
 | AI-native development    | Solo founder = team output                              | Efficient use of resources                         |
-| Dual interface           | Web dashboard + spike-cli (CLI) for same 455+ MCP tools | No competitor has both human and agent access      |
+| Dual interface           | Web dashboard + spike-cli (CLI) for same 533+ MCP tools | No competitor has both human and agent access      |
 | Open-source distribution | spike-cli on npm (`@spike-land-ai/spike-cli`)           | Developer adoption channel without marketing spend |
 | Production quality       | 99.9% uptime infrastructure                             | Ready to scale                                     |
 | Clear market             | $50B+ developer tools & cloud platform market           | Large TAM                                          |
@@ -235,7 +235,7 @@ These programs have no traction requirements and provide immediate value:
 > "We're pre-launch with a production-ready product. Our thesis is that
 > AI-assisted development enables solo founders to build what previously
 > required teams. Spike Land proves this - a full managed deployment platform
-> with 455+ MCP tools built in 2 months. Now we need go-to-market support to
+> with 533+ MCP tools built in 2 months. Now we need go-to-market support to
 > find our first 100 customers."
 
 ### 6. Techstars Anywhere (Fully Remote)
