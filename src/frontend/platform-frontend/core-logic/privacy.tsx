@@ -351,6 +351,25 @@ export function PrivacyPage() {
           .
         </p>
       </section>
+
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold">14. Impressum & Legal Notice</h2>
+        <p className="leading-relaxed text-foreground">
+          <strong>spike.land</strong> is operated by:
+        </p>
+        <p className="leading-relaxed text-foreground">
+          SPIKE LAND LTD
+          <br />
+          Apartment 70, 42 Mighell Street
+          <br />
+          Brighton, BN2 0AU, United Kingdom
+        </p>
+        <p className="leading-relaxed text-foreground">
+          <strong>Company Registration:</strong> 16906682 (England and Wales)
+          <br />
+          <strong>Director:</strong> Zoltan Erdos
+        </p>
+      </section>
     </div>
   );
 }

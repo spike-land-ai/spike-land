@@ -192,6 +192,7 @@ const packages: Record<string, PkgConfig> = {
 
   "image-studio-worker": {
     tier: 2,
+    includeTests: [tests("image-studio-worker/**/*.test.ts"), tests("image-studio-worker/**/*.test.tsx")],
     coverageExclude: [
       "**/frontend/**",
       "**/migrations/**",
