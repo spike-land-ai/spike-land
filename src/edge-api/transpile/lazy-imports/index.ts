@@ -10,21 +10,8 @@ Object.assign(globalThis, {
 });
 
 const getCorsHeaders = (requestOrigin?: string | null) => {
-  let allowOrigin = "https://spike.land";
-  if (
-    requestOrigin &&
-    (requestOrigin.endsWith(".spike.land") ||
-      requestOrigin.startsWith("http://localhost:") ||
-      requestOrigin.startsWith("https://localhost:") ||
-      requestOrigin.startsWith("http://127.0.0.1:") ||
-      requestOrigin.startsWith("https://local.spike.land") ||
-      requestOrigin.startsWith("https://127.0.0.1:"))
-  ) {
-    allowOrigin = requestOrigin;
-  }
-
   return {
-    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Origin": requestOrigin || "*",
     "Access-Control-Allow-Headers": "*",
     "cache-control": "no-cache",
   } as const;
@@ -140,19 +127,7 @@ export default {
 
     if (request.method === "OPTIONS") {
       const requestOrigin = request.headers.get("Origin");
-      let allowOrigin = "https://spike.land";
-      if (
-        requestOrigin &&
-        (requestOrigin.endsWith(".spike.land") ||
-          requestOrigin.startsWith("http://localhost:") ||
-          requestOrigin.startsWith("https://localhost:") ||
-          requestOrigin.startsWith("http://127.0.0.1:") ||
-          requestOrigin.startsWith("https://local.spike.land") ||
-          requestOrigin.startsWith("https://local.spike.land:") ||
-          requestOrigin.startsWith("https://127.0.0.1:"))
-      ) {
-        allowOrigin = requestOrigin;
-      }
+      const allowOrigin = requestOrigin || "*";
 
       return new Response(null, {
         status: 204,

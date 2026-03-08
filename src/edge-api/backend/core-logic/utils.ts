@@ -3,16 +3,8 @@
  */
 export function getAllowOrigin(request: Request): string {
   const origin = request.headers.get("Origin");
-  if (!origin) return "https://spike.land";
-
-  if (
-    origin === "https://spike.land" ||
-    origin.endsWith(".spike.land") ||
-    origin.startsWith("http://localhost:")
-  ) {
-    return origin;
-  }
-  return "https://spike.land";
+  if (!origin) return "*";
+  return origin;
 }
 
 // CORS headers for API proxies
@@ -25,7 +17,7 @@ export const API_CORS_HEADERS = {
  * Default CORS headers for responses
  */
 export const DEFAULT_CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "https://spike.land",
+  "Access-Control-Allow-Origin": "*",
   "Content-Type": "application/json; charset=UTF-8",
 };
 
@@ -33,7 +25,7 @@ export const DEFAULT_CORS_HEADERS: Record<string, string> = {
  * Preflight CORS headers for OPTIONS requests
  */
 export const PREFLIGHT_CORS_HEADERS: Record<string, string> = {
-  "Access-Control-Allow-Origin": "https://spike.land",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
