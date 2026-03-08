@@ -295,7 +295,7 @@ jobs:
       - name: Verify deployed version
         run: |
           sleep 5
-          DEPLOYED_SHA=$(curl -sf https://spike.land/api/version | jq -r '.sha // ""' 2>/dev/null || echo "")
+          DEPLOYED_SHA=$(curl -sf https://spike-edge.spikeland.workers.dev/api/version | jq -r '.sha // ""' 2>/dev/null || echo "")
           HEAD_SHA=$(git rev-parse HEAD)
           if [ "$DEPLOYED_SHA" != "$HEAD_SHA" ]; then
             echo "WARNING: Deployed SHA ($DEPLOYED_SHA) does not match HEAD ($HEAD_SHA)"
