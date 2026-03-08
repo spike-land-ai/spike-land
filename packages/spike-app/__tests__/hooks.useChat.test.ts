@@ -380,6 +380,39 @@ describe("useChat", () => {
     expect(result.current.messages[1].toolCalls![1].name).toBe("tool2");
   });
 
+  it("should handle partial lines in SSE stream", async () => {
+    const encoder = new TextEncoder();
+    // Split one "data: ..." line into two chunks
+    const streamChunks = [
+      encoder.encode('data: {"type": "text_delta", "text": "Part'),
+      encoder.encode('ial"}\n'),
+      encoder.encode("data: [DONE]\n"),
+    ];
+
+    let chunkIndex = 0;
+    const mockReader = {
+      read: vi.fn().mockImplementation(() => {
+        if (chunkIndex < streamChunks.length) {
+          return Promise.resolve({ value: streamChunks[chunkIndex++], done: false });
+        }
+        return Promise.resolve({ value: undefined, done: true });
+      }),
+    };
+
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      body: { getReader: () => mockReader },
+    } as any);
+
+    const { result } = renderHook(() => useChat());
+
+    await act(async () => {
+      await result.current.sendMessage("Hi");
+    });
+
+    expect(result.current.messages[1].content).toBe("Partial");
+  });
+
   it("should persist messages to localStorage with debounce", async () => {
     vi.useFakeTimers();
     const { result } = renderHook(() => useChat());

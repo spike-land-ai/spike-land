@@ -148,17 +148,48 @@ describe("useAppSession", () => {
     });
   });
 
-  it("updates available tools when dependencies are met", () => {
-    const { result } = renderHook(() => useAppSession(slug, graph, tools));
-
-    expect(result.current.isToolAvailable("tool-2")).toBe(false);
+  it("warns when JSON parsing fails in content text block", () => {
+    const jsonGraph = {
+      "json-tool": {
+        outputs: { data: "string" },
+      },
+    };
+    const { result } = renderHook(() => useAppSession(slug, jsonGraph, ["json-tool"]));
 
     act(() => {
-      result.current.recordToolResult("tool-1", {}, { "output-1": "done" });
+      result.current.recordToolResult("json-tool", {}, {
+        content: [{ type: "text", text: "invalid-json" }],
+      });
     });
 
-    expect(result.current.isToolAvailable("tool-2")).toBe(true);
-    expect(result.current.session.availableTools).toContain("tool-2");
+    expect(console.warn).toHaveBeenCalled();
+    expect(result.current.session.outputs).toEqual({});
+  });
+
+  it("updates available tools with multiple dependencies", () => {
+    const multiGraph = {
+      "tool-a": { always_available: true, outputs: { out: "s" } },
+      "tool-b": { always_available: true, outputs: { out: "s" } },
+      "tool-c": {
+        inputs: {
+          i1: "from:tool-a.out",
+          i2: "from:tool-b.out",
+        },
+      },
+    };
+    const { result } = renderHook(() => useAppSession(slug, multiGraph, ["tool-a", "tool-b", "tool-c"]));
+
+    expect(result.current.isToolAvailable("tool-c")).toBe(false);
+
+    act(() => {
+      result.current.recordToolResult("tool-a", {}, { out: "val-a" });
+    });
+    expect(result.current.isToolAvailable("tool-c")).toBe(false);
+
+    act(() => {
+      result.current.recordToolResult("tool-b", {}, { out: "val-b" });
+    });
+    expect(result.current.isToolAvailable("tool-c")).toBe(true);
   });
 
   it("resetSession clears outputs and history but keeps slug", () => {
