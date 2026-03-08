@@ -118,7 +118,7 @@ async function fetchAndSaveImage(
       headers: {
         "Content-Type": `image/${outputFormat}`,
         "Cache-Control": "public, max-age=31536000, immutable",
-        "Access-Control-Allow-Origin": "https://spike.land",
+        "Access-Control-Allow-Origin": "*",
       },
     });
   } catch (error) {
@@ -134,16 +134,7 @@ export async function handleReplicateRequest(
   env: Env,
   ctx: ExecutionContext,
 ): Promise<Response> {
-  // Basic security: restrict access to spike.land or authenticated clients
-  const origin = request.headers.get("Origin");
-  if (
-    origin &&
-    origin !== "https://spike.land" &&
-    !origin.endsWith(".spike.land") &&
-    !origin.includes("localhost")
-  ) {
-    return new Response("Unauthorized Origin", { status: 403 });
-  }
+  // Removed origin restriction to allow direct MCP usage from anywhere.
 
   try {
     const input = parseInputFromUrl(request.url);
@@ -158,7 +149,7 @@ export async function handleReplicateRequest(
       return new Response(saved.body, {
         headers: {
           "Content-Type": `image/${input.output_format}`,
-          "Access-Control-Allow-Origin": "https://spike.land",
+          "Access-Control-Allow-Origin": "*",
           "Cache-Control": "public, max-age=31536000, immutable",
         },
       });

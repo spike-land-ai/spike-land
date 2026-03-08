@@ -19,7 +19,7 @@ export function createApp(): Hono<{ Bindings: Env; Variables: AuthVariables }> {
   app.use(
     "*",
     cors({
-      origin: ["https://spike.land", "https://local.spike.land:5173"],
+      origin: "*",
       allowHeaders: [
         "Authorization",
         "Content-Type",
