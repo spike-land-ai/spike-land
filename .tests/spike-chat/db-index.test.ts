@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createDb } from "../db/db-index";
+import { createDb } from "../../src/edge-api/spike-chat/db/db-index";
 
 describe("db-index", () => {
   it("creates a db instance", () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { embedRouter } from "../api/routes/embed";
+import { embedRouter } from "../../src/edge-api/spike-chat/api/routes/embed";
 
 describe("embedRouter", () => {
   it("renders embed HTML", async () => {

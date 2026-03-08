@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import app from "../api/app";
+import app from "../../src/edge-api/spike-chat/api/app";
 
 describe("app", () => {
   it("responds to /", async () => {

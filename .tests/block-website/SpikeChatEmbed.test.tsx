@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { SpikeChatEmbed } from "../SpikeChatEmbed";
+import { SpikeChatEmbed } from "../../src/core/block-website/ui/SpikeChatEmbed";
 import React from "react";
 
 describe("SpikeChatEmbed", () => {

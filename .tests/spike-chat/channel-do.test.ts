@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { ChannelDurableObject } from "../edge/channel-do";
-import { Env } from "../core-logic/env";
+import { ChannelDurableObject } from "../../src/edge-api/spike-chat/edge/channel-do";
+import { Env } from "../../src/edge-api/spike-chat/core-logic/env";
 
 describe("ChannelDurableObject", () => {
   it("returns 501 on fetch", async () => {

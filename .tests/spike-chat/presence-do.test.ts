@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { PresenceDurableObject } from "../edge/presence-do";
-import { Env } from "../core-logic/env";
+import { PresenceDurableObject } from "../../src/edge-api/spike-chat/edge/presence-do";
+import { Env } from "../../src/edge-api/spike-chat/core-logic/env";
 
 describe("PresenceDurableObject", () => {
   it("returns 501 on fetch", async () => {

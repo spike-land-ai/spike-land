@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { authMiddleware } from "../api/middleware";
+import { authMiddleware } from "../../src/edge-api/spike-chat/api/middleware";
 import { Context } from "hono";
 
 describe("authMiddleware", () => {

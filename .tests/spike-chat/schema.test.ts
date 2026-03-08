@@ -10,7 +10,7 @@ import {
   webhooks, 
   agentProfiles, 
   slashCommands 
-} from "../db/schema";
+} from "../../src/edge-api/spike-chat/db/schema";
 
 describe("schema", () => {
   it("exports schemas", () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateId } from "../core-logic/id-gen";
+import { generateId } from "../../src/edge-api/spike-chat/core-logic/id-gen";
 
 describe("id-gen", () => {
   it("generates a valid ULID", () => {
