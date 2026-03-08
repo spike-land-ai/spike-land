@@ -7,6 +7,10 @@ interface TranspileResult {
 }
 
 const TRANSPILE_ENDPOINT = "https://js.spike.land";
+const PREVIEW_MODULE_CDN = "https://esm.sh";
+const PREVIEW_REACT_VERSION = "19.2.4";
+const PREVIEW_EMOTION_VERSION = "11.14.0";
+const PREVIEW_TAILWIND_BROWSER_URL = "https://unpkg.com/@tailwindcss/browser@4.2.1/dist/index.global.js";
 
 function getPreviewTokens(isDarkMode: boolean) {
   if (isDarkMode) {
@@ -108,18 +112,19 @@ function buildPreviewHtml(transpiledCode: string, isDarkMode: boolean): string {
   <script type="importmap">
   {
     "imports": {
-      "react": "https://esm.sh/react@19",
-      "react/": "https://esm.sh/react@19/",
-      "react-dom": "https://esm.sh/react-dom@19",
-      "react-dom/": "https://esm.sh/react-dom@19/",
-      "@emotion/react/jsx-runtime": "https://esm.sh/@emotion/react@11/jsx-runtime",
-      "@emotion/react/jsx-dev-runtime": "https://esm.sh/@emotion/react@11/jsx-dev-runtime",
-      "@emotion/react": "https://esm.sh/@emotion/react@11",
-      "@emotion/styled": "https://esm.sh/@emotion/styled@11"
+      "react": "${PREVIEW_MODULE_CDN}/react@${PREVIEW_REACT_VERSION}?bundle",
+      "react/jsx-runtime": "${PREVIEW_MODULE_CDN}/react@${PREVIEW_REACT_VERSION}/jsx-runtime?bundle",
+      "react/jsx-dev-runtime": "${PREVIEW_MODULE_CDN}/react@${PREVIEW_REACT_VERSION}/jsx-dev-runtime?bundle",
+      "react-dom": "${PREVIEW_MODULE_CDN}/react-dom@${PREVIEW_REACT_VERSION}?bundle&external=react",
+      "react-dom/client": "${PREVIEW_MODULE_CDN}/react-dom@${PREVIEW_REACT_VERSION}/client?bundle&external=react",
+      "@emotion/react/jsx-runtime": "${PREVIEW_MODULE_CDN}/@emotion/react@${PREVIEW_EMOTION_VERSION}/jsx-runtime?bundle&external=react",
+      "@emotion/react/jsx-dev-runtime": "${PREVIEW_MODULE_CDN}/@emotion/react@${PREVIEW_EMOTION_VERSION}/jsx-dev-runtime?bundle&external=react",
+      "@emotion/react": "${PREVIEW_MODULE_CDN}/@emotion/react@${PREVIEW_EMOTION_VERSION}?bundle&external=react",
+      "@emotion/styled": "${PREVIEW_MODULE_CDN}/@emotion/styled@${PREVIEW_EMOTION_VERSION}?bundle&external=react,@emotion/react"
     }
   }
   </script>
-  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <script src="${PREVIEW_TAILWIND_BROWSER_URL}"></script>
   <style type="text/tailwindcss">
     @theme inline {
       --font-sans: var(--font-sans);
@@ -192,6 +197,11 @@ function buildPreviewHtml(transpiledCode: string, isDarkMode: boolean): string {
     const el = document.getElementById("error-display");
     el.style.display = "block";
     el.textContent = e.message;
+  });
+  window.addEventListener("unhandledrejection", (e) => {
+    const el = document.getElementById("error-display");
+    el.style.display = "block";
+    el.textContent = e.reason instanceof Error ? e.reason.message : String(e.reason);
   });
 
   ${code}

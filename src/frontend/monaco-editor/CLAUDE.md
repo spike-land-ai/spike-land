@@ -34,7 +34,6 @@ npm run test:coverage # Tests with coverage
 ├── services/         # Service layer
 ├── types/            # TypeScript types
 ├── utils/            # Utilities
-├── sw.ts             # Service worker
 └── __tests__/        # Test files
 ```
 

@@ -1,8 +1,6 @@
 import {
   buildMainBundle,
   buildMainScripts,
-  buildPrecacheManifest,
-  buildServiceWorker,
   buildWasm,
 } from "../lazy-imports/esbuild-build-tasks.ts";
 
@@ -34,10 +32,8 @@ async function main() {
   try {
     await buildMainScripts();
     await buildWasm();
-    await buildServiceWorker();
     const wasmFile = await getWasmFile();
     await buildMainBundle(wasmFile);
-    await buildPrecacheManifest("./dist");
     stop();
   } catch (error) {
     console.error("Build failed:", error);

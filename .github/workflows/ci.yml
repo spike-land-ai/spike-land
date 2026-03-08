@@ -213,6 +213,11 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
+      - name: Purge Cloudflare cache after worker deploys
+        run: bash scripts/purge-cache.sh
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
       - name: Build spike-app SPA
         run: cd packages/spike-app && npm run build
 

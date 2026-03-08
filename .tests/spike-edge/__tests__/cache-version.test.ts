@@ -73,7 +73,7 @@ describe("getCacheVersion", () => {
 
     // First call reads from R2
     const version1 = await getCacheVersion(r2);
-    expect(version1).toBe("initial123456");
+    expect(version1).toBe("initial12345");
     expect(r2.get).toHaveBeenCalledTimes(1);
 
     // Change mock (should not be called due to cache)
@@ -85,16 +85,16 @@ describe("getCacheVersion", () => {
         ),
       );
 
-    // Second call within TTL (e.g. 1 minute later) returns cached value
-    vi.advanceTimersByTime(60 * 1000);
+    // Second call within TTL returns cached value
+    vi.advanceTimersByTime(59 * 1000);
     const version2 = await getCacheVersion(r2);
-    expect(version2).toBe("initial123456");
+    expect(version2).toBe("initial12345");
     expect(r2.get).not.toHaveBeenCalled(); // No new call to R2
 
-    // Third call after TTL expires (e.g. 5 minutes + 1 ms later)
-    vi.advanceTimersByTime(4 * 60 * 1000 + 1); // Exact time where it expires
+    // Third call after TTL expires
+    vi.advanceTimersByTime(1_001);
     const version3 = await getCacheVersion(r2);
-    expect(version3).toBe("changed123456");
+    expect(version3).toBe("changed12345");
     expect(r2.get).toHaveBeenCalledTimes(1); // Fetched again
   });
 
@@ -105,7 +105,7 @@ describe("getCacheVersion", () => {
     expect(versionMissing).toMatch(/^[a-z0-9]+$/);
 
     // Reset cache by expiring timer
-    vi.advanceTimersByTime(10 * 60 * 1000);
+    vi.advanceTimersByTime(2 * 60 * 1000);
 
     // 2. index.html without build-sha
     const noShaR2 = mockR2(
@@ -114,7 +114,7 @@ describe("getCacheVersion", () => {
     const versionNoSha = await getCacheVersion(noShaR2);
     expect(versionNoSha).toMatch(/^[a-z0-9]+$/);
 
-    // Timestamp fallback returns the same string for same 5-minute bucket
+    // Timestamp fallback returns the same string for the same 1-minute bucket
     const versionNoSha2 = await getCacheVersion(noShaR2);
     expect(versionNoSha2).toBe(versionNoSha);
   });

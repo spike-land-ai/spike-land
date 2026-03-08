@@ -120,23 +120,7 @@ printf '%s\n' "${NEW_KEYS[@]}" >> "$UPLOADED_KEYS_FILE"
 sort -u -o "$UPLOADED_KEYS_FILE" "$UPLOADED_KEYS_FILE"
 
 # ── 5b. Purge Cloudflare edge cache ──
-echo "Purging Cloudflare edge cache..."
-CF_ZONE_ID="$(curl -sf --max-time 10 \
-  -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-  "https://api.cloudflare.com/client/v4/zones?name=spike.land" \
-  | jq -r '.result[0].id // ""' 2>/dev/null)" || CF_ZONE_ID=""
-
-if [ -n "$CF_ZONE_ID" ]; then
-  curl -sf --max-time 15 \
-    -X POST "https://api.cloudflare.com/client/v4/zones/${CF_ZONE_ID}/purge_cache" \
-    -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-    -H "Content-Type: application/json" \
-    -d '{"purge_everything": true}' \
-    && echo "Cache purged successfully." \
-    || echo "WARNING: Cache purge API call failed (non-fatal)"
-else
-  echo "WARNING: Could not resolve zone ID for spike.land — skipping cache purge"
-fi
+bash "$(dirname "$0")/../../scripts/purge-cache.sh"
 
 # ── 6. Seed blog posts to D1 and upload images to R2 ──
 BLOG_DIR="../../content/blog"

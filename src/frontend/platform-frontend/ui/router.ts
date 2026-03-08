@@ -53,6 +53,14 @@ const aboutRoute = createRoute({
   component: withSuspense(() => import("../core-logic/about"), "AboutPage"),
 });
 
+const securityRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/security",
+  beforeLoad: () => {
+    throw redirect({ to: "/docs/$slug", params: { slug: "security" } });
+  },
+});
+
 const analyticsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/analytics",
@@ -395,6 +403,7 @@ const routeTree = rootRoute.addChildren([
   legacyToolsIndexRedirectRoute,
   startChecklistRoute,
   aboutRoute,
+  securityRoute,
   analyticsRoute,
   callbackRoute,
   loginRoute,

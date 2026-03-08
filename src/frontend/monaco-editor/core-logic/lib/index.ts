@@ -17,7 +17,6 @@ export * from "./memfs";
 export * from "./process-image";
 export * from "./routes";
 export * from "./shared-w-polyfill";
-export * from "./sw-version";
 export * from "./throttle";
 export * from "./transferables";
 export * from "./tw-dev-setup";

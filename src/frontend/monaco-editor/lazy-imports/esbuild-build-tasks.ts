@@ -3,7 +3,6 @@ import { readdir, readFile, stat, writeFile } from "fs/promises"; // Assuming th
 import { getCommonBuildOptions } from "./esbuild-build-config.ts";
 import { environment } from "../core-logic/lib/esbuild-make-env.ts";
 import { build } from "./esbuild-operations.ts";
-import { createHash } from "crypto";
 import { tryCatch } from "./try-catch.ts"; // Added import
 export type Environment = "development" | "production";
 import path from "path";
@@ -155,34 +154,7 @@ export const buildWasm = async (): Promise<void> => {
   });
 };
 
-export async function buildServiceWorker(): Promise<void> {
-  await build({
-    ...getCommonBuildOptions("production"),
-    entryPoints: ["core-logic/sw.ts"],
-    format: "iife",
-    outExtension: { ".js": ".js" },
-    minifySyntax: false,
-    minifyIdentifiers: false,
-    bundle: true,
-    treeShaking: true,
-    external: ["worker_threads"],
-    minifyWhitespace: false,
-    target: "es2024",
-  });
-
-  await build({
-    ...getCommonBuildOptions("production"),
-    entryPoints: ["core-logic/sw-deps.ts"],
-    format: "iife",
-    outExtension: { ".js": ".js" },
-    minifySyntax: true,
-    minifyIdentifiers: true,
-    treeShaking: true,
-    external: ["worker_threads"],
-    minifyWhitespace: true,
-    target: "es2024",
-  });
-}
+// Service worker build removed — SW has been deleted for cache busting fix
 
 const createAliases = async (
   dir: string,
@@ -299,8 +271,6 @@ export async function buildMainBundle(wasmFile: string): Promise<void> {
     entryPoints: ["cf-esbuild.mjs", "core-logic/modules.ts"],
     alias: {
       ...buildOptions.alias,
-      "@src/swVersion": "/swVersion.mjs",
-
       "esbuild-wasm/esbuild.wasm": `./${wasmFile}`,
       // ...(isProduction ? {} : {
       // "react": "preact/compat",
@@ -313,7 +283,6 @@ export async function buildMainBundle(wasmFile: string): Promise<void> {
       "node-html-parser",
       ...(buildOptions.external ?? []),
       "esbuild-wasm",
-      "/swVersion.mjs",
       `./${wasmFile}`,
       "esbuild-wasm/esbuild.wasm",
     ],
@@ -486,67 +455,4 @@ export async function buildMainBundle(wasmFile: string): Promise<void> {
   runImportMapReplaceOnAllFilesRecursive("dist/@");
 }
 
-const PRECACHE_EXTENSIONS = new Set([".js", ".mjs", ".css", ".wasm"]);
-
-async function collectAssets(dir: string, baseDir: string): Promise<string[]> {
-  const assets: string[] = [];
-
-  const { data: items, error } = await tryCatch(readdir(dir));
-  if (error || !items) return assets;
-
-  for (const item of items) {
-    const fullPath = path.join(dir, item);
-    const { data: itemStat, error: statError } = await tryCatch(stat(fullPath));
-    if (statError || !itemStat) continue;
-
-    if (itemStat.isDirectory()) {
-      const nested = await collectAssets(fullPath, baseDir);
-      assets.push(...nested);
-    } else {
-      const ext = path.extname(item);
-      if (PRECACHE_EXTENSIONS.has(ext)) {
-        const relativePath = "/" + path.relative(baseDir, fullPath);
-        assets.push(relativePath);
-      }
-    }
-  }
-
-  return assets;
-}
-
-export async function buildPrecacheManifest(distDir: string): Promise<void> {
-  const assets = await collectAssets(distDir, distDir);
-  assets.sort();
-
-  const keyFiles = ["sw.js", "sw-deps.js", "start.mjs", "cf-esbuild.mjs", "modules.mjs"];
-  const hash = createHash("md5");
-  for (const file of keyFiles) {
-    const { data } = await tryCatch(readFile(path.join(distDir, file)));
-    if (data) hash.update(data);
-  }
-  const version = hash.digest("hex").slice(0, 12);
-
-  const manifest = {
-    version,
-    assets: assets.map((url) => ({ url })),
-  };
-
-  const manifestPath = path.join(distDir, "precache-manifest.json");
-  const { error: writeError } = await tryCatch(
-    writeFile(manifestPath, JSON.stringify(manifest, null, 2)),
-  );
-  if (writeError) {
-    console.error("Error writing precache-manifest.json:", writeError);
-    return;
-  }
-
-  const swVersionPath = path.join(distDir, "sw-version.json");
-  const { error: versionWriteError } = await tryCatch(
-    writeFile(swVersionPath, JSON.stringify({ version })),
-  );
-  if (versionWriteError) {
-    console.error("Error writing sw-version.json:", versionWriteError);
-  }
-
-  console.debug(`Precache manifest: ${assets.length} assets, version: ${version}`);
-}
+// Precache manifest generation removed — SW has been deleted for cache busting fix

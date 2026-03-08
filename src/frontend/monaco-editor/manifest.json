@@ -52,7 +52,6 @@
     "recordrtc",
     "three",
     "ts-md5",
-    "workbox-window",
     "worker-rpc"
   ],
   "files": [
@@ -120,7 +119,6 @@
     "core-logic/lib/process-image.ts",
     "core-logic/lib/routes.ts",
     "core-logic/lib/shared-w-polyfill.ts",
-    "core-logic/lib/sw-version.ts",
     "core-logic/lib/throttle.ts",
     "core-logic/lib/transferables.ts",
     "core-logic/lib/tw-dev-setup.ts",
@@ -149,9 +147,7 @@
     "core-logic/services/message/MessageHandlerService.ts",
     "core-logic/services/screenshot/ScreenshotService.ts",
     "core-logic/start.ts",
-    "core-logic/sw-deps.ts",
     "core-logic/sw-local-fake-server.ts",
-    "core-logic/sw.ts",
     "crypto-data-structures/md5.ts",
     "edge/ServiceWorkerManager.ts",
     "editor/config.ts",

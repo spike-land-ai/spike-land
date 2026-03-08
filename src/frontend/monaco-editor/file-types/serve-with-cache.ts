@@ -7,6 +7,14 @@ function getContentType(path: string) {
   return lookup(path) || "application/octet-stream";
 }
 
+function getHashHeaderValue(filePath: string, assetHash: string): string {
+  const fileParts = filePath.split(".");
+  if (fileParts.length < 3) {
+    return assetHash;
+  }
+  return fileParts.at(-2) || assetHash;
+}
+
 export const serveWithCache = (files: Record<string, string>, cacheToUse: () => Promise<Cache>) => {
   const ASSET_HASH = files.ASSET_HASH || md5(JSON.stringify(files));
 
@@ -112,9 +120,8 @@ export const serveWithCache = (files: Record<string, string>, cacheToUse: () => 
 
         // Create a promise to represent the in-flight fetch
         const inFlightPromise = (async (req: Request) => {
-          const fileParts = (files[filePath] ? files[filePath] : filePath).split(".");
-          fileParts.pop();
-          const hash = fileParts.pop()!;
+          const resolvedFilePath = files[filePath] ? files[filePath] : filePath;
+          const hash = getHashHeaderValue(resolvedFilePath, ASSET_HASH);
 
           let kvResp: Response;
           try {
@@ -139,8 +146,16 @@ export const serveWithCache = (files: Record<string, string>, cacheToUse: () => 
           headers.set("Content-Type", contentType);
           headers.set("x-hash", hash);
 
-          // Overwrite the Cache-Control header
-          headers.set("Cache-Control", "public, max-age=604800, immutable");
+          // Content-type-aware cache control
+          const isHtml = contentType.includes("text/html") || !filePath.includes(".");
+          const isHashed = /\.[0-9a-f]{8,}\./.test(filePath);
+          if (isHtml) {
+            headers.set("Cache-Control", "public, no-cache, must-revalidate");
+          } else if (isHashed) {
+            headers.set("Cache-Control", "public, max-age=604800, immutable");
+          } else {
+            headers.set("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+          }
           headers.set("Access-Control-Allow-Origin", "*");
           // Access-Control-Allow-Credentials: true
           headers.set("Access-Control-Allow-Credentials", "true");

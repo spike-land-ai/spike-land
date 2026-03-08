@@ -44,6 +44,7 @@ const packagePathMap: Record<string, string> = {
   "google-analytics-mcp": "mcp-tools/google-analytics",
   "google-ads-mcp": "mcp-tools/google-ads",
   "hackernews-mcp": "mcp-tools/hackernews",
+  "iwd-spotlight-mcp": "mcp-tools/iwd-spotlight",
   "image-studio-worker": "edge-api/image-studio-worker",
   "mcp-auth": "edge-api/auth",
   "mcp-image-studio": "mcp-tools/image-studio",
@@ -175,6 +176,7 @@ const packages: Record<string, PkgConfig> = {
       tests("code/**/*.test.ts"),
       tests("code/**/*.spec.ts"),
       tests("code/**/*.spec.tsx"),
+      src("frontend/monaco-editor/file-types/__tests__/**/*.test.ts"),
     ],
     aliases: { "@": src("frontend/monaco-editor/@") },
     includeSrc: [src("frontend/monaco-editor/**/*.ts"), src("frontend/monaco-editor/**/*.tsx")],
@@ -186,6 +188,7 @@ const packages: Record<string, PkgConfig> = {
   "google-analytics-mcp": { tier: 2, pool: "forks" },
   "google-ads-mcp": { tier: 2, pool: "forks" },
   "hackernews-mcp": { tier: 2, pool: "forks" },
+  "iwd-spotlight-mcp": { tier: 2, pool: "forks" },
 
   "image-studio-worker": {
     tier: 2,
@@ -287,6 +290,10 @@ const packages: Record<string, PkgConfig> = {
 
   "spike-edge": {
     tier: 2,
+    includeTests: [
+      tests("spike-edge/**/*.test.ts"),
+      src("edge-api/main/api/__tests__/**/*.test.ts"),
+    ],
     aliases: { "cloudflare:workers": src("edge-api/main/core-logic/cloudflare-workers.ts") },
     coverageExclude: [],
   },

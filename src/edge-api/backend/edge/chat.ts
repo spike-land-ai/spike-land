@@ -16,24 +16,6 @@ const main = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const url = new URL(request.url);
 
-    if (url.pathname === "/swVersion.mjs" || url.pathname === "/@/lib/swVersion.mjs") {
-      return new Response(`export const swVersion = "${ASSET_HASH}" ;`, {
-        headers: {
-          "Content-Type": "application/javascript",
-          "x-hash": ASSET_HASH,
-        },
-      });
-    }
-    if (url.pathname === "/swVersion.json") {
-      return new Response(JSON.stringify({ swVersion: ASSET_HASH }), {
-        headers: {
-          "Content-Type": "application/json",
-          "x-hash": ASSET_HASH,
-          "cache-control": "public, max-age=0, must-revalidate",
-        },
-      });
-    }
-
     const kvServer = serveWithCache(files, () => caches.open(`file-cache-${ASSET_HASH}`));
 
     const path = url.pathname.slice(1).split("/");
@@ -104,32 +86,7 @@ const main = {
 
     await env.KV.put("lastRequest", request.url);
 
-    if (url.pathname === "/swVersion.js") {
-      return new Response(
-        `self.swVersion = "${ASSET_HASH}"; self.files= ${JSON.stringify(files)};`,
-        {
-          headers: {
-            "Content-Type": "application/javascript",
-          },
-        },
-      );
-    }
-
-    if (url.pathname === "/sw-config.json") {
-      return new Response(
-        JSON.stringify({
-          killSwitch: false,
-          version: "v16",
-          swVersion: ASSET_HASH,
-          valid: Date.now() + 1000 * 60 * 60,
-        }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
-    }
+    // SW endpoints removed — service worker has been deleted
     if (url.pathname === "/transpile" && request.method === "POST") {
       const body = await request.text();
 

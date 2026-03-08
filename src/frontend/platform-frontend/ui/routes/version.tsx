@@ -43,10 +43,12 @@ function fileTypeIcon(key: string): string {
 }
 
 export function VersionPage() {
+  const defaultVisibleAssetCount = 100;
   const [data, setData] = useState<VersionData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showAllAssets, setShowAllAssets] = useState(false);
 
   useEffect(() => {
     fetch(apiUrl("/version"))
@@ -85,6 +87,10 @@ export function VersionPage() {
   const shortSha = data.sha.slice(0, 7);
   const buildDate = new Date(data.buildTime);
   const buildTimeStr = isNaN(buildDate.getTime()) ? data.buildTime : buildDate.toLocaleString();
+  const visibleAssets = showAllAssets
+    ? data.assets
+    : data.assets.slice(0, defaultVisibleAssetCount);
+  const hasHiddenAssets = data.assets.length > defaultVisibleAssetCount;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(data.sha).then(() => {
@@ -117,7 +123,26 @@ export function VersionPage() {
 
       <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
         <div className="border-b border-border px-4 py-3">
-          <h2 className="font-semibold text-foreground">Deployed Assets ({data.assets.length})</h2>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-semibold text-foreground">Deployed Assets ({data.assets.length})</h2>
+              {hasHiddenAssets && (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Showing the first {defaultVisibleAssetCount} assets by default to keep this page
+                  usable.
+                </p>
+              )}
+            </div>
+            {hasHiddenAssets && (
+              <button
+                type="button"
+                onClick={() => setShowAllAssets((current) => !current)}
+                className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                {showAllAssets ? "Show Fewer" : "Show All"}
+              </button>
+            )}
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -131,7 +156,7 @@ export function VersionPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {data.assets.map((asset) => (
+              {visibleAssets.map((asset) => (
                 <tr key={asset.key} className="hover:bg-muted transition-colors">
                   <td
                     className="max-w-xs truncate px-4 py-2 font-mono text-xs text-foreground"
@@ -165,6 +190,11 @@ export function VersionPage() {
             </tbody>
           </table>
         </div>
+        {hasHiddenAssets && !showAllAssets && (
+          <div className="border-t border-border px-4 py-3 text-sm text-muted-foreground">
+            {data.assets.length - defaultVisibleAssetCount} additional assets hidden.
+          </div>
+        )}
       </div>
     </div>
   );
