@@ -118,7 +118,8 @@ blog.get("/api/blog", async (c) => {
 });
 
 blog.get("/api/blog/:slug", async (c) => {
-  const slug = c.req.param("slug");
+  // Normalise: strip accidental .mdx suffix so old links still resolve
+  const slug = c.req.param("slug").replace(/\.mdx$/i, "");
   const showDrafts = isLocalDev(c);
 
   let cached: Response | null = null;
@@ -248,6 +249,85 @@ blog.get("/blog/:slug/:filename", async (c, next) => {
 async function getBlogPostRow(db: D1Database, slug: string): Promise<BlogPostRow | null> {
   return db.prepare("SELECT * FROM blog_posts WHERE slug = ?").bind(slug).first<BlogPostRow>();
 }
+
+// RSS 2.0 feed endpoint
+blog.get("/blog/rss", async (c) => {
+  let response: Response | null = null;
+
+  const buildRssXml = (posts: BlogPostRow[]): string => {
+    const items = posts.map((post) => {
+      const pubDate = new Date(post.date).toUTCString();
+      const link = `https://spike.land/blog/${post.slug}`;
+      return [
+        "    <item>",
+        `      <title><![CDATA[${post.title}]]></title>`,
+        `      <link>${link}</link>`,
+        `      <description><![CDATA[${post.description}]]></description>`,
+        `      <pubDate>${pubDate}</pubDate>`,
+        `      <author>${post.author}</author>`,
+        `      <guid isPermaLink="true">${link}</guid>`,
+        `      <category>${post.category}</category>`,
+        "    </item>",
+      ].join("\n");
+    });
+
+    return [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">',
+      "  <channel>",
+      "    <title>spike.land Blog</title>",
+      "    <link>https://spike.land/blog</link>",
+      "    <description>Articles, tutorials, and engineering insights from the spike.land team about AI, MCP, and edge computing.</description>",
+      "    <language>en</language>",
+      '    <atom:link href="https://spike.land/blog/rss" rel="self" type="application/rss+xml" />',
+      ...items,
+      "  </channel>",
+      "</rss>",
+    ].join("\n");
+  };
+
+  try {
+    response = await withEdgeCache(
+      c.req.raw,
+      safeCtx(c),
+      async () => {
+        const result = await c.env.DB.prepare(
+          "SELECT * FROM blog_posts WHERE draft = 0 ORDER BY date DESC LIMIT 50",
+        ).all<BlogPostRow>();
+
+        const posts = result.results ?? [];
+        const xml = buildRssXml(posts);
+
+        return new Response(xml, {
+          headers: { "Content-Type": "application/rss+xml; charset=utf-8" },
+        });
+      },
+      { ttl: 3600, swr: 86400 },
+    );
+  } catch {
+    try {
+      const result = await c.env.DB.prepare(
+        "SELECT * FROM blog_posts WHERE draft = 0 ORDER BY date DESC LIMIT 50",
+      ).all<BlogPostRow>();
+
+      const posts = result.results ?? [];
+      const xml = buildRssXml(posts);
+
+      response = new Response(xml, {
+        headers: { "Content-Type": "application/rss+xml; charset=utf-8" },
+      });
+    } catch {
+      // D1 unavailable
+    }
+  }
+
+  if (!response) {
+    const xml = buildRssXml([]);
+    return c.body(xml, 200, { "Content-Type": "application/rss+xml; charset=utf-8" });
+  }
+
+  return response;
+});
 
 export { blog, rowToPost, getBlogPostRow };
 export type { BlogPostRow };

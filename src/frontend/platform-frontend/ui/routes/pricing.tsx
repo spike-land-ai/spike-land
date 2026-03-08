@@ -37,7 +37,7 @@ function makePlans(pricing: import("../hooks/usePricing").PricingData): PricingP
         { text: "Basic dashboard" },
       ],
       cta: "Get Started Free",
-      ctaHref: "/tools",
+      ctaHref: "/apps",
       highlighted: false,
     },
     {

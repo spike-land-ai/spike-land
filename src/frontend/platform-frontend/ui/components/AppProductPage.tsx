@@ -104,8 +104,8 @@ export function AppProductPage({ appId }: AppProductPageProps) {
     <div className="flex flex-col space-y-12 p-6 lg:p-16 max-w-7xl mx-auto">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground/50">
-        <Link to="/apps" className="hover:text-primary transition-colors">
-          Apps
+        <Link to="/packages" className="hover:text-primary transition-colors">
+          Packages
         </Link>
         <ChevronRight className="size-3" />
         <span className="text-foreground/70">{meta.name}</span>
@@ -145,6 +145,7 @@ export function AppProductPage({ appId }: AppProductPageProps) {
               className="rounded-2xl h-14 px-8 text-lg font-bold"
             >
               <Link to="/apps/qa-studio">
+              <Link to="/packages/qa-studio/ui">
                 <Layout className="mr-2 h-5 w-5" />
                 Launch UI
               </Link>

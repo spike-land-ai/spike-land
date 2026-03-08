@@ -4,4 +4,5 @@ export interface Env {
   PRESENCE_DO: DurableObjectNamespace;
   AUTH_MCP: Fetcher;
   MCP_SERVICE: Fetcher;
+  AGENT_API_KEY?: string;
 }

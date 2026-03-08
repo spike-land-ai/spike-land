@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useEffect, useMemo } from "react";
 import {
   ArrowRight,
   Blocks,
@@ -18,7 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "../shared/ui/button";
-import { useApps, type McpAppSummary } from "../hooks/useApps";
+import { groupAppsByCategory, useApps, type McpAppSummary } from "../hooks/useApps";
 
 type SurfaceId = "chat" | "terminal" | "mdx" | "server";
 
@@ -39,6 +39,7 @@ const FALLBACK_APPS: McpAppSummary[] = [
     name: "QA Studio",
     description: "Browser automation loops with screenshots, narration, and MCP execution.",
     emoji: "🧪",
+    category: "Browser Automation",
     tool_count: 10,
     sort_order: 0,
   },
@@ -47,6 +48,7 @@ const FALLBACK_APPS: McpAppSummary[] = [
     name: "Chess Engine",
     description: "Stateful gameplay, ratings, and challenge flows over MCP tools.",
     emoji: "♟️",
+    category: "Games & Simulation",
     tool_count: 5,
     sort_order: 1,
   },
@@ -55,6 +57,7 @@ const FALLBACK_APPS: McpAppSummary[] = [
     name: "Bugbook",
     description: "Signal-ranked bug reporting and triage coordination.",
     emoji: "🐞",
+    category: "Code & Developer Tools",
     tool_count: 4,
     sort_order: 2,
   },
@@ -63,6 +66,7 @@ const FALLBACK_APPS: McpAppSummary[] = [
     name: "Learn & Verify",
     description: "Turn documents into adaptive quiz and badge flows.",
     emoji: "📚",
+    category: "Docs & Knowledge",
     tool_count: 6,
     sort_order: 3,
   },
@@ -171,6 +175,8 @@ const CHANNEL_EVENTS = [
 ];
 
 const PRODUCT_RULES = [
+  "Tool names are namespaced. auth_get_profile means app auth, tool get_profile.",
+  "Vibe-code should compose MCP apps and their toolsets, not pretend each tool is a standalone app.",
   "Prefer spike.land MCP tools and @spike-land-ai packages over ad hoc external glue.",
   "Keep chat, terminal, MDX, and server editing tied to the same app identity.",
   "Treat bot output as durable app history, not transient token streams.",
@@ -247,6 +253,17 @@ function AppAtlasCard({
           </p>
         </div>
       </div>
+      <div className="mt-3">
+        <span
+          className="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em]"
+          style={{
+            background: "color-mix(in srgb, var(--chat-accent) 10%, transparent)",
+            color: "var(--chat-accent)",
+          }}
+        >
+          {app.category}
+        </span>
+      </div>
       <p className="mt-3 line-clamp-2 text-sm leading-6" style={{ color: "var(--muted-fg)" }}>
         {app.description}
       </p>
@@ -255,24 +272,58 @@ function AppAtlasCard({
 }
 
 export function BuildPage() {
+  const search = useSearch({ strict: false }) as {
+    app?: string;
+    surface?: SurfaceId;
+    category?: string;
+  };
+  const navigate = useNavigate();
   const { data: apps, isLoading, isError } = useApps();
-  const [selectedSurface, setSelectedSurface] = useState<SurfaceId>("chat");
-  const [selectedAppSlug, setSelectedAppSlug] = useState<string | null>(null);
 
   const atlasApps = useMemo(() => {
-    if (apps && apps.length > 0) return apps.slice(0, 6);
+    if (apps && apps.length > 0) return apps.slice(0, 10);
     return FALLBACK_APPS;
   }, [apps]);
+  const atlasSections = useMemo(() => groupAppsByCategory(atlasApps), [atlasApps]);
+  const activeCategorySection = useMemo(() => {
+    if (atlasSections.length === 0) return null;
+    return atlasSections.find((section) => section.category === search.category) ?? atlasSections[0];
+  }, [atlasSections, search.category]);
+  const visibleApps = activeCategorySection?.apps ?? [];
+
+  const selectedSurface: SurfaceId = SURFACES.some((surface) => surface.id === search.surface)
+    ? (search.surface as SurfaceId)
+    : "chat";
+  const selectedAppSlug = search.app ?? null;
 
   useEffect(() => {
-    if (!selectedAppSlug && atlasApps.length > 0) {
-      setSelectedAppSlug(atlasApps[0].slug);
+    if (!activeCategorySection) return;
+
+    const appExistsInCategory = activeCategorySection.apps.some((app) => app.slug === selectedAppSlug);
+    const nextAppSlug = appExistsInCategory ? selectedAppSlug : activeCategorySection.apps[0]?.slug;
+
+    if (
+      search.category === activeCategorySection.category &&
+      nextAppSlug === selectedAppSlug &&
+      search.surface === selectedSurface
+    ) {
+      return;
     }
-  }, [atlasApps, selectedAppSlug]);
+
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        category: activeCategorySection.category,
+        app: nextAppSlug,
+        surface: selectedSurface,
+      }),
+      replace: true,
+    });
+  }, [activeCategorySection, navigate, search.category, search.surface, selectedAppSlug, selectedSurface]);
 
   const activeApp = useMemo(() => {
-    return atlasApps.find((app) => app.slug === selectedAppSlug) ?? atlasApps[0] ?? null;
-  }, [atlasApps, selectedAppSlug]);
+    return visibleApps.find((app) => app.slug === selectedAppSlug) ?? visibleApps[0] ?? null;
+  }, [selectedAppSlug, visibleApps]);
 
   const activeSurface = SURFACES.find((surface) => surface.id === selectedSurface) ?? SURFACES[0];
   const ActiveSurfaceIcon = activeSurface.Icon;
@@ -281,6 +332,36 @@ export function BuildPage() {
     : isError
       ? "Showing curated atlas"
       : "Live registry connected";
+
+  const selectApp = (appSlug: string) => {
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        app: appSlug,
+      }),
+    });
+  };
+
+  const selectCategory = (category: string) => {
+    const section = atlasSections.find((candidate) => candidate.category === category);
+
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        category,
+        app: section?.apps[0]?.slug ?? prev.app,
+      }),
+    });
+  };
+
+  const selectSurface = (surface: SurfaceId) => {
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        surface,
+      }),
+    });
+  };
 
   return (
     <div
@@ -350,7 +431,8 @@ export function BuildPage() {
                 Vibe-code is the product page for a different operating model: each MCP app gets its
                 own spike-chat channel, can be browsed from an atlas, opened in terminal mode,
                 published as an MDX app, and even edited at the MCP server layer using spike.land
-                tools first.
+                tools first. The building blocks are MCP apps like <span className="font-bold text-foreground">auth</span>,
+                <span className="font-mono text-foreground"> auth_get_profile</span> is just one tool inside that app.
               </p>
             </div>
 
@@ -519,25 +601,49 @@ export function BuildPage() {
                   app atlas
                 </p>
                 <h2 className="mt-2 text-2xl font-black tracking-tight text-foreground">
-                  Browse real apps, then choose the surface.
+                  Browse real apps by category, then choose the surface.
                 </h2>
               </div>
               <div className="text-right">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
                   {registryStatus}
                 </p>
-                <p className="mt-1 text-sm font-semibold text-foreground">{atlasApps.length} shown</p>
+                <p className="mt-1 text-sm font-semibold text-foreground">
+                  {atlasApps.length} apps across {atlasSections.length} categories
+                </p>
               </div>
             </div>
 
-            <div className="mt-5 grid gap-3">
-              {atlasApps.map((app) => (
-                <AppAtlasCard
-                  key={app.slug}
-                  app={app}
-                  selected={activeApp?.slug === app.slug}
-                  onSelect={() => setSelectedAppSlug(app.slug)}
-                />
+            <div className="mt-5 max-h-[42rem] space-y-5 overflow-y-auto pr-1">
+              {atlasSections.map((section) => (
+                <div key={section.category}>
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="rounded-full px-3 py-1 text-[11px] font-black uppercase tracking-[0.22em]"
+                        style={{
+                          background: "color-mix(in srgb, var(--primary-color) 9%, transparent)",
+                          color: "var(--primary-color)",
+                        }}
+                      >
+                        {section.category}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                      {section.apps.length} app{section.apps.length === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                  <div className="grid gap-3">
+                    {section.apps.map((app) => (
+                      <AppAtlasCard
+                        key={app.slug}
+                        app={app}
+                        selected={activeApp?.slug === app.slug}
+                        onSelect={() => selectApp(app.slug)}
+                      />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -577,7 +683,7 @@ export function BuildPage() {
                     </p>
                   </div>
 
-                  <div className="grid shrink-0 gap-3 sm:grid-cols-2">
+                  <div className="grid shrink-0 gap-3 sm:grid-cols-3">
                     <div
                       className="rounded-[22px] border px-4 py-3"
                       style={{
@@ -589,6 +695,18 @@ export function BuildPage() {
                         tools
                       </p>
                       <p className="mt-2 text-2xl font-black text-foreground">{activeApp.tool_count}</p>
+                    </div>
+                    <div
+                      className="rounded-[22px] border px-4 py-3"
+                      style={{
+                        borderColor: "color-mix(in srgb, var(--border-color) 75%, transparent)",
+                        background: "color-mix(in srgb, var(--bg) 70%, transparent)",
+                      }}
+                    >
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                        category
+                      </p>
+                      <p className="mt-2 text-sm font-black text-foreground">{activeApp.category}</p>
                     </div>
                     <div
                       className="rounded-[22px] border px-4 py-3"
@@ -614,7 +732,7 @@ export function BuildPage() {
                       <button
                         key={surface.id}
                         type="button"
-                        onClick={() => setSelectedSurface(surface.id)}
+                        onClick={() => selectSurface(surface.id)}
                         className="rounded-[24px] border p-4 text-left transition-all duration-200 hover:-translate-y-0.5"
                         style={{
                           borderColor: isActive
@@ -697,12 +815,30 @@ export function BuildPage() {
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <Button asChild className="h-11 rounded-2xl px-5 text-sm font-black">
+                      <Button
+                        asChild
+                        className="h-11 rounded-2xl px-5 text-sm font-black"
+                        variant={selectedSurface === "chat" ? "default" : "outline"}
+                      >
                         <Link
                           to="/tools/$appSlug"
                           params={{ appSlug: activeApp.slug }}
+                          search={{ surface: "chat" }}
                         >
-                          Open {activeApp.name}
+                          Open Chat
+                        </Link>
+                      </Button>
+                      <Button
+                        asChild
+                        className="h-11 rounded-2xl px-5 text-sm font-bold"
+                        variant={selectedSurface === "terminal" ? "default" : "outline"}
+                      >
+                        <Link
+                          to="/tools/$appSlug"
+                          params={{ appSlug: activeApp.slug }}
+                          search={{ surface: "terminal" }}
+                        >
+                          Open Terminal
                         </Link>
                       </Button>
                       <Button
@@ -710,7 +846,26 @@ export function BuildPage() {
                         variant="outline"
                         className="h-11 rounded-2xl px-5 text-sm font-bold"
                       >
-                        <Link to="/tools">Back to Atlas</Link>
+                        <Link
+                          to="/tools/$appSlug"
+                          params={{ appSlug: activeApp.slug }}
+                          search={{ surface: "mdx" }}
+                        >
+                          Open MDX
+                        </Link>
+                      </Button>
+                      <Button
+                        asChild
+                        variant="ghost"
+                        className="h-11 rounded-2xl px-5 text-sm font-bold"
+                      >
+                        <Link
+                          to="/apps/$appId"
+                          params={{ appId: activeApp.slug }}
+                          search={{ tab: "Terminal" }}
+                        >
+                          Package View
+                        </Link>
                       </Button>
                     </div>
                   </div>
@@ -740,7 +895,8 @@ export function BuildPage() {
             </h2>
             <p className="mt-3 text-sm leading-7 text-muted-foreground">
               If vibe-code writes a feature, it should reach for spike.land tools, internal packages,
-              and MCP contracts before inventing random infrastructure around them.
+              and MCP contracts before inventing random infrastructure around them. New MCP apps
+              should emerge by composing existing app capabilities into a sharper product surface.
             </p>
 
             <div className="mt-5 grid gap-3">

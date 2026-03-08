@@ -37,10 +37,10 @@ export function NotFoundPage() {
           Home
         </Link>
         <Link
-          to="/tools"
+          to="/apps"
           className="rounded-2xl border border-border bg-card px-6 py-3 text-sm font-bold text-foreground hover:border-primary/30 transition-colors"
         >
-          Tools
+          Apps
         </Link>
         <Link
           to="/blog"

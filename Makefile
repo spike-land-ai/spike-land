@@ -8,13 +8,18 @@
 #   make validate      Check workspace graph vs dependency-map.json
 
 SHELL := /bin/bash
+# Updated usage header:
+#   make test-changed      Run only tests for changed packages (vitest, fast)
+#   make test-docker       Run changed package tests via Docker cache (skips unchanged)
+#   make test-docker-all   Run ALL tests via Docker cache
 ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 .PHONY: build-all test-all lint-all check-all status validate \
         build test test-watch test-coverage typecheck lint \
         rollback-worker rollback-spa rollback-spa-list \
         docker-setup docker-dev docker-ci docker-staging docker-prod \
-        docker-down docker-ps docker-logs
+        docker-down docker-ps docker-logs \
+        test-docker test-docker-all test-changed
 
 build-all:
 	yarn workspaces foreach -Apt run build
@@ -96,3 +101,28 @@ docker-ps:
 docker-logs:
 	@test -n "$(SVC)" || (echo "Usage: make docker-logs SVC=spike-edge" && exit 1)
 	$(COMPOSE_BASE) logs -f $(SVC)
+
+# ─── Incremental test targets ────────────────────────────────────────────────
+.PHONY: test-changed test-docker test-docker-all
+
+test-changed:
+	@bash scripts/test-changed.sh
+
+test-docker:
+	@DOCKER_BUILDKIT=1 bash scripts/docker-test.sh
+
+test-docker-all:
+	@DOCKER_BUILDKIT=1 bash scripts/docker-test.sh --all
+
+# ─── Docker-cached test runner ────────────────────────────────────────────────
+# Only re-runs tests for packages whose source files have changed.
+# BuildKit cache hit = tests already passed for that file state.
+
+test-docker:
+	@bash scripts/docker-test.sh
+
+test-docker-all:
+	@bash scripts/docker-test.sh --all
+
+test-changed:
+	@bash scripts/test-changed.sh

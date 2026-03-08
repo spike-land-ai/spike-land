@@ -229,6 +229,21 @@ describe("GET /api/blog/:slug", () => {
 
     expect(res.status).toBe(404);
   });
+
+  it("strips .mdx suffix from slug before querying", async () => {
+    const row = makeRow({ slug: "my-post", content: "Full body content" });
+    const db = mockDB([], row);
+    const testApp = app(db);
+
+    const res = await testApp.request("/api/blog/my-post.mdx", undefined, {
+      DB: db,
+      SPA_ASSETS: mockR2(),
+    } as unknown as Env);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Record<string, unknown>;
+    expect(body.slug).toBe("my-post");
+  });
 });
 
 // ---------- GET /api/blog-images/:slug/:filename ----------

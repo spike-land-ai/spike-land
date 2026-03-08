@@ -1,0 +1,100 @@
+{
+  "bazdmeg-mcp": [
+    "src/mcp-tools/bazdmeg"
+  ],
+  "block-sdk": [
+    "src/core/shared-utils",
+    "src/core/server-base",
+    "src/core/block-tasks",
+    "src/core/block-sdk"
+  ],
+  "block-tasks": [
+    "src/core/shared-utils",
+    "src/core/server-base",
+    "src/core/block-sdk",
+    "src/core/block-tasks"
+  ],
+  "chess-engine": [
+    "src/core/chess"
+  ],
+  "esbuild-wasm-mcp": [
+    "src/mcp-tools/esbuild-wasm"
+  ],
+  "google-analytics-mcp": [
+    "src/mcp-tools/google-analytics"
+  ],
+  "google-ads-mcp": [
+    "src/mcp-tools/google-ads"
+  ],
+  "hackernews-mcp": [
+    "src/mcp-tools/hackernews"
+  ],
+  "image-studio-worker": [
+    "src/edge-api/image-studio-worker"
+  ],
+  "mcp-auth": [
+    "src/edge-api/auth"
+  ],
+  "mcp-image-studio": [
+    "src/core/shared-utils",
+    "src/core/server-base",
+    "src/core/block-sdk",
+    "src/core/block-tasks",
+    "src/core/react-engine",
+    "src/mcp-tools/image-studio"
+  ],
+  "mcp-server-base": [
+    "src/core/shared-utils",
+    "src/core/server-base"
+  ],
+  "openclaw-mcp": [
+    "src/mcp-tools/openclaw"
+  ],
+  "qa-studio": [
+    "src/core/browser-automation"
+  ],
+  "react-ts-worker": [
+    "src/core/react-engine"
+  ],
+  "shared": [
+    "src/core/shared-utils"
+  ],
+  "spike-cli": [
+    "src/cli/spike-cli"
+  ],
+  "spike-chat": [
+    "src/edge-api/main/core-logic/cloudflare-workers.ts",
+    "src/edge-api/spike-chat"
+  ],
+  "spike-edge": [
+    "src/edge-api/main"
+  ],
+  "spike-land-mcp": [
+    "src/core/shared-utils",
+    "src/core/server-base",
+    "src/edge-api/spike-land"
+  ],
+  "spike-review": [
+    "src/mcp-tools/code-review"
+  ],
+  "state-machine": [
+    "src/core/statecharts"
+  ],
+  "stripe-analytics-mcp": [
+    "src/core/shared-utils",
+    "src/core/server-base",
+    "src/core/block-sdk",
+    "src/core/block-tasks",
+    "src/core/react-engine",
+    "src/mcp-tools/stripe-analytics"
+  ],
+  "transpile": [
+    "src/edge-api/transpile"
+  ],
+  "vibe-dev": [
+    "src/cli/docker-dev"
+  ],
+  "whatsapp-mcp": [
+    "src/utilities/whatsapp"
+  ]
+}

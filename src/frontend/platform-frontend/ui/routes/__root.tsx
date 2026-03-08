@@ -23,15 +23,15 @@ const ROUTE_META: Record<string, { title: string; description: string; ogImage?:
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
   },
-  "/tools": {
-    title: "AI Tools Registry - spike.land",
-    description:
-      "Browse 80+ MCP tools on spike.land. Find tools for code review, image generation, data analysis, and more.",
-  },
   "/apps": {
-    title: "Apps - spike.land",
+    title: "MCP Apps - spike.land",
     description:
-      "Browse and interact with AI-powered applications on spike.land. Connect AI agents to real-world data and actions.",
+      "Browse MCP apps on spike.land by category. Open each app in chat, terminal, MDX, or overview mode.",
+  },
+  "/packages": {
+    title: "MCP Packages - spike.land",
+    description:
+      "Inspect MCP package details, terminals, and implementation surfaces behind spike.land apps.",
   },
   "/store": {
     title: "App Store - spike.land",
@@ -93,6 +93,11 @@ const ROUTE_META: Record<string, { title: string; description: string; ogImage?:
     description: "Configure your spike.land account, billing, API keys, and preferences.",
   },
   "/build": {
+    title: "vibe-code - Chat-Native MCP App Builder | spike.land",
+    description:
+      "See how vibe-code turns every MCP app into a chat-native product surface with spike-chat, terminal execution, MDX app views, and MCP server editing.",
+  },
+  "/vibe-code": {
     title: "vibe-code - Chat-Native MCP App Builder | spike.land",
     description:
       "See how vibe-code turns every MCP app into a chat-native product surface with spike-chat, terminal execution, MDX app views, and MCP server editing.",
@@ -170,7 +175,8 @@ function injectJsonLd(id: string, content: string) {
 }
 
 const BASE_NAV_LINKS = [
-  { to: "/tools", label: "Tools" },
+  { to: "/apps", label: "Apps" },
+  { to: "/vibe-code", label: "Vibe Code" },
   { to: "/store", label: "Store" },
   { to: "/pricing", label: "Pricing" },
   { to: "/docs", label: "Docs" },
@@ -222,22 +228,39 @@ export function RootLayout() {
         description: DEFAULT_DESCRIPTION,
       };
 
-    // Special handling for dynamic app pages
-    if (pathname.startsWith("/apps/") && pathname !== "/apps/new") {
+    // Special handling for dynamic MCP app pages
+    if (pathname.startsWith("/apps/")) {
+      const appId = pathname.split("/")[2];
+      const search = new URLSearchParams(searchStr);
+      const surface = search.get("surface") || "overview";
+      const appName = appId
+        ? appId.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+        : "App";
+      meta = {
+        title: `${appName} (${surface}) — spike.land`,
+        description: `Open ${appName} as a categorized MCP app on spike.land across chat, terminal, MDX, and overview surfaces.`,
+      };
+    }
+
+    if (
+      pathname.startsWith("/packages/") &&
+      pathname !== "/packages/new" &&
+      pathname !== "/packages/qa-studio/ui"
+    ) {
       const appId = pathname.split("/")[2];
       const search = new URLSearchParams(searchStr);
       const tab = search.get("tab") || "Overview";
       const appName = appId
         ? appId.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
-        : "Tool";
+        : "Package";
       meta = {
-        title: `${appName} (${tab}) — spike.land`,
-        description: `Explore ${appName} on spike.land — the MCP-first AI development platform.`,
+        title: `${appName} Package (${tab}) — spike.land`,
+        description: `Inspect the ${appName} MCP package on spike.land — package details, terminal access, and implementation context.`,
       };
     }
 
     const ogImage = meta.ogImage ?? DEFAULT_OG_IMAGE;
-    const canonicalUrl = `${SITE_URL}${pathname === "/" ? "" : pathname}${searchStr}`;
+    const canonicalUrl = `${SITE_URL}${pathname === "/" ? "" : pathname}`;
 
     document.title = meta.title;
 
@@ -274,6 +297,32 @@ export function RootLayout() {
       ogLocale.setAttribute("property", "og:locale");
       ogLocale.content = "en_US";
       document.head.appendChild(ogLocale);
+    }
+
+    // BreadcrumbList structured data
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments.length > 0) {
+      const breadcrumbItems = [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        ...segments.map((seg, i) => ({
+          "@type": "ListItem",
+          position: i + 2,
+          name: seg.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+          item: `${SITE_URL}/${segments.slice(0, i + 1).join("/")}`,
+        })),
+      ];
+      injectJsonLd(
+        "jsonld-breadcrumb",
+        JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: breadcrumbItems,
+        }),
+      );
+    } else {
+      // Homepage — remove breadcrumb if present
+      const existing = document.getElementById("jsonld-breadcrumb");
+      if (existing) existing.remove();
     }
   }, [pathname, searchStr]);
 

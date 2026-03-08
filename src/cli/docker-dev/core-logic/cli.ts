@@ -211,6 +211,90 @@ program
   });
 
 // ============================================================
+// chat-poll command - Poll spike-chat channels instead of Redis
+// ============================================================
+program
+  .command("chat-poll")
+  .description("Poll spike-chat channels for new messages (replaces Redis polling)")
+  .option("--chat-url <url>", "Spike-chat base URL", "https://chat.spike.land")
+  .option("--api-key <key>", "Agent API key for spike-chat auth")
+  .option("--channels <ids>", "Comma-separated channel IDs to watch")
+  .option("--interval <ms>", "Polling interval in milliseconds", "5000")
+  .option("--once", "Run once and exit")
+  .action(async (options) => {
+    try {
+      const { createSpikeChatConfig, startPollingLoop, listAppChannels, pollChannels, postMessage } =
+        await import("./spike-chat-poller.js");
+
+      const config = createSpikeChatConfig({
+        chatUrl: options.chatUrl,
+        apiKey: options.apiKey || process.env.AGENT_API_KEY,
+        pollInterval: parseInt(options.interval, 10) || 5000,
+      });
+
+      console.log("vibe-dev Chat Poll");
+      console.log("===================");
+      console.log(`Chat URL: ${config.chatUrl}`);
+      console.log(`Poll interval: ${config.pollInterval}ms`);
+
+      // Determine channels to watch
+      let channelIds: string[];
+      if (options.channels) {
+        channelIds = (options.channels as string).split(",").map((s: string) => s.trim());
+      } else {
+        console.log("Discovering app-* channels...");
+        const appChannels = await listAppChannels(config);
+        channelIds = appChannels.map((ch) => ch.slug);
+        if (channelIds.length === 0) {
+          console.log("No app channels found. Waiting for channels to be created...");
+          channelIds = ["app-default"];
+        }
+      }
+
+      console.log(`Watching channels: ${channelIds.join(", ")}\n`);
+
+      if (options.once) {
+        const cursors = new Map<string, string>();
+        const results = await pollChannels(config, channelIds, cursors);
+        for (const batch of results) {
+          console.log(`[${batch.channelId}] ${batch.messages.length} new messages`);
+          for (const msg of batch.messages) {
+            console.log(`  ${msg.userId}: ${msg.content.substring(0, 100)}`);
+          }
+        }
+        process.exit(0);
+      }
+
+      const { stop } = startPollingLoop(config, channelIds, async (channelId, msgs) => {
+        for (const msg of msgs) {
+          console.log(`[${channelId}] ${msg.userId}: ${msg.content.substring(0, 100)}`);
+
+          // Post a simple acknowledgment (in production, this would trigger Claude)
+          await postMessage(
+            config,
+            channelId,
+            `Received: "${msg.content.substring(0, 50)}..." — processing...`,
+          );
+        }
+      });
+
+      process.on("SIGINT", () => {
+        console.log("\nStopping chat poll...");
+        stop();
+        process.exit(0);
+      });
+
+      process.on("SIGTERM", () => {
+        stop();
+        process.exit(0);
+      });
+    } catch (error) {
+      console.error("Chat poll failed:", error);
+      process.exit(1);
+    }
+  });
+
+// ============================================================
 // claude command - Run Claude Code with MCP tools configured
 // ============================================================
 program

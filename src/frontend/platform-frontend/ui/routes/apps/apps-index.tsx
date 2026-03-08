@@ -51,17 +51,17 @@ export function AppsIndexPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">MCP Tools</h1>
+          <h1 className="text-2xl font-bold">MCP Packages</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Model Context Protocol tools you can use via terminal or API
+            Package-level implementation surfaces behind spike.land MCP apps.
           </p>
         </div>
         <Link
-          to="/apps/new"
+          to="/packages/new"
           search={{ prompt: "" }}
           className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90"
         >
-          Create Tool
+          Create Package
         </Link>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
