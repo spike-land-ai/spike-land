@@ -282,6 +282,102 @@ describe("useChat", () => {
     // In the current useChat implementation, submitBrowserResult resolves a promise in pendingBrowserRef,
     // but it doesn't seem to update the message state with the result yet?
     // Let me check useChat.ts again.
+    expect(result.current.messages[1].browserCommands).toHaveLength(1);
+  });
+
+  it("should not send empty or whitespace-only messages", async () => {
+    const { result } = renderHook(() => useChat());
+    
+    await act(async () => {
+      await result.current.sendMessage("");
+      await result.current.sendMessage("   ");
+    });
+
+    expect(result.current.messages).toEqual([]);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("should handle malformed JSON in SSE stream", async () => {
+    const encoder = new TextEncoder();
+    const streamChunks = [
+      encoder.encode('data: {invalid json}\n'),
+      encoder.encode('data: {"type": "text_delta", "text": "Valid"}\n'),
+      encoder.encode("data: [DONE]\n"),
+    ];
+
+    let chunkIndex = 0;
+    const mockReader = {
+      read: vi.fn().mockImplementation(() => {
+        if (chunkIndex < streamChunks.length) {
+          return Promise.resolve({ value: streamChunks[chunkIndex++], done: false });
+        }
+        return Promise.resolve({ value: undefined, done: true });
+      }),
+    };
+
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      body: { getReader: () => mockReader },
+    } as any);
+
+    const { result } = renderHook(() => useChat());
+
+    await act(async () => {
+      await result.current.sendMessage("Hi");
+    });
+
+    expect(result.current.messages[1].content).toBe("Valid");
+  });
+
+  it("should throw error if response body is missing", async () => {
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      body: null,
+    } as any);
+
+    const { result } = renderHook(() => useChat());
+
+    await act(async () => {
+      await result.current.sendMessage("Hi");
+    });
+
+    expect(result.current.error).toBe("No response body");
+  });
+
+  it("should handle multiple tool calls in one stream", async () => {
+    const encoder = new TextEncoder();
+    const streamChunks = [
+      encoder.encode('data: {"type": "tool_call_start", "name": "tool1"}\n'),
+      encoder.encode('data: {"type": "tool_call_end", "name": "tool1", "result": "res1"}\n'),
+      encoder.encode('data: {"type": "tool_call_start", "name": "tool2"}\n'),
+      encoder.encode('data: {"type": "tool_call_end", "name": "tool2", "result": "res2"}\n'),
+      encoder.encode("data: [DONE]\n"),
+    ];
+
+    let chunkIndex = 0;
+    const mockReader = {
+      read: vi.fn().mockImplementation(() => {
+        if (chunkIndex < streamChunks.length) {
+          return Promise.resolve({ value: streamChunks[chunkIndex++], done: false });
+        }
+        return Promise.resolve({ value: undefined, done: true });
+      }),
+    };
+
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      body: { getReader: () => mockReader },
+    } as any);
+
+    const { result } = renderHook(() => useChat());
+
+    await act(async () => {
+      await result.current.sendMessage("Call tools");
+    });
+
+    expect(result.current.messages[1].toolCalls).toHaveLength(2);
+    expect(result.current.messages[1].toolCalls![0].name).toBe("tool1");
+    expect(result.current.messages[1].toolCalls![1].name).toBe("tool2");
   });
 
   it("should persist messages to localStorage with debounce", async () => {
