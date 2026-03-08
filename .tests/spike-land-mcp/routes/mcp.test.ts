@@ -237,11 +237,7 @@ describe("GET /mcp (mcpRoute handler)", () => {
       "/",
       {
         method: "GET",
-<<<<<<< HEAD
         headers: {
-=======
-        headers: { 
->>>>>>> auto-pr-1772961809
           Authorization: "Bearer valid-test-token",
           Accept: "text/event-stream"
         },
