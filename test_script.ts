@@ -22,11 +22,11 @@ async function run() {
   });
   const initRes = await transport.handleRequest(initReq);
   console.log("Init Status:", initRes.status);
-  
+
   // Now try GET for SSE
   const req = new Request("http://localhost/mcp", {
     method: "GET",
-    headers: { 
+    headers: {
       "Accept": "text/event-stream",
       "Mcp-Session-Id": "session-123",
       "Mcp-Protocol-Version": "2024-11-05"
@@ -36,7 +36,7 @@ async function run() {
   const res = await transport.handleRequest(req);
   console.log("Status:", res.status);
   console.log("Headers:", Object.fromEntries(res.headers.entries()));
-  
+
   await mcpServer.close();
 }
 run().catch(console.error);

@@ -16,16 +16,16 @@ export function HeroSection() {
           <div className="mb-6 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary shadow-sm glassmorphism">
             ✨ Quality Gates for AI-Assisted Development
           </div>
-          
+
           <h1 className="mb-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-5xl font-extrabold tracking-tight text-transparent sm:text-7xl">
             The BAZDMEG Method
           </h1>
-          
+
           <p className="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-muted-foreground sm:text-2xl">
             Eight principles for AI-assisted development. Born from pain. Tested in production.
             Stop reviewing slop and start shipping quality.
           </p>
-          
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

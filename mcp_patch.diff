@@ -48,7 +48,7 @@ mcpRoute.get("/", async (c) => {
 
   const userId = c.var.userId;
   const db = c.var.db;
-  
+
   const enabledCategories = await loadEnabledCategories(userId, c.env.KV);
   const mcpServer = await createMcpServer(userId, db, {
     enabledCategories,
@@ -58,14 +58,14 @@ mcpRoute.get("/", async (c) => {
     spikeEdge: c.env.SPIKE_EDGE,
     spaAssets: c.env.SPA_ASSETS,
   });
-  
+
   const sessionId = c.req.header("Mcp-Session-Id");
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: () => sessionId ?? crypto.randomUUID(),
   });
-  
+
   await mcpServer.connect(transport);
-  
+
   return transport.handleRequest(c.req.raw);
 });
 
