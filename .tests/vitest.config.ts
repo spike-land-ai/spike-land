@@ -11,6 +11,10 @@ function tests(...segments: string[]) {
   return path.join(root, ".tests", ...segments);
 }
 
+function pkg(...segments: string[]) {
+  return path.join(root, "packages", ...segments);
+}
+
 const reporter = path.join(root, "vitest-minimal-reporter.ts");
 
 // ── Tier thresholds ────────────────────────────────────────────────
@@ -69,6 +73,8 @@ const packagePathMap: Record<string, string> = {
 };
 
 const baseAliases: Record<string, string> = {
+  react: path.join(root, "node_modules/react"),
+  "react-dom": path.join(root, "node_modules/react-dom"),
   "@spike-land-ai/shared/tool-builder": src("core/shared-utils/core-logic/tool-builder-index.ts"),
   "@spike-land-ai/shared": src("core/shared-utils/core-logic/index.ts"),
   "@spike-land-ai/block-sdk/storage": src("core/block-sdk/core-logic/storage-index.ts"),
@@ -192,7 +198,15 @@ const packages: Record<string, PkgConfig> = {
 
   "image-studio-worker": {
     tier: 2,
+<<<<<<< HEAD
+    env: "jsdom",
     includeTests: [tests("image-studio-worker/**/*.test.ts"), tests("image-studio-worker/**/*.test.tsx")],
+    aliases: {
+      "@/": pkg("image-studio-worker/frontend/src/"),
+    },
+=======
+    includeTests: [tests("image-studio-worker/**/*.test.ts"), tests("image-studio-worker/**/*.test.tsx")],
+>>>>>>> main
     coverageExclude: [
       "**/frontend/**",
       "**/migrations/**",
