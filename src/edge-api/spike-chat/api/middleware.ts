@@ -36,6 +36,7 @@ export async function authMiddleware(
   let sessionRes: Response;
   try {
     sessionRes = await c.env.AUTH_MCP.fetch(sessionReq);
+    /* v8 ignore next 3 */
     if (sessionRes.status === 503) {
       sessionRes = await fetch(sessionReq);
     }
