@@ -1,13 +1,11 @@
-import { NextResponse } from "next/server";
-
 // Mock admin verification
 const requireAdminByUserId = async () => ({ isAdmin: true });
 
 export async function GET() {
   const { isAdmin } = await requireAdminByUserId();
-  if (!isAdmin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!isAdmin) return Response.json({ error: "Forbidden" }, { status: 403 });
 
-  return NextResponse.json({
+  return Response.json({
     totalCalls: 1000,
     errorRate: "0.5%",
     topErrors: [{ skillName: "test_tool", errorCount: 5 }],
