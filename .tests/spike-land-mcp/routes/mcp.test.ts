@@ -226,6 +226,14 @@ describe("GET /mcp (mcpRoute handler)", () => {
   });
 
   it("supports SSE connection with auth", async () => {
+    // Override the transport mock to simulate the SDK's uninitialized state error
+    const prevMock = _transportHandleRequest;
+    _transportHandleRequest = async () =>
+      new Response(JSON.stringify({ error: "uninitialized" }), {
+        status: 400,
+        headers: new Headers({ "Content-Type": "application/json" }),
+      });
+
     const app = await buildTestApp();
     const env = mockEnv();
 
@@ -248,6 +256,9 @@ describe("GET /mcp (mcpRoute handler)", () => {
 
     expect(res.status).toBe(400);
     expect(res.headers.get("content-type")).toContain("application/json");
+
+    // Restore the transport mock for other tests
+    _transportHandleRequest = prevMock;
   });
 
   it("returns 401 from route handler when no Authorization header (covers line 206)", async () => {
