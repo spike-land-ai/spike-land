@@ -124,6 +124,18 @@ process_package() {
   # Stage files
   git add "${staged_files[@]}"
 
+  # ── Typecheck gate (with auto-fix) ────────────────────────────────
+  echo -e "  ${BLUE}Running typecheck...${NC}"
+  if bash scripts/typecheck-autofix.sh 2>&1 | tail -5; then
+    echo -e "  ${GREEN}Typecheck passed${NC}"
+  else
+    echo -e "  ${RED}Typecheck FAILED — unstaging${NC}"
+    git reset HEAD -- "${staged_files[@]}" >/dev/null 2>&1
+    update_queue_status "$pkg" "failed"
+    FAILED+=("$pkg")
+    return 1
+  fi
+
   # ── Local test gate ───────────────────────────────────────────────
   echo -e "  ${BLUE}Running local tests...${NC}"
   if yarn vitest run --config .tests/vitest.config.ts --changed main 2>&1 | tail -5; then
