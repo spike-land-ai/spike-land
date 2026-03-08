@@ -173,7 +173,7 @@ export function AppFooter() {
         <div className="mt-20 pt-8 border-t border-border dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col items-center md:items-start gap-1">
             <p className="text-xs font-bold text-muted-foreground/60 tracking-tight">
-              &copy; {currentYear} spike.land. Built with passion on Cloudflare Workers.
+              &copy; {currentYear} SPIKE LAND LTD. Built with passion on Cloudflare Workers.
             </p>
             <p className="text-xs text-muted-foreground/40">
               Handcrafted in Europe. Global reach via Edge Computing.

@@ -44,6 +44,7 @@ const packagePathMap: Record<string, string> = {
   "google-analytics-mcp": "mcp-tools/google-analytics",
   "google-ads-mcp": "mcp-tools/google-ads",
   "hackernews-mcp": "mcp-tools/hackernews",
+  "iwd-spotlight-mcp": "mcp-tools/iwd-spotlight",
   "image-studio-worker": "edge-api/image-studio-worker",
   "mcp-auth": "edge-api/auth",
   "mcp-image-studio": "mcp-tools/image-studio",
@@ -175,6 +176,7 @@ const packages: Record<string, PkgConfig> = {
       tests("code/**/*.test.ts"),
       tests("code/**/*.spec.ts"),
       tests("code/**/*.spec.tsx"),
+      src("frontend/monaco-editor/file-types/__tests__/**/*.test.ts"),
     ],
     aliases: { "@": src("frontend/monaco-editor/@") },
     includeSrc: [src("frontend/monaco-editor/**/*.ts"), src("frontend/monaco-editor/**/*.tsx")],
@@ -186,9 +188,11 @@ const packages: Record<string, PkgConfig> = {
   "google-analytics-mcp": { tier: 2, pool: "forks" },
   "google-ads-mcp": { tier: 2, pool: "forks" },
   "hackernews-mcp": { tier: 2, pool: "forks" },
+  "iwd-spotlight-mcp": { tier: 2, pool: "forks" },
 
   "image-studio-worker": {
     tier: 2,
+    includeTests: [tests("image-studio-worker/**/*.test.ts"), tests("image-studio-worker/**/*.test.tsx")],
     coverageExclude: [
       "**/frontend/**",
       "**/migrations/**",
@@ -282,11 +286,16 @@ const packages: Record<string, PkgConfig> = {
   "spike-chat": {
     tier: 1,
     aliases: { "cloudflare:workers": src("edge-api/main/core-logic/cloudflare-workers.ts") },
+    includeTests: [src("edge-api/spike-chat/__tests__/**/*.test.ts")],
     coverageExclude: [],
   },
 
   "spike-edge": {
     tier: 2,
+    includeTests: [
+      tests("spike-edge/**/*.test.ts"),
+      src("edge-api/main/api/__tests__/**/*.test.ts"),
+    ],
     aliases: { "cloudflare:workers": src("edge-api/main/core-logic/cloudflare-workers.ts") },
     coverageExclude: [],
   },
@@ -394,6 +403,7 @@ const packages: Record<string, PkgConfig> = {
   "whatsapp-mcp": {
     tier: 2,
     pool: "forks",
+    includeTests: [src("utilities/whatsapp/__tests__/**/*.test.ts")],
   },
 };
 
@@ -416,7 +426,6 @@ function buildProject(name: string, cfg: PkgConfig) {
     name,
     include: cfg.includeTests ?? defaultIncludeTests,
     reporters: cfg.reporters ?? [reporter],
-    passWithNoTests: true,
     coverage: {
       provider: cfg.provider ?? "v8",
       ...(cfg.coverageReporter ? { reporter: cfg.coverageReporter } : {}),
@@ -446,7 +455,6 @@ const projects = Object.entries(packages).map(([name, cfg]) => buildProject(name
 export default defineConfig({
   resolve: { alias: baseAliases },
   test: {
-    passWithNoTests: true,
     reporters: [reporter],
     coverage: {
       exclude: [
