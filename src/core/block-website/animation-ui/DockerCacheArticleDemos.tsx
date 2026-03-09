@@ -222,9 +222,7 @@ function DemoShell({
 
 function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <div
-      className={`rounded-[1.5rem] border border-border bg-card p-3 sm:p-4 md:p-5 ${className}`}
-    >
+    <div className={`rounded-[1.5rem] border border-border bg-card p-3 sm:p-4 md:p-5 ${className}`}>
       {children}
     </div>
   );
@@ -422,7 +420,9 @@ export function SharedOptimizationProblemDemo() {
 
         <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-3">
           <Panel
-            className={showChange ? "border-warning-foreground/25 bg-warning text-warning-foreground" : ""}
+            className={
+              showChange ? "border-warning-foreground/25 bg-warning text-warning-foreground" : ""
+            }
           >
             The edit lands in the middle of both stacks.
           </Panel>
@@ -982,8 +982,8 @@ export function FocusedContextDemo() {
                   <motion.div
                     key={index}
                     animate={{
-                    opacity: visible ? 0.9 : 0.08,
-                  }}
+                      opacity: visible ? 0.9 : 0.08,
+                    }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                     className={`h-10 rounded-xl ${visible ? fillClass : "bg-transparent"}`}
                   />
