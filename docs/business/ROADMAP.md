@@ -1,6 +1,6 @@
 # Spike Land - Development Roadmap
 
-> **Last Updated**: 2026-03-04 **Current Phase**: Platform Launch & Growth
+> **Last Updated**: 2026-03-09 **Current Phase**: Platform Launch & Growth
 > **Business Structure**: UK Limited Company (SPIKE LAND LTD - Company
 > #16906682)
 
@@ -18,23 +18,52 @@ The web platform provides a visual dashboard. Every capability is exposed as an
 MCP tool. Every workflow can be automated by AI agents through the Model Context
 Protocol.
 
-**The moat is three things no competitor has together:**
+Apps are organized into categories for discovery, but they are not limited to a
+single frontend. The same app can increasingly be expressed through multiple
+surfaces: browser UI, CLI, chat, embedded cross-origin views, and local/offline
+bundles. One path under active development is a typed-to-MDX rendering model
+where strong TypeScript tool contracts can be turned programmatically into
+session-aware frontend surfaces.
+
+The platform is also being built as a feedback system rather than a one-shot
+generator:
+
+`intent -> select tools/skills -> generate -> transpile -> render -> review -> observe -> improve`
+
+That loop matters because the more the platform is used, the more traces,
+feedback, and failure data it can use to improve the next run.
+
+The core equation is simple:
+
+`Spike Land = tools + agents`
+
+The moat is not the tools alone, and it is not the agents alone. The strength
+comes from running high-quality tools and agents in the same observable loop,
+then using that loop to improve spike.land itself.
+
+**The moat is four things no competitor has together:**
 
 1. **MCP-native architecture with multi-channel access** - 533+ tools callable
    by any AI agent via standard protocol, accessible through spike-cli (CLI),
    web chat, WhatsApp, and Telegram. No competitor offers this breadth of access
    channels.
-2. **Open app-store distribution with vibe coding** - Build full-stack apps
-   with AI assistance, publish them into the catalog, and distribute them as
-   callable MCP software.
-3. **UK Ltd with Stripe-first billing** - Global payments, VAT handling,
+2. **Open app-store distribution with multi-surface apps** - Build full-stack
+   apps with AI assistance, publish them into the catalog, and distribute them
+   as callable MCP software with more than one frontend over time.
+3. **Feedback-driven self-improvement loop** - Generation, transpilation,
+   rendering, review, observability, and prompt/skill improvement are designed
+   as one system rather than separate tools.
+4. **Quality tools + intelligent agents** - QA, review, browser automation,
+   deployment, and bug-detection tools are used by agents inside the platform
+   itself, including ELO-guided prioritization and remediation loops.
+5. **UK Ltd with Stripe-first billing** - Global payments, VAT handling,
    SEIS/EIS eligible
 
 **Positioning**: Open MCP app store with managed runtime **Core Product**:
 spike-cli (MCP multiplexer CLI), Spike web chat, WhatsApp & Telegram bots
-**Supporting Tools**: App Store, vibe coding, real-time code editor, offline
-bundling, Cloudflare deployment guides **Target Market**: Developers, AI agent
-builders, solo founders, small teams
+**Supporting Tools**: App Store, vibe coding, real-time code editor,
+feedback-driven QA/review, offline bundling, Cloudflare deployment guides
+**Target Market**: Developers, AI agent builders, solo founders, small teams
 
 ---
 
@@ -56,6 +85,11 @@ builders, solo founders, small teams
 | **Stripe**             | 75%        | Subscriptions + one-time payments                                                                      |
 | **Dev Workflow Tools** | Production | 5 MCP tools for local development                                                                      |
 | **Security**           | Hardened   | Durable Object rate limiting, command injection prevention                                               |
+| **Feedback Loop**      | Beta       | Generate -> transpile -> render -> review loop with structured failure handling and learning-note direction |
+| **Experimentation & Bug Detection** | Beta | Deterministic variant assignment, impression/error tracking, Bayesian winner selection, and anomaly monitoring used as reliability tooling |
+| **Observability**      | Production | Tool-call logging, feedback tools, and bug reporting surfaces across MCP services                       |
+| **Agent Bridges**      | Beta       | OpenClaw MCP bridge live; WhatsApp MCP utility exists; unified routing expansion planned                |
+| **Browser Handoff**    | In Progress| Browser automation is live; shared remote browser/session handoff surfaces are being integrated         |
 
 ### Tech Stack
 
@@ -75,6 +109,23 @@ builders, solo founders, small teams
 - 533+ MCP tools (86 native + multiplexer ecosystem)
 - D1 database with 17 tables in spike-land-mcp (Drizzle-managed)
 - block-sdk for composable storage blocks
+
+### Platform Characteristics
+
+- **Apps are callable products**: not just pages, but typed tool surfaces that
+  can be expressed through multiple frontends.
+- **Command plane over UI-only flows**: `/create`, `/test`, `/deploy`, and
+  `/vibe-code` are the intended control-plane verbs across cloud and local
+  execution paths.
+- **Feedback is first-class**: tool calls, failures, review output, and user
+  reports are part of the product loop rather than post-hoc instrumentation.
+- **Experimentation is also a quality system**: A/B testing, variant error
+  tracking, and anomaly detection are treated as reliability inputs, not just
+  growth tooling.
+- **Observability compounds quality**: as usage grows, the platform should gain
+  better traces, better skill routing, and better next-run performance.
+- **Tools and agents reinforce each other**: the platform's QA, review, deploy,
+  and bug-detection tools are used by agents to improve the platform itself.
 
 ---
 
@@ -207,25 +258,32 @@ spike.land apps and skills
 | Open submissions with review gates | Critical | Planned |
 | Shared SDK v1 documentation | Critical | Planned |
 | Cross-origin MCP integration guides | High | In progress |
+| Multi-surface app metadata and frontend contracts | High | Planned |
 | Offline browser bundle path | High | In progress |
+| Typed-to-MDX universal runner | High | In progress |
+| Session-aware generated app surfaces | Medium | Planned |
 | Store security and sandbox docs | High | In progress |
 | Performance budgets per store surface | Medium | Planned |
 
-#### Phase 13: WhatsApp & Telegram Integration (Q1-Q2 2026)
+#### Phase 13: Multi-Channel Assistant Surfaces (Q1-Q2 2026)
 
-**Goal**: Multi-channel access to Spike AI assistant
+**Goal**: Multi-channel access to Spike AI assistant with unified routing
 
-| Task                                                        | Priority | Status  |
-| ----------------------------------------------------------- | -------- | ------- |
-| WhatsApp Business API integration                           | Critical | Planned |
-| Telegram Bot API integration                                | Critical | Planned |
-| Unified message routing (web chat, WhatsApp, Telegram, CLI) | Critical | Planned |
-| Channel-specific formatting (markdown, rich cards)          | High     | Planned |
-| Media support (images, files) across channels               | High     | Planned |
-| Session persistence across channels                         | Medium   | Planned |
+| Task                                                        | Priority | Status      |
+| ----------------------------------------------------------- | -------- | ----------- |
+| WhatsApp Business API integration                           | Critical | Planned     |
+| Telegram Bot API integration                                | Critical | Planned     |
+| Unified message routing (web chat, WhatsApp, Telegram, CLI) | Critical | Planned     |
+| Web chat deepening toward Slack-like workspace utility      | High     | Planned     |
+| OpenClaw/local-agent bridge handoff                         | High     | In progress |
+| Channel-specific formatting (markdown, rich cards)          | High     | Planned     |
+| Media support (images, files) across channels               | High     | Planned     |
+| Session persistence across channels                         | Medium   | Planned     |
+| Additional channel adapters (email/voice-style surfaces)    | Low      | Exploratory |
 
 **Exit criteria**: Users can interact with Spike via WhatsApp and Telegram with
-the same capabilities as web chat and spike-cli.
+the same capabilities as web chat and spike-cli, with unified session routing
+across surfaces.
 
 #### Phase 14: Expanded MCP Registry And Marketplace (Q2 2026)
 
@@ -245,21 +303,25 @@ the same capabilities as web chat and spike-cli.
 **Exit criteria**: API PRO add-on purchasable, rate-limited, metered,
 documented. Third-party developers can submit tools.
 
-#### Phase 15: Managed Deployments (Q3 2026)
+#### Phase 15: Managed Deployments & Command Plane (Q3 2026)
 
-**Goal**: One-command deployment for vibe-coded apps
+**Goal**: One-command execution and deployment for vibe-coded apps
 
-| Task                            | Priority | Status  |
-| ------------------------------- | -------- | ------- |
-| `spike deploy` CLI command      | Critical | Planned |
-| Managed hosting infrastructure  | Critical | Planned |
-| Custom domain support           | High     | Planned |
-| Environment variable management | High     | Planned |
-| Deployment logs and monitoring  | High     | Planned |
-| Rollback support                | Medium   | Planned |
+| Task                                             | Priority | Status      |
+| ------------------------------------------------ | -------- | ----------- |
+| `spike deploy` CLI command                       | Critical | Planned     |
+| Slash-command execution (`/create`, `/test`, `/deploy`, `/vibe-code`) | Critical | Planned     |
+| Cloud vs local execution routing                 | High     | In progress |
+| Managed hosting infrastructure                   | Critical | Planned     |
+| Review/test/deploy pipeline orchestration        | High     | Planned     |
+| Custom domain support                            | High     | Planned     |
+| Environment variable management                  | High     | Planned     |
+| Deployment logs and monitoring                   | High     | Planned     |
+| Rollback support                                 | Medium   | Planned     |
 
 **Exit criteria**: Users can deploy full-stack apps from spike-cli with
-`spike deploy`.
+`spike deploy`, and the golden-path command loop can take a narrow app request
+from intent to running deployed surface in under 60 seconds.
 
 #### Phase 16: MCP Multiplexer Expansion (Q4 2026)
 
@@ -276,20 +338,31 @@ documented. Third-party developers can submit tools.
 
 **Exit criteria**: 1,000+ tools in the registry, 100+ community-contributed tools, automated quality gates for submissions.
 
-#### Phase 17: Enterprise & Self-Extending Agents (Q1 2027)
+#### Phase 17: Enterprise, Browser Handoff & Self-Improving Agents (Q1 2027)
 
-**Goal**: Enable AI agents to discover, create, and publish tools autonomously
+**Goal**: Enable AI agents to discover, create, improve, and publish tools autonomously
 
 | Task | Priority | Status |
 |------|----------|--------|
 | Agent-driven tool creation workflow | Critical | Planned |
+| Browser-session handoff for user-auth steps | Critical | Planned |
+| Shared remote browser/noVNC session surface | High | Planned |
+| Agent observability and replay dashboards | High | Planned |
+| Prompt/skill improvement loop from traces | High | Planned |
+| ELO-guided agent selection for issue remediation | High | Planned |
+| Bug severity / trust scoring integrated into auto-fix routing | High | Planned |
+| Experiment-detected regressions routed into agent remediation | High | Planned |
 | Enterprise SSO and RBAC | Critical | Planned |
 | Private tool registries for organizations | High | Planned |
 | Cross-organization tool sharing | High | Planned |
 | Agent session state persistence | Medium | Planned |
 | Compliance and audit logging | Medium | Planned |
 
-**Exit criteria**: Enterprise customers with private registries, AI agents autonomously publishing tools, SOC 2 Type II compliance.
+**Exit criteria**: Enterprise customers with private registries, AI agents
+autonomously publishing tools, browser-session handoff for human-auth
+boundaries, measured improvement loops from real agent traces, and ELO-informed
+automatic routing of remediation work to the right agents, including
+experiment-detected regressions and variant failures.
 
 ---
 
@@ -312,6 +385,9 @@ documented. Third-party developers can submit tools.
 - **Overage conversion rate** (% who hit limits and buy more vs. churn)
 - **MCP API adoption rate** (% of BUSINESS users enabling API access)
 - **Multi-channel usage** (% of users engaging via WhatsApp/Telegram vs. web)
+- **Time-to-running-app** (golden-path intent -> deployed surface time)
+- **Feedback-loop lift** (success rate improvement after review/repair cycle)
+- **Tool-call observability coverage** (% of important tool paths traced/reviewable)
 - **Tool marketplace submissions** (third-party developer engagement)
 - **Net Revenue Retention** (target: >110%)
 
@@ -325,10 +401,11 @@ documented. Third-party developers can submit tools.
 | Railway        | $5+/mo   | No      | Yes                 | No                           | 533+ tools + vibe coding  |
 | Render         | $7+/mo   | No      | Yes                 | No                           | AI-first deployment       |
 | Replit         | $25+/mo  | No      | No                  | No                           | MCP registry + CLI        |
-| **Spike Land** | $0-99/mo | **Yes** | **Yes (spike-cli)** | **Yes (WhatsApp, Telegram)** | Full platform             |
+| **Spike Land** | $0-99/mo | **Yes** | **Yes (spike-cli)** | **Yes (WhatsApp, Telegram)** | Full platform + self-improving loop |
 
-**No deployment platform offers a programmable AI agent with 533+ MCP tools
-accessible via CLI, web, WhatsApp, and Telegram.** This is the differentiator.
+**No deployment platform offers a programmable AI agent with 533+ MCP tools,
+multi-surface apps, and a feedback-driven loop accessible via CLI, web,
+WhatsApp, and Telegram.** This is the differentiator.
 
 ---
 
@@ -387,10 +464,13 @@ accessible via CLI, web, WhatsApp, and Telegram.** This is the differentiator.
 | ------------------------- | -------- | -------- |
 | `deploy_app`              | Critical | Phase 15 |
 | `manage_deployment`       | Critical | Phase 15 |
-| `whatsapp_send`           | High     | Phase 12 |
-| `telegram_send`           | High     | Phase 12 |
-| `marketplace_submit_tool` | High     | Phase 13 |
-| `marketplace_review_tool` | Medium   | Phase 13 |
+| `whatsapp_send`           | High     | Phase 13 |
+| `telegram_send`           | High     | Phase 13 |
+| `surface_render_mdx`      | High     | Phase 12 |
+| `browser_handoff_session` | High     | Phase 17 |
+| `observe_agent_run`       | High     | Phase 17 |
+| `marketplace_submit_tool` | High     | Phase 14 |
+| `marketplace_review_tool` | Medium   | Phase 14 |
 
 ---
 

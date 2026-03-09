@@ -39,10 +39,13 @@ This is already a live platform, not a concept.
 | **Developer Surface** | Web product, `spike-cli`, MCP registry, cross-origin runtime surface |
 | **Tool Layer** | `80+` native tools with broader ecosystem access through the multiplexer model |
 | **App Model** | Full-stack React apps with live editing, preview, publishing, and shared tool contracts |
+| **Surface Model** | Apps are organized in categories and can expose multiple frontends rather than one fixed UI |
 | **Execution Modes** | Managed edge runtime, cross-origin embedding, and offline-capable browser path |
 | **Commercial State** | Public beta, pre-revenue, with commercialization and hardening still underway |
 
 The question is no longer whether this can be built. The platform exists. The question is whether this is the right layer to back.
+
+An app on spike.land is not just a page. It is closer to a callable product surface that can be rendered through different interfaces over time: browser UI, CLI, chat, and other frontends against the same typed tool layer.
 
 ---
 
@@ -73,6 +76,12 @@ spike.land is an attempt to collapse that stack.
 That matters externally because it is a strategic platform bet. It matters internally because the same architecture can inform how serious engineering teams build and test software.
 
 The testing thesis is a good example. Instead of forcing business logic through large browser suites, the same behavior can be expressed as typed tool handlers and verified at function speed, with the browser reduced to a thin smoke layer. A workflow that might otherwise need a slow, brittle end-to-end path can often be checked as a handful of tool calls in seconds and one or two browser checks around the shell.
+
+More importantly, the platform is wired for feedback-driven development end to end: generate, transpile, render, review, capture failures, and feed those learnings back into the next run. That turns the product from a one-shot generator into a self-improving loop.
+
+The shortest version is this: `Spike Land = tools + agents`. The advantage is not a generic chat surface. It is that high-quality QA, review, experimentation, and bug-detection tools are available to agents inside the same measured system, and the platform can use ELO-style scoring and trust signals to route remediation work to the right agent rather than treating all fixes as interchangeable.
+
+The clearest proof of leverage is the platform itself. It has been built bottom-up by one developer using a relatively small AI-tool budget, which is exactly the point of the architecture: if the loop is good enough, a small amount of intelligence plus strong feedback and strong tooling compounds far beyond the raw model spend.
 
 That is the relevant DORA point. I would not present unmeasured benchmark numbers, but the architecture is aligned with the real drivers behind DORA: smaller deploy units, faster verification, and thinner recovery paths. That is more important than claiming a premature metric win.
 
@@ -154,6 +163,6 @@ And that is why I think it fits Investec unusually well.
 
 ---
 
-*Document Version: 5.0*  
+*Document Version: 5.1*  
 *Prepared: March 2026*  
 *Founder: Zoltan Erdos, SPIKE LAND LTD*
