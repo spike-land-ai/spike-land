@@ -8,8 +8,10 @@
 import { z } from "zod";
 import type { ToolRegistryAdapter } from "../../../lazy-imports/types";
 import { freeTool } from "../../../lazy-imports/procedures-index.ts";
+import { eq, like, or, and, asc, desc } from "drizzle-orm";
 import { apiRequest, safeToolCall, textResult } from "../../lib/tool-helpers";
 import type { DrizzleDB } from "../../../db/db/db-index.ts";
+import { mcpApps } from "../../../db/db/schema.ts";
 
 export function registerStoreSearchTools(
   registry: ToolRegistryAdapter,
@@ -28,16 +30,34 @@ export function registerStoreSearchTools(
       .meta({ category: "store-search", tier: "free" })
       .handler(async () => {
         return safeToolCall("store_list_apps_with_tools", async () => {
-          const apps = await apiRequest<
-            Array<{
-              slug: string;
-              name: string;
-              icon: string;
-              category: string;
-              tagline: string;
-              toolNames: string[];
-            }>
-          >("/api/store/apps/with-tools");
+          const rows = await db
+            .select({
+              slug: mcpApps.slug,
+              name: mcpApps.name,
+              icon: mcpApps.emoji,
+              tagline: mcpApps.description,
+              toolsStr: mcpApps.tools,
+            })
+            .from(mcpApps)
+            .where(eq(mcpApps.status, "live"));
+
+          const apps = rows.map((r) => {
+            let toolNames: string[] = [];
+            try {
+              toolNames = JSON.parse(r.toolsStr) as string[];
+            } catch {
+              // Ignore
+            }
+
+            return {
+              slug: r.slug,
+              name: r.name,
+              icon: r.icon,
+              category: "developer",
+              tagline: r.tagline,
+              toolNames,
+            };
+          });
 
           return textResult(JSON.stringify(apps));
         });
@@ -68,19 +88,49 @@ export function registerStoreSearchTools(
       .meta({ category: "store-search", tier: "free" })
       .handler(async ({ input }) => {
         return safeToolCall("store_search", async () => {
-          const params = new URLSearchParams({ query: input.query });
-          if (input.category) params.set("category", input.category);
-          if (input.limit !== undefined) {
-            params.set("limit", String(input.limit));
+          if (input.category && input.category.toLowerCase() !== "developer") {
+             return textResult(`No apps found matching "${input.query}" in category "${input.category}".`);
           }
 
-          const results = await apiRequest<
-            Array<{
-              name: string;
-              tagline: string;
-              slug: string;
-            }>
-          >(`/api/store/search?${params.toString()}`);
+          const q = `%${input.query}%`;
+          const rows = await db
+            .select({
+              name: mcpApps.name,
+              tagline: mcpApps.description,
+              slug: mcpApps.slug,
+              sortOrder: mcpApps.sortOrder,
+            })
+            .from(mcpApps)
+            .where(
+              and(
+                eq(mcpApps.status, "live"),
+                or(
+                  like(mcpApps.name, q),
+                  like(mcpApps.description, q),
+                  like(mcpApps.slug, q),
+                  like(mcpApps.markdown, q),
+                ),
+              ),
+            );
+
+          // Simple score based on where it matches and sort_order
+          const scored = rows.map((r) => {
+            let score = 0;
+            const nameLC = r.name.toLowerCase();
+            const descLC = r.tagline.toLowerCase();
+            const queryLC = input.query.toLowerCase();
+
+            if (nameLC === queryLC) score += 100;
+            else if (nameLC.includes(queryLC)) score += 50;
+
+            if (descLC.includes(queryLC)) score += 10;
+
+            score -= r.sortOrder; // lower sort_order is better
+            return { ...r, score };
+          });
+
+          scored.sort((a, b) => b.score - a.score);
+          const results = scored.slice(0, input.limit);
 
           if (results.length === 0) {
             return textResult(`No apps found matching "${input.query}".`);
@@ -105,13 +155,19 @@ export function registerStoreSearchTools(
       .meta({ category: "store-search", tier: "free" })
       .handler(async ({ input }) => {
         return safeToolCall("store_browse_category", async () => {
-          const apps = await apiRequest<
-            Array<{
-              name: string;
-              tagline: string;
-              slug: string;
-            }>
-          >(`/api/store/category/${input.category}`);
+          if (input.category.toLowerCase() !== "developer") {
+            return textResult(`No apps found in category "${input.category}".`);
+          }
+
+          const apps = await db
+            .select({
+              name: mcpApps.name,
+              tagline: mcpApps.description,
+              slug: mcpApps.slug,
+            })
+            .from(mcpApps)
+            .where(eq(mcpApps.status, "live"))
+            .orderBy(asc(mcpApps.sortOrder));
 
           if (apps.length === 0) {
             return textResult(`No apps found in category "${input.category}".`);
@@ -129,14 +185,16 @@ export function registerStoreSearchTools(
       .meta({ category: "store-search", tier: "free" })
       .handler(async () => {
         return safeToolCall("store_featured_apps", async () => {
-          const apps =
-            await apiRequest<
-              Array<{
-                name: string;
-                tagline: string;
-                slug: string;
-              }>
-            >("/api/store/featured");
+          const apps = await db
+            .select({
+              name: mcpApps.name,
+              tagline: mcpApps.description,
+              slug: mcpApps.slug,
+            })
+            .from(mcpApps)
+            .where(eq(mcpApps.status, "live"))
+            .orderBy(asc(mcpApps.sortOrder))
+            .limit(10);
 
           if (apps.length === 0) {
             return textResult("No featured apps at the moment.");
@@ -154,14 +212,16 @@ export function registerStoreSearchTools(
       .meta({ category: "store-search", tier: "free" })
       .handler(async () => {
         return safeToolCall("store_new_apps", async () => {
-          const apps =
-            await apiRequest<
-              Array<{
-                name: string;
-                tagline: string;
-                slug: string;
-              }>
-            >("/api/store/new");
+          const apps = await db
+            .select({
+              name: mcpApps.name,
+              tagline: mcpApps.description,
+              slug: mcpApps.slug,
+            })
+            .from(mcpApps)
+            .where(eq(mcpApps.status, "live"))
+            .orderBy(desc(mcpApps.createdAt))
+            .limit(10);
 
           if (apps.length === 0) {
             return textResult("No new apps at the moment.");
@@ -181,38 +241,37 @@ export function registerStoreSearchTools(
       .meta({ category: "store-search", tier: "free" })
       .handler(async ({ input }) => {
         return safeToolCall("store_app_detail", async () => {
-          const app = await apiRequest<{
-            name: string;
-            tagline: string;
-            description: string;
-            category: string;
-            tags: string[];
-            pricing: string;
-            toolCount: number;
-            isFeatured: boolean;
-            isNew: boolean;
-          } | null>(`/api/store/apps/${input.slug}`);
+          const rows = await db
+            .select()
+            .from(mcpApps)
+            .where(eq(mcpApps.slug, input.slug))
+            .limit(1);
 
-          if (!app) {
+          const appRow = rows[0];
+
+          if (!appRow || appRow.status !== "live") {
             return textResult(`App "${input.slug}" not found.`);
           }
 
-          const tags = app.tags.length > 0 ? app.tags.map((t) => `\`${t}\``).join(", ") : "None";
+          const isFeatured = appRow.sortOrder < 100;
+          const isNew = Date.now() - appRow.createdAt * 1000 < 1000 * 60 * 60 * 24 * 7; // 7 days
+
+          const tags = "None";
 
           const card = [
-            `## ${app.name}`,
-            `*${app.tagline}*`,
+            `## ${appRow.name}`,
+            `*${appRow.description}*`,
             "",
-            app.description,
+            appRow.markdown || appRow.description,
             "",
             `| Field | Value |`,
             `| --- | --- |`,
-            `| Category | ${app.category} |`,
+            `| Category | developer |`,
             `| Tags | ${tags} |`,
-            `| Pricing | ${app.pricing} |`,
-            `| Tools | ${app.toolCount} |`,
-            `| Featured | ${app.isFeatured ? "Yes" : "No"} |`,
-            `| New | ${app.isNew ? "Yes" : "No"} |`,
+            `| Pricing | Free |`,
+            `| Tools | ${appRow.toolCount} |`,
+            `| Featured | ${isFeatured ? "Yes" : "No"} |`,
+            `| New | ${isNew ? "Yes" : "No"} |`,
           ].join("\n");
 
           return textResult(card);

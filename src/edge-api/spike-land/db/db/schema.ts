@@ -791,3 +791,27 @@ export const userApiKeyVaultRelations = relations(userApiKeyVault, ({ one }) => 
 export const accessGrantsRelations = relations(accessGrants, ({ one }) => ({
   user: one(users, { fields: [accessGrants.userId], references: [users.id] }),
 }));
+
+// ─── MCP Apps ─────────────────────────────────────────────────────────────────
+
+export const mcpApps = sqliteTable(
+  "mcp_apps",
+  {
+    slug: text("slug").primaryKey(),
+    name: text("name").notNull(),
+    description: text("description").notNull(),
+    emoji: text("emoji").notNull().default(""),
+    status: text("status").notNull().default("draft"),
+    tools: text("tools").notNull().default("[]"),
+    graph: text("graph").notNull().default("{}"),
+    markdown: text("markdown").notNull().default(""),
+    toolCount: integer("tool_count").notNull().default(0),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: integer("created_at", { mode: "number" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "number" }).notNull(),
+  },
+  (t) => ({
+    statusIdx: index("idx_mcp_apps_status").on(t.status),
+    sortIdx: index("idx_mcp_apps_sort").on(t.sortOrder),
+  })
+);
