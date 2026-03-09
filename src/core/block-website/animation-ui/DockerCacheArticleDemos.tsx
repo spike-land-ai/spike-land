@@ -96,18 +96,18 @@ const DECOMPOSED_PAIRS = [
 function toneClasses(tone: Tone): string {
   switch (tone) {
     case "cyan":
-      return "border-info-foreground/30 bg-info/35 text-info-foreground";
+      return "border-info-foreground/35 bg-info text-info-foreground";
     case "amber":
-      return "border-warning-foreground/30 bg-warning/35 text-warning-foreground";
+      return "border-warning-foreground/35 bg-warning text-warning-foreground";
     case "emerald":
-      return "border-success-foreground/30 bg-success/35 text-success-foreground";
+      return "border-success-foreground/35 bg-success text-success-foreground";
     case "rose":
-      return "border-destructive-foreground/30 bg-destructive/35 text-destructive-foreground";
+      return "border-destructive-foreground/35 bg-destructive text-destructive-foreground";
     case "violet":
-      return "border-primary/30 bg-primary/20 text-primary-foreground";
+      return "border-accent-foreground/35 bg-accent text-accent-foreground";
     case "slate":
     default:
-      return "border-border bg-background/45 text-foreground";
+      return "border-border bg-muted text-foreground";
   }
 }
 
@@ -186,7 +186,7 @@ function DemoShell({
   children: ReactNode;
 }) {
   return (
-    <div className="dark relative overflow-hidden rounded-3xl border border-border bg-card p-4 text-foreground sm:p-5 md:p-8">
+    <div className="dark relative overflow-hidden rounded-3xl border border-border bg-background p-4 text-foreground sm:p-5 md:p-8">
       <div className="absolute inset-0 opacity-100" style={demoGlowStyle} />
       <div className="absolute inset-0 opacity-[0.16]" style={demoGridStyle} />
       <div className="relative space-y-4 sm:space-y-5">
@@ -201,13 +201,13 @@ function DemoShell({
           </div>
 
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 lg:self-start">
-            <div className="flex min-h-10 min-w-0 items-center justify-center rounded-full border border-info-foreground/25 bg-info/35 px-3 py-1.5 text-center text-[10px] font-black uppercase tracking-[0.14em] text-info-foreground sm:min-w-[13rem] sm:tracking-[0.18em]">
+            <div className="flex min-h-10 min-w-0 items-center justify-center rounded-full border border-info-foreground/30 bg-info px-3 py-1.5 text-center text-[10px] font-black uppercase tracking-[0.14em] text-info-foreground sm:min-w-[13rem] sm:tracking-[0.18em]">
               {status}
             </div>
             <button
               type="button"
               onClick={hasStarted ? onRestart : onStart}
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-border bg-background/45 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-foreground transition-colors hover:border-primary/50 hover:bg-primary/15 hover:text-primary-foreground sm:min-w-[6.75rem]"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-foreground transition-colors hover:border-primary/50 hover:bg-primary/15 hover:text-primary-foreground sm:min-w-[6.75rem]"
             >
               {hasStarted ? <RefreshCcw className="size-3.5" /> : <Play className="size-3.5" />}
               {hasStarted ? "Restart" : "Start"}
@@ -223,7 +223,7 @@ function DemoShell({
 function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <div
-      className={`rounded-[1.5rem] border border-border bg-background/45 p-3 sm:p-4 md:p-5 ${className}`}
+      className={`rounded-[1.5rem] border border-border bg-card p-3 sm:p-4 md:p-5 ${className}`}
     >
       {children}
     </div>
@@ -254,7 +254,7 @@ function LayerBar({
   return (
     <motion.div
       animate={{
-        opacity: dim ? 0.28 : 1,
+        opacity: dim ? 0.46 : 1,
         boxShadow: active ? "0 0 18px rgba(34,211,238,0.2)" : "0 0 0 rgba(0,0,0,0)",
       }}
       transition={{ duration: 0.25, ease: "easeOut" }}
@@ -279,18 +279,18 @@ function MetricRow({
   const width = `${Math.max(10, Math.min(100, value))}%`;
   const fillClass =
     tone === "cyan"
-      ? "bg-cyan-400"
+      ? "bg-info-foreground"
       : tone === "emerald"
-        ? "bg-emerald-400"
+        ? "bg-success-foreground"
         : tone === "rose"
-          ? "bg-rose-400"
+          ? "bg-destructive-foreground"
           : tone === "amber"
-            ? "bg-amber-400"
-            : "bg-violet-400";
+            ? "bg-warning-foreground"
+            : "bg-accent-foreground";
 
   return (
     <div className="space-y-1">
-      <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300/70">
+      <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground/85">
         <span>{label}</span>
         <span>{width}</span>
       </div>
@@ -322,7 +322,7 @@ function PipelineBox({
   return (
     <motion.div
       animate={{
-        opacity: dim ? 0.35 : 1,
+        opacity: dim ? 0.52 : 1,
         boxShadow: active ? "0 0 18px rgba(255,255,255,0.08)" : "0 0 0 rgba(0,0,0,0)",
       }}
       transition={{ duration: 0.25, ease: "easeOut" }}
@@ -358,7 +358,9 @@ export function SharedOptimizationProblemDemo() {
                 <Package2 className="size-3" />
                 Docker
               </Label>
-              <span className="text-xs font-medium text-slate-400">deterministic layers</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                deterministic layers
+              </span>
             </div>
             {["base image", "dependencies", "app source", "build output"].map((label, index) => (
               <LayerBar
@@ -387,7 +389,7 @@ export function SharedOptimizationProblemDemo() {
                 : "0 0 0 rgba(0,0,0,0)",
             }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="relative mx-auto flex size-16 items-center justify-center rounded-full border border-violet-400/30 bg-violet-500/10 text-violet-100"
+            className="relative mx-auto flex size-16 items-center justify-center rounded-full border border-accent-foreground/30 bg-accent text-accent-foreground"
           >
             <Blocks className="size-7" />
           </motion.div>
@@ -398,7 +400,7 @@ export function SharedOptimizationProblemDemo() {
                 <Bot className="size-3" />
                 LLM
               </Label>
-              <span className="text-xs font-medium text-slate-400">prefix computation</span>
+              <span className="text-xs font-medium text-muted-foreground">prefix computation</span>
             </div>
             {["system rules", "tool schema", "repo context", "task output"].map((label, index) => (
               <LayerBar
@@ -418,16 +420,22 @@ export function SharedOptimizationProblemDemo() {
           </Panel>
         </div>
 
-        <div className="grid gap-3 text-sm text-slate-300 md:grid-cols-3">
-          <Panel className={showChange ? "border-amber-400/20 bg-amber-500/10 text-amber-50" : ""}>
+        <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-3">
+          <Panel
+            className={showChange ? "border-warning-foreground/25 bg-warning text-warning-foreground" : ""}
+          >
             The edit lands in the middle of both stacks.
           </Panel>
           <Panel
-            className={showInvalidation ? "border-rose-400/20 bg-rose-500/10 text-rose-50" : ""}
+            className={
+              showInvalidation
+                ? "border-destructive-foreground/25 bg-destructive text-destructive-foreground"
+                : ""
+            }
           >
             Everything after that point has to rerun.
           </Panel>
-          <Panel className="border-cyan-400/20 bg-cyan-500/10 text-cyan-50">
+          <Panel className="border-info-foreground/25 bg-info text-info-foreground">
             Different mechanism. Same optimization law.
           </Panel>
         </div>
@@ -478,7 +486,7 @@ export function PrefixInvalidationDemo() {
               <Panel key={scenario.key} className="space-y-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <Label tone={scenario.tone}>{scenario.title}</Label>
-                  <span className="text-xs font-semibold text-slate-400">
+                  <span className="text-xs font-semibold text-muted-foreground">
                     recompute {invalidationTriggered ? invalidatedCount : 0}/8
                   </span>
                 </div>
@@ -513,7 +521,7 @@ export function PrefixInvalidationDemo() {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                     <span>cache still valid</span>
                     <span>{validCount}/8</span>
                   </div>
@@ -524,9 +532,9 @@ export function PrefixInvalidationDemo() {
                         className={`h-2 flex-1 rounded-full ${
                           token <= validCount
                             ? scenario.tone === "rose"
-                              ? "bg-rose-400"
-                              : "bg-emerald-400"
-                            : "bg-white/10"
+                              ? "bg-destructive-foreground"
+                              : "bg-success-foreground"
+                            : "bg-border/50"
                         }`}
                       />
                     ))}
@@ -560,7 +568,9 @@ export function ContextWindowDesignDemo() {
           <Panel className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="rose">monolithic transcript</Label>
-              <span className="text-xs font-semibold text-slate-400">compress after the fact</span>
+              <span className="text-xs font-semibold text-muted-foreground">
+                compress after the fact
+              </span>
             </div>
             <div className="space-y-2">
               {MONOLITH_ITEMS.map((label, index) => {
@@ -570,10 +580,10 @@ export function ContextWindowDesignDemo() {
                   <motion.div
                     key={label}
                     animate={{
-                      opacity: visible ? 1 : 0.18,
+                      opacity: visible ? 1 : 0.34,
                     }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
-                    className="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm font-semibold text-rose-50"
+                    className="rounded-2xl border border-destructive-foreground/25 bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground"
                   >
                     {label}
                   </motion.div>
@@ -586,7 +596,7 @@ export function ContextWindowDesignDemo() {
                 boxShadow: step >= 3 ? "0 0 18px rgba(251,191,36,0.18)" : "0 0 0 rgba(0,0,0,0)",
               }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              className="flex items-center justify-center gap-3 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-50"
+              className="flex items-center justify-center gap-3 rounded-2xl border border-warning-foreground/25 bg-warning px-4 py-3 text-sm font-semibold text-warning-foreground"
             >
               <RefreshCcw className="size-4" />
               summarize the mess
@@ -596,7 +606,9 @@ export function ContextWindowDesignDemo() {
           <Panel className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="emerald">programmatic decomposition</Label>
-              <span className="text-xs font-semibold text-slate-400">small contexts by stage</span>
+              <span className="text-xs font-semibold text-muted-foreground">
+                small contexts by stage
+              </span>
             </div>
             <div className="grid gap-3">
               {DECOMPOSED_PAIRS.map((pair, pairIndex) => (
@@ -609,7 +621,7 @@ export function ContextWindowDesignDemo() {
                       <motion.div
                         key={label}
                         animate={{
-                          opacity: visible ? 1 : 0.2,
+                          opacity: visible ? 1 : 0.38,
                           boxShadow: active
                             ? "0 0 18px rgba(255,255,255,0.08)"
                             : "0 0 0 rgba(0,0,0,0)",
@@ -631,14 +643,14 @@ export function ContextWindowDesignDemo() {
                 <motion.div
                   key={label}
                   animate={{
-                    opacity: step >= 3 ? 1 : 0.25,
+                    opacity: step >= 3 ? 1 : 0.46,
                     boxShadow:
                       step >= 3 && index === 1
                         ? "0 0 18px rgba(255,255,255,0.08)"
                         : "0 0 0 rgba(0,0,0,0)",
                   }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-center text-xs font-black uppercase tracking-[0.2em] text-slate-200"
+                  className="rounded-2xl border border-border bg-muted px-4 py-2 text-center text-xs font-black uppercase tracking-[0.2em] text-foreground"
                 >
                   {label}
                 </motion.div>
@@ -676,7 +688,7 @@ export function MonolithAntiPatternDemo() {
                 <Package2 className="size-3" />
                 Docker
               </Label>
-              <span className="text-xs font-semibold text-slate-400">
+              <span className="text-xs font-semibold text-muted-foreground">
                 one volatile step too early
               </span>
             </div>
@@ -712,7 +724,7 @@ export function MonolithAntiPatternDemo() {
                 <Bot className="size-3" />
                 Agent
               </Label>
-              <span className="text-xs font-semibold text-slate-400">one giant prompt</span>
+              <span className="text-xs font-semibold text-muted-foreground">one giant prompt</span>
             </div>
             <PipelineBox
               icon={<FolderTree className="size-4" />}
@@ -741,11 +753,23 @@ export function MonolithAntiPatternDemo() {
           </Panel>
         </div>
 
-        <div className="grid gap-3 text-sm text-slate-300 md:grid-cols-2">
-          <Panel className={dockerBreaks ? "border-rose-400/20 bg-rose-500/10 text-rose-50" : ""}>
+        <div className="grid gap-3 text-sm text-muted-foreground md:grid-cols-2">
+          <Panel
+            className={
+              dockerBreaks
+                ? "border-destructive-foreground/25 bg-destructive text-destructive-foreground"
+                : ""
+            }
+          >
             One early source snapshot poisons the rest of the Docker build.
           </Panel>
-          <Panel className={agentBreaks ? "border-rose-400/20 bg-rose-500/10 text-rose-50" : ""}>
+          <Panel
+            className={
+              agentBreaks
+                ? "border-destructive-foreground/25 bg-destructive text-destructive-foreground"
+                : ""
+            }
+          >
             One giant prompt poisons planning, coding, testing, and review.
           </Panel>
         </div>
@@ -824,13 +848,13 @@ export function MultiStageBuildDemo() {
               <div key={stage.label} className="relative space-y-2">
                 <motion.div
                   animate={{
-                    opacity: pending ? 0.32 : 1,
+                    opacity: pending ? 0.52 : 1,
                     boxShadow: active ? "0 0 18px rgba(255,255,255,0.08)" : "0 0 0 rgba(0,0,0,0)",
                   }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
                   className={`rounded-[1.5rem] border px-4 py-4 ${toneClasses(stage.tone)}`}
                 >
-                  <div className="mb-3 flex size-9 items-center justify-center rounded-2xl border border-white/10 bg-black/10">
+                  <div className="mb-3 flex size-9 items-center justify-center rounded-2xl border border-border bg-background">
                     {stage.icon}
                   </div>
                   <div className="text-sm font-black uppercase tracking-[0.16em]">
@@ -840,8 +864,8 @@ export function MultiStageBuildDemo() {
                 <div
                   className={`rounded-2xl border px-3 py-2 text-xs font-semibold ${
                     pending
-                      ? "border-white/8 bg-white/5 text-slate-500"
-                      : "border-white/10 bg-white/5 text-slate-300"
+                      ? "border-border bg-card text-muted-foreground"
+                      : "border-border bg-card text-foreground"
                   }`}
                 >
                   artifact: {stage.artifact}
@@ -852,7 +876,7 @@ export function MultiStageBuildDemo() {
                       opacity: complete || active ? 1 : 0.18,
                     }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
-                    className="absolute -right-3 top-10 z-20 hidden items-center text-cyan-200/70 lg:flex"
+                    className="absolute -right-3 top-10 z-20 hidden items-center text-info-foreground/75 lg:flex"
                   >
                     <ChevronRight className="size-5" />
                   </motion.div>
@@ -863,7 +887,7 @@ export function MultiStageBuildDemo() {
         </div>
 
         <Panel className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="text-sm font-semibold text-slate-200">
+          <div className="text-sm font-semibold text-foreground">
             Each stage gets the smallest valid context and emits a typed artifact.
           </div>
           <div className="flex flex-wrap gap-2">
@@ -901,7 +925,7 @@ export function FocusedContextDemo() {
           <Panel className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="rose">expensive + noisy</Label>
-              <span className="text-xs font-semibold text-slate-400">wide search space</span>
+              <span className="text-xs font-semibold text-muted-foreground">wide search space</span>
             </div>
             <div className="grid grid-cols-6 gap-2">
               {Array.from({ length: 24 }, (_, index) => {
@@ -915,7 +939,7 @@ export function FocusedContextDemo() {
                       opacity: visible ? 0.22 : 0.08,
                     }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
-                    className={`h-10 rounded-xl ${highlighted ? "bg-rose-400/35" : visible ? "bg-white/8" : "bg-white/[0.03]"}`}
+                    className={`h-10 rounded-xl ${highlighted ? "bg-destructive/85" : visible ? "bg-muted" : "bg-background"}`}
                   />
                 );
               })}
@@ -945,19 +969,21 @@ export function FocusedContextDemo() {
           <Panel className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="emerald">cheap + focused</Label>
-              <span className="text-xs font-semibold text-slate-400">narrow search space</span>
+              <span className="text-xs font-semibold text-muted-foreground">
+                narrow search space
+              </span>
             </div>
             <div className="grid grid-cols-6 gap-2">
               {Array.from({ length: 24 }, (_, index) => {
                 const visible = index < narrowCount;
-                const fillClass = index < 6 ? "bg-emerald-400/50" : "bg-cyan-400/30";
+                const fillClass = index < 6 ? "bg-success/85" : "bg-info/75";
 
                 return (
                   <motion.div
                     key={index}
                     animate={{
-                      opacity: visible ? 0.75 : 0.03,
-                    }}
+                    opacity: visible ? 0.9 : 0.08,
+                  }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                     className={`h-10 rounded-xl ${visible ? fillClass : "bg-transparent"}`}
                   />
@@ -1040,7 +1066,7 @@ export function PracticalRulesDemo() {
               opacity: 0.78,
             }}
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className="rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4 text-sm font-semibold text-slate-200 xl:col-span-1"
+            className="rounded-[1.4rem] border border-border bg-card px-4 py-4 text-sm font-semibold text-foreground xl:col-span-1"
           >
             Treat the prompt like a build graph, not a conversation dump.
           </motion.div>
@@ -1076,7 +1102,7 @@ export function CacheAwareBuildGraphDemo() {
                 <Layers3 className="size-3" />
                 layered prompt
               </Label>
-              <span className="text-xs font-semibold text-slate-400">
+              <span className="text-xs font-semibold text-muted-foreground">
                 stable first, volatile last
               </span>
             </div>
@@ -1106,7 +1132,7 @@ export function CacheAwareBuildGraphDemo() {
                 <FolderTree className="size-3" />
                 build graph
               </Label>
-              <span className="text-xs font-semibold text-slate-400">rebuild one stage</span>
+              <span className="text-xs font-semibold text-muted-foreground">rebuild one stage</span>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {[
@@ -1122,7 +1148,7 @@ export function CacheAwareBuildGraphDemo() {
                   <motion.div
                     key={node.label}
                     animate={{
-                      opacity: dim ? 0.3 : 1,
+                      opacity: dim ? 0.48 : 1,
                       boxShadow: active ? "0 0 18px rgba(255,255,255,0.08)" : "0 0 0 rgba(0,0,0,0)",
                     }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
@@ -1133,11 +1159,11 @@ export function CacheAwareBuildGraphDemo() {
                 );
               })}
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               <Label tone={showGraph ? "emerald" : "slate"}>typed artifacts</Label>
-              <ArrowRight className="size-4 text-cyan-200/60" />
+              <ArrowRight className="size-4 text-info-foreground/65" />
               <Label tone={rebuildMode ? "amber" : "slate"}>narrow contexts</Label>
-              <ArrowRight className="size-4 text-cyan-200/60" />
+              <ArrowRight className="size-4 text-info-foreground/65" />
               <Label tone={showGraph ? "violet" : "slate"}>parallel work</Label>
             </div>
           </Panel>
