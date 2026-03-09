@@ -522,7 +522,7 @@ app.all("/api/*", (c) => {
 
 app.route("/", spa);
 
-export { RateLimiter };
+export { RateLimiter, app };
 export default {
   fetch: app.fetch,
   scheduled: (_event: ScheduledEvent, env: Env, ctx: ExecutionContext) => {
