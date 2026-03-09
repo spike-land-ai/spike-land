@@ -1,4 +1,4 @@
-import * as http from "node:http";
+import http from "node:http";
 import type { ServiceInfo } from "./types.js";
 
 interface DockerContainer {
@@ -25,7 +25,7 @@ export class ServiceRegistry {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         },
-        (res: http.IncomingMessage) => {
+        (res) => {
           const chunks: Buffer[] = [];
           res.on("data", (chunk: Buffer) => chunks.push(chunk));
           res.on("end", () => {

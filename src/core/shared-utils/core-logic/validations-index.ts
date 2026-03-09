@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IMAGE_CONSTRAINTS, SUPPORTED_ASPECT_RATIOS } from "./constants-index";
+import { IMAGE_CONSTRAINTS, SUPPORTED_ASPECT_RATIOS } from "./constants-index.ts";
 
 /**
  * Shared Zod validation schemas for API requests

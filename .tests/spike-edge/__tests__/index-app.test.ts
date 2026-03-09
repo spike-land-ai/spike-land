@@ -412,10 +412,11 @@ describe("MCP proxy routes", () => {
 describe("scheduled handler via default export", () => {
   it("is exported as scheduled function", async () => {
     // Just verify the export exists without triggering full CF bindings
-    const mod = await import("../../../src/edge-api/main/index.js");
+    const mod = await import("../../../src/edge-api/main/api/index.js");
     expect(mod.default).toBeDefined();
     expect(typeof mod.default.scheduled).toBe("function");
     expect(typeof mod.default.fetch).toBe("function");
     expect(mod.RateLimiter).toBeDefined();
+    expect(mod.app).toBeDefined();
   });
 });

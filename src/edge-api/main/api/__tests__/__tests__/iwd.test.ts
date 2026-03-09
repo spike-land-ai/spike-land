@@ -239,9 +239,9 @@ describe("GET /iwd", () => {
 
 describe("POST /api/iwd/checkin", () => {
   it("creates a visitor, returns the feed payload, and sets a cookie", async () => {
-    vi.spyOn(crypto, "getRandomValues").mockImplementation((arr: Uint8Array) => {
-      arr[0] = 0;
-      return arr;
+    vi.spyOn(crypto, "getRandomValues").mockImplementation((arr: unknown) => {
+      (arr as Uint32Array)[0] = 0;
+      return arr as Uint32Array;
     });
 
     const { db } = createMockDB({});

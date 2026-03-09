@@ -4,8 +4,7 @@
     "outDir": "./dist",
     "noEmit": false,
     "declaration": true,
-    "declarationMap": true,
-    "allowImportingTsExtensions": false
+    "declarationMap": true
   },
   "include": ["index.ts"],
   "references": []

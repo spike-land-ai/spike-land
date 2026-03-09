@@ -118,8 +118,7 @@ export function classifyIdeaLocally(text: string): CreateClassificationResult {
       slug: fallbackSlug,
       category: "app",
       template: "blank-react",
-      reason:
-        "No strong keyword match. Start from a blank React app and refine the shape in-editor.",
+      reason: "No strong keyword match. Start from a blank React app and refine the shape in-editor.",
     };
   }
 
@@ -484,8 +483,8 @@ export function registerCreateTools(
               `**Status:** ${app.status}\n` +
               `**URL:** ${app.codespaceUrl}`,
           );
-        } catch (_error) {
-          const msg = _error instanceof Error ? _error.message : "Unknown error";
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : "Unknown error";
           return textResult(
             `**Error: NOT_FOUND**\nNo app found with slug "${slug}".\nDetail: ${msg}\n**Retryable:** false`,
           );

@@ -6,16 +6,16 @@
  */
 
 // Types
-export * from "./types-index";
+export * from "./types-index.ts";
 
 // Constants
-export * from "./constants-index";
+export * from "./constants-index.ts";
 
 // Validations
-export * from "./validations-index";
+export * from "./validations-index.ts";
 
 // Tool Builder
-export * from "./tool-builder-index";
+export * from "./tool-builder-index.ts";
 
 // Logger
 export { createLogger, type Logger, type LogLevel, type LogEntry } from "./logger.js";

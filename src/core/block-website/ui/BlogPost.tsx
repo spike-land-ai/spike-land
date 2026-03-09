@@ -65,7 +65,7 @@ function lazyDemo(load: () => Promise<Record<string, unknown>>, name: string) {
 }
 
 const interactiveImport = () =>
-  import("../core-logic/interactive-index") as Promise<Record<string, unknown>>;
+  import("../core-logic/interactive-index.ts") as Promise<Record<string, unknown>>;
 
 const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>> = {
   convergencedemo: lazyDemo(interactiveImport, "ConvergenceDemo"),
