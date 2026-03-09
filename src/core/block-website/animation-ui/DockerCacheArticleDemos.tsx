@@ -186,7 +186,7 @@ function DemoShell({
   children: ReactNode;
 }) {
   return (
-    <div className="dark relative flex h-[clamp(26rem,74svh,46rem)] max-h-[calc(100svh-2rem)] flex-col overflow-hidden rounded-3xl border border-border bg-background p-4 text-foreground sm:h-[clamp(28rem,72svh,48rem)] sm:p-5 md:p-8">
+    <div className="dark relative flex h-[clamp(34rem,78svh,44rem)] max-h-[calc(100svh-2rem)] flex-col overflow-hidden rounded-3xl border border-border bg-background p-4 text-foreground sm:p-5 md:h-[clamp(30rem,60svh,37rem)] md:p-8">
       <div className="absolute inset-0 opacity-100" style={demoGlowStyle} />
       <div className="absolute inset-0 opacity-[0.16]" style={demoGridStyle} />
       <div className="relative flex min-h-0 flex-1 flex-col gap-4 sm:gap-5">
