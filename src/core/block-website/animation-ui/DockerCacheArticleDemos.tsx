@@ -342,7 +342,7 @@ export function SharedOptimizationProblemDemo() {
       >
         <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr] md:items-center">
           <Panel className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="cyan">
                 <Package2 className="size-3" />
                 Docker
@@ -382,7 +382,7 @@ export function SharedOptimizationProblemDemo() {
           </motion.div>
 
           <Panel className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="violet">
                 <Bot className="size-3" />
                 LLM
@@ -465,7 +465,7 @@ export function PrefixInvalidationDemo() {
 
             return (
               <Panel key={scenario.key} className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <Label tone={scenario.tone}>{scenario.title}</Label>
                   <span className="text-xs font-semibold text-slate-400">
                     recompute {invalidationTriggered ? invalidatedCount : 0}/8
@@ -547,7 +547,7 @@ export function ContextWindowDesignDemo() {
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Panel className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="rose">monolithic transcript</Label>
               <span className="text-xs font-semibold text-slate-400">compress after the fact</span>
             </div>
@@ -583,7 +583,7 @@ export function ContextWindowDesignDemo() {
           </Panel>
 
           <Panel className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="emerald">programmatic decomposition</Label>
               <span className="text-xs font-semibold text-slate-400">small contexts by stage</span>
             </div>
@@ -660,7 +660,7 @@ export function MonolithAntiPatternDemo() {
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Panel className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="cyan">
                 <Package2 className="size-3" />
                 Docker
@@ -696,7 +696,7 @@ export function MonolithAntiPatternDemo() {
           </Panel>
 
           <Panel className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="violet">
                 <Bot className="size-3" />
                 Agent
@@ -888,7 +888,7 @@ export function FocusedContextDemo() {
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Panel className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="rose">expensive + noisy</Label>
               <span className="text-xs font-semibold text-slate-400">wide search space</span>
             </div>
@@ -932,7 +932,7 @@ export function FocusedContextDemo() {
           </Panel>
 
           <Panel className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="emerald">cheap + focused</Label>
               <span className="text-xs font-semibold text-slate-400">narrow search space</span>
             </div>
@@ -1060,7 +1060,7 @@ export function CacheAwareBuildGraphDemo() {
       >
         <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
           <Panel className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <Label tone="cyan">
                 <Layers3 className="size-3" />
                 layered prompt
