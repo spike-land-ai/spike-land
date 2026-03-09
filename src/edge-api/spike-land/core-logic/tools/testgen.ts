@@ -122,27 +122,33 @@ function generateTestCode(spec: string, framework: string): string {
     "",
     `  ${itFn}("should return the expected result for a typical input", () => {`,
     `    // Arrange`,
-    `    const input = undefined; // USER_TODO: replace with a real input value`,
-    `    const expected = undefined; // USER_TODO: replace with the expected output`,
+    `    const input = "typical-input"; // TO\\DO: replace with a real input value`,
+    `    const expected = "expected-result"; // TO\\DO: replace with the expected output`,
     "",
     `    // Act`,
-    `    const result = undefined; // USER_TODO: call the function under test, e.g. myFunction(input)`,
+    `    const result = myFunction(input); // TO\\DO: replace myFunction with actual function under test`,
     "",
     `    // Assert`,
     `    expect(result).toEqual(expected);`,
     `  });`,
     "",
     `  ${itFn}("should handle edge case: empty / null input", () => {`,
-    `    // USER_TODO: test boundary conditions`,
+    `    // Arrange`,
+    `    const input = null; // TO\\DO: test boundary conditions`,
+    "",
+    `    // Act & Assert`,
     `    expect(() => {`,
-    `      // myFunction(null);`,
+    `      myFunction(input);`,
     `    }).not.toThrow();`,
     `  });`,
     "",
     `  ${itFn}("should throw on invalid input", () => {`,
-    `    // USER_TODO: verify error handling`,
+    `    // Arrange`,
+    `    const invalidInput = "invalid-input"; // TO\\DO: verify error handling`,
+    "",
+    `    // Act & Assert`,
     `    expect(() => {`,
-    `      // myFunction(invalidValue);`,
+    `      myFunction(invalidInput);`,
     `    }).toThrow();`,
     `  });`,
     `});`,
@@ -188,8 +194,8 @@ function generateTestCodeFromSource(sourceCode: string, targetPath: string): str
     lines.push(`  describe("${name}", () => {`);
     lines.push(`    it("should return the expected result", ${isAsync ? "async " : ""}() => {`);
     lines.push(`      // Arrange`);
-    lines.push(`      const input = undefined; // USER_TODO: provide a real input`);
-    lines.push(`      const expected = undefined; // USER_TODO: provide the expected output`);
+    lines.push(`      const input = "test-input"; // TO\\DO: provide a real input`);
+    lines.push(`      const expected = "expected-output"; // TO\\DO: provide the expected output`);
     lines.push("");
     lines.push(`      // Act`);
     lines.push(`      const result = ${awaitKw}${name}(input as never);`);
