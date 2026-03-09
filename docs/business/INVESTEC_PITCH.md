@@ -64,6 +64,14 @@ AI companies, cloud vendors, and developer tools are all moving closer to the la
 
 ---
 
+## Team
+
+I would like to build this with former colleagues I trust, including people from Investec. If this works, 1% of a successful company is worth more than 100% of a failed startup.
+
+I am willing to share meaningful equity to build the right team. This started as a long-running hobby project. It is now a real company.
+
+---
+
 ## Risks
 
 1. **Focus**  
@@ -108,6 +116,6 @@ That is why this is strategically interesting. That is why it fits Investec.
 
 ---
 
-*Document Version: 5.5*  
+*Document Version: 5.6*  
 *Prepared: March 2026*  
 *Founder: Zoltan Erdos, SPIKE LAND LTD*
