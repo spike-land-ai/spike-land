@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -96,20 +96,31 @@ const DECOMPOSED_PAIRS = [
 function toneClasses(tone: Tone): string {
   switch (tone) {
     case "cyan":
-      return "border-cyan-400/30 bg-cyan-500/10 text-cyan-100";
+      return "border-info-foreground/30 bg-info/35 text-info-foreground";
     case "amber":
-      return "border-amber-400/30 bg-amber-500/10 text-amber-100";
+      return "border-warning-foreground/30 bg-warning/35 text-warning-foreground";
     case "emerald":
-      return "border-emerald-400/30 bg-emerald-500/10 text-emerald-100";
+      return "border-success-foreground/30 bg-success/35 text-success-foreground";
     case "rose":
-      return "border-rose-400/30 bg-rose-500/10 text-rose-100";
+      return "border-destructive-foreground/30 bg-destructive/35 text-destructive-foreground";
     case "violet":
-      return "border-violet-400/30 bg-violet-500/10 text-violet-100";
+      return "border-primary/30 bg-primary/20 text-primary-foreground";
     case "slate":
     default:
-      return "border-white/10 bg-white/5 text-slate-100";
+      return "border-border bg-background/45 text-foreground";
   }
 }
+
+const demoGlowStyle: CSSProperties = {
+  backgroundImage:
+    "radial-gradient(circle at top left, color-mix(in srgb, var(--info-fg) 18%, transparent), transparent 38%), radial-gradient(circle at bottom right, color-mix(in srgb, var(--primary-color) 24%, transparent), transparent 34%)",
+};
+
+const demoGridStyle: CSSProperties = {
+  backgroundImage:
+    "linear-gradient(color-mix(in srgb, var(--border-color) 26%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--border-color) 26%, transparent) 1px, transparent 1px)",
+  backgroundSize: "28px 28px",
+};
 
 function getSequenceValue<T>(values: readonly T[], index: number): T {
   const safeIndex = Math.min(index, values.length - 1);
@@ -175,28 +186,28 @@ function DemoShell({
   children: ReactNode;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(2,6,23,0.98))] p-4 text-slate-100 sm:p-5 md:p-8">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.12),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.12),transparent_34%)]" />
-      <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.28)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.28)_1px,transparent_1px)] [background-size:28px_28px]" />
+    <div className="dark relative overflow-hidden rounded-3xl border border-border bg-card p-4 text-foreground sm:p-5 md:p-8">
+      <div className="absolute inset-0 opacity-100" style={demoGlowStyle} />
+      <div className="absolute inset-0 opacity-[0.16]" style={demoGridStyle} />
       <div className="relative space-y-4 sm:space-y-5">
         <div className="grid gap-3 sm:gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
           <div className="min-w-0 space-y-2">
-            <div className="text-[9px] font-black uppercase tracking-[0.24em] text-cyan-200/80 sm:text-[10px] sm:tracking-[0.32em]">
+            <div className="text-[9px] font-black uppercase tracking-[0.24em] text-info-foreground/80 sm:text-[10px] sm:tracking-[0.32em]">
               {kicker}
             </div>
-            <h3 className="text-lg font-black leading-tight tracking-tight text-white sm:text-xl md:text-2xl">
+            <h3 className="text-lg font-black leading-tight tracking-tight text-foreground sm:text-xl md:text-2xl">
               {title}
             </h3>
           </div>
 
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 lg:self-start">
-            <div className="flex min-h-10 min-w-0 items-center justify-center rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-center text-[10px] font-black uppercase tracking-[0.14em] text-cyan-50 sm:min-w-[13rem] sm:tracking-[0.18em]">
+            <div className="flex min-h-10 min-w-0 items-center justify-center rounded-full border border-info-foreground/25 bg-info/35 px-3 py-1.5 text-center text-[10px] font-black uppercase tracking-[0.14em] text-info-foreground sm:min-w-[13rem] sm:tracking-[0.18em]">
               {status}
             </div>
             <button
               type="button"
               onClick={hasStarted ? onRestart : onStart}
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-white/12 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-slate-200 transition-colors hover:border-cyan-300/50 hover:text-cyan-50 sm:min-w-[6.75rem]"
+              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-border bg-background/45 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-foreground transition-colors hover:border-primary/50 hover:bg-primary/15 hover:text-primary-foreground sm:min-w-[6.75rem]"
             >
               {hasStarted ? <RefreshCcw className="size-3.5" /> : <Play className="size-3.5" />}
               {hasStarted ? "Restart" : "Start"}
@@ -212,7 +223,7 @@ function DemoShell({
 function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <div
-      className={`rounded-[1.5rem] border border-white/10 bg-white/[0.045] p-3 sm:p-4 md:p-5 ${className}`}
+      className={`rounded-[1.5rem] border border-border bg-background/45 p-3 sm:p-4 md:p-5 ${className}`}
     >
       {children}
     </div>
@@ -283,7 +294,7 @@ function MetricRow({
         <span>{label}</span>
         <span>{width}</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-white/8">
+      <div className="h-2 overflow-hidden rounded-full bg-border/40">
         <motion.div
           initial={{ width: animate ? 0 : width }}
           animate={{ width }}
@@ -317,7 +328,7 @@ function PipelineBox({
       transition={{ duration: 0.25, ease: "easeOut" }}
       className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold ${toneClasses(tone)}`}
     >
-      <div className="flex size-8 items-center justify-center rounded-xl border border-white/10 bg-black/10">
+      <div className="flex size-8 items-center justify-center rounded-xl border border-border bg-background/55">
         {icon}
       </div>
       <span>{label}</span>
