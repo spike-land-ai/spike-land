@@ -14,6 +14,7 @@ import {
   FolderTree,
   Layers3,
   Package2,
+  Play,
   RefreshCcw,
   Search,
   Sparkles,
@@ -124,41 +125,52 @@ function getSequenceValue<T>(values: readonly T[], index: number): T {
 function useDemoSequence(length: number, intervalMs = 1500) {
   const { ref, progress } = useInViewProgress();
   const [step, setStep] = useState(0);
-  const [restartCount, setRestartCount] = useState(0);
+  const [runId, setRunId] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
   const isVisible = progress > 0.18;
+  const isRunning = hasStarted && isVisible;
 
   useEffect(() => {
-    if (!isVisible) {
-      setStep(0);
+    if (!isRunning) {
       return;
     }
 
-    setStep(0);
     const interval = window.setInterval(() => {
       setStep((current) => (current + 1) % length);
     }, intervalMs);
 
     return () => window.clearInterval(interval);
-  }, [intervalMs, isVisible, length, restartCount]);
+  }, [intervalMs, isRunning, length, runId]);
+
+  const start = () => {
+    setStep(0);
+    setHasStarted(true);
+    setRunId((current) => current + 1);
+  };
 
   const restart = () => {
     setStep(0);
-    setRestartCount((current) => current + 1);
+    setHasStarted(true);
+    setRunId((current) => current + 1);
   };
 
-  return { ref, step, restart };
+  return { ref, step, hasStarted, isRunning, start, restart };
 }
 
 function DemoShell({
   title,
   kicker,
   status,
+  hasStarted,
+  onStart,
   onRestart,
   children,
 }: {
   title: string;
   kicker: string;
   status: string;
+  hasStarted: boolean;
+  onStart: () => void;
   onRestart: () => void;
   children: ReactNode;
 }) {
@@ -181,11 +193,11 @@ function DemoShell({
             </div>
             <button
               type="button"
-              onClick={onRestart}
+              onClick={hasStarted ? onRestart : onStart}
               className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-slate-200 transition-colors hover:border-cyan-300/50 hover:text-cyan-50"
             >
-              <RefreshCcw className="size-3.5" />
-              Restart
+              {hasStarted ? <RefreshCcw className="size-3.5" /> : <Play className="size-3.5" />}
+              {hasStarted ? "Restart" : "Start"}
             </button>
           </div>
         </div>
@@ -251,7 +263,17 @@ function LayerBar({
   );
 }
 
-function MetricRow({ label, value, tone }: { label: string; value: number; tone: Tone }) {
+function MetricRow({
+  label,
+  value,
+  tone,
+  animate = true,
+}: {
+  label: string;
+  value: number;
+  tone: Tone;
+  animate?: boolean;
+}) {
   const width = `${Math.max(10, Math.min(100, value))}%`;
   const fillClass =
     tone === "cyan"
@@ -272,8 +294,9 @@ function MetricRow({ label, value, tone }: { label: string; value: number; tone:
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-white/8">
         <motion.div
+          initial={{ width: animate ? 0 : width }}
           animate={{ width }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          transition={{ duration: animate ? 0.8 : 0, ease: "easeOut" }}
           className={`h-full rounded-full ${fillClass}`}
         />
       </div>
@@ -317,7 +340,10 @@ function PipelineBox({
 }
 
 export function SharedOptimizationProblemDemo() {
-  const { ref, step, restart } = useDemoSequence(SHARED_PHASES.length, 1700);
+  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
+    SHARED_PHASES.length,
+    1700,
+  );
   const showChange = step >= 1;
   const showInvalidation = step >= 2;
 
@@ -326,7 +352,9 @@ export function SharedOptimizationProblemDemo() {
       <DemoShell
         title="Same invalidation shape"
         kicker="Docker vs LLM cache"
-        status={getSequenceValue(SHARED_PHASES, step)}
+        status={hasStarted ? getSequenceValue(SHARED_PHASES, step) : "Ready to start"}
+        hasStarted={hasStarted}
+        onStart={start}
         onRestart={restart}
       >
         <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr] md:items-center">
@@ -349,7 +377,7 @@ export function SharedOptimizationProblemDemo() {
                       ? "rose"
                       : "cyan"
                 }
-                active={showChange && index === 1}
+                active={hasStarted && showChange && index === 1}
                 dim={showInvalidation && index > 1}
               />
             ))}
@@ -357,10 +385,14 @@ export function SharedOptimizationProblemDemo() {
 
           <motion.div
             animate={{
-              scale: showInvalidation ? [1, 1.08, 1] : [1, 1.03, 1],
-              opacity: showInvalidation ? [0.7, 1, 0.7] : [0.45, 0.8, 0.45],
+              scale: hasStarted ? (showInvalidation ? [1, 1.08, 1] : [1, 1.03, 1]) : 1,
+              opacity: hasStarted ? (showInvalidation ? [0.7, 1, 0.7] : [0.45, 0.8, 0.45]) : 0.45,
             }}
-            transition={{ duration: 1.8, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+            transition={{
+              duration: 1.8,
+              repeat: isRunning ? Number.POSITIVE_INFINITY : 0,
+              ease: "easeInOut",
+            }}
             className="relative mx-auto flex size-16 items-center justify-center rounded-full border border-violet-400/30 bg-violet-500/10 text-violet-100"
           >
             <Blocks className="size-7" />
@@ -385,7 +417,7 @@ export function SharedOptimizationProblemDemo() {
                       ? "rose"
                       : "violet"
                 }
-                active={showChange && index === 1}
+                active={hasStarted && showChange && index === 1}
                 dim={showInvalidation && index > 1}
               />
             ))}
@@ -411,7 +443,10 @@ export function SharedOptimizationProblemDemo() {
 }
 
 export function PrefixInvalidationDemo() {
-  const { ref, step, restart } = useDemoSequence(PREFIX_PHASES.length, 1350);
+  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
+    PREFIX_PHASES.length,
+    1350,
+  );
   const tokens = Array.from({ length: 8 }, (_, index) => index + 1);
 
   return (
@@ -419,7 +454,9 @@ export function PrefixInvalidationDemo() {
       <DemoShell
         title="Early edits are expensive"
         kicker="Prefix invalidation"
-        status={getSequenceValue(PREFIX_PHASES, step)}
+        status={hasStarted ? getSequenceValue(PREFIX_PHASES, step) : "Ready to start"}
+        hasStarted={hasStarted}
+        onStart={start}
         onRestart={restart}
       >
         <div className="grid gap-4 md:grid-cols-2">
@@ -470,7 +507,7 @@ export function PrefixInvalidationDemo() {
                         }}
                         transition={{
                           duration: 1.2,
-                          repeat: changed ? Number.POSITIVE_INFINITY : 0,
+                          repeat: changed && isRunning ? Number.POSITIVE_INFINITY : 0,
                           ease: "easeInOut",
                         }}
                         className={`flex h-14 items-center justify-center rounded-2xl border text-sm font-black ${
@@ -517,7 +554,10 @@ export function PrefixInvalidationDemo() {
 }
 
 export function ContextWindowDesignDemo() {
-  const { ref, step, restart } = useDemoSequence(CONTEXT_PHASES.length, 1450);
+  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
+    CONTEXT_PHASES.length,
+    1450,
+  );
   const visiblePairs = Math.min(DECOMPOSED_PAIRS.length, step + 1);
   const visibleMonolithItems = Math.min(MONOLITH_ITEMS.length, (step + 1) * 2);
 
@@ -526,7 +566,9 @@ export function ContextWindowDesignDemo() {
       <DemoShell
         title="Long chats are bad build graphs"
         kicker="Context window design"
-        status={getSequenceValue(CONTEXT_PHASES, step)}
+        status={hasStarted ? getSequenceValue(CONTEXT_PHASES, step) : "Ready to start"}
+        hasStarted={hasStarted}
+        onStart={start}
         onRestart={restart}
       >
         <div className="grid gap-4 md:grid-cols-2">
@@ -550,7 +592,7 @@ export function ContextWindowDesignDemo() {
                     }}
                     transition={{
                       duration: 1.4 + index * 0.05,
-                      repeat: overloaded ? Number.POSITIVE_INFINITY : 0,
+                      repeat: overloaded && isRunning ? Number.POSITIVE_INFINITY : 0,
                       ease: "easeInOut",
                     }}
                     className="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm font-semibold text-rose-50"
@@ -567,7 +609,7 @@ export function ContextWindowDesignDemo() {
               }}
               transition={{
                 duration: 1.2,
-                repeat: step >= 3 ? Number.POSITIVE_INFINITY : 0,
+                repeat: step >= 3 && isRunning ? Number.POSITIVE_INFINITY : 0,
                 ease: "easeInOut",
               }}
               className="flex items-center justify-center gap-3 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-50"
@@ -599,7 +641,7 @@ export function ContextWindowDesignDemo() {
                         }}
                         transition={{
                           duration: 1.2,
-                          repeat: active ? Number.POSITIVE_INFINITY : 0,
+                          repeat: active && isRunning ? Number.POSITIVE_INFINITY : 0,
                           ease: "easeInOut",
                         }}
                         className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${
@@ -623,7 +665,7 @@ export function ContextWindowDesignDemo() {
                   }}
                   transition={{
                     duration: 1.2,
-                    repeat: step >= 3 && index === 1 ? Number.POSITIVE_INFINITY : 0,
+                    repeat: step >= 3 && index === 1 && isRunning ? Number.POSITIVE_INFINITY : 0,
                     ease: "easeInOut",
                   }}
                   className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-center text-xs font-black uppercase tracking-[0.2em] text-slate-200"
@@ -640,7 +682,7 @@ export function ContextWindowDesignDemo() {
 }
 
 export function MonolithAntiPatternDemo() {
-  const { ref, step, restart } = useDemoSequence(ANTI_PATTERN_PHASES.length, 1500);
+  const { ref, step, hasStarted, start, restart } = useDemoSequence(ANTI_PATTERN_PHASES.length, 1500);
   const dockerBreaks = step >= 1;
   const agentBreaks = step >= 2;
 
@@ -649,7 +691,9 @@ export function MonolithAntiPatternDemo() {
       <DemoShell
         title="The same anti-pattern shows up twice"
         kicker="COPY . . in AI form"
-        status={getSequenceValue(ANTI_PATTERN_PHASES, step)}
+        status={hasStarted ? getSequenceValue(ANTI_PATTERN_PHASES, step) : "Ready to start"}
+        hasStarted={hasStarted}
+        onStart={start}
         onRestart={restart}
       >
         <div className="grid gap-4 md:grid-cols-2">
@@ -667,7 +711,7 @@ export function MonolithAntiPatternDemo() {
               icon={<FileCode2 className="size-4" />}
               label="COPY . ."
               tone="amber"
-              active={step <= 1}
+              active={hasStarted && step <= 1}
             />
             <PipelineBox
               icon={<Blocks className="size-4" />}
@@ -701,7 +745,7 @@ export function MonolithAntiPatternDemo() {
               icon={<FolderTree className="size-4" />}
               label="full repo + full thread"
               tone="amber"
-              active={step >= 2}
+              active={hasStarted && step >= 2}
             />
             <PipelineBox
               icon={<Sparkles className="size-4" />}
@@ -780,7 +824,10 @@ const ACTIVE_STAGE_INDEXES = [[0], [1], [2], [3, 4], [5]] as const;
 const COMPLETE_STAGE_INDEXES = [[], [0], [0, 1], [0, 1, 2], [0, 1, 2, 3, 4]] as const;
 
 export function MultiStageBuildDemo() {
-  const { ref, step, restart } = useDemoSequence(MULTI_STAGE_PHASES.length, 1500);
+  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
+    MULTI_STAGE_PHASES.length,
+    1500,
+  );
   const activeIndexes = new Set<number>(getSequenceValue(ACTIVE_STAGE_INDEXES, step));
   const completeIndexes = new Set<number>(getSequenceValue(COMPLETE_STAGE_INDEXES, step));
 
@@ -789,7 +836,9 @@ export function MultiStageBuildDemo() {
       <DemoShell
         title="Build the workflow as stages"
         kicker="Multi-stage execution"
-        status={getSequenceValue(MULTI_STAGE_PHASES, step)}
+        status={hasStarted ? getSequenceValue(MULTI_STAGE_PHASES, step) : "Ready to start"}
+        hasStarted={hasStarted}
+        onStart={start}
         onRestart={restart}
       >
         <div className="grid gap-3 lg:grid-cols-[repeat(6,minmax(0,1fr))]">
@@ -808,7 +857,7 @@ export function MultiStageBuildDemo() {
                   }}
                   transition={{
                     duration: 1.3,
-                    repeat: active ? Number.POSITIVE_INFINITY : 0,
+                    repeat: active && isRunning ? Number.POSITIVE_INFINITY : 0,
                     ease: "easeInOut",
                   }}
                   className={`rounded-[1.5rem] border px-4 py-4 ${toneClasses(stage.tone)}`}
@@ -837,7 +886,7 @@ export function MultiStageBuildDemo() {
                     }}
                     transition={{
                       duration: 1.2,
-                      repeat: activeIndexes.has(index + 1) ? Number.POSITIVE_INFINITY : 0,
+                      repeat: activeIndexes.has(index + 1) && isRunning ? Number.POSITIVE_INFINITY : 0,
                       ease: "easeInOut",
                     }}
                     className="absolute -right-3 top-10 z-20 hidden items-center text-cyan-200/70 lg:flex"
@@ -865,7 +914,10 @@ export function MultiStageBuildDemo() {
 }
 
 export function FocusedContextDemo() {
-  const { ref, step, restart } = useDemoSequence(FOCUS_PHASES.length, 1400);
+  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
+    FOCUS_PHASES.length,
+    1400,
+  );
   const wideCount = getSequenceValue([6, 14, 20, 24] as const, step);
   const narrowCount = getSequenceValue([6, 8, 10, 12] as const, step);
   const wideCacheReuse = getSequenceValue([58, 42, 30, 22] as const, step);
@@ -880,7 +932,9 @@ export function FocusedContextDemo() {
       <DemoShell
         title="Smaller context improves quality"
         kicker="Focus beats bloat"
-        status={getSequenceValue(FOCUS_PHASES, step)}
+        status={hasStarted ? getSequenceValue(FOCUS_PHASES, step) : "Ready to start"}
+        hasStarted={hasStarted}
+        onStart={start}
         onRestart={restart}
       >
         <div className="grid gap-4 md:grid-cols-2">
@@ -898,11 +952,11 @@ export function FocusedContextDemo() {
                   <motion.div
                     key={index}
                     animate={{
-                      opacity: visible ? [0.22, 0.58, 0.22] : 0.08,
+                      opacity: visible ? (isRunning ? [0.22, 0.58, 0.22] : 0.22) : 0.08,
                     }}
                     transition={{
                       duration: 1.5 + (index % 5) * 0.12,
-                      repeat: visible ? Number.POSITIVE_INFINITY : 0,
+                      repeat: visible && isRunning ? Number.POSITIVE_INFINITY : 0,
                       ease: "easeInOut",
                     }}
                     className={`h-10 rounded-xl ${highlighted ? "bg-rose-400/35" : visible ? "bg-white/8" : "bg-white/[0.03]"}`}
@@ -911,9 +965,14 @@ export function FocusedContextDemo() {
               })}
             </div>
             <div className="space-y-3">
-              <MetricRow label="cache reuse" value={wideCacheReuse} tone="rose" />
-              <MetricRow label="token waste" value={wideTokenWaste} tone="amber" />
-              <MetricRow label="reasoning focus" value={wideReasoningFocus} tone="rose" />
+              <MetricRow label="cache reuse" value={wideCacheReuse} tone="rose" animate={hasStarted} />
+              <MetricRow label="token waste" value={wideTokenWaste} tone="amber" animate={hasStarted} />
+              <MetricRow
+                label="reasoning focus"
+                value={wideReasoningFocus}
+                tone="rose"
+                animate={hasStarted}
+              />
             </div>
           </Panel>
 
@@ -931,12 +990,12 @@ export function FocusedContextDemo() {
                   <motion.div
                     key={index}
                     animate={{
-                      opacity: visible ? [0.75, 1, 0.75] : 0.03,
-                      scale: visible ? [1, 1.03, 1] : 1,
+                      opacity: visible ? (isRunning ? [0.75, 1, 0.75] : 0.75) : 0.03,
+                      scale: visible ? (isRunning ? [1, 1.03, 1] : 1) : 1,
                     }}
                     transition={{
                       duration: 1.6 + (index % 4) * 0.12,
-                      repeat: visible ? Number.POSITIVE_INFINITY : 0,
+                      repeat: visible && isRunning ? Number.POSITIVE_INFINITY : 0,
                       ease: "easeInOut",
                     }}
                     className={`h-10 rounded-xl ${visible ? fillClass : "bg-transparent"}`}
@@ -945,9 +1004,24 @@ export function FocusedContextDemo() {
               })}
             </div>
             <div className="space-y-3">
-              <MetricRow label="cache reuse" value={narrowCacheReuse} tone="emerald" />
-              <MetricRow label="token waste" value={narrowTokenWaste} tone="cyan" />
-              <MetricRow label="reasoning focus" value={narrowReasoningFocus} tone="emerald" />
+              <MetricRow
+                label="cache reuse"
+                value={narrowCacheReuse}
+                tone="emerald"
+                animate={hasStarted}
+              />
+              <MetricRow
+                label="token waste"
+                value={narrowTokenWaste}
+                tone="cyan"
+                animate={hasStarted}
+              />
+              <MetricRow
+                label="reasoning focus"
+                value={narrowReasoningFocus}
+                tone="emerald"
+                animate={hasStarted}
+              />
             </div>
           </Panel>
         </div>
@@ -957,7 +1031,7 @@ export function FocusedContextDemo() {
 }
 
 export function PracticalRulesDemo() {
-  const { ref, step, restart } = useDemoSequence(7, 1150);
+  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(7, 1150);
   const rules = [
     { label: "stable instructions first", tone: "cyan" as Tone },
     { label: "keep tool schemas stable", tone: "violet" as Tone },
@@ -974,7 +1048,9 @@ export function PracticalRulesDemo() {
       <DemoShell
         title="The rules are operational"
         kicker="Cache-aware checklist"
-        status={`Rule ${step + 1} / ${rules.length}: ${currentRule.label}`}
+        status={hasStarted ? `Rule ${step + 1} / ${rules.length}: ${currentRule.label}` : "Ready to start"}
+        hasStarted={hasStarted}
+        onStart={start}
         onRestart={restart}
       >
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -992,7 +1068,7 @@ export function PracticalRulesDemo() {
                 }}
                 transition={{
                   duration: 1.1,
-                  repeat: active ? Number.POSITIVE_INFINITY : 0,
+                  repeat: active && isRunning ? Number.POSITIVE_INFINITY : 0,
                   ease: "easeInOut",
                 }}
                 className={`rounded-[1.4rem] border px-4 py-4 text-sm font-black tracking-tight ${toneClasses(rule.tone)}`}
@@ -1007,7 +1083,7 @@ export function PracticalRulesDemo() {
             }}
             transition={{
               duration: 1.2,
-              repeat: step === rules.length - 1 ? Number.POSITIVE_INFINITY : 0,
+              repeat: step === rules.length - 1 && isRunning ? Number.POSITIVE_INFINITY : 0,
               ease: "easeInOut",
             }}
             className="rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4 text-sm font-semibold text-slate-200 xl:col-span-1"
