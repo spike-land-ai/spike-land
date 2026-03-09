@@ -368,8 +368,12 @@ export function SharedOptimizationProblemDemo() {
 
           <motion.div
             animate={{
-              scale: hasStarted ? (showInvalidation ? 1.08 : 1.03) : 1,
               opacity: hasStarted ? (showInvalidation ? 1 : 0.8) : 0.45,
+              boxShadow: hasStarted
+                ? showInvalidation
+                  ? "0 0 22px rgba(168,85,247,0.28)"
+                  : "0 0 12px rgba(168,85,247,0.18)"
+                : "0 0 0 rgba(0,0,0,0)",
             }}
             transition={{ duration: 0.25, ease: "easeOut" }}
             className="relative mx-auto flex size-16 items-center justify-center rounded-full border border-violet-400/30 bg-violet-500/10 text-violet-100"
@@ -477,9 +481,10 @@ export function PrefixInvalidationDemo() {
                       <motion.div
                         key={token}
                         animate={{
-                          y: 0,
-                          scale: changed ? 1.04 : 1,
                           opacity: invalidated ? 0.28 : token <= validCount ? 1 : 0.82,
+                          boxShadow: changed
+                            ? "0 0 0 1px rgba(251,191,36,0.5), 0 0 18px rgba(251,191,36,0.18)"
+                            : "0 0 0 rgba(0,0,0,0)",
                         }}
                         transition={{ duration: 0.25, ease: "easeOut" }}
                         className={`flex h-14 items-center justify-center rounded-2xl border text-sm font-black ${
@@ -555,8 +560,6 @@ export function ContextWindowDesignDemo() {
                     key={label}
                     animate={{
                       opacity: visible ? 1 : 0.18,
-                      y: visible ? 0 : 10,
-                      x: 0,
                     }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                     className="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm font-semibold text-rose-50"
@@ -568,8 +571,9 @@ export function ContextWindowDesignDemo() {
             </div>
             <motion.div
               animate={{
-                scale: step >= 3 ? 1.03 : 1,
                 opacity: step >= 3 ? 1 : 0.55,
+                boxShadow:
+                  step >= 3 ? "0 0 18px rgba(251,191,36,0.18)" : "0 0 0 rgba(0,0,0,0)",
               }}
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="flex items-center justify-center gap-3 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-50"
@@ -596,8 +600,9 @@ export function ContextWindowDesignDemo() {
                         key={label}
                         animate={{
                           opacity: visible ? 1 : 0.2,
-                          y: visible ? 0 : 10,
-                          scale: active ? 1.02 : 1,
+                          boxShadow: active
+                            ? "0 0 18px rgba(255,255,255,0.08)"
+                            : "0 0 0 rgba(0,0,0,0)",
                         }}
                         transition={{ duration: 0.25, ease: "easeOut" }}
                         className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${
@@ -617,7 +622,10 @@ export function ContextWindowDesignDemo() {
                   key={label}
                   animate={{
                     opacity: step >= 3 ? 1 : 0.25,
-                    scale: step >= 3 && index === 1 ? 1.03 : 1,
+                    boxShadow:
+                      step >= 3 && index === 1
+                        ? "0 0 18px rgba(255,255,255,0.08)"
+                        : "0 0 0 rgba(0,0,0,0)",
                   }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
                   className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-center text-xs font-black uppercase tracking-[0.2em] text-slate-200"
@@ -807,8 +815,7 @@ export function MultiStageBuildDemo() {
                 <motion.div
                   animate={{
                     opacity: pending ? 0.32 : 1,
-                    y: 0,
-                    scale: active ? 1.02 : 1,
+                    boxShadow: active ? "0 0 18px rgba(255,255,255,0.08)" : "0 0 0 rgba(0,0,0,0)",
                   }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
                   className={`rounded-[1.5rem] border px-4 py-4 ${toneClasses(stage.tone)}`}
@@ -833,7 +840,6 @@ export function MultiStageBuildDemo() {
                   <motion.div
                     animate={{
                       opacity: complete || active ? 1 : 0.18,
-                      x: 0,
                     }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                     className="absolute -right-3 top-10 z-20 hidden items-center text-cyan-200/70 lg:flex"
@@ -941,7 +947,6 @@ export function FocusedContextDemo() {
                     key={index}
                     animate={{
                       opacity: visible ? 0.75 : 0.03,
-                      scale: 1,
                     }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                     className={`h-10 rounded-xl ${visible ? fillClass : "bg-transparent"}`}
@@ -1011,8 +1016,7 @@ export function PracticalRulesDemo() {
                 key={rule.label}
                 animate={{
                   opacity: visible ? 1 : 0.18,
-                  y: 0,
-                  scale: active ? 1.02 : 1,
+                  boxShadow: active ? "0 0 18px rgba(255,255,255,0.08)" : "0 0 0 rgba(0,0,0,0)",
                 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
                 className={`rounded-[1.4rem] border px-4 py-4 text-sm font-black tracking-tight ${toneClasses(rule.tone)}`}
@@ -1109,7 +1113,7 @@ export function CacheAwareBuildGraphDemo() {
                     key={node.label}
                     animate={{
                       opacity: dim ? 0.3 : 1,
-                      scale: active ? 1.03 : 1,
+                      boxShadow: active ? "0 0 18px rgba(255,255,255,0.08)" : "0 0 0 rgba(0,0,0,0)",
                     }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                     className={`rounded-2xl border px-4 py-3 text-sm font-black uppercase tracking-[0.16em] ${toneClasses(node.tone)}`}
