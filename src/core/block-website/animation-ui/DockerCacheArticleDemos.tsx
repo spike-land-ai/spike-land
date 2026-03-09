@@ -111,6 +111,9 @@ function toneClasses(tone: Tone): string {
   }
 }
 
+/** Shared opacity for inactive/dimmed elements across all demos. */
+const DIM_OPACITY = 0.45;
+
 const demoGlowStyle: CSSProperties = {
   backgroundImage:
     "radial-gradient(circle at top left, color-mix(in srgb, var(--info-fg) 18%, transparent), transparent 38%), radial-gradient(circle at bottom right, color-mix(in srgb, var(--primary-color) 24%, transparent), transparent 34%)",
@@ -185,6 +188,7 @@ function DemoShell({
   onRestart: () => void;
   children: ReactNode;
 }) {
+  // Force dark mode — demos use dark theme regardless of page theme for contrast
   return (
     <div className="dark relative overflow-hidden rounded-3xl border border-border bg-background p-4 text-foreground sm:p-5 md:p-8">
       <div className="absolute inset-0 opacity-100" style={demoGlowStyle} />
@@ -252,7 +256,7 @@ function LayerBar({
   return (
     <motion.div
       animate={{
-        opacity: dim ? 0.46 : 1,
+        opacity: dim ? DIM_OPACITY : 1,
         boxShadow: active ? "0 0 18px rgba(34,211,238,0.2)" : "0 0 0 rgba(0,0,0,0)",
       }}
       transition={{ duration: 0.25, ease: "easeOut" }}
@@ -320,7 +324,7 @@ function PipelineBox({
   return (
     <motion.div
       animate={{
-        opacity: dim ? 0.52 : 1,
+        opacity: dim ? DIM_OPACITY : 1,
         boxShadow: active ? "0 0 18px rgba(255,255,255,0.08)" : "0 0 0 rgba(0,0,0,0)",
       }}
       transition={{ duration: 0.25, ease: "easeOut" }}
@@ -580,7 +584,7 @@ export function ContextWindowDesignDemo() {
                   <motion.div
                     key={label}
                     animate={{
-                      opacity: visible ? 1 : 0.34,
+                      opacity: visible ? 1 : DIM_OPACITY,
                     }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
                     className="rounded-2xl border border-destructive-foreground/25 bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground"
@@ -621,7 +625,7 @@ export function ContextWindowDesignDemo() {
                       <motion.div
                         key={label}
                         animate={{
-                          opacity: visible ? 1 : 0.38,
+                          opacity: visible ? 1 : DIM_OPACITY,
                           boxShadow: active
                             ? "0 0 18px rgba(255,255,255,0.08)"
                             : "0 0 0 rgba(0,0,0,0)",
@@ -643,7 +647,7 @@ export function ContextWindowDesignDemo() {
                 <motion.div
                   key={label}
                   animate={{
-                    opacity: step >= 3 ? 1 : 0.46,
+                    opacity: step >= 3 ? 1 : DIM_OPACITY,
                     boxShadow:
                       step >= 3 && index === 1
                         ? "0 0 18px rgba(255,255,255,0.08)"
@@ -848,7 +852,7 @@ export function MultiStageBuildDemo() {
               <div key={stage.label} className="relative space-y-2">
                 <motion.div
                   animate={{
-                    opacity: pending ? 0.52 : 1,
+                    opacity: pending ? DIM_OPACITY : 1,
                     boxShadow: active ? "0 0 18px rgba(255,255,255,0.08)" : "0 0 0 rgba(0,0,0,0)",
                   }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
@@ -1148,7 +1152,7 @@ export function CacheAwareBuildGraphDemo() {
                   <motion.div
                     key={node.label}
                     animate={{
-                      opacity: dim ? 0.48 : 1,
+                      opacity: dim ? DIM_OPACITY : 1,
                       boxShadow: active ? "0 0 18px rgba(255,255,255,0.08)" : "0 0 0 rgba(0,0,0,0)",
                     }}
                     transition={{ duration: 0.25, ease: "easeOut" }}
