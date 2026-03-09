@@ -242,20 +242,10 @@ function LayerBar({
     <motion.div
       animate={{
         opacity: dim ? 0.28 : 1,
-        scale: active ? [1, 1.02, 1] : 1,
-        boxShadow: active
-          ? [
-              "0 0 0 rgba(34,211,238,0)",
-              "0 0 18px rgba(34,211,238,0.2)",
-              "0 0 0 rgba(34,211,238,0)",
-            ]
-          : "0 0 0 rgba(0,0,0,0)",
+        scale: active ? 1.02 : 1,
+        boxShadow: active ? "0 0 18px rgba(34,211,238,0.2)" : "0 0 0 rgba(0,0,0,0)",
       }}
-      transition={{
-        duration: 1.4,
-        repeat: active ? Number.POSITIVE_INFINITY : 0,
-        ease: "easeInOut",
-      }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${toneClasses(tone)}`}
     >
       {label}
@@ -321,14 +311,10 @@ function PipelineBox({
     <motion.div
       animate={{
         opacity: dim ? 0.35 : 1,
-        y: active ? [0, -4, 0] : 0,
-        scale: active ? [1, 1.02, 1] : 1,
+        y: 0,
+        scale: active ? 1.02 : 1,
       }}
-      transition={{
-        duration: 1.3,
-        repeat: active ? Number.POSITIVE_INFINITY : 0,
-        ease: "easeInOut",
-      }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold ${toneClasses(tone)}`}
     >
       <div className="flex size-8 items-center justify-center rounded-xl border border-white/10 bg-black/10">
@@ -340,10 +326,7 @@ function PipelineBox({
 }
 
 export function SharedOptimizationProblemDemo() {
-  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
-    SHARED_PHASES.length,
-    1700,
-  );
+  const { ref, step, hasStarted, start, restart } = useDemoSequence(SHARED_PHASES.length, 1700);
   const showChange = step >= 1;
   const showInvalidation = step >= 2;
 
@@ -385,14 +368,10 @@ export function SharedOptimizationProblemDemo() {
 
           <motion.div
             animate={{
-              scale: hasStarted ? (showInvalidation ? [1, 1.08, 1] : [1, 1.03, 1]) : 1,
-              opacity: hasStarted ? (showInvalidation ? [0.7, 1, 0.7] : [0.45, 0.8, 0.45]) : 0.45,
+              scale: hasStarted ? (showInvalidation ? 1.08 : 1.03) : 1,
+              opacity: hasStarted ? (showInvalidation ? 1 : 0.8) : 0.45,
             }}
-            transition={{
-              duration: 1.8,
-              repeat: isRunning ? Number.POSITIVE_INFINITY : 0,
-              ease: "easeInOut",
-            }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
             className="relative mx-auto flex size-16 items-center justify-center rounded-full border border-violet-400/30 bg-violet-500/10 text-violet-100"
           >
             <Blocks className="size-7" />
@@ -443,10 +422,7 @@ export function SharedOptimizationProblemDemo() {
 }
 
 export function PrefixInvalidationDemo() {
-  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
-    PREFIX_PHASES.length,
-    1350,
-  );
+  const { ref, step, hasStarted, start, restart } = useDemoSequence(PREFIX_PHASES.length, 1350);
   const tokens = Array.from({ length: 8 }, (_, index) => index + 1);
 
   return (
@@ -501,15 +477,11 @@ export function PrefixInvalidationDemo() {
                       <motion.div
                         key={token}
                         animate={{
-                          y: changed ? [0, -4, 0] : 0,
-                          scale: changed ? [1, 1.04, 1] : 1,
+                          y: 0,
+                          scale: changed ? 1.04 : 1,
                           opacity: invalidated ? 0.28 : token <= validCount ? 1 : 0.82,
                         }}
-                        transition={{
-                          duration: 1.2,
-                          repeat: changed && isRunning ? Number.POSITIVE_INFINITY : 0,
-                          ease: "easeInOut",
-                        }}
+                        transition={{ duration: 0.25, ease: "easeOut" }}
                         className={`flex h-14 items-center justify-center rounded-2xl border text-sm font-black ${
                           changed
                             ? toneClasses("amber")
@@ -554,10 +526,7 @@ export function PrefixInvalidationDemo() {
 }
 
 export function ContextWindowDesignDemo() {
-  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
-    CONTEXT_PHASES.length,
-    1450,
-  );
+  const { ref, step, hasStarted, start, restart } = useDemoSequence(CONTEXT_PHASES.length, 1450);
   const visiblePairs = Math.min(DECOMPOSED_PAIRS.length, step + 1);
   const visibleMonolithItems = Math.min(MONOLITH_ITEMS.length, (step + 1) * 2);
 
@@ -580,7 +549,6 @@ export function ContextWindowDesignDemo() {
             <div className="space-y-2">
               {MONOLITH_ITEMS.map((label, index) => {
                 const visible = index < visibleMonolithItems;
-                const overloaded = step >= 2 && visible;
 
                 return (
                   <motion.div
@@ -588,13 +556,9 @@ export function ContextWindowDesignDemo() {
                     animate={{
                       opacity: visible ? 1 : 0.18,
                       y: visible ? 0 : 10,
-                      x: overloaded ? [0, index % 2 === 0 ? 5 : -5, 0] : 0,
+                      x: 0,
                     }}
-                    transition={{
-                      duration: 1.4 + index * 0.05,
-                      repeat: overloaded && isRunning ? Number.POSITIVE_INFINITY : 0,
-                      ease: "easeInOut",
-                    }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
                     className="rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-2.5 text-sm font-semibold text-rose-50"
                   >
                     {label}
@@ -604,14 +568,10 @@ export function ContextWindowDesignDemo() {
             </div>
             <motion.div
               animate={{
-                scale: step >= 3 ? [1, 1.03, 1] : 1,
+                scale: step >= 3 ? 1.03 : 1,
                 opacity: step >= 3 ? 1 : 0.55,
               }}
-              transition={{
-                duration: 1.2,
-                repeat: step >= 3 && isRunning ? Number.POSITIVE_INFINITY : 0,
-                ease: "easeInOut",
-              }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
               className="flex items-center justify-center gap-3 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-50"
             >
               <RefreshCcw className="size-4" />
@@ -637,13 +597,9 @@ export function ContextWindowDesignDemo() {
                         animate={{
                           opacity: visible ? 1 : 0.2,
                           y: visible ? 0 : 10,
-                          scale: active ? [1, 1.02, 1] : 1,
+                          scale: active ? 1.02 : 1,
                         }}
-                        transition={{
-                          duration: 1.2,
-                          repeat: active && isRunning ? Number.POSITIVE_INFINITY : 0,
-                          ease: "easeInOut",
-                        }}
+                        transition={{ duration: 0.25, ease: "easeOut" }}
                         className={`rounded-2xl border px-4 py-3 text-sm font-semibold ${
                           itemIndex === 0 ? toneClasses("cyan") : toneClasses("emerald")
                         }`}
@@ -661,13 +617,9 @@ export function ContextWindowDesignDemo() {
                   key={label}
                   animate={{
                     opacity: step >= 3 ? 1 : 0.25,
-                    scale: step >= 3 && index === 1 ? [1, 1.03, 1] : 1,
+                    scale: step >= 3 && index === 1 ? 1.03 : 1,
                   }}
-                  transition={{
-                    duration: 1.2,
-                    repeat: step >= 3 && index === 1 && isRunning ? Number.POSITIVE_INFINITY : 0,
-                    ease: "easeInOut",
-                  }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                   className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-center text-xs font-black uppercase tracking-[0.2em] text-slate-200"
                 >
                   {label}
@@ -827,10 +779,7 @@ const ACTIVE_STAGE_INDEXES = [[0], [1], [2], [3, 4], [5]] as const;
 const COMPLETE_STAGE_INDEXES = [[], [0], [0, 1], [0, 1, 2], [0, 1, 2, 3, 4]] as const;
 
 export function MultiStageBuildDemo() {
-  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
-    MULTI_STAGE_PHASES.length,
-    1500,
-  );
+  const { ref, step, hasStarted, start, restart } = useDemoSequence(MULTI_STAGE_PHASES.length, 1500);
   const activeIndexes = new Set<number>(getSequenceValue(ACTIVE_STAGE_INDEXES, step));
   const completeIndexes = new Set<number>(getSequenceValue(COMPLETE_STAGE_INDEXES, step));
 
@@ -855,14 +804,10 @@ export function MultiStageBuildDemo() {
                 <motion.div
                   animate={{
                     opacity: pending ? 0.32 : 1,
-                    y: active ? [0, -4, 0] : 0,
-                    scale: active ? [1, 1.02, 1] : 1,
+                    y: 0,
+                    scale: active ? 1.02 : 1,
                   }}
-                  transition={{
-                    duration: 1.3,
-                    repeat: active && isRunning ? Number.POSITIVE_INFINITY : 0,
-                    ease: "easeInOut",
-                  }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                   className={`rounded-[1.5rem] border px-4 py-4 ${toneClasses(stage.tone)}`}
                 >
                   <div className="mb-3 flex size-9 items-center justify-center rounded-2xl border border-white/10 bg-black/10">
@@ -885,14 +830,9 @@ export function MultiStageBuildDemo() {
                   <motion.div
                     animate={{
                       opacity: complete || active ? 1 : 0.18,
-                      x: activeIndexes.has(index + 1) ? [0, 4, 0] : 0,
+                      x: 0,
                     }}
-                    transition={{
-                      duration: 1.2,
-                      repeat:
-                        activeIndexes.has(index + 1) && isRunning ? Number.POSITIVE_INFINITY : 0,
-                      ease: "easeInOut",
-                    }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
                     className="absolute -right-3 top-10 z-20 hidden items-center text-cyan-200/70 lg:flex"
                   >
                     <ChevronRight className="size-5" />
@@ -918,10 +858,7 @@ export function MultiStageBuildDemo() {
 }
 
 export function FocusedContextDemo() {
-  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
-    FOCUS_PHASES.length,
-    1400,
-  );
+  const { ref, step, hasStarted, start, restart } = useDemoSequence(FOCUS_PHASES.length, 1400);
   const wideCount = getSequenceValue([6, 14, 20, 24] as const, step);
   const narrowCount = getSequenceValue([6, 8, 10, 12] as const, step);
   const wideCacheReuse = getSequenceValue([58, 42, 30, 22] as const, step);
@@ -956,13 +893,9 @@ export function FocusedContextDemo() {
                   <motion.div
                     key={index}
                     animate={{
-                      opacity: visible ? (isRunning ? [0.22, 0.58, 0.22] : 0.22) : 0.08,
+                      opacity: visible ? 0.22 : 0.08,
                     }}
-                    transition={{
-                      duration: 1.5 + (index % 5) * 0.12,
-                      repeat: visible && isRunning ? Number.POSITIVE_INFINITY : 0,
-                      ease: "easeInOut",
-                    }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
                     className={`h-10 rounded-xl ${highlighted ? "bg-rose-400/35" : visible ? "bg-white/8" : "bg-white/[0.03]"}`}
                   />
                 );
@@ -1004,14 +937,10 @@ export function FocusedContextDemo() {
                   <motion.div
                     key={index}
                     animate={{
-                      opacity: visible ? (isRunning ? [0.75, 1, 0.75] : 0.75) : 0.03,
-                      scale: visible ? (isRunning ? [1, 1.03, 1] : 1) : 1,
+                      opacity: visible ? 0.75 : 0.03,
+                      scale: 1,
                     }}
-                    transition={{
-                      duration: 1.6 + (index % 4) * 0.12,
-                      repeat: visible && isRunning ? Number.POSITIVE_INFINITY : 0,
-                      ease: "easeInOut",
-                    }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
                     className={`h-10 rounded-xl ${visible ? fillClass : "bg-transparent"}`}
                   />
                 );
@@ -1045,7 +974,7 @@ export function FocusedContextDemo() {
 }
 
 export function PracticalRulesDemo() {
-  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(7, 1150);
+  const { ref, step, hasStarted, start, restart } = useDemoSequence(7, 1150);
   const rules = [
     { label: "stable instructions first", tone: "cyan" as Tone },
     { label: "keep tool schemas stable", tone: "violet" as Tone },
@@ -1079,14 +1008,10 @@ export function PracticalRulesDemo() {
                 key={rule.label}
                 animate={{
                   opacity: visible ? 1 : 0.18,
-                  y: active ? [0, -3, 0] : 0,
-                  scale: active ? [1, 1.02, 1] : 1,
+                  y: 0,
+                  scale: active ? 1.02 : 1,
                 }}
-                transition={{
-                  duration: 1.1,
-                  repeat: active && isRunning ? Number.POSITIVE_INFINITY : 0,
-                  ease: "easeInOut",
-                }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
                 className={`rounded-[1.4rem] border px-4 py-4 text-sm font-black tracking-tight ${toneClasses(rule.tone)}`}
               >
                 {rule.label}
@@ -1095,13 +1020,9 @@ export function PracticalRulesDemo() {
           })}
           <motion.div
             animate={{
-              opacity: step === rules.length - 1 ? [0.78, 1, 0.78] : 0.78,
+              opacity: 0.78,
             }}
-            transition={{
-              duration: 1.2,
-              repeat: step === rules.length - 1 && isRunning ? Number.POSITIVE_INFINITY : 0,
-              ease: "easeInOut",
-            }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
             className="rounded-[1.4rem] border border-white/10 bg-white/5 px-4 py-4 text-sm font-semibold text-slate-200 xl:col-span-1"
           >
             Treat the prompt like a build graph, not a conversation dump.
@@ -1113,10 +1034,7 @@ export function PracticalRulesDemo() {
 }
 
 export function CacheAwareBuildGraphDemo() {
-  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
-    FINAL_GRAPH_PHASES.length,
-    1450,
-  );
+  const { ref, step, hasStarted, start, restart } = useDemoSequence(FINAL_GRAPH_PHASES.length, 1450);
   const visibleLayers = Math.min(4, step + 1);
   const showGraph = step >= 4;
   const rebuildMode = step >= 5;
@@ -1185,13 +1103,9 @@ export function CacheAwareBuildGraphDemo() {
                     key={node.label}
                     animate={{
                       opacity: dim ? 0.3 : 1,
-                      scale: active ? [1, 1.03, 1] : 1,
+                      scale: active ? 1.03 : 1,
                     }}
-                    transition={{
-                      duration: 1.2,
-                      repeat: active && isRunning ? Number.POSITIVE_INFINITY : 0,
-                      ease: "easeInOut",
-                    }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
                     className={`rounded-2xl border px-4 py-3 text-sm font-black uppercase tracking-[0.16em] ${toneClasses(node.tone)}`}
                   >
                     {node.label}
