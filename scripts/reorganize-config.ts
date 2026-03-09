@@ -91,7 +91,6 @@ export const excludeGlobs = [
   "**/node_modules/**",
   "**/*.d.ts",
   "**/routeTree.gen.ts",
-  "monaco-editor/**",
 ];
 
 // Semantic names for common npm packages (used when no tag matches)

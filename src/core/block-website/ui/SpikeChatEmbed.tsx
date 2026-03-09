@@ -17,12 +17,9 @@ export function SpikeChatEmbed({
   height = 500,
 }: SpikeChatEmbedProps) {
   const isLocal = typeof window !== "undefined" && window.location.hostname.includes("localhost");
-  const configuredBaseUrl = "/";
+  const configuredBaseUrl = import.meta.env.VITE_CHAT_BASE_URL?.trim() ?? "";
   const baseUrl = isLocal ? "http://localhost:8787" : configuredBaseUrl;
-  const embedUrl = new URL(
-    `/embed/${workspaceSlug}/${channelSlug}?guest=${guestAccess}`,
-    isLocal ? baseUrl : typeof window !== "undefined" ? window.location.origin : "https://spike.land",
-  ).toString();
+  const embedUrl = `${baseUrl}/embed/${workspaceSlug}/${channelSlug}?guest=${guestAccess}`;
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">(
     baseUrl ? "loading" : "unavailable",
   );

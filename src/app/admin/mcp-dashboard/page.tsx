@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState } from "react";
 
 interface LatencyStat {
@@ -12,7 +13,7 @@ interface McpHealthData {
   latencyStats: LatencyStat[];
 }
 
-export function McpDashboardPage() {
+export default function McpDashboardPage() {
   const [data, setData] = useState<McpHealthData | null>(null);
 
   useEffect(() => {

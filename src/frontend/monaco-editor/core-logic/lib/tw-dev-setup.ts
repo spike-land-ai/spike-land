@@ -36,7 +36,7 @@ class ResourceLoaderImpl implements ResourceLoader {
   private shouldLoadResources(): boolean {
     const pathname = location.pathname;
 
-    return true;
+    return pathname.endsWith(ResourceLoaderImpl.IFRAME_PATH);
   }
 
   private async loadResources(): Promise<void> {
