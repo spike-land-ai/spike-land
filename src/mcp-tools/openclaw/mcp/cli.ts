@@ -36,7 +36,7 @@ function runCli(
   opts: { timeout?: number; maxBuffer?: number },
 ): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
-    execFile(bin, args, { ...opts, encoding: "utf8" }, (error, stdout, stderr) => {
+    execFile(bin, args, { ...opts, encoding: "utf8" }, (error: Error | null, stdout: string, stderr: string) => {
       if (error) {
         const enriched = error as Error & { stderr?: string };
         enriched.stderr = stderr;

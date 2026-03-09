@@ -38,7 +38,7 @@ export function runCommand(
         maxBuffer: MAX_BUFFER,
         env: { ...process.env, FORCE_COLOR: "0" },
       },
-      (error, stdout, stderr) => {
+      (error: Error | null, stdout: string, stderr: string) => {
         const code = error && "code" in error ? (error.code as number) : error ? 1 : 0;
         resolve({
           ok: code === 0,
