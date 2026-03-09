@@ -426,7 +426,7 @@ export function BlogPostView({
           prose-strong:text-foreground prose-strong:font-black
           prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:bg-primary/[0.02] prose-blockquote:py-6 prose-blockquote:px-8 prose-blockquote:rounded-r-3xl prose-blockquote:text-foreground prose-blockquote:font-bold prose-blockquote:italic
           prose-code:text-primary prose-code:bg-primary/[0.05] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-lg prose-code:before:content-none prose-code:after:content-none prose-code:font-bold
-          prose-pre:bg-muted/50 prose-pre:border-2 prose-pre:border-border/50 prose-pre:rounded-[2rem] prose-pre:p-8
+          prose-pre:bg-muted/50 prose-pre:border-2 prose-pre:border-border/50 prose-pre:rounded-[2rem] prose-pre:px-4 prose-pre:py-4 sm:prose-pre:px-6 sm:prose-pre:py-5 prose-pre:overflow-x-auto
           prose-li:text-muted-foreground prose-li:font-medium
           prose-ul:list-disc prose-ol:list-decimal
           prose-img:rounded-[2.5rem] prose-img:shadow-2xl prose-img:border prose-img:border-border/50

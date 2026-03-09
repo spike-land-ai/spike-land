@@ -572,8 +572,7 @@ export function ContextWindowDesignDemo() {
             <motion.div
               animate={{
                 opacity: step >= 3 ? 1 : 0.55,
-                boxShadow:
-                  step >= 3 ? "0 0 18px rgba(251,191,36,0.18)" : "0 0 0 rgba(0,0,0,0)",
+                boxShadow: step >= 3 ? "0 0 18px rgba(251,191,36,0.18)" : "0 0 0 rgba(0,0,0,0)",
               }}
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="flex items-center justify-center gap-3 rounded-2xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-50"
