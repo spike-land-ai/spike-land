@@ -89,6 +89,10 @@ export function registerStorageTools(
 
       results.forEach((res, index: number) => {
         const file = input.files[index];
+        if (!file) {
+          errors.push({ key: `index:${index}`, error: "Missing file metadata for diff result" });
+          return;
+        }
         if (res.status === "rejected") {
           errors.push({ key: file.key, error: String(res.reason) });
         } else if (res.value) {
@@ -175,6 +179,10 @@ export function registerStorageTools(
 
       results.forEach((res, index: number) => {
         const file = input.files[index];
+        if (!file) {
+          errors.push({ key: `index:${index}`, error: "Missing file metadata for upload result" });
+          return;
+        }
         if (res.status === "rejected") {
           errors.push({ key: file.key, error: String(res.reason) });
         } else {
