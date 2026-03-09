@@ -175,7 +175,7 @@ function DemoShell({
   children: ReactNode;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(2,6,23,0.98))] p-6 text-slate-100 md:p-8">
+    <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(2,6,23,0.98))] p-6 text-slate-100 md:p-8">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.12),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.12),transparent_34%)]" />
       <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,0.28)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.28)_1px,transparent_1px)] [background-size:28px_28px]" />
       <div className="relative space-y-5">
