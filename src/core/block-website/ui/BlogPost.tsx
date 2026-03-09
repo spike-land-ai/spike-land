@@ -56,7 +56,7 @@ function lazyDemo(load: () => Promise<Record<string, unknown>>, name: string) {
   return function LazyDemoWrapper(props: Record<string, unknown>) {
     return (
       <Suspense fallback={<DemoFallback />}>
-        <div className="my-12 overflow-hidden rounded-3xl border border-border/50 shadow-2xl bg-card">
+        <div className="not-prose my-12 overflow-hidden rounded-3xl border border-border/50 bg-card shadow-2xl">
           <LazyComp {...props} />
         </div>
       </Suspense>
