@@ -37,6 +37,7 @@
     "animation/TypeReveal.tsx",
     "animation/Whisper.tsx",
     "core-logic/AppShowcase.tsx",
+    "core-logic/blog-image-policy.ts",
     "core-logic/ScrollWeight.tsx",
     "core-logic/core-index.ts",
     "core-logic/dev-mode.ts",

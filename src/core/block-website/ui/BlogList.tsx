@@ -3,6 +3,7 @@ import type { BlogPost } from "../core-logic/types";
 import { Calendar, Tag, ArrowRight, Clock, BookOpen } from "lucide-react";
 import { cn } from "@spike-land-ai/shared";
 import { apiUrl } from "../core-logic/api";
+import { sanitizeBlogImageSrc } from "../core-logic/blog-image-policy";
 
 type BlogMeta = Omit<BlogPost, "content">;
 
@@ -23,11 +24,13 @@ function hashSlug(slug: string): number {
 }
 
 function CardImage({ post, className = "" }: { post: BlogMeta; className?: string }) {
-  if (post.heroImage) {
+  const safeHeroImage = sanitizeBlogImageSrc(post.heroImage);
+
+  if (safeHeroImage) {
     return (
       <div className={cn("overflow-hidden relative group", className)}>
         <img
-          src={post.heroImage}
+          src={safeHeroImage}
           alt={post.title}
           width={800}
           height={500}

@@ -5,6 +5,7 @@ import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import type { BlogPost } from "../core-logic/types";
 import { apiUrl } from "../core-logic/api";
+import { sanitizeBlogImageSrc } from "../core-logic/blog-image-policy";
 import { BlogListView } from "./BlogList";
 import { ExperimentProvider, useExperiment } from "./useExperiment";
 import { useWidgetTracking } from "./useWidgetTracking";
@@ -154,23 +155,28 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
       {children}
     </div>
   ),
-  img: ({ src, alt, ...rest }: React.ImgHTMLAttributes<HTMLImageElement>) => (
-    <div className="my-12">
-      <img
-        src={src}
-        alt={alt ?? ""}
-        loading="lazy"
-        decoding="async"
-        className="rounded-3xl shadow-2xl border border-border/50 mx-auto transition-transform hover:scale-[1.01] duration-500"
-        {...rest}
-      />
-      {alt && (
-        <p className="mt-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground/40">
-          {alt}
-        </p>
-      )}
-    </div>
-  ),
+  img: ({ src, alt, ...rest }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+    const safeSrc = sanitizeBlogImageSrc(src);
+    if (!safeSrc) return null;
+
+    return (
+      <div className="my-12">
+        <img
+          src={safeSrc}
+          alt={alt ?? ""}
+          loading="lazy"
+          decoding="async"
+          className="rounded-3xl shadow-2xl border border-border/50 mx-auto transition-transform hover:scale-[1.01] duration-500"
+          {...rest}
+        />
+        {alt && (
+          <p className="mt-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground/40">
+            {alt}
+          </p>
+        )}
+      </div>
+    );
+  },
 };
 
 export function BlogPostView({
@@ -280,6 +286,11 @@ export function BlogPostView({
     /!\[[^\]]*\]\(https:\/\/placehold\.co\/[^)]+\)\n?/g,
     "",
   );
+  const safeHeroImage = sanitizeBlogImageSrc(resolvedPost.heroImage);
+  const lightHeroImage = safeHeroImage?.replace(
+    /\.(png|jpe?g|webp|avif)$/i,
+    "-light.$1",
+  );
 
   return (
     <ExperimentProvider>
@@ -314,7 +325,7 @@ export function BlogPostView({
           </div>
         </div>
 
-        {resolvedPost.heroImage && (
+        {safeHeroImage && (
           <>
             <motion.div
               layoutId={`hero-image-${slug}`}
@@ -322,7 +333,7 @@ export function BlogPostView({
               onClick={() => setIsHeroExpanded(true)}
             >
               <motion.img
-                src={resolvedPost.heroImage}
+                src={safeHeroImage}
                 alt={resolvedPost.title}
                 width={1200}
                 height={514}
@@ -331,7 +342,7 @@ export function BlogPostView({
                 className="w-full aspect-[21/9] object-cover hidden dark:block"
               />
               <motion.img
-                src={resolvedPost.heroImage.replace(/\.(png|jpe?g|webp|avif)$/i, "-light.$1")}
+                src={lightHeroImage ?? safeHeroImage}
                 alt={resolvedPost.title}
                 width={1200}
                 height={514}
@@ -339,7 +350,7 @@ export function BlogPostView({
                 decoding="async"
                 className="w-full aspect-[21/9] object-cover dark:hidden block"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = resolvedPost.heroImage!;
+                  (e.target as HTMLImageElement).src = safeHeroImage;
                 }}
               />
             </motion.div>
@@ -354,17 +365,17 @@ export function BlogPostView({
                 >
                   <motion.img
                     layoutId={`hero-image-${slug}`}
-                    src={resolvedPost.heroImage}
+                    src={safeHeroImage}
                     alt={resolvedPost.title}
                     className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain hidden dark:block"
                   />
                   <motion.img
                     layoutId={`hero-image-${slug}-light`}
-                    src={resolvedPost.heroImage.replace(/\.(png|jpe?g|webp|avif)$/i, "-light.$1")}
+                    src={lightHeroImage ?? safeHeroImage}
                     alt={resolvedPost.title}
                     className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain dark:hidden block"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = resolvedPost.heroImage!;
+                      (e.target as HTMLImageElement).src = safeHeroImage;
                     }}
                   />
                 </motion.div>
