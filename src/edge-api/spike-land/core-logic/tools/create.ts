@@ -347,7 +347,7 @@ export function registerCreateTools(
               `**Score:** ${result.score}\n` +
               `**Reason:** ${result.reason}`,
           );
-        } catch (error) {
+        } catch (_error) {
           try {
             const fallback = await apiRequest<{ healthy: boolean }>(
               `/api/create/health/${encodeURIComponent(input.codespace_id)}`,
@@ -483,8 +483,8 @@ export function registerCreateTools(
               `**Status:** ${app.status}\n` +
               `**URL:** ${app.codespaceUrl}`,
           );
-        } catch (error) {
-          const msg = error instanceof Error ? error.message : "Unknown error";
+        } catch (_error) {
+          const msg = _error instanceof Error ? _error.message : "Unknown error";
           return textResult(
             `**Error: NOT_FOUND**\nNo app found with slug "${slug}".\nDetail: ${msg}\n**Retryable:** false`,
           );
