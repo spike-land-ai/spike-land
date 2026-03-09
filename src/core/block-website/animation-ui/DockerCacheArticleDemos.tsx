@@ -1097,7 +1097,10 @@ export function PracticalRulesDemo() {
 }
 
 export function CacheAwareBuildGraphDemo() {
-  const { ref, step, restart } = useDemoSequence(FINAL_GRAPH_PHASES.length, 1450);
+  const { ref, step, hasStarted, isRunning, start, restart } = useDemoSequence(
+    FINAL_GRAPH_PHASES.length,
+    1450,
+  );
   const visibleLayers = Math.min(4, step + 1);
   const showGraph = step >= 4;
   const rebuildMode = step >= 5;
@@ -1107,7 +1110,9 @@ export function CacheAwareBuildGraphDemo() {
       <DemoShell
         title="This is build engineering"
         kicker="Final mental model"
-        status={getSequenceValue(FINAL_GRAPH_PHASES, step)}
+        status={hasStarted ? getSequenceValue(FINAL_GRAPH_PHASES, step) : "Ready to start"}
+        hasStarted={hasStarted}
+        onStart={start}
         onRestart={restart}
       >
         <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
@@ -1131,7 +1136,9 @@ export function CacheAwareBuildGraphDemo() {
                 key={layer.label}
                 label={layer.label}
                 tone={layer.tone}
-                active={(step === index || (rebuildMode && index === 3)) && index < visibleLayers}
+                active={
+                  hasStarted && (step === index || (rebuildMode && index === 3)) && index < visibleLayers
+                }
                 dim={index >= visibleLayers}
               />
             ))}
@@ -1164,7 +1171,7 @@ export function CacheAwareBuildGraphDemo() {
                     }}
                     transition={{
                       duration: 1.2,
-                      repeat: active ? Number.POSITIVE_INFINITY : 0,
+                      repeat: active && isRunning ? Number.POSITIVE_INFINITY : 0,
                       ease: "easeInOut",
                     }}
                     className={`rounded-2xl border px-4 py-3 text-sm font-black uppercase tracking-[0.16em] ${toneClasses(node.tone)}`}
