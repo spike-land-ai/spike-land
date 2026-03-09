@@ -56,7 +56,7 @@ function lazyDemo(load: () => Promise<Record<string, unknown>>, name: string) {
   return function LazyDemoWrapper(props: Record<string, unknown>) {
     return (
       <Suspense fallback={<DemoFallback />}>
-        <div className="my-12 overflow-hidden rounded-3xl border border-border/50 shadow-2xl bg-card">
+        <div className="not-prose my-12 overflow-hidden rounded-3xl border border-border/50 bg-card shadow-2xl">
           <LazyComp {...props} />
         </div>
       </Suspense>
@@ -131,18 +131,18 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
         className={cn(
           "p-6 my-10 rounded-2xl border-l-4 shadow-sm",
           isInfo &&
-            "bg-blue-500/[0.03] border-l-blue-500 border-y border-r border-blue-500/10 text-blue-900 dark:text-blue-100",
+            "bg-info/10 border-l-info-foreground border-y border-r border-info-foreground/20 text-info-foreground",
           isSuccess &&
-            "bg-emerald-500/[0.03] border-l-emerald-500 border-y border-r border-emerald-500/10 text-emerald-900 dark:text-emerald-100",
+            "bg-success/10 border-l-success-foreground border-y border-r border-success-foreground/20 text-success-foreground",
           isWarning &&
-            "bg-amber-500/[0.03] border-l-amber-500 border-y border-r border-amber-500/10 text-amber-900 dark:text-amber-100",
+            "bg-warning/10 border-l-warning-foreground border-y border-r border-warning-foreground/20 text-warning-foreground",
         )}
       >
         <div className="flex gap-4">
           <div className="shrink-0 mt-1">
-            {isInfo && <Info size={20} className="text-blue-500" />}
-            {isSuccess && <CheckCircle2 size={20} className="text-emerald-500" />}
-            {isWarning && <AlertTriangle size={20} className="text-amber-500" />}
+            {isInfo && <Info size={20} className="text-info-foreground" />}
+            {isSuccess && <CheckCircle2 size={20} className="text-success-foreground" />}
+            {isWarning && <AlertTriangle size={20} className="text-warning-foreground" />}
           </div>
           <div className="font-medium leading-relaxed italic">{children}</div>
         </div>
@@ -426,7 +426,7 @@ export function BlogPostView({
           prose-strong:text-foreground prose-strong:font-black
           prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:bg-primary/[0.02] prose-blockquote:py-6 prose-blockquote:px-8 prose-blockquote:rounded-r-3xl prose-blockquote:text-foreground prose-blockquote:font-bold prose-blockquote:italic
           prose-code:text-primary prose-code:bg-primary/[0.05] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-lg prose-code:before:content-none prose-code:after:content-none prose-code:font-bold
-          prose-pre:bg-muted/50 prose-pre:border-2 prose-pre:border-border/50 prose-pre:rounded-[2rem] prose-pre:p-8
+          prose-pre:bg-muted/50 prose-pre:border-2 prose-pre:border-border/50 prose-pre:rounded-[2rem] prose-pre:px-4 prose-pre:py-4 sm:prose-pre:px-6 sm:prose-pre:py-5 prose-pre:overflow-x-auto
           prose-li:text-muted-foreground prose-li:font-medium
           prose-ul:list-disc prose-ol:list-decimal
           prose-img:rounded-[2.5rem] prose-img:shadow-2xl prose-img:border prose-img:border-border/50

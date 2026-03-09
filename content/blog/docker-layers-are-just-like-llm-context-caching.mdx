@@ -140,6 +140,32 @@ Parallelism becomes possible once the stages are real.
 
 ---
 
+## Good tool design removes the context problem by design
+
+This is the part most coding agents still miss.
+
+If the system is built around giant chat transcripts, the context window stays the bottleneck. The agent has to remember everything because the system gave it nowhere else to put state.
+
+But if the workflow is built around small tools and typed artifacts, the problem changes.
+
+State moves out of the prompt and into the system:
+
+- the plan is a file
+- the diff is a tool result
+- the failing test is a tool result
+- the repo is queryable on demand
+- the deployment status is fetched when needed
+
+Now the model does not need to carry the whole story forward in one ever-growing conversation.
+
+That is a huge design shift.
+
+You are not "managing" the context window anymore in the way current coding agents do. You are designing the system so the important state is addressable, externalized, and reloadable. Context becomes a narrow working set, not a permanent memory dump.
+
+That is why tool design matters so much. A good tool surface does not just help the model act. It prevents context collapse by construction.
+
+---
+
 ## Smaller context is not only cheaper. It is better
 
 This matters for quality, not just cost.
