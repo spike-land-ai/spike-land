@@ -11,9 +11,13 @@
 
 ## Thesis
 
-spike.land is not an AI app. It is a developer platform.
+spike.land is not an AI app.
 
-If AI makes apps cheaper, value moves down to runtime, deployment, and orchestration. That is the layer spike.land is building.
+It is a developer platform.
+
+If AI makes apps cheaper, value moves down to runtime, deployment, and orchestration.
+
+That is the layer spike.land is building.
 
 The closest comparison is Vercel, but for edge-native, MCP-native, real-time software that can run across edge, browser, and embedded surfaces.
 
@@ -38,37 +42,49 @@ This is already live.
 | **Execution** | Edge-hosted, embeddable, browser-capable |
 | **Commercial** | Public beta, pre-revenue |
 
-Build risk is no longer the main question. The platform exists. The question is whether this is the right layer to back.
+Build risk is no longer the main question.
+
+The platform exists.
+
+The question is whether this is the right layer to back.
 
 ---
 
 ## Why it matters to Investec
 
-I spent four years at Investec. I know the engineering bar, and I know how much waste still sits in delivery: deploy glue, integration glue, test glue, and process built around complexity.
+I spent four years at Investec.
+
+I know the engineering bar, and I know how much waste still sits in delivery: deploy glue, integration glue, test glue, and process built around complexity.
 
 spike.land tries to cut that out.
 
-The clearest example is testing. Business logic can be exposed as typed tools and tested at function speed. The browser becomes a thin smoke layer.
+The clearest example is testing.
 
-That means faster feedback, less flaky CI, and lower cost. The same model also makes the system easier for agents to use, test, and improve.
+Business logic can be exposed as typed tools and tested at function speed.
 
-The platform itself is proof of leverage: one developer, small AI-tool budget, working product. That is the point of the architecture. Strong tools plus strong feedback beat raw model spend.
+The browser becomes a thin smoke layer.
+
+That means faster feedback, less flaky CI, and lower cost.
+
+The same model also makes the system easier for agents to use, test, and improve.
+
+The platform itself is proof of leverage: one developer, small AI-tool budget, working product.
+
+That is the point of the architecture.
+
+Strong tools plus strong feedback beat raw model spend.
 
 ---
 
 ## Why now
 
-The shift is not AI hype. It is that the platform layer is strategic again.
+The shift is not AI hype.
 
-AI companies, cloud vendors, and developer tools are all moving closer to the layer that controls execution and workflow. That is where spike.land sits.
+It is that the platform layer is strategic again.
 
----
+AI companies, cloud vendors, and developer tools are all moving closer to the layer that controls execution and workflow.
 
-## Team
-
-I would like to build this with former colleagues I trust, including people from Investec. If this works, 1% of a successful company is worth more than 100% of a failed startup.
-
-I am willing to share meaningful equity to build the right team. This started as a long-running hobby project. It is now a real company.
+That is where spike.land sits.
 
 ---
 
@@ -108,14 +124,20 @@ Auditability, governance, runtime boundaries.
 
 ## Closing
 
-spike.land should not be judged as another AI startup. It should be judged as a bet on the layer below the app.
+spike.land should not be judged as another AI startup.
 
-If AI adoption is slow, that layer still matters. If AI adoption is fast, it matters more.
+It should be judged as a bet on the layer below the app.
 
-That is why this is strategically interesting. That is why it fits Investec.
+If AI adoption is slow, that layer still matters.
+
+If AI adoption is fast, it matters more.
+
+That is why this is strategically interesting.
+
+That is why it fits Investec.
 
 ---
 
-*Document Version: 5.6*  
+*Document Version: 5.4*  
 *Prepared: March 2026*  
 *Founder: Zoltan Erdos, SPIKE LAND LTD*
