@@ -1,5 +1,8 @@
 name = "image-studio-mcp"
 main = "../../src/edge-api/image-studio-worker/api-mcp/index.ts"
+
+[dev]
+port = 3100
 compatibility_date = "2025-07-12"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true

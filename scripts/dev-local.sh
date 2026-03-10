@@ -37,13 +37,25 @@ fi
 
 cleanup() {
   echo "Shutting down..."
-  kill $PID_EDGE $PID_APP $PID_SYNC 2>/dev/null || true
+  kill $PID_EDGE $PID_MCP $PID_AUTH $PID_APP 2>/dev/null || true
   wait 2>/dev/null || true
 }
 trap cleanup EXIT INT TERM
 
+echo "Starting mcp-auth on https://local.spike.land:8791 ..."
+(cd "$ROOT/packages/mcp-auth" && npx wrangler dev --port 8791 --local-protocol=https \
+  --https-key-path="$KEY_FILE" \
+  --https-cert-path="$CERT_FILE") &
+PID_AUTH=$!
+
+echo "Starting spike-land-mcp on https://local.spike.land:8790 ..."
+(cd "$ROOT/packages/spike-land-mcp" && npx wrangler dev --port 8790 --local-protocol=https \
+  --https-key-path="$KEY_FILE" \
+  --https-cert-path="$CERT_FILE") &
+PID_MCP=$!
+
 echo "Starting spike-edge on https://local.spike.land:8787 ..."
-(cd "$ROOT/packages/spike-edge" && npx wrangler dev --local-protocol=https \
+(cd "$ROOT/packages/spike-edge" && npx wrangler dev --port 8787 --local-protocol=https \
   --https-key-path="$KEY_FILE" \
   --https-cert-path="$CERT_FILE") &
 PID_EDGE=$!
@@ -53,13 +65,10 @@ echo "Starting spike-app on https://local.spike.land:5173 ..."
 PID_APP=$!
 
 echo ""
-echo "  spike-app:  https://local.spike.land:5173"
-echo "  spike-edge: https://local.spike.land:8787"
+echo "  spike-app:      https://local.spike.land:5173"
+echo "  spike-edge:     https://local.spike.land:8787"
+echo "  spike-land-mcp: https://local.spike.land:8790"
+echo "  mcp-auth:       https://local.spike.land:8791"
 echo ""
-
-echo "Starting auto-sync..."
-bash "$ROOT/scripts/auto-sync.sh" &
-PID_SYNC=$!
-
 
 wait

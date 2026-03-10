@@ -8,8 +8,6 @@
 import tseslint from "typescript-eslint";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
-import boundariesPlugin from "eslint-plugin-boundaries";
-
 // ─── Shared Rules ────────────────────────────────────────────────────────────
 
 const sharedRules = {

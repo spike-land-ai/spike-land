@@ -1,4 +1,8 @@
 name = "esbuild"
+
+[dev]
+port = 8789
+
 # SECURITY: Account ID should be set via environment variable, not hardcoded
 # Wrangler automatically reads CLOUDFLARE_ACCOUNT_ID from environment
 # See docs/SECRETS_SETUP.md for configuration instructions

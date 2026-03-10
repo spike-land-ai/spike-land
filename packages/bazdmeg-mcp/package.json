@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.27.1",
-    "@spike-land-ai/mcp-server-base": "*",
+    "@spike-land-ai/mcp-server-base": "workspace:*",
     "zod": "4.3.6"
   },
   "devDependencies": {

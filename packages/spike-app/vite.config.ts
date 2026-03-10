@@ -13,6 +13,7 @@ const certDir = resolve(import.meta.dirname, "../../.dev-certs");
 const certFile = resolve(certDir, "local.spike.land.pem");
 const keyFile = resolve(certDir, "local.spike.land-key.pem");
 const hasLocalCerts = existsSync(certFile) && existsSync(keyFile);
+const apiTarget = process.env.VITE_API_URL ?? "https://local.spike.land:8787";
 
 /**
  * Vite plugin that rewrites CSS @plugin directives to PnP-resolved paths.
@@ -78,10 +79,7 @@ export default defineConfig(() => ({
         import.meta.dirname,
         "../../src/frontend/platform-frontend/ui/components",
       ),
-      "@/hooks": resolve(
-        import.meta.dirname,
-        "../../src/frontend/platform-frontend/ui/hooks",
-      ),
+      "@/hooks": resolve(import.meta.dirname, "../../src/frontend/platform-frontend/ui/hooks"),
       // Static route pages that live in core-logic/ rather than ui/routes/
       "@/routes/about": resolve(
         import.meta.dirname,
@@ -95,10 +93,7 @@ export default defineConfig(() => ({
         import.meta.dirname,
         "../../src/frontend/platform-frontend/core-logic/terms.tsx",
       ),
-      "@/routes": resolve(
-        import.meta.dirname,
-        "../../src/frontend/platform-frontend/ui/routes",
-      ),
+      "@/routes": resolve(import.meta.dirname, "../../src/frontend/platform-frontend/ui/routes"),
       "@/lib/auth": resolve(
         import.meta.dirname,
         "../../src/frontend/platform-frontend/auth/auth.ts",
@@ -107,10 +102,7 @@ export default defineConfig(() => ({
         import.meta.dirname,
         "../../src/frontend/platform-frontend/core-logic/reportError.ts",
       ),
-      "@/lib": resolve(
-        import.meta.dirname,
-        "../../src/frontend/platform-frontend/core-logic/lib",
-      ),
+      "@/lib": resolve(import.meta.dirname, "../../src/frontend/platform-frontend/core-logic/lib"),
       "@": resolve(import.meta.dirname, "../../src/frontend/platform-frontend"),
       "@spike-land-ai/block-website/ui": resolve(
         import.meta.dirname,
@@ -178,47 +170,47 @@ export default defineConfig(() => ({
       : {}),
     proxy: {
       "/api": {
-        target: "https://local.spike.land:8787",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },
       "/errors": {
-        target: "https://local.spike.land:8787",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },
       "/analytics": {
-        target: "https://local.spike.land:8787",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },
       "/mcp": {
-        target: "https://local.spike.land:8787",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },
       "/oauth": {
-        target: "https://local.spike.land:8787",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },
       "/transpile": {
-        target: "https://local.spike.land:8787",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },
       "^/blog/.+/comments": {
-        target: "https://local.spike.land:8787",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },
       "^/blog/comments/": {
-        target: "https://local.spike.land:8787",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },
       "^/blog/.+/.+\\.(png|jpe?g|gif|webp|svg|avif)$": {
-        target: "https://local.spike.land:8787",
+        target: apiTarget,
         changeOrigin: true,
         secure: false,
       },

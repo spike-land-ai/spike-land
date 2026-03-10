@@ -1,9 +1,9 @@
 name: Incremental Tests (Docker Cache)
 
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_dispatch:
+  # Disabled from automatic triggers — ci.yml already runs incremental tests natively.
+  # Use manually via Actions tab or `gh workflow run test-incremental.yml` when needed.
 
 jobs:
   detect-changes:

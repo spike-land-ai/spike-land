@@ -16,10 +16,28 @@ ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 .PHONY: build-all test-all lint-all check-all status validate \
         build test test-watch test-coverage typecheck lint \
+        dev health \
         rollback-worker rollback-spa rollback-spa-list \
         docker-setup docker-dev docker-ci docker-staging docker-prod \
         docker-down docker-ps docker-logs \
         test-docker test-docker-all test-changed
+
+dev:
+	yarn dev
+
+health:
+	@status=0; \
+	echo "=== Workspace Health Check ==="; \
+	echo "--- Typecheck ---"; \
+	if yarn typecheck; then echo "PASS typecheck"; else echo "FAIL typecheck"; status=1; fi; \
+	echo "--- Lint ---"; \
+	if yarn lint:check; then echo "PASS lint"; else echo "FAIL lint"; status=1; fi; \
+	echo "--- Format (changed files) ---"; \
+	if yarn format:changed; then echo "PASS format"; else echo "FAIL format"; status=1; fi; \
+	echo "--- Tests (changed) ---"; \
+	if yarn test:src; then echo "PASS tests"; else echo "FAIL tests"; status=1; fi; \
+	echo "=== Done ==="; \
+	exit $$status
 
 build-all:
 	yarn workspaces foreach -Apt run build
@@ -47,7 +65,7 @@ test-watch:
 test-coverage:
 	yarn workspaces foreach -Ap run test:coverage
 typecheck:
-	yarn workspaces foreach -Apt run typecheck
+	yarn typecheck
 lint: lint-all
 
 rollback-worker:
@@ -116,8 +134,11 @@ test-docker-all:
 
 setup:
 	@echo "Checking prerequisites..."
-	@node -v >/dev/null || (echo "Node.js required" && exit 1)
-	@node -e "if(+process.versions.node.split('.')[0]<24)process.exit(1)" || echo "Warning: Node 24+ recommended"
+	@node -v >/dev/null || (echo "✗ Node.js required — install via nvm" && exit 1)
+	@node -e "if(+process.versions.node.split('.')[0]<24)process.exit(1)" || echo "⚠ Warning: Node 24+ recommended"
+	@command -v mkcert >/dev/null || echo "⚠ mkcert not found — install: brew install mkcert nss (needed for yarn dev)"
+	@command -v docker >/dev/null || echo "⚠ docker not found — needed for docker-based dev/test"
+	@test -n "$$NODE_AUTH_TOKEN" || echo "⚠ NODE_AUTH_TOKEN not set — required for @spike-land-ai packages (see CONTRIBUTING.md)"
 	@echo "Installing dependencies..."
 	yarn install
 	@echo "Setting up pre-commit hooks..."
@@ -127,4 +148,7 @@ setup:
 		dir=$$(dirname "$$f"); \
 		[ ! -f "$$dir/.dev.vars" ] && cp "$$f" "$$dir/.dev.vars" && echo "Created $$dir/.dev.vars"; \
 	done || true
-	@echo "Setup complete! Set NODE_AUTH_TOKEN if you haven't (see CONTRIBUTING.md)"
+	@echo ""
+	@echo "Setup complete!"
+	@echo "  Next: yarn dev (starts full local stack)"
+	@echo "  See CONTRIBUTING.md for details"

@@ -5,8 +5,16 @@ if command -v gitleaks >/dev/null 2>&1; then
 else
   echo "Warning: gitleaks not installed — skipping secret detection"
 fi
-# Typecheck staged TS files
-STAGED=$(git diff --cached --name-only --diff-filter=ACM -- '*.ts' '*.tsx')
+
+# Format staged files with Biome
+STAGED=$(git diff --cached --name-only --diff-filter=ACM -- '*.ts' '*.tsx' '*.json')
 if [ -n "$STAGED" ]; then
+  echo "$STAGED" | xargs npx biome format --write 2>/dev/null
+  echo "$STAGED" | xargs git add
+fi
+
+# Typecheck staged TS files
+STAGED_TS=$(git diff --cached --name-only --diff-filter=ACM -- '*.ts' '*.tsx')
+if [ -n "$STAGED_TS" ]; then
   npx tsc --noEmit --incremental
 fi

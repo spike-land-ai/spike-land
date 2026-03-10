@@ -29,6 +29,12 @@ jobs:
           key: tsbuildinfo-${{ runner.os }}-${{ hashFiles('tsconfig.json', 'src/**/*.ts', 'src/**/*.tsx') }}
           restore-keys: tsbuildinfo-${{ runner.os }}-
 
+      - uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: node-modules-${{ runner.os }}-
+
       - run: yarn install
       - run: yarn typecheck
 
@@ -36,6 +42,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -44,11 +52,24 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .eslintcache
-          key: eslintcache-${{ runner.os }}-${{ hashFiles('eslint.config.mjs') }}-${{ github.sha }}
-          restore-keys: eslintcache-${{ runner.os }}-${{ hashFiles('eslint.config.mjs') }}-
+          key: eslintcache-${{ runner.os }}-${{ hashFiles('eslint.config.mjs') }}
+          restore-keys: eslintcache-${{ runner.os }}-
+
+      - uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: node-modules-${{ runner.os }}-
 
       - run: yarn install
-      - run: yarn lint
+      - run: yarn lint:check
+      - name: Check formatting for changed files
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            bash scripts/format-changed.sh --base origin/main --head HEAD
+          else
+            bash scripts/format-changed.sh --base HEAD~1 --head HEAD
+          fi
 
   test:
     runs-on: ubuntu-latest
@@ -60,6 +81,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
+
+      - uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: node-modules-${{ runner.os }}-
 
       - run: yarn install
       - name: Run changed tests
@@ -79,6 +106,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
+
+      - uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: node-modules-${{ runner.os }}-
 
       - run: yarn install
       - run: yarn build:src
@@ -108,6 +141,12 @@ jobs:
           cache: yarn
           registry-url: https://npm.pkg.github.com
 
+      - uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: node-modules-${{ runner.os }}-
+
       - run: yarn install
 
       # publish-changed.js reads from dist/<packageName>/ (line: const DIST = join(ROOT, "dist"))
@@ -132,13 +171,19 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     env:
-      CLOUDFLARE_ACCOUNT_ID: 1f98921051196545ebe79a450d3c71ed
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
+
+      - uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: node-modules-${{ runner.os }}-
 
       - run: yarn install
 

@@ -12,7 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint --quiet ../../src/spike-land-mcp/",
+    "lint": "eslint --quiet .",
     "db:generate": "drizzle-kit generate",
     "db:reconcile:local": "node --import tsx ../../scripts/d1-local-baseline.ts spike-land-mcp",
     "db:migrate:local": "node --import tsx ../../scripts/d1-local-baseline.ts spike-land-mcp --apply-pending",
@@ -21,7 +21,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@spike-land-ai/mcp-server-base": "workspace:*",
-    "@spike-land-ai/shared": "*",
+    "@spike-land-ai/shared": "workspace:*",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.12.5",
     "zod": "4.3.6"

@@ -295,6 +295,48 @@ const visibleContentAppSummaries = contentApps
   .filter((app) => CATALOG_VISIBLE_STATUSES.has(app.status.toLowerCase()))
   .map((app) => normalizeAppSummary(app));
 
+function resolveLocalAppDetail(slug: string): McpAppDetail | null {
+  const showcaseApp = getShowcaseAppDetail(slug);
+  if (showcaseApp) {
+    return {
+      ...showcaseApp,
+      category: inferAppCategory([
+        showcaseApp.category,
+        showcaseApp.slug,
+        showcaseApp.name,
+        showcaseApp.description,
+        ...showcaseApp.tools,
+      ]),
+      tags: showcaseApp.tags ?? [],
+      tagline: showcaseApp.tagline ?? "",
+      pricing: showcaseApp.pricing ?? "free",
+      is_featured: showcaseApp.is_featured ?? false,
+      is_new: showcaseApp.is_new ?? false,
+    };
+  }
+
+  const contentApp = contentApps.find((app) => app.slug === slug);
+  if (contentApp) {
+    return {
+      ...contentApp,
+      category: inferAppCategory([
+        contentApp.category,
+        contentApp.slug,
+        contentApp.name,
+        contentApp.description,
+        ...contentApp.tools,
+      ]),
+      tags: contentApp.tags ?? [],
+      tagline: contentApp.tagline ?? "",
+      pricing: contentApp.pricing ?? "free",
+      is_featured: contentApp.is_featured ?? false,
+      is_new: contentApp.is_new ?? false,
+    };
+  }
+
+  return null;
+}
+
 function mergeCatalogApps(...sources: McpAppSummary[][]): McpAppSummary[] {
   const deduped = new Map<string, McpAppSummary>();
 
@@ -384,55 +426,28 @@ export function useApp(slug: string) {
   return useQuery({
     queryKey: ["mcp-app", slug],
     queryFn: async (): Promise<McpAppDetail> => {
+      const localApp = resolveLocalAppDetail(slug);
+      if (localApp) {
+        return localApp;
+      }
+
       try {
         const response = await fetch(mcpUrl(`/apps/${encodeURIComponent(slug)}`));
         if (response.ok) {
           const app = (await response.json()) as PublicAppDetail;
           return {
             ...app,
-            category: inferAppCategory([app.category, app.slug, app.name, app.description, ...app.tools]),
+            category: inferAppCategory([
+              app.category,
+              app.slug,
+              app.name,
+              app.description,
+              ...app.tools,
+            ]),
           };
         }
       } catch {
         // Fall through to local showcase and content app fallbacks.
-      }
-
-      const showcaseApp = getShowcaseAppDetail(slug);
-      if (showcaseApp) {
-        return {
-          ...showcaseApp,
-          category: inferAppCategory([
-            showcaseApp.category,
-            showcaseApp.slug,
-            showcaseApp.name,
-            showcaseApp.description,
-            ...showcaseApp.tools,
-          ]),
-          tags: showcaseApp.tags ?? [],
-          tagline: showcaseApp.tagline ?? "",
-          pricing: showcaseApp.pricing ?? "free",
-          is_featured: showcaseApp.is_featured ?? false,
-          is_new: showcaseApp.is_new ?? false,
-        };
-      }
-
-      const contentApp = contentApps.find((app) => app.slug === slug);
-      if (contentApp) {
-        return {
-          ...contentApp,
-          category: inferAppCategory([
-            contentApp.category,
-            contentApp.slug,
-            contentApp.name,
-            contentApp.description,
-            ...contentApp.tools,
-          ]),
-          tags: contentApp.tags ?? [],
-          tagline: contentApp.tagline ?? "",
-          pricing: contentApp.pricing ?? "free",
-          is_featured: contentApp.is_featured ?? false,
-          is_new: contentApp.is_new ?? false,
-        };
       }
 
       const data = await fetchStoreTools();

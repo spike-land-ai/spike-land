@@ -3,6 +3,9 @@
 name = "spike-land-mcp"
 main = "./index.ts"
 compatibility_date = "2025-07-12"
+
+[dev]
+port = 8790
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 

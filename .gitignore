@@ -42,6 +42,14 @@ errors.json
 error_lines.txt
 coverage_output.txt
 incremental-coverage.json
+eslint_errors.json
+eslint_report.json
+eslint_report_formatted.json
+fix_issues.js
+mcp_debug.ts
+test_output.txt
+test_script.ts
+test_transport.js
 # Terraform
 .terraform/
 *.tfstate
