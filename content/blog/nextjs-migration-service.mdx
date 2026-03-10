@@ -18,9 +18,9 @@ heroPrompt: "A cinematic developer-focused illustration of a large aging Next.js
 <Tldr>
 
 - Most Next.js migrations fail because people start with rewriting code instead of reading architecture.
-- We handle migration in three tiers: documentation, repo-level automation, and PR-generating MCP infrastructure.
+- We handle migration in five tiers: documentation, repo-level automation, PR-generating MCP infrastructure, fixing Next.js itself, and — for £1,000,000 — running Next.js in the browser with zero install.
 - The technical foundation is the same one behind the BAZDMEG method: requirement clarity, structural analysis, deterministic transformation, and aggressive verification.
-- This is not "vibe migrate my app." It is a reviewable migration system.
+- This is not "[vibe migrate my app](/blog/the-vibe-coding-paradox)." It is a reviewable migration system.
 
 </Tldr>
 
@@ -68,7 +68,7 @@ The only version worth selling is one that has a real method behind it.
 
 ## The Method Behind The Migration
 
-The migration work sits on the same foundation as [BAZDMEG](https://spike.land/bazdmeg):
+The migration work sits on the same foundation as [BAZDMEG](https://spike.land/bazdmeg) — the thinking behind which is laid out in [It Feels Like Cheating (Because It Is)](/blog/it-feels-like-cheating):
 
 - requirement clarity before code generation
 - safe entrypoints before destructive actions
@@ -92,7 +92,9 @@ That is why the flow is:
 5. verify the output
 6. escalate only the edge cases that deserve human judgment
 
-The same principle shows up elsewhere in our work too. When we reorganized 990 TypeScript files in our monorepo, the trick was not taste. It was dependency analysis. The architecture was already in the imports. The script just read it.
+This sequencing mirrors a broader principle about how AI-assisted work succeeds. The reasoning behind it is laid out in [Think Slowly, Ship Fast](/blog/think-slowly-ship-fast): decide before you generate, not after.
+
+The same principle shows up elsewhere in our work too. When we [reorganized 990 TypeScript files](/blog/where-does-your-code-belong) in our monorepo, the trick was not taste. It was dependency analysis. The architecture was already in the imports. The script just read it.
 
 Migration works the same way.
 
@@ -113,12 +115,64 @@ It is a migration from Next.js toward an explicit, edge-native stack:
 | `getServerSideProps`, ISR patterns | explicit loaders, client-first rendering, edge handlers |
 | `next/image`, `next/font` | direct imports and standard platform-native handling |
 
+The reasoning behind this target stack — why edge-native Cloudflare Workers replaced both Next.js and AWS for us — is covered in [The Universal Interface Wasn't GraphQL](/blog/the-universal-interface-wasnt-graphql).
+
 That does not mean every feature maps 1:1.
 
 It means the target stack is opinionated, explicit, and cheaper to reason about.
 
-That is the real benefit. Not "new shiny tool."  
+That is the real benefit. Not "new shiny tool."
 A simpler runtime model, faster local loops, fewer hidden conventions, and less framework rent.
+
+### What The Code Actually Looks Like
+
+Here is a concrete example. A typical Next.js API route:
+
+```typescript
+// pages/api/health.ts (Next.js)
+export default async function handler(req, res) {
+  const deep = req.query.deep === "true";
+  const dbStatus = await checkDb();
+  res.status(200).json({ status: "ok", db: dbStatus });
+}
+```
+
+Becomes an explicit Hono handler on Cloudflare Workers:
+
+```typescript
+// routes/health.ts (Hono + Cloudflare Workers)
+import type { Context } from "hono";
+import { Hono } from "hono";
+import type { Env } from "../../core-logic/env.js";
+
+const health = new Hono<{ Bindings: Env }>();
+
+health.get("/health", async (c: Context<{ Bindings: Env }>) => {
+  const deep = c.req.query("deep") === "true";
+  const [r2Status, d1Status] = await Promise.all([
+    checkDependencyHealth(() => c.env.R2.head("__health_check__")),
+    checkDependencyHealth(() => c.env.DB.prepare("SELECT 1").first()),
+  ]);
+  return c.json(buildHealthPayload({ r2: r2Status, d1: d1Status }));
+});
+
+export { health };
+```
+
+No file-based routing convention. Typed bindings via `c.env` instead of environment variables. The handler is an explicit function, not a default export that relies on framework magic.
+
+Auth middleware follows the same pattern — explicit, composable, no hidden conventions:
+
+```typescript
+// middleware/auth.ts (Hono)
+app.use("/proxy/*", authMiddleware);
+app.use("/api/checkout", authMiddleware);
+app.use("/api/billing/*", authMiddleware);
+```
+
+Every protected route is visible in one place. No `_middleware.ts` files scattered across directories.
+
+These are not contrived examples. They are from [our production edge API](https://github.com/spike-land-ai).
 
 ## Why Sophisticated Legacy Projects Are Still In Scope
 
@@ -165,7 +219,7 @@ Not because the hard parts disappear, but because they stop contaminating the wh
 
 ## Why Gian Pierre Matters Here
 
-Gian Pierre helped shape the thinking behind this work earlier by validating a simple idea:
+Gian Pierre helped shape the thinking behind this work earlier by validating a simple idea — first as [a chemist who walked into a codebase](/blog/a-chemist-walked-into-a-codebase) and shipped real apps by starting with requirements:
 
 large codebases are not as chaotic as they look.
 
@@ -184,13 +238,15 @@ That is the right role for human expertise.
 
 Not brute-forcing the entire migration by hand, but stepping in where structure extraction and deterministic passes hit real business complexity.
 
-## The Three Tiers
+## The Five Tiers
 
 ### Tier 1 - Documentation: $420
 
 This tier exists for teams that are not ready to commit to migration work yet, but need a serious map.
 
-If funded, Gian Pierre will migrate eight real Next.js projects and document what actually happens: the false starts, the dead ends, the framework-specific traps, the easy wins, and the parts that are truly mechanical versus the parts that require judgment.
+If funded, Gian Pierre will migrate eight real Next.js projects — ranging from content sites and SaaS dashboards to e-commerce storefronts and internal tools — and document what actually happens: the false starts, the dead ends, the framework-specific traps, the easy wins, and the parts that are truly mechanical versus the parts that require judgment.
+
+The projects are chosen to cover the most common Next.js patterns: Pages Router, App Router, mixed rendering, middleware-heavy auth, Vercel-specific optimizations, and third-party integration density. The goal is not to cherry-pick easy wins but to map the real surface area of migration work.
 
 This is not theory.
 It is paid field research.
@@ -237,9 +293,9 @@ about 1 week from repo access
 
 This is the full system.
 
-Instead of running a one-off script, we formalize migration as a capability.
+Instead of running a one-off script, we formalize migration as a capability. If you want to understand how MCP systems are structured, [MCP Explained: The Universal Adapter for AI Tools](/blog/mcp-explained-universal-adapter-for-ai-tools) covers the full request lifecycle.
 
-The MCP server reads your repo, inspects the structure, applies migration rules, generates the transformation, and opens a real pull request.
+The MCP server reads your repo, inspects the structure, applies migration rules, generates the transformation, and opens a real pull request. The engineering pattern behind this — agents that can write their own tools when the framework is invisible — is described in [The Architecture of Scale](/blog/the-architecture-of-scale-building-tools).
 
 That is a different class of offer.
 
@@ -254,8 +310,62 @@ a working MCP migration server for your repo, a generated PR, and one year of ma
 **Best for:**  
 teams with multiple apps, recurring migration needs, or enough engineering pain that systematizing the work is cheaper than repeating it manually
 
-**Timeline:**  
+**Timeline:**
 about 2 weeks from contract
+
+---
+
+### Tier 4 - Fix Next.js Itself: £100,000
+
+This is not a joke.
+
+For a hundred thousand pounds, Gian Pierre will contribute the changes upstream to Next.js so that your existing codebase — with its current syntax, current conventions, current file structure — runs natively on Cloudflare Workers, Hono, and Vite without a migration at all.
+
+No migration pass. No rewrite. No new routing library.
+
+The old syntax just works on the new runtime.
+
+This is the version where Next.js becomes the adapter instead of the bottleneck.
+
+Gian Pierre says he will do it this weekend.
+
+If he cannot deliver — and he can deliver absolutely anything — the money funds [COMPASS](https://spike.land/docs/compass-prd), Gian Pierre's flagship project and the first pet project of spike.land. COMPASS goes public on March 21st. A universal bureaucracy navigator for the 4 billion people who miss services they are eligible for. 193 countries, 400+ languages, free forever.
+
+Either way, the money does something that matters.
+
+**What you get:**
+upstream contributions to Next.js that make the framework natively compatible with edge-native deployment targets, so nobody else has to migrate either
+
+**Best for:**
+organizations where the cost of migrating hundreds of apps exceeds the cost of fixing the framework once
+
+**Timeline:**
+this weekend, if Gian Pierre is right. Otherwise, COMPASS launches March 21st.
+
+---
+
+### Tier 5 - Next.js In The Browser: £1,000,000
+
+This is the full overhaul. By Zoltan himself.
+
+For one million pounds, your Next.js projects run inside the browser. No install. No build. No setup time. You open a URL and the app is running.
+
+The database runs on the edge — or in the browser. Dynamic app boundaries replace static build-time decisions. The entire Next.js execution model gets rebuilt from the ground up to work as a zero-install, browser-native platform.
+
+This is not a migration. This is a new runtime.
+
+**What you get:**
+a browser-native Next.js runtime where your existing projects run without installation, build steps, or server infrastructure — edge database, dynamic boundaries, instant start
+
+**Best for:**
+organizations that want to eliminate deployment entirely — or anyone who has looked at their CI pipeline and thought "why does this exist"
+
+**Timeline:**
+Zoltan delivers. If somehow he does not — Gian Pierre steps in, and the money funds COMPASS.
+
+---
+
+The tiers are designed to meet you where you are. Most teams start with Tier 1 or Tier 2. Tier 3 is for recurring needs. Tier 4 is for the industry. Tier 5 is for the future.
 
 ## What The Technical Pipeline Looks Like
 
@@ -304,6 +414,8 @@ After the transformation:
 - business-critical flows must still hold
 - generated diff must be understandable by a human reviewer
 
+The reason this verification step is fast rather than ceremonial is covered in [Tool-First Testing vs Browser Testing: A Benchmark](/blog/tool-first-testing-benchmark) — MCP tool tests run 99x faster than browser-driven E2E and eliminate flakiness entirely.
+
 If the diff cannot be explained, it is not done.
 
 ### 5. Escalation
@@ -322,7 +434,7 @@ The following usually need custom treatment:
 - code that assumes long-lived Node.js APIs or server processes
 - undocumented Next.js internals
 - application logic that was accidentally encoded inside framework behavior
-- repos with weak test coverage on core business paths
+- repos with weak test coverage on core business paths (if this describes your repo, read [The Testing Pyramid Is Upside Down](/blog/the-testing-pyramid-is-upside-down) before you start)
 
 We say this up front because false confidence is expensive.
 
@@ -333,14 +445,16 @@ A migration service should reduce risk, not hide it.
 The pricing is not based on hype.
 It is based on what type of work you are buying.
 
-**$420** buys risk reduction through field-tested documentation.  
-**£1,000** buys a repo-level mechanical migration pass plus reviewable output.  
+**$420** buys risk reduction through field-tested documentation.
+**£1,000** buys a repo-level mechanical migration pass plus reviewable output.
 **$10,000** buys a repeatable migration capability with ongoing maintenance.
+**£100,000** buys a fix to Next.js itself so nobody has to migrate at all.
+**£1,000,000** buys a browser-native Next.js runtime with zero install, edge database, and no build step.
 
 The alternative is usually some combination of:
 - a full sprint of senior engineering time
 - framework lock-in that keeps costing money
-- a migration attempt that stalls halfway because nobody separated structure from chaos
+- a migration attempt that stalls halfway because nobody [separated structure from chaos](/blog/you-cannot-automate-chaos)
 
 That is more expensive than any tier here.
 
@@ -375,8 +489,11 @@ Yes. Both are in scope.
 **What if the app has blockers?**  
 We tell you before paid migration work starts. If a repo contains real blockers, the correct answer is not to bluff.
 
-**Why not just use an AI coding agent directly?**  
-Because a raw agent without structure will confidently produce migration slop. The value here is not "AI exists." The value is requirement discipline, structural reading, deterministic transformation, and human review only where needed.
+**Why not just use an AI coding agent directly?**
+Because a raw agent without structure will confidently produce migration slop. We have [written about what happens when you skip this step](/blog/what-i-learned-from-my-worst-pull-request). The value here is not "AI exists." The value is requirement discipline, structural reading, deterministic transformation, and human review only where needed.
+
+**Do I have to fully commit to the target stack before using any of this?**
+No. If you want to start smaller, you can [embed spike.land MCP tools in your existing project](/blog/mcp-apps-from-any-origin) without a full migration.
 
 **What is the link to BAZDMEG?**  
 Same mindset: safe read first, preview second, destructive action last, ownership always. The method matters more than the model.
@@ -388,7 +505,7 @@ If you are still deciding whether leaving Next.js is worth it, [read the origina
 If you have already decided and want to know which tier fits, go to [/migrate](/migrate).
 
 Describe your app in one paragraph.
-We will tell you whether it belongs in Tier 1, Tier 2, Tier 3, or whether you should not migrate at all.
+We will tell you whether it belongs in Tier 1, Tier 2, Tier 3, Tier 4, Tier 5, or whether you should not migrate at all.
 
 Because the goal is not to sell migration theater.
 

@@ -82,6 +82,14 @@ const DOCS_MANIFEST: DocEntry[] = [
     description: "Understanding rate limits and quotas",
     filePath: "docs/api/API_REFERENCE.md",
   },
+  {
+    slug: "compass-prd",
+    title: "COMPASS — Universal Bureaucracy Navigator",
+    category: "Products",
+    description:
+      "PRD for COMPASS: bureaucratic literacy as a universal human right. Navigating services for 4B people across 193 countries.",
+    filePath: "docs/compass-prd.md",
+  },
 ];
 
 const CATEGORIES = [...new Set(DOCS_MANIFEST.map((d) => d.category))];
