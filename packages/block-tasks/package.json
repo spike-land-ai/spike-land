@@ -4,6 +4,9 @@
   "description": "Proof-of-concept full-stack block — task queue with CRUD, claim workflow, and React UI",
   "type": "module",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "exports": {
     ".": "./index.ts",
     "./worker": "./worker.ts",

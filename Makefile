@@ -5,7 +5,6 @@
 #   make test-all      Run all tests
 #   make lint-all      Run all linters
 #   make check-all     lint + test everything
-#   make validate      Check workspace graph vs dependency-map.json
 
 SHELL := /bin/bash
 # Updated usage header:
@@ -14,7 +13,7 @@ SHELL := /bin/bash
 #   make test-docker-all   Run ALL tests via Docker cache
 ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
-.PHONY: build-all test-all lint-all check-all status validate \
+.PHONY: build-all test-all lint-all check-all status \
         build test test-watch test-coverage typecheck lint \
         dev health \
         rollback-worker rollback-spa rollback-spa-list \
@@ -53,9 +52,6 @@ lint-all:
 
 check-all: lint-all test-all
 	@echo "All checks passed"
-
-validate:
-	node "$(ROOT).github/scripts/validate-workspace-graph.mjs"
 
 # Short aliases
 build: build-all

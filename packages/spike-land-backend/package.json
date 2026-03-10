@@ -5,6 +5,9 @@
   "type": "module",
   "module": "dist/index.js",
   "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "dev": "wrangler dev",
     "dev:remote": "wrangler dev --remote",

@@ -170,7 +170,7 @@ Deploying or monitoring the API:
 1. Read: [README.md](./README.md) - Architecture overview (5 min)
 2. Check: [../../README.md](../../README.md) - Deployment setup (15 min)
 3. Review:
-   [../../docs/guides/SECRETS_SETUP.md](../../docs/guides/SECRETS_SETUP.md) -
+   [../develop/SECRETS_SETUP.md](../develop/SECRETS_SETUP.md) -
    Environment variables
 4. Reference: [openapi.yaml](./openapi.yaml) - Complete API specification
 5. Configure: Vercel deployment with cron jobs (see `vercel.json`)

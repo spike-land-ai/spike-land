@@ -4,6 +4,9 @@
   "description": "Educational video compositions (Remotion)",
   "type": "module",
   "main": "./index.ts",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "build": "npx remotion bundle index.ts dist/bundle.js",
     "start": "npx remotion preview index.ts",

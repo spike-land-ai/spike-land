@@ -2,6 +2,9 @@
   "name": "@spike-land-ai/status",
   "version": "0.0.1",
   "private": true,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy"

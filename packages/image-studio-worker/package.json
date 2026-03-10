@@ -5,6 +5,9 @@
   "description": "Image Studio — Cloudflare Worker with React frontend",
   "type": "module",
   "main": "index.ts",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "dev": "npm run build:frontend && wrangler dev",
     "dev:all": "npm run build:frontend & wrangler dev",

@@ -283,7 +283,7 @@ packages:
     kind: worker
     version: 1.0.0
     description: Main backend (Durable Objects, Hono, real-time collaboration)
-    entry: cf-workers.ts
+    entry: index.ts
     deps: [code, esbuild-wasm, esbuild-wasm-mcp]
     worker:
       name: spike-land
@@ -304,7 +304,7 @@ packages:
         - binding: X9
           bucket_name: code-chain
       site:
-        bucket: node_modules/@spike-land-ai/code/dist
+        bucket: ./dist
 
   transpile:
     kind: worker
@@ -373,10 +373,10 @@ packages:
       registries: [github]
     worker:
       name: spike-land-frontend
-      entry: worker.ts
+      entry: api/worker.ts
       compatibility_date: "2025-11-11"
       assets:
-        directory: ./dist-vite/client
+        directory: ./dist-vite
         not_found_handling: single-page-application
       routes:
         - pattern: testing.spike.land

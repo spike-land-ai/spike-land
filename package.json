@@ -89,13 +89,13 @@
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@spike-land-ai/mcp-server-base": "workspace:*",
-    "@spike-land-ai/shared": "workspace:*",
     "@biomejs/biome": "^2.4.6",
     "@changesets/cli": "2.30.0",
     "@cloudflare/puppeteer": "^1.0.6",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-slot": "^1.2.4",
+    "@spike-land-ai/mcp-server-base": "workspace:*",
+    "@spike-land-ai/shared": "workspace:*",
     "@testing-library/user-event": "^14.6.1",
     "@types/cors": "^2.8.19",
     "@types/cross-spawn": "^6.0.6",

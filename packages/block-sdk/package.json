@@ -4,6 +4,9 @@
   "description": "Full-stack block SDK — defineBlock(), StorageAdapter, React bindings, MCP integration",
   "type": "module",
   "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "exports": {
     ".": "./index.ts",
     "./storage": "./storage/index.ts",

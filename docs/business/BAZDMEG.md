@@ -106,10 +106,10 @@ The requirement IS the product. The code is just the output.
 
 Write it like you mean it.
 
-_Sources: posts [01](blog/01-my-prs-were-pure-ai-slop.md),
-[08](blog/08-how-to-not-produce-ai-slop.md),
-[11](blog/11-requirement-is-the-product.md),
-[16](blog/16-how-i-vibe-coded-production-saas.md)_
+_Sources: posts [01](../../content/blog/01-my-prs-were-pure-ai-slop.mdx),
+[08](../../content/blog/08-how-to-not-produce-ai-slop.mdx),
+[11](../../content/blog/11-requirement-is-the-product.mdx),
+[16](../../content/blog/16-how-i-vibe-coded-production-saas.mdx)_
 
 ---
 
@@ -161,9 +161,9 @@ Before you add a single AI agent to your workflow, audit this list:
 If your tests flake, you are gaslighting your AI. Fix the foundation before you
 build the house.
 
-_Sources: posts [03](blog/03-last-two-days-sprint-horror.md),
-[08](blog/08-how-to-not-produce-ai-slop.md),
-[16](blog/16-how-i-vibe-coded-production-saas.md),
+_Sources: posts [03](../../content/blog/03-last-two-days-sprint-horror.mdx),
+[08](../../content/blog/08-how-to-not-produce-ai-slop.mdx),
+[16](../../content/blog/16-how-i-vibe-coded-production-saas.mdx),
 [you-cannot-automate-chaos](/content/blog/you-cannot-automate-chaos.mdx)_
 
 ---
@@ -222,9 +222,9 @@ traditionally.
 The model is only as good as its context. Bad context in, bad code out. Good
 context in, production code out.
 
-_Sources: posts [07](blog/07-context-engineering-replaced-coding.md),
-[08](blog/08-how-to-not-produce-ai-slop.md),
-[09](blog/09-new-developer-onboarding-ai-edition.md),
+_Sources: posts [07](../../content/blog/07-context-engineering-replaced-coding.mdx),
+[08](../../content/blog/08-how-to-not-produce-ai-slop.mdx),
+[09](../../content/blog/09-new-developer-onboarding-ai-edition.mdx),
 [context-engineering-your-zero-shot-prompt](/content/blog/context-engineering-your-zero-shot-prompt.mdx),
 [how-claude-code-engineers-context](/content/blog/how-claude-code-engineers-context.mdx)_
 
@@ -295,7 +295,7 @@ a business rule, it belongs in the MCP tool test.
 
 You have not lost any coverage. You have lost the browser.
 
-_Sources: posts [08](blog/08-how-to-not-produce-ai-slop.md),
+_Sources: posts [08](../../content/blog/08-how-to-not-produce-ai-slop.mdx),
 [the-testing-pyramid-is-upside-down](/content/blog/the-testing-pyramid-is-upside-down.mdx),
 [think-slowly-ship-fast](/content/blog/think-slowly-ship-fast.mdx)_
 
@@ -348,8 +348,8 @@ went from **~55% to ~85%**.
 
 Natural selection, running on softmax.
 
-_Sources: posts [04](blog/04-2025-year-agents-outperformed.md),
-[07](blog/07-context-engineering-replaced-coding.md),
+_Sources: posts [04](../../content/blog/04-2025-year-agents-outperformed.mdx),
+[07](../../content/blog/07-context-engineering-replaced-coding.mdx),
 [the-vibe-coding-paradox](/content/blog/the-vibe-coding-paradox.mdx),
 [automate-dev-team-ai-agents](/content/blog/automate-dev-team-ai-agents.mdx)_
 
@@ -407,9 +407,9 @@ Name it. Discuss it. Fix it.
 
 Trust rebuilds one good PR at a time. It is slow. But it is worth it.
 
-_Sources: posts [02](blog/02-more-productive-ruining-career.md),
-[03](blog/03-last-two-days-sprint-horror.md),
-[05](blog/05-trust-gap-teams-reject-ai-code.md)_
+_Sources: posts [02](../../content/blog/02-more-productive-ruining-career.mdx),
+[03](../../content/blog/03-last-two-days-sprint-horror.mdx),
+[05](../../content/blog/05-trust-gap-teams-reject-ai-code.mdx)_
 
 ---
 
@@ -468,11 +468,11 @@ overwhelming.
 
 AI does it better. I do it anyway. And I have never been happier.
 
-_Sources: posts [10](blog/10-what-do-developers-become.md),
-[12](blog/12-earning-less-than-five-years-ago.md),
-[13](blog/13-brighton-dogs-adhd-startup.md),
-[14](blog/14-why-i-still-code-when-ai-better.md),
-[15](blog/15-letter-to-junior-developer-2026.md)_
+_Sources: posts [10](../../content/blog/10-what-do-developers-become.mdx),
+[12](../../content/blog/12-earning-less-than-five-years-ago.mdx),
+[13](../../content/blog/13-brighton-dogs-adhd-startup.mdx),
+[14](../../content/blog/14-why-i-still-code-when-ai-better.mdx),
+[15](../../content/blog/15-letter-to-junior-developer-2026.mdx)_
 
 ---
 
@@ -545,8 +545,8 @@ I am not bitter. I am just realistic. The world changed. The rules changed.
 But I keep building. Because the alternative is to slow down. And I refuse to do
 that.
 
-_Sources: posts [06](blog/06-quality-speed-price-triangle-broken.md),
-[12](blog/12-earning-less-than-five-years-ago.md)_
+_Sources: posts [06](../../content/blog/06-quality-speed-price-triangle-broken.mdx),
+[12](../../content/blog/12-earning-less-than-five-years-ago.mdx)_
 
 ---
 
@@ -554,13 +554,13 @@ _Sources: posts [06](blog/06-quality-speed-price-triangle-broken.md),
 
 | Principle                       | Blog Posts                                                                                                                                                                                                                                                                                                                                                         |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. Requirements Are The Product | [My PRs Were Pure AI Slop](blog/01-my-prs-were-pure-ai-slop.md), [How to Not Produce AI Slop](blog/08-how-to-not-produce-ai-slop.md), [The Requirement Is the Product](blog/11-requirement-is-the-product.md), [How I Vibe-Coded a Production SaaS](blog/16-how-i-vibe-coded-production-saas.md)                                                                   |
-| 2. Discipline Before Automation | [The Last Two Days of Every Sprint](blog/03-last-two-days-sprint-horror.md), [How to Not Produce AI Slop](blog/08-how-to-not-produce-ai-slop.md), [You Cannot Automate Chaos](/content/blog/you-cannot-automate-chaos.mdx)                                                                                                                                         |
-| 3. Context Is Architecture      | [Context Engineering Replaced Coding](blog/07-context-engineering-replaced-coding.md), [New Developer Onboarding](blog/09-new-developer-onboarding-ai-edition.md), [Context Engineering Your 0-Shot Prompt](/content/blog/context-engineering-your-zero-shot-prompt.mdx), [How Claude Code Engineers Context](/content/blog/how-claude-code-engineers-context.mdx) |
-| 4. Test The Lies                | [How to Not Produce AI Slop](blog/08-how-to-not-produce-ai-slop.md), [The Testing Pyramid Is Upside Down](/content/blog/the-testing-pyramid-is-upside-down.mdx), [Think Slowly, Ship Fast](/content/blog/think-slowly-ship-fast.mdx)                                                                                                                               |
-| 5. Orchestrate, Do Not Operate  | [2025: The Year Agents Outperformed](blog/04-2025-year-agents-outperformed.md), [The Vibe Coding Paradox](/content/blog/the-vibe-coding-paradox.mdx), [How to Automate Your Dev Team](/content/blog/automate-dev-team-ai-agents.mdx)                                                                                                                               |
-| 6. Trust Is Earned In PRs       | [More Productive, Ruining Career](blog/02-more-productive-ruining-career.md), [The Last Two Days of Every Sprint](blog/03-last-two-days-sprint-horror.md), [The Trust Gap](blog/05-trust-gap-teams-reject-ai-code.md)                                                                                                                                              |
-| 7. Own What You Ship            | [What Do Developers Become](blog/10-what-do-developers-become.md), [Earning Less Than Five Years Ago](blog/12-earning-less-than-five-years-ago.md), [Brighton, Dogs, and ADHD](blog/13-brighton-dogs-adhd-startup.md), [Why I Still Code](blog/14-why-i-still-code-when-ai-better.md), [Letter to a Junior Developer](blog/15-letter-to-junior-developer-2026.md)  |
+| 1. Requirements Are The Product | [My PRs Were Pure AI Slop](../../content/blog/01-my-prs-were-pure-ai-slop.mdx), [How to Not Produce AI Slop](../../content/blog/08-how-to-not-produce-ai-slop.mdx), [The Requirement Is the Product](../../content/blog/11-requirement-is-the-product.mdx), [How I Vibe-Coded a Production SaaS](../../content/blog/16-how-i-vibe-coded-production-saas.mdx)                                                                   |
+| 2. Discipline Before Automation | [The Last Two Days of Every Sprint](../../content/blog/03-last-two-days-sprint-horror.mdx), [How to Not Produce AI Slop](../../content/blog/08-how-to-not-produce-ai-slop.mdx), [You Cannot Automate Chaos](/content/blog/you-cannot-automate-chaos.mdx)                                                                                                                                         |
+| 3. Context Is Architecture      | [Context Engineering Replaced Coding](../../content/blog/07-context-engineering-replaced-coding.mdx), [New Developer Onboarding](../../content/blog/09-new-developer-onboarding-ai-edition.mdx), [Context Engineering Your 0-Shot Prompt](/content/blog/context-engineering-your-zero-shot-prompt.mdx), [How Claude Code Engineers Context](/content/blog/how-claude-code-engineers-context.mdx) |
+| 4. Test The Lies                | [How to Not Produce AI Slop](../../content/blog/08-how-to-not-produce-ai-slop.mdx), [The Testing Pyramid Is Upside Down](/content/blog/the-testing-pyramid-is-upside-down.mdx), [Think Slowly, Ship Fast](/content/blog/think-slowly-ship-fast.mdx)                                                                                                                               |
+| 5. Orchestrate, Do Not Operate  | [2025: The Year Agents Outperformed](../../content/blog/04-2025-year-agents-outperformed.mdx), [The Vibe Coding Paradox](/content/blog/the-vibe-coding-paradox.mdx), [How to Automate Your Dev Team](/content/blog/automate-dev-team-ai-agents.mdx)                                                                                                                               |
+| 6. Trust Is Earned In PRs       | [More Productive, Ruining Career](../../content/blog/02-more-productive-ruining-career.mdx), [The Last Two Days of Every Sprint](../../content/blog/03-last-two-days-sprint-horror.mdx), [The Trust Gap](../../content/blog/05-trust-gap-teams-reject-ai-code.mdx)                                                                                                                                              |
+| 7. Own What You Ship            | [What Do Developers Become](../../content/blog/10-what-do-developers-become.mdx), [Earning Less Than Five Years Ago](../../content/blog/12-earning-less-than-five-years-ago.mdx), [Brighton, Dogs, and ADHD](../../content/blog/13-brighton-dogs-adhd-startup.mdx), [Why I Still Code](../../content/blog/14-why-i-still-code-when-ai-better.mdx), [Letter to a Junior Developer](../../content/blog/15-letter-to-junior-developer-2026.mdx)  |
 
 ---
 

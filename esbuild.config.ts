@@ -414,11 +414,10 @@ if (process.argv[1]?.endsWith("esbuild.config.ts")) {
 }
 
 function copyBrowserAssets(opts: BuildOptions, outDir: string) {
-  const pkgDir = resolve("packages", opts.packageName);
   const srcDir = resolveSourceDir(opts.packageName, opts.kind);
 
   // Copy index.html
-  const htmlSrc = join(pkgDir, "index.html");
+  const htmlSrc = join(srcDir, "index.html");
   if (existsSync(htmlSrc)) {
     let html = readFileSync(htmlSrc, "utf8");
     // Change main.ts to main.js or main.tsx to main.js

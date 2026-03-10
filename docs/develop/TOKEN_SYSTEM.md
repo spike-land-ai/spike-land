@@ -234,7 +234,7 @@ costs.
 
 ### Other Platform Costs
 
-- **Box Creation**: Variable cost based on BoxTier (EC2 provisioning now active)
+- **Box Creation**: Variable cost based on BoxTier (AWS was decommissioned 2026-03-02; platform now runs on Cloudflare Workers)
 - **Custom Enhancements**: Defined per feature
 
 ### Consumption Rules

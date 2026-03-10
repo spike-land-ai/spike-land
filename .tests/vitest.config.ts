@@ -87,7 +87,9 @@ const baseAliases: Record<string, string> = {
   "@spike-land-ai/block-sdk": src("core/block-sdk/core-logic/index.ts"),
   "@spike-land-ai/block-tasks": src("core/block-tasks/lazy-imports/index.ts"),
   "@spike-land-ai/mcp-server-base": src("core/server-base/core-logic/index.ts"),
-  "@spike-land-ai/mcp-image-studio/register": src("mcp-tools/image-studio/lazy-imports/register.ts"),
+  "@spike-land-ai/mcp-image-studio/register": src(
+    "mcp-tools/image-studio/lazy-imports/register.ts",
+  ),
   "@spike-land-ai/mcp-image-studio": src("mcp-tools/image-studio/core-logic/index.ts"),
   "react/jsx-dev-runtime": src("core/react-engine/core-logic/react/jsx-runtime.ts"),
   "react/jsx-runtime": src("core/react-engine/core-logic/react/jsx-runtime.ts"),
@@ -195,6 +197,7 @@ const packages: Record<string, PkgConfig> = {
     reportsDirectory: path.join(root, "coverage/code"),
   },
 
+  "docker-compose-mcp": { tier: 2, pool: "forks" },
   "esbuild-wasm-mcp": { tier: 2, pool: "forks" },
   "google-analytics-mcp": { tier: 2, pool: "forks" },
   "google-ads-mcp": { tier: 2, pool: "forks" },
@@ -204,9 +207,12 @@ const packages: Record<string, PkgConfig> = {
   "image-studio-worker": {
     tier: 2,
     env: "jsdom",
-    includeTests: [tests("image-studio-worker/**/*.test.ts"), tests("image-studio-worker/**/*.test.tsx")],
+    includeTests: [
+      tests("image-studio-worker/**/*.test.ts"),
+      tests("image-studio-worker/**/*.test.tsx"),
+    ],
     aliases: {
-      "@/": pkg("image-studio-worker/frontend/src/"),
+      "@/": src("edge-api/image-studio-worker/frontend/src/"),
     },
     coverageExclude: [
       "**/frontend/**",
