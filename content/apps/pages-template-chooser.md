@@ -11,7 +11,7 @@ tags:
   - "design"
   - "app-store"
 tagline: "App Store quality template picking for Pages on macOS."
-pricing: "free"
+pricing: "freemium"
 is_featured: true
 is_new: true
 status: "live"
@@ -23,6 +23,8 @@ graph: {}
 # Pages Template Chooser
 
 An App Store quality template picker for Pages on macOS. The goal is not a generic file-open dialog. It should feel like a first-party creation surface with a calm sidebar, premium merchandising, and a dense but elegant preview grid.
+
+The premium template gallery allows creators to elevate their documents and unleash their creativity with exclusive, professionally designed templates.
 
 ## Product Intent
 
