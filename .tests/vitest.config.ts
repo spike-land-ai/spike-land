@@ -75,6 +75,8 @@ const packagePathMap: Record<string, string> = {
 const baseAliases: Record<string, string> = {
   react: path.join(root, "node_modules/react"),
   "react-dom": path.join(root, "node_modules/react-dom"),
+  "@spike-land-ai/block-website/core": src("core/block-website/core-logic/core-index.ts"),
+  "@spike-land-ai/block-website/ui": src("core/block-website/core-logic/ui-index.ts"),
   "@spike-land-ai/shared/tool-builder": src("core/shared-utils/core-logic/tool-builder-index.ts"),
   "@spike-land-ai/shared": src("core/shared-utils/core-logic/index.ts"),
   "@spike-land-ai/block-sdk/storage": src("core/block-sdk/core-logic/storage-index.ts"),
