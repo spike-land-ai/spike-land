@@ -3,6 +3,8 @@ slug: "blog"
 name: "Blog"
 description: "Read the latest updates, tutorials, and announcements from the spike.land team. Access published articles directly via AI tools."
 emoji: "📰"
+tagline: "Published articles and tutorials, callable directly from your workspace."
+category: "Docs & Knowledge"
 status: "live"
 sort_order: 3
 tools:

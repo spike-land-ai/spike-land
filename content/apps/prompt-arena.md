@@ -3,7 +3,10 @@ slug: "prompt-arena"
 name: "Prompt Arena"
 description: "Submit prompts, review code, and compete on our global ELO leaderboard. The AI Prompt Arena is where the best prompt engineers test their skills."
 emoji: "⚔️"
+tagline: "Competitive prompting, live ladders, and review-driven scoreboards."
+category: "Code & Developer Tools"
 status: "beta"
+is_new: true
 sort_order: 5
 tools: []
 graph: {}
