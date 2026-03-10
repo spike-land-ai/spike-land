@@ -1,201 +1,210 @@
 ---
 title: "A Chemist Walked Into a Codebase"
 slug: "a-chemist-walked-into-a-codebase"
-description: "How a chemist with no coding experience built three production apps in a few evenings — and accidentally proved that most of the software industry is a very expensive group therapy session."
+description: "A chemist shipping apps is interesting. The real story is simpler: the secret of building software is the requirement. Compress the business into a PRD, formalize it as MCP tools, and enforce it with tests."
 date: "2026-03-05"
 author: "Zoltan Erdos"
 category: "Developer Experience"
-tags: ["mcp", "vibe-coding", "bazdmeg", "agents", "architecture", "beginners", "bullshit-jobs"]
+tags: ["mcp", "prd", "bazdmeg", "agents", "architecture", "requirements"]
 featured: true
-primer: "A chemist. A few evenings. Three production apps. £90K of software. Zero standups."
+primer: "The secret of building any app is the requirement."
 heroImage: "/blog/a-chemist-walked-into-a-codebase/hero-v2.png"
 ---
 
 ![A chemist in a lab coat looking at glowing digital code floating in the air, cinematic lighting, conceptual illustration](/blog/a-chemist-walked-into-a-codebase/hero-v2.png)
 
-## The Weekend That Changed Things
+<Tldr>
 
-[Gian Pierre](https://www.gianpierre.co.uk/) came to visit for a weekend — we've been friends for eight years. He's a chemist, lives in London, and earns £35K a year. He brought his Windows laptop, which was so catastrophically slow I couldn't even get Gmail to load on it. 
+- The secret of building any app is not the framework. It is the requirement.
+- A compact PRD beats a pile of vague user stories and browser-driven prompt soup.
+- MCP formalizes the requirement into typed, testable capabilities.
+- Quality gates and MCP tests are what keep the business logic honest.
 
-He came to visit because I was mentoring him on how to become a UX designer. 
+</Tldr>
 
-My overengineered approach at that time was to do everything with Claude Code and MCP servers, like all other devs do — add it to Claude Code, then let the agent use it during development as a dev tool.
+## The Interesting Part Is Not That A Chemist Shipped Apps
 
-So, here's a brilliant mind — he had already managed to put together almost half of his class project in Figma.
+[Gian Pierre](https://www.gianpierre.co.uk/) is a chemist, not a software
+engineer. He still managed to ship multiple real apps.
 
---- 
+GlassBank, HealthBridge, and his coaching platform are the proof. The details
+matter less than the pattern.
 
-Coincidentally, that same weekend, the new MacBook M5 was released, so I could finally justify upgrading from my old M1 MacBook Pro. Since it is still a highly capable machine today, I gave it to Gian Pierre.
+That is interesting, but it is not the real lesson.
 
-## Who Is Gian Pierre?
+The real lesson is that he started in the right place: the requirement.
 
-He's not a developer. He's never had a software engineering job. His background is molecular structures and lab work. When he came to visit, he was in the middle of a Figma UX course — GlassBank, the inclusive banking app he'd later ship, started as that class project.
+Most developers still start too low in the stack. They open a repo and think
+about routing, components, folders, state, database tables. They start
+implementing before they have really described the system.
 
-He wanted to be a UX designer, not a developer. That matters. He wasn't trying to learn to code. He was trying to solve a problem.
+Gian Pierre did the opposite. He thought in terms of what the system should do.
+Not React. Not architecture diagrams. Not framework identity. Just capabilities,
+constraints, and user outcomes.
 
-Meanwhile, I was busy perfecting something I'd been calling the "BAZDMEG method" — obsessing over my own system, convinced I was onto something. Gian Pierre had read my other post, [Think Slowly, Ship Fast](/blog/think-slowly-ship-fast), and apparently taken it far more seriously than most people do.
+That is why the apps shipped.
 
-A few weeks later, he came to visit again, now with his new MacBook. I helped him set up his development environment, and we started working on his UX course project — GlassBank, the inclusive banking app he'd later ship.
+## The Secret Of Building Any App
 
-He had a clear vision of what he wanted to build, and he was able to articulate it perfectly with Claude.
+At one point, I thought the answer was to generate endless user stories and push
+them through browser automation.
 
-No context. No preamble. 
-I stared at it for a full minute before responding.
+That was a mistake.
 
-*HOW DID YOU DO THAT??*
+That is when I started pushing Gian Pierre toward the BAZDMEG method.
 
-## The Wrong Instinct
+The real trick is to work with PRD files.
 
-When I finally understood what he'd done, my first reaction was embarrassment. Not at him — at myself. Because I'd been so focused on my own clever system that I missed the obvious thing he'd figured out by instinct.
+A good PRD is not corporate theater. It is the smallest honest version of the
+business plan:
 
-If you're a developer, you probably start a project like this: pick a framework, set up files and folders, build from the inside out — components, routes, state management. You build the scaffolding first, then fill it with meaning.
+- who the user is
+- what the system must do
+- what states exist
+- what must never happen
+- what counts as success
+- which edge cases matter
 
-Gian Pierre couldn't do that. He didn't have the mental model. When you've spent your career thinking about chemical reactions, you don't think in terms of React components. You think in terms of what a system *does*.
+My current test for a requirement is simple:
 
-He knew the coaching app needed to book sessions, track frameworks, have an AI that remembers context, manage client progress. These aren't technical details. They're capabilities. Business logic written in plain English.
+Ask the agent to explain the business plan back to you with the minimum number
+of tokens possible.
 
-So instead of building an app that calls APIs, he built the capabilities first — small, typed, testable units of business logic — and wrapped a UI around them afterward.
+If it cannot do that clearly, the product is still fuzzy.
 
-In MCP terms: he built the tools before he built the interface.
+That is the first BAZDMEG rule:
+
+**Requirements are the product. Code is just the output.**
+
+## Why PRDs Beat Prompt Soup
 
 <div className="my-8">
   <img src="/blog/a-chemist-walked-into-a-codebase/traditional-vs-capabilities.svg" alt="Animated comparison of traditional scaffolding outside-in model versus the domain expert inside-out Model Context Protocol capabilities approach" className="w-full rounded-xl border border-gray-800" />
 </div>
 
-## What "Think Slowly, Ship Fast" Actually Looks Like
+Developers love to start with implementation details. Folders. Routes. Hooks.
+State containers. Database adapters.
 
-This is the part I want to be precise about, because it's not magic.
+Users do not buy folders. They buy outcomes.
 
-Gian Pierre had read the Hourglass Model post. He understood the core idea: heavy specs at the top, disposable UI in the middle, bulletproof business logic at the bottom. Most people read that and nod. He actually did it.
+A PRD keeps the conversation where it belongs:
 
-He built what we call **MCP (Model Context Protocol) tools** — small functions with clear typed inputs, outputs, and plain-language descriptions of what they do. Each tool was a self-contained unit of business logic. Think of them as virtual logic lego blocks: reusable, testable, and something an AI agent can actually *use* while it's planning.
+- capabilities
+- constraints
+- invariants
+- failure modes
+- edge cases
 
-Then he designed the whole app from those MCPs outward.
+When that is clear, the implementation stops feeling heroic. The UI becomes a
+rendering problem. The code gets lighter because it is no longer carrying
+product confusion inside it.
 
-When Claude Code planned the implementation, it didn't have to guess what the backend would return. It could call the tools. It could see the exact responses before writing a single line of frontend code. And because Gian Pierre had designed at the MCP level first, the plan was clear enough that Gemini Flash could understand and implement it flawlessly.
+That is also why a domain expert can suddenly move very fast. They no longer
+need to learn the entire software stack first. They only need to explain the
+system clearly enough that an agent can build against it.
 
-<Callout type="info">
-When an AI agent tests the tools it depends on during the planning phase, you get three things: faster development, more tests, and fewer bugs. The agent naturally tests everything as it explores.
-</Callout>
+## MCP Is The Formalization
 
-The result? 100% code coverage on the coaching platform. Not because anyone mandated it. Because the AI naturally wrote tests to understand what the tools did before building on top of them.
+This is where MCP becomes more than a protocol.
 
-## What He Actually Built
+An MCP tool is a capability with a name, a schema, a contract, and a plain
+language description. In other words: a formal slice of the requirement.
 
-He didn't build one app. He built three. Check them yourself at [gianpierre.co.uk](https://www.gianpierre.co.uk/).
+Instead of telling an agent "build my app," you give it the actual working
+parts of the system:
 
-**The Coaching App** — an evidence-based coaching platform with 24 structured lessons across 6 modules, 7 coaching frameworks, 6 interactive exercise types, a life satisfaction radar chart measuring 8 dimensions, a streak and badge gamification system, and a reflective journal. Built with Next.js 16, Drizzle ORM, and NextAuth. Full competitive audit of BetterUp, Marlee, Noom, and four others. Five user personas with willingness-to-pay analysis. Deployed to production.
+- `create_client_profile`
+- `book_coaching_session`
+- `score_life_satisfaction`
+- `recommend_next_action`
 
-**HealthBridge** — an AI symptom triage assistant powered by Google Gemini 2.5 Flash. A full RAG pipeline with cosine similarity search and text-embedding-004. Three specialized tools with Zod validation schemas. Multi-step reasoning that chains up to 3 tool calls per turn. Emergency overrides that bypass all reasoning for chest pain and stroke signs. Streaming token-by-token UI. This is not a tutorial project. This is production-grade AI engineering.
+Now the agent is not guessing what the system should do. It can inspect the
+capabilities directly. It can call them during planning. It can see the input
+shapes, output shapes, and constraints before it writes the UI.
 
-**GlassBank** — the app that started as a Figma class project. An inclusive mobile banking app with WCAG 2.1 AA accessibility, a glassmorphism design system, dual-interface modes (Standard and Simplified), and a competitive analysis of 6 banks. [Live on Vercel](https://glassbank-app.vercel.app/). The UI is beautiful because it was written by a highly capable model working from a well-designed spec. The business logic underneath is typed and tested.
+This is the key move.
 
-A chemist built all of this. In a few evenings. After his day job. On a MacBook that used to be mine.
+PRD first.
+MCP second.
+UI last.
 
-## The £90,000 Question
+## Quality Gates Are What Make It Real
 
-Let's do the math. Not to be cute — to be honest about what the software industry actually costs.
+MCPs alone are not enough. Plenty of people can generate tools. That is not the
+hard part.
 
-A traditional team to build Gian Pierre's three projects:
+The hard part is admitting confusion early and enforcing quality gates.
 
-| Role | Duration | Cost |
-|------|----------|------|
-| Senior Full-Stack Developer | 6 weeks | £11,250 |
-| AI/ML Engineer | 4 weeks | £8,500 |
-| UX Designer | 4 weeks | £5,500 |
-| Frontend Developer | 4 weeks | £6,000 |
-| Product Manager | 10 weeks | £17,500 |
-| Scrum Master | 10 weeks | £13,750 |
-| **Total** | | **£62,500 - £120,000** |
+If a tool contract is vague, fix the contract.
 
-Gian Pierre did it in roughly 60-80 hours. Midpoint cost to hire a team: £90,000. His effective rate: **£1,286 per hour**.
+If a state transition is ambiguous, fix the PRD.
 
-For context, a UK senior developer earns £40-75/hour. A McKinsey consultant bills £300-500/hour. Gian Pierre, the chemist, produced £1,286/hour of market value.
+If the failure path is unclear, make it explicit.
 
-But here's the part that should make you uncomfortable. Look at that team table again. The Product Manager and the Scrum Master together cost **£31,250**. Half the budget. Their entire job is translating between the person who understands the problem and the people who can build it.
+If the test is missing, the requirement is not finished.
 
-Gian Pierre IS the person who understands the problem. The AI IS the builder. The translation layer — the most expensive line item — simply didn't need to exist.
+This is the pragmatic part people keep skipping. They want magic prompts. They
+want the vibe. They want the illusion that software now writes itself.
 
-Also: I got fired from VMO2 while writing about AI making jobs obsolete (ironically, because of [my own misuse of AI tools](/blog/what-i-learned-from-my-worst-pull-request)). I'm choosing to call that irony. Gian Pierre chose to call it an opportunity.
+No. The leverage comes from clarity plus verification.
 
-## The Bullshit Jobs Problem
+When you know how to write MCPs and enforce them with quality gates, the code
+suddenly becomes weightless. It stops feeling like construction and starts
+feeling like rendering. The code is naturally cleaner because it is no longer
+trying to invent the product while implementing it.
 
-In 2018, the anthropologist David Graeber published [*Bullshit Jobs*](https://en.wikipedia.org/wiki/Bullshit_Jobs). His thesis: a huge portion of the modern economy consists of jobs that even the people doing them secretly believe are pointless. He identified five types.
+## Yes, You Can Unit Test Business Logic Through MCPs
 
-Every single one exists in a typical software team.
+You absolutely can, and you absolutely should.
 
-**Flunkies** — people whose job is to make someone else feel important. In software: the senior engineer whose primary output is attending leadership meetings and nodding. Gian Pierre had no org chart to perform for.
+That is not a side benefit. That is the whole point.
 
-**Goons** — roles that exist only because competitors have them. An arms race of pointlessness. In software: adopting Kubernetes because your competitor did. Gian Pierre picked Next.js because it solved his problem, not because it was on a tech radar published by a consultancy whose business model depends on you feeling behind.
+Once the business logic lives behind typed MCP tools, you can test the rule
+itself:
 
-**Duct Tapers** — people hired to fix problems that shouldn't exist. In software: the platform engineer who spends their career managing YAML files for a deployment pipeline that a `git push` to Vercel would have replaced. MCP-first means the abstraction was right from the start, so nobody needed to tape over it.
+- validation
+- permissions
+- calculations
+- state transitions
+- failure paths
 
-**Box Tickers** — people who create the appearance of productivity without the substance. Sprint retrospectives that change nothing. Velocity charts that are gamed. JIRA ticket grooming sessions that exist because someone once read the Scrum Guide and confused ritual with progress. Gian Pierre's process: describe capability, build, ship. No ceremonies were harmed in the making of his software.
+No browser.
+No DOM timing.
+No UI guesswork.
+No trying to infer business rules from buttons.
 
-**Taskmasters** — people whose job is to create work for others. The project manager who translates business requirements into JIRA stories so developers can translate JIRA stories back into... business requirements, but in TypeScript. Gian Pierre collapsed this entire game of telephone into one step: tell the AI what the system should do.
+You test the actual capability.
 
-<Callout type="warning">
-Graeber cited a YouGov poll: 37% of British workers believe their own job makes no meaningful contribution to the world. Apply that to a 6-person dev team. That's 2.2 people. At £65K average salary, that's **£143,000 per year** spent on work that even the workers think is pointless. Per team.
-</Callout>
+This is how spike.land stays coherent with one developer. The agent plans
+against the tools, the product calls the tools, and the test suite verifies the
+same tools.
 
-## Human Nature: The Real Bug
+One interface. Three jobs.
 
-Here's the part nobody wants to talk about.
+## What Gian Pierre Actually Proved
 
-We didn't build this mountain of ceremony because we're stupid. We built it because we're *human*. And humans have some deeply inconvenient firmware.
+He did not prove that software engineering no longer matters.
 
-**We confuse complexity with competence.** A developer who sets up Kubernetes for a three-person startup isn't solving a scaling problem. They're performing sophistication. The same instinct that made medieval monks illuminate manuscripts with gold leaf makes modern engineers add a service mesh to a TODO app. It feels like work. It looks impressive. It is, in Graeber's precise terminology, bullshit.
+He proved that most teams still start too late in the stack.
 
-**We'd rather be busy than effective.** Gian Pierre's entire development process could fit in a tweet: "Described what I needed. AI built it. Shipped." That's terrifying. Where's the struggle? Where's the craft? Where are the 14-hour days and the war stories? We have built an entire professional identity around suffering through complexity. A chemist who skips all of it and ships better software in an evening is not inspiring — he's insulting.
+If a domain expert can explain the business clearly, compress it into a PRD,
+formalize it as MCP tools, and guard it with tests, the rest becomes much
+easier.
 
-**We protect what we know, not what works.** The React developer who spent three years mastering hooks, context, and state management has a legitimate emotional investment in that knowledge. Telling them a chemist just did their job in an evening with AI is like telling a calligrapher that the printing press is here. Technically a promotion for humanity. Personally devastating.
+That is the actual trick.
 
-**We build empires, not solutions.** Graeber noticed that managers are evaluated by headcount. A director managing 20 engineers outranks one managing 5. This creates a gravitational pull toward hiring, toward complexity, toward inventing problems that justify the team's existence. Nobody gets promoted for saying "actually, one person with Claude Code could do this."
+Not vibe coding.
+Not heroic prompts.
+Not giant context windows.
 
-Sandi Metz nailed it in 2016: *"Duplication is far cheaper than the wrong abstraction."* The software industry heard that, nodded sagely, and immediately built seventeen more abstractions. Because abstractions create jobs. And jobs create org charts. And org charts create directors. And directors create the meetings that the flunkies attend.
+The secret of building any app is the requirement.
 
-**The sunk cost of identity.** This is the deepest one. We don't just learn frameworks — we *become* them. "I'm a React developer." "I'm a backend engineer." "I'm a DevOps specialist." These aren't job descriptions. They're identities. And identities don't go quietly. A chemist who builds production software without those identities isn't just a productivity story — he's an existential threat to every person whose sense of self is wrapped up in knowing how `useEffect` cleanup functions work.
+Write the PRD.
+Turn it into MCPs.
+Enforce the gates.
+Test the business logic.
+Let the UI be the easy part.
 
-## The 64x Multiplier
-
-Gian Pierre produced roughly £90,000 of software in 70 hours. A junior developer at £20/hour produces roughly £20/hour of value. That's a **64x multiplier**.
-
-Not because Gian Pierre is 64 times smarter. Because he carried zero overhead. No framework religion. No architecture astronautics. No ceremony. No translation layers. No identity crisis about whether he's a "real developer."
-
-He's a chemist who needed a coaching platform. He described what it should do. The AI built it. He shipped it.
-
-The 10x developer was always a myth. The real multiplier was never about typing speed or algorithm knowledge. It was about how much bullshit you could avoid. Gian Pierre avoided all of it — not by discipline, but by ignorance. He didn't know the bullshit existed, so he didn't do it.
-
-That's not a bug. That's the most devastating feature request the software industry has ever received.
-
-## Who Is the Genius Here?
-
-I want to sit with this question honestly, because it's not rhetorical.
-
-I've been building software professionally for years. I was busy refining my method, writing blog posts about it, giving it a name. Gian Pierre read one of those posts and used it better than I had. He took the MCP-first idea and applied it with a clarity that I — too inside my own head — couldn't manage.
-
-He didn't have the context that would have stopped him. He didn't know which parts were supposed to be hard. He didn't have professional habits telling him to add another layer of abstraction. He just read what worked and did it.
-
-Hardware access changed his trajectory. The MacBook I handed him that weekend wasn't just a faster machine — it was the difference between being able to run Claude Code and not. Between being able to build at all and being stuck.
-
-But that's not the whole story either. The tools were there. The methodology was written down. He absorbed it and executed it better than most engineers I've worked with.
-
-So who's the genius? I genuinely don't know. Maybe the question is wrong. Maybe "genius" is the wrong frame entirely when the constraint was never intelligence — it was access, and friction, and identity, and all the things we accidentally build around ourselves to protect our sense of what a "real developer" looks like.
-
-## So What Should He Earn?
-
-Three answers, depending on your worldview:
-
-**The capitalist answer:** He produces £1,286/hour of value. Pay him accordingly. A company hiring Gian Pierre at £150K/year while he replaces a £400K team is getting the deal of a lifetime.
-
-**The Graeber answer:** He should earn what the productive fraction of a traditional team earns — roughly £40K per project — but since he can do 10+ projects a year, that's £400K+. The difference between that and the team's total cost is the bullshit tax the industry has been charging.
-
-**The honest answer:** It doesn't matter what we think he should earn. The market will decide. And the market is about to discover that domain experts with AI produce better software faster than professional developers drowning in ceremony. The pricing will adjust. It always does. Just ask the calligraphers.
-
-If spike.land reaches its goal by March 21st, we might hire him. Not as charity. Because he's good. Because he figured something out that most engineers are still arguing about in Slack.
-
-*[Gian Pierre](https://www.gianpierre.co.uk/) is actively looking for work. If you're hiring someone who ships £90K of software in a few evenings — [here's his portfolio](https://www.gianpierre.co.uk/). You're welcome.*
-
----
-
-*Zoltan Erdos is a developer based in Brighton, UK, building [spike.land](https://spike.land). He got fired in January and is choosing to be philosophical about it. Gian Pierre's portfolio: [gianpierre.co.uk](https://www.gianpierre.co.uk/).*
+And yes: once you work this way, the code starts to feel naturally beautiful.
+Not because the model became magical, but because the requirement finally became
+clear enough to build.

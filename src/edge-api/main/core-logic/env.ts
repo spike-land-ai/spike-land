@@ -16,6 +16,7 @@ export interface Env {
   STRIPE_WEBHOOK_SECRET: string;
   GEMINI_API_KEY: string;
   CLAUDE_OAUTH_TOKEN: string;
+  LLM_CONTEXT_WINDOW?: string;
   GITHUB_TOKEN: string;
   ALLOWED_ORIGINS: string;
   QUIZ_BADGE_SECRET: string;

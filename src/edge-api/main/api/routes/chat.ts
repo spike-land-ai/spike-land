@@ -1,69 +1,877 @@
 import { Hono } from "hono";
+import type { Context } from "hono";
 import type { Env, Variables } from "../../core-logic/env.js";
 import { getChatSystemPrompt } from "../../core-logic/chat-system-prompt.js";
 import { BROWSER_TOOLS } from "../../core-logic/chat-browser-tools.js";
+import {
+  appendStageSummary,
+  buildHistoricalContextMessage,
+  buildStageUserMessage,
+  createStageMemoryBudget,
+  summarizeCompletedStage,
+} from "./chat-stage-memory.js";
+import { groupToolExecutionBatches } from "./chat-tool-batching.js";
 
 const chat = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-chat.post("/api/chat", async (c) => {
-  const body = await c.req.json<{
-    message?: string;
-    history?: Array<{ role: string; content: string }>;
-  }>();
-  if (!body.message || typeof body.message !== "string") {
-    return c.json({ error: "message is required" }, 400);
+const MAX_TOOL_LOOPS = 10;
+const BROWSER_RESULT_TIMEOUT_MS = 15_000;
+const BROWSER_RESULT_POLL_MS = 250;
+const MAX_SEARCH_RESULTS = 8;
+
+type ChatContext = Context<{ Bindings: Env; Variables: Variables }>;
+
+interface ChatRequestBody {
+  message?: string;
+  threadId?: string;
+}
+
+interface ToolCatalogItem {
+  name: string;
+  description: string;
+  inputSchema: unknown;
+}
+
+interface BrowserResultRequestBody {
+  threadId?: string;
+  toolCallId?: string;
+  result?: unknown;
+}
+
+interface ChatThreadRow {
+  id: string;
+  user_id: string;
+  title: string;
+  last_prompt_tokens: number | null;
+  last_completion_tokens: number | null;
+  last_total_tokens: number | null;
+  created_at: number;
+  updated_at: number;
+}
+
+interface ChatRoundRow {
+  id: string;
+  thread_id: string;
+  input_role: string;
+  input_content: string;
+  assistant_blocks: string;
+  assistant_text: string;
+  prompt_tokens: number | null;
+  completion_tokens: number | null;
+  total_tokens: number | null;
+  created_at: number;
+  updated_at: number;
+}
+
+interface BrowserResultRow {
+  tool_call_id: string;
+  status: string;
+  result_json: string | null;
+}
+
+interface UsageSnapshot {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+}
+
+interface ChatThreadSummaryResponse {
+  id: string;
+  title: string;
+  usage: UsageSnapshot | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface StoredTextBlock {
+  type: "text";
+  text: string;
+}
+
+interface StoredToolCallBlock {
+  type: "tool_call";
+  toolCallId: string;
+  name: string;
+  args: Record<string, unknown>;
+  result?: string;
+  status: "pending" | "done" | "error";
+  transport: "browser" | "mcp";
+}
+
+type StoredAssistantBlock = StoredTextBlock | StoredToolCallBlock;
+
+interface PendingToolExecution {
+  toolCallId: string;
+  name: string;
+  args: Record<string, unknown>;
+  blockIndex: number;
+}
+
+type ToolResultContent = {
+  type: "tool_result";
+  tool_use_id: string;
+  content: string;
+};
+
+type AnthropicAssistantContent = Array<
+  | { type: "text"; text: string }
+  | {
+      type: "tool_use";
+      id: string;
+      name: string;
+      input: Record<string, unknown>;
+    }
+>;
+
+type AnthropicUserContent = string | ToolResultContent[];
+
+type AnthropicMessage =
+  | { role: "user"; content: AnthropicUserContent }
+  | { role: "assistant"; content: AnthropicAssistantContent };
+
+type AnthropicAssistantMessage = Extract<AnthropicMessage, { role: "assistant" }>;
+type AnthropicToolResultMessage = { role: "user"; content: ToolResultContent[] };
+
+const MCP_AGENT_TOOLS: Array<{
+  name: string;
+  description: string;
+  input_schema: Record<string, unknown>;
+}> = [
+  ...BROWSER_TOOLS,
+  {
+    name: "mcp_tool_search",
+    description:
+      "Search the available MCP tools by natural-language query. Use this before calling a tool you are not already certain about.",
+    input_schema: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "What you need to do or the data you need to find",
+        },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "mcp_tool_call",
+    description:
+      "Call any MCP tool by exact name using a JSON arguments object. Use mcp_tool_search first when you need discovery.",
+    input_schema: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description: "Exact MCP tool name to call",
+        },
+        arguments: {
+          type: "object",
+          description: "JSON arguments to pass to the target tool",
+        },
+      },
+      required: ["name"],
+    },
+  },
+];
+
+function normalizeToolArgs(value: unknown): Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
   }
 
-  const history = Array.isArray(body.history) ? body.history : [];
-  const requestId = (c.get("requestId") as string | undefined) ?? crypto.randomUUID();
+  return value as Record<string, unknown>;
+}
 
-  // Fetch MCP tools from MCP_SERVICE
-  let mcpTools: Array<{ name: string; description: string; input_schema: unknown }> = [];
+function safeJsonParse<T>(value: string, fallback: T): T {
   try {
-    const toolsRes = await c.env.MCP_SERVICE.fetch(
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function serializeToolContent(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
+  }
+}
+
+function summarizeThreadTitle(message: string): string {
+  const trimmed = message.trim().replace(/\s+/g, " ");
+  if (trimmed.length <= 80) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, 77).trimEnd()}...`;
+}
+
+function parseAssistantBlocks(value: string): StoredAssistantBlock[] {
+  return safeJsonParse<StoredAssistantBlock[]>(value, []);
+}
+
+function assistantBlocksToAnthropicContent(
+  blocks: StoredAssistantBlock[],
+): AnthropicAssistantContent {
+  const content: AnthropicAssistantContent = [];
+
+  for (const block of blocks) {
+    if (block.type === "text") {
+      if (block.text) {
+        content.push({ type: "text", text: block.text });
+      }
+      continue;
+    }
+
+    content.push({
+      type: "tool_use",
+      id: block.toolCallId,
+      name: block.name,
+      input: block.args,
+    });
+  }
+
+  return content;
+}
+
+function formatUsage(
+  promptTokens: number | null,
+  completionTokens: number | null,
+  totalTokens: number | null,
+): UsageSnapshot | null {
+  if (
+    typeof promptTokens !== "number" ||
+    typeof completionTokens !== "number" ||
+    typeof totalTokens !== "number"
+  ) {
+    return null;
+  }
+
+  return {
+    promptTokens,
+    completionTokens,
+    totalTokens,
+  };
+}
+
+function formatThreadSummary(row: ChatThreadRow): ChatThreadSummaryResponse {
+  return {
+    id: row.id,
+    title: row.title,
+    usage: formatUsage(row.last_prompt_tokens, row.last_completion_tokens, row.last_total_tokens),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function serializeRoundInput(
+  inputRole: "user" | "tool_result",
+  inputContent: string | ToolResultContent[],
+) {
+  if (inputRole === "user") {
+    return inputContent as string;
+  }
+
+  return JSON.stringify(inputContent);
+}
+
+function scoreTool(query: string, tool: ToolCatalogItem): number {
+  const lowerQuery = query.toLowerCase();
+  const queryTokens = lowerQuery
+    .split(/[^a-z0-9_]+/i)
+    .map((token) => token.trim())
+    .filter(Boolean);
+
+  let score = 0;
+  if (tool.name.toLowerCase().includes(lowerQuery)) {
+    score += 12;
+  }
+  if (tool.description.toLowerCase().includes(lowerQuery)) {
+    score += 6;
+  }
+
+  for (const token of queryTokens) {
+    if (tool.name.toLowerCase().includes(token)) {
+      score += 4;
+    }
+    if (tool.description.toLowerCase().includes(token)) {
+      score += 2;
+    }
+  }
+
+  return score;
+}
+
+function searchToolCatalog(query: string, toolCatalog: ToolCatalogItem[]) {
+  return toolCatalog
+    .map((tool) => ({ tool, score: scoreTool(query, tool) }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      return a.tool.name.localeCompare(b.tool.name);
+    })
+    .slice(0, MAX_SEARCH_RESULTS)
+    .map(({ tool }) => ({
+      name: tool.name,
+      description: tool.description,
+      inputSchema: tool.inputSchema,
+    }));
+}
+
+async function fetchToolCatalog(env: Env, requestId: string): Promise<ToolCatalogItem[]> {
+  try {
+    const toolsRes = await env.MCP_SERVICE.fetch(
       new Request("https://mcp.spike.land/tools", {
         headers: { "X-Request-Id": requestId },
       }),
     );
-    if (toolsRes.ok) {
-      const data = await toolsRes.json<{
-        tools: Array<{ name: string; description: string; inputSchema?: unknown }>;
-      }>();
-      mcpTools = (data.tools ?? []).slice(0, 50).map((t) => ({
-        name: t.name,
-        description: t.description,
-        input_schema: t.inputSchema ?? { type: "object", properties: {} },
-      }));
+
+    if (!toolsRes.ok) {
+      return [];
     }
+
+    const data = await toolsRes.json<{
+      tools: Array<{ name: string; description: string; inputSchema?: unknown }>;
+    }>();
+
+    return (data.tools ?? []).map((tool) => ({
+      name: tool.name,
+      description: tool.description,
+      inputSchema: tool.inputSchema ?? { type: "object", properties: {} },
+    }));
   } catch {
-    // Non-fatal — proceed without MCP tools
+    return [];
+  }
+}
+
+async function getThreadForUser(db: D1Database, threadId: string, userId: string) {
+  return db
+    .prepare(
+      `SELECT id, user_id, title, last_prompt_tokens, last_completion_tokens, last_total_tokens, created_at, updated_at
+       FROM chat_threads
+       WHERE id = ? AND user_id = ?
+       LIMIT 1`,
+    )
+    .bind(threadId, userId)
+    .first<ChatThreadRow>();
+}
+
+async function listThreadsForUser(db: D1Database, userId: string) {
+  const result = await db
+    .prepare(
+      `SELECT id, user_id, title, last_prompt_tokens, last_completion_tokens, last_total_tokens, created_at, updated_at
+       FROM chat_threads
+       WHERE user_id = ?
+       ORDER BY updated_at DESC`,
+    )
+    .bind(userId)
+    .all<ChatThreadRow>();
+
+  return result.results ?? [];
+}
+
+async function listRoundsForThread(db: D1Database, threadId: string) {
+  const result = await db
+    .prepare(
+      `SELECT id, thread_id, input_role, input_content, assistant_blocks, assistant_text, prompt_tokens, completion_tokens, total_tokens, created_at, updated_at
+       FROM chat_rounds
+       WHERE thread_id = ?
+       ORDER BY created_at ASC`,
+    )
+    .bind(threadId)
+    .all<ChatRoundRow>();
+
+  return result.results ?? [];
+}
+
+async function createThread(
+  db: D1Database,
+  userId: string,
+  message: string,
+): Promise<ChatThreadSummaryResponse> {
+  const now = Date.now();
+  const threadId = crypto.randomUUID();
+
+  await db
+    .prepare(
+      `INSERT INTO chat_threads (
+        id,
+        user_id,
+        title,
+        last_prompt_tokens,
+        last_completion_tokens,
+        last_total_tokens,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, ?, NULL, NULL, NULL, ?, ?)`,
+    )
+    .bind(threadId, userId, summarizeThreadTitle(message), now, now)
+    .run();
+
+  return {
+    id: threadId,
+    title: summarizeThreadTitle(message),
+    usage: null,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+async function insertRound(
+  db: D1Database,
+  params: {
+    threadId: string;
+    userId: string;
+    inputRole: "user" | "tool_result";
+    inputContent: string | ToolResultContent[];
+    assistantBlocks: StoredAssistantBlock[];
+    usage: UsageSnapshot | null;
+  },
+) {
+  const now = Date.now();
+  const assistantText = params.assistantBlocks
+    .filter((block): block is StoredTextBlock => block.type === "text")
+    .map((block) => block.text)
+    .join("");
+
+  await db
+    .prepare(
+      `INSERT INTO chat_rounds (
+        id,
+        thread_id,
+        user_id,
+        input_role,
+        input_content,
+        assistant_blocks,
+        assistant_text,
+        prompt_tokens,
+        completion_tokens,
+        total_tokens,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .bind(
+      crypto.randomUUID(),
+      params.threadId,
+      params.userId,
+      params.inputRole,
+      serializeRoundInput(params.inputRole, params.inputContent),
+      JSON.stringify(params.assistantBlocks),
+      assistantText,
+      params.usage?.promptTokens ?? null,
+      params.usage?.completionTokens ?? null,
+      params.usage?.totalTokens ?? null,
+      now,
+      now,
+    )
+    .run();
+}
+
+async function updateThreadUsage(db: D1Database, threadId: string, usage: UsageSnapshot | null) {
+  await db
+    .prepare(
+      `UPDATE chat_threads
+       SET last_prompt_tokens = ?,
+           last_completion_tokens = ?,
+           last_total_tokens = ?,
+           updated_at = ?
+       WHERE id = ?`,
+    )
+    .bind(
+      usage?.promptTokens ?? null,
+      usage?.completionTokens ?? null,
+      usage?.totalTokens ?? null,
+      Date.now(),
+      threadId,
+    )
+    .run();
+}
+
+function createSseSender(writer: WritableStreamDefaultWriter<Uint8Array>) {
+  const encoder = new TextEncoder();
+
+  return async function sendSseEvent(eventName: string, payload: Record<string, unknown> = {}) {
+    const message = {
+      type: eventName,
+      ...payload,
+    };
+
+    await writer.write(encoder.encode(`event: ${eventName}\ndata: ${JSON.stringify(message)}\n\n`));
+  };
+}
+
+async function waitForBrowserResult(
+  db: D1Database,
+  threadId: string,
+  toolCallId: string,
+  userId: string,
+) {
+  const deadline = Date.now() + BROWSER_RESULT_TIMEOUT_MS;
+
+  while (Date.now() < deadline) {
+    const row = await db
+      .prepare(
+        `SELECT tool_call_id, status, result_json
+         FROM chat_browser_results
+         WHERE tool_call_id = ? AND thread_id = ? AND user_id = ?
+         LIMIT 1`,
+      )
+      .bind(toolCallId, threadId, userId)
+      .first<BrowserResultRow>();
+
+    if (row?.status === "done" && row.result_json) {
+      return safeJsonParse<unknown>(row.result_json, row.result_json);
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, BROWSER_RESULT_POLL_MS));
   }
 
-  const allTools = [...BROWSER_TOOLS, ...mcpTools];
+  return {
+    success: false,
+    error: "Timed out waiting for the browser result.",
+  };
+}
 
-  const messages: Array<{ role: string; content: unknown }> = [
-    ...history.map((h) => ({ role: h.role, content: h.content })),
-    { role: "user", content: body.message },
-  ];
+async function callMcpTool(
+  env: Env,
+  requestId: string,
+  name: string,
+  args: Record<string, unknown>,
+) {
+  const rpcRes = await env.MCP_SERVICE.fetch(
+    new Request("https://mcp.spike.land/mcp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Request-Id": requestId,
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: crypto.randomUUID(),
+        method: "tools/call",
+        params: { name, arguments: args },
+      }),
+    }),
+  );
+
+  if (!rpcRes.ok) {
+    throw new Error(`MCP tool call failed with status ${rpcRes.status}`);
+  }
+
+  const rpcData = await rpcRes.json<{
+    result?: { content?: Array<{ text?: string }> };
+    error?: { message: string };
+  }>();
+
+  if (rpcData.error) {
+    throw new Error(rpcData.error.message);
+  }
+
+  if (rpcData.result?.content?.length) {
+    return rpcData.result.content.map((item) => item.text ?? "").join("\n");
+  }
+
+  return "Tool completed successfully.";
+}
+
+async function executeTool(params: {
+  c: ChatContext;
+  threadId: string;
+  userId: string;
+  requestId: string;
+  toolName: string;
+  toolCallId: string;
+  toolArgs: Record<string, unknown>;
+  toolCatalog: ToolCatalogItem[];
+  sendSseEvent: (eventName: string, payload?: Record<string, unknown>) => Promise<void>;
+}) {
+  const {
+    c,
+    threadId,
+    userId,
+    requestId,
+    toolName,
+    toolCallId,
+    toolArgs,
+    toolCatalog,
+    sendSseEvent,
+  } = params;
+
+  if (toolName === "mcp_tool_search") {
+    const query = typeof toolArgs.query === "string" ? toolArgs.query.trim() : "";
+    if (!query) {
+      return {
+        transport: "mcp" as const,
+        result: "Search query is required.",
+        status: "error" as const,
+      };
+    }
+
+    return {
+      transport: "mcp" as const,
+      result: JSON.stringify(
+        {
+          matches: searchToolCatalog(query, toolCatalog),
+        },
+        null,
+        2,
+      ),
+      status: "done" as const,
+    };
+  }
+
+  if (toolName === "mcp_tool_call") {
+    const targetName = typeof toolArgs.name === "string" ? toolArgs.name.trim() : "";
+    if (!targetName) {
+      return {
+        transport: "mcp" as const,
+        result: "Tool name is required.",
+        status: "error" as const,
+      };
+    }
+
+    if (targetName === "mcp_tool_search" || targetName === "mcp_tool_call") {
+      return {
+        transport: "mcp" as const,
+        result: "Recursive agent tool calls are not allowed.",
+        status: "error" as const,
+      };
+    }
+
+    if (targetName.startsWith("browser_")) {
+      return {
+        transport: "mcp" as const,
+        result: "Browser tools must be called directly, not through mcp_tool_call.",
+        status: "error" as const,
+      };
+    }
+
+    try {
+      const result = await callMcpTool(
+        c.env,
+        requestId,
+        targetName,
+        normalizeToolArgs(toolArgs.arguments),
+      );
+
+      return {
+        transport: "mcp" as const,
+        result,
+        status: "done" as const,
+      };
+    } catch (error) {
+      return {
+        transport: "mcp" as const,
+        result: `Tool error: ${error instanceof Error ? error.message : "unknown"}`,
+        status: "error" as const,
+      };
+    }
+  }
+
+  if (toolName.startsWith("browser_")) {
+    const now = Date.now();
+
+    await c.env.DB.prepare(
+      `INSERT INTO chat_browser_results (
+        tool_call_id,
+        thread_id,
+        user_id,
+        tool_name,
+        args_json,
+        status,
+        result_json,
+        created_at,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, 'pending', NULL, ?, ?)
+      ON CONFLICT(tool_call_id) DO UPDATE SET
+        args_json = excluded.args_json,
+        status = 'pending',
+        result_json = NULL,
+        updated_at = excluded.updated_at`,
+    )
+      .bind(toolCallId, threadId, userId, toolName, JSON.stringify(toolArgs), now, now)
+      .run();
+
+    await sendSseEvent("browser_command", {
+      threadId,
+      toolCallId,
+      tool: toolName,
+      args: toolArgs,
+    });
+
+    const browserResult = await waitForBrowserResult(c.env.DB, threadId, toolCallId, userId);
+
+    return {
+      transport: "browser" as const,
+      result: serializeToolContent(browserResult),
+      status:
+        typeof browserResult === "object" &&
+        browserResult !== null &&
+        "success" in browserResult &&
+        browserResult.success === false
+          ? ("error" as const)
+          : ("done" as const),
+    };
+  }
+
+  return {
+    transport: "mcp" as const,
+    result: `Unknown tool: ${toolName}`,
+    status: "error" as const,
+  };
+}
+
+chat.get("/api/chat/threads", async (c) => {
+  const userId = c.get("userId");
+  const threads = await listThreadsForUser(c.env.DB, userId);
+
+  return c.json({
+    threads: threads.map(formatThreadSummary),
+  });
+});
+
+chat.get("/api/chat/threads/:threadId", async (c) => {
+  const userId = c.get("userId");
+  const threadId = c.req.param("threadId");
+
+  const thread = await getThreadForUser(c.env.DB, threadId, userId);
+  if (!thread) {
+    return c.json({ error: "Thread not found" }, 404);
+  }
+
+  const rounds = await listRoundsForThread(c.env.DB, threadId);
+
+  return c.json({
+    thread: formatThreadSummary(thread),
+    rounds: rounds.map((round) => ({
+      id: round.id,
+      inputRole: round.input_role,
+      inputContent: round.input_role === "user" ? round.input_content : null,
+      assistantBlocks: parseAssistantBlocks(round.assistant_blocks),
+      assistantText: round.assistant_text,
+      usage: formatUsage(round.prompt_tokens, round.completion_tokens, round.total_tokens),
+      createdAt: round.created_at,
+      updatedAt: round.updated_at,
+    })),
+  });
+});
+
+chat.post("/api/chat/browser-results", async (c) => {
+  const userId = c.get("userId");
+  const body = await c.req.json<BrowserResultRequestBody>();
+
+  if (!body.threadId || !body.toolCallId) {
+    return c.json({ error: "threadId and toolCallId are required" }, 400);
+  }
+
+  const thread = await getThreadForUser(c.env.DB, body.threadId, userId);
+  if (!thread) {
+    return c.json({ error: "Thread not found" }, 404);
+  }
+
+  const result = await c.env.DB.prepare(
+    `UPDATE chat_browser_results
+     SET status = 'done',
+         result_json = ?,
+         updated_at = ?
+     WHERE tool_call_id = ? AND thread_id = ? AND user_id = ?`,
+  )
+    .bind(JSON.stringify(body.result ?? null), Date.now(), body.toolCallId, body.threadId, userId)
+    .run();
+
+  if ((result.meta.changes ?? 0) === 0) {
+    return c.json({ error: "Browser result not found" }, 404);
+  }
+
+  return c.json({ ok: true });
+});
+
+chat.post("/api/chat", async (c) => {
+  const userId = c.get("userId");
+  const body = await c.req.json<ChatRequestBody>();
+
+  if (!body.message || typeof body.message !== "string" || !body.message.trim()) {
+    return c.json({ error: "message is required" }, 400);
+  }
+
+  const requestId = (c.get("requestId") as string | undefined) ?? crypto.randomUUID();
+  const message = body.message.trim();
+
+  const threadSummary = body.threadId
+    ? await (async () => {
+        const existingThread = await getThreadForUser(c.env.DB, body.threadId!, userId);
+        if (!existingThread) {
+          return null;
+        }
+        return formatThreadSummary(existingThread);
+      })()
+    : await createThread(c.env.DB, userId, message);
+
+  if (!threadSummary) {
+    return c.json({ error: "Thread not found" }, 404);
+  }
 
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
+  const sendSseEvent = createSseSender(writer);
   const encoder = new TextEncoder();
-
-  const sendEvent = async (data: unknown) => {
-    if (data === "[DONE]") {
-      await writer.write(encoder.encode("data: [DONE]\n\n"));
-    } else {
-      await writer.write(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
-    }
-  };
 
   const bgTask = (async () => {
     try {
+      const toolCatalog = await fetchToolCatalog(c.env, requestId);
+      const priorRounds = await listRoundsForThread(c.env.DB, threadSummary.id);
+      const configuredContextWindow = Number.parseInt(c.env.LLM_CONTEXT_WINDOW ?? "", 10);
+      const stageBudget = createStageMemoryBudget(
+        Number.isFinite(configuredContextWindow) && configuredContextWindow > 0
+          ? configuredContextWindow
+          : undefined,
+      );
+      const historicalContextMessage = buildHistoricalContextMessage(
+        priorRounds.map((round) => ({
+          inputRole: round.input_role,
+          inputContent: round.input_role === "user" ? round.input_content : "",
+          assistantBlocks: parseAssistantBlocks(round.assistant_blocks),
+        })),
+        stageBudget,
+      );
+      const baseMessages: AnthropicMessage[] = historicalContextMessage
+        ? [{ role: "user", content: historicalContextMessage }]
+        : [];
+
       let toolLoopCount = 0;
-      const MAX_TOOL_LOOPS = 10;
+      let currentInputRole: "user" | "tool_result" = "user";
+      let currentInputContent: string | ToolResultContent[] = message;
+      let aggregateUsage: UsageSnapshot | null = null;
+      let completedStageSummaries: string[] = [];
+      let latestStageProtocol: {
+        assistant: AnthropicAssistantMessage;
+        toolResults: AnthropicToolResultMessage;
+        summary: string | null;
+      } | null = null;
+
+      await sendSseEvent("thread", {
+        thread: threadSummary,
+      });
 
       while (toolLoopCount <= MAX_TOOL_LOOPS) {
+        const stageMessages: AnthropicMessage[] = [
+          ...baseMessages,
+          {
+            role: "user",
+            content: buildStageUserMessage(message, completedStageSummaries, stageBudget),
+          },
+          ...(latestStageProtocol
+            ? [latestStageProtocol.assistant, latestStageProtocol.toolResults]
+            : []),
+        ];
+
         const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
           headers: {
@@ -75,19 +883,24 @@ chat.post("/api/chat", async (c) => {
             model: "claude-sonnet-4-6",
             max_tokens: 4096,
             system: getChatSystemPrompt(),
-            tools: allTools,
-            messages,
+            tools: MCP_AGENT_TOOLS,
+            messages: stageMessages,
             stream: true,
           }),
         });
 
         if (!anthropicRes.ok) {
-          await sendEvent({ type: "error", error: `Anthropic API error: ${anthropicRes.status}` });
+          await sendSseEvent("error", {
+            error: `Anthropic API error: ${anthropicRes.status}`,
+          });
           break;
         }
 
         const reader = anthropicRes.body?.getReader();
-        if (!reader) break;
+        if (!reader) {
+          await sendSseEvent("error", { error: "Missing response body from Anthropic." });
+          break;
+        }
 
         const decoder = new TextDecoder();
         let buffer = "";
@@ -95,173 +908,248 @@ chat.post("/api/chat", async (c) => {
         let currentToolId = "";
         let toolInputJson = "";
         let hasToolUse = false;
-        const toolResults: Array<{ type: "tool_result"; tool_use_id: string; content: string }> =
-          [];
-        const contentBlocks: Array<{
-          type: string;
-          text?: string;
-          id?: string;
-          name?: string;
-          input?: unknown;
-        }> = [];
+        let currentPromptTokens = 0;
+        let currentCompletionTokens = 0;
+        const toolResults: ToolResultContent[] = [];
+        const assistantBlocks: StoredAssistantBlock[] = [];
+        const pendingToolExecutions: PendingToolExecution[] = [];
 
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            break;
+          }
 
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
           buffer = lines.pop() ?? "";
 
           for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
+            if (!line.startsWith("data: ")) {
+              continue;
+            }
+
             const rawData = line.slice(6).trim();
-            if (rawData === "[DONE]" || !rawData) continue;
+            if (!rawData || rawData === "[DONE]") {
+              continue;
+            }
 
             try {
               const event = JSON.parse(rawData) as {
                 type: string;
+                message?: { usage?: { input_tokens?: number } };
+                usage?: { output_tokens?: number };
                 content_block?: { type: string; name?: string; id?: string };
                 delta?: { type: string; text?: string; partial_json?: string };
-                index?: number;
               };
+
+              if (event.type === "message_start") {
+                currentPromptTokens = event.message?.usage?.input_tokens ?? currentPromptTokens;
+                continue;
+              }
+
+              if (event.type === "message_delta") {
+                currentCompletionTokens = event.usage?.output_tokens ?? currentCompletionTokens;
+                continue;
+              }
 
               if (event.type === "content_block_start") {
                 const block = event.content_block;
                 if (block?.type === "text") {
-                  contentBlocks.push({ type: "text", text: "" });
+                  assistantBlocks.push({ type: "text", text: "" });
                 } else if (block?.type === "tool_use") {
                   currentToolName = block.name ?? "";
-                  currentToolId = block.id ?? "";
+                  currentToolId = block.id ?? crypto.randomUUID();
                   toolInputJson = "";
                   hasToolUse = true;
-                  await sendEvent({ type: "tool_call_start", name: currentToolName, args: {} });
                 }
-              } else if (event.type === "content_block_delta") {
+                continue;
+              }
+
+              if (event.type === "content_block_delta") {
                 const delta = event.delta;
                 if (delta?.type === "text_delta" && delta.text) {
-                  // Append to last text block
-                  const lastBlock = contentBlocks[contentBlocks.length - 1];
+                  const lastBlock = assistantBlocks[assistantBlocks.length - 1];
                   if (lastBlock?.type === "text") {
-                    lastBlock.text = (lastBlock.text ?? "") + delta.text;
+                    lastBlock.text += delta.text;
+                  } else {
+                    assistantBlocks.push({ type: "text", text: delta.text });
                   }
-                  await sendEvent({ type: "text_delta", text: delta.text });
+
+                  await sendSseEvent("text_delta", { text: delta.text });
                 } else if (delta?.type === "input_json_delta" && delta.partial_json) {
                   toolInputJson += delta.partial_json;
                 }
-              } else if (event.type === "content_block_stop") {
-                if (currentToolName && currentToolId) {
-                  let toolArgs: Record<string, unknown> = {};
-                  try {
-                    toolArgs = JSON.parse(toolInputJson || "{}") as Record<string, unknown>;
-                  } catch {
-                    // Malformed JSON — use empty args
-                  }
+                continue;
+              }
 
-                  contentBlocks.push({
-                    type: "tool_use",
-                    id: currentToolId,
-                    name: currentToolName,
-                    input: toolArgs,
-                  });
+              if (event.type === "content_block_stop" && currentToolName && currentToolId) {
+                const toolArgs = safeJsonParse<Record<string, unknown>>(toolInputJson || "{}", {});
+                const initialBlock: StoredToolCallBlock = {
+                  type: "tool_call",
+                  toolCallId: currentToolId,
+                  name: currentToolName,
+                  args: toolArgs,
+                  status: "pending",
+                  transport: currentToolName.startsWith("browser_") ? "browser" : "mcp",
+                };
 
-                  const isBrowser = currentToolName.startsWith("browser_");
-                  if (isBrowser) {
-                    const rid = crypto.randomUUID();
-                    await sendEvent({
-                      type: "browser_command",
-                      tool: currentToolName,
-                      args: toolArgs,
-                      requestId: rid,
-                    });
-                    toolResults.push({
-                      type: "tool_result",
-                      tool_use_id: currentToolId,
-                      content: JSON.stringify({ success: true, note: "Executed in browser" }),
-                    });
-                  } else {
-                    let result = "Tool call failed";
-                    try {
-                      const rpcRes = await c.env.MCP_SERVICE.fetch(
-                        new Request("https://mcp.spike.land/mcp", {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                            "X-Request-Id": requestId,
-                          },
-                          body: JSON.stringify({
-                            jsonrpc: "2.0",
-                            id: crypto.randomUUID(),
-                            method: "tools/call",
-                            params: { name: currentToolName, arguments: toolArgs },
-                          }),
-                        }),
-                      );
-                      if (rpcRes.ok) {
-                        const rpcData = await rpcRes.json<{
-                          result?: { content?: Array<{ text?: string }> };
-                          error?: { message: string };
-                        }>();
-                        if (rpcData.result?.content) {
-                          result = rpcData.result.content.map((item) => item.text ?? "").join("\n");
-                        } else if (rpcData.error) {
-                          result = `Error: ${rpcData.error.message}`;
-                        }
-                      }
-                    } catch (error) {
-                      result = `Tool error: ${error instanceof Error ? error.message : "unknown"}`;
-                    }
+                assistantBlocks.push(initialBlock);
+                pendingToolExecutions.push({
+                  toolCallId: currentToolId,
+                  name: currentToolName,
+                  args: toolArgs,
+                  blockIndex: assistantBlocks.length - 1,
+                });
 
-                    await sendEvent({ type: "tool_call_end", name: currentToolName, result });
-                    toolResults.push({
-                      type: "tool_result",
-                      tool_use_id: currentToolId,
-                      content: result,
-                    });
-                  }
+                await sendSseEvent("tool_call_start", {
+                  toolCallId: currentToolId,
+                  name: currentToolName,
+                  args: toolArgs,
+                  transport: initialBlock.transport,
+                });
 
-                  currentToolName = "";
-                  currentToolId = "";
-                  toolInputJson = "";
-                }
+                currentToolName = "";
+                currentToolId = "";
+                toolInputJson = "";
               }
             } catch {
-              // Skip malformed SSE events
+              // Skip malformed Anthropic SSE events.
             }
           }
         }
 
-        if (hasToolUse && toolResults.length > 0 && toolLoopCount < MAX_TOOL_LOOPS) {
-          messages.push({
-            role: "assistant",
-            content: contentBlocks.map((block) => {
-              if (block.type === "tool_use") {
-                return { type: "tool_use", id: block.id, name: block.name, input: block.input };
+        for (const batch of groupToolExecutionBatches(pendingToolExecutions)) {
+          const batchResults = await Promise.all(
+            batch.map((pending) =>
+              executeTool({
+                c,
+                threadId: threadSummary.id,
+                userId,
+                requestId,
+                toolName: pending.name,
+                toolCallId: pending.toolCallId,
+                toolArgs: pending.args,
+                toolCatalog,
+                sendSseEvent,
+              }),
+            ),
+          );
+
+          batch.forEach((pending, index) => {
+            const toolResult = batchResults[index];
+            if (!toolResult) {
+              return;
+            }
+
+            const block = assistantBlocks[pending.blockIndex];
+            if (block?.type === "tool_call" && block.toolCallId === pending.toolCallId) {
+              block.result = toolResult.result;
+              block.status = toolResult.status;
+              block.transport = toolResult.transport;
+            }
+
+            toolResults.push({
+              type: "tool_result",
+              tool_use_id: pending.toolCallId,
+              content: toolResult.result,
+            });
+          });
+
+          for (const [index, pending] of batch.entries()) {
+            const toolResult = batchResults[index];
+            if (!toolResult) {
+              continue;
+            }
+
+            await sendSseEvent("tool_call_end", {
+              toolCallId: pending.toolCallId,
+              name: pending.name,
+              result: toolResult.result,
+              status: toolResult.status,
+              transport: toolResult.transport,
+            });
+          }
+        }
+
+        const usage =
+          currentPromptTokens > 0 || currentCompletionTokens > 0
+            ? {
+                promptTokens: currentPromptTokens,
+                completionTokens: currentCompletionTokens,
+                totalTokens: currentPromptTokens + currentCompletionTokens,
               }
-              return { type: "text", text: block.text ?? "" };
-            }),
-          });
-          messages.push({
-            role: "user",
-            content: toolResults,
-          });
-          toolLoopCount++;
+            : null;
+
+        if (usage) {
+          aggregateUsage = {
+            promptTokens: usage.promptTokens,
+            completionTokens: (aggregateUsage?.completionTokens ?? 0) + usage.completionTokens,
+            totalTokens:
+              usage.promptTokens + (aggregateUsage?.completionTokens ?? 0) + usage.completionTokens,
+          };
+        }
+
+        await insertRound(c.env.DB, {
+          threadId: threadSummary.id,
+          userId,
+          inputRole: currentInputRole,
+          inputContent: currentInputContent,
+          assistantBlocks,
+          usage,
+        });
+
+        if (hasToolUse && toolResults.length > 0 && toolLoopCount < MAX_TOOL_LOOPS) {
+          if (latestStageProtocol?.summary) {
+            completedStageSummaries = appendStageSummary(
+              completedStageSummaries,
+              latestStageProtocol.summary,
+              stageBudget,
+            );
+          }
+
+          latestStageProtocol = {
+            assistant: {
+              role: "assistant",
+              content: assistantBlocksToAnthropicContent(assistantBlocks),
+            },
+            toolResults: {
+              role: "user",
+              content: toolResults,
+            },
+            summary: summarizeCompletedStage(assistantBlocks, stageBudget),
+          };
+
+          currentInputRole = "tool_result";
+          currentInputContent = toolResults;
+          toolLoopCount += 1;
           continue;
         }
 
         break;
       }
-    } catch (err) {
+
+      await updateThreadUsage(c.env.DB, threadSummary.id, aggregateUsage);
+
+      if (aggregateUsage) {
+        await sendSseEvent("usage", {
+          promptTokens: aggregateUsage.promptTokens,
+          completionTokens: aggregateUsage.completionTokens,
+          totalTokens: aggregateUsage.totalTokens,
+        });
+      }
+
+      await sendSseEvent("done", { threadId: threadSummary.id });
+    } catch (error) {
       try {
-        await sendEvent({
-          type: "error",
-          error: err instanceof Error ? err.message : "Internal error",
+        await sendSseEvent("error", {
+          error: error instanceof Error ? error.message : "Internal error",
         });
       } catch {
-        // Writer may already be closed
+        // Writer may already be closed.
       }
     } finally {
-      await sendEvent("[DONE]");
+      await writer.write(encoder.encode("data: [DONE]\n\n"));
       await writer.close();
     }
   })();
@@ -269,7 +1157,7 @@ chat.post("/api/chat", async (c) => {
   try {
     c.executionCtx.waitUntil(bgTask);
   } catch {
-    /* no ExecutionContext in tests */
+    // No ExecutionContext in tests.
   }
 
   return new Response(readable, {

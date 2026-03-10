@@ -1,0 +1,25 @@
+{
+  "name": "@compass/rights-engine",
+  "version": "0.1.0",
+  "description": "COMPASS Rights Engine — rights awareness, appeal guidance, complaint templates, and legal resource referrals",
+  "type": "module",
+  "main": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types": "./types.ts",
+    "./rights-lookup": "./core-logic/rights-lookup.ts",
+    "./appeal-engine": "./core-logic/appeal-engine.ts",
+    "./legal-resources": "./core-logic/legal-resources.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.0"
+  }
+}

@@ -319,40 +319,62 @@ export async function apiRequest<T>(
     headers.Authorization = `Bearer ${serviceToken}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers: { ...headers, ...(options.headers as Record<string, string>) },
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-  if (!response.ok) {
-    const body = await response.text().catch(() => "Unknown error");
-    let errorMsg: string;
-    try {
-      const json = JSON.parse(body) as { error?: string };
-      errorMsg = json.error || body;
-    } catch {
-      errorMsg = body;
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: { ...headers, ...(options.headers as Record<string, string>) },
+      signal: controller.signal as NonNullable<RequestInit["signal"]>,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const body = await response.text().catch(() => "Unknown error");
+      let errorMsg: string;
+      try {
+        const json = JSON.parse(body) as { error?: string };
+        errorMsg = json.error || body;
+      } catch {
+        errorMsg = body;
+      }
+
+      if (response.status === 404) {
+        throw new McpError(errorMsg, McpErrorCode.UPSTREAM_SERVICE_ERROR, false);
+      }
+      if (response.status === 403 || response.status === 401) {
+        throw new McpError(errorMsg, McpErrorCode.PERMISSION_DENIED, false);
+      }
+      if (response.status === 409) {
+        throw new McpError(errorMsg, McpErrorCode.CONFLICT, false);
+      }
+      if (response.status === 429) {
+        throw new McpError(errorMsg, McpErrorCode.RATE_LIMITED, true);
+      }
+      if (response.status === 400) {
+        throw new McpError(errorMsg, McpErrorCode.VALIDATION_ERROR, false);
+      }
+      throw new McpError(errorMsg, McpErrorCode.UPSTREAM_SERVICE_ERROR, true);
     }
 
-    if (response.status === 404) {
-      throw new McpError(errorMsg, McpErrorCode.UPSTREAM_SERVICE_ERROR, false);
+    if (response.status === 204) {
+      return undefined as unknown as T;
     }
-    if (response.status === 403 || response.status === 401) {
-      throw new McpError(errorMsg, McpErrorCode.PERMISSION_DENIED, false);
+
+    return response.json() as Promise<T>;
+  } catch (error: unknown) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new McpError(
+        `Request to ${endpoint} timed out after 15 seconds.`,
+        McpErrorCode.UPSTREAM_SERVICE_ERROR,
+        true,
+      );
     }
-    if (response.status === 409) {
-      throw new McpError(errorMsg, McpErrorCode.CONFLICT, false);
-    }
-    if (response.status === 429) {
-      throw new McpError(errorMsg, McpErrorCode.RATE_LIMITED, true);
-    }
-    if (response.status === 400) {
-      throw new McpError(errorMsg, McpErrorCode.VALIDATION_ERROR, false);
-    }
-    throw new McpError(errorMsg, McpErrorCode.UPSTREAM_SERVICE_ERROR, true);
+    throw error;
   }
-
-  return response.json() as Promise<T>;
 }
 
 // ─── Workspace Resolution ─────────────────────────────────────────────────────

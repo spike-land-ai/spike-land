@@ -1,104 +1,349 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { apiUrl } from "../../core-logic/api";
 
-export interface ChatMessage {
+export interface ChatUsageSnapshot {
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+}
+
+export interface ChatUsage extends ChatUsageSnapshot {
+  contextWindow: number;
+}
+
+export interface ChatThreadSummary {
   id: string;
-  role: "user" | "assistant";
+  title: string;
+  usage: ChatUsageSnapshot | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+interface StoredTextBlock {
+  type: "text";
+  text: string;
+}
+
+interface StoredToolCallBlock {
+  type: "tool_call";
+  toolCallId: string;
+  name: string;
+  args: Record<string, unknown>;
+  result?: string;
+  status: "pending" | "done" | "error";
+  transport: "browser" | "mcp";
+}
+
+type StoredAssistantBlock = StoredTextBlock | StoredToolCallBlock;
+
+interface ThreadRound {
+  id: string;
+  inputRole: string;
+  inputContent: string | null;
+  assistantBlocks: StoredAssistantBlock[];
+  assistantText: string;
+  usage: ChatUsageSnapshot | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface UserConversationItem {
+  id: string;
+  kind: "user";
   content: string;
-  toolCalls?: Array<{
-    name: string;
-    args: Record<string, unknown>;
-    result?: string;
-    status: "pending" | "done" | "error";
-  }>;
-  browserCommands?: Array<{
-    tool: string;
-    args: Record<string, unknown>;
-    requestId: string;
-    result?: unknown;
-  }>;
   timestamp: number;
 }
 
+export interface AssistantTextConversationItem {
+  id: string;
+  kind: "assistant_text";
+  content: string;
+  timestamp: number;
+}
+
+export interface ToolCallConversationItem {
+  id: string;
+  kind: "tool_call";
+  toolCallId: string;
+  name: string;
+  args: Record<string, unknown>;
+  result?: string;
+  status: "pending" | "done" | "error";
+  transport: "browser" | "mcp";
+  timestamp: number;
+}
+
+export type ConversationItem =
+  | UserConversationItem
+  | AssistantTextConversationItem
+  | ToolCallConversationItem;
+
+interface UseChatOptions {
+  enabled?: boolean;
+}
+
 interface UseChatReturn {
-  messages: ChatMessage[];
-  sendMessage: (content: string) => Promise<void>;
+  threads: ChatThreadSummary[];
+  currentThreadId: string | null;
+  items: ConversationItem[];
+  usage: ChatUsage | null;
+  isLoadingHistory: boolean;
   isStreaming: boolean;
   error: string | null;
+  sendMessage: (content: string) => Promise<void>;
+  selectThread: (threadId: string) => Promise<void>;
+  newThread: () => void;
   clearError: () => void;
-  clearMessages: () => void;
-  submitBrowserResult: (requestId: string, result: unknown) => void;
+  submitBrowserResult: (toolCallId: string, result: unknown) => Promise<void>;
 }
 
-const STORAGE_KEY = "spike-chat-messages";
+interface ThreadDetailResponse {
+  thread: ChatThreadSummary;
+  rounds: ThreadRound[];
+}
+
+interface ThreadsResponse {
+  threads: ChatThreadSummary[];
+}
+
+interface SettingsResponse {
+  context_window?: number;
+}
 
 let nextId = 0;
-function makeId() {
-  return `msg-${Date.now()}-${++nextId}`;
+function makeId(prefix: string) {
+  return `${prefix}-${Date.now()}-${++nextId}`;
 }
 
-export function useChat(): UseChatReturn {
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]") as ChatMessage[];
-    } catch {
-      return [];
+function formatToolResult(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
+  }
+}
+
+export function buildConversationItems(rounds: ThreadRound[]): ConversationItem[] {
+  const items: ConversationItem[] = [];
+
+  for (const round of rounds) {
+    if (round.inputRole === "user" && round.inputContent) {
+      items.push({
+        id: `${round.id}-user`,
+        kind: "user",
+        content: round.inputContent,
+        timestamp: round.createdAt,
+      });
     }
-  });
+
+    round.assistantBlocks.forEach((block, index) => {
+      if (block.type === "text") {
+        if (!block.text) {
+          return;
+        }
+
+        items.push({
+          id: `${round.id}-text-${index}`,
+          kind: "assistant_text",
+          content: block.text,
+          timestamp: round.createdAt,
+        });
+        return;
+      }
+
+      items.push({
+        id: `${round.id}-tool-${block.toolCallId}`,
+        kind: "tool_call",
+        toolCallId: block.toolCallId,
+        name: block.name,
+        args: block.args,
+        result: block.result,
+        status: block.status,
+        transport: block.transport,
+        timestamp: round.createdAt,
+      });
+    });
+  }
+
+  return items;
+}
+
+export function useChat({ enabled = true }: UseChatOptions = {}): UseChatReturn {
+  const [threads, setThreads] = useState<ChatThreadSummary[]>([]);
+  const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
+  const [items, setItems] = useState<ConversationItem[]>([]);
+  const [usageSnapshot, setUsageSnapshot] = useState<ChatUsageSnapshot | null>(null);
+  const [contextWindow, setContextWindow] = useState(128_000);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const abortRef = useRef<AbortController | null>(null);
-  const pendingBrowserRef = useRef<Map<string, (result: unknown) => void>>(new Map());
+  const currentThreadIdRef = useRef<string | null>(null);
+  const activeAssistantTextIdRef = useRef<string | null>(null);
+  const didInitRef = useRef(false);
 
-  // Debounce localStorage persistence to avoid excessive I/O during streaming
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-    }, 1000);
-    return () => clearTimeout(timeoutId);
-  }, [messages]);
+    currentThreadIdRef.current = currentThreadId;
+  }, [currentThreadId]);
 
-  const submitBrowserResult = useCallback((requestId: string, result: unknown) => {
-    const resolve = pendingBrowserRef.current.get(requestId);
-    if (resolve) {
-      resolve(result);
-      pendingBrowserRef.current.delete(requestId);
+  const usage = useMemo<ChatUsage | null>(() => {
+    if (!usageSnapshot) {
+      return null;
     }
+
+    return {
+      ...usageSnapshot,
+      contextWindow,
+    };
+  }, [contextWindow, usageSnapshot]);
+
+  const loadThread = useCallback(async (threadId: string) => {
+    setIsLoadingHistory(true);
+
+    try {
+      const res = await fetch(apiUrl(`/chat/threads/${threadId}`), {
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+
+      const payload = (await res.json()) as ThreadDetailResponse;
+      currentThreadIdRef.current = payload.thread.id;
+      setCurrentThreadId(payload.thread.id);
+      setItems(buildConversationItems(payload.rounds));
+      setUsageSnapshot(payload.thread.usage);
+      activeAssistantTextIdRef.current = null;
+      setError(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to load thread";
+      setError(message);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }, []);
+
+  const refreshThreads = useCallback(
+    async (options?: { selectFirst?: boolean }) => {
+      if (!enabled) {
+        return;
+      }
+
+      try {
+        const res = await fetch(apiUrl("/chat/threads"), {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          throw new Error(await res.text());
+        }
+
+        const payload = (await res.json()) as ThreadsResponse;
+        setThreads(payload.threads);
+
+        if (options?.selectFirst && !currentThreadIdRef.current && payload.threads[0]) {
+          await loadThread(payload.threads[0].id);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to load threads";
+        setError(message);
+      }
+    },
+    [enabled, loadThread],
+  );
+
+  useEffect(() => {
+    if (!enabled) {
+      abortRef.current?.abort();
+      currentThreadIdRef.current = null;
+      setThreads([]);
+      setCurrentThreadId(null);
+      setItems([]);
+      setUsageSnapshot(null);
+      setIsLoadingHistory(false);
+      setIsStreaming(false);
+      setError(null);
+      didInitRef.current = false;
+      activeAssistantTextIdRef.current = null;
+      return;
+    }
+
+    void (async () => {
+      try {
+        const res = await fetch(apiUrl("/settings/public"));
+        if (!res.ok) {
+          return;
+        }
+
+        const payload = (await res.json()) as SettingsResponse;
+        if (typeof payload.context_window === "number" && payload.context_window > 0) {
+          setContextWindow(payload.context_window);
+        }
+      } catch {
+        // Best-effort public settings load.
+      }
+    })();
+
+    if (!didInitRef.current) {
+      didInitRef.current = true;
+      void refreshThreads({ selectFirst: true });
+    }
+  }, [enabled, refreshThreads]);
+
+  const appendAssistantText = useCallback((text: string) => {
+    setItems((prev) => {
+      const existingId = activeAssistantTextIdRef.current;
+      if (existingId) {
+        return prev.map((item) =>
+          item.kind === "assistant_text" && item.id === existingId
+            ? { ...item, content: item.content + text }
+            : item,
+        );
+      }
+
+      const id = makeId("assistant");
+      activeAssistantTextIdRef.current = id;
+
+      return [
+        ...prev,
+        {
+          id,
+          kind: "assistant_text",
+          content: text,
+          timestamp: Date.now(),
+        },
+      ];
+    });
   }, []);
 
   const sendMessage = useCallback(
     async (content: string) => {
-      if (!content.trim() || isStreaming) return;
+      if (!enabled || isStreaming || !content.trim()) {
+        return;
+      }
 
-      const userMsg: ChatMessage = {
-        id: makeId(),
-        role: "user",
-        content: content.trim(),
-        timestamp: Date.now(),
-      };
-
-      setMessages((prev) => [...prev, userMsg]);
-      setIsStreaming(true);
+      activeAssistantTextIdRef.current = null;
       setError(null);
+      setIsStreaming(true);
 
-      const assistantMsg: ChatMessage = {
-        id: makeId(),
-        role: "assistant",
-        content: "",
-        toolCalls: [],
-        browserCommands: [],
+      const trimmed = content.trim();
+      const optimisticUserItem: UserConversationItem = {
+        id: makeId("user"),
+        kind: "user",
+        content: trimmed,
         timestamp: Date.now(),
       };
 
-      setMessages((prev) => [...prev, assistantMsg]);
+      setItems((prev) => [...prev, optimisticUserItem]);
 
       try {
         abortRef.current = new AbortController();
-
-        const history = messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        }));
 
         const res = await fetch(apiUrl("/chat"), {
           method: "POST",
@@ -106,148 +351,263 @@ export function useChat(): UseChatReturn {
             "Content-Type": "application/json",
           },
           credentials: "include",
-          body: JSON.stringify({ message: content.trim(), history }),
+          body: JSON.stringify({
+            message: trimmed,
+            ...(currentThreadIdRef.current ? { threadId: currentThreadIdRef.current } : {}),
+          }),
           signal: abortRef.current.signal,
         });
 
         if (!res.ok) {
-          const errBody = await res.text();
-          throw new Error(errBody || `HTTP ${res.status}`);
+          throw new Error((await res.text()) || `HTTP ${res.status}`);
         }
 
         const reader = res.body?.getReader();
-        if (!reader) throw new Error("No response body");
+        if (!reader) {
+          throw new Error("No response body");
+        }
 
         const decoder = new TextDecoder();
         let buffer = "";
 
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            break;
+          }
 
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop() || "";
+          const chunks = buffer.split("\n\n");
+          buffer = chunks.pop() ?? "";
 
-          for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
-            const data = line.slice(6);
-            if (data === "[DONE]") continue;
+          for (const chunk of chunks) {
+            const lines = chunk.split("\n");
+            let eventName = "message";
+            const dataLines: string[] = [];
+
+            for (const line of lines) {
+              if (line.startsWith("event:")) {
+                eventName = line.slice(6).trim();
+              } else if (line.startsWith("data:")) {
+                dataLines.push(line.slice(5).trimStart());
+              }
+            }
+
+            const rawData = dataLines.join("\n");
+            if (!rawData || rawData === "[DONE]") {
+              continue;
+            }
 
             try {
-              const event = JSON.parse(data) as {
-                type: string;
+              const payload = JSON.parse(rawData) as {
+                type?: string;
                 text?: string;
+                error?: string;
+                promptTokens?: number;
+                completionTokens?: number;
+                totalTokens?: number;
+                thread?: ChatThreadSummary;
+                toolCallId?: string;
                 name?: string;
                 args?: Record<string, unknown>;
                 result?: string;
-                requestId?: string;
-                tool?: string;
-                error?: string;
+                status?: "pending" | "done" | "error";
+                transport?: "browser" | "mcp";
               };
 
-              if (event.type === "text_delta" && event.text) {
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantMsg.id ? { ...m, content: m.content + event.text } : m,
-                  ),
-                );
-              } else if (event.type === "tool_call_start" && event.name) {
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantMsg.id
+              const resolvedEvent = payload.type ?? eventName;
+
+              if (resolvedEvent === "thread" && payload.thread) {
+                currentThreadIdRef.current = payload.thread.id;
+                setCurrentThreadId(payload.thread.id);
+                void refreshThreads();
+                continue;
+              }
+
+              if (resolvedEvent === "text_delta" && payload.text) {
+                appendAssistantText(payload.text);
+                continue;
+              }
+
+              if (
+                resolvedEvent === "tool_call_start" &&
+                payload.toolCallId &&
+                payload.name &&
+                payload.transport
+              ) {
+                activeAssistantTextIdRef.current = null;
+                setItems((prev) => [
+                  ...prev,
+                  {
+                    id: makeId("tool"),
+                    kind: "tool_call",
+                    toolCallId: payload.toolCallId,
+                    name: payload.name,
+                    args: payload.args ?? {},
+                    status: payload.status ?? "pending",
+                    transport: payload.transport,
+                    timestamp: Date.now(),
+                  },
+                ]);
+                continue;
+              }
+
+              if (resolvedEvent === "tool_call_end" && payload.toolCallId) {
+                activeAssistantTextIdRef.current = null;
+                setItems((prev) =>
+                  prev.map((item) =>
+                    item.kind === "tool_call" && item.toolCallId === payload.toolCallId
                       ? {
-                          ...m,
-                          toolCalls: [
-                            ...(m.toolCalls || []),
-                            {
-                              name: event.name!,
-                              args: event.args || {},
-                              status: "pending" as const,
-                            },
-                          ],
+                          ...item,
+                          result: payload.result,
+                          status: payload.status ?? "done",
+                          transport: payload.transport ?? item.transport,
                         }
-                      : m,
+                      : item,
                   ),
                 );
-              } else if (event.type === "tool_call_end" && event.name) {
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantMsg.id
-                      ? {
-                          ...m,
-                          toolCalls: (m.toolCalls || []).map((tc) =>
-                            tc.name === event.name && tc.status === "pending"
-                              ? {
-                                  ...tc,
-                                  ...(event.result !== undefined ? { result: event.result } : {}),
-                                  status: "done" as const,
-                                }
-                              : tc,
-                          ),
-                        }
-                      : m,
-                  ),
-                );
-              } else if (event.type === "browser_command" && event.tool && event.requestId) {
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === assistantMsg.id
-                      ? {
-                          ...m,
-                          browserCommands: [
-                            ...(m.browserCommands || []),
-                            {
-                              tool: event.tool!,
-                              args: event.args || {},
-                              requestId: event.requestId!,
-                            },
-                          ],
-                        }
-                      : m,
-                  ),
-                );
-              } else if (event.type === "error") {
-                setError(event.error || "Unknown error");
+                continue;
+              }
+
+              if (
+                resolvedEvent === "usage" &&
+                typeof payload.promptTokens === "number" &&
+                typeof payload.completionTokens === "number" &&
+                typeof payload.totalTokens === "number"
+              ) {
+                setUsageSnapshot({
+                  promptTokens: payload.promptTokens,
+                  completionTokens: payload.completionTokens,
+                  totalTokens: payload.totalTokens,
+                });
+                void refreshThreads();
+                continue;
+              }
+
+              if (resolvedEvent === "error") {
+                setError(payload.error ?? "Unknown error");
               }
             } catch {
-              // skip malformed SSE
+              // Ignore malformed SSE chunks.
             }
           }
         }
       } catch (err) {
-        if (err instanceof Error && err.name === "AbortError") return;
-        const msg = err instanceof Error ? err.message : "Failed to send message";
-        setError(msg);
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === assistantMsg.id && !m.content
-              ? { ...m, content: "Sorry, something went wrong. Please try again." }
-              : m,
-          ),
-        );
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+
+        const message = err instanceof Error ? err.message : "Failed to send message";
+        setError(message);
+        setItems((prev) => [
+          ...prev,
+          {
+            id: makeId("assistant-error"),
+            kind: "assistant_text",
+            content: "Sorry, something went wrong. Please try again.",
+            timestamp: Date.now(),
+          },
+        ]);
       } finally {
+        activeAssistantTextIdRef.current = null;
         setIsStreaming(false);
         abortRef.current = null;
+        void refreshThreads();
       }
     },
-    [isStreaming, messages],
+    [appendAssistantText, enabled, isStreaming, refreshThreads],
   );
 
-  const clearError = useCallback(() => setError(null), []);
-  const clearMessages = useCallback(() => {
-    setMessages([]);
+  const selectThread = useCallback(
+    async (threadId: string) => {
+      if (!enabled || isStreaming) {
+        return;
+      }
+
+      setUsageSnapshot(null);
+      await loadThread(threadId);
+    },
+    [enabled, isStreaming, loadThread],
+  );
+
+  const newThread = useCallback(() => {
+    if (isStreaming) {
+      return;
+    }
+
+    activeAssistantTextIdRef.current = null;
+    currentThreadIdRef.current = null;
+    setCurrentThreadId(null);
+    setItems([]);
+    setUsageSnapshot(null);
     setError(null);
-    localStorage.removeItem(STORAGE_KEY);
+  }, [isStreaming]);
+
+  const clearError = useCallback(() => setError(null), []);
+
+  const submitBrowserResult = useCallback(async (toolCallId: string, result: unknown) => {
+    const threadId = currentThreadIdRef.current;
+    if (!threadId) {
+      return;
+    }
+
+    setItems((prev) =>
+      prev.map((item) =>
+        item.kind === "tool_call" && item.toolCallId === toolCallId && !item.result
+          ? {
+              ...item,
+              result: formatToolResult(result),
+            }
+          : item,
+      ),
+    );
+
+    try {
+      const res = await fetch(apiUrl("/chat/browser-results"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          threadId,
+          toolCallId,
+          result,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error((await res.text()) || `HTTP ${res.status}`);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to submit browser result";
+      setError(message);
+      setItems((prev) =>
+        prev.map((item) =>
+          item.kind === "tool_call" && item.toolCallId === toolCallId
+            ? {
+                ...item,
+                status: "error",
+                result: message,
+              }
+            : item,
+        ),
+      );
+    }
   }, []);
 
   return {
-    messages,
-    sendMessage,
+    threads,
+    currentThreadId,
+    items,
+    usage,
+    isLoadingHistory,
     isStreaming,
     error,
+    sendMessage,
+    selectThread,
+    newThread,
     clearError,
-    clearMessages,
     submitBrowserResult,
   };
 }

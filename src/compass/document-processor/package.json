@@ -1,0 +1,25 @@
+{
+  "name": "@compass/document-processor",
+  "version": "0.1.0",
+  "description": "COMPASS Document Processor — form comprehension, checklist generation, and template-based form filling",
+  "type": "module",
+  "main": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types": "./types.ts",
+    "./checklist-generator": "./core-logic/checklist-generator.ts",
+    "./form-filler": "./core-logic/form-filler.ts",
+    "./plain-language": "./core-logic/plain-language.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "test:coverage": "vitest run --config vitest.config.ts --coverage"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.0"
+  }
+}

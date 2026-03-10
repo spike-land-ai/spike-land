@@ -258,8 +258,8 @@ export function registerVaultTools(
 
   registry.registerBuilt(
     t
-      .tool("vault_delete_secret", "Delete a secret from the vault.", {
-        secret_id: z.string().min(1).describe("The ID of the secret to delete."),
+      .tool("vault_delete_secret", "Delete a secret from the vault by its name.", {
+        name: z.string().min(1).describe("The name of the secret to delete (e.g. OPENAI_API_KEY)."),
       })
       .meta({ category: "vault", tier: "free" })
       .handler(async ({ input, ctx }) => {
@@ -267,7 +267,7 @@ export function registerVaultTools(
           const secret = await ctx.db
             .select({ id: vaultSecrets.id, key: vaultSecrets.key })
             .from(vaultSecrets)
-            .where(and(eq(vaultSecrets.id, input.secret_id), eq(vaultSecrets.userId, ctx.userId)))
+            .where(and(eq(vaultSecrets.key, input.name), eq(vaultSecrets.userId, ctx.userId)))
             .limit(1);
 
           if (secret.length === 0 || !secret[0]) {
@@ -275,14 +275,14 @@ export function registerVaultTools(
               content: [
                 {
                   type: "text",
-                  text: `Secret not found or you don't have access.`,
+                  text: `Secret '${input.name}' not found or you don't have access.`,
                 },
               ],
               isError: true,
             };
           }
 
-          await ctx.db.delete(vaultSecrets).where(eq(vaultSecrets.id, input.secret_id));
+          await ctx.db.delete(vaultSecrets).where(eq(vaultSecrets.id, secret[0].id));
 
           return {
             content: [

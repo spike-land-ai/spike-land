@@ -24,40 +24,77 @@ interface JsonSchemaProperty {
 
 /** Map a Zod type to a JSON Schema property, unwrapping Optional/Default wrappers. */
 function resolveZodProperty(zodField: unknown): { prop: JsonSchemaProperty; optional: boolean } {
-  let field = zodField as z.ZodTypeAny;
+  let field = zodField as any;
   let optional = false;
 
-  while (field instanceof z.ZodOptional || field instanceof z.ZodDefault) {
-    optional = true;
-    field =
-      field instanceof z.ZodOptional
-        ? (field.unwrap() as z.ZodTypeAny)
-        : (field.removeDefault() as z.ZodTypeAny);
+  while (field) {
+    const t =
+      field.type ||
+      field.def?.type ||
+      field._def?.type ||
+      field.typeName ||
+      field.def?.typeName ||
+      field._def?.typeName;
+    if (t === "optional" || t === "ZodOptional") {
+      optional = true;
+      field = field.innerType || field.def?.innerType || field._def?.innerType || field.unwrap?.();
+    } else if (t === "default" || t === "ZodDefault") {
+      optional = true;
+      field =
+        field.innerType || field.def?.innerType || field._def?.innerType || field.removeDefault?.();
+    } else if (t === "nullable" || t === "ZodNullable") {
+      field = field.innerType || field.def?.innerType || field._def?.innerType || field.unwrap?.();
+    } else if (t === "effects" || t === "ZodEffects") {
+      field = field.schema || field.def?.schema || field._def?.schema || field.innerType?.();
+    } else if (t === "pipe" || t === "ZodPipeline") {
+      field = field.in || field.def?.in || field._def?.in;
+    } else {
+      break;
+    }
   }
 
-  const originalField = zodField as z.ZodTypeAny;
-  const description = originalField.description ?? field.description ?? "";
+  const originalField = zodField as any;
+  const description =
+    originalField.description ??
+    originalField.def?.description ??
+    originalField._def?.description ??
+    field.description ??
+    field.def?.description ??
+    field._def?.description ??
+    "";
+  const t =
+    field.type ||
+    field.def?.type ||
+    field._def?.type ||
+    field.typeName ||
+    field.def?.typeName ||
+    field._def?.typeName;
 
-  if (field instanceof z.ZodEnum) {
+  if (t === "enum" || t === "ZodEnum") {
+    const options = field.options || field.def?.values || field._def?.values || [];
     return {
       prop: {
         type: "string",
         description,
-        ...(field.options.length > 0 ? { enum: field.options.map((value) => String(value)) } : {}),
+        ...(options.length > 0 ? { enum: options.map((value: any) => String(value)) } : {}),
       },
       optional,
     };
   }
 
-  if (field instanceof z.ZodObject) {
+  if (t === "object" || t === "ZodObject") {
     const nestedProps: Record<string, JsonSchemaProperty> = {};
     const nestedRequired: string[] = [];
+    let shape = field.shape || field.def?.shape || field._def?.shape;
+    if (typeof shape === "function") shape = shape();
 
-    for (const [key, nestedField] of Object.entries(field.shape)) {
-      const { prop: nestedProp, optional: nestedOptional } = resolveZodProperty(nestedField);
-      nestedProps[key] = nestedProp;
-      if (!nestedOptional) {
-        nestedRequired.push(key);
+    if (shape) {
+      for (const [key, nestedField] of Object.entries(shape)) {
+        const { prop: nestedProp, optional: nestedOptional } = resolveZodProperty(nestedField);
+        nestedProps[key] = nestedProp;
+        if (!nestedOptional) {
+          nestedRequired.push(key);
+        }
       }
     }
 
@@ -72,8 +109,11 @@ function resolveZodProperty(zodField: unknown): { prop: JsonSchemaProperty; opti
     };
   }
 
-  if (field instanceof z.ZodArray) {
-    const { prop: itemProp } = resolveZodProperty(field.element);
+  if (t === "array" || t === "ZodArray") {
+    const element = field.element || field.def?.type || field._def?.type;
+    const { prop: itemProp } = element
+      ? resolveZodProperty(element)
+      : { prop: { type: "string", description: "" } };
     return {
       prop: {
         type: "array",
@@ -85,9 +125,9 @@ function resolveZodProperty(zodField: unknown): { prop: JsonSchemaProperty; opti
   }
 
   let jsonType = "string";
-  if (field instanceof z.ZodNumber) {
+  if (t === "number" || t === "ZodNumber") {
     jsonType = "number";
-  } else if (field instanceof z.ZodBoolean) {
+  } else if (t === "boolean" || t === "ZodBoolean") {
     jsonType = "boolean";
   }
   const prop: JsonSchemaProperty = { type: jsonType, description };
@@ -138,8 +178,8 @@ publicToolsRoute.get("/", async (c) => {
     const properties: Record<string, JsonSchemaProperty> = {};
     const required: string[] = [];
 
-    for (const key of Object.keys(t.inputSchema)) {
-      const { prop, optional } = resolveZodProperty(t.inputSchema[key]);
+    for (const [key, field] of Object.entries(t.inputSchema)) {
+      const { prop, optional } = resolveZodProperty(field);
       properties[key] = prop;
       if (!optional) {
         required.push(key);
@@ -162,7 +202,6 @@ publicToolsRoute.get("/", async (c) => {
   });
 
   const response = c.json({ tools });
-  // Tool definitions rarely change — cache aggressively
   c.header("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
   return response;
 });

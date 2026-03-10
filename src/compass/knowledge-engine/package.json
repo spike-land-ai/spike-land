@@ -1,0 +1,25 @@
+{
+  "name": "@compass/knowledge-engine",
+  "version": "0.1.0",
+  "description": "COMPASS Knowledge Engine — five-layer bureaucratic process graph for 193 countries",
+  "type": "module",
+  "main": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types": "./types.ts",
+    "./graph": "./core-logic/graph.ts",
+    "./versioning": "./core-logic/versioning.ts",
+    "./regulatory-monitor": "./core-logic/regulatory-monitor.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config ./vitest.config.ts",
+    "test:watch": "vitest --config ./vitest.config.ts",
+    "test:coverage": "vitest run --config ./vitest.config.ts --coverage"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.0"
+  }
+}

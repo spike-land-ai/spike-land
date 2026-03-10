@@ -32,6 +32,7 @@ import { experiments } from "./routes/experiments.js";
 import { fixer } from "./routes/fixer.js";
 import { cachePurge } from "./routes/cache-purge.js";
 import { chat } from "./routes/chat.js";
+import { settings } from "./routes/settings.js";
 import { spikeChat } from "./routes/spike-chat.js";
 import { spa } from "./routes/spa.js";
 import { wellKnown } from "./routes/well-known.js";
@@ -177,6 +178,7 @@ app.post("/api/experiments/*/evaluate", authMiddleware);
 
 // Auth and credit metering for AI chat endpoint
 app.use("/api/chat", authMiddleware);
+app.use("/api/chat/*", authMiddleware);
 app.use("/api/chat", creditMeterMiddleware);
 
 // Auth and credit metering for Spike Chat (Grok-powered)
@@ -242,6 +244,7 @@ app.route("/", credits);
 app.route("/", support);
 app.route("/", experiments);
 app.route("/", fixer);
+app.route("/", settings);
 app.route("/", chat);
 app.route("/", spikeChat);
 app.route("/", cachePurge);

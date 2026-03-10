@@ -1,7 +1,7 @@
 import { Link, useParams, useSearch, useNavigate } from "@tanstack/react-router";
-import { useCallback, useState, useEffect, lazy, Suspense } from "react";
+import { useCallback, useEffect, lazy, Suspense, useState } from "react";
 import { type AppStatus, StatusBadge } from "../../components/StatusBadge";
-import { ChatThread, type Message } from "../../components/ChatThread";
+import { AgentChatPanel } from "../../components/AgentChatPanel";
 import { type AppVersion, VersionHistory } from "../../components/VersionHistory";
 import { AppProductPage } from "../../components/AppProductPage";
 
@@ -47,8 +47,6 @@ export function AppDetailPage() {
   const navigate = useNavigate();
 
   const activeTab = tabs.includes(search.tab as Tab) ? (search.tab as Tab) : "Overview";
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [appStatus] = useState<AppStatus>("live");
 
   const setActiveTab = useCallback(
@@ -84,37 +82,16 @@ export function AppDetailPage() {
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
           { "@type": "ListItem", position: 2, name: "Packages", item: `${SITE_URL}/packages` },
-          { "@type": "ListItem", position: 3, name: appName, item: `${SITE_URL}/packages/${appId}` },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: appName,
+            item: `${SITE_URL}/packages/${appId}`,
+          },
         ],
       }),
     );
   }, [appId]);
-
-  const handleSendMessage = useCallback((content: string) => {
-    const userMsg: Message = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content,
-      timestamp: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, userMsg]);
-    setIsLoading(true);
-
-    // Simulate assistant response
-    setTimeout(() => {
-      const assistantMsg: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: `I received your message about "${content.slice(
-          0,
-          50,
-        )}...". I'll work on that change now.`,
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, assistantMsg]);
-      setIsLoading(false);
-    }, 1500);
-  }, []);
 
   function handleAction(_action: "archive" | "delete" | "restore") {
     // No-op until edge API integration
@@ -193,7 +170,9 @@ export function AppDetailPage() {
           </Suspense>
         )}
         {activeTab === "Chat" && (
-          <ChatThread messages={messages} onSendMessage={handleSendMessage} isLoading={isLoading} />
+          <AgentChatPanel
+            placeholder={`Ask the agent how to use or modify ${appId ?? "this package"}...`}
+          />
         )}
         {activeTab === "Versions" && (
           <div className="p-6">
