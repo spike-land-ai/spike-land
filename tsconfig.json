@@ -5,12 +5,15 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
+    // TODO: enable strictNullChecks — currently disabled to avoid large blast radius.
+    // Schedule a dedicated PR with incremental adoption (per-package tsconfig overrides).
     "strictNullChecks": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    // TODO: enable verbatimModuleSyntax to enforce import type discipline at compiler level
     "verbatimModuleSyntax": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
@@ -27,7 +30,6 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/frontend/monaco-editor/*"],
       "@/generated/prisma": ["./src/core/chess/core-logic/prisma.ts"],
       "@spike-land-ai/shared": ["./src/core/shared-utils/core-logic/index.ts"],
       "@spike-land-ai/shared/*": ["./src/core/shared-utils/core-logic/*"],
@@ -92,15 +94,9 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "src/spike-app/**",
-    "src/code/**",
-    "src/chess-engine/**",
-    "src/image-studio-worker/frontend/**",
-    "src/state-machine/persistence.ts",
     "src/core/statecharts/node-sys/persistence.ts",
     "src/frontend/platform-frontend/**",
     "src/frontend/monaco-editor/**",
-    "src/media/educational-videos/**",
-    "src/app/**"
+    "src/media/educational-videos/**"
   ]
 }

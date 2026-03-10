@@ -1,6 +1,10 @@
 #!/bin/sh
-# Secret detection
-gitleaks git --pre-commit --staged --verbose 2>/dev/null || true
+# Secret detection — warn if gitleaks is missing, fail if it finds secrets
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --pre-commit --staged --verbose
+else
+  echo "Warning: gitleaks not installed — skipping secret detection"
+fi
 # Typecheck staged TS files
 STAGED=$(git diff --cached --name-only --diff-filter=ACM -- '*.ts' '*.tsx')
 if [ -n "$STAGED" ]; then

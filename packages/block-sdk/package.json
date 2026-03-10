@@ -42,6 +42,7 @@
     "build": "tsc --noEmit",
     "test": "vitest run --config vitest.config.ts",
     "test:coverage": "vitest run --config vitest.config.ts --coverage",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "source": "./index.ts"

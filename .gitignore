@@ -36,6 +36,10 @@ transform-manifest.js
 generate-images.ts
 find-missing-images.ts
 update_mcp*.py
+auto_fix.mjs
+quick_fix.js
+errors.json
+error_lines.txt
 coverage_output.txt
 incremental-coverage.json
 # Terraform

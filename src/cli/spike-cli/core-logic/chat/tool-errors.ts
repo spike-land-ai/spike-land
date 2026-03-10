@@ -12,6 +12,7 @@ export interface StructuredToolError {
   suggestions: string[];
   retryable: boolean;
   hint?: string;
+  originalStack?: string;
 }
 
 /**
@@ -41,6 +42,7 @@ export function buildNotFoundError(name: string, allTools: NamespacedTool[]): St
  */
 export function buildUpstreamError(name: string, error: unknown): StructuredToolError {
   const message = error instanceof Error ? error.message : String(error);
+  const originalStack = error instanceof Error ? error.stack : undefined;
   const classification = classifyError(message);
 
   return {
@@ -49,6 +51,7 @@ export function buildUpstreamError(name: string, error: unknown): StructuredTool
     suggestions: classification.suggestions,
     retryable: classification.retryable,
     hint: classification.hint,
+    originalStack,
   };
 }
 

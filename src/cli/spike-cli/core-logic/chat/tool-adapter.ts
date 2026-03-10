@@ -14,6 +14,16 @@ import {
 } from "./tool-pipeline";
 import { buildNotFoundError, buildUpstreamError, formatToolError } from "./tool-errors";
 
+interface ToolResultContent {
+  text?: string;
+  [key: string]: unknown;
+}
+
+/** Extract text from MCP tool result content blocks. */
+function extractToolResultText(content: ToolResultContent[]): string {
+  return content.map((c) => c.text ?? JSON.stringify(c)).join("\n");
+}
+
 /**
  * Ensure input schema has `type: "object"` at top level,
  * as required by Claude's tool_use format.
@@ -96,7 +106,7 @@ export async function executeToolCall(
   log(`Executing tool: ${name}`);
   try {
     const callResult = await manager.callTool(name, input);
-    const text = callResult.content.map((c) => c.text ?? JSON.stringify(c)).join("\n");
+    const text = extractToolResultText(callResult.content);
     return { result: text, isError: callResult.isError ?? false };
   } catch (err) {
     const structured = buildUpstreamError(name, err);
@@ -121,7 +131,7 @@ export function createToolExecutor(
   const baseHandler = async (ctx: ToolCallCtx): Promise<ToolExecResult> => {
     try {
       const callResult = await manager.callTool(ctx.toolName, ctx.input);
-      const text = callResult.content.map((c) => c.text ?? JSON.stringify(c)).join("\n");
+      const text = extractToolResultText(callResult.content);
       return { result: text, isError: callResult.isError ?? false };
     } catch (err) {
       const allTools = manager.getAllTools();

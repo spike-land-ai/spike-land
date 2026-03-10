@@ -114,10 +114,6 @@ test-docker:
 test-docker-all:
 	@DOCKER_BUILDKIT=1 bash scripts/docker-test.sh --all
 
-# ─── Docker-cached test runner ────────────────────────────────────────────────
-# Only re-runs tests for packages whose source files have changed.
-# BuildKit cache hit = tests already passed for that file state.
-
 setup:
 	@echo "Checking prerequisites..."
 	@node -v >/dev/null || (echo "Node.js required" && exit 1)

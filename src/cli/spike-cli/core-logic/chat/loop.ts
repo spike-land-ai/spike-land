@@ -128,7 +128,8 @@ export async function runAgentLoop(
     });
   }
 
-  // Reached maxTurns
+  // Reached maxTurns — call onTurnEnd to avoid leaking UI spinners
+  ctx.onTurnEnd?.();
   ctx.onTextDelta?.("\n[Reached maximum turns]\n");
 }
 
@@ -182,11 +183,13 @@ async function executeToolsParallel(
   const settled = await Promise.allSettled(executions);
   return settled.map((s, i) => {
     if (s.status === "fulfilled") return s.value;
-    // On rejection, return error result
+    // On rejection, log full error before serializing to preserve stack trace
+    const error = s.reason;
+    log(`Tool "${toolUseBlocks[i]!.name}" rejected: ${error instanceof Error ? error.stack ?? error.message : String(error)}`);
     return {
       type: "tool_result" as const,
       tool_use_id: toolUseBlocks[i]!.id,
-      content: `Tool execution failed: ${s.reason instanceof Error ? s.reason.message : String(s.reason)}`,
+      content: `Tool execution failed: ${error instanceof Error ? error.message : String(error)}`,
       is_error: true,
     };
   });
