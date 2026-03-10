@@ -1,4 +1,6 @@
 import { Hono } from "hono";
+import { extractHeroMedia } from "../../../../core/block-website/core-logic/blog-source.js";
+import { hashImagePrompt } from "../../../../core/block-website/core-logic/blog-image-policy.js";
 import type { Env } from "../../core-logic/env.js";
 import { getClientId, sendGA4Events } from "../../lazy-imports/ga4.js";
 import { safeCtx, withEdgeCache } from "../lib/edge-cache.js";
@@ -21,9 +23,24 @@ interface BlogPostRow {
   draft: number;
   unlisted: number;
   hero_image: string | null;
+  hero_prompt?: string | null;
   content: string;
   created_at: number;
   updated_at: number;
+}
+
+interface ToolTextPart {
+  type: string;
+  text?: string;
+}
+
+interface ToolCallResult {
+  content?: ToolTextPart[];
+  isError?: boolean;
+}
+
+interface ToolApiResponse {
+  result?: ToolCallResult;
 }
 
 function stripQuotes(value: string): string {
@@ -47,28 +64,6 @@ function parseTagsValue(raw: string | null): string[] {
     .filter(Boolean);
 }
 
-function extractHeroImage(content: string, frontmatterHeroImage: string | null) {
-  let heroImage = frontmatterHeroImage;
-  let body = content.trim();
-
-  if (!heroImage) {
-    const lines = body.split("\n").slice(0, 5);
-    for (const line of lines) {
-      const match = line.match(/^!\[.*?\]\((\/blog\/[^)]+)\)$/);
-      if (match?.[1] && !line.includes("placehold.co")) {
-        heroImage = match[1];
-        body = body.replace(line + "\n", "").replace(line, "").trim();
-        break;
-      }
-    }
-    return { heroImage, body };
-  }
-
-  const escapedHero = heroImage.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  body = body.replace(new RegExp(`^!\\[.*?\\]\\(${escapedHero}\\)\\n?`, "m"), "").trim();
-  return { heroImage, body };
-}
-
 function sourceToRow(rawContent: string, requestedSlug: string): BlogPostRow | null {
   const match = rawContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!match?.[1]) return null;
@@ -78,9 +73,11 @@ function sourceToRow(rawContent: string, requestedSlug: string): BlogPostRow | n
   if (!title) return null;
 
   const frontmatterHeroImage = stripQuotes(getFrontmatterValue(frontmatter, "heroImage") ?? "");
-  const { heroImage, body } = extractHeroImage(
+  const frontmatterHeroPrompt = stripQuotes(getFrontmatterValue(frontmatter, "heroPrompt") ?? "");
+  const { heroImage, heroPrompt, body } = extractHeroMedia(
     rawContent.slice(match[0].length),
     frontmatterHeroImage || null,
+    frontmatterHeroPrompt || null,
   );
 
   return {
@@ -96,6 +93,7 @@ function sourceToRow(rawContent: string, requestedSlug: string): BlogPostRow | n
     draft: getFrontmatterValue(frontmatter, "draft") === "true" ? 1 : 0,
     unlisted: getFrontmatterValue(frontmatter, "unlisted") === "true" ? 1 : 0,
     hero_image: heroImage,
+    hero_prompt: heroPrompt,
     content: body,
     created_at: 0,
     updated_at: 0,
@@ -140,6 +138,7 @@ function rowToPost(row: BlogPostRow, includeContent = false) {
     draft: Boolean(row.draft),
     unlisted: Boolean(row.unlisted),
     heroImage: row.hero_image,
+    heroPrompt: typeof row.hero_prompt === "string" ? row.hero_prompt : null,
   };
   if (includeContent) {
     post.content = row.content;
@@ -190,8 +189,7 @@ blog.get("/api/blog", async (c) => {
       safeCtx(c),
       async () => {
         const result = await c.env.DB.prepare(
-          `SELECT slug, title, description, primer, date, author, category, tags, featured, draft, unlisted, hero_image
-         FROM blog_posts${visibilityFilter} ORDER BY date DESC`,
+          `SELECT * FROM blog_posts${visibilityFilter} ORDER BY date DESC`,
         ).all<BlogPostRow>();
 
         if (!result.results?.length) return null;
@@ -206,8 +204,7 @@ blog.get("/api/blog", async (c) => {
   } catch {
     // Cache API unavailable — fall back to direct D1
     const result = await c.env.DB.prepare(
-      `SELECT slug, title, description, primer, date, author, category, tags, featured, draft, unlisted, hero_image
-       FROM blog_posts${visibilityFilter} ORDER BY date DESC`,
+      `SELECT * FROM blog_posts${visibilityFilter} ORDER BY date DESC`,
     ).all<BlogPostRow>();
 
     if (result.results?.length) {
@@ -331,27 +328,226 @@ const CONTENT_TYPES: Record<string, string> = {
   avif: "image/avif",
 };
 
-async function serveBlogImage(
-  spaAssets: R2Bucket,
+const IMAGE_STUDIO_URL = "https://image-studio-mcp.spike.land/api/tool";
+
+function buildImageResponse(
+  object: R2ObjectBody,
+  contentType: string,
+  cacheControl: string,
+): Response {
+  return new Response(object.body, {
+    headers: {
+      "Content-Type": object.httpMetadata?.contentType || contentType,
+      "Cache-Control": cacheControl,
+    },
+  });
+}
+
+function normalizePrompt(value: string | null | undefined): string | null {
+  const trimmed = value?.trim() ?? "";
+  return trimmed ? trimmed : null;
+}
+
+function inferHeroOutputFormat(ext: string): "png" | "jpeg" | "webp" {
+  if (ext === "jpg" || ext === "jpeg") return "jpeg";
+  if (ext === "webp") return "webp";
+  return "png";
+}
+
+async function callImageStudioTool<T>(name: string, args: Record<string, unknown>): Promise<T> {
+  const response = await fetch(IMAGE_STUDIO_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      name,
+      arguments: args,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Image Studio returned ${response.status}`);
+  }
+
+  const payload = (await response.json()) as ToolApiResponse;
+  const text = payload.result?.content
+    ?.map((item) => (typeof item.text === "string" ? item.text : ""))
+    .join("\n")
+    .trim();
+
+  if (payload.result?.isError) {
+    throw new Error(text || "Image Studio returned an error");
+  }
+
+  if (!text) {
+    throw new Error("Image Studio returned an empty payload");
+  }
+
+  return JSON.parse(text) as T;
+}
+
+async function generateHeroImageAsset(
+  prompt: string,
+  outputFormat: "png" | "jpeg" | "webp",
+): Promise<{ body: ArrayBuffer; contentType: string }> {
+  const fullPrompt = [
+    prompt,
+    "Cinematic wide developer blog hero artwork.",
+    "No typography, no captions, no logos, no watermarks, no border, no UI chrome.",
+  ].join(" ");
+
+  const job = await callImageStudioTool<{ jobId?: string }>("generate", {
+    prompt: fullPrompt,
+    aspect_ratio: "21:9",
+    tier: "TIER_1K",
+    resolution: "1K",
+    model_preference: "latest",
+    output_format: outputFormat,
+    num_images: 1,
+  });
+
+  if (!job.jobId) {
+    throw new Error("Generation job id missing");
+  }
+
+  let outputUrl: string | null = null;
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const status = await callImageStudioTool<{
+      outputUrl?: string;
+      status?: string;
+      error?: string;
+    }>("job_status", {
+      job_id: job.jobId,
+      job_type: "generation",
+    });
+
+    if (status.outputUrl) {
+      outputUrl = status.outputUrl;
+      break;
+    }
+
+    if (status.status === "FAILED") {
+      throw new Error(status.error || "Hero image generation failed");
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 900));
+  }
+
+  if (!outputUrl) {
+    throw new Error("Hero image generation did not finish in time");
+  }
+
+  const assetResponse = await fetch(outputUrl);
+  if (!assetResponse.ok) {
+    throw new Error(`Generated hero fetch failed with ${assetResponse.status}`);
+  }
+
+  return {
+    body: await assetResponse.arrayBuffer(),
+    contentType:
+      assetResponse.headers.get("Content-Type") || CONTENT_TYPES[outputFormat] || "image/png",
+  };
+}
+
+async function resolveHeroPrompt(
+  db: D1Database,
   slug: string,
   filename: string,
+  requestedPrompt?: string | null,
+): Promise<{ prompt: string; promptHash: string } | null> {
+  const explicitPrompt = normalizePrompt(requestedPrompt);
+  if (explicitPrompt) {
+    return {
+      prompt: explicitPrompt,
+      promptHash: hashImagePrompt(explicitPrompt),
+    };
+  }
+
+  const requestedPath = `/blog/${slug}/${filename}`;
+  const row = await getBlogPostRow(db, slug);
+  if (!row || row.hero_image !== requestedPath) {
+    return null;
+  }
+
+  let prompt = normalizePrompt(row.hero_prompt);
+
+  if (!prompt) {
+    const sourceRow = await fetchBlogPostSource(slug);
+    if (sourceRow?.hero_image === requestedPath) {
+      prompt = normalizePrompt(sourceRow.hero_prompt);
+    }
+  }
+
+  if (!prompt) return null;
+
+  return {
+    prompt,
+    promptHash: hashImagePrompt(prompt),
+  };
+}
+
+async function serveBlogImage(
+  spaAssets: R2Bucket,
+  db: D1Database,
+  slug: string,
+  filename: string,
+  requestedPrompt?: string | null,
+  versionToken?: string | null,
 ): Promise<Response | null> {
   const ext = filename.split(".").pop()?.toLowerCase() ?? "";
   const key = `blog-images/${slug}/${filename}`;
+  const contentType = CONTENT_TYPES[ext] || "application/octet-stream";
+  const heroPrompt = await resolveHeroPrompt(db, slug, filename, requestedPrompt);
+  const versionedCache = versionToken
+    ? "public, max-age=31536000, immutable"
+    : "public, max-age=3600";
 
   const obj = await spaAssets.get(key);
+  if (heroPrompt) {
+    if (obj?.customMetadata?.promptHash === heroPrompt.promptHash) {
+      return buildImageResponse(obj, contentType, versionedCache);
+    }
+
+    try {
+      const generated = await generateHeroImageAsset(heroPrompt.prompt, inferHeroOutputFormat(ext));
+      const bodyForCache = generated.body.slice(0);
+
+      await spaAssets.put(key, bodyForCache, {
+        httpMetadata: { contentType: generated.contentType },
+        customMetadata: {
+          promptHash: heroPrompt.promptHash,
+          source: "prompt-driven-hero",
+        },
+      });
+
+      return new Response(generated.body, {
+        headers: {
+          "Content-Type": generated.contentType,
+          "Cache-Control": versionedCache,
+        },
+      });
+    } catch {
+      if (obj) {
+        return buildImageResponse(obj, contentType, "public, max-age=3600");
+      }
+    }
+  }
+
   if (obj) {
-    const contentType = CONTENT_TYPES[ext] || "application/octet-stream";
-    return new Response(obj.body, {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000, immutable",
-      },
-    });
+    return buildImageResponse(obj, contentType, "public, max-age=31536000, immutable");
   }
 
   // Fallback to production for local dev (R2 bucket is empty locally)
-  const prodUrl = `https://spike.land/api/blog-images/${slug}/${filename}`;
+  const prodUrl = new URL(`https://spike.land/api/blog-images/${slug}/${filename}`);
+  if (requestedPrompt) {
+    prodUrl.searchParams.set("prompt", requestedPrompt);
+  }
+  if (versionToken) {
+    prodUrl.searchParams.set("v", versionToken);
+  }
+
   const upstream = await fetch(prodUrl);
   if (upstream.ok) {
     return new Response(upstream.body, {
@@ -367,7 +563,14 @@ async function serveBlogImage(
 
 blog.get("/api/blog-images/:slug/:filename", async (c) => {
   const { slug, filename } = c.req.param();
-  const resp = await serveBlogImage(c.env.SPA_ASSETS, slug, filename);
+  const resp = await serveBlogImage(
+    c.env.SPA_ASSETS,
+    c.env.DB,
+    slug,
+    filename,
+    c.req.query("prompt"),
+    c.req.query("v"),
+  );
   return resp ?? c.notFound();
 });
 
@@ -378,7 +581,14 @@ blog.get("/blog/:slug/:filename", async (c, next) => {
 
   if (!IMAGE_EXTS.has(ext)) return next();
 
-  const resp = await serveBlogImage(c.env.SPA_ASSETS, slug, filename);
+  const resp = await serveBlogImage(
+    c.env.SPA_ASSETS,
+    c.env.DB,
+    slug,
+    filename,
+    c.req.query("prompt"),
+    c.req.query("v"),
+  );
   return resp ?? next();
 });
 
@@ -392,7 +602,16 @@ async function getBlogPostRow(db: D1Database, slug: string): Promise<BlogPostRow
       .bind(normalizedSlug)
       .first<BlogPostRow>();
 
-    if (row) return row;
+    if (row) {
+      if (!normalizePrompt(row.hero_prompt) && row.hero_image) {
+        const sourceRow = await fetchBlogPostSource(normalizedSlug);
+        if (sourceRow?.hero_image === row.hero_image && normalizePrompt(sourceRow.hero_prompt)) {
+          row.hero_prompt = sourceRow.hero_prompt;
+        }
+      }
+
+      return row;
+    }
   } catch {
     // Fall through to the canonical MDX source when D1 is unavailable or stale.
   }

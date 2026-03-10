@@ -2,6 +2,7 @@
  * Pure functions for blog seed script. Extracted for testability.
  */
 import matter from "gray-matter";
+import { extractHeroMedia } from "../src/core/block-website/core-logic/blog-source.js";
 
 export interface BlogPost {
   slug: string;
@@ -16,6 +17,7 @@ export interface BlogPost {
   draft: boolean;
   unlisted: boolean;
   heroImage: string | null;
+  heroPrompt: string | null;
   content: string;
 }
 
@@ -37,28 +39,11 @@ export function parseMdxContent(rawContent: string, filename: string): BlogPost 
   const isDraft = Boolean(data.draft);
   const isUnlisted = Boolean(data.unlisted);
 
-  let heroImage: string | null = data.heroImage || null;
-  let body = content.trim();
-
-  // Auto-detect hero image from first 5 lines if not in frontmatter
-  if (!heroImage) {
-    const lines = body.split("\n").slice(0, 5);
-    for (const line of lines) {
-      const match = line.match(/^!\[.*?\]\((\/blog\/[^)]+)\)$/);
-      if (match?.[1] && !line.includes("placehold.co")) {
-        heroImage = match[1];
-        body = body
-          .replace(line + "\n", "")
-          .replace(line, "")
-          .trim();
-        break;
-      }
-    }
-  } else {
-    // Strip hero image line from body if it matches the frontmatter heroImage
-    const escapedHero = heroImage.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    body = body.replace(new RegExp(`^!\\[.*?\\]\\(${escapedHero}\\)\\n?`, "m"), "").trim();
-  }
+  const { heroImage, heroPrompt, body } = extractHeroMedia(
+    content,
+    typeof data.heroImage === "string" ? data.heroImage : null,
+    typeof data.heroPrompt === "string" ? data.heroPrompt : null,
+  );
 
   return {
     slug: data.slug || filename.replace(".mdx", ""),
@@ -73,6 +58,7 @@ export function parseMdxContent(rawContent: string, filename: string): BlogPost 
     draft: isDraft,
     unlisted: isUnlisted,
     heroImage,
+    heroPrompt,
     content: body,
   };
 }
@@ -92,8 +78,8 @@ export function generateSQL(posts: BlogPost[]): string {
 
   for (const post of posts) {
     statements.push(
-      `INSERT OR REPLACE INTO blog_posts (slug, title, description, primer, date, author, category, tags, featured, draft, unlisted, hero_image, content, updated_at)
-VALUES ('${escapeSQL(post.slug)}', '${escapeSQL(post.title)}', '${escapeSQL(post.description)}', '${escapeSQL(post.primer)}', '${escapeSQL(post.date)}', '${escapeSQL(post.author)}', '${escapeSQL(post.category)}', '${escapeSQL(JSON.stringify(post.tags))}', ${post.featured ? 1 : 0}, ${post.draft ? 1 : 0}, ${post.unlisted ? 1 : 0}, ${post.heroImage ? `'${escapeSQL(post.heroImage)}'` : "NULL"}, '${escapeSQL(post.content)}', unixepoch());`,
+      `INSERT OR REPLACE INTO blog_posts (slug, title, description, primer, date, author, category, tags, featured, draft, unlisted, hero_image, hero_prompt, content, updated_at)
+VALUES ('${escapeSQL(post.slug)}', '${escapeSQL(post.title)}', '${escapeSQL(post.description)}', '${escapeSQL(post.primer)}', '${escapeSQL(post.date)}', '${escapeSQL(post.author)}', '${escapeSQL(post.category)}', '${escapeSQL(JSON.stringify(post.tags))}', ${post.featured ? 1 : 0}, ${post.draft ? 1 : 0}, ${post.unlisted ? 1 : 0}, ${post.heroImage ? `'${escapeSQL(post.heroImage)}'` : "NULL"}, ${post.heroPrompt ? `'${escapeSQL(post.heroPrompt)}'` : "NULL"}, '${escapeSQL(post.content)}', unixepoch());`,
     );
   }
 

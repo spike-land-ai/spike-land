@@ -30,6 +30,7 @@ async function getBlogData(slug: string) {
       unlisted: Boolean(frontmatter.unlisted),
       content: markdownBody,
       hero_image: frontmatter.heroImage || null,
+      hero_prompt: frontmatter.heroPrompt || null,
     };
   } catch (err) {
     console.error(`Error reading blog post ${slug}:`, err);

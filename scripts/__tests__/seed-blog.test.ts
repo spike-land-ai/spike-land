@@ -110,6 +110,7 @@ Rest of the content.
 `;
     const post = parseMdxContent(mdx, "auto-hero.mdx");
     expect(post!.heroImage).toBe("/blog/auto-hero/hero.png");
+    expect(post!.heroPrompt).toBe("Hero");
     expect(post!.content).not.toContain("![Hero]");
     expect(post!.content).toBe("Rest of the content.");
   });
@@ -127,6 +128,7 @@ Content.
 `;
     const post = parseMdxContent(mdx, "placeholder.mdx");
     expect(post!.heroImage).toBeNull();
+    expect(post!.heroPrompt).toBeNull();
   });
 
   it("strips hero image line from body when heroImage is in frontmatter", () => {
@@ -143,8 +145,26 @@ Body after hero.
 `;
     const post = parseMdxContent(mdx, "fm-hero.mdx");
     expect(post!.heroImage).toBe("/blog/fm-hero/hero.png");
+    expect(post!.heroPrompt).toBe("Alt text");
     expect(post!.content).not.toContain("![Alt text]");
     expect(post!.content).toBe("Body after hero.");
+  });
+
+  it("prefers explicit heroPrompt from frontmatter", () => {
+    const mdx = `---
+title: "Prompted Hero"
+slug: "prompted-hero"
+date: "2026-01-01"
+heroImage: "/blog/prompted-hero/hero.png"
+heroPrompt: "A deliberate prompt"
+---
+
+![Alt text](/blog/prompted-hero/hero.png)
+
+Body after hero.
+`;
+    const post = parseMdxContent(mdx, "prompted-hero.mdx");
+    expect(post!.heroPrompt).toBe("A deliberate prompt");
   });
 
   it("defaults missing fields to empty values", () => {
@@ -164,6 +184,7 @@ Content.
     expect(post!.featured).toBe(false);
     expect(post!.unlisted).toBe(false);
     expect(post!.heroImage).toBeNull();
+    expect(post!.heroPrompt).toBeNull();
   });
 });
 
@@ -207,6 +228,7 @@ describe("generateSQL", () => {
     draft: false,
     unlisted: false,
     heroImage: null,
+    heroPrompt: null,
     content: "# Hello",
   };
 
@@ -217,13 +239,19 @@ describe("generateSQL", () => {
 
   it("uses NULL for null heroImage", () => {
     const sql = generateSQL([post]);
-    expect(sql).toContain(", NULL, ");
+    expect(sql).toContain(", NULL, NULL, ");
   });
 
   it("quotes non-null heroImage", () => {
     const withHero = { ...post, heroImage: "/blog/test/hero.png" };
     const sql = generateSQL([withHero]);
     expect(sql).toContain("'/blog/test/hero.png'");
+  });
+
+  it("quotes non-null heroPrompt", () => {
+    const withHeroPrompt = { ...post, heroPrompt: "Wide cinematic software architecture artwork" };
+    const sql = generateSQL([withHeroPrompt]);
+    expect(sql).toContain("'Wide cinematic software architecture artwork'");
   });
 
   it("serializes tags as JSON array", () => {

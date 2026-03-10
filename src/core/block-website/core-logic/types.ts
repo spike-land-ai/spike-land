@@ -11,5 +11,6 @@ export interface BlogPost {
   draft?: boolean;
   unlisted?: boolean;
   heroImage: string | null;
+  heroPrompt: string | null;
   content: string;
 }

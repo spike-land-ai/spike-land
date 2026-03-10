@@ -4,6 +4,7 @@ export * from "./BlogList";
 export * from "./BlogPost";
 export * from "./Footer";
 export * from "./GlitchText";
+export * from "./ImageLoader";
 export * from "./InteractiveBlogErrorBoundary";
 export * from "./LandingHero";
 export * from "./LandingPage";

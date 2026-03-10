@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
-import { blog, getBlogPostRow, rowToPost, type BlogPostRow } from "../../routes/blog.js";
-import type { Env } from "../../../core-logic/env.js";
+import { blog, getBlogPostRow, rowToPost, type BlogPostRow } from "../routes/blog.js";
+import { hashImagePrompt } from "../../../../core/block-website/core-logic/blog-image-policy.js";
+import type { Env } from "../../core-logic/env.js";
 
 // ---------- helpers ----------
 
@@ -19,6 +20,7 @@ function makeRow(overrides: Partial<BlogPostRow> = {}): BlogPostRow {
     draft: 0,
     unlisted: 0,
     hero_image: null,
+    hero_prompt: null,
     content: "# Hello World\n\nSome content here.",
     created_at: 1709251200,
     updated_at: 1709251200,
@@ -26,7 +28,11 @@ function makeRow(overrides: Partial<BlogPostRow> = {}): BlogPostRow {
   };
 }
 
-function makeR2Object(body: string, contentType = "image/png"): R2ObjectBody {
+function makeR2Object(
+  body: string,
+  contentType = "image/png",
+  customMetadata: Record<string, string> = {},
+): R2ObjectBody {
   return {
     body: new ReadableStream({
       start(controller) {
@@ -47,7 +53,7 @@ function makeR2Object(body: string, contentType = "image/png"): R2ObjectBody {
     checksums: { toJSON: () => ({}) } as unknown as R2Checksums,
     uploaded: new Date(),
     httpMetadata: { contentType },
-    customMetadata: {},
+    customMetadata,
     storageClass: "Standard",
     writeHttpMetadata: () => {},
     range: undefined as unknown as R2Range,
@@ -82,6 +88,7 @@ function mockDB(rows: BlogPostRow[], single?: BlogPostRow | null) {
 function mockR2(getResult: R2ObjectBody | null = null) {
   return {
     get: vi.fn().mockResolvedValue(getResult),
+    put: vi.fn().mockResolvedValue(undefined),
   } as unknown as R2Bucket;
 }
 
@@ -116,6 +123,13 @@ describe("rowToPost", () => {
     const post = rowToPost(row);
     expect(post.heroImage).toBe("/blog/test/hero.png");
     expect(post).not.toHaveProperty("hero_image");
+  });
+
+  it("maps hero_prompt to heroPrompt", () => {
+    const row = makeRow({ hero_prompt: "Wide cinematic architecture illustration" });
+    const post = rowToPost(row);
+    expect(post.heroPrompt).toBe("Wide cinematic architecture illustration");
+    expect(post).not.toHaveProperty("hero_prompt");
   });
 
   it("converts unlisted integer 1 to boolean true", () => {
@@ -155,6 +169,7 @@ describe("rowToPost", () => {
     expect(post).toHaveProperty("tags");
     expect(post).toHaveProperty("featured");
     expect(post).toHaveProperty("heroImage");
+    expect(post).toHaveProperty("heroPrompt");
   });
 });
 
@@ -262,6 +277,7 @@ tags: ["chat", "mcp"]
 featured: true
 primer: "Fallback primer"
 heroImage: "/blog/the-universal-interface-wasnt-graphql/hero.png"
+heroPrompt: "A sleek universal chat interface with glowing data streams"
 unlisted: true
 ---
 
@@ -274,10 +290,14 @@ Body from source fallback.`,
     const db = mockDB([], null);
     const testApp = app(db);
 
-    const res = await testApp.request("/api/blog/the-universal-interface-wasnt-graphql", undefined, {
-      DB: db,
-      SPA_ASSETS: mockR2(),
-    } as unknown as Env);
+    const res = await testApp.request(
+      "/api/blog/the-universal-interface-wasnt-graphql",
+      undefined,
+      {
+        DB: db,
+        SPA_ASSETS: mockR2(),
+      } as unknown as Env,
+    );
 
     expect(res.status).toBe(200);
     const body = (await res.json()) as Record<string, unknown>;
@@ -285,6 +305,7 @@ Body from source fallback.`,
     expect(body.title).toBe("The Universal Interface Wasn't GraphQL");
     expect(body.content).toBe("Body from source fallback.");
     expect(body.heroImage).toBe("/blog/the-universal-interface-wasnt-graphql/hero.png");
+    expect(body.heroPrompt).toBe("A sleek universal chat interface with glowing data streams");
     expect(body.unlisted).toBe(true);
   });
 
@@ -347,14 +368,21 @@ Recovered body.`,
 // ---------- GET /api/blog-images/:slug/:filename ----------
 
 describe("GET /api/blog-images/:slug/:filename", () => {
-  it("serves image from R2 with correct content type", async () => {
-    const r2 = mockR2(makeR2Object("PNG_DATA", "image/png"));
+  it("serves a cached hero image when the prompt hash matches", async () => {
+    const prompt = "Wide cinematic architecture artwork";
+    const r2 = mockR2(
+      makeR2Object("PNG_DATA", "image/png", { promptHash: hashImagePrompt(prompt) }),
+    );
     const testApp = app(mockDB([]));
 
-    const res = await testApp.request("/api/blog-images/test-post/hero.png", undefined, {
-      DB: mockDB([]),
-      SPA_ASSETS: r2,
-    } as unknown as Env);
+    const res = await testApp.request(
+      `/api/blog-images/test-post/hero.png?prompt=${encodeURIComponent(prompt)}&v=${hashImagePrompt(prompt)}`,
+      undefined,
+      {
+        DB: mockDB([]),
+        SPA_ASSETS: r2,
+      } as unknown as Env,
+    );
 
     expect(res.status).toBe(200);
     expect(res.headers.get("Content-Type")).toBe("image/png");
@@ -362,7 +390,74 @@ describe("GET /api/blog-images/:slug/:filename", () => {
     expect(r2.get).toHaveBeenCalledWith("blog-images/test-post/hero.png");
   });
 
-  it("returns 404 for missing image", async () => {
+  it("generates and caches a hero image when the tracked prompt changes", async () => {
+    const prompt = "A futuristic universal adapter connecting AI tools";
+    const db = mockDB(
+      [],
+      makeRow({
+        slug: "test-post",
+        hero_image: "/blog/test-post/hero.png",
+        hero_prompt: prompt,
+      }),
+    );
+    const r2 = mockR2(makeR2Object("OLD_DATA", "image/png"));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            result: {
+              content: [{ type: "text", text: JSON.stringify({ jobId: "job-123" }) }],
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            result: {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify({
+                    status: "COMPLETED",
+                    outputUrl: "https://images.example/hero.png",
+                  }),
+                },
+              ],
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response("NEW_PNG_DATA", {
+          status: 200,
+          headers: { "Content-Type": "image/png" },
+        }),
+      );
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const testApp = app(db);
+
+    const res = await testApp.request("/api/blog-images/test-post/hero.png", undefined, {
+      DB: db,
+      SPA_ASSETS: r2,
+    } as unknown as Env);
+
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Type")).toBe("image/png");
+    expect((r2.put as unknown as ReturnType<typeof vi.fn>).mock.calls[0]?.[0]).toBe(
+      "blog-images/test-post/hero.png",
+    );
+    expect((r2.put as unknown as ReturnType<typeof vi.fn>).mock.calls[0]?.[2]).toMatchObject({
+      customMetadata: { promptHash: hashImagePrompt(prompt), source: "prompt-driven-hero" },
+    });
+  });
+
+  it("returns 404 for missing non-hero images", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, { status: 404 })));
 
     const r2 = mockR2(null);
@@ -377,13 +472,20 @@ describe("GET /api/blog-images/:slug/:filename", () => {
   });
 
   it("maps .jpg extension to image/jpeg", async () => {
-    const r2 = mockR2(makeR2Object("JPG_DATA", "image/jpeg"));
+    const prompt = "A wide comparison of two frameworks in a neon corridor";
+    const r2 = mockR2(
+      makeR2Object("JPG_DATA", "image/jpeg", { promptHash: hashImagePrompt(prompt) }),
+    );
     const testApp = app(mockDB([]));
 
-    const res = await testApp.request("/api/blog-images/test-post/photo.jpg", undefined, {
-      DB: mockDB([]),
-      SPA_ASSETS: r2,
-    } as unknown as Env);
+    const res = await testApp.request(
+      `/api/blog-images/test-post/photo.jpg?prompt=${encodeURIComponent(prompt)}&v=${hashImagePrompt(prompt)}`,
+      undefined,
+      {
+        DB: mockDB([]),
+        SPA_ASSETS: r2,
+      } as unknown as Env,
+    );
 
     expect(res.status).toBe(200);
     expect(res.headers.get("Content-Type")).toBe("image/jpeg");
@@ -393,14 +495,21 @@ describe("GET /api/blog-images/:slug/:filename", () => {
 // ---------- GET /blog/:slug/:filename (backward compat) ----------
 
 describe("GET /blog/:slug/:filename (backward compat)", () => {
-  it("serves image for known image extensions", async () => {
-    const r2 = mockR2(makeR2Object("PNG_DATA"));
+  it("serves hero images for known image extensions", async () => {
+    const prompt = "A glowing dashboard of MCP tools";
+    const r2 = mockR2(
+      makeR2Object("PNG_DATA", "image/png", { promptHash: hashImagePrompt(prompt) }),
+    );
     const testApp = app(mockDB([]));
 
-    const res = await testApp.request("/blog/test-post/hero.png", undefined, {
-      DB: mockDB([]),
-      SPA_ASSETS: r2,
-    } as unknown as Env);
+    const res = await testApp.request(
+      `/blog/test-post/hero.png?prompt=${encodeURIComponent(prompt)}&v=${hashImagePrompt(prompt)}`,
+      undefined,
+      {
+        DB: mockDB([]),
+        SPA_ASSETS: r2,
+      } as unknown as Env,
+    );
 
     expect(res.status).toBe(200);
     expect(res.headers.get("Content-Type")).toBe("image/png");
@@ -410,15 +519,12 @@ describe("GET /blog/:slug/:filename (backward compat)", () => {
     const r2 = mockR2(null);
     const testApp = app(mockDB([]));
 
-    // .html is not in IMAGE_EXTS, should call next()
     const res = await testApp.request("/blog/test-post/readme.html", undefined, {
       DB: mockDB([]),
       SPA_ASSETS: r2,
     } as unknown as Env);
 
-    // Falls through to 404 since there's no SPA catch-all
     expect(res.status).toBe(404);
-    // R2 should NOT have been called
     expect(r2.get).not.toHaveBeenCalled();
   });
 

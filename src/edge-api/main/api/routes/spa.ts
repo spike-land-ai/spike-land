@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { hashImagePrompt } from "../../../../core/block-website/core-logic/blog-image-policy.js";
 import type { Env } from "../../core-logic/env.js";
 import { getClientId, sendGA4Events } from "../../lazy-imports/ga4.js";
 import { safeCtx, withEdgeCache } from "../lib/edge-cache.js";
@@ -121,8 +122,12 @@ spa.get("/*", async (c) => {
           const postTitle = escapeHtml(row.title);
           const postDesc = escapeHtml(row.description);
           const postAuthor = escapeHtml(row.author);
+          const heroPrompt =
+            typeof row.hero_prompt === "string" && row.hero_prompt.trim()
+              ? row.hero_prompt.trim()
+              : null;
           const postImage = row.hero_image
-            ? `https://spike.land${row.hero_image}`
+            ? `https://spike.land${row.hero_image}${heroPrompt ? `?v=${hashImagePrompt(heroPrompt)}` : ""}`
             : "https://spike.land/og-image.png";
           const postUrl = `https://spike.land${path}`;
 
@@ -256,8 +261,7 @@ spa.get("/*", async (c) => {
           "/bugbook": {
             title: "Bugbook - spike.land",
             description: "Public bug tracker with ELO-based prioritization on spike.land.",
-            ssrContent:
-              "<h1>Bugbook</h1><p>Public bug tracker with ELO-based prioritization.</p>",
+            ssrContent: "<h1>Bugbook</h1><p>Public bug tracker with ELO-based prioritization.</p>",
           },
           "/settings": {
             title: "Settings - spike.land",
@@ -351,10 +355,7 @@ spa.get("/*", async (c) => {
     // Inject noindex for utility pages that shouldn't appear in search results
     const noindexPaths = ["/callback", "/settings", "/login"];
     if (noindexPaths.includes(path)) {
-      html = html.replace(
-        "</head>",
-        `<meta name="robots" content="noindex, nofollow" />\n</head>`,
-      );
+      html = html.replace("</head>", `<meta name="robots" content="noindex, nofollow" />\n</head>`);
     }
 
     const response = new Response(html, {

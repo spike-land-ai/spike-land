@@ -2,6 +2,7 @@ import { useParams, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { BlogPostView } from "@spike-land-ai/block-website/ui";
 import type { BlogPost } from "@spike-land-ai/block-website/core";
+import { extractHeroMedia } from "../../../../../core/block-website/core-logic/blog-source.js";
 import { apiUrl } from "../../../core-logic/api";
 
 const SITE_URL = "https://spike.land";
@@ -44,28 +45,6 @@ function parseTagsValue(raw: string | null): string[] {
     .filter(Boolean);
 }
 
-function extractHeroImage(content: string, frontmatterHeroImage: string | null) {
-  let heroImage = frontmatterHeroImage;
-  let body = content.trim();
-
-  if (!heroImage) {
-    const lines = body.split("\n").slice(0, 5);
-    for (const line of lines) {
-      const match = line.match(/^!\[.*?\]\((\/blog\/[^)]+)\)$/);
-      if (match?.[1] && !line.includes("placehold.co")) {
-        heroImage = match[1];
-        body = body.replace(`${line}\n`, "").replace(line, "").trim();
-        break;
-      }
-    }
-    return { heroImage, body };
-  }
-
-  const escapedHero = heroImage.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  body = body.replace(new RegExp(`^!\\[.*?\\]\\(${escapedHero}\\)\\n?`, "m"), "").trim();
-  return { heroImage, body };
-}
-
 function parseLocalBlogPost(rawContent: string, requestedSlug: string): BlogPost | null {
   const match = rawContent.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!match?.[1]) return null;
@@ -75,9 +54,11 @@ function parseLocalBlogPost(rawContent: string, requestedSlug: string): BlogPost
   if (!title) return null;
 
   const frontmatterHeroImage = stripQuotes(getFrontmatterValue(frontmatter, "heroImage") ?? "");
-  const { heroImage, body } = extractHeroImage(
+  const frontmatterHeroPrompt = stripQuotes(getFrontmatterValue(frontmatter, "heroPrompt") ?? "");
+  const { heroImage, heroPrompt, body } = extractHeroMedia(
     rawContent.slice(match[0].length),
     frontmatterHeroImage || null,
+    frontmatterHeroPrompt || null,
   );
 
   return {
@@ -93,6 +74,7 @@ function parseLocalBlogPost(rawContent: string, requestedSlug: string): BlogPost
     draft: getFrontmatterValue(frontmatter, "draft") === "true",
     unlisted: getFrontmatterValue(frontmatter, "unlisted") === "true",
     heroImage,
+    heroPrompt,
     content: body,
   };
 }

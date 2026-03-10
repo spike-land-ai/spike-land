@@ -5,8 +5,12 @@ import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import type { BlogPost } from "../core-logic/types";
 import { apiUrl } from "../core-logic/api";
-import { sanitizeBlogImageSrc } from "../core-logic/blog-image-policy";
+import {
+  buildPromptDrivenBlogImageSrc,
+  sanitizeBlogImageSrc,
+} from "../core-logic/blog-image-policy";
 import { BlogListView } from "./BlogList";
+import { ImageLoader } from "./ImageLoader";
 import { ExperimentProvider, useExperiment } from "./useExperiment";
 import { useWidgetTracking } from "./useWidgetTracking";
 import {
@@ -324,6 +328,7 @@ export function BlogPostView({
     "",
   );
   const safeHeroImage = sanitizeBlogImageSrc(resolvedPost.heroImage);
+  const heroImageSrc = buildPromptDrivenBlogImageSrc(safeHeroImage, resolvedPost.heroPrompt);
 
   return (
     <ExperimentProvider>
@@ -365,27 +370,20 @@ export function BlogPostView({
               className="mb-16 rounded-[3rem] overflow-hidden shadow-2xl ring-1 ring-border/5 cursor-zoom-in group"
               onClick={() => setIsHeroExpanded(true)}
             >
-              <motion.img
+              <ImageLoader
                 src={safeHeroImage}
+                prompt={resolvedPost.heroPrompt}
                 alt={resolvedPost.title}
                 width={1200}
                 height={514}
                 loading="eager"
                 decoding="async"
-                className="w-full aspect-[21/9] object-cover hidden dark:block"
-              />
-              <motion.img
-                src={safeHeroImage}
-                alt={resolvedPost.title}
-                width={1200}
-                height={514}
-                loading="eager"
-                decoding="async"
-                className="w-full aspect-[21/9] object-cover dark:hidden block"
+                wrapperClassName="w-full"
+                className="w-full aspect-[21/9] object-cover"
               />
             </motion.div>
             <AnimatePresence>
-              {isHeroExpanded && (
+              {isHeroExpanded && heroImageSrc && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -395,15 +393,9 @@ export function BlogPostView({
                 >
                   <motion.img
                     layoutId={`hero-image-${slug}`}
-                    src={safeHeroImage}
+                    src={heroImageSrc}
                     alt={resolvedPost.title}
-                    className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain hidden dark:block"
-                  />
-                  <motion.img
-                    layoutId={`hero-image-${slug}-light`}
-                    src={safeHeroImage}
-                    alt={resolvedPost.title}
-                    className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain dark:hidden block"
+                    className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain"
                   />
                 </motion.div>
               )}
@@ -500,7 +492,12 @@ const SLIDER_STOPS = [
   { amount: 0, label: "Moral support", sub: "Keep building awesome stuff!", icon: Heart },
   { amount: 1, label: "A tiny coffee", sub: "Fuel for the next MCP tool.", icon: Coffee },
   { amount: 5, label: "Workers month", sub: "Covers Cloudflare Workers for a month.", icon: Zap },
-  { amount: 10, label: "Infra buffer", sub: "Keeps two months of Workers paid ahead.", icon: Shield },
+  {
+    amount: 10,
+    label: "Infra buffer",
+    sub: "Keeps two months of Workers paid ahead.",
+    icon: Shield,
+  },
   { amount: 25, label: "Growth Fund", sub: "Help us build more complex agents.", icon: Shield },
   { amount: 100, label: "Legend Tier", sub: "We will name a variable after you.", icon: Gift },
   {
@@ -730,7 +727,9 @@ function SupportWidget({ post }: { post: BlogPost }) {
                 max={SUPPORT_AMOUNT_MAX}
                 step="0.01"
                 onChange={(e) => setCustomAmount(normalizeSupportAmountInput(e.target.value))}
-                onBlur={() => setCustomAmount((currentAmount) => normalizeSupportAmountInput(currentAmount))}
+                onBlur={() =>
+                  setCustomAmount((currentAmount) => normalizeSupportAmountInput(currentAmount))
+                }
                 placeholder="5.00"
                 className="w-full h-14 bg-background border-2 border-border/50 rounded-2xl px-8 font-black text-xl focus:border-primary focus:outline-none transition-all"
               />

@@ -4,6 +4,7 @@ import { Calendar, Tag, ArrowRight, Clock, BookOpen } from "lucide-react";
 import { cn } from "@spike-land-ai/shared";
 import { apiUrl } from "../core-logic/api";
 import { sanitizeBlogImageSrc } from "../core-logic/blog-image-policy";
+import { ImageLoader } from "./ImageLoader";
 
 type BlogMeta = Omit<BlogPost, "content">;
 
@@ -23,26 +24,22 @@ function hashSlug(slug: string): number {
   return Math.abs(hash);
 }
 
-function CardImage({
-  post,
-  className = "",
-}: {
-  post: BlogMeta;
-  className?: string;
-}) {
+function CardImage({ post, className = "" }: { post: BlogMeta; className?: string }) {
   const safeHeroImage = sanitizeBlogImageSrc(post.heroImage);
 
   if (safeHeroImage) {
     return (
       <div className={cn("overflow-hidden relative group", className)}>
-        <img
+        <ImageLoader
           src={safeHeroImage}
+          prompt={post.heroPrompt}
           alt={post.title}
           width={800}
           height={500}
           loading="lazy"
           decoding="async"
-          className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110"
+          wrapperClassName="h-full"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       </div>
@@ -83,10 +80,7 @@ function FeaturedCard({
 }) {
   const content = (
     <div className="flex flex-col lg:flex-row h-full">
-      <CardImage
-        post={post}
-        className="lg:w-3/5 lg:h-full aspect-[16/9] lg:aspect-auto"
-      />
+      <CardImage post={post} className="lg:w-3/5 lg:h-full aspect-[16/9] lg:aspect-auto" />
       <div className="flex w-full flex-col justify-center bg-card p-8 lg:w-2/5 lg:p-12">
         <div className="mb-6 flex flex-wrap items-center gap-4 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           {post.draft && (
@@ -95,9 +89,7 @@ function FeaturedCard({
             </span>
           )}
           {post.category && (
-            <span className="rubik-chip rubik-chip-accent px-3 py-1">
-              {post.category}
-            </span>
+            <span className="rubik-chip rubik-chip-accent px-3 py-1">{post.category}</span>
           )}
           <div className="flex items-center gap-1.5 text-muted-foreground/60">
             <Calendar className="size-3" />
@@ -203,17 +195,11 @@ function BlogCard({
   return (
     <article className="rubik-panel group relative flex h-full flex-col overflow-hidden transition-[border-color,box-shadow,transform] duration-300 hover:border-primary/24 hover:shadow-[var(--panel-shadow-strong)] hover:-translate-y-0.5">
       {LinkComp === "a" ? (
-        <a
-          href={`/blog/${post.slug}`}
-          className="block h-full w-full flex flex-col flex-1"
-        >
+        <a href={`/blog/${post.slug}`} className="block h-full w-full flex flex-col flex-1">
           {content}
         </a>
       ) : (
-        <LinkComp
-          to={`/blog/${post.slug}`}
-          className="block h-full w-full flex flex-col flex-1"
-        >
+        <LinkComp to={`/blog/${post.slug}`} className="block h-full w-full flex flex-col flex-1">
           {content}
         </LinkComp>
       )}
@@ -251,8 +237,7 @@ export function BlogListView({
           const r = await fetch(apiUrl("/blog"));
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
           const data = (await r.json()) as unknown;
-          if (!Array.isArray(data))
-            throw new Error("Unexpected response shape");
+          if (!Array.isArray(data)) throw new Error("Unexpected response shape");
           if (cancelled) return;
           const posts = (data as BlogMeta[]).filter((post) => !post.unlisted);
           if (limit) {
@@ -285,9 +270,7 @@ export function BlogListView({
 
   if (loading) {
     return (
-      <div
-        className={cn("rubik-container font-sans", showHeader && "rubik-page")}
-      >
+      <div className={cn("rubik-container font-sans", showHeader && "rubik-page")}>
         {showHeader && (
           <div className="mx-auto mb-20 max-w-2xl animate-pulse text-center">
             <div className="h-4 bg-muted rounded w-24 mx-auto mb-6" />
@@ -295,16 +278,10 @@ export function BlogListView({
             <div className="h-6 bg-muted rounded w-1/2 mx-auto" />
           </div>
         )}
-        <div
-          aria-busy="true"
-          className="rubik-panel mb-12 h-[400px] animate-pulse bg-muted/30"
-        />
+        <div aria-busy="true" className="rubik-panel mb-12 h-[400px] animate-pulse bg-muted/30" />
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="rubik-panel h-[350px] animate-pulse bg-muted/30"
-            />
+            <div key={i} className="rubik-panel h-[350px] animate-pulse bg-muted/30" />
           ))}
         </div>
       </div>
@@ -339,9 +316,7 @@ export function BlogListView({
   const [featured, ...rest] = posts;
 
   return (
-    <div
-      className={cn("rubik-container font-sans", showHeader && "rubik-page")}
-    >
+    <div className={cn("rubik-container font-sans", showHeader && "rubik-page")}>
       {showHeader && (
         <div className="mx-auto mb-24 max-w-4xl space-y-6 text-center">
           <div className="rubik-eyebrow border-primary/14 bg-primary/10 text-primary">
@@ -352,8 +327,7 @@ export function BlogListView({
             The <span className="text-primary italic">Spike.land</span> Blog
           </h1>
           <p className="mx-auto max-w-2xl text-xl font-medium leading-8 text-muted-foreground sm:text-2xl">
-            Deep dives into autonomous agents, edge computing, and the Model
-            Context Protocol.
+            Deep dives into autonomous agents, edge computing, and the Model Context Protocol.
           </p>
         </div>
       )}
