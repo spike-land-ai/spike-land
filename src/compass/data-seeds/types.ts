@@ -102,6 +102,8 @@ export interface StepData {
   readonly order: number;
   readonly title: string;
   readonly description: string;
+  /** Official government URL for online application specific to this step */
+  readonly applicationUrl?: string;
   /** Office or location where this step takes place */
   readonly location?: string;
   /** Documents to bring or upload at this step */
