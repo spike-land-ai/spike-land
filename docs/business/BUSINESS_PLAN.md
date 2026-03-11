@@ -25,6 +25,8 @@ workflows ahead of full launch.
 
 The SEIS raise of up to £250,000 will be used to accelerate go-to-market, expand the hosted tool ecosystem, and fund early hiring in growth and customer success.
 
+The company's flagship application, COMPASS (Universal Bureaucracy Navigator), demonstrates the platform's capabilities at global scale. COMPASS is a suite of 12 MCP-native engines (28,042 lines of code) designed to help ~4 billion people navigate bureaucratic systems and access $2.1 trillion per year in unclaimed benefits across healthcare, social protection, education, and more. COMPASS runs entirely on the Spike Land MCP runtime, proving that the same infrastructure available to any developer can power mission-critical, compliance-heavy, multi-country applications.
+
 *\*Note: The beta platform currently includes 86 natively hosted MCP tools, with 533+ total tools accessible through its MCP Multiplexer architecture — an industry-first lazy-loading system that reduces AI agent context window usage by up to 100x.*
 
 **Based on the company's current facts, management believes it appears to meet the core SEIS conditions: incorporated December 2025, no prior risk-finance investment, fewer than 25 employees, gross assets under £350,000, and carrying on or preparing to carry on a qualifying software development trade. Advance Assurance is being sought on that basis.**
@@ -70,7 +72,8 @@ Developers building with AI face two compounding problems:
 
 1. **Fragmented tooling** — The average developer uses 8+ SaaS tools daily (deployment, monitoring, QA, etc.). Each requires separate authentication, billing, and integration work.
 2. **No managed MCP registry** — The Model Context Protocol (Anthropic, 2024) is emerging as a standard for AI-tool interaction. Developers currently have limited options for a managed MCP platform that combines hosted tools, authentication, rate limiting, and billing in one offering, so many teams still end up building, hosting, and securing their own MCP servers.
-3. **Context window waste** — AI agents load all available tool descriptions (often 47,000+ tokens) at the start of every session, consuming 70-95% of their cognitive capacity before doing any useful work. As tool ecosystems grow, this problem compounds exponentially.
+3. **No open-source, community-driven MCP platform** — While proprietary AI tool ecosystems are emerging (OpenAI, Anthropic), there is no open-source, permissionless MCP platform where any developer can publish tools that pass automated quality gates. The market lacks the equivalent of npm for AI tools — a platform that scales through community contribution and trust signals rather than corporate curation.
+4. **Context window waste** — AI agents load all available tool descriptions (often 47,000+ tokens) at the start of every session, consuming 70-95% of their cognitive capacity before doing any useful work. As tool ecosystems grow, this problem compounds exponentially.
 
 ### 4.2 Solution
 
@@ -184,6 +187,24 @@ OpenAI’s December 18, 2025 app directory update validates the broader trend to
 
 ---
 
+## 9.5 COMPASS Revenue Layer
+
+COMPASS is positioned as the flagship application built on the Spike Land platform, demonstrating platform capabilities while generating an independent revenue stream through institutional partnerships.
+
+| Revenue Stream | Value Proposition | Y1 Target | Y5 Target |
+|---|---|---|---|
+| Government partnerships | Reduced processing costs, higher program uptake, policy data | $3M | $200M+ |
+| International org licensing | Amplified program reach (UNHCR, ILO, World Bank) | $2M | $80M+ |
+| NGO/legal aid suite | Case management, batch processing (freemium model) | $2M | $40M+ |
+| Systemic intelligence reports | Anonymized aggregate bureaucratic performance data | $1M | $20M+ |
+| **Total** | | **$8M** | **$340M+** |
+
+COMPASS is free for end users. Revenue derives from institutional partnerships that benefit from reduced processing costs, higher program uptake, and anonymized systemic intelligence. This revenue layer is additive to the core platform SaaS revenue and is presented separately to maintain SEIS-compliant conservative framing for the platform business.
+
+COMPASS technical footprint: 12 MCP-native engines, 28,042 LOC, targeting 4 Tier 1 countries in Year 1 (Germany, India, US, Kenya), scaling to 150+ countries by Year 5.
+
+---
+
 ## 10. Three-Year Financial Forecasts
 
 ### 10.1 Key Assumptions
@@ -247,6 +268,18 @@ To demonstrate the path from SEIS-funded strategic burn to eventual profitabilit
 
 *\*Note: Liabilities consist primarily of accrued expenses and short-term trade creditors. Share Premium figure represents the forecast position post-SEIS raise.*
 
+### 10.5 Combined Revenue Scenarios
+
+The following scenarios illustrate the combined potential of the platform SaaS business and the COMPASS revenue layer. The SEIS-compliant forecasts in Sections 10.2–10.4 represent the Platform Only scenario.
+
+| Scenario | Y1 Revenue | Y2 Revenue | Y3 Revenue | Notes |
+|---|---|---|---|---|
+| **Platform Only** (Base Case) | £42,832 | £150,000 | £400,000 | SEIS-compliant forecasts above |
+| **Platform + COMPASS Pilot** | £42,832 + $2M | £150,000 + $12M | £400,000 + $45M | COMPASS pilot in 2 Tier 1 countries |
+| **Platform + COMPASS Scale** | £42,832 + $8M | £150,000 + $45M | £400,000 + $140M | Full COMPASS rollout per PRD |
+
+*Note: COMPASS revenue is denominated in USD as institutional partnerships are predominantly USD-denominated. Platform revenue remains GBP. Scenarios are not additive to the SEIS-compliant P&L forecasts, which reflect platform revenue only.*
+
 ---
 
 ## 11. Use of Funds & Milestones
@@ -260,7 +293,8 @@ The maximum £250,000 SEIS raise will be deployed over 18-24 months for qualifyi
 | **Tool Registry Expansion** | £40,000 | Scale platform to 120+ hosted tools; implement marketplace revenue share. |
 | **GTM & Content Marketing** | £50,000 | Founder-led demos, SEO content, initial push to first 100 paying customers. |
 | **Growth & Engineering Hires** | £80,000 | Hire Growth Lead & CS/Engineering support to lower churn and drive acquisition. |
-| **Working Capital / Contingency** | £20,000 | Professional fees, legal, accounting, and buffer. |
+| **COMPASS Pilot Deployment** | £15,000 | Knowledge Engine for 2 Tier 1 countries; WhatsApp/PWA deployment; initial gov partnerships. |
+| **Working Capital / Contingency** | £5,000 | Professional fees, legal, accounting, and buffer. |
 | **Total** | **£250,000** | |
 
 ---
@@ -306,5 +340,5 @@ For growth-scenario projections beyond the SEIS-compliant forecasts in this docu
 - **VALUATION_ANALYSIS.md** — Eight-method valuation framework
 
 ---
-*Document Version: 2.3 (SEIS Advance Assurance Edition)*
+*Document Version: 2.4 (SEIS Advance Assurance Edition)*
 *Prepared: March 2026*

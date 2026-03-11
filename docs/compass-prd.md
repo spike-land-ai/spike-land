@@ -57,6 +57,43 @@ WhatsApp/Telegram/SMS (largest reach) | PWA (offline-capable) | Native Android (
 
 Phase 1: 50 (85% population) → Phase 2: 150 (97%) → Phase 3: 400+ including indigenous. Localization, not translation.
 
+## Platform Integration
+
+COMPASS is built entirely on the Spike Land MCP runtime, demonstrating that the same platform infrastructure available to any developer can power mission-critical, compliance-heavy, multi-country applications.
+
+### MCP-Native Architecture
+
+Each COMPASS engine is implemented as an MCP tool, discoverable and callable through the Spike Land registry:
+
+| COMPASS Engine | MCP Tool Surface | Platform Component Used |
+|---|---|---|
+| Knowledge Engine | `compass.knowledge.*` | D1 (graph storage), Durable Objects (versioning) |
+| Conversation Engine | `compass.conversation.*` | Workers AI (LLM inference), KV (session state) |
+| Eligibility Matcher | `compass.eligibility.*` | Workers (deterministic rules engine) |
+| Document Processor | `compass.document.*` | R2 (document storage), Workers (OCR pipeline) |
+| Offline Core | `compass.offline.*` | R2 (country pack bundles), IndexedDB (client-side) |
+| Feedback Loop | `compass.feedback.*` | D1 (anonymized outcomes), Workers (differential privacy) |
+
+### API Layer
+
+COMPASS API runs on Hono framework on Cloudflare Workers — the same edge API stack (`spike-edge`) used by the Spike Land platform. This means:
+
+- Global low-latency access (Cloudflare's 300+ PoPs)
+- No separate infrastructure to maintain
+- Same auth layer (`mcp-auth` with Better Auth + Drizzle)
+- Same billing and metering infrastructure
+
+### PWA & App Store Distribution
+
+- COMPASS PWA is deployable through the Spike Land app store
+- Offline-capable via IndexedDB + compressed country packs
+- Installable on any device without app store gatekeeping
+- WhatsApp/Telegram bots connect via the same MCP tool surface
+
+### Developer Ecosystem Implications
+
+COMPASS proves that if a privacy-compliant, offline-capable, 50-language bureaucracy navigator with differential privacy can run on Spike Land's MCP runtime, then any tool can. This is the platform's strongest proof point for developer adoption and investor confidence.
+
 ## Data & Privacy
 
 **Data model:** Five-layer graph — Jurisdiction → Program → Process → Institution → Outcome.
@@ -75,6 +112,10 @@ Free for users. Funded by impact.
 | Intl org licensing | Amplified program reach | $80M+ |
 | NGO/legal aid suite | Case management, batch processing (freemium) | $40M+ |
 | Systemic intelligence reports | Anonymized aggregate bureaucratic performance | $20M+ |
+
+### Platform Revenue Integration
+
+COMPASS revenue flows through the Spike Land platform. Government partnerships and institutional licensing are processed through the platform's billing infrastructure. This creates a flywheel: COMPASS validates the platform, platform infrastructure reduces COMPASS operational costs, and COMPASS revenue funds platform development.
 
 ### Projections
 
@@ -103,6 +144,13 @@ Free for users. Funded by impact.
 | Scale | M7–18 | 35 countries/150 langs, Android+offline, USSD+IVR, NGO tools, intelligence reporting, document OCR |
 | Ecosystem | M19–36 | 80+ countries/300+ langs, open API, predictive features (proactive alerts, deadline prediction), institutional feedback loop, Compass Foundation |
 
+### Platform Milestone Alignment
+
+COMPASS roadmap phases are aligned with Spike Land platform milestones:
+- **Foundation (M1-6)**: Coincides with platform commercial launch and billing activation
+- **Scale (M7-18)**: Coincides with marketplace launch and 70/30 revenue share activation
+- **Ecosystem (M19-36)**: Coincides with enterprise-ready access controls and ARR scaling
+
 ## Metrics
 
 | Category | Metric | Y1 | Y3 |
@@ -129,7 +177,13 @@ Free for users. Funded by impact.
 | Over-reliance | Medium | Present options not directives, state limitations |
 | Funding dependency | Medium | Diversified revenue, Foundation with independent governance |
 
-## Team (Y1: 100 people)
+## Team
+
+### Near-Term Execution Model
+
+In the near term (Y1-Y2), COMPASS development leverages the proven AI-assisted solo-founder model that built the Spike Land platform. The founder built the entire platform end-to-end using AI-assisted development, demonstrating that the 100-person team plan represents the long-term scaling trajectory, not the immediate requirement. Initial COMPASS engines are being built with the same methodology, targeting 2 Tier 1 countries (Germany, India) with a lean team before scaling.
+
+### Long-Term Team (Y3+)
 
 Leadership 5 (CEO/CTO/CPO/Partnerships/GC) | Engineering 30 (ML/NLP, backend, mobile, infra, security) | Knowledge Ops 25 (bureaucratic analysts, legal researchers, QA) | Localization 15 | Partnerships 10 | Design/Research 10 | Community 5.
 
