@@ -14,7 +14,7 @@
  * interface.
  */
 
-import {
+import type {
   AnswerMap,
   ConversationConfig,
   ConversationEvent,
@@ -23,9 +23,9 @@ import {
   LLMProvider,
   Message,
   MessageMetadata,
-  Phase,
   RAGContext,
 } from "../types.js";
+import { Phase } from "../types.js";
 import { ConversationStateMachine } from "./state-machine.js";
 import { buildRAGPrompt, buildSystemPrompt } from "./prompt-builder.js";
 
@@ -186,7 +186,7 @@ export class ConversationManager {
    */
   async handleMessage(sessionId: string, userContent: string): Promise<Message> {
     const state = await this.requireSession(sessionId);
-    const config = state.context["config"] as ConversationConfig;
+    const config = state.context.config as ConversationConfig;
 
     if (state.history.length >= config.maxTurns * 2) {
       return this.makeMessage(
@@ -201,7 +201,7 @@ export class ConversationManager {
       phase: state.currentPhase,
     });
 
-    let currentState: ConversationState = {
+    const currentState: ConversationState = {
       ...state,
       history: [...state.history, userMessage],
       updatedAt: new Date().toISOString(),

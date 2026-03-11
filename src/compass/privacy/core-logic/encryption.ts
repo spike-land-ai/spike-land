@@ -112,11 +112,11 @@ interface WebCryptoLocal {
 // all runtimes without side-effects at import time.
 function getCrypto(): WebCryptoLocal {
   // globalThis.crypto is available in: browsers, CF Workers, Node >= 20, Deno
-  const c = (globalThis as Record<string, unknown>)["crypto"];
+  const c = (globalThis as Record<string, unknown>).crypto;
   if (
     typeof c !== "object" ||
     c === null ||
-    typeof (c as Record<string, unknown>)["subtle"] === "undefined"
+    typeof (c as Record<string, unknown>).subtle === "undefined"
   ) {
     throw new Error(
       "Web Crypto API (globalThis.crypto.subtle) is not available in this runtime. " +

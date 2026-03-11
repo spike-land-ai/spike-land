@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { DifferentialPrivacy } from "../core-logic/differential-privacy.js";
 import type { AggregateMetric, DPConfig } from "../types.js";
 

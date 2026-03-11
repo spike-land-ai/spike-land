@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { ConversationStateMachine, TransitionError } from "../core-logic/state-machine.js";
-import { Phase, ConversationState, ConversationEvent, AnswerMap } from "../types.js";
+import type { ConversationState, ConversationEvent, AnswerMap } from "../types.js";
+import { Phase } from "../types.js";
 
 // ---------------------------------------------------------------------------
 // Test fixture helpers

@@ -11,7 +11,7 @@ import {
   Undo2,
   Users,
 } from "lucide-react";
-import { Fragment, startTransition, useEffect, useState } from "react";
+import { Fragment, startTransition, useEffect, useMemo, useState } from "react";
 import { Chess, type Color, type Move, type PieceSymbol, type Square } from "chess.js";
 
 const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
@@ -261,18 +261,27 @@ export function ChessArenaApp() {
     "Pick a queue, choose a side, then start a local match to play immediately.",
   );
 
-  const game = buildGame(moves);
+  const game = useMemo(() => buildGame(moves), [moves]);
   const previewColor = matchPhase === "lobby" ? colorFromSeat(seatSide) : playerColor;
   const boardOrientation = isBoardFlipped ? oppositeColor(previewColor) : previewColor;
   const displayedFiles = boardOrientation === "w" ? FILES : [...FILES].reverse();
   const displayedRanks = boardOrientation === "w" ? RANKS : [...RANKS].reverse();
   const currentMode = matchPhase === "lobby" ? queueMode : activeQueueMode;
   const botHandle = botHandleForMode(currentMode);
-  const selectedMoves =
-    selectedSquare && matchPhase === "playing" && game.turn() === playerColor && !game.isGameOver()
-      ? game.moves({ verbose: true, square: selectedSquare as Square })
-      : [];
-  const legalTargets = new Set(selectedMoves.map((move) => move.to));
+  const selectedMoves = useMemo(
+    () =>
+      selectedSquare &&
+      matchPhase === "playing" &&
+      game.turn() === playerColor &&
+      !game.isGameOver()
+        ? game.moves({ verbose: true, square: selectedSquare as Square })
+        : [],
+    [selectedSquare, matchPhase, game, playerColor],
+  );
+  const legalTargets = useMemo(
+    () => new Set(selectedMoves.map((move) => move.to)),
+    [selectedMoves],
+  );
   const canInteract = matchPhase === "playing" && !game.isGameOver() && game.turn() === playerColor;
   const pulse = arenaPulse(currentMode);
   const queueCount = queueMode === "Arena" ? 124 : queueMode === "Rapid" ? 78 : 124;

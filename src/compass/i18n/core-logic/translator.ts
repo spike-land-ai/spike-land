@@ -104,7 +104,7 @@ const BUILTIN_PLURAL_RULES: Record<string, (n: number) => PluralCategory> = {
     if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return "few";
     return "many";
   },
-  uk: (n) => BUILTIN_PLURAL_RULES["ru"]!(n),
+  uk: (n) => BUILTIN_PLURAL_RULES.ru!(n),
   // Polish
   pl: (n) => {
     if (n === 1) return "one";

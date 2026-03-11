@@ -34,7 +34,7 @@ import type { AuditEntry } from "../types.js";
 // ---------------------------------------------------------------------------
 
 function generateId(): string {
-  const c = (globalThis as Record<string, unknown>)["crypto"] as
+  const c = (globalThis as Record<string, unknown>).crypto as
     | { randomUUID?: () => string }
     | undefined;
   if (typeof c?.randomUUID === "function") {

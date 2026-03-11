@@ -433,10 +433,10 @@ export class CulturalAdapter {
    */
   adaptGreeting(locale: string, timeOfDay: string, name?: string): string {
     const data =
-      GREETING_DATA[locale] ?? GREETING_DATA[this.baseLocale(locale)] ?? GREETING_DATA["en"]!;
+      GREETING_DATA[locale] ?? GREETING_DATA[this.baseLocale(locale)] ?? GREETING_DATA.en!;
 
     const key = timeOfDay.toLowerCase();
-    const template = (data[key] ?? data["default"])!;
+    const template = (data[key] ?? data.default)!;
 
     // Build the name interpolation part, inserting a comma separator
     // only when a name is provided — e.g. "Good morning, Lena!"
@@ -493,9 +493,7 @@ export class CulturalAdapter {
    * ```
    */
   getDateFormat(locale: string): string {
-    return (
-      DATE_FORMATS[locale] ?? DATE_FORMATS[this.baseLocale(locale)] ?? DATE_FORMATS["_default"]!
-    );
+    return DATE_FORMATS[locale] ?? DATE_FORMATS[this.baseLocale(locale)] ?? DATE_FORMATS._default!;
   }
 
   // -------------------------------------------------------------------------
@@ -515,9 +513,7 @@ export class CulturalAdapter {
    */
   getCurrencyFormat(locale: string): CurrencyFormat {
     return (
-      CURRENCY_FORMATS[locale] ??
-      CURRENCY_FORMATS[this.baseLocale(locale)] ??
-      CURRENCY_FORMATS["en"]!
+      CURRENCY_FORMATS[locale] ?? CURRENCY_FORMATS[this.baseLocale(locale)] ?? CURRENCY_FORMATS.en!
     );
   }
 
@@ -541,7 +537,7 @@ export class CulturalAdapter {
     return (
       PATIENT_PHRASING_DATA[locale] ??
       PATIENT_PHRASING_DATA[this.baseLocale(locale)] ??
-      PATIENT_PHRASING_DATA["en"]!
+      PATIENT_PHRASING_DATA.en!
     );
   }
 

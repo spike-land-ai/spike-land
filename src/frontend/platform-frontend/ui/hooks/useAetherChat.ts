@@ -45,7 +45,7 @@ export function useAetherChat(): UseAetherChatReturn {
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentStage, setCurrentStage] = useState<PipelineStage>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [noteCount, setNoteCount] = useState(0);
+  const [noteCount, _setNoteCount] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
 
   // Persist messages to localStorage (debounced)

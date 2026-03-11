@@ -9,14 +9,14 @@
  *  - Accessible: plain language, no jargon unless defined, short sentences.
  */
 
-import {
+import type {
   ConversationConfig,
   PatienceLevel,
-  Phase,
   Process,
   ProcessStep,
   RAGContext,
 } from "../types.js";
+import { Phase } from "../types.js";
 
 // ---------------------------------------------------------------------------
 // Patience personality snippets

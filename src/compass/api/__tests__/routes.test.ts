@@ -4,7 +4,7 @@
  * All engine dependencies are provided as mocks — no real DB, AI, or network
  * calls happen.  Auth middleware is bypassed by injecting a valid stub token.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { createApp } from "../app.js";
 import type { CompassEngines } from "../app.js";
 import type {

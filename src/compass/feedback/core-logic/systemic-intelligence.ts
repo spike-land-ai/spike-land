@@ -9,7 +9,7 @@
  */
 
 import { DifferentialPrivacy } from "./differential-privacy.js";
-import { OutcomeTracker } from "./outcome-tracker.js";
+import type { OutcomeTracker } from "./outcome-tracker.js";
 import type {
   AggregateMetric,
   Bottleneck,

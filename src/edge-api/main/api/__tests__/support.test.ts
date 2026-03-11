@@ -19,7 +19,7 @@ import type { Env } from "../../core-logic/env.js";
 function createMockDB(
   opts: { insertError?: Error | null; fistbumpCount?: number; donationCount?: number } = {},
 ) {
-  const { insertError = null, fistbumpCount = 1, donationCount = 0 } = opts;
+  const { insertError = null, fistbumpCount = 1, donationCount: _donationCount = 0 } = opts;
 
   const runFn = insertError
     ? vi.fn().mockRejectedValue(insertError)

@@ -443,7 +443,7 @@ const planColors: Record<Plan, string> = {
 function BillingTab() {
   const { t } = useTranslation("settings");
   const { showToast } = useToast();
-  const { pricing } = usePricing();
+  const { pricing: _pricing } = usePricing();
   const search = useSearch({ strict: false }) as { success?: string; canceled?: string };
 
   const [billing, setBilling] = useState<BillingStatus | null>(null);

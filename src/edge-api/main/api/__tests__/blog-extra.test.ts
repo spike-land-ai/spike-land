@@ -56,7 +56,7 @@ function mockR2(getResult: unknown = null) {
   } as unknown as R2Bucket;
 }
 
-function createApp(env: Partial<Env> = {}) {
+function createApp(_env: Partial<Env> = {}) {
   const testApp = new Hono<{ Bindings: Env }>();
   testApp.route("/", blog);
   return testApp;

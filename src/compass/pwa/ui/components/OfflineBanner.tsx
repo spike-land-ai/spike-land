@@ -45,7 +45,7 @@ export function OfflineBanner({
     }
 
     return undefined;
-  }, [isOnline]); // eslint-disable-line react-hooks/exhaustive-deps — intentional
+  }, [isOnline, visible]);
 
   if (!visible) return null;
 

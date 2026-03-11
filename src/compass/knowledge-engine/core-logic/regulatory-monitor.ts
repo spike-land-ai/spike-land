@@ -167,7 +167,7 @@ export class RegulatoryMonitor {
    * **Stub**: always returns an empty string.
    * Override in a concrete subclass to perform real HTTP requests.
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   protected async fetchPageContent(_url: string): Promise<string> {
     return "";
   }

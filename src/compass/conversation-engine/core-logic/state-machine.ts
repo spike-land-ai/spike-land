@@ -6,7 +6,8 @@
  * rather than mutating the input.
  */
 
-import { Phase, ConversationEvent, ConversationState } from "../types.js";
+import type { ConversationEvent, ConversationState } from "../types.js";
+import { Phase } from "../types.js";
 
 // ---------------------------------------------------------------------------
 // Transition table

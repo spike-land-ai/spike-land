@@ -33,12 +33,12 @@ export interface SearchEngine {
 function parseSearchQuery(
   raw: Record<string, string | string[] | undefined>,
 ): SearchRequest | null {
-  const query = typeof raw["query"] === "string" ? raw["query"].trim() : undefined;
+  const query = typeof raw.query === "string" ? raw.query.trim() : undefined;
   if (!query) return null;
 
-  const jurisdiction = typeof raw["jurisdiction"] === "string" ? raw["jurisdiction"] : undefined;
-  const domain = typeof raw["domain"] === "string" ? raw["domain"] : undefined;
-  const page = raw["page"] ? parseInt(String(raw["page"]), 10) : undefined;
+  const jurisdiction = typeof raw.jurisdiction === "string" ? raw.jurisdiction : undefined;
+  const domain = typeof raw.domain === "string" ? raw.domain : undefined;
+  const page = raw.page ? parseInt(String(raw.page), 10) : undefined;
 
   return { query, jurisdiction, domain, page };
 }

@@ -10,12 +10,11 @@
  *  - Progress is expressed as a fraction of visible questions.
  */
 
-import {
+import type {
   AnswerMap,
   ConversationState,
   InterviewQuestion,
   QuestionType,
-  QuestionValidation,
   UserProfile,
 } from "../types.js";
 

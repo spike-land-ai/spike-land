@@ -123,7 +123,7 @@ describe("VersionTracker", () => {
       const halfLifeAgo = daysAgo(HALF_LIFE_DAYS);
 
       // Build a tracker frozen at NOW, pre-populated with an old verification
-      const frozenNow = new VersionTracker(() => NOW);
+      const _frozenNow = new VersionTracker(() => NOW);
       // Verify with a custom internal record by exploiting the clock
       const staleTracker = new VersionTracker(() => halfLifeAgo);
       staleTracker.markVerified("ent-old", "program", "alice");
@@ -133,7 +133,7 @@ describe("VersionTracker", () => {
       // need to use the stale tracker with the correct "now" injected.
       // We accomplish this by building a tracker whose now = NOW but the
       // record was set with verifiedAt = halfLifeAgo.
-      const tHalfLife = new VersionTracker(() => NOW);
+      const _tHalfLife = new VersionTracker(() => NOW);
       // Hack: inject a past verification by re-calling markVerified with
       // a clock frozen in the past, then read from a clock at NOW.
       // Since the tracker stores verifiedAt from _its_ clock, we must

@@ -5,7 +5,7 @@
  * locale switching, missing-key sentinel, getMissingKeys, hasTranslation.
  */
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { Translator } from "../core-logic/translator.js";
 import { buildEnBundle } from "../locales/en.js";
 import { buildDeBundle } from "../locales/de.js";

@@ -63,7 +63,6 @@ function timingSafeEqual(a: string, b: string): boolean {
 
   let result = 0;
   for (let i = 0; i < a.length; i++) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
 

@@ -62,7 +62,7 @@ describe("ProfileBuilder — basic construction", () => {
 
 describe("ProfileBuilder.build() — required fields", () => {
   it("throws when age is missing", () => {
-    const builder = minimalBuilder();
+    const _builder = minimalBuilder();
     // Deliberately create a builder without age by resetting
     const fresh = new ProfileBuilder()
       .setIncome(0)

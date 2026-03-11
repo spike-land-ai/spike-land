@@ -10,7 +10,7 @@
 
 import type { McpServer, RegisteredTool } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
-import { z } from "zod";
+import type { z } from "zod";
 
 import type { BuiltTool } from "@spike-land-ai/shared/tool-builder";
 import { CATEGORY_DESCRIPTIONS } from "../core-logic/mcp/categories";
