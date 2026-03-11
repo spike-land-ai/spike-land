@@ -4472,7 +4472,7 @@ __metadata:
     "@types/react": "npm:^19.2.14"
     "@types/react-dom": "npm:^19.2.3"
     "@vitejs/plugin-react": "npm:^5.1.4"
-    hono: "npm:^4.12.5"
+    hono: "npm:^4.12.7"
     jsdom: "npm:^28.1.0"
     lucide-react: "npm:^0.577.0"
     react: "npm:^19.2.4"
@@ -4644,7 +4644,7 @@ __metadata:
     "@cloudflare/workers-types": "npm:^4.20260307.1"
     drizzle-kit: "npm:^0.31.9"
     drizzle-orm: "npm:^0.45.1"
-    hono: "npm:^4.12.5"
+    hono: "npm:^4.12.7"
     typescript: "npm:^5.9.3"
     ulid: "npm:^2.4.0"
     vitest: "npm:^4.0.18"
@@ -4686,7 +4686,7 @@ __metadata:
     "@cloudflare/workers-types": "npm:4.20260307.1"
     "@vitest/coverage-v8": "npm:^4.0.18"
     eslint: "npm:^10.0.3"
-    hono: "npm:^4.12.5"
+    hono: "npm:^4.12.7"
     typescript: "npm:^5.9.3"
     vitest: "npm:^4.0.18"
     wrangler: "npm:^4.71.0"
@@ -4708,7 +4708,7 @@ __metadata:
     "@vitest/coverage-istanbul": "npm:4.0.18"
     "@vitest/coverage-v8": "npm:4.0.18"
     ai: "npm:6.0.116"
-    hono: "npm:^4.12.5"
+    hono: "npm:^4.12.7"
     react: "npm:19.2.4"
     react-dom: "npm:19.2.4"
     replicate: "npm:1.4.0"
@@ -4731,7 +4731,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:^4.0.18"
     drizzle-kit: "npm:^0.31.9"
     drizzle-orm: "npm:^0.45.1"
-    hono: "npm:^4.12.5"
+    hono: "npm:^4.12.7"
     typescript: "npm:^5.9.3"
     vitest: "npm:^4.0.18"
     wrangler: "npm:^4.71.0"
@@ -4776,7 +4776,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@spike-land-ai/status@workspace:packages/status"
   dependencies:
-    hono: "npm:^4.12.5"
+    hono: "npm:^4.12.7"
     wrangler: "npm:^4.71.0"
   languageName: unknown
   linkType: soft
@@ -10862,10 +10862,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hono@npm:^4.11.4, hono@npm:^4.12.5":
+"hono@npm:^4.11.4":
   version: 4.12.5
   resolution: "hono@npm:4.12.5"
   checksum: 10c0/a8cf0c988e84b370978b57d941fc543b93994b7b01c847611ec73be8e8c9fda5baeac8be08a44eaefdf215381fea2620ccb742ff5c4eaeecb35b92f6a75832c6
+  languageName: node
+  linkType: hard
+
+"hono@npm:^4.12.7":
+  version: 4.12.7
+  resolution: "hono@npm:4.12.7"
+  checksum: 10c0/1f6936582069fbcb96bed803b00ccd88a735746a1b3373f6b659b28e9bc5312f26d1368de7b2a72da0247280cbe636333946a87394c2845c3e9b46f400646eb0
   languageName: node
   linkType: hard
 

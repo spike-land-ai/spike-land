@@ -24,7 +24,7 @@
     "@google/genai": "^1.44.0",
     "@spike-land-ai/mcp-image-studio": "workspace:*",
     "@spike-land-ai/shared": "workspace:*",
-    "hono": "^4.12.5"
+    "hono": "^4.12.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "4.20260307.1",

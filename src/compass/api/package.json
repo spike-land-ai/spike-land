@@ -26,7 +26,7 @@
     "dev": "wrangler dev --local"
   },
   "dependencies": {
-    "hono": "^4.6.0"
+    "hono": "^4.12.7"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250214.0",
