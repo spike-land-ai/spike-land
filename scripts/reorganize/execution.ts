@@ -282,7 +282,7 @@ function rewriteCssSource(
   });
 }
 
-export async function updateTsConfigPaths(pathMapping: Map<string, string>, srcDir?: string) {
+export async function updateTsConfigPaths(pathMapping: Map<string, string>, _srcDir?: string) {
   const tsConfigPath = path.resolve(process.cwd(), "tsconfig.json");
   const content = await fs.readFile(tsConfigPath, "utf-8");
   const tsconfig = JSON.parse(content);
@@ -351,9 +351,7 @@ export async function updateTsConfigPaths(pathMapping: Map<string, string>, srcD
 export async function updatePackagesConfigs(pathMapping: Map<string, string>, srcDir?: string) {
   const rootDir = process.cwd();
   const packagesDir = path.join(rootDir, "packages");
-  const entries = await fs
-    .readdir(packagesDir, { withFileTypes: true })
-    .catch((): Dirent[] => []);
+  const entries = await fs.readdir(packagesDir, { withFileTypes: true }).catch((): Dirent[] => []);
 
   // Build a secondary lookup: if srcDir is "src-old", also try matching
   // paths that reference "src/" (the output dir name) against the old paths.

@@ -112,7 +112,7 @@ export function CodeBlock({ children, className }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
   const langMatch = className?.match(/language-(\S+)/);
-  const lang = langMatch ? resolveLang(langMatch[1]) : null;
+  const lang = langMatch?.[1] ? resolveLang(langMatch[1]) : null;
   const code =
     typeof children === "string"
       ? children.replace(/\n$/, "")

@@ -20,7 +20,9 @@ const sharedRules = {
       caughtErrorsIgnorePattern: "^_",
     },
   ],
+  // ── Type-safety rules (no type-aware linting required) ──────────────────────
   "@typescript-eslint/no-explicit-any": "error",
+  "@typescript-eslint/no-non-null-assertion": "warn",
   "@typescript-eslint/consistent-type-imports": [
     "error",
     {
@@ -30,6 +32,21 @@ const sharedRules = {
     },
   ],
   "dot-notation": "error",
+  // ── Type-aware rules (require parserOptions.project / projectService) ────────
+  // These rules are intentionally NOT enabled here because this config has no
+  // parserOptions.project set. Enabling them without it either silently no-ops
+  // or throws a parser error on every file.
+  //
+  // To activate them, add parserOptions.projectService: true (or point
+  // parserOptions.project to a tsconfig) in each languageOptions block, then
+  // uncomment:
+  //
+  //   "@typescript-eslint/no-floating-promises": "error",
+  //   "@typescript-eslint/no-misused-promises": "error",
+  //   "@typescript-eslint/consistent-type-exports": "error",
+  //   "@typescript-eslint/no-unnecessary-type-assertion": "warn",
+  //   "@typescript-eslint/prefer-nullish-coalescing": "warn",
+  //   "@typescript-eslint/prefer-optional-chain": "warn",
 };
 
 // ─── Config ──────────────────────────────────────────────────────────────────

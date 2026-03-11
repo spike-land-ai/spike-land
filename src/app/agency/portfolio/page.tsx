@@ -1,4 +1,3 @@
-import React from "react";
 import { PortfolioCard } from "../../../components/agency/portfolio-card";
 
 const PORTFOLIO_ITEMS = [

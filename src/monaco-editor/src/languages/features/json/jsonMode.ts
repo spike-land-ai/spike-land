@@ -5,10 +5,10 @@
 
 import { WorkerManager } from "./workerManager";
 import type { JSONWorker } from "./jsonWorker";
-import { LanguageServiceDefaults } from "./register";
+import type { LanguageServiceDefaults } from "./register";
 import * as languageFeatures from "../common/lspLanguageFeatures";
 import { createTokenizationSupport } from "./tokenization";
-import { Uri, IDisposable, languages, editor } from "../../../editor";
+import { Uri, type IDisposable, languages, editor } from "../../../editor";
 
 let worker: languageFeatures.WorkerAccessor<JSONWorker>;
 

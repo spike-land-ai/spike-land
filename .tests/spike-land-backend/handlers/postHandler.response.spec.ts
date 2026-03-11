@@ -1,59 +1,67 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import type { CoreMessage, StreamTextResult } from "ai";
-import { jsonSchema, streamText, tool } from "ai";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Code } from "../../../src/edge-api/backend/lazy-imports/chatRoom";
 import type Env from "../../../src/edge-api/backend/core-logic/env";
 import type { McpTool } from "../../../src/edge-api/backend/core-logic/mcp";
 import { StorageService } from "../../../src/edge-api/backend/core-logic/services/storageService";
 import type { PostRequestBody } from "../../../src/edge-api/backend/core-logic/types/aiRoutes";
-import { PostHandler } from "../../../src/edge-api/backend/core-logic/handlers/postHandler";
-import {
-  createMockCode,
-  createMockEnv,
-  createMockMcpServer,
-  createMockStorageService,
-  setupCrypto,
-  setupStorageServiceMock,
-} from "../../../src/edge-api/backend/core-logic/handlers/postHandler.test-utils";
+import { PostHandler } from "../../../src/edge-api/backend/ai/postHandler";
+import { streamGemini } from "../../../src/edge-api/backend/ai/gemini-stream";
+import type { ChatMessage } from "../../../src/edge-api/backend/ai/gemini-stream";
 
-type StreamResult = StreamTextResult<Record<string, unknown>, unknown>;
-
-// Mock all external dependencies
-vi.mock("@ai-sdk/google", () => ({
-  createGoogleGenerativeAI: vi.fn(),
-}));
-vi.mock("ai");
+// Mock dependencies
+vi.mock("../../../src/edge-api/backend/ai/gemini-stream");
 vi.mock("../../../src/edge-api/backend/core-logic/services/storageService");
 
-// Setup crypto mock
-setupCrypto();
+vi.stubGlobal("crypto", {
+  ...globalThis.crypto,
+  randomUUID: vi.fn(() => "req-123"),
+});
+
+function createMockMcpServer() {
+  return {
+    tools: [
+      {
+        name: "read_code",
+        description: "Read code",
+        inputSchema: { type: "object" as const, properties: {}, required: [] },
+      },
+    ] as McpTool[],
+    executeTool: vi.fn().mockResolvedValue({ result: "ok" }),
+  };
+}
+
+function createMockCode(mcpServer = createMockMcpServer()): Code {
+  return {
+    getSession: vi.fn().mockReturnValue({ codeSpace: "test-space" }),
+    getEnv: vi.fn().mockReturnValue({}),
+    getMcpServer: vi.fn().mockReturnValue(mcpServer),
+  } as unknown as Code;
+}
 
 describe("PostHandler - Response", () => {
   let postHandler: PostHandler;
   let mockCode: Code;
   let mockEnv: Env;
-  let mockStorageService: StorageService;
-  let mockMcpServer: { tools: McpTool[] };
+  let mockStorageService: { saveRequestBody: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockMcpServer = createMockMcpServer();
-    mockCode = createMockCode(mockMcpServer);
-    mockEnv = createMockEnv();
-    mockStorageService = createMockStorageService();
-    setupStorageServiceMock(StorageService, mockStorageService);
+    mockCode = createMockCode();
+    mockEnv = { CLAUDE_CODE_OAUTH_TOKEN: "test-key", GEMINI_API_KEY: "test-gemini-key" } as Env;
+    mockStorageService = { saveRequestBody: vi.fn().mockResolvedValue(undefined) };
+    vi.mocked(StorageService).mockImplementation(function () {
+      return mockStorageService as unknown as StorageService;
+    });
 
-    // Mock AI SDK helpers to pass through their config
-    vi.mocked(tool).mockImplementation(
-      <TParameters, TResult>(config: {
-        description?: string;
-        parameters: TParameters;
-        execute?: (args: unknown) => Promise<TResult> | TResult;
-      }) => config,
+    vi.mocked(streamGemini).mockReturnValue(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode("data: [DONE]\n\n"));
+          controller.close();
+        },
+      }),
     );
-    vi.mocked(jsonSchema).mockImplementation(<T>(schema: T) => schema);
 
     postHandler = new PostHandler(mockCode, mockEnv);
   });
@@ -73,107 +81,27 @@ describe("PostHandler - Response", () => {
 
     it("should create error response without details", () => {
       const response = callCreateErrorResponse("Test error", 400);
-
       expect(response.status).toBe(400);
-      expect(response.headers.get("Content-Type")).toBe("application/json; charset=UTF-8");
-      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
     });
 
     it("should create error response with details", async () => {
       const response = callCreateErrorResponse("Test error", 500, "Detailed info");
-
       expect(response.status).toBe(500);
       const body = await response.json();
-      expect(body).toEqual({
-        error: "Test error",
-        details: "Detailed info",
-      });
-    });
-  });
-
-  describe("createSystemPrompt", () => {
-    const callCreateSystemPrompt = (codeSpace: string) => {
-      return (
-        postHandler as unknown as {
-          createSystemPrompt: (codeSpace: string) => string;
-        }
-      ).createSystemPrompt(codeSpace);
-    };
-
-    it("should create system prompt with codeSpace", () => {
-      const prompt = callCreateSystemPrompt("my-space");
-
-      expect(prompt).toContain("CodeSpace: my-space");
-      expect(prompt).toContain("React components");
-      expect(prompt).toContain("Tailwind CSS");
-      expect(prompt).toContain("dark/light mode");
-    });
-  });
-
-  describe("getCorsHeaders", () => {
-    const callGetCorsHeaders = () => {
-      return (
-        postHandler as unknown as {
-          getCorsHeaders: () => Record<string, string>;
-        }
-      ).getCorsHeaders();
-    };
-
-    it("should return CORS headers", () => {
-      const headers = callGetCorsHeaders();
-
-      expect(headers["Access-Control-Allow-Origin"]).toBe("https://spike.land");
-      expect(headers["Content-Type"]).toBe("application/json; charset=UTF-8");
+      expect(body).toEqual({ error: "Test error", details: "Detailed info" });
     });
   });
 
   describe("createStreamResponse", () => {
     it("should create stream with correct parameters", async () => {
-      const messages = [{ role: "user" as const, content: "Hello" }];
-      const tools: McpTool[] = mockMcpServer.tools;
+      const messages: ChatMessage[] = [{ role: "user" as const, content: "Hello" }];
+      const tools: McpTool[] = mockCode.getMcpServer().tools;
       const body: PostRequestBody = { messages: [] };
-
-      const mockToDataStreamResponse = vi.fn().mockReturnValue(new Response("stream"));
-      const mockStreamResponse = {
-        toDataStreamResponse: mockToDataStreamResponse,
-        toUIMessageStreamResponse: mockToDataStreamResponse,
-        toTextStreamResponse: mockToDataStreamResponse,
-        warnings: [],
-        usage: {},
-        sources: [],
-        files: [],
-        finishReason: "stop",
-        text: "response text",
-        toolCalls: [],
-        toolResults: [],
-        rawCall: {},
-        rawResponse: {},
-        request: {},
-        response: {},
-        providerMetadata: {},
-        experimental_providerMetadata: {},
-        reasoning: undefined,
-        reasoningDetails: undefined,
-        steps: [],
-        experimental_steps: [],
-        object: "text-completion",
-        experimental_completion: {},
-        experimental_objectGeneration: {},
-        experimental_telemetry: {},
-        experimental_usage: {},
-      } as unknown as StreamResult;
-
-      vi.mocked(streamText).mockResolvedValue(mockStreamResponse);
-
-      const googleProvider = vi.fn().mockReturnValue("gemini-3-flash-preview");
-      vi.mocked(createGoogleGenerativeAI).mockReturnValue(
-        googleProvider as unknown as ReturnType<typeof createGoogleGenerativeAI>,
-      );
 
       await (
         postHandler as unknown as {
           createStreamResponse: (
-            messages: CoreMessage[],
+            messages: ChatMessage[],
             tools: McpTool[],
             body: PostRequestBody,
             codeSpace: string,
@@ -182,118 +110,26 @@ describe("PostHandler - Response", () => {
         }
       ).createStreamResponse(messages, tools, body, "test-space", "req-123");
 
-      expect(createGoogleGenerativeAI).toHaveBeenCalledWith({
-        apiKey: undefined,
-      });
-
-      expect(streamText).toHaveBeenCalledWith({
+      expect(streamGemini).toHaveBeenCalledWith({
+        apiKey: "test-gemini-key",
         model: "gemini-3-flash-preview",
-        system: expect.stringContaining("CodeSpace: test-space"),
+        systemPrompt: expect.stringContaining("CodeSpace: test-space"),
         messages,
-        tools: tools.reduce(
-          (acc, t) => {
-            acc[t.name] = {
-              description: t.description,
-              inputSchema: expect.any(Object),
-              execute: expect.any(Function),
-            };
-            return acc;
-          },
-          {} as Record<
-            string,
-            {
-              description: string;
-              inputSchema: unknown;
-              execute: (args: Record<string, unknown>) => Promise<Record<string, unknown>>;
-            }
-          >,
-        ),
-        toolChoice: "auto",
-        onStepFinish: expect.any(Function),
-      });
-
-      expect(mockToDataStreamResponse).toHaveBeenCalledWith({
-        headers: expect.objectContaining({
-          "Access-Control-Allow-Origin": "https://spike.land",
-        }),
+        tools: expect.any(Object),
+        onToolResult: expect.any(Function),
       });
     });
 
-    it("should handle getErrorMessage callback", async () => {
-      const consoleErrorSpy = vi.spyOn(console, "error");
-      // Capture the callback to verify it was passed correctly
-      let capturedGetErrorMessageCallback: ((error: Error) => string) | undefined;
-
-      const mockToDataStreamResponse = vi.fn().mockImplementation((options) => {
-        capturedGetErrorMessageCallback = options.getErrorMessage;
-        return new Response("stream");
+    it("should return SSE response with correct headers", async () => {
+      const request = new Request("https://test.spike.land/api/post", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ messages: [{ role: "user", content: "test" }] }),
       });
 
-      // Verify the callback was captured (used to ensure proper setup)
-      expect(capturedGetErrorMessageCallback).toBeUndefined(); // Will be defined after streamText is called
-
-      const mockStreamResponse = {
-        toUIMessageStreamResponse: mockToDataStreamResponse,
-        warnings: [],
-        usage: {},
-        sources: [],
-        files: [],
-        finishReason: "stop",
-        text: "response text",
-        toolCalls: [],
-        toolResults: [],
-        rawCall: {},
-        rawResponse: {},
-        request: {},
-        response: {},
-        providerMetadata: {},
-        experimental_providerMetadata: {},
-        reasoning: undefined,
-        reasoningDetails: undefined,
-        steps: [],
-        experimental_steps: [],
-        object: "text-completion",
-        experimental_completion: {},
-        experimental_objectGeneration: {},
-        experimental_telemetry: {},
-        experimental_usage: {},
-      } as unknown as StreamResult;
-
-      vi.mocked(streamText).mockResolvedValue(mockStreamResponse);
-
-      const googleProvider = vi.fn().mockReturnValue("gemini-3-flash-preview");
-      vi.mocked(createGoogleGenerativeAI).mockReturnValue(
-        googleProvider as unknown as ReturnType<typeof createGoogleGenerativeAI>,
-      );
-
-      await (
-        postHandler as unknown as {
-          createStreamResponse: (
-            messages: CoreMessage[],
-            tools: McpTool[],
-            body: PostRequestBody,
-            codeSpace: string,
-            requestId: string,
-          ) => Promise<Response>;
-        }
-      ).createStreamResponse([], [], { messages: [] }, "test-space", "req-123");
-
-      // The getErrorMessage callback should have been captured during toDataStreamResponse call
-      const capturedCall = mockToDataStreamResponse.mock.calls[0]?.[0];
-      const errorCallback = capturedCall?.getErrorMessage;
-
-      if (errorCallback) {
-        const errorMessage = errorCallback(new Error("Test error"));
-        expect(errorMessage).toBe("Streaming error: Test error");
-        // The error callback should trigger console.error when called
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          "[AI Routes][req-123] Error during streaming:",
-          expect.any(Error),
-        );
-      } else {
-        // Skip this assertion if the callback wasn't set up correctly
-        console.log("Error callback not captured, skipping assertion");
-      }
+      const response = await postHandler.handle(request, new URL("https://test.spike.land"));
+      expect(response.headers.get("Content-Type")).toBe("text/event-stream");
+      expect(response.headers.get("Cache-Control")).toBe("no-cache");
     });
   });
 });

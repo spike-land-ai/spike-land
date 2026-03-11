@@ -278,10 +278,6 @@ export class AppealEngine {
     return results;
   }
 
-  private detectGrounds(decision: string): string[] {
-    return this.detectGroundsWithMeta(decision).map((g) => g.ground);
-  }
-
   private scoreSuccess(totalGrounds: number, strongGrounds: number): SuccessLikelihood {
     if (strongGrounds >= 2 || totalGrounds >= 4) return "high";
     if (strongGrounds >= 1 || totalGrounds >= 2) return "medium";
@@ -346,7 +342,7 @@ export class AppealEngine {
   }
 
   private findBestTemplate(
-    analysis: RejectionAnalysis,
+    _analysis: RejectionAnalysis,
     type: AppealType,
   ): AppealTemplate | undefined {
     // Try to find a template that matches any ground keyword

@@ -7,7 +7,11 @@ import type { APIResponse } from "../../types.js";
 // ---------------------------------------------------------------------------
 
 export interface SessionEngine {
-  create(opts: { locale: string; jurisdiction?: string; userId: string }): Promise<Session>;
+  create(opts: {
+    locale: string;
+    jurisdiction?: string | undefined;
+    userId: string;
+  }): Promise<Session>;
   get(id: string): Promise<Session | null>;
   end(id: string): Promise<Session | null>;
 }

@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { LanguageServiceDefaults } from "./register";
+import type { LanguageServiceDefaults } from "./register";
 import type { TypeScriptWorker } from "./tsWorker";
-import { editor, Uri, IDisposable } from "../../../editor";
+import { editor, Uri, type IDisposable } from "../../../editor";
 import { createWebWorker } from "../../../internal/common/workers";
 
 export class WorkerManager {

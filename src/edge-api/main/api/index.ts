@@ -169,6 +169,13 @@ app.use("/api/cockpit/*", authMiddleware);
 // Auth middleware for cache purge (destructive — requires auth)
 app.use("/api/cache/*", authMiddleware);
 
+// Auth middleware for analytics GET endpoints (founder-only read access)
+app.get("/analytics/events", authMiddleware);
+app.get("/analytics/summary", authMiddleware);
+app.get("/analytics/funnel", authMiddleware);
+app.get("/analytics/dashboard", authMiddleware);
+app.get("/analytics/mcp/*", authMiddleware);
+
 // Auth middleware for error log listing (BUG 3: protect stack traces)
 app.get("/errors", authMiddleware);
 app.get("/errors/summary", authMiddleware);

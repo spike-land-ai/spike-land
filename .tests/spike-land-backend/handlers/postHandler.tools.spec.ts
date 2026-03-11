@@ -1,15 +1,14 @@
-import { type AnthropicProvider, createAnthropic } from "@ai-sdk/anthropic";
-import { jsonSchema, streamText, type StreamTextResult, tool } from "ai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Code } from "../../../src/edge-api/backend/lazy-imports/chatRoom";
 import type Env from "../../../src/edge-api/backend/core-logic/env";
 import type { McpTool } from "../../../src/edge-api/backend/core-logic/mcp";
 import { StorageService } from "../../../src/edge-api/backend/core-logic/services/storageService";
-import { PostHandler } from "../../../src/edge-api/backend/core-logic/handlers/postHandler";
+import { PostHandler } from "../../../src/edge-api/backend/ai/postHandler";
+import { streamGemini } from "../../../src/edge-api/backend/ai/gemini-stream";
+import type { ToolDef } from "../../../src/edge-api/backend/ai/gemini-stream";
 
 // Mock dependencies
-vi.mock("@ai-sdk/anthropic");
-vi.mock("ai");
+vi.mock("../../../src/edge-api/backend/ai/gemini-stream");
 vi.mock("../../../src/edge-api/backend/core-logic/services/storageService");
 
 describe("PostHandler - Tool Schema Validation", () => {
@@ -17,53 +16,33 @@ describe("PostHandler - Tool Schema Validation", () => {
   let mockCode: Code;
   let mockEnv: Env;
 
-  let mockStreamResponse: StreamTextResult<Record<string, unknown>, unknown>;
-  let mockToDataStreamResponse: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
-    // Reset mocks
     vi.clearAllMocks();
 
-    // Mock AI SDK helpers to pass through their config
-    vi.mocked(tool).mockImplementation(
-      <TParameters, TResult>(config: {
-        description?: string;
-        parameters: TParameters;
-        execute?: (args: unknown) => Promise<TResult> | TResult;
-      }) => config,
+    vi.stubGlobal("crypto", {
+      ...globalThis.crypto,
+      randomUUID: vi.fn(() => "test-uuid-tools"),
+    });
+
+    // Mock streamGemini
+    vi.mocked(streamGemini).mockReturnValue(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode("data: [DONE]\n\n"));
+          controller.close();
+        },
+      }),
     );
-    vi.mocked(jsonSchema).mockImplementation(<T>(schema: T) => schema);
 
-    // Setup mock stream response
-    mockToDataStreamResponse = vi.fn().mockReturnValue(new Response("stream"));
-    mockStreamResponse = {
-      toDataStreamResponse: mockToDataStreamResponse,
-      warnings: [],
-      usage: {},
-      experimental_providerMetadata: undefined,
-    } as unknown as StreamTextResult<Record<string, unknown>, unknown>;
+    mockEnv = { CLAUDE_CODE_OAUTH_TOKEN: "test-key", GEMINI_API_KEY: "test-gemini-key" } as Env;
 
-    // Default mock for streamText
-    vi.mocked(streamText).mockResolvedValue(mockStreamResponse);
-
-    // Setup mock environment
-    mockEnv = {
-      CLAUDE_CODE_OAUTH_TOKEN: "test-key",
-    } as Env;
-
-    // Setup mock MCP tools with correct schema
     const mockTools: McpTool[] = [
       {
         name: "read_code",
         description: "Read current code",
         inputSchema: {
           type: "object",
-          properties: {
-            codeSpace: {
-              type: "string",
-              description: "The codeSpace identifier",
-            },
-          },
+          properties: { codeSpace: { type: "string", description: "The codeSpace identifier" } },
           required: ["codeSpace"],
         },
       },
@@ -72,31 +51,18 @@ describe("PostHandler - Tool Schema Validation", () => {
         description: "Update code",
         inputSchema: {
           type: "object",
-          properties: {
-            codeSpace: {
-              type: "string",
-            },
-            code: {
-              type: "string",
-            },
-          },
+          properties: { codeSpace: { type: "string" }, code: { type: "string" } },
           required: ["codeSpace", "code"],
         },
       },
     ];
 
-    // Setup mock code object
     mockCode = {
       getSession: vi.fn().mockReturnValue({ codeSpace: "test-space" }),
-      getOrigin: vi.fn().mockReturnValue("https://test.spike.land"),
       getEnv: vi.fn().mockReturnValue(mockEnv),
-      getMcpServer: vi.fn().mockReturnValue({
-        tools: mockTools,
-        executeTool: vi.fn(),
-      }),
+      getMcpServer: vi.fn().mockReturnValue({ tools: mockTools, executeTool: vi.fn() }),
     } as unknown as Code;
 
-    // Mock StorageService - use function expression for Vitest 4 constructor mocking
     const mockStorageService = {
       saveRequestBody: vi.fn().mockResolvedValue(undefined),
       loadRequestBody: vi.fn(),
@@ -122,262 +88,73 @@ describe("PostHandler - Tool Schema Validation", () => {
       });
     });
 
-    it("should convert tools to correct format for AI SDK", async () => {
-      let capturedTools: Record<string, unknown> | undefined;
-
-      // Mock streamText to capture the tools being passed
-      vi.mocked(streamText).mockImplementation((options: Parameters<typeof streamText>[0]) => {
-        capturedTools = options.tools;
-        return Promise.resolve(mockStreamResponse);
-      });
-
-      // Mock createAnthropic to return a provider
-      const mockProvider = vi.fn(() => ({
-        id: "claude-4-sonnet-20250514",
-      })) as unknown as AnthropicProvider;
-      vi.mocked(createAnthropic).mockReturnValue(mockProvider);
-
+    it("should convert tools to ToolDef format", async () => {
       const request = new Request("https://test.spike.land/api/post", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: "test" }],
-        }),
+        body: JSON.stringify({ messages: [{ role: "user", content: "test" }] }),
       });
 
       await postHandler.handle(request, new URL("https://test.spike.land"));
 
-      // Verify streamText was called
-      expect(streamText).toHaveBeenCalled();
+      expect(streamGemini).toHaveBeenCalled();
 
-      // Verify tools were passed in the correct format
-      expect(capturedTools).toBeDefined();
-      expect(typeof capturedTools).toBe("object");
+      const callArgs = vi.mocked(streamGemini).mock.calls[0]![0];
+      const tools = callArgs.tools!;
 
-      // Each tool should have description, parameters (Zod schema), and execute function
-      Object.entries(capturedTools!).forEach(([_toolName, tool]: [string, unknown]) => {
-        expect(tool).toHaveProperty("description");
-        expect(tool).toHaveProperty("inputSchema");
+      expect(typeof tools).toBe("object");
+
+      Object.entries(tools).forEach(([_toolName, tool]: [string, ToolDef]) => {
+        expect(tool).toHaveProperty("parameters");
         expect(tool).toHaveProperty("execute");
-        expect(typeof (tool as { execute: unknown }).execute).toBe("function");
-      });
-    });
-
-    it("should validate that Zod schemas are created from inputSchema", async () => {
-      const JsonSchemaToZodConverter = await import(
-        "../../../src/edge-api/backend/core-logic/utils/jsonSchemaToZod"
-      ).then((m) => m.JsonSchemaToZodConverter);
-      const converter = new JsonSchemaToZodConverter();
-
-      const mcpServer = mockCode.getMcpServer();
-      const tools = mcpServer.tools;
-
-      tools.forEach((tool) => {
-        const zodSchema = converter.convert(tool.inputSchema);
-
-        // Verify the Zod schema is created correctly
-        expect(zodSchema).toBeDefined();
-        expect(zodSchema._def).toBeDefined(); // Zod internal structure
-
-        // Test parsing with valid data
-        const validData =
-          tool.name === "read_code"
-            ? { codeSpace: "test" }
-            : { codeSpace: "test", code: "console.log('hello')" };
-
-        expect(() => zodSchema.parse(validData)).not.toThrow();
-
-        // Test parsing with invalid data (missing required fields)
-        expect(() => zodSchema.parse({})).toThrow();
-      });
-    });
-
-    it("should reject tools with invalid inputSchema.type", () => {
-      const invalidTools = [
-        {
-          name: "invalid_tool_1",
-          description: "Tool with string type",
-          inputSchema: {
-            type: "string", // Invalid - should be "object"
-          },
-        },
-        {
-          name: "invalid_tool_2",
-          description: "Tool with array type",
-          inputSchema: {
-            type: "array", // Invalid - should be "object"
-          },
-        },
-      ];
-
-      invalidTools.forEach((tool) => {
-        expect(tool.inputSchema.type).not.toBe("object");
-        // This is the validation that should prevent the error
-        expect(() => {
-          if (tool.inputSchema.type !== "object") {
-            throw new Error(
-              `Tool ${tool.name} has invalid inputSchema.type: ${tool.inputSchema.type}. Must be 'object'`,
-            );
-          }
-        }).toThrow();
+        expect(typeof tool.execute).toBe("function");
       });
     });
 
     it("should handle DISABLE_AI_TOOLS environment variable", async () => {
-      // Set the environment variable
       mockEnv.DISABLE_AI_TOOLS = "true";
-
-      let capturedOptions: Parameters<typeof streamText>[0] | undefined;
-      vi.mocked(streamText).mockImplementation((options: Parameters<typeof streamText>[0]) => {
-        capturedOptions = options;
-        return Promise.resolve(mockStreamResponse);
-      });
-
-      const mockProvider = vi.fn(() => ({
-        id: "claude-4-sonnet-20250514",
-      })) as unknown as AnthropicProvider;
-      vi.mocked(createAnthropic).mockReturnValue(mockProvider);
 
       const request = new Request("https://test.spike.land/api/post", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: "test" }],
-        }),
+        body: JSON.stringify({ messages: [{ role: "user", content: "test" }] }),
       });
 
       await postHandler.handle(request, new URL("https://test.spike.land"));
 
-      // Verify tools are disabled
-      expect(capturedOptions.tools).toBeUndefined();
-      expect(capturedOptions.toolChoice).toBeUndefined();
-      expect(capturedOptions.maxSteps).toBeUndefined();
+      const callArgs = vi.mocked(streamGemini).mock.calls[0]![0];
+      expect(callArgs.tools).toBeUndefined();
     });
   });
 
-  describe("Tool Format Sent to API", () => {
-    it("should not wrap tools in 'custom' property", async () => {
-      let capturedTools: Record<string, unknown> | undefined;
-
-      vi.mocked(streamText).mockImplementation((options: Parameters<typeof streamText>[0]) => {
-        capturedTools = options.tools;
-        return Promise.resolve(mockStreamResponse);
-      });
-
-      const mockProvider = vi.fn(() => ({
-        id: "claude-4-sonnet-20250514",
-      })) as unknown as AnthropicProvider;
-      vi.mocked(createAnthropic).mockReturnValue(mockProvider);
-
-      const request = new Request("https://test.spike.land/api/post", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: "test" }],
-        }),
-      });
-
-      await postHandler.handle(request, new URL("https://test.spike.land"));
-
-      // Ensure tools don't have a 'custom' wrapper
-      if (capturedTools) {
-        Object.entries(capturedTools).forEach(([_, tool]: [string, unknown]) => {
-          if (tool && typeof tool === "object") {
-            expect(tool).not.toHaveProperty("custom");
-          }
-        });
-      }
-    });
-
+  describe("Tool Execute Functions", () => {
     it("should create valid tool execute functions", async () => {
-      let capturedTools: Record<string, unknown> | undefined;
-
-      vi.mocked(streamText).mockImplementation((options: Parameters<typeof streamText>[0]) => {
-        capturedTools = options.tools;
-        return Promise.resolve(mockStreamResponse);
-      });
-
-      const mockProvider = vi.fn(() => ({
-        id: "claude-4-sonnet-20250514",
-      })) as unknown as AnthropicProvider;
-      vi.mocked(createAnthropic).mockReturnValue(mockProvider);
-
-      // Mock executeTool to return a response
       const mockExecuteTool = vi.fn().mockResolvedValue({ success: true });
-      (
-        mockCode.getMcpServer() as unknown as {
-          executeTool: typeof mockExecuteTool;
-        }
-      ).executeTool = mockExecuteTool;
+      (mockCode.getMcpServer() as unknown as { executeTool: typeof mockExecuteTool }).executeTool =
+        mockExecuteTool;
 
       const request = new Request("https://test.spike.land/api/post", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: "test" }],
-        }),
+        body: JSON.stringify({ messages: [{ role: "user", content: "test" }] }),
       });
 
       await postHandler.handle(request, new URL("https://test.spike.land"));
 
-      // Test execute function for read_code tool
-      if (capturedTools! && capturedTools!.read_code) {
-        const result = await capturedTools.read_code.execute({
-          codeSpace: "test",
-        });
-        // The execute function merges the codeSpace from session ("test-space") with the args
-        expect(mockExecuteTool).toHaveBeenCalledWith("read_code", {
-          codeSpace: "test-space",
-        });
+      const callArgs = vi.mocked(streamGemini).mock.calls[0]![0];
+      const tools = callArgs.tools!;
+
+      if (tools.read_code) {
+        const result = await tools.read_code.execute({ codeSpace: "test" });
+        expect(mockExecuteTool).toHaveBeenCalledWith("read_code", { codeSpace: "test-space" });
         expect(result).toEqual({ success: true });
       }
     });
-  });
 
-  describe("Schema Validation Before API Call", () => {
-    it("should validate tool schemas before sending to streamText", async () => {
-      vi.mocked(streamText).mockResolvedValue(mockStreamResponse);
-
-      const mockProvider = vi.fn(() => ({
-        id: "claude-4-sonnet-20250514",
-      })) as unknown as AnthropicProvider;
-      vi.mocked(createAnthropic).mockReturnValue(mockProvider);
-
-      const request = new Request("https://test.spike.land/api/post", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: "test" }],
-        }),
-      });
-
-      // Should handle tools and pass valid schemas to streamText
-      await postHandler.handle(request, new URL("https://test.spike.land"));
-
-      expect(streamText).toHaveBeenCalled();
-    });
-
-    it("tool execute function catches and rethrows executeTool errors (lines 553-554)", async () => {
-      let capturedTools:
-        | Record<string, { execute: (args: Record<string, unknown>) => Promise<unknown> }>
-        | undefined;
-
-      vi.mocked(streamText).mockImplementation((options: Parameters<typeof streamText>[0]) => {
-        capturedTools = options.tools as typeof capturedTools;
-        return Promise.resolve(mockStreamResponse);
-      });
-
-      const mockProvider = vi.fn(() => ({
-        id: "claude-4-sonnet-20250514",
-      })) as unknown as AnthropicProvider;
-      vi.mocked(createAnthropic).mockReturnValue(mockProvider);
-
-      // Make executeTool throw
+    it("tool execute function catches and rethrows executeTool errors", async () => {
       const throwingExecuteTool = vi.fn().mockRejectedValue(new Error("tool crashed"));
       (
-        mockCode.getMcpServer() as unknown as {
-          executeTool: typeof throwingExecuteTool;
-        }
+        mockCode.getMcpServer() as unknown as { executeTool: typeof throwingExecuteTool }
       ).executeTool = throwingExecuteTool;
 
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -385,25 +162,21 @@ describe("PostHandler - Tool Schema Validation", () => {
       const request = new Request("https://test.spike.land/api/post", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: "test" }],
-        }),
+        body: JSON.stringify({ messages: [{ role: "user", content: "test" }] }),
       });
 
       await postHandler.handle(request, new URL("https://test.spike.land"));
 
-      // Call a captured tool's execute to trigger the error path
-      if (capturedTools) {
-        const toolEntry = Object.values(capturedTools)[0];
-        if (toolEntry?.execute) {
-          await expect(toolEntry.execute({ codeSpace: "test" })).rejects.toThrow(
-            "Failed to execute",
-          );
-          expect(consoleSpy).toHaveBeenCalledWith(
-            expect.stringContaining("Error executing tool"),
-            expect.any(Error),
-          );
-        }
+      const callArgs = vi.mocked(streamGemini).mock.calls[0]![0];
+      const tools = callArgs.tools!;
+
+      const toolEntry = Object.values(tools)[0];
+      if (toolEntry?.execute) {
+        await expect(toolEntry.execute({ codeSpace: "test" })).rejects.toThrow("Failed to execute");
+        expect(consoleSpy).toHaveBeenCalledWith(
+          expect.stringContaining("Error executing tool"),
+          expect.any(Error),
+        );
       }
 
       consoleSpy.mockRestore();
@@ -412,7 +185,6 @@ describe("PostHandler - Tool Schema Validation", () => {
     it("should skip tools without inputSchema", async () => {
       const consoleWarnSpy = vi.spyOn(console, "warn");
 
-      // Add a tool without inputSchema
       const tools = mockCode.getMcpServer().tools;
       tools.push({
         name: "invalid_tool",
@@ -420,24 +192,14 @@ describe("PostHandler - Tool Schema Validation", () => {
         inputSchema: undefined as unknown as McpTool["inputSchema"],
       });
 
-      vi.mocked(streamText).mockResolvedValue(mockStreamResponse);
-
-      const mockProvider = vi.fn(() => ({
-        id: "claude-4-sonnet-20250514",
-      })) as unknown as AnthropicProvider;
-      vi.mocked(createAnthropic).mockReturnValue(mockProvider);
-
       const request = new Request("https://test.spike.land/api/post", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: "test" }],
-        }),
+        body: JSON.stringify({ messages: [{ role: "user", content: "test" }] }),
       });
 
       await postHandler.handle(request, new URL("https://test.spike.land"));
 
-      // Verify warning was logged - check all warn calls
       const warnCalls = consoleWarnSpy.mock.calls;
       const hasExpectedWarning = warnCalls.some((call) =>
         call.some(

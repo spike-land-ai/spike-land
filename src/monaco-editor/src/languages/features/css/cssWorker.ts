@@ -5,7 +5,7 @@
 
 import type { worker } from "../../../editor";
 import * as cssService from "vscode-css-languageservice";
-import { Options } from "./register";
+import type { Options } from "./register";
 
 export class CSSWorker {
   // --- model sync -----------------------
@@ -29,10 +29,10 @@ export class CSSWorker {
         customDataProviders.push(cssService.newCSSDataProvider(data.dataProviders![id]!));
       }
     }
-    const lsOptions: cssService.LanguageServiceOptions = { // @ts-ignore
-      customDataProviders,
-      useDefaultDataProvider,
-    };
+    const lsOptions: cssService.LanguageServiceOptions = { customDataProviders };
+    if (useDefaultDataProvider !== undefined) {
+      lsOptions.useDefaultDataProvider = useDefaultDataProvider;
+    }
 
     switch (this._languageId) {
       case "css":

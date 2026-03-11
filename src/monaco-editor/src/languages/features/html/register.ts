@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as mode from "./htmlMode";
-import { languages, Emitter, IEvent, IDisposable } from "../../../editor";
+import { languages, Emitter, type IEvent, type IDisposable } from "../../../editor";
 
 export interface HTMLFormatConfiguration {
   readonly tabSize: number;

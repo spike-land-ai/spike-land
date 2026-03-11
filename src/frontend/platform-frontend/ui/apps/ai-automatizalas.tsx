@@ -90,7 +90,7 @@ function StatCard({
   );
 }
 
-const WHATSAPP_URL = "https://wa.me/36709537783";
+const WHATSAPP_URL = "https://wa.me/447514727998";
 
 export function AiAutomatizalasApp() {
   const [heroRevealed, setHeroRevealed] = useState(false);

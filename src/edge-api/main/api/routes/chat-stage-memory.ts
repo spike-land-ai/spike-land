@@ -347,7 +347,7 @@ function fitSectionsToBudget(sections: string[], maxTokens: number) {
   let usedTokens = 0;
 
   for (let index = sections.length - 1; index >= 0; index -= 1) {
-    const section = sections[index];
+    const section = sections[index] ?? "";
     const nextTokens = estimateTokens(section);
     if (selected.length > 0 && usedTokens + nextTokens > maxTokens) {
       break;

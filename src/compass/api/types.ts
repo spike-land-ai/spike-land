@@ -64,9 +64,9 @@ export interface MessageRequest {
  */
 export interface SearchRequest {
   query: string;
-  jurisdiction?: string;
-  domain?: string;
-  page?: number;
+  jurisdiction?: string | undefined;
+  domain?: string | undefined;
+  page?: number | undefined;
 }
 
 // ---------------------------------------------------------------------------

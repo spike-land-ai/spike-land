@@ -5,9 +5,9 @@
 
 import { WorkerManager } from "./workerManager";
 import type { CSSWorker } from "./cssWorker";
-import { LanguageServiceDefaults } from "./register";
+import type { LanguageServiceDefaults } from "./register";
 import * as languageFeatures from "../common/lspLanguageFeatures";
-import { Uri, IDisposable, languages } from "../../../editor";
+import { Uri, type IDisposable, languages } from "../../../editor";
 
 export function setupMode(defaults: LanguageServiceDefaults): IDisposable {
   const disposables: IDisposable[] = [];

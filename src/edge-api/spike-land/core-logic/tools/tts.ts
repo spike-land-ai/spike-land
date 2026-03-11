@@ -13,13 +13,16 @@ import { McpError, McpErrorCode, safeToolCall } from "../lib/tool-helpers";
 import type { DrizzleDB } from "../../db/db/db-index.ts";
 import type { Env } from "../env";
 
+/** Minimal env fields required by TTS tools. */
+type TtsEnv = Pick<Env, "ELEVENLABS_API_KEY">;
+
 const DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // Rachel
 
 export function registerTtsTools(
   registry: ToolRegistry,
   userId: string,
   db: DrizzleDB,
-  env: Env,
+  env: TtsEnv,
 ): void {
   registry.registerBuilt(
     freeTool(userId, db)

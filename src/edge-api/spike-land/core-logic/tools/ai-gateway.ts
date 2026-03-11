@@ -13,6 +13,9 @@ import { McpError, McpErrorCode, safeToolCall } from "../lib/tool-helpers";
 import type { DrizzleDB } from "../../db/db/db-index.ts";
 import type { Env } from "../env";
 
+/** Minimal env fields required by AI gateway tools. */
+type AiGatewayEnv = Pick<Env, "ANTHROPIC_API_KEY" | "OPENAI_API_KEY" | "GEMINI_API_KEY">;
+
 // ─── Inline Model Registry ──────────────────────────────────────────────────
 
 interface ModelInfo {
@@ -115,7 +118,7 @@ interface AnthropicResponse {
 }
 
 async function callAnthropic(
-  env: Env,
+  env: Pick<Env, "ANTHROPIC_API_KEY">,
   message: string,
   modelId: string,
   maxTokens: number,
@@ -175,7 +178,7 @@ interface OpenAIResponse {
 }
 
 async function callOpenAI(
-  env: Env,
+  env: Pick<Env, "OPENAI_API_KEY">,
   message: string,
   modelId: string,
   maxTokens: number,
@@ -240,7 +243,7 @@ interface GeminiResponse {
 }
 
 async function callGemini(
-  env: Env,
+  env: Pick<Env, "GEMINI_API_KEY">,
   message: string,
   modelId: string,
   maxTokens: number,
@@ -303,7 +306,7 @@ export function registerAiGatewayTools(
   registry: ToolRegistry,
   userId: string,
   db: DrizzleDB,
-  env: Env,
+  env: AiGatewayEnv,
 ): void {
   // Tool 1: ai_list_providers
   registry.registerBuilt(

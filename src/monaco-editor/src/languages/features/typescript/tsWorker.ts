@@ -6,13 +6,13 @@
 import * as ts from "./lib/typescriptServices";
 import { libFileMap } from "./lib/lib";
 import {
-  Diagnostic,
-  DiagnosticRelatedInformation,
-  EmitOutput,
-  IExtraLibs,
-  TypeScriptWorker as ITypeScriptWorker,
+  type Diagnostic,
+  type DiagnosticRelatedInformation,
+  type EmitOutput,
+  type IExtraLibs,
+  type TypeScriptWorker as ITypeScriptWorker,
 } from "./register";
-import { Uri, worker } from "../../../editor";
+import { Uri, type worker } from "../../../editor";
 
 /**
  * Loading a default lib as a source file will mess up TS completely.
@@ -71,7 +71,7 @@ export class TypeScriptWorker implements ts.LanguageServiceHost, ITypeScriptWork
   private _getModel(fileName: string): worker.IMirrorModel | null {
     let models = this._ctx.getMirrorModels();
     for (let i = 0; i < models.length; i++) {
-      const uri = models[i]?.uri;
+      const uri = models[i]!.uri;
       if (uri.toString() === fileName || uri.toString(true) === fileName) {
         return models[i] || null;
       }
@@ -109,7 +109,7 @@ export class TypeScriptWorker implements ts.LanguageServiceHost, ITypeScriptWork
       text = libFileMap[libizedFileName]!;
     } else if (fileName in this._extraLibs) {
       // extra lib
-      text = this._extraLibs[fileName]?.content;
+      text = this._extraLibs[fileName]!.content;
     } else {
       return;
     }

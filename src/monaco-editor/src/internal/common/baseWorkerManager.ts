@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { editor, IDisposable, Uri } from "../../editor";
+import { editor, type IDisposable, Uri } from "../../editor";
 import { createWebWorker } from "./workers";
 
 const STOP_WHEN_IDLE_FOR = 2 * 60 * 1000; // 2min
 
-export interface WorkerManagerConfig<TWorker extends object, TDefaults> {
+export interface WorkerManagerConfig<TDefaults> {
   moduleId: string;
   createWorker: () => Worker;
   buildCreateData: (defaults: TDefaults) => Record<string, unknown>;
@@ -22,7 +22,7 @@ export interface LanguageServiceDefaultsMinimal {
 
 export class BaseWorkerManager<TWorker extends object, TDefaults extends LanguageServiceDefaultsMinimal = LanguageServiceDefaultsMinimal> {
   private _defaults: TDefaults;
-  private _config: WorkerManagerConfig<TWorker, TDefaults>;
+  private _config: WorkerManagerConfig<TDefaults>;
   private _idleCheckInterval: number;
   private _lastUsedTime: number;
   private _configChangeListener: IDisposable;
@@ -30,7 +30,7 @@ export class BaseWorkerManager<TWorker extends object, TDefaults extends Languag
   private _worker: editor.MonacoWebWorker<TWorker> | null;
   private _client: Promise<TWorker> | null;
 
-  constructor(defaults: TDefaults, config: WorkerManagerConfig<TWorker, TDefaults>) {
+  constructor(defaults: TDefaults, config: WorkerManagerConfig<TDefaults>) {
     this._defaults = defaults;
     this._config = config;
     this._worker = null;
@@ -92,6 +92,7 @@ export class BaseWorkerManager<TWorker extends object, TDefaults extends Languag
         if (this._worker) {
           return this._worker.withSyncedResources(resources);
         }
+        return undefined;
       })
       .then((_) => _client);
   }

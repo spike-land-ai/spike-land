@@ -1082,11 +1082,11 @@ chat.post("/api/chat", async (c) => {
             : null;
 
         if (usage) {
+          const prevCompletionTokens: number = aggregateUsage?.completionTokens ?? 0;
           aggregateUsage = {
             promptTokens: usage.promptTokens,
-            completionTokens: (aggregateUsage?.completionTokens ?? 0) + usage.completionTokens,
-            totalTokens:
-              usage.promptTokens + (aggregateUsage?.completionTokens ?? 0) + usage.completionTokens,
+            completionTokens: prevCompletionTokens + usage.completionTokens,
+            totalTokens: usage.promptTokens + prevCompletionTokens + usage.completionTokens,
           };
         }
 

@@ -27,9 +27,9 @@ export interface ExtractedLink {
 export interface LinkValidationResult {
   link: ExtractedLink;
   status: LinkStatus;
-  httpStatus?: number;
+  httpStatus?: number | undefined;
   reason: string;
-  suggestion?: string;
+  suggestion?: string | undefined;
   durationMs: number;
 }
 
@@ -61,25 +61,25 @@ export interface ScanReport {
 
 export interface CheckerOptions {
   rootDir: string;
-  filePattern?: string;
-  files?: string[];
-  checkExternal?: boolean;
-  checkGithub?: boolean;
-  skipCodeBlocks?: boolean;
-  skipComments?: boolean;
-  githubToken?: string;
-  concurrency?: number;
-  timeout?: number;
-  verbose?: boolean;
-  excludePatterns?: string[];
+  filePattern?: string | undefined;
+  files?: string[] | undefined;
+  checkExternal?: boolean | undefined;
+  checkGithub?: boolean | undefined;
+  skipCodeBlocks?: boolean | undefined;
+  skipComments?: boolean | undefined;
+  githubToken?: string | undefined;
+  concurrency?: number | undefined;
+  timeout?: number | undefined;
+  verbose?: boolean | undefined;
+  excludePatterns?: string[] | undefined;
 }
 
 export interface ParsedGitHubUrl {
   org: string;
   repo: string;
   type: "repo" | "file" | "tree" | "raw" | "actions" | "badge";
-  branch?: string;
-  path?: string;
-  workflow?: string;
+  branch?: string | undefined;
+  path?: string | undefined;
+  workflow?: string | undefined;
   url: string;
 }

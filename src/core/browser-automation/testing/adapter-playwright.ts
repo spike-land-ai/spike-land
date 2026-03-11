@@ -138,6 +138,7 @@ class PlaywrightPageWrapper implements BrowserPage {
         `Failed to get accessibility tree via CDP: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
+    return null;
   }
 
   /** Access underlying Playwright page for event listeners */

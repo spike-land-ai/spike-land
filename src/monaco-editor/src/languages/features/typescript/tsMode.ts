@@ -5,9 +5,9 @@
 
 import { WorkerManager } from "./workerManager";
 import type { TypeScriptWorker } from "./tsWorker";
-import { LanguageServiceDefaults } from "./register";
+import type { LanguageServiceDefaults } from "./register";
 import * as languageFeatures from "./languageFeatures";
-import { languages, IDisposable, Uri } from "../../../editor";
+import { languages, type IDisposable, Uri } from "../../../editor";
 
 let javaScriptWorker: (...uris: Uri[]) => Promise<TypeScriptWorker>;
 let typeScriptWorker: (...uris: Uri[]) => Promise<TypeScriptWorker>;

@@ -1,6 +1,5 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { jsonSchema as aiJsonSchema, streamText, tool } from "ai";
-import type { ModelMessage, StepResult, Tool, ToolSet } from "ai";
+import type { ChatMessage, ToolDef } from "./gemini-stream";
+import { streamGemini } from "./gemini-stream";
 import type { Code } from "../lazy-imports/chatRoom";
 import type Env from "../core-logic/env";
 import { hashClientId, sendGA4Events } from "../core-logic/lib/ga4";
@@ -14,10 +13,7 @@ import { StorageService } from "../core-logic/services/storageService";
 import type { ErrorResponse, PostRequestBody } from "../lazy-imports/types";
 import { DEFAULT_CORS_HEADERS } from "../core-logic/utils";
 
-/**
- * Type for the processed tools record
- */
-type ProcessedToolsRecord = Record<string, Tool<Record<string, unknown>, unknown>>;
+type ProcessedToolsRecord = Record<string, ToolDef>;
 
 export class PostHandler {
   private storageService: StorageService;
@@ -124,76 +120,57 @@ export class PostHandler {
   }
 
   private async createStreamResponse(
-    messages: ModelMessage[],
+    messages: ChatMessage[],
     tools: McpTool[],
     body: PostRequestBody,
     codeSpace: string,
     requestId: string,
   ): Promise<Response> {
     const systemPrompt = createSystemPrompt(codeSpace);
-    const google = createGoogleGenerativeAI({
-      apiKey: this.env.GEMINI_API_KEY,
-    });
 
     // Create a copy of messages to avoid mutation
     const messagesCopy = JSON.parse(JSON.stringify(body.messages));
 
     try {
-      const processedTools = this.processTools(tools, codeSpace, requestId);
-
-      // Check if we should disable tools due to AI SDK compatibility issues
       const disableTools = this.env.DISABLE_AI_TOOLS === "true";
+      const processedTools = disableTools
+        ? undefined
+        : this.processTools(tools, codeSpace, requestId);
 
-      const result = await streamText({
-        model: google("gemini-3-flash-preview"),
-        system: systemPrompt,
+      const stream = streamGemini({
+        apiKey: this.env.GEMINI_API_KEY,
+        model: "gemini-3-flash-preview",
+        systemPrompt,
         messages,
-        ...(disableTools
-          ? {}
-          : {
-              tools: processedTools,
-              toolChoice: "auto" as const,
-              onStepFinish: async (stepResult: StepResult<ToolSet>) => {
-                if (stepResult.toolResults && stepResult.toolResults.length > 0) {
-                  try {
-                    const toolMessages = stepResult.toolResults.map((result) => ({
-                      ["role"]: "assistant" as const,
-                      ["content"]: JSON.stringify(result),
-                    }));
+        ...(processedTools !== undefined && { tools: processedTools }),
+        onToolResult: async (_toolName, result) => {
+          try {
+            messagesCopy.push({
+              role: "assistant" as const,
+              content: JSON.stringify(result),
+            });
 
-                    messagesCopy.push(...toolMessages);
-
-                    await this.storageService.saveRequestBody(codeSpace, {
-                      ...body,
-                      messages: messagesCopy,
-                    });
-                  } catch (error) {
-                    console.error(
-                      `[AI Routes][${requestId}] Error saving messages after tool call:`,
-                      error,
-                    );
-                  }
-                }
-              },
-            }),
+            await this.storageService.saveRequestBody(codeSpace, {
+              ...body,
+              messages: messagesCopy,
+            });
+          } catch (error) {
+            console.error(
+              `[AI Routes][${requestId}] Error saving messages after tool call:`,
+              error,
+            );
+          }
+        },
       });
 
-      // Use the appropriate streaming response method
-      if (typeof result?.toUIMessageStreamResponse === "function") {
-        return result.toUIMessageStreamResponse({
-          headers: this.getCorsHeaders(),
-        });
-      }
-
-      // Fallback to text stream for simpler responses
-      if (typeof result?.toTextStreamResponse === "function") {
-        return result.toTextStreamResponse({
-          headers: this.getCorsHeaders(),
-        });
-      }
-
-      console.error(`[AI Routes][${requestId}] No streaming methods available on result`);
-      throw new Error("Streaming methods not available on streamText result");
+      return new Response(stream, {
+        headers: {
+          ...this.getCorsHeaders(),
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      });
     } catch (streamErrorCaught) {
       console.error(`[AI Routes][${requestId}] Stream error details:`, {
         message: streamErrorCaught instanceof Error ? streamErrorCaught.message : "Unknown error",
@@ -203,11 +180,7 @@ export class PostHandler {
     }
   }
 
-  private processTools(
-    tools: McpTool[],
-    codeSpace: string,
-    requestId: string,
-  ): ProcessedToolsRecord {
+  processTools(tools: McpTool[], codeSpace: string, requestId: string): ProcessedToolsRecord {
     return tools.reduce<ProcessedToolsRecord>((acc, mcpTool) => {
       if (!mcpTool.inputSchema) {
         console.warn(
@@ -223,18 +196,16 @@ export class PostHandler {
         return acc;
       }
 
-      const schemaDefinition = aiJsonSchema<Record<string, unknown>>({
-        type: "object" as const,
-        properties: mcpTool.inputSchema.properties,
-        required: mcpTool.inputSchema.required,
-      });
-
       const mcpServerRef = this.code.getMcpServer();
       const toolName = mcpTool.name;
 
-      const aiTool = tool<Record<string, unknown>, unknown>({
+      acc[mcpTool.name] = {
         ...(mcpTool.description !== undefined && { description: mcpTool.description }),
-        inputSchema: schemaDefinition,
+        parameters: {
+          type: "object",
+          properties: mcpTool.inputSchema.properties as Record<string, unknown>,
+          required: mcpTool.inputSchema.required as string[],
+        },
         execute: async (args: Record<string, unknown>) => {
           try {
             const response = await mcpServerRef.executeTool(toolName, {
@@ -251,9 +222,8 @@ export class PostHandler {
             );
           }
         },
-      });
+      };
 
-      acc[mcpTool.name] = aiTool;
       return acc;
     }, {});
   }

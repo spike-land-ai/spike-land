@@ -90,22 +90,30 @@ function getWorker(descriptor: {
 export function createWebWorker<T extends object>(
   opts: IWebWorkerOptions,
 ): editor.MonacoWebWorker<T> {
+  const workerDescriptor: { label: string; moduleId: string; createWorker?: () => Worker } = {
+    label: opts.label ?? "monaco-editor-worker",
+    moduleId: opts.moduleId,
+  };
+  if (opts.createWorker !== undefined) {
+    workerDescriptor.createWorker = opts.createWorker;
+  }
   const worker = Promise.resolve(
-    getWorker({ // @ts-ignore
-      label: opts.label ?? "monaco-editor-worker",
-      moduleId: opts.moduleId,
-      createWorker: opts.createWorker,
-    }),
+    getWorker(workerDescriptor),
   ).then((w) => {
     w.postMessage("ignore");
     w.postMessage(opts.createData);
     return w;
   });
-  return editor.createWebWorker<T>({ // @ts-ignore
+  const webWorkerOpts: { worker: Promise<Worker>; keepIdleModels?: boolean; host?: Record<string, (...args: unknown[]) => unknown> } = {
     worker,
-    host: opts.host as Record<string, (...args: unknown[]) => unknown> | undefined,
-    keepIdleModels: opts.keepIdleModels,
-  });
+  };
+  if (opts.keepIdleModels !== undefined) {
+    webWorkerOpts.keepIdleModels = opts.keepIdleModels;
+  }
+  if (opts.host !== undefined) {
+    webWorkerOpts.host = opts.host as Record<string, (...args: unknown[]) => unknown>;
+  }
+  return editor.createWebWorker<T>(webWorkerOpts as Parameters<typeof editor.createWebWorker<T>>[0]);
 }
 
 export interface IWebWorkerOptions {

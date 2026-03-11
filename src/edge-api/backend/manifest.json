@@ -2,15 +2,14 @@
   "name": "backend",
   "category": "edge-api",
   "dependencies": [
-    "@ai-sdk/google",
     "@cloudflare/kv-asset-handler",
     "@cloudflare/workers-types",
     "@spike-land-ai/code",
     "@spike-land-ai/shared",
-    "ai",
     "replicate"
   ],
   "files": [
+    "ai/gemini-stream.ts",
     "ai/postHandler.ts",
     "ai/replicateHandler.ts",
     "core-logic/Logs.ts",

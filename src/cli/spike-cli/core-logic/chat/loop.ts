@@ -185,7 +185,9 @@ async function executeToolsParallel(
     if (s.status === "fulfilled") return s.value;
     // On rejection, log full error before serializing to preserve stack trace
     const error = s.reason;
-    log(`Tool "${toolUseBlocks[i]!.name}" rejected: ${error instanceof Error ? error.stack ?? error.message : String(error)}`);
+    log(
+      `Tool "${toolUseBlocks[i]!.name}" rejected: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`,
+    );
     return {
       type: "tool_result" as const,
       tool_use_id: toolUseBlocks[i]!.id,
@@ -224,7 +226,16 @@ async function streamResponse(
   const finalMessage = await stream.finalMessage();
 
   // Extract usage from final message (Anthropic.Message has usage typed directly)
-  const usage = finalMessage.usage ?? undefined;
+  // Map null fields to undefined to match TokenUsage (which uses optional, not nullable)
+  const rawUsage = finalMessage.usage;
+  const usage: TokenUsage | undefined = rawUsage
+    ? {
+        input_tokens: rawUsage.input_tokens,
+        output_tokens: rawUsage.output_tokens,
+        cache_creation_input_tokens: rawUsage.cache_creation_input_tokens ?? undefined,
+        cache_read_input_tokens: rawUsage.cache_read_input_tokens ?? undefined,
+      }
+    : undefined;
 
   return usage ? { content, usage } : { content };
 }

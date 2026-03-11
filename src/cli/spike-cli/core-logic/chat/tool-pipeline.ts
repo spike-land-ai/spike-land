@@ -160,7 +160,7 @@ export function timeoutMiddleware(defaultMs: number = 30000): ToolMiddleware {
  * Reuses calculateBackoff from reconnect.ts.
  */
 export function retryMiddleware(maxRetries: number = 2): ToolMiddleware {
-  return async (ctx, next) => {
+  return async (_ctx, next) => {
     let lastResult: ToolExecResult | undefined;
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {

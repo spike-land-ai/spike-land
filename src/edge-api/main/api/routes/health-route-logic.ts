@@ -16,9 +16,9 @@ export interface HealthFetchBinding {
 export interface HealthPayloadOptions {
   r2: HealthStatus;
   d1: HealthStatus;
-  authMcp?: HealthStatus;
-  mcpService?: HealthStatus;
-  timestamp?: string;
+  authMcp?: HealthStatus | undefined;
+  mcpService?: HealthStatus | undefined;
+  timestamp?: string | undefined;
 }
 
 export async function checkDependencyHealth(check: () => Promise<unknown>): Promise<HealthStatus> {
@@ -41,9 +41,12 @@ export async function checkFetchBindingHealth(
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 3_000);
 
   try {
-    const response = await binding.fetch(new Request(options.requestUrl ?? "https://internal/health"), {
-      signal: controller.signal,
-    });
+    const response = await binding.fetch(
+      new Request(options.requestUrl ?? "https://internal/health"),
+      {
+        signal: controller.signal,
+      },
+    );
     return response.ok ? "ok" : "degraded";
   } catch {
     return "degraded";

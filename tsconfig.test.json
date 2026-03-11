@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Vitest globals (describe, it, expect, vi, etc.) are imported explicitly
+    // in test files, so no need for globals injection here. Adding vitest
+    // to types ensures the augmented matchers (.toBeInTheDocument, etc.) are
+    // visible without the globals flag.
+    "types": ["vitest/globals"],
+    // Test files use .js extensions on relative imports (e.g. Scheduler.js)
+    // pointing at .ts sources. Allow that under bundler resolution.
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    // Separate tsbuildinfo so test typechecks don't invalidate the main cache.
+    "tsBuildInfoFile": ".tsbuildinfo.test",
+    "incremental": true
+  },
+  "include": [
+    // All source files (same as root tsconfig) so test imports resolve correctly.
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    // Test files co-located with source (excluded from main tsconfig).
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.ts",
+    "src/**/*.spec.tsx",
+    // Tests living under the dedicated .tests/ directory.
+    ".tests/**/*.ts",
+    ".tests/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "packages/*/dist",
+    "src/monaco-editor",
+    // Keep the same heavy exclusions from the root config for build speed.
+    "src/core/statecharts/node-sys/persistence.ts",
+    "src/frontend/platform-frontend/**",
+    "src/frontend/monaco-editor/**",
+    "src/media/educational-videos/**"
+  ]
+}

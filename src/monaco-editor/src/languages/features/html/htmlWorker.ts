@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { worker } from "../../../editor";
+import type { worker } from "../../../editor";
 import * as htmlService from "vscode-html-languageservice";
-import { IHTMLDataProvider } from "vscode-html-languageservice";
+import type { IHTMLDataProvider } from "vscode-html-languageservice";
 import type { Options } from "./register";
 
 export class HTMLWorker {
@@ -28,10 +28,11 @@ export class HTMLWorker {
         customDataProviders.push(htmlService.newHTMLDataProvider(id, data.dataProviders![id]!));
       }
     }
-    this._languageService = htmlService.getLanguageService({ // @ts-ignore
-      useDefaultDataProvider,
-      customDataProviders,
-    });
+    const htmlLsOptions: htmlService.LanguageServiceOptions = { customDataProviders };
+    if (useDefaultDataProvider !== undefined) {
+      htmlLsOptions.useDefaultDataProvider = useDefaultDataProvider;
+    }
+    this._languageService = htmlService.getLanguageService(htmlLsOptions);
   }
 
   async doComplete(

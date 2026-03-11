@@ -139,7 +139,7 @@ export async function pollChannels(
 
         // Update cursor to the last message ID (including bot messages)
         if (msgs.length > 0) {
-          cursors.set(channelId, msgs[msgs.length - 1]?.id);
+          cursors.set(channelId, msgs[msgs.length - 1]!.id);
         }
       } catch (err) {
         console.error(`[spike-chat-poller] Error polling ${channelId}:`, err);
@@ -154,16 +154,12 @@ export async function pollChannels(
  * Creates a spike-chat config from environment variables or CLI flags.
  */
 export function createSpikeChatConfig(overrides?: Partial<SpikeChatConfig>): SpikeChatConfig {
-  const chatUrl = overrides?.chatUrl
-    || process.env.SPIKE_CHAT_URL
-    || "https://chat.spike.land";
+  const chatUrl = overrides?.chatUrl || process.env.SPIKE_CHAT_URL || "https://chat.spike.land";
 
-  const apiKey = overrides?.apiKey
-    || process.env.AGENT_API_KEY
-    || "";
+  const apiKey = overrides?.apiKey || process.env.AGENT_API_KEY || "";
 
-  const pollInterval = overrides?.pollInterval
-    || parseInt(process.env.SPIKE_CHAT_POLL_INTERVAL || "5000", 10);
+  const pollInterval =
+    overrides?.pollInterval || parseInt(process.env.SPIKE_CHAT_POLL_INTERVAL || "5000", 10);
 
   if (!apiKey) {
     throw new Error(

@@ -11,8 +11,8 @@ export interface StructuredToolError {
   message: string;
   suggestions: string[];
   retryable: boolean;
-  hint?: string;
-  originalStack?: string;
+  hint?: string | undefined;
+  originalStack?: string | undefined;
 }
 
 /**
@@ -59,7 +59,7 @@ interface ErrorClassification {
   code: string;
   retryable: boolean;
   suggestions: string[];
-  hint?: string;
+  hint?: string | undefined;
 }
 
 function classifyError(message: string): ErrorClassification {

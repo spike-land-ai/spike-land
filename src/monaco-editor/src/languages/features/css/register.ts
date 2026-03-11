@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as mode from "./cssMode";
-import { languages, Emitter, IEvent } from "../../../editor";
+import { languages, Emitter, type IEvent } from "../../../editor";
 
 export interface CSSFormatConfiguration {
   /** separate selectors with newline (e.g. "a,\nbr" or "a, br"): Default: true */
@@ -195,12 +195,11 @@ const optionsDefault: Required<Options> = {
     idSelector: "ignore",
   },
   data: { useDefaultDataProvider: true },
-  format: { // @ts-ignore
+  format: {
     newlineBetweenSelectors: true,
     newlineBetweenRules: true,
     spaceAroundSelectorSeparator: false,
     braceStyle: "collapse",
-    maxPreserveNewLines: undefined,
     preserveNewLines: true,
   },
 };

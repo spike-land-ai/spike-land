@@ -50,7 +50,7 @@ export class PresenceDurableObject extends DurableObject {
     if (request.method === "GET" && url.pathname === "/state") {
       const state = Object.fromEntries(this.presence.entries());
       return new Response(JSON.stringify(state), {
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -74,12 +74,14 @@ export class PresenceDurableObject extends DurableObject {
 
     if (existing?.status !== status) {
       this.presence.set(userId, { status, lastSeen: now });
-      this.broadcast(JSON.stringify({
-        type: "presence_changed",
-        userId,
-        status,
-        lastSeen: now
-      }));
+      this.broadcast(
+        JSON.stringify({
+          type: "presence_changed",
+          userId,
+          status,
+          lastSeen: now,
+        }),
+      );
     } else {
       existing.lastSeen = now;
     }
@@ -98,7 +100,10 @@ export class PresenceDurableObject extends DurableObject {
         if (data.type === "ping") {
           ws.send(JSON.stringify({ type: "pong" }));
         }
-      } else if (data.type === "presence_set" && ["online", "away", "dnd", "offline"].includes(data.status)) {
+      } else if (
+        data.type === "presence_set" &&
+        ["online", "away", "dnd", "offline"].includes(data.status)
+      ) {
         this.updatePresence(attachment.userId, data.status);
       }
     } catch (e) {
@@ -129,19 +134,19 @@ export class PresenceDurableObject extends DurableObject {
 
   override async alarm() {
     const now = Date.now();
-    let _changed = false;
 
     // Check timeouts
     for (const [userId, data] of this.presence.entries()) {
       if (data.status !== "offline" && now - data.lastSeen > this.TIMEOUT) {
         data.status = "offline";
-        this.broadcast(JSON.stringify({
-          type: "presence_changed",
-          userId,
-          status: "offline",
-          lastSeen: data.lastSeen
-        }));
-        _changed = true;
+        this.broadcast(
+          JSON.stringify({
+            type: "presence_changed",
+            userId,
+            status: "offline",
+            lastSeen: data.lastSeen,
+          }),
+        );
       }
     }
 

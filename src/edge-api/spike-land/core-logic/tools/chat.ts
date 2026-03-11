@@ -12,6 +12,9 @@ import { McpError, McpErrorCode, safeToolCall } from "../lib/tool-helpers";
 import type { DrizzleDB } from "../../db/db/db-index.ts";
 import type { Env } from "../env";
 
+/** Minimal env fields required by chat tools. */
+type ChatEnv = Pick<Env, "ANTHROPIC_API_KEY">;
+
 const MODEL_MAP: Record<string, string> = {
   opus: "claude-4-6-opus",
   sonnet: "claude-4-6-sonnet",
@@ -35,7 +38,7 @@ export function registerChatTools(
   registry: ToolRegistry,
   userId: string,
   db: DrizzleDB,
-  env: Env,
+  env: ChatEnv,
 ): void {
   registry.registerBuilt(
     freeTool(userId, db)

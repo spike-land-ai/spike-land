@@ -319,7 +319,7 @@ server.setRequestHandler(
     const result = await Promise.resolve(tool.handler((request.params.arguments ?? {}) as never));
     return {
       content: result.content,
-      isError: result.isError,
+      ...(result.isError !== undefined ? { isError: result.isError } : {}),
     };
   },
 );

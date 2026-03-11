@@ -141,6 +141,7 @@ class PuppeteerPageWrapper implements BrowserPage {
         `Failed to get accessibility tree via CDP: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
+    return null;
   }
 }
 

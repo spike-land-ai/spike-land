@@ -6,7 +6,7 @@
 import type * as mode from "./tsMode";
 import type * as ts from "./lib/typescriptServices";
 import { typescriptVersion as tsversion } from "./lib/typescriptServicesMetadata"; // do not import the whole typescriptServices here
-import { languages, Emitter, IEvent, IDisposable, Uri } from "../../../editor";
+import { languages, Emitter, type IEvent, type IDisposable, Uri } from "../../../editor";
 
 //#region enums copied from typescript to prevent loading the entire typescriptServices ---
 
@@ -670,7 +670,7 @@ class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
       myVersion = this._removedExtraLibs[filePath]! + 1;
     }
     if (this._extraLibs[filePath]) {
-      myVersion = this._extraLibs[filePath]?.version + 1;
+      myVersion = this._extraLibs[filePath]!.version + 1;
     }
 
     this._extraLibs[filePath] = {
@@ -698,7 +698,7 @@ class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
 
   setExtraLibs(libs: { content: string; filePath?: string }[]): void {
     for (const filePath in this._extraLibs) {
-      this._removedExtraLibs[filePath] = this._extraLibs[filePath]?.version;
+      this._removedExtraLibs[filePath] = this._extraLibs[filePath]!.version;
     }
     // clear out everything
     this._extraLibs = Object.create(null);
@@ -761,7 +761,7 @@ class LanguageServiceDefaultsImpl implements LanguageServiceDefaults {
     this._onDidChange.fire(undefined);
   }
 
-  setMaximumWorkerIdleTime(value: number): void {}
+  setMaximumWorkerIdleTime(_value: number): void {}
 
   setEagerModelSync(value: boolean) {
     // doesn't fire an event since no

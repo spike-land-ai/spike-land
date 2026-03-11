@@ -1,6 +1,6 @@
 import path from "node:path";
 
-export function flattenFilename(relPath: string, packageName: string): string {
+export function flattenFilename(relPath: string, _packageName: string): string {
   const parts = relPath.split(path.sep);
   const fileName = parts.pop()!;
 

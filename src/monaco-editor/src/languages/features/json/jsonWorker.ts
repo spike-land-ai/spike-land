@@ -6,7 +6,7 @@
 import * as jsonService from "vscode-json-languageservice";
 import type { worker } from "../../../editor";
 import { URI } from "vscode-uri";
-import { DiagnosticsOptions } from "./register";
+import type { DiagnosticsOptions } from "./register";
 
 let defaultSchemaRequestService: ((url: string) => Promise<string>) | undefined;
 if (typeof fetch !== "undefined") {
@@ -25,18 +25,19 @@ export class JSONWorker {
     this._ctx = ctx;
     this._languageSettings = createData.languageSettings;
     this._languageId = createData.languageId;
-    this._languageService = jsonService.getLanguageService({ // @ts-ignore
+    const jsonLsParams: jsonService.LanguageServiceParams = {
       workspaceContext: {
         resolveRelativePath: (relativePath: string, resource: string) => {
           const base = resource.substr(0, resource.lastIndexOf("/") + 1);
           return resolvePath(base, relativePath);
         },
       },
-      schemaRequestService: createData.enableSchemaRequest
-        ? defaultSchemaRequestService
-        : undefined,
       clientCapabilities: jsonService.ClientCapabilities.LATEST,
-    });
+    };
+    if (createData.enableSchemaRequest && defaultSchemaRequestService !== undefined) {
+      jsonLsParams.schemaRequestService = defaultSchemaRequestService;
+    }
+    this._languageService = jsonService.getLanguageService(jsonLsParams);
     this._languageService.configure(this._languageSettings);
   }
 

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.hardened.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+  },
+  "include": [
+    "../../src/media/educational-videos/**/*.ts",
+    "../../src/media/educational-videos/**/*.tsx"
+  ],
+  "exclude": [
+    "../../src/media/educational-videos/node_modules",
+    "../../src/media/educational-videos/**/*.test.ts",
+    "../../src/media/educational-videos/**/*.test.tsx",
+    "../../src/media/educational-videos/**/*.spec.ts",
+    "../../src/media/educational-videos/**/*.spec.tsx"
+  ],
+  "references": []
+}

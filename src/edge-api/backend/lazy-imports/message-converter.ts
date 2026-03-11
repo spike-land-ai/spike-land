@@ -1,4 +1,4 @@
-import type { ModelMessage } from "ai";
+import type { ChatMessage } from "../ai/gemini-stream";
 import { VALID_ROLES } from "../core-logic/lib/message-validation";
 import type { ValidRole } from "../core-logic/lib/message-validation";
 
@@ -35,7 +35,7 @@ interface MessageWithParts {
 
 export type { MessagePart, MessageWithParts, CoreMessage };
 
-type CoreMessage = ModelMessage;
+type CoreMessage = ChatMessage;
 
 function isValidRole(role: unknown): role is ValidRole {
   return typeof role === "string" && VALID_ROLES.includes(role as ValidRole);

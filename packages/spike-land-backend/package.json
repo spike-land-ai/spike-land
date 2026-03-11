@@ -39,12 +39,10 @@
     "wrangler": "4.71.0"
   },
   "dependencies": {
-    "@ai-sdk/google": "3.0.43",
     "@cloudflare/kv-asset-handler": "0.4.2",
     "@modelcontextprotocol/sdk": "1.27.1",
     "@spike-land-ai/code": "^0.9.58",
     "@types/node": "25.3.5",
-    "ai": "6.0.116",
     "hono": "^4.12.7",
     "replicate": "1.4.0",
     "zod": "4.3.6"

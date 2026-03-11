@@ -1,6 +1,22 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Navigate } from "@tanstack/react-router";
+import { useAuth } from "../hooks/useAuth";
 
-type TimeRange = "24h" | "7d" | "30d";
+const FOUNDER_EMAIL = "zoltan.erdos@spike.land";
+
+type TimeRange =
+  | "1m"
+  | "5m"
+  | "15m"
+  | "1h"
+  | "6h"
+  | "24h"
+  | "7d"
+  | "30d"
+  | "3mo"
+  | "6mo"
+  | "1y"
+  | "3y";
 
 interface PlatformEvent {
   id: string;
@@ -10,12 +26,55 @@ interface PlatformEvent {
   created_at: number;
 }
 
-interface AnalyticsSummary {
-  totalEvents: number;
-  uniqueUsers: number;
-  eventsByType: Array<{ event_type: string; count: number }>;
-  toolUsage: Array<{ tool_name: string; count: number }>;
-  blogViews?: Array<{ slug: string; count: number }>;
+interface FunnelRow {
+  event_type: string;
+  count: number;
+  unique_users: number;
+}
+
+interface DashboardData {
+  summary: {
+    totalEvents: number;
+    uniqueUsers: number;
+    eventsByType: Array<{ event_type: string; count: number }>;
+    toolUsage: Array<{ tool_name: string; count: number }>;
+    blogViews?: Array<{ slug: string; count: number }>;
+  };
+  recentEvents: PlatformEvent[];
+  funnel: FunnelRow[] | null;
+  activeUsers: number | null;
+  meta: {
+    range: string;
+    queriedAt: number;
+    earliestEvent: number | null;
+  };
+}
+
+const RANGE_GROUPS: { label: string; ranges: TimeRange[] }[] = [
+  { label: "Realtime", ranges: ["1m", "5m", "15m"] },
+  { label: "Short", ranges: ["1h", "6h", "24h"] },
+  { label: "Medium", ranges: ["7d", "30d"] },
+  { label: "Long", ranges: ["3mo", "6mo", "1y", "3y"] },
+];
+
+const AUTO_REFRESH: Partial<Record<TimeRange, number>> = {
+  "1m": 10_000,
+  "5m": 30_000,
+  "15m": 60_000,
+  "1h": 120_000,
+};
+
+function isRealtimeRange(range: TimeRange): boolean {
+  return range in AUTO_REFRESH;
+}
+
+function relativeTime(timestamp: number): string {
+  const diff = Date.now() - timestamp;
+  if (diff < 1000) return "just now";
+  if (diff < 60_000) return `${Math.floor(diff / 1000)}s ago`;
+  if (diff < 3600_000) return `${Math.floor(diff / 60_000)}m ago`;
+  if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}h ago`;
+  return `${Math.floor(diff / 86400_000)}d ago`;
 }
 
 function MetricCard({
@@ -43,28 +102,115 @@ function TimeRangeSelector({
   value: TimeRange;
   onChange: (range: TimeRange) => void;
 }) {
-  const ranges: TimeRange[] = ["24h", "7d", "30d"];
   return (
     <div
       role="group"
       aria-label="Time range"
-      className="flex gap-1 rounded-lg border border-border bg-muted p-1"
+      className="flex items-center gap-1 overflow-x-auto rounded-lg border border-border bg-muted p-1"
     >
-      {ranges.map((range) => (
-        <button
-          key={range}
-          type="button"
-          aria-pressed={value === range}
-          onClick={() => onChange(range)}
-          className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
-            value === range
-              ? "bg-card text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {range}
-        </button>
+      {RANGE_GROUPS.map((group, gi) => (
+        <div key={group.label} className="flex items-center gap-1">
+          {gi > 0 && (
+            <span className="mx-0.5 text-border select-none" aria-hidden="true">
+              ·
+            </span>
+          )}
+          {group.ranges.map((range) => (
+            <button
+              key={range}
+              type="button"
+              aria-pressed={value === range}
+              onClick={() => onChange(range)}
+              className={`whitespace-nowrap rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                value === range
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {range}
+            </button>
+          ))}
+        </div>
       ))}
+    </div>
+  );
+}
+
+function LiveIndicator({ lastUpdated }: { lastUpdated: number | null }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="relative flex h-2.5 w-2.5">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500" />
+      </span>
+      <span className="text-xs font-medium text-green-600 dark:text-green-400">Live</span>
+      {lastUpdated && (
+        <span className="text-xs text-muted-foreground">Updated {relativeTime(lastUpdated)}</span>
+      )}
+    </div>
+  );
+}
+
+const FUNNEL_ORDER = [
+  "signup_completed",
+  "mcp_server_connected",
+  "first_tool_call",
+  "second_session",
+  "upgrade_completed",
+];
+
+const FUNNEL_LABELS: Record<string, string> = {
+  signup_completed: "Signup",
+  mcp_server_connected: "MCP Connected",
+  first_tool_call: "First Tool Call",
+  second_session: "Second Session",
+  upgrade_completed: "Upgrade",
+};
+
+function ConversionFunnel({ data }: { data: FunnelRow[] }) {
+  const ordered = FUNNEL_ORDER.map((type) => {
+    const row = data.find((r) => r.event_type === type);
+    return {
+      type,
+      label: FUNNEL_LABELS[type] ?? type,
+      count: row?.unique_users ?? 0,
+    };
+  }).filter((step) => step.count > 0 || data.length > 0);
+
+  const maxCount = Math.max(...ordered.map((s) => s.count), 1);
+
+  if (ordered.every((s) => s.count === 0)) {
+    return (
+      <div className="flex h-48 items-center justify-center rounded-2xl border-2 border-dashed border-border text-muted-foreground">
+        No funnel data yet
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {ordered.map((step, i) => {
+        const prevCount = i > 0 ? (ordered[i - 1]?.count ?? 0) : 0;
+        const pct = i > 0 && prevCount > 0 ? ((step.count / prevCount) * 100).toFixed(1) : null;
+
+        return (
+          <div key={step.type} className="space-y-1">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium text-foreground">{step.label}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-foreground font-semibold">{step.count}</span>
+                {pct && <span className="text-xs text-muted-foreground">{pct}% of prev</span>}
+              </div>
+            </div>
+            <div className="h-3 w-full rounded-full bg-muted">
+              <div
+                className="h-3 rounded-full bg-primary transition-all"
+                style={{ width: `${Math.max(2, (step.count / maxCount) * 100)}%` }}
+              />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -72,51 +218,119 @@ function TimeRangeSelector({
 const API_BASE = "/analytics";
 
 export function AnalyticsPage() {
+  const { user, isLoading: authLoading } = useAuth();
   const [timeRange, setTimeRange] = useState<TimeRange>("24h");
-  const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
-  const [recentEvents, setRecentEvents] = useState<PlatformEvent[]>([]);
+  const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const fetchData = useCallback(async (range: TimeRange) => {
-    setLoading(true);
+  const fetchData = useCallback(async (range: TimeRange, isAutoRefresh = false) => {
+    if (!isAutoRefresh) setLoading(true);
     try {
-      const [summaryRes, eventsRes] = await Promise.all([
-        fetch(`${API_BASE}/summary?range=${range}`),
-        fetch(`${API_BASE}/events?range=${range}&limit=20`),
-      ]);
-
-      if (summaryRes.ok) {
-        setSummary((await summaryRes.json()) as AnalyticsSummary);
-      }
-      if (eventsRes.ok) {
-        setRecentEvents((await eventsRes.json()) as PlatformEvent[]);
+      const res = await fetch(`${API_BASE}/dashboard?range=${range}`, {
+        credentials: "include",
+      });
+      if (res.ok) {
+        setData((await res.json()) as DashboardData);
+        setLastUpdated(Date.now());
       }
     } catch {
       // Network error — keep existing data
     } finally {
-      setLoading(false);
+      if (!isAutoRefresh) setLoading(false);
     }
   }, []);
 
+  // Initial fetch and range change
   useEffect(() => {
+    if (!user || user.email !== FOUNDER_EMAIL) return;
     fetchData(timeRange);
+  }, [timeRange, fetchData, user]);
+
+  // Auto-refresh for realtime ranges
+  useEffect(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    const refreshMs = AUTO_REFRESH[timeRange];
+    if (!refreshMs) return;
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      } else {
+        fetchData(timeRange, true);
+        intervalRef.current = setInterval(() => fetchData(timeRange, true), refreshMs);
+      }
+    };
+
+    intervalRef.current = setInterval(() => fetchData(timeRange, true), refreshMs);
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [timeRange, fetchData]);
 
+  // Auth guard
+  if (authLoading) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-border border-t-primary" />
+      </div>
+    );
+  }
+
+  if (!user || user.email !== FOUNDER_EMAIL) {
+    return <Navigate to="/" />;
+  }
+
+  const summary = data?.summary;
+  const recentEvents = data?.recentEvents ?? [];
   const toolInvocations =
     summary?.eventsByType.find((e) => e.event_type === "tool_use")?.count ?? 0;
+  const signups =
+    summary?.eventsByType.find((e) => e.event_type === "signup_completed")?.count ?? 0;
+  const conversionRate =
+    summary && summary.uniqueUsers > 0 ? ((signups / summary.uniqueUsers) * 100).toFixed(1) : "0";
+  const showFunnel = data?.funnel !== null && data?.funnel !== undefined;
+  const isRealtime = isRealtimeRange(timeRange);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+          {isRealtime && <LiveIndicator lastUpdated={lastUpdated} />}
+          {!isRealtime && lastUpdated && (
+            <span className="text-xs text-muted-foreground">
+              Updated {relativeTime(lastUpdated)}
+            </span>
+          )}
+        </div>
         <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
       </div>
 
-      {/* Metric Cards */}
+      {/* KPI Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           label="Unique Visitors"
           value={loading ? "..." : String(summary?.uniqueUsers ?? 0)}
+          subtitle={
+            isRealtime && data?.activeUsers != null ? `${data.activeUsers} active now` : timeRange
+          }
+        />
+        <MetricCard
+          label="Total Events"
+          value={loading ? "..." : String(summary?.totalEvents ?? 0)}
           subtitle={timeRange}
         />
         <MetricCard
@@ -125,13 +339,9 @@ export function AnalyticsPage() {
           subtitle={timeRange}
         />
         <MetricCard
-          label="Event Types"
-          value={loading ? "..." : String(summary?.eventsByType.length ?? 0)}
-        />
-        <MetricCard
-          label="Total Events"
-          value={loading ? "..." : String(summary?.totalEvents ?? 0)}
-          subtitle={timeRange}
+          label="Conversion Rate"
+          value={loading ? "..." : `${conversionRate}%`}
+          subtitle={showFunnel ? "signups / visitors" : `${timeRange} (need 7d+)`}
         />
       </div>
 
@@ -228,14 +438,26 @@ export function AnalyticsPage() {
                     </span>
                     <span className="text-sm text-muted-foreground">{event.source}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(event.created_at).toLocaleTimeString()}
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {isRealtime
+                      ? relativeTime(event.created_at)
+                      : new Date(event.created_at).toLocaleTimeString()}
                   </span>
                 </div>
               ))}
             </div>
           )}
         </div>
+
+        {/* Conversion Funnel (only for >= 7d ranges) */}
+        {showFunnel && data?.funnel && (
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Conversion Funnel
+            </h3>
+            <ConversionFunnel data={data.funnel} />
+          </div>
+        )}
       </div>
 
       {/* Events by Type */}

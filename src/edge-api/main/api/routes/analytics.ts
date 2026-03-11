@@ -22,10 +22,56 @@ function isValidEvent(event: unknown): event is AnalyticsEvent {
 }
 
 const VALID_RANGES: Record<string, number> = {
-  "24h": 24 * 60 * 60 * 1000,
-  "7d": 7 * 24 * 60 * 60 * 1000,
-  "30d": 30 * 24 * 60 * 60 * 1000,
+  "1m": 60_000,
+  "5m": 5 * 60_000,
+  "15m": 15 * 60_000,
+  "1h": 60 * 60_000,
+  "6h": 6 * 60 * 60_000,
+  "24h": 24 * 60 * 60_000,
+  "7d": 7 * 24 * 60 * 60_000,
+  "30d": 30 * 24 * 60 * 60_000,
+  "3mo": 90 * 24 * 60 * 60_000,
+  "6mo": 180 * 24 * 60 * 60_000,
+  "1y": 365 * 24 * 60 * 60_000,
+  "3y": 3 * 365 * 24 * 60 * 60_000,
 };
+
+const VALID_RANGE_KEYS = Object.keys(VALID_RANGES).join(", ");
+
+const ADMIN_EMAIL = "zoltan.erdos@spike.land";
+
+/**
+ * Dual auth check: accepts either X-Internal-Secret (service-to-service)
+ * or an authenticated founder session (userId → email → ADMIN_EMAIL).
+ */
+async function requireFounderOrSecret(
+  c: import("hono").Context<{ Bindings: Env; Variables: Variables }>,
+): Promise<{ authorized: boolean; error?: string; status?: number }> {
+  // Path 1: Internal secret (service-to-service)
+  if (requireInternalSecret(c.env, c.req)) {
+    return { authorized: true };
+  }
+
+  // Path 2: Authenticated founder session
+  const userId = c.get("userId") as string | undefined;
+  if (!userId) {
+    return { authorized: false, error: "Unauthorized", status: 401 };
+  }
+
+  const userRow = await c.env.DB.prepare("SELECT email FROM users WHERE id = ? LIMIT 1")
+    .bind(userId)
+    .first<{ email: string }>();
+
+  if (!userRow || userRow.email !== ADMIN_EMAIL) {
+    return { authorized: false, error: "Forbidden", status: 403 };
+  }
+
+  return { authorized: true };
+}
+
+function parseRange(range: string): number | null {
+  return VALID_RANGES[range] ?? null;
+}
 
 analytics.post("/analytics/ingest", async (c) => {
   const clientIp = c.req.header("cf-connecting-ip") ?? "unknown";
@@ -118,19 +164,18 @@ analytics.post("/analytics/ingest", async (c) => {
 });
 
 analytics.get("/analytics/events", async (c) => {
-  // SECURITY: This endpoint returns raw event rows including client_ids.
-  // Require internal secret — do not expose to unauthenticated callers.
-  if (!requireInternalSecret(c.env, c.req)) {
-    return c.json({ error: "Unauthorized" }, 401);
+  const auth = await requireFounderOrSecret(c);
+  if (!auth.authorized) {
+    return c.json({ error: auth.error }, auth.status as 401 | 403);
   }
 
   const range = c.req.query("range") ?? "24h";
   const type = c.req.query("type");
   const limit = Math.min(parseInt(c.req.query("limit") ?? "50", 10), 200);
 
-  const rangeMs = VALID_RANGES[range];
+  const rangeMs = parseRange(range);
   if (!rangeMs) {
-    return c.json({ error: "Invalid range. Use 24h, 7d, or 30d" }, 400);
+    return c.json({ error: `Invalid range. Use one of: ${VALID_RANGE_KEYS}` }, 400);
   }
 
   const cutoff = Date.now() - rangeMs;
@@ -154,16 +199,16 @@ analytics.get("/analytics/events", async (c) => {
 });
 
 analytics.get("/analytics/summary", async (c) => {
-  // SECURITY: Aggregate metrics still leak signup/tool-use cadence to competitors.
-  if (!requireInternalSecret(c.env, c.req)) {
-    return c.json({ error: "Unauthorized" }, 401);
+  const auth = await requireFounderOrSecret(c);
+  if (!auth.authorized) {
+    return c.json({ error: auth.error }, auth.status as 401 | 403);
   }
 
   const range = c.req.query("range") ?? "24h";
 
-  const rangeMs = VALID_RANGES[range];
+  const rangeMs = parseRange(range);
   if (!rangeMs) {
-    return c.json({ error: "Invalid range. Use 24h, 7d, or 30d" }, 400);
+    return c.json({ error: `Invalid range. Use one of: ${VALID_RANGE_KEYS}` }, 400);
   }
 
   const cutoff = Date.now() - rangeMs;
@@ -198,10 +243,112 @@ analytics.get("/analytics/summary", async (c) => {
   });
 });
 
+analytics.get("/analytics/dashboard", async (c) => {
+  const auth = await requireFounderOrSecret(c);
+  if (!auth.authorized) {
+    return c.json({ error: auth.error }, auth.status as 401 | 403);
+  }
+
+  const range = c.req.query("range") ?? "24h";
+
+  const rangeMs = parseRange(range);
+  if (!rangeMs) {
+    return c.json({ error: `Invalid range. Use one of: ${VALID_RANGE_KEYS}` }, 400);
+  }
+
+  const cutoff = Date.now() - rangeMs;
+  const realtimeCutoff = Date.now() - 5 * 60_000;
+  const includeFunnel = rangeMs >= 7 * 24 * 60 * 60_000;
+
+  const queries = [
+    // 0: total events
+    c.env.DB.prepare("SELECT COUNT(*) as total FROM analytics_events WHERE created_at >= ?").bind(
+      cutoff,
+    ),
+    // 1: unique users
+    c.env.DB.prepare(
+      "SELECT COUNT(DISTINCT client_id) as unique_users FROM analytics_events WHERE created_at >= ?",
+    ).bind(cutoff),
+    // 2: events by type
+    c.env.DB.prepare(
+      "SELECT event_type, COUNT(*) as count FROM analytics_events WHERE created_at >= ? GROUP BY event_type ORDER BY count DESC",
+    ).bind(cutoff),
+    // 3: tool usage
+    c.env.DB.prepare(
+      "SELECT json_extract(metadata, '$.toolName') as tool_name, COUNT(*) as count FROM analytics_events WHERE created_at >= ? AND event_type = 'tool_use' AND metadata IS NOT NULL GROUP BY tool_name ORDER BY count DESC LIMIT 20",
+    ).bind(cutoff),
+    // 4: blog views
+    c.env.DB.prepare(
+      "SELECT json_extract(metadata, '$.slug') as slug, COUNT(*) as count FROM analytics_events WHERE created_at >= ? AND event_type = 'blog_view' AND metadata IS NOT NULL GROUP BY slug ORDER BY count DESC LIMIT 20",
+    ).bind(cutoff),
+    // 5: recent events (last 30)
+    c.env.DB.prepare(
+      "SELECT id, source, event_type, metadata, client_id, created_at FROM analytics_events WHERE created_at >= ? ORDER BY created_at DESC LIMIT 30",
+    ).bind(cutoff),
+    // 6: active users (last 5 min)
+    c.env.DB.prepare(
+      "SELECT COUNT(DISTINCT client_id) as active_users FROM analytics_events WHERE created_at >= ?",
+    ).bind(realtimeCutoff),
+    // 7: earliest event timestamp
+    c.env.DB.prepare("SELECT MIN(created_at) as earliest FROM analytics_events"),
+  ];
+
+  // 8: funnel data (only for ranges >= 7d)
+  if (includeFunnel) {
+    queries.push(
+      c.env.DB.prepare(
+        `SELECT
+           event_type,
+           COUNT(*) as count,
+           COUNT(DISTINCT client_id) as unique_users
+         FROM analytics_events
+         WHERE event_type IN (
+           'signup_completed', 'mcp_server_connected',
+           'first_tool_call', 'second_session', 'upgrade_completed'
+         )
+         AND created_at >= ?
+         GROUP BY event_type
+         ORDER BY CASE event_type
+           WHEN 'signup_completed' THEN 1
+           WHEN 'mcp_server_connected' THEN 2
+           WHEN 'first_tool_call' THEN 3
+           WHEN 'second_session' THEN 4
+           WHEN 'upgrade_completed' THEN 5
+         END`,
+      ).bind(cutoff),
+    );
+  }
+
+  const results = await c.env.DB.batch(queries);
+
+  const totalRow = results[0]?.results[0] as Record<string, unknown> | undefined;
+  const usersRow = results[1]?.results[0] as Record<string, unknown> | undefined;
+  const activeRow = results[6]?.results[0] as Record<string, unknown> | undefined;
+  const earliestRow = results[7]?.results[0] as Record<string, unknown> | undefined;
+
+  return c.json({
+    summary: {
+      totalEvents: totalRow?.total ?? 0,
+      uniqueUsers: usersRow?.unique_users ?? 0,
+      eventsByType: results[2]?.results ?? [],
+      toolUsage: results[3]?.results ?? [],
+      blogViews: results[4]?.results ?? [],
+    },
+    recentEvents: results[5]?.results ?? [],
+    funnel: includeFunnel ? (results[8]?.results ?? null) : null,
+    activeUsers: (activeRow?.active_users as number) ?? null,
+    meta: {
+      range,
+      queriedAt: Date.now(),
+      earliestEvent: (earliestRow?.earliest as number) ?? null,
+    },
+  });
+});
+
 analytics.get("/analytics/funnel", async (c) => {
-  // SECURITY: Funnel data reveals signup and conversion rates — internal only.
-  if (!requireInternalSecret(c.env, c.req)) {
-    return c.json({ error: "Unauthorized" }, 401);
+  const auth = await requireFounderOrSecret(c);
+  if (!auth.authorized) {
+    return c.json({ error: auth.error }, auth.status as 401 | 403);
   }
 
   const cutoffMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
@@ -230,9 +377,11 @@ analytics.get("/analytics/funnel", async (c) => {
 // ─── MCP Analytics Proxy (to spike-land-mcp internal API) ────────────────────
 
 analytics.get("/analytics/mcp/tools", async (c) => {
-  if (!requireInternalSecret(c.env, c.req)) {
-    return c.json({ error: "Unauthorized" }, 401);
+  const auth = await requireFounderOrSecret(c);
+  if (!auth.authorized) {
+    return c.json({ error: auth.error }, auth.status as 401 | 403);
   }
+
   const url = new URL("https://mcp.spike.land/internal/analytics/tools");
   if (c.req.query("range")) url.searchParams.set("range", c.req.query("range")!);
   if (c.req.query("limit")) url.searchParams.set("limit", c.req.query("limit")!);
@@ -242,8 +391,9 @@ analytics.get("/analytics/mcp/tools", async (c) => {
 });
 
 analytics.get("/analytics/mcp/users", async (c) => {
-  if (!requireInternalSecret(c.env, c.req)) {
-    return c.json({ error: "Unauthorized" }, 401);
+  const auth = await requireFounderOrSecret(c);
+  if (!auth.authorized) {
+    return c.json({ error: auth.error }, auth.status as 401 | 403);
   }
 
   const url = new URL("https://mcp.spike.land/internal/analytics/users");
@@ -255,8 +405,9 @@ analytics.get("/analytics/mcp/users", async (c) => {
 });
 
 analytics.get("/analytics/mcp/summary", async (c) => {
-  if (!requireInternalSecret(c.env, c.req)) {
-    return c.json({ error: "Unauthorized" }, 401);
+  const auth = await requireFounderOrSecret(c);
+  if (!auth.authorized) {
+    return c.json({ error: auth.error }, auth.status as 401 | 403);
   }
 
   const url = new URL("https://mcp.spike.land/internal/analytics/summary");

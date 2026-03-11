@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-  Diagnostic,
-  DiagnosticRelatedInformation,
-  LanguageServiceDefaults,
+  type Diagnostic,
+  type DiagnosticRelatedInformation,
+  type LanguageServiceDefaults,
   typescriptDefaults,
 } from "./register";
 import type * as ts from "./lib/typescriptServices";
@@ -18,9 +18,9 @@ import {
   Uri,
   Position,
   Range,
-  CancellationToken,
-  IDisposable,
-  IRange,
+  type CancellationToken,
+  type IDisposable,
+  type IRange,
   MarkerTag,
   MarkerSeverity,
 } from "../../../editor";
@@ -441,7 +441,7 @@ export class SuggestAdapter extends Adapter implements languages.CompletionItemP
     model: editor.ITextModel,
     position: Position,
     _context: languages.CompletionContext,
-    token: CancellationToken,
+    _token: CancellationToken,
   ): Promise<languages.CompletionList | undefined> {
     const wordInfo = model.getWordUntilPosition(position);
     const wordRange = new Range(
@@ -498,7 +498,7 @@ export class SuggestAdapter extends Adapter implements languages.CompletionItemP
 
   public async resolveCompletionItem(
     item: languages.CompletionItem,
-    token: CancellationToken,
+    _token: CancellationToken,
   ): Promise<languages.CompletionItem> {
     const myItem = <MyCompletionItem>item;
     const resource = myItem.uri;
@@ -620,7 +620,7 @@ export class SignatureHelpAdapter extends Adapter implements languages.Signature
   public async provideSignatureHelp(
     model: editor.ITextModel,
     position: Position,
-    token: CancellationToken,
+    _token: CancellationToken,
     context: languages.SignatureHelpContext,
   ): Promise<languages.SignatureHelpResult | undefined> {
     const resource = model.uri;
@@ -686,7 +686,7 @@ export class QuickInfoAdapter extends Adapter implements languages.HoverProvider
   public async provideHover(
     model: editor.ITextModel,
     position: Position,
-    token: CancellationToken,
+    _token: CancellationToken,
   ): Promise<languages.Hover | undefined> {
     const resource = model.uri;
     const offset = model.getOffsetAt(position);
@@ -728,7 +728,7 @@ export class DocumentHighlightAdapter
   public async provideDocumentHighlights(
     model: editor.ITextModel,
     position: Position,
-    token: CancellationToken,
+    _token: CancellationToken,
   ): Promise<languages.DocumentHighlight[] | undefined> {
     const resource = model.uri;
     const offset = model.getOffsetAt(position);
@@ -773,7 +773,7 @@ export class DefinitionAdapter extends Adapter {
   public async provideDefinition(
     model: editor.ITextModel,
     position: Position,
-    token: CancellationToken,
+    _token: CancellationToken,
   ): Promise<languages.Definition | undefined> {
     const resource = model.uri;
     const offset = model.getOffsetAt(position);
@@ -825,8 +825,8 @@ export class ReferenceAdapter extends Adapter implements languages.ReferenceProv
   public async provideReferences(
     model: editor.ITextModel,
     position: Position,
-    context: languages.ReferenceContext,
-    token: CancellationToken,
+    _context: languages.ReferenceContext,
+    _token: CancellationToken,
   ): Promise<languages.Location[] | undefined> {
     const resource = model.uri;
     const offset = model.getOffsetAt(position);
@@ -870,7 +870,7 @@ export class ReferenceAdapter extends Adapter implements languages.ReferenceProv
 export class OutlineAdapter extends Adapter implements languages.DocumentSymbolProvider {
   public async provideDocumentSymbols(
     model: editor.ITextModel,
-    token: CancellationToken,
+    _token: CancellationToken,
   ): Promise<languages.DocumentSymbol[] | undefined> {
     const resource = model.uri;
     const worker = await this._worker(resource);
@@ -889,16 +889,21 @@ export class OutlineAdapter extends Adapter implements languages.DocumentSymbolP
       item: ts.NavigationTree,
       containerLabel?: string,
     ): languages.DocumentSymbol => {
-      const result: languages.DocumentSymbol = { // @ts-ignore
+      const span = item.spans![0]!;
+      const result: languages.DocumentSymbol = {
         name: item.text,
         detail: "",
         kind: <languages.SymbolKind>(outlineTypeTable[item.kind] || languages.SymbolKind.Variable),
-        range: this._textSpanToRange(model, item.spans![0]),
-        selectionRange: this._textSpanToRange(model, item.spans![0]),
+        range: this._textSpanToRange(model, span),
+        selectionRange: this._textSpanToRange(model, span),
         tags: [],
-        children: item.childItems?.map((child) => convert(child, item.text)),
-        containerName: containerLabel,
       };
+      if (item.childItems !== undefined) {
+        result.children = item.childItems.map((child) => convert(child, item.text));
+      }
+      if (containerLabel !== undefined) {
+        result.containerName = containerLabel;
+      }
       return result;
     };
 
@@ -1001,7 +1006,7 @@ export class FormatAdapter
     model: editor.ITextModel,
     range: Range,
     options: languages.FormattingOptions,
-    token: CancellationToken,
+    _token: CancellationToken,
   ): Promise<languages.TextEdit[] | undefined> {
     const resource = model.uri;
     const startOffset = model.getOffsetAt({
@@ -1046,7 +1051,7 @@ export class FormatOnTypeAdapter
     position: Position,
     ch: string,
     options: languages.FormattingOptions,
-    token: CancellationToken,
+    _token: CancellationToken,
   ): Promise<languages.TextEdit[] | undefined> {
     const resource = model.uri;
     const offset = model.getOffsetAt(position);
@@ -1078,7 +1083,7 @@ export class CodeActionAdaptor extends FormatHelper implements languages.CodeAct
     model: editor.ITextModel,
     range: Range,
     context: languages.CodeActionContext,
-    token: CancellationToken,
+    _token: CancellationToken,
   ): Promise<languages.CodeActionList | undefined> {
     const resource = model.uri;
     const start = model.getOffsetAt({
@@ -1169,7 +1174,7 @@ export class RenameAdapter extends Adapter implements languages.RenameProvider {
     model: editor.ITextModel,
     position: Position,
     newName: string,
-    token: CancellationToken,
+    _token: CancellationToken,
   ): Promise<(languages.WorkspaceEdit & languages.Rejection) | undefined> {
     const resource = model.uri;
     const fileName = resource.toString();
@@ -1233,7 +1238,7 @@ export class InlayHintsAdapter extends Adapter implements languages.InlayHintsPr
   public async provideInlayHints(
     model: editor.ITextModel,
     range: Range,
-    token: CancellationToken,
+    _token: CancellationToken,
   ): Promise<languages.InlayHintList | null> {
     const resource = model.uri;
     const fileName = resource.toString();

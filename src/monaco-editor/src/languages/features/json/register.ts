@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as mode from "./jsonMode";
-import { Emitter, IEvent, languages, Uri } from "../../../editor";
+import { Emitter, type IEvent, languages, Uri } from "../../../editor";
 
 // ---- JSON service types ----
 export interface BaseASTNode {
