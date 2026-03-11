@@ -5,6 +5,7 @@ describe("createLogger", () => {
   beforeEach(() => {
     vi.spyOn(console, "debug").mockImplementation(() => {});
     vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.spyOn(console, "info").mockImplementation(() => {});
     vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.spyOn(console, "error").mockImplementation(() => {});
   });
@@ -18,8 +19,8 @@ describe("createLogger", () => {
       const logger = createLogger("test-service");
       logger.info("hello");
 
-      expect(console.log).toHaveBeenCalledOnce();
-      const raw = (console.log as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+      expect(console.info).toHaveBeenCalledOnce();
+      const raw = (console.info as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
       const entry = JSON.parse(raw) as LogEntry;
 
       expect(entry.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -44,7 +45,7 @@ describe("createLogger", () => {
       const logger = createLogger("svc");
       logger.info("no data");
 
-      const raw = (console.log as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+      const raw = (console.info as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
       const entry = JSON.parse(raw) as LogEntry;
 
       expect(Object.prototype.hasOwnProperty.call(entry, "data")).toBe(false);
@@ -57,9 +58,9 @@ describe("createLogger", () => {
       expect(console.debug).toHaveBeenCalledOnce();
     });
 
-    it("info calls console.log", () => {
+    it("info calls console.info", () => {
       createLogger("svc").info("i");
-      expect(console.log).toHaveBeenCalledOnce();
+      expect(console.info).toHaveBeenCalledOnce();
     });
 
     it("warn calls console.warn", () => {
@@ -82,7 +83,7 @@ describe("createLogger", () => {
       logger.error("pass");
 
       expect(console.debug).not.toHaveBeenCalled();
-      expect(console.log).not.toHaveBeenCalled();
+      expect(console.info).not.toHaveBeenCalled();
       expect(console.warn).toHaveBeenCalledOnce();
       expect(console.error).toHaveBeenCalledOnce();
     });
@@ -93,7 +94,7 @@ describe("createLogger", () => {
       logger.info("pass");
 
       expect(console.debug).not.toHaveBeenCalled();
-      expect(console.log).toHaveBeenCalledOnce();
+      expect(console.info).toHaveBeenCalledOnce();
     });
 
     it("should only emit error when level is error", () => {
@@ -104,7 +105,7 @@ describe("createLogger", () => {
       logger.error("pass");
 
       expect(console.debug).not.toHaveBeenCalled();
-      expect(console.log).not.toHaveBeenCalled();
+      expect(console.info).not.toHaveBeenCalled();
       expect(console.warn).not.toHaveBeenCalled();
       expect(console.error).toHaveBeenCalledOnce();
     });
@@ -117,7 +118,7 @@ describe("createLogger", () => {
       logger.error("e");
 
       expect(console.debug).toHaveBeenCalledOnce();
-      expect(console.log).toHaveBeenCalledOnce();
+      expect(console.info).toHaveBeenCalledOnce();
       expect(console.warn).toHaveBeenCalledOnce();
       expect(console.error).toHaveBeenCalledOnce();
     });
@@ -129,7 +130,7 @@ describe("createLogger", () => {
       const child = logger.withRequestId("req-123");
       child.info("with id");
 
-      const raw = (console.log as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+      const raw = (console.info as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
       const entry = JSON.parse(raw) as LogEntry;
 
       expect(entry.requestId).toBe("req-123");
@@ -141,7 +142,7 @@ describe("createLogger", () => {
       logger.withRequestId("req-456");
       logger.info("no id");
 
-      const raw = (console.log as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+      const raw = (console.info as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
       const entry = JSON.parse(raw) as LogEntry;
 
       expect(Object.prototype.hasOwnProperty.call(entry, "requestId")).toBe(false);
@@ -152,7 +153,7 @@ describe("createLogger", () => {
       const child = logger.withRequestId("req-789");
       child.info("should be filtered");
 
-      expect(console.log).not.toHaveBeenCalled();
+      expect(console.info).not.toHaveBeenCalled();
     });
 
     it("child logger should include requestId in every log call", () => {

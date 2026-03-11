@@ -724,7 +724,7 @@ describe("game-manager", () => {
 
   describe("acceptDraw", () => {
     it("sets status to DRAW", async () => {
-      const game = makeGameRecord();
+      const game = makeGameRecord({ status: "DRAW_OFFERED" });
       mockPrisma.chessGame.update.mockResolvedValue({});
       mockPrisma.chessGame.findUnique.mockResolvedValue(game);
       mockPrisma.chessPlayer.findUnique.mockResolvedValue(null);
@@ -747,7 +747,7 @@ describe("game-manager", () => {
         userId: "user-black",
       });
 
-      const game = makeGameRecord();
+      const game = makeGameRecord({ status: "DRAW_OFFERED" });
       mockPrisma.chessGame.update.mockResolvedValue({});
       mockPrisma.chessGame.findUnique.mockResolvedValue(game);
       mockPrisma.chessPlayer.findUnique

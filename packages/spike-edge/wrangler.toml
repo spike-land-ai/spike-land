@@ -1,11 +1,11 @@
 name = "spike-edge"
 main = "./index.ts"
 compatibility_date = "2026-03-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
 
 [dev]
 port = 8787
-compatibility_flags = ["nodejs_compat"]
-workers_dev = true
 
 [[r2_buckets]]
 binding = "R2"

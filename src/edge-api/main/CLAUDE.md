@@ -107,4 +107,4 @@ All proxy routes sanitize caller-provided headers against an explicit allowlist
 - Shared workflow: `.github/.github/workflows/ci-publish.yml`
 - Private package (`"private": true`) — not published to GitHub Packages
 - Deploy via `npm run deploy` (wrangler deploy --minify)
-- Compatibility date: `2025-01-01`, flags: `nodejs_compat`
+- Compatibility date: `2026-03-01`, flags: `nodejs_compat`

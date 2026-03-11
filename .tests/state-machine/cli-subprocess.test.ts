@@ -24,8 +24,8 @@ const mockStdoutWrite = vi.fn((data: string) => {
   return true;
 });
 
-// Mock console.error to suppress output - set up before module import
-const mockConsoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+// Mock process.stderr.write to capture startup message - set up before module import
+const mockStderrWrite = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
 beforeEach(() => {
   stdoutWrites.length = 0;
@@ -41,7 +41,7 @@ describe("state-machine CLI module", () => {
   it("cli.ts can be imported without errors", async () => {
     // Just importing the module exercises the module-level code
     // (createInterface call, console.error, rl.on registration)
-    const mod = await import("../../src/core/statecharts/cli.js");
+    const mod = await import("../../src/core/statecharts/cli/cli.js");
     expect(mod).toBeDefined();
   });
 
@@ -53,9 +53,9 @@ describe("state-machine CLI module", () => {
     });
   });
 
-  it("console.error was called with startup message", () => {
-    expect(mockConsoleError).toHaveBeenCalledWith(
-      "State Machine MCP-like CLI started. Send JSON commands.",
+  it("startup message was written to stderr", () => {
+    expect(mockStderrWrite).toHaveBeenCalledWith(
+      "State Machine MCP-like CLI started. Send JSON commands.\n",
     );
   });
 
@@ -239,7 +239,9 @@ describe("state-machine CLI module", () => {
     );
 
     // Force current state to a
-    const { clearMachines, getMachine } = await import("../../src/core/statecharts/engine.js");
+    const { clearMachines, getMachine } = await import(
+      "../../src/core/statecharts/node-sys/engine.js"
+    );
     const instance = getMachine(machineId);
     instance.currentStates = ["a"];
 

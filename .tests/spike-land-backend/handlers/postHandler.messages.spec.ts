@@ -1,7 +1,5 @@
-import type { Message } from "@spike-land-ai/code";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { convertMessages } from "../../../src/edge-api/backend/lazy-imports/message-converter";
-import type { ChatMessage } from "../../../src/edge-api/backend/ai/gemini-stream";
 
 describe("PostHandler - Messages (convertMessages)", () => {
   describe("convertMessages", () => {

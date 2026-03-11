@@ -11,10 +11,6 @@ function tests(...segments: string[]) {
   return path.join(root, ".tests", ...segments);
 }
 
-function pkg(...segments: string[]) {
-  return path.join(root, "packages", ...segments);
-}
-
 const reporter = path.join(root, "vitest-minimal-reporter.ts");
 
 // ── Tier thresholds ────────────────────────────────────────────────

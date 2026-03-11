@@ -199,8 +199,7 @@ describe("POST /stripe/webhook", () => {
 
   describe("idempotency", () => {
     it("skips duplicate event IDs and returns duplicate:true", async () => {
-      const { db } = createMockDb();
-      const app = createApp({ STRIPE_WEBHOOK_SECRET: WEBHOOK_SECRET, DB: db });
+      const { db: _db } = createMockDb();
 
       // Make the first() call return an existing event record
       const { mockPrepare } = createMockDb({ id: "evt_dup" });

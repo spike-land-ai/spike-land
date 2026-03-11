@@ -11,6 +11,7 @@ dist/
 !.yarn/sdks
 !.yarn/versions
 *.tsbuildinfo
+.tsbuildinfo*
 .env
 .env.local
 .dev.vars

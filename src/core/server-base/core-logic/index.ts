@@ -280,7 +280,9 @@ export function wrapServerWithLogging(
         if (onLog) {
           onLog(entry);
         } else {
-          console.error(`[mcp-analytics] ${serverName}/${toolName} ${outcome} ${durationMs}ms`);
+          process.stderr.write(
+            `[mcp-analytics] ${serverName}/${toolName} ${outcome} ${durationMs}ms\n`,
+          );
         }
       }
     };
