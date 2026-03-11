@@ -1,7 +1,7 @@
 ---
 title: "A Chemist Walked Into a Codebase"
 slug: "a-chemist-walked-into-a-codebase"
-description: "A chemist shipping apps is interesting. The real story is simpler: the secret of building software is the requirement. Compress the business into a PRD, formalize it as MCP tools, and enforce it with tests."
+description: "A chemist shipping apps is interesting. The deeper story is spike.land's core bet: formalize business logic as typed MCP tools, enforce it with tests, and turn that into running software."
 date: "2026-03-05"
 author: "Zoltan Erdos"
 category: "Developer Experience"
@@ -16,10 +16,12 @@ heroPrompt: "A chemist in a lab coat looking at glowing digital code floating in
 
 <Tldr>
 
-- The secret of building any app is not the framework. It is the requirement.
+- The secret of building any app is not picking a fashionable framework. It is formalizing the requirement.
 - A compact PRD beats a pile of vague user stories and browser-driven prompt soup.
+- spike.land is a full-stack framework for MCP-native apps: the deployed MCP server becomes a usable app surface and a callable runtime.
 - MCP formalizes the requirement into typed, testable capabilities.
 - Quality gates and MCP tests are what keep the business logic honest.
+- Gian Pierre is proof that the method can cross the developer boundary. He is not, by himself, proof of universal scale.
 
 </Tldr>
 
@@ -32,6 +34,12 @@ GlassBank, HealthBridge, and his coaching platform are the proof. The details
 matter less than the pattern.
 
 That is interesting, but it is not the real lesson.
+
+It also does not mean every business analyst can do this cold today.
+
+What it means is narrower and more important: the method can cross the boundary
+from software engineers to domain experts when the business logic is explicit
+enough.
 
 The real lesson is that he started in the right place: the requirement.
 
@@ -129,6 +137,13 @@ PRD first.
 MCP second.
 UI last.
 
+This is also where spike.land fits.
+
+spike.land is a full-stack framework for MCP-native software. On spike.land, a
+deployed MCP server is not just an API endpoint. It becomes a usable app
+surface, a callable runtime, and a distribution unit built on the same typed
+capabilities.
+
 ## Quality Gates Are What Make It Real
 
 MCPs alone are not enough. Plenty of people can generate tools. That is not the
@@ -186,6 +201,8 @@ One interface. Three jobs.
 
 He did not prove that software engineering no longer matters.
 
+He did not prove universal repeatability either.
+
 He proved that most teams still start too late in the stack.
 
 If a domain expert can explain the business clearly, compress it into a PRD,
@@ -200,6 +217,11 @@ Not giant context windows.
 
 The secret of building any app is the requirement.
 
+The framework matters too, but in a different place.
+
+Once the requirement is clear, the framework should make that clarity
+executable. That is the job spike.land is trying to do.
+
 That same discipline applied in the other direction — reading architecture out of an existing codebase instead of building from scratch — is the basis for the [Next.js migration service](/blog/nextjs-migration-service).
 
 Write the PRD.
@@ -207,6 +229,11 @@ Turn it into MCPs.
 Enforce the gates.
 Test the business logic.
 Let the UI be the easy part.
+
+The next step is not to romanticize one exceptional builder.
+
+The next step is to make this repeatable with templates, guardrails, and
+verification so the method works beyond exceptional individuals.
 
 And yes: once you work this way, the code starts to feel naturally beautiful.
 Not because the model became magical, but because the requirement finally became

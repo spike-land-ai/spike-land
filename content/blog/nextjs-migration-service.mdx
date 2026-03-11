@@ -1,7 +1,7 @@
 ---
 title: "We Migrate Next.js Apps Without Guesswork"
 slug: "nextjs-migration-service"
-description: "Most migrations fail because teams try to rewrite the app before they understand the architecture. We extract the structure first, automate the mechanical work, and escalate the hard cases only when needed."
+description: "Most migrations fail because teams try to rewrite the app before they understand the architecture. We extract the structure first, automate the mechanical work, and turn the process into a repeatable MCP capability on spike.land."
 date: "2026-03-10"
 author: "Zoltan Erdos"
 category: "Services"
@@ -19,6 +19,7 @@ heroPrompt: "A cinematic developer-focused illustration of a large aging Next.js
 
 - Most Next.js migrations fail because people start with rewriting code instead of reading architecture.
 - We handle migration in five tiers: documentation, repo-level automation, PR-generating MCP infrastructure, fixing Next.js itself, and — for £1,000,000 — running Next.js in the browser with zero install.
+- This service is one commercial wedge on top of spike.land's full-stack framework for MCP-native software.
 - The technical foundation is the same one behind the BAZDMEG method: requirement clarity, structural analysis, deterministic transformation, and aggressive verification.
 - This is not "[vibe migrate my app](/blog/the-vibe-coding-paradox)." It is a reviewable migration system.
 
@@ -65,6 +66,25 @@ But not with blind search-and-replace.
 And not with hand-wavy AI prompts pretending to understand your architecture.
 
 The only version worth selling is one that has a real method behind it.
+
+## Why This Belongs Inside spike.land
+
+spike.land is not just a registry or a hosted MCP endpoint. It is a full-stack
+framework for MCP-native software.
+
+That matters here because the migration service is not a separate consultancy
+business bolted onto the side. It is the same underlying framework
+commercialized from the other direction.
+
+When starting from a blank requirement, spike.land formalizes business logic as
+typed capabilities and turns that into a running app.
+
+When starting from an existing codebase, this service reads the structure,
+separates mechanical work from judgment, and turns migration into a typed,
+reviewable capability.
+
+That is why the ladder runs from documentation to deterministic repo pass to
+MCP server. It is a productization path, not just a stack of service packages.
 
 ## The Method Behind The Migration
 
@@ -229,8 +249,14 @@ That was obvious in our reorganization work. A script could sort hundreds of fil
 
 That same idea carries over here.
 
-Gian Pierre is not the story because he hand-edits every file.
-He is the story because he sees systems where other people see mess.
+One strong operator is not statistical proof of scale.
+
+That is not what this section is claiming.
+
+Gian Pierre is evidence that the method crosses the developer boundary when the
+structure is made visible enough. He is not the story because he hand-edits
+every file. He is the story because he sees systems where other people see
+mess.
 
 If the support is there, he will look at the migration cases that actually need expert judgment: old repos, ugly repos, mixed-pattern repos, high-sediment repos.
 
@@ -243,6 +269,8 @@ Not brute-forcing the entire migration by hand, but stepping in where structure 
 ### Tier 1 - Documentation: $420
 
 This tier exists for teams that are not ready to commit to migration work yet, but need a serious map.
+
+It is also the field-research layer for the broader framework.
 
 If funded, Gian Pierre will migrate eight real Next.js projects — ranging from content sites and SaaS dashboards to e-commerce storefronts and internal tools — and document what actually happens: the false starts, the dead ends, the framework-specific traps, the easy wins, and the parts that are truly mechanical versus the parts that require judgment.
 
@@ -271,6 +299,9 @@ Changing route definitions. Translating config. Replacing framework imports. Rew
 That work should not consume human attention if it can be made deterministic.
 
 Tier 2 runs the migration against your repo, applies the mechanical pass, handles the predictable edge cases, and returns a reviewable diff.
+
+This is the point where the field research becomes a deterministic product
+surface.
 
 You still own the merge.
 You still review the output.
@@ -302,7 +333,8 @@ That is a different class of offer.
 It means the migration becomes repeatable, inspectable, and maintainable as the target stack evolves.
 
 You are not buying "some engineering time."
-You are buying a migration system pointed at your codebase.
+You are buying a migration system pointed at your codebase, running on the same
+platform principles as the rest of spike.land.
 
 **What you get:**  
 a working MCP migration server for your repo, a generated PR, and one year of maintenance as the target stack evolves
@@ -365,7 +397,9 @@ Zoltan delivers. If somehow he does not — Gian Pierre steps in, and the money 
 
 ---
 
-The tiers are designed to meet you where you are. Most teams start with Tier 1 or Tier 2. Tier 3 is for recurring needs. Tier 4 is for the industry. Tier 5 is for the future.
+The tiers are designed to meet you where you are, but they are also a
+productization ladder. Most teams start with Tier 1 or Tier 2. Tier 3 is for
+recurring needs. Tier 4 is for the industry. Tier 5 is for the future.
 
 ## What The Technical Pipeline Looks Like
 
