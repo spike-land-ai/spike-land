@@ -1,0 +1,1019 @@
+
+/Users/z/Developer/spike-land-ai/.tests/code/__tests__/integration/start-with-prompt-flow.spec.tsx
+  141:37  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  193:37  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  258:39  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  273:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  278:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  374:37  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/.tests/spike-app/apps/pagesTemplateChooser.test.tsx
+  99:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/.tests/spike-edge/__tests__/index-full.test.ts
+   98:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  139:8   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/.tests/spike-land-backend/__tests__/chat.spec.ts
+  55:10  error  'handleRequest' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/z/Developer/spike-land-ai/.tests/spike-land-mcp/auth/middleware.test.ts
+   8:15  error  'Env' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  45:10  error  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+  53:33  error  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+  62:37  error  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+  66:24  error  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+  73:15  error  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/.tests/spike-land-mcp/routes/oauth.test.ts
+  51:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/.tests/spike-land-mcp/routes/well-known.test.ts
+  36:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/src/app/admin/mcp-dashboard/page.tsx
+  20:5  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/cli/docker-dev/core-logic/spike-chat-poller.ts
+  142:34  warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+  204:3   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/cli/docker-dev/node-sys/agent.ts
+  76:43  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/conversation-engine/__tests__/interview.test.ts
+  229:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  233:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  238:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/data-seeds/__tests__/seed-loader.test.ts
+  134:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/document-processor/__tests__/checklist-generator.test.ts
+  82:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/document-processor/__tests__/form-filler.test.ts
+  363:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  369:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/document-processor/core-logic/form-filler.ts
+   76:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  173:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  186:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  206:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  212:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/document-processor/core-logic/plain-language.ts
+   54:61  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  137:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/eligibility-engine/__tests__/rules-engine.test.ts
+  509:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  510:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  512:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  513:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/eligibility-engine/core-logic/profile-builder.ts
+  202:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  203:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  204:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  205:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  207:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  208:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/eligibility-engine/core-logic/ranking.ts
+   62:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   63:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  140:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  147:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  153:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  158:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  168:35  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  171:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  176:35  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  183:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/i18n/core-logic/cultural-adapter.ts
+  436:74  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  439:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  497:72  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  520:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  544:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/i18n/core-logic/translator.ts
+  107:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/messaging/__tests__/telegram-adapter.test.ts
+  128:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  168:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/messaging/__tests__/whatsapp-adapter.test.ts
+  140:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/pwa/__tests__/useOnlineStatus.test.ts
+  86:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/compass/rights-engine/core-logic/rights-lookup.ts
+  305:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  311:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-sdk/core-logic/memory.ts
+   57:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   66:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   76:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   77:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   81:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   90:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  101:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  110:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  111:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  112:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  122:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  126:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  127:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  139:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  152:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  162:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-sdk/db/idb.ts
+  158:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  160:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  165:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  176:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  203:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  204:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  205:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  205:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  208:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  247:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  253:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  255:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  256:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  256:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  285:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  286:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  289:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-sdk/lazy-imports/define-block.ts
+  97:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/animation-ui/DarwinianTreeDemo.tsx
+   67:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   84:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  106:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/animation-ui/SpikeCliDemo.tsx
+  327:47  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/core-logic/blog-image-policy.ts
+  49:39  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/core-logic/categorizer-engine.ts
+  31:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  40:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/core-logic/elevenlabs-tts.ts
+   48:19  warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+  168:21  warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+  195:47  warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+  229:7   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  278:19  warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+  320:29  warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+  335:11  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  370:23  warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/core-logic/reducers.ts
+  18:49  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/core-logic/view-transition.ts
+  32:3  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/ui/BlogList.tsx
+  263:5  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/ui/BlogReaderControls.tsx
+   45:20  warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+  448:7   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/ui/CodeBlock.tsx
+  126:5  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  154:5  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/ui/CodeCategorizerQuiz.tsx
+  165:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  172:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  173:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  196:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  197:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  202:53  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  235:53  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/ui/ContentCreatorMode.tsx
+   35:50  warning  Forbidden non-null assertion                                                       @typescript-eslint/no-non-null-assertion
+   48:31  warning  Forbidden non-null assertion                                                       @typescript-eslint/no-non-null-assertion
+  130:21  warning  Promise-returning function provided to attribute where a void return was expected  @typescript-eslint/no-misused-promises
+  243:64  warning  Forbidden non-null assertion                                                       @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/ui/MCPTerminalDemo.tsx
+  139:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/ui/SupportBanner.tsx
+  184:21  warning  Promise-returning function provided to attribute where a void return was expected  @typescript-eslint/no-misused-promises
+  232:23  warning  Promise-returning function provided to attribute where a void return was expected  @typescript-eslint/no-misused-promises
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/ui/TryItCta.tsx
+  17:5  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/core/block-website/ui/TryItNow.tsx
+  45:5  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/core/browser-automation/core-logic/browser-session.ts
+   73:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  126:45  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/browser-automation/core-logic/link-checker/github-validator.ts
+  14:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  15:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  41:10  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  42:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/browser-automation/core-logic/link-checker/markdown-parser.ts
+   20:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   53:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   54:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   69:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   70:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   85:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  100:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  180:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/browser-automation/core-logic/narrate.ts
+  342:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  410:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  434:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  481:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/browser-automation/edge/adapter-puppeteer.ts
+  176:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/browser-automation/edge/session-do.ts
+   67:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  232:52  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/browser-automation/lazy-imports/http-server.ts
+  78:9  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/core/browser-automation/testing/adapter-playwright.ts
+  191:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/react-dom/events/EventDelegation.ts
+  103:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  113:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/react-worker-dom/bridge/main-applier.ts
+  39:43  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  44:45  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  44:61  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  54:41  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  60:41  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  62:38  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  67:41  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  77:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  77:38  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  84:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  91:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  91:43  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/react-worker-dom/bridge/worker-document.ts
+  73:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/reconciler/ReactFiberBeginWork.ts
+  122:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  270:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  476:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/reconciler/ReactFiberClassComponent.ts
+   72:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   90:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   91:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   97:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   98:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   99:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  103:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  108:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  111:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/reconciler/ReactFiberCommitWork.ts
+  139:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/reconciler/ReactFiberCompleteWork.ts
+  106:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  157:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/reconciler/ReactFiberHooks.ts
+  308:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  367:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  398:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  404:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  405:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  406:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  422:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  423:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  424:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  432:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  433:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  434:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  439:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  445:31  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  458:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  699:69  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/reconciler/ReactFiberNewContext.ts
+  162:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  163:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  163:37  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  166:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  169:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  169:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  169:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  170:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/reconciler/ReactFiberWorkLoop.ts
+  139:7  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/scheduler/Scheduler.ts
+  211:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  223:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  229:3   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/scheduler/SchedulerMinHeap.ts
+  22:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  23:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  35:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/react-engine/core-logic/shared/shallowEqual.ts
+  20:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/server-base/core-logic/error-shipper.ts
+  61:7  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  69:7  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/core/shared-utils/core-logic/builder.ts
+  86:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/core/shared-utils/styling/cva.ts
+  19:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  20:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  56:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  69:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  70:69  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/src/core/shared-utils/ui/slot.tsx
+  19:29  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  20:7   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  21:25  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  21:80  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  22:10  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  36:17  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/src/core/statecharts/core-logic/parser.ts
+   28:46  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  232:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  233:74  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  240:51  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  241:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  254:57  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/backend/ai/gemini-stream.ts
+  193:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  206:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/backend/ai/replicateHandler.ts
+  170:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/backend/edge/chat.ts
+  206:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/backend/lazy-imports/apiHandler.ts
+  38:35  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  39:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/backend/lazy-imports/apiRoutes.ts
+  251:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  252:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  253:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  262:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  263:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/backend/lazy-imports/chatRoom.ts
+  512:32  warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+  726:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/edge-api/backend/lazy-imports/websocketHandler.ts
+  105:9  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/image-studio-worker/core-logic/nanoid.ts
+   9:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  10:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/image-studio-worker/mcp/db.ts
+   371:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   410:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   517:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   552:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   666:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   808:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   896:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   931:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1076:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  1095:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/__tests__/__tests__/blog.test.ts
+  195:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  196:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  212:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/__tests__/__tests__/experiments.test.ts
+  120:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  138:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  138:59  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  248:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  249:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/__tests__/__tests__/iwd.test.ts
+  87:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/__tests__/blog.test.ts
+  220:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  221:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  237:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  258:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  301:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  344:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/__tests__/experiments.test.ts
+  120:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  138:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  138:59  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  248:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  249:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/__tests__/iwd.test.ts
+  87:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/__tests__/prd-compression.test.ts
+   52:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   53:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   59:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   65:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   71:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   77:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   83:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   89:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  100:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  101:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  102:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  103:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  189:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  198:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  246:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  247:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  248:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  317:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  318:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/__tests__/pricing.test.ts
+   73:33  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   73:53  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   74:34  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   74:55  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   75:33  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   75:53  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  158:34  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  159:34  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  160:34  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  164:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  170:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  176:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  182:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  188:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  189:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  204:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  208:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  212:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/content-edit.ts
+  82:47  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/routes/analytics.ts
+  386:59  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  387:59  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  400:59  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  401:57  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  414:59  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/routes/bugbook.ts
+  146:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  191:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/routes/chat.ts
+  821:65  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/routes/checkout.ts
+   66:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  123:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  142:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  150:38  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/routes/credits.ts
+  81:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/routes/errors.ts
+  79:48  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/routes/experiments-route-logic.ts
+  106:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/routes/iwd.ts
+   326:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  2399:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  2400:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/routes/whatsapp.ts
+  271:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/main/core-logic/__tests__/elo-service.test.ts
+  122:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  123:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-chat/api/routes/webhooks.ts
+  92:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-chat/core-logic/mention-parser.ts
+  25:44  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  27:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  28:43  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  34:45  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-chat/edge/channel-do.ts
+  42:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  45:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-chat/edge/presence-do.ts
+  16:5   warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+  37:32  warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+  38:7   warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+  45:7   warning  Forbidden non-null assertion                                                                                                                                        @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/lib/quiz-engine.ts
+  686:35  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  686:49  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  708:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  714:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  729:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  760:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  761:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  762:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  763:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/mcp/search.ts
+  111:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/apps.ts
+  664:41  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/bft.ts
+  108:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  109:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  147:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  193:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  476:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/business-plan-analyzer.ts
+   85:49  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   95:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   95:50  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   98:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   98:50  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  107:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/career/career-index.ts
+  342:47  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/career/growth.ts
+  448:8  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/causality.ts
+  85:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  85:59  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/chat.ts
+  70:53  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/context-architect.ts
+   55:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   56:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  271:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  273:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  381:35  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/crdt.ts
+   94:59  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  100:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  104:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  220:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  448:57  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  449:35  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  451:42  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  454:11  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  458:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  504:31  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  510:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  511:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  553:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/diff.ts
+   87:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   89:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  112:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  125:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/esbuild.ts
+  132:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  133:34  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  134:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/learnit.ts
+   75:47  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  186:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/netsim.ts
+  118:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  119:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/orchestrator.ts
+  202:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/store/apps.ts
+   48:10  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   88:40  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  278:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/core-logic/tools/tts.ts
+  91:43  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/db/tools/agent-inbox.ts
+  95:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/db/tools/bootstrap.ts
+  57:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/db/tools/gateway-meta.ts
+  276:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/db/tools/persona/audit-questionnaire.ts
+  225:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  226:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/db/tools/reminders.ts
+  107:47  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  107:74  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/spike-land/db/tools/swarm-monitoring.ts
+  50:57  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/edge-api/status/__tests__/monitor.test.ts
+  107:31  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  123:31  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/animation-ui/start-with-prompt.tsx
+   52:46  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   69:46  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  258:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  264:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/concurrency/RenderService.ts
+  55:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/concurrency/code-session.ts
+  112:68  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/concurrency/shared.ts
+  107:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  120:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  131:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  185:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  213:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/concurrency/transpile.ts
+  226:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/components/app/monaco/model.ts
+  251:62  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/components/app/monaco/utils.ts
+  23:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  99:57  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/lib/chat-utils.ts
+   48:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   50:55  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   52:10  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   54:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  121:24  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  217:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  253:41  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/lib/diff-utils.ts
+  153:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  157:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  163:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  164:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  164:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  165:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  165:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  166:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  166:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  171:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  171:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/lib/get-parts.ts
+  52:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  89:34  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  90:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/lib/importmap-utils.ts
+  166:41  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  166:59  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  166:81  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  321:38  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  340:38  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  352:38  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/lib/lru-cache/core.ts
+  845:47  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  846:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  981:15  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/lib/process-image.ts
+  40:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  43:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/lib/shared-w-polyfill.ts
+  7:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/lib/use-archive.ts
+  265:5  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/services/SessionSynchronizer.ts
+   54:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   65:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  100:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/services/editorUtils.ts
+  102:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/core-logic/sw-local-fake-server.ts
+  127:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  266:40  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/crypto-data-structures/md5.ts
+  13:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/file-types/serve-with-cache.ts
+  144:42  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/lazy-imports/ata.worker.ts
+  129:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  130:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/lazy-imports/esbuild-fetch-plugin.ts
+  152:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  152:40  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  159:53  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  211:44  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/ui/@/components/app/suggestions.tsx
+  25:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  25:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  27:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  28:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/ui/@/external/CodeBlock.tsx
+  25:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/monaco-editor/ui/@/lib/render-app.tsx
+   67:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   77:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   77:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  351:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/core-logic/__tests__/ata-cache.test.ts
+  28:53  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  31:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/core-logic/__tests__/derive-surface.test.ts
+   69:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   70:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   71:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   72:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  103:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  104:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  105:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  106:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  200:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  201:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/core-logic/derive-surface.ts
+  221:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  278:13  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/editor/CodeEditor.tsx
+  182:50  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  193:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/editor/monaco-cover/theme.ts
+  196:55  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/editor/tsx-highlighting.ts
+   75:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  254:38  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  269:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/ui/components/SpikeChatPanel.tsx
+  91:50  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/ui/hooks/__tests__/useFocusTrap.test.ts
+   41:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   48:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  102:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  103:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  134:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  135:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  163:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  164:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  230:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/ui/hooks/__tests__/useSpikeChat.test.ts
+  163:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  173:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  179:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  180:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  181:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  183:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  193:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  197:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  217:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  218:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  228:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  229:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  247:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  248:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  258:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  259:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  304:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  308:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  315:7   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  319:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  326:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  331:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  349:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/ui/hooks/__tests__/useTranspiler.test.ts
+  125:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  126:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/ui/hooks/useTranspiler.ts
+   70:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   76:16  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+   82:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  266:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/ui/routes/learn/$sessionId.tsx
+  100:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  105:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  106:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  107:5   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  111:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  111:57  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  225:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/ui/routes/learn/badge/$token.tsx
+  19:31  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/ui/routes/pricing.tsx
+  220:41  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/bazdmeg/core-logic/engine.ts
+  240:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/bazdmeg/mcp/deps.ts
+   28:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  116:20  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/bazdmeg/mcp/workflow.ts
+  323:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  324:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  332:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  333:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  339:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  340:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  370:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  469:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  472:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  473:31  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/bazdmeg/node-sys/manifest.ts
+  108:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  113:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  117:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  124:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  125:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  134:51  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  144:36  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  152:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  173:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  178:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  181:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  190:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  191:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  191:50  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  196:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  200:35  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  202:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  205:18  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  205:50  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/docker-compose/core-logic/caddy-admin.ts
+  65:29  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/hackernews/core-logic/hn-write-client.ts
+   81:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  120:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  150:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  174:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  202:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  235:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  262:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  285:19  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  329:26  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/image-studio/core-logic/tools/avatar.ts
+  62:43  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/image-studio/core-logic/tools/banner.ts
+  117:34  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  164:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/image-studio/core-logic/tools/crop.ts
+  77:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  78:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/image-studio/core-logic/tools/diagram.ts
+   70:34  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  105:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/image-studio/core-logic/tools/edit.ts
+  98:43  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/image-studio/core-logic/tools/generate.ts
+  158:45  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  227:45  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  256:43  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/image-studio/core-logic/tools/icon.ts
+   99:34  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  136:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/image-studio/core-logic/tools/screenshot.ts
+  77:32  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/iwd-spotlight/core-logic/storytelling.ts
+  79:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/iwd-spotlight/mcp/index.ts
+  61:1  warning  Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator  @typescript-eslint/no-floating-promises
+
+/Users/z/Developer/spike-land-ai/src/mcp-tools/reorganize/core-logic/analyze.ts
+  39:22  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  39:42  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/media/educational-videos/video/components/diagrams/NoteLifecycle.tsx
+  137:23  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  138:28  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  147:47  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/media/educational-videos/video/components/diagrams/SkillMatchingDiagram.tsx
+  264:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+  284:27  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+/Users/z/Developer/spike-land-ai/src/media/educational-videos/video/compositions/vibe-coding-paradox/Scene02_PhysicsOfAttention.tsx
+  33:12  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+✖ 644 problems (27 errors, 617 warnings)
+

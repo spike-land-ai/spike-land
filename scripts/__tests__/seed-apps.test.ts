@@ -78,7 +78,7 @@ graph:
       expect(sql).toContain("'App 1'");
       expect(sql).toContain("'[\"t1\"]'");
       expect(sql).toContain("'Code & Developer Tools'");
-      expect(sql).toContain("'[\"code\",\"developer\"]'");
+      expect(sql).toContain('\'["code","developer"]\'');
       expect(sql).toContain("'Build faster'");
       expect(sql).toContain("'free'");
     });

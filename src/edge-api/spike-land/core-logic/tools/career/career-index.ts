@@ -339,7 +339,7 @@ export function registerCareerTools(
                   ? `${job.currency}${job.salary_min.toLocaleString()} - ${job.currency}${job.salary_max.toLocaleString()}`
                   : job.salary_min
                     ? `From ${job.currency}${job.salary_min.toLocaleString()}`
-                    : `Up to ${job.currency}${job.salary_max!.toLocaleString()}`;
+                    : `Up to ${job.currency}${job.salary_max?.toLocaleString()}`;
               text += `  Salary: ${salary}\n`;
             }
             text += `  [Apply](${job.url})\n\n`;

@@ -10,7 +10,7 @@ export function md5(input: object | string): string {
 
   // Check cache
   if (shortHashCache.has(strInput)) {
-    return shortHashCache.get(strInput)!;
+    return shortHashCache.get(strInput);
   }
 
   // Compute numeric hash

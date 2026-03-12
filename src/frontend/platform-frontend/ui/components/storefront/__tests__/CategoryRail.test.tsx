@@ -7,22 +7,48 @@ describe("CategoryRail", () => {
   const mockGroups: AppCategoryGroup[] = [
     {
       category: "Code & Developer Tools",
-      apps: [{ slug: "app1", name: "App 1", description: "Desc 1", emoji: "🔧", category: "Code & Developer Tools", tags: [], tagline: "Tag 1", pricing: "free", is_featured: false, is_new: false, tool_count: 1, sort_order: 1 } as McpAppSummary],
+      apps: [
+        {
+          slug: "app1",
+          name: "App 1",
+          description: "Desc 1",
+          emoji: "🔧",
+          category: "Code & Developer Tools",
+          tags: [],
+          tagline: "Tag 1",
+          pricing: "free",
+          is_featured: false,
+          is_new: false,
+          tool_count: 1,
+          sort_order: 1,
+        } as McpAppSummary,
+      ],
     },
     {
       category: "Agents & Collaboration",
-      apps: [{ slug: "app2", name: "App 2", description: "Desc 2", emoji: "🔧", category: "Agents & Collaboration", tags: [], tagline: "Tag 2", pricing: "free", is_featured: false, is_new: false, tool_count: 1, sort_order: 2 } as McpAppSummary],
+      apps: [
+        {
+          slug: "app2",
+          name: "App 2",
+          description: "Desc 2",
+          emoji: "🔧",
+          category: "Agents & Collaboration",
+          tags: [],
+          tagline: "Tag 2",
+          pricing: "free",
+          is_featured: false,
+          is_new: false,
+          tool_count: 1,
+          sort_order: 2,
+        } as McpAppSummary,
+      ],
     },
   ];
 
   it("renders Discover option and handles click", () => {
     const mockOnSelect = vi.fn();
     render(
-      <CategoryRail
-        groups={mockGroups}
-        activeCategory={null}
-        onSelectCategory={mockOnSelect}
-      />
+      <CategoryRail groups={mockGroups} activeCategory={null} onSelectCategory={mockOnSelect} />,
     );
 
     const discoverBtn = screen.getByRole("button", { name: /Discover/i });
@@ -42,7 +68,7 @@ describe("CategoryRail", () => {
         groups={mockGroups}
         activeCategory="Code & Developer Tools"
         onSelectCategory={mockOnSelect}
-      />
+      />,
     );
 
     const activeBtn = screen.getByRole("button", { name: /Code & Developer Tools 1/i });

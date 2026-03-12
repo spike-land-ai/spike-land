@@ -6,7 +6,7 @@ function createMockIDB() {
 
   const mockObjectStore = (name: string) => {
     if (!stores[name]) stores[name] = new Map();
-    const store = stores[name]!;
+    const store = stores[name];
 
     return {
       get(key: string) {
@@ -39,7 +39,7 @@ function createMockIDB() {
         };
         const advance = () => {
           if (index < entries.length) {
-            const [key, value] = entries[index]!;
+            const [key, value] = entries[index];
             index++;
             req.result = {
               value,
@@ -141,8 +141,8 @@ describe("idb-cache", () => {
     const result = await getWasmModule("esbuild-wasm");
 
     expect(result).toBeInstanceOf(ArrayBuffer);
-    expect(new Uint8Array(result!)[0]).toBe(0);
-    expect(new Uint8Array(result!)[1]).toBe(97);
+    expect(new Uint8Array(result)[0]).toBe(0);
+    expect(new Uint8Array(result)[1]).toBe(97);
   });
 
   it("should return null for missing WASM module entries", async () => {

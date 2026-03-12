@@ -135,7 +135,9 @@ export function registerReactionsTools(
           const existing = await ctx.db
             .select({ id: toolReactions.id })
             .from(toolReactions)
-            .where(and(eq(toolReactions.id, input.reactionId), eq(toolReactions.userId, ctx.userId)))
+            .where(
+              and(eq(toolReactions.id, input.reactionId), eq(toolReactions.userId, ctx.userId)),
+            )
             .limit(1);
 
           if (existing.length === 0) {
@@ -146,7 +148,9 @@ export function registerReactionsTools(
 
           await ctx.db
             .delete(toolReactions)
-            .where(and(eq(toolReactions.id, input.reactionId), eq(toolReactions.userId, ctx.userId)));
+            .where(
+              and(eq(toolReactions.id, input.reactionId), eq(toolReactions.userId, ctx.userId)),
+            );
 
           return textResult(`Reaction '${input.reactionId}' deleted.`);
         });

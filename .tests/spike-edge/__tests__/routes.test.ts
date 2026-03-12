@@ -340,9 +340,9 @@ describe("proxy route — stripe", () => {
     );
 
     expect(res.status).toBe(200);
-    const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[0]!).toBe("https://api.stripe.com/v1/customers");
-    expect(fetchCall[1]!.headers.Authorization).toBe("Bearer sk_test_xxx");
+    const fetchCall = mockFetch.mock.calls[0];
+    expect(fetchCall[0]).toBe("https://api.stripe.com/v1/customers");
+    expect(fetchCall[1]?.headers.Authorization).toBe("Bearer sk_test_xxx");
 
     vi.unstubAllGlobals();
   });
@@ -393,8 +393,8 @@ describe("proxy route — ai", () => {
     );
 
     expect(res.status).toBe(200);
-    const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.headers["x-api-key"]).toBe("claude-token");
+    const fetchCall = mockFetch.mock.calls[0];
+    expect(fetchCall[1]?.headers["x-api-key"]).toBe("claude-token");
 
     vi.unstubAllGlobals();
   });
@@ -426,9 +426,9 @@ describe("proxy route — ai", () => {
     );
 
     expect(res.status).toBe(200);
-    const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.headers.Authorization).toBe("Bearer gemini-key");
-    expect(fetchCall[1]!.body).toBe(JSON.stringify({ contents: [] }));
+    const fetchCall = mockFetch.mock.calls[0];
+    expect(fetchCall[1]?.headers.Authorization).toBe("Bearer gemini-key");
+    expect(fetchCall[1]?.body).toBe(JSON.stringify({ contents: [] }));
 
     vi.unstubAllGlobals();
   });
@@ -523,10 +523,10 @@ describe("proxy route — github", () => {
     );
 
     expect(res.status).toBe(200);
-    const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.headers.Authorization).toBe("Bearer ghp_xxx");
-    expect(fetchCall[1]!.headers.Accept).toBe("application/vnd.github+json");
-    expect(fetchCall[1]!.headers["User-Agent"]).toBe("spike-edge");
+    const fetchCall = mockFetch.mock.calls[0];
+    expect(fetchCall[1]?.headers.Authorization).toBe("Bearer ghp_xxx");
+    expect(fetchCall[1]?.headers.Accept).toBe("application/vnd.github+json");
+    expect(fetchCall[1]?.headers["User-Agent"]).toBe("spike-edge");
 
     vi.unstubAllGlobals();
   });
@@ -970,10 +970,10 @@ describe("proxy route — body forwarding", () => {
       env,
     );
 
-    const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.method).toBe("POST");
-    expect(fetchCall[1]!.body).toBe("amount=1000&currency=usd");
-    expect(fetchCall[1]!.headers["Stripe-Version"]).toBe("2024-06-20");
+    const fetchCall = mockFetch.mock.calls[0];
+    expect(fetchCall[1]?.method).toBe("POST");
+    expect(fetchCall[1]?.body).toBe("amount=1000&currency=usd");
+    expect(fetchCall[1]?.headers["Stripe-Version"]).toBe("2024-06-20");
 
     vi.unstubAllGlobals();
   });
@@ -1001,8 +1001,8 @@ describe("proxy route — body forwarding", () => {
       env,
     );
 
-    const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.body).toBeNull();
+    const fetchCall = mockFetch.mock.calls[0];
+    expect(fetchCall[1]?.body).toBeNull();
 
     vi.unstubAllGlobals();
   });
@@ -1034,9 +1034,9 @@ describe("proxy route — body forwarding", () => {
       env,
     );
 
-    const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.method).toBe("POST");
-    expect(fetchCall[1]!.body).toBe(JSON.stringify({ title: "Bug report" }));
+    const fetchCall = mockFetch.mock.calls[0];
+    expect(fetchCall[1]?.method).toBe("POST");
+    expect(fetchCall[1]?.body).toBe(JSON.stringify({ title: "Bug report" }));
 
     vi.unstubAllGlobals();
   });
@@ -1064,8 +1064,8 @@ describe("proxy route — body forwarding", () => {
       env,
     );
 
-    const fetchCall = mockFetch.mock.calls[0]!;
-    expect(fetchCall[1]!.body).toBeNull();
+    const fetchCall = mockFetch.mock.calls[0];
+    expect(fetchCall[1]?.body).toBeNull();
 
     vi.unstubAllGlobals();
   });

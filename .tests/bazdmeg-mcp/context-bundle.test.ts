@@ -103,7 +103,7 @@ describe("buildContextBundle", () => {
     expect(bundle.packageName).toBe("test-pkg");
     expect(bundle.claudeMd).toContain("# Test Package");
     expect(bundle.packageJson).toBeDefined();
-    expect(bundle.packageJson!.name).toBe("@spike-land-ai/test-pkg");
+    expect(bundle.packageJson?.name).toBe("@spike-land-ai/test-pkg");
     expect(bundle.exportedTypes).toHaveLength(1);
     expect(bundle.exportedTypes[0].symbols).toContain("Config");
     expect(bundle.exportedTypes[0].symbols).toContain("Status");
@@ -178,9 +178,9 @@ describe("buildContextBundle", () => {
     await writeFile(pkgJsonPath, "{}");
     bundle = await buildContextBundle(result.root, "bad-pkg", []);
     expect(bundle.packageJson).not.toBeNull();
-    expect(bundle.packageJson!.name).toBe("unknown"); // default
-    expect(bundle.packageJson!.version).toBe("0.0.0"); // default
-    expect(bundle.packageJson!.scripts).toEqual({}); // default
+    expect(bundle.packageJson?.name).toBe("unknown"); // default
+    expect(bundle.packageJson?.version).toBe("0.0.0"); // default
+    expect(bundle.packageJson?.scripts).toEqual({}); // default
 
     // Test missing package.json file entirely
     const fs = await import("node:fs/promises");

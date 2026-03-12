@@ -368,10 +368,10 @@ describe("cli stutter prevention (cli/cli/cli → cli/spike-cli/core-logic)", ()
       "spike-cli": { kind: "cli" },
     });
 
-    const category = categories.get("spike-cli")!;
+    const category = categories.get("spike-cli");
     const appName = resolveAppName("spike-cli");
 
-    const depGroup = getDependencyGroupName(nodes[0].resolvedDeps!);
+    const depGroup = getDependencyGroupName(nodes[0].resolvedDeps);
     const finalDepGroup = deduplicateDepGroup(depGroup, category);
 
     const path = `${category}/${appName}/${finalDepGroup}`;

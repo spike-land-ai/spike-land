@@ -54,10 +54,10 @@ describe("blockToTools", () => {
     const storage = createMemoryAdapter();
     await testBlock.initialize(storage);
     const tools = blockToTools(testBlock, storage, "user-1");
-    const addTool = tools.find((t) => t.name === "add_note")!;
+    const addTool = tools.find((t) => t.name === "add_note");
     const result = await addTool.handler({ text: "hello" });
     expect(result.isError).toBeUndefined();
-    const data = JSON.parse(result.content[0]!.text!);
+    const data = JSON.parse(result.content[0]?.text);
     expect(data.id).toBeTruthy();
   });
 });
@@ -107,7 +107,7 @@ describe("registerBlockTools", () => {
 
     registerBlockTools(testBlock, mockRegistry, storage, "user-1");
 
-    const addHandler = handlers.get("add_note")!;
+    const addHandler = handlers.get("add_note");
     const result = await addHandler({ text: "test note" });
     expect(result).toBeDefined();
   });

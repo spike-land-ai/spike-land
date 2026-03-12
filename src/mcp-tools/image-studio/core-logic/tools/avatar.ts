@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { AVATAR_STYLE_VALUES, errorResult, jsonResult, toolEvent } from "../../mcp/types.js";
-import { tryCatch } from "../../mcp/try-catch.js";
 import { imageProcedure } from "../../lazy-imports/image-middleware.js";
 import { consumeCreditsOrError } from "../define-tool.js";
 
@@ -59,7 +58,7 @@ export const avatarTool = imageProcedure
     );
     if (error) return error;
 
-    ctx.notify?.(toolEvent("job:created", jobRes.data.jobId!, { tier, status: "PENDING" }));
+    ctx.notify?.(toolEvent("job:created", jobRes.data.jobId, { tier, status: "PENDING" }));
     return jsonResult({
       jobId: jobRes.data.jobId,
       creditsCost: jobRes.data.creditsCost ?? cost,
@@ -70,3 +69,53 @@ export const avatarTool = imageProcedure
 export const avatar = avatarTool.handler;
 export const AvatarInputSchema = z.object(avatarTool.inputSchema);
 export type AvatarInput = Parameters<typeof avatar>[0];
+
+// --- Inlined Result and tryCatch ---
+type Result<T> =
+  | {
+      ok: true;
+      data: T;
+      error?: never;
+      unwrap(): T;
+      map<U>(fn: (val: T) => U): Result<U>;
+      flatMap<U>(fn: (val: T) => Result<U>): Result<U>;
+    }
+  | {
+      ok: false;
+      data?: never;
+      error: Error;
+      unwrap(): never;
+      map<U>(fn: (val: T) => U): Result<U>;
+      flatMap<U>(fn: (val: T) => Result<U>): Result<U>;
+    };
+
+function ok<T>(data: T): Result<T> {
+  return {
+    ok: true,
+    data,
+    unwrap: () => data,
+    map: <U>(fn: (val: T) => U) => ok(fn(data)),
+    flatMap: <U>(fn: (val: T) => Result<U>) => fn(data),
+  };
+}
+
+function fail<T = never>(error: Error): Result<T> {
+  return {
+    ok: false,
+    error,
+    unwrap: () => {
+      throw error;
+    },
+    map: () => fail(error),
+    flatMap: () => fail(error),
+  };
+}
+
+async function tryCatch<T>(promise: Promise<T>): Promise<Result<T>> {
+  try {
+    const data = await promise;
+    return ok(data);
+  } catch (err) {
+    return fail(err instanceof Error ? err : new Error(String(err)));
+  }
+}

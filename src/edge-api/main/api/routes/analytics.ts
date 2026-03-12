@@ -383,8 +383,8 @@ analytics.get("/analytics/mcp/tools", async (c) => {
   }
 
   const url = new URL("https://mcp.spike.land/internal/analytics/tools");
-  if (c.req.query("range")) url.searchParams.set("range", c.req.query("range")!);
-  if (c.req.query("limit")) url.searchParams.set("limit", c.req.query("limit")!);
+  if (c.req.query("range")) url.searchParams.set("range", c.req.query("range"));
+  if (c.req.query("limit")) url.searchParams.set("limit", c.req.query("limit"));
 
   const res = await c.env.MCP_SERVICE.fetch(new Request(url.toString()));
   return new Response(res.body, { status: res.status, headers: new Headers(res.headers) });
@@ -397,8 +397,8 @@ analytics.get("/analytics/mcp/users", async (c) => {
   }
 
   const url = new URL("https://mcp.spike.land/internal/analytics/users");
-  if (c.req.query("range")) url.searchParams.set("range", c.req.query("range")!);
-  if (c.req.query("tool")) url.searchParams.set("tool", c.req.query("tool")!);
+  if (c.req.query("range")) url.searchParams.set("range", c.req.query("range"));
+  if (c.req.query("tool")) url.searchParams.set("tool", c.req.query("tool"));
 
   const res = await c.env.MCP_SERVICE.fetch(new Request(url.toString()));
   return new Response(res.body, { status: res.status, headers: new Headers(res.headers) });
@@ -411,7 +411,7 @@ analytics.get("/analytics/mcp/summary", async (c) => {
   }
 
   const url = new URL("https://mcp.spike.land/internal/analytics/summary");
-  if (c.req.query("range")) url.searchParams.set("range", c.req.query("range")!);
+  if (c.req.query("range")) url.searchParams.set("range", c.req.query("range"));
 
   const res = await c.env.MCP_SERVICE.fetch(new Request(url.toString()));
   return new Response(res.body, { status: res.status, headers: new Headers(res.headers) });

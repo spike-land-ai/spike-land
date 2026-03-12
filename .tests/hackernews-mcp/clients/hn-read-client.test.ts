@@ -190,11 +190,11 @@ describe("HNReadClient", () => {
       const result = await client.getItemWithComments(12345, 2);
 
       expect(result).not.toBeNull();
-      expect(result!.id).toBe(12345);
-      expect(result!.comments).toHaveLength(2);
-      expect(result!.comments[0].id).toBe(12346);
-      expect(result!.comments[0].children).toHaveLength(1);
-      expect(result!.comments[0].children[0].id).toBe(12348);
+      expect(result?.id).toBe(12345);
+      expect(result?.comments).toHaveLength(2);
+      expect(result?.comments[0].id).toBe(12346);
+      expect(result?.comments[0].children).toHaveLength(1);
+      expect(result?.comments[0].children[0].id).toBe(12348);
     });
 
     it("returns null for missing item", async () => {
@@ -227,9 +227,9 @@ describe("HNReadClient", () => {
       const client = new HNReadClient(fetch);
       const result = await client.getItemWithComments(12345, 1);
 
-      expect(result!.comments).toHaveLength(2);
+      expect(result?.comments).toHaveLength(2);
       // Depth=1 means no children fetched
-      expect(result!.comments[0].children).toHaveLength(0);
+      expect(result?.comments[0].children).toHaveLength(0);
     });
   });
 
@@ -491,7 +491,7 @@ describe("HNReadClient", () => {
       const client = new HNReadClient(fetch);
       const result = await client.getItemWithComments(12345, 2);
       expect(result).not.toBeNull();
-      expect(result!.comments).toHaveLength(0);
+      expect(result?.comments).toHaveLength(0);
     });
 
     it("item without kids property uses ?? [] fallback in getItemWithComments", async () => {
@@ -507,7 +507,7 @@ describe("HNReadClient", () => {
       const client = new HNReadClient(fetch);
       const result = await client.getItemWithComments(12345, 2);
       expect(result).not.toBeNull();
-      expect(result!.comments).toHaveLength(0);
+      expect(result?.comments).toHaveLength(0);
     });
 
     it("recursive buildCommentTree uses ?? [] when child item has no kids", async () => {
@@ -535,9 +535,9 @@ describe("HNReadClient", () => {
       const client = new HNReadClient(fetch);
       const result = await client.getItemWithComments(12345, 2);
       expect(result).not.toBeNull();
-      expect(result!.comments).toHaveLength(2);
+      expect(result?.comments).toHaveLength(2);
       // kids undefined means no children fetched
-      expect(result!.comments[0].children).toHaveLength(0);
+      expect(result?.comments[0].children).toHaveLength(0);
     });
   });
 });

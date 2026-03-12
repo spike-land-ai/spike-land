@@ -70,7 +70,7 @@ export class WorkerNodeImpl implements WorkerNode {
   set textContent(value: string | null) {
     // Remove all children
     while (this._children.length > 0) {
-      this.removeChild(this._children[this._children.length - 1]!);
+      this.removeChild(this._children[this._children.length - 1]);
     }
     collector.record({
       type: MutationType.SET_TEXT_CONTENT,

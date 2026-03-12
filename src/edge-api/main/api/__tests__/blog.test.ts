@@ -217,8 +217,8 @@ describe("GET /api/blog", () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as Array<Record<string, unknown>>;
     expect(body).toHaveLength(2);
-    expect(body[0]!.slug).toBe("newer");
-    expect(body[1]!.slug).toBe("older");
+    expect(body[0]?.slug).toBe("newer");
+    expect(body[1]?.slug).toBe("older");
     expect((db.prepare as unknown as ReturnType<typeof vi.fn>).mock.calls[0]?.[0]).toContain(
       "unlisted = 0",
     );
@@ -234,7 +234,7 @@ describe("GET /api/blog", () => {
     } as unknown as Env);
 
     const body = (await res.json()) as Array<Record<string, unknown>>;
-    expect(body[0]!).not.toHaveProperty("content");
+    expect(body[0]).not.toHaveProperty("content");
   });
 
   it("returns inferred heroPrompt values for prompt-driven hero images", async () => {
@@ -255,7 +255,7 @@ describe("GET /api/blog", () => {
 
     expect(res.status).toBe(200);
     const body = (await res.json()) as Array<Record<string, unknown>>;
-    expect(body[0]!.heroPrompt).toBe(prompt);
+    expect(body[0]?.heroPrompt).toBe(prompt);
   });
 
   it("recovers missing heroPrompt values from the canonical MDX source", async () => {
@@ -298,7 +298,7 @@ Body from source fallback.`,
 
     expect(res.status).toBe(200);
     const body = (await res.json()) as Array<Record<string, unknown>>;
-    expect(body[0]!.heroPrompt).toBe("Recovered cinematic prompt");
+    expect(body[0]?.heroPrompt).toBe("Recovered cinematic prompt");
   });
 
   it("uses the canonical source prompt even when the stored hero image path is stale", async () => {
@@ -341,7 +341,7 @@ Body from source fallback.`,
 
     expect(res.status).toBe(200);
     const body = (await res.json()) as Array<Record<string, unknown>>;
-    expect(body[0]!.heroPrompt).toBe("Recovered cinematic prompt");
+    expect(body[0]?.heroPrompt).toBe("Recovered cinematic prompt");
   });
 
   it("returns 404 when no posts exist", async () => {

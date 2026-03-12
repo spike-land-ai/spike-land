@@ -33,8 +33,13 @@ database_name = "spike-edge-analytics"
 database_id = "f7219e86-7dc6-4627-92ad-17fce49ae35a"
 migrations_dir = "db/migrations"
 
+# GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN must be set via:
+#   wrangler secret put GOOGLE_CLIENT_ID
+#   wrangler secret put GOOGLE_CLIENT_SECRET
+#   wrangler secret put GOOGLE_REFRESH_TOKEN
 [vars]
 GA_MEASUREMENT_ID = "G-9WNEM9ZHE7"
+GA_PROPERTY_ID = "461757579"
 
 [[services]]
 binding = "AUTH_MCP"

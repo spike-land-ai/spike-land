@@ -197,12 +197,12 @@ describe("analytics ingest endpoint", () => {
     expect(ctx.waitUntil).toHaveBeenCalledTimes(1);
 
     // Await the promise passed to waitUntil so GA4 fetch runs
-    const ga4Promise = (ctx.waitUntil as ReturnType<typeof vi.fn>).mock.calls[0]![0];
+    const ga4Promise = (ctx.waitUntil as ReturnType<typeof vi.fn>).mock.calls[0]?.[0];
     await ga4Promise;
 
     // GA4 fetch should have been called
     expect(mockFetch).toHaveBeenCalled();
-    const [url] = mockFetch.mock.calls[0]!;
+    const [url] = mockFetch.mock.calls[0];
     expect(url).toContain("google-analytics.com/mp/collect");
   });
 

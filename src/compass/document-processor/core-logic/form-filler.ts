@@ -73,7 +73,7 @@ export class FormFiller {
   prefillFromProfile(userProfile: UserProfile): FilledForm {
     this.requireTemplate();
 
-    for (const field of this.template!.fields) {
+    for (const field of this.template?.fields) {
       const value = this.resolveProfileValue(field, userProfile);
       if (value !== undefined) {
         this.values.set(field.id, value);
@@ -170,7 +170,7 @@ export class FormFiller {
     // the internal mutable map.
     const source: ReadonlyMap<string, unknown> = form ? form.values : this.values;
 
-    const requiredFields = this.template!.fields.filter((f) => f.required);
+    const requiredFields = this.template?.fields.filter((f) => f.required);
     const missingFields = requiredFields
       .filter((f) => {
         const v = source.get(f.id);
@@ -183,7 +183,7 @@ export class FormFiller {
       requiredFields.length === 0 ? 100 : Math.round((answered / requiredFields.length) * 100);
 
     const filledForm: FilledForm = {
-      templateId: this.template!.id,
+      templateId: this.template?.id,
       values: source,
       completionPercentage: percentage,
       missingFields,
@@ -203,13 +203,13 @@ export class FormFiller {
   }
 
   private findField(fieldId: string): FormField | undefined {
-    return this.template!.fields.find((f) => f.id === fieldId);
+    return this.template?.fields.find((f) => f.id === fieldId);
   }
 
   private buildFilledForm(): FilledForm {
     const { percentage, missingFields } = this.getCompletionStatus();
     return {
-      templateId: this.template!.id,
+      templateId: this.template?.id,
       values: new Map(this.values),
       completionPercentage: percentage,
       missingFields,

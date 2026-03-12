@@ -45,13 +45,13 @@ export function messagesPush(messages: Message[], newMessage: Message): Message[
 
   const lastMessage = messagesCopy[messagesCopy.length - 1];
 
-  if (lastMessage!.role === newMessage.role && newMessage.role === "assistant") {
+  if (lastMessage?.role === newMessage.role && newMessage.role === "assistant") {
     const newMessageText = getTextFromMessageContent(newMessage.content);
-    const lastMessageText = getTextFromMessageContent(lastMessage!.content);
+    const lastMessageText = getTextFromMessageContent(lastMessage?.content);
     messagesCopy[messagesCopy.length - 1] = {
-      ...lastMessage!,
+      ...lastMessage,
       id: newMessage.id,
-      role: lastMessage!.role,
+      role: lastMessage?.role,
       content: newMessageText.startsWith(lastMessageText)
         ? newMessageText
         : lastMessageText + newMessageText,
@@ -118,7 +118,7 @@ function parseSingleDiffBlock(blockText: string): CodeModification | null {
     if (parts.length >= 2) {
       // We need at least one separator to define search and replace parts
       // Trim the part first, then check for and remove markers.
-      let tempSearch = parts[0]!.trim();
+      let tempSearch = parts[0]?.trim();
       if (tempSearch.startsWith(searchMarker)) {
         // Remove marker and then trim any leading whitespace from the actual search content.
         tempSearch = tempSearch.substring(searchMarker.length).trimStart();
@@ -214,7 +214,7 @@ function parseModification(mod: string): CodeModification | null {
     .split(SEARCH_REPLACE_MARKERS.SEPARATOR);
 
   if (parts.length === 2) {
-    const search = parts[0]!.trim();
+    const search = parts[0]?.trim();
     const replace = parts[1]?.trim() ?? "";
 
     return {
@@ -250,7 +250,7 @@ export const loadMessages = (codeSpace: string): Message[] => {
   const validMessages = rawMessages.filter((m) => !!m.role);
 
   return validMessages.reduce((acc, current, index) => {
-    if (index === 0 || current.role !== validMessages[index - 1]!.role) {
+    if (index === 0 || current.role !== validMessages[index - 1]?.role) {
       acc.push(current);
     }
     return acc;

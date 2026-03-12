@@ -132,7 +132,7 @@ describe("narrate", () => {
     expect(mainLine).toBeDefined();
     expect(buttonLine).toBeDefined();
     // Button should be indented relative to landmark
-    expect(buttonLine!.startsWith("  ")).toBe(true);
+    expect(buttonLine?.startsWith("  ")).toBe(true);
   });
 
   it("handles named landmarks", () => {
@@ -227,8 +227,8 @@ describe("findElementByRef", () => {
     ]);
     const node = findElementByRef(tree, 2);
     expect(node).not.toBeNull();
-    expect(node!.role).toBe("button");
-    expect(node!.name).toBe("Submit");
+    expect(node?.role).toBe("button");
+    expect(node?.name).toBe("Submit");
   });
 
   it("returns null for non-existent ref", () => {
@@ -249,6 +249,6 @@ describe("findElementByRef", () => {
     ]);
     const node = findElementByRef(tree, 2);
     expect(node).not.toBeNull();
-    expect(node!.name).toBe("Second");
+    expect(node?.name).toBe("Second");
   });
 });

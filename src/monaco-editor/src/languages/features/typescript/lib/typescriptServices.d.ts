@@ -41,7 +41,7 @@ declare namespace ts {
       type ChangePropertyTypes<
         T,
         Substitutions extends {
-          [K in keyof T]?: any;
+          [K in keyof T]?: unknown;
         },
       > = {
         [K in keyof T]: K extends keyof Substitutions ? Substitutions[K] : T[K];
@@ -152,7 +152,7 @@ declare namespace ts {
         /**
          * Object containing arguments for the command
          */
-        arguments?: any;
+        arguments?: unknown;
       }
       /**
        * Request to reload the project structure for all the opened files
@@ -172,7 +172,7 @@ declare namespace ts {
         /**
          * Event-specific information
          */
-        body?: any;
+        body?: unknown;
       }
       /**
        * Response by server to client request message.
@@ -199,7 +199,7 @@ declare namespace ts {
         /**
          * Contains message body if success === true.
          */
-        body?: any;
+        body?: unknown;
         /**
          * Contains extra information that plugin can include to be passed on
          */
@@ -1206,7 +1206,7 @@ declare namespace ts {
       export interface ConfigureResponse extends Response {}
       export interface ConfigurePluginRequestArguments {
         pluginName: string;
-        configuration: any;
+        configuration: unknown;
       }
       export interface ConfigurePluginRequest extends Request {
         command: CommandTypes.ConfigurePlugin;
@@ -2408,7 +2408,7 @@ declare namespace ts {
       }
       export interface TelemetryEventBody {
         telemetryEventName: string;
-        payload: any;
+        payload: unknown;
       }
       export type TypesInstallerInitializationFailedEventName =
         "typesInstallerInitializationFailed";
@@ -2752,7 +2752,7 @@ declare namespace ts {
     interface CompressedData {
       length: number;
       compressionKind: string;
-      data: any;
+      data: unknown;
     }
     type ModuleImportResult =
       | {
@@ -2782,10 +2782,10 @@ declare namespace ts {
         options?: WatchOptions,
       ): FileWatcher;
       preferNonRecursiveWatch?: boolean;
-      setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): any;
-      clearTimeout(timeoutId: any): void;
-      setImmediate(callback: (...args: any[]) => void, ...args: any[]): any;
-      clearImmediate(timeoutId: any): void;
+      setTimeout(callback: (...args: unknown[]) => void, ms: number, ...args: unknown[]): unknown;
+      clearTimeout(timeoutId: unknown): void;
+      setImmediate(callback: (...args: unknown[]) => void, ...args: unknown[]): unknown;
+      clearImmediate(timeoutId: unknown): void;
       gc?(): void;
       trace?(s: string): void;
       require?(initialPath: string, moduleName: string): ModuleImportResult;
@@ -2854,7 +2854,7 @@ declare namespace ts {
       function ThrowProjectDoesNotContainDocument(fileName: string, project: Project): never;
     }
     type NormalizedPath = string & {
-      __normalizedPathTag: any;
+      __normalizedPathTag: unknown;
     };
     interface NormalizedPathMap<T> {
       get(path: NormalizedPath): T | undefined;
@@ -2934,12 +2934,12 @@ declare namespace ts {
       languageServiceHost: LanguageServiceHost;
       serverHost: ServerHost;
       session?: Session<unknown>;
-      config: any;
+      config: unknown;
     }
     interface PluginModule {
       create(createInfo: PluginCreateInfo): LanguageService;
       getExternalFiles?(proj: Project, updateLevel: ProgramUpdateLevel): string[];
-      onConfigurationChanged?(config: any): void;
+      onConfigurationChanged?(config: unknown): void;
     }
     interface PluginModuleWithName {
       name: string;
@@ -3587,7 +3587,7 @@ declare namespace ts {
     /** @deprecated use ts.server.protocol.CommandTypes */
     type CommandNames = protocol.CommandTypes;
     /** @deprecated use ts.server.protocol.CommandTypes */
-    const CommandNames: any;
+    const CommandNames: unknown;
     type Event = <T extends object>(body: T, eventName: string) => void;
     interface EventSender {
       event: Event;
@@ -3825,13 +3825,13 @@ declare namespace ts {
     [index: string]: T;
   }
   interface SortedReadonlyArray<T> extends ReadonlyArray<T> {
-    " __sortedArrayBrand": any;
+    " __sortedArrayBrand": unknown;
   }
   interface SortedArray<T> extends Array<T> {
-    " __sortedArrayBrand": any;
+    " __sortedArrayBrand": unknown;
   }
   type Path = string & {
-    __pathBrand: any;
+    __pathBrand: unknown;
   };
   interface TextRange {
     pos: number;
@@ -4570,13 +4570,13 @@ declare namespace ts {
     ): T | undefined;
   }
   interface JSDocContainer extends Node {
-    _jsdocContainerBrand: any;
+    _jsdocContainerBrand: unknown;
   }
   interface LocalsContainer extends Node {
-    _localsContainerBrand: any;
+    _localsContainerBrand: unknown;
   }
   interface FlowContainer extends Node {
-    _flowContainerBrand: any;
+    _flowContainerBrand: unknown;
   }
   type HasJSDoc =
     | AccessorDeclaration
@@ -4825,7 +4825,7 @@ declare namespace ts {
     | BindingPattern
     | EntityNameExpression;
   interface Declaration extends Node {
-    _declarationBrand: any;
+    _declarationBrand: unknown;
   }
   interface NamedDeclaration extends Declaration {
     readonly name?: DeclarationName;
@@ -4944,10 +4944,10 @@ declare namespace ts {
     readonly initializer?: Expression;
   }
   interface AutoAccessorPropertyDeclaration extends PropertyDeclaration {
-    _autoAccessorBrand: any;
+    _autoAccessorBrand: unknown;
   }
   interface ObjectLiteralElement extends NamedDeclaration {
-    _objectLiteralBrand: any;
+    _objectLiteralBrand: unknown;
     readonly name?: PropertyName;
   }
   /** Unlike ObjectLiteralElement, excludes JSXAttribute and JSXSpreadAttribute. */
@@ -5008,7 +5008,7 @@ declare namespace ts {
    * - AccessorDeclaration
    */
   interface FunctionLikeDeclarationBase extends SignatureDeclarationBase {
-    _functionLikeDeclarationBrand: any;
+    _functionLikeDeclarationBrand: unknown;
     readonly asteriskToken?: AsteriskToken | undefined;
     readonly questionToken?: QuestionToken | undefined;
     readonly exclamationToken?: ExclamationToken | undefined;
@@ -5120,7 +5120,7 @@ declare namespace ts {
     readonly body: Block;
   }
   interface TypeNode extends Node {
-    _typeNodeBrand: any;
+    _typeNodeBrand: unknown;
   }
   interface KeywordTypeNode<TKind extends KeywordTypeSyntaxKind = KeywordTypeSyntaxKind>
     extends KeywordToken<TKind>,
@@ -5276,7 +5276,7 @@ declare namespace ts {
     readonly literal: TemplateMiddle | TemplateTail;
   }
   interface Expression extends Node {
-    _expressionBrand: any;
+    _expressionBrand: unknown;
   }
   interface OmittedExpression extends Expression {
     readonly kind: SyntaxKind.OmittedExpression;
@@ -5286,12 +5286,12 @@ declare namespace ts {
     readonly expression: Expression;
   }
   interface UnaryExpression extends Expression {
-    _unaryExpressionBrand: any;
+    _unaryExpressionBrand: unknown;
   }
   /** Deprecated, please use UpdateExpression */
   type IncrementExpression = UpdateExpression;
   interface UpdateExpression extends UnaryExpression {
-    _updateExpressionBrand: any;
+    _updateExpressionBrand: unknown;
   }
   type PrefixUnaryOperator =
     | SyntaxKind.PlusPlusToken
@@ -5312,13 +5312,13 @@ declare namespace ts {
     readonly operator: PostfixUnaryOperator;
   }
   interface LeftHandSideExpression extends UpdateExpression {
-    _leftHandSideExpressionBrand: any;
+    _leftHandSideExpressionBrand: unknown;
   }
   interface MemberExpression extends LeftHandSideExpression {
-    _memberExpressionBrand: any;
+    _memberExpressionBrand: unknown;
   }
   interface PrimaryExpression extends MemberExpression {
-    _primaryExpressionBrand: any;
+    _primaryExpressionBrand: unknown;
   }
   interface NullLiteral extends PrimaryExpression {
     readonly kind: SyntaxKind.NullKeyword;
@@ -5518,7 +5518,7 @@ declare namespace ts {
     rawText?: string;
   }
   interface LiteralExpression extends LiteralLikeNode, PrimaryExpression {
-    _literalExpressionBrand: any;
+    _literalExpressionBrand: unknown;
   }
   interface RegularExpressionLiteral extends LiteralExpression {
     readonly kind: SyntaxKind.RegularExpressionLiteral;
@@ -5619,7 +5619,7 @@ declare namespace ts {
     readonly name: MemberName;
   }
   interface PropertyAccessChain extends PropertyAccessExpression {
-    _optionalChainBrand: any;
+    _optionalChainBrand: unknown;
     readonly name: MemberName;
   }
   interface SuperPropertyAccessExpression extends PropertyAccessExpression {
@@ -5627,7 +5627,7 @@ declare namespace ts {
   }
   /** Brand for a PropertyAccessExpression which, like a QualifiedName, consists of a sequence of identifiers separated by dots. */
   interface PropertyAccessEntityNameExpression extends PropertyAccessExpression {
-    _propertyAccessExpressionLikeQualifiedNameBrand?: any;
+    _propertyAccessExpressionLikeQualifiedNameBrand?: unknown;
     readonly expression: EntityNameExpression;
     readonly name: Identifier;
   }
@@ -5642,7 +5642,7 @@ declare namespace ts {
     readonly argumentExpression: Expression;
   }
   interface ElementAccessChain extends ElementAccessExpression {
-    _optionalChainBrand: any;
+    _optionalChainBrand: unknown;
   }
   interface SuperElementAccessExpression extends ElementAccessExpression {
     readonly expression: SuperExpression;
@@ -5656,7 +5656,7 @@ declare namespace ts {
     readonly arguments: NodeArray<Expression>;
   }
   interface CallChain extends CallExpression {
-    _optionalChainBrand: any;
+    _optionalChainBrand: unknown;
   }
   type OptionalChain = PropertyAccessChain | ElementAccessChain | CallChain | NonNullChain;
   interface SuperCall extends CallExpression {
@@ -5712,7 +5712,7 @@ declare namespace ts {
     readonly expression: Expression;
   }
   interface NonNullChain extends NonNullExpression {
-    _optionalChainBrand: any;
+    _optionalChainBrand: unknown;
   }
   interface MetaProperty extends PrimaryExpression, FlowContainer {
     readonly kind: SyntaxKind.MetaProperty;
@@ -5815,7 +5815,7 @@ declare namespace ts {
   }
   type JsxChild = JsxText | JsxExpression | JsxElement | JsxSelfClosingElement | JsxFragment;
   interface Statement extends Node, JSDocContainer {
-    _statementBrand: any;
+    _statementBrand: unknown;
   }
   interface NotEmittedStatement extends Statement {
     readonly kind: SyntaxKind.NotEmittedStatement;
@@ -5983,11 +5983,11 @@ declare namespace ts {
   }
   type ClassLikeDeclaration = ClassDeclaration | ClassExpression;
   interface ClassElement extends NamedDeclaration {
-    _classElementBrand: any;
+    _classElementBrand: unknown;
     readonly name?: PropertyName;
   }
   interface TypeElement extends NamedDeclaration {
-    _typeElementBrand: any;
+    _typeElementBrand: unknown;
     readonly name?: PropertyName;
     readonly questionToken?: QuestionToken | undefined;
   }
@@ -6265,7 +6265,7 @@ declare namespace ts {
     readonly right: Identifier;
   }
   interface JSDocType extends TypeNode {
-    _jsDocTypeBrand: any;
+    _jsDocTypeBrand: unknown;
   }
   interface JSDocAllType extends JSDocType {
     readonly kind: SyntaxKind.JSDocAllType;
@@ -7913,7 +7913,7 @@ declare namespace ts {
     fileNames: string[];
     projectReferences?: readonly ProjectReference[];
     watchOptions?: WatchOptions;
-    raw?: any;
+    raw?: unknown;
     errors: Diagnostic[];
     wildcardDirectories?: MapLike<WatchDirectoryFlags>;
     compileOnSave?: boolean;
@@ -10508,8 +10508,8 @@ declare namespace ts {
     getMemoryUsage?(): number;
     exit(exitCode?: number): void;
     realpath?(path: string): string;
-    setTimeout?(callback: (...args: any[]) => void, ms: number, ...args: any[]): any;
-    clearTimeout?(timeoutId: any): void;
+    setTimeout?(callback: (...args: unknown[]) => void, ms: number, ...args: unknown[]): unknown;
+    clearTimeout?(timeoutId: unknown): void;
     clearScreen?(): void;
     base64decode?(input: string): string;
     base64encode?(input: string): string;
@@ -10588,7 +10588,7 @@ declare namespace ts {
     start?: number,
     length?: number,
   ): Scanner;
-  type ErrorCallback = (message: DiagnosticMessage, length: number, arg0?: any) => void;
+  type ErrorCallback = (message: DiagnosticMessage, length: number, arg0?: unknown) => void;
   interface Scanner {
     /** @deprecated use {@link getTokenFullStart} */
     getStartPos(): number;
@@ -11421,7 +11421,7 @@ declare namespace ts {
     fileName: string,
     readFile: (path: string) => string | undefined,
   ): {
-    config?: any;
+    config?: unknown;
     error?: Diagnostic;
   };
   /**
@@ -11433,7 +11433,7 @@ declare namespace ts {
     fileName: string,
     jsonText: string,
   ): {
-    config?: any;
+    config?: unknown;
     error?: Diagnostic;
   };
   /**
@@ -11447,7 +11447,7 @@ declare namespace ts {
   /**
    * Convert the json syntax tree into the json value
    */
-  function convertToObject(sourceFile: JsonSourceFile, errors: Diagnostic[]): any;
+  function convertToObject(sourceFile: JsonSourceFile, errors: Diagnostic[]): unknown;
   /**
    * Parse the contents of a config file (tsconfig.json).
    * @param json The contents of the config file to parse
@@ -11456,7 +11456,7 @@ declare namespace ts {
    *    file to. e.g. outDir
    */
   function parseJsonConfigFileContent(
-    json: any,
+    json: unknown,
     host: ParseConfigHost,
     basePath: string,
     existingOptions?: CompilerOptions,
@@ -11485,7 +11485,7 @@ declare namespace ts {
     existingWatchOptions?: WatchOptions,
   ): ParsedCommandLine;
   function convertCompilerOptionsFromJson(
-    jsonOptions: any,
+    jsonOptions: unknown,
     basePath: string,
     configFileName?: string,
   ): {
@@ -11493,7 +11493,7 @@ declare namespace ts {
     errors: Diagnostic[];
   };
   function convertTypeAcquisitionFromJson(
-    jsonOptions: any,
+    jsonOptions: unknown,
     basePath: string,
     configFileName?: string,
   ): {
@@ -11524,7 +11524,7 @@ declare namespace ts {
     getCurrentDirectory(): string;
   }
   interface ParsedTsconfig {
-    raw: any;
+    raw: unknown;
     options?: CompilerOptions;
     watchOptions?: WatchOptions;
     typeAcquisition?: TypeAcquisition;
@@ -12361,9 +12361,9 @@ declare namespace ts {
       options?: WatchOptions,
     ): FileWatcher;
     /** If provided, will be used to set delayed compilation, so that multiple changes in short span are compiled together */
-    setTimeout?(callback: (...args: any[]) => void, ms: number, ...args: any[]): any;
+    setTimeout?(callback: (...args: unknown[]) => void, ms: number, ...args: unknown[]): unknown;
     /** If provided, will be used to reset existing delayed compilation */
-    clearTimeout?(timeoutId: any): void;
+    clearTimeout?(timeoutId: unknown): void;
     preferNonRecursiveWatch?: boolean;
   }
   interface ProgramHost<T extends BuilderProgram> {
@@ -12733,7 +12733,7 @@ declare namespace ts {
     getScriptVersion(fileName: string): string;
     getScriptSnapshot(fileName: string): IScriptSnapshot | undefined;
     getProjectReferences?(): readonly ProjectReference[] | undefined;
-    getLocalizedDiagnosticMessages?(): any;
+    getLocalizedDiagnosticMessages?(): unknown;
     getCancellationToken?(): HostCancellationToken;
     getCurrentDirectory(): string;
     getDefaultLibFileName(options: CompilerOptions): string;
@@ -14339,7 +14339,7 @@ declare namespace ts {
     reportStats(): string;
   }
   type DocumentRegistryBucketKey = string & {
-    __bucketKey: any;
+    __bucketKey: unknown;
   };
   function preProcessFile(
     sourceText: string,

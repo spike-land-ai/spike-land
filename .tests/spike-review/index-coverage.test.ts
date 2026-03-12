@@ -5,7 +5,7 @@
  * Targets uncovered lines in index.ts.
  */
 
-import {  beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock MCP server base
 const mockTool = vi.fn();
@@ -90,22 +90,22 @@ describe("tool handlers", () => {
       const handler = toolHandlers["check_bazdmeg_gates"];
       expect(handler).toBeDefined();
 
-      const result = (await handler!({ diff: "+const x = 1;", claudeMdContent: "" })) as {
+      const result = (await handler({ diff: "+const x = 1;", claudeMdContent: "" })) as {
         content: Array<{ type: string; text: string }>;
       };
 
-      expect(result.content[0]!.type).toBe("text");
-      expect(typeof result.content[0]!.text).toBe("string");
+      expect(result.content[0]?.type).toBe("text");
+      expect(typeof result.content[0]?.text).toBe("string");
     });
 
     it("handles diff with content", async () => {
       const handler = toolHandlers["check_bazdmeg_gates"];
-      const result = (await handler!({
+      const result = (await handler({
         diff: "+const x: any = 1;\n-const y = 2;",
         claudeMdContent: "# Rules\n- No any types",
       })) as { content: Array<{ type: string; text: string }> };
 
-      expect(result.content[0]!.type).toBe("text");
+      expect(result.content[0]?.type).toBe("text");
     });
   });
 
@@ -125,31 +125,31 @@ describe("tool handlers", () => {
 +  return bar(foo());
  }`;
 
-      const result = (await handler!({ diff, context: "Test context", rules: ["No any"] })) as {
+      const result = (await handler({ diff, context: "Test context", rules: ["No any"] })) as {
         content: Array<{ type: string; text: string }>;
       };
 
-      expect(result.content[0]!.type).toBe("text");
-      expect(result.content[0]!.text).toContain("Review Prompt");
+      expect(result.content[0]?.type).toBe("text");
+      expect(result.content[0]?.text).toContain("Review Prompt");
     });
 
     it("handles diff with no context or rules", async () => {
       const handler = toolHandlers["review_diff"];
-      const result = (await handler!({ diff: "+const x = 1;" })) as {
+      const result = (await handler({ diff: "+const x = 1;" })) as {
         content: Array<{ type: string; text: string }>;
       };
 
-      expect(result.content[0]!.type).toBe("text");
+      expect(result.content[0]?.type).toBe("text");
     });
 
     it("counts additions and deletions", async () => {
       const handler = toolHandlers["review_diff"];
       const diff = `--- a/f.ts\n+++ b/f.ts\n@@ -1,2 +1,3 @@\n+added line\n kept line\n-removed line`;
 
-      const result = (await handler!({ diff })) as {
+      const result = (await handler({ diff })) as {
         content: Array<{ type: string; text: string }>;
       };
-      expect(result.content[0]!.text).toBeDefined();
+      expect(result.content[0]?.text).toBeDefined();
     });
   });
 
@@ -189,12 +189,12 @@ describe("tool handlers", () => {
       createServer("test-token");
 
       const handler = freshHandlers["get_pr_details"];
-      const result = (await handler!({ owner: "org", repo: "repo", prNumber: 1 })) as {
+      const result = (await handler({ owner: "org", repo: "repo", prNumber: 1 })) as {
         content: Array<{ type: string; text: string }>;
       };
 
-      expect(result.content[0]!.type).toBe("text");
-      const parsed = JSON.parse(result.content[0]!.text);
+      expect(result.content[0]?.type).toBe("text");
+      const parsed = JSON.parse(result.content[0]?.text);
       expect(parsed.title).toBe("Test PR");
 
       GitHubClient.prototype.getPRDetails = origGetPRDetails;
@@ -227,7 +227,7 @@ describe("tool handlers", () => {
       createServer("test-token");
 
       const handler = freshHandlers["validate_comment_target"];
-      const result = (await handler!({
+      const result = (await handler({
         owner: "org",
         repo: "repo",
         prNumber: 1,
@@ -236,7 +236,7 @@ describe("tool handlers", () => {
         side: "RIGHT",
       })) as { content: Array<{ type: string; text: string }> };
 
-      const parsed = JSON.parse(result.content[0]!.text);
+      const parsed = JSON.parse(result.content[0]?.text);
       expect(parsed.valid).toBe(false);
       expect(parsed.reason).toContain("not found in PR diff");
 

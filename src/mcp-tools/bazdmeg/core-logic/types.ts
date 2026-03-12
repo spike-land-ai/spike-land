@@ -194,7 +194,11 @@ export const AutoShipSchema = z.object({
     .describe("Commit message (default: chore(<pkg>): auto-ship changes)"),
   packageName: z.string().optional().describe("Which package to ship (default: active workspace)"),
   push: z.coerce.boolean().optional().default(true).describe("Whether to push after commit"),
-  dryRun: z.coerce.boolean().optional().default(false).describe("Run checks only, skip commit/push"),
+  dryRun: z.coerce
+    .boolean()
+    .optional()
+    .default(false)
+    .describe("Run checks only, skip commit/push"),
 });
 
 // ── Build & Typecheck Schemas ───────────────────────────────────────────────

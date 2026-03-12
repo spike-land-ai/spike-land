@@ -76,7 +76,10 @@ async function testRoute(page: Page, route: string): Promise<TestResult> {
   page.on("console", consoleHandler);
 
   // Listen for request failures
-  const requestFailedHandler = (request: { url: () => string; failure: () => { errorText: string } | null }) => {
+  const requestFailedHandler = (request: {
+    url: () => string;
+    failure: () => { errorText: string } | null;
+  }) => {
     const failure = request.failure();
     if (failure && !request.url().includes("favicon")) {
       networkErrors.push(`${request.url().slice(0, 100)}: ${failure.errorText}`);
@@ -117,7 +120,9 @@ async function testRoute(page: Page, route: string): Promise<TestResult> {
     }
 
     // Check for React error boundaries / error states
-    const errorBoundary = await page.$('[data-testid="error-boundary"], .error-boundary, [class*="error"]');
+    const errorBoundary = await page.$(
+      '[data-testid="error-boundary"], .error-boundary, [class*="error"]',
+    );
     if (errorBoundary) {
       const errorText = await errorBoundary.innerText().catch(() => "");
       if (errorText && errorText.toLowerCase().includes("error")) {
@@ -130,7 +135,10 @@ async function testRoute(page: Page, route: string): Promise<TestResult> {
     const brokenImages = await page.evaluate(() => {
       const imgs = Array.from(document.querySelectorAll("img"));
       return imgs
-        .filter((img) => img.complete && img.naturalWidth === 0 && img.src && !img.src.startsWith("data:"))
+        .filter(
+          (img) =>
+            img.complete && img.naturalWidth === 0 && img.src && !img.src.startsWith("data:"),
+        )
         .map((img) => img.src.slice(0, 100));
     });
     if (brokenImages.length > 0) {
@@ -166,7 +174,6 @@ async function testRoute(page: Page, route: string): Promise<TestResult> {
       result.issues.push(`Page JS errors: ${pageErrors.join("; ").slice(0, 200)}`);
       result.status = "fail";
     }
-
   } catch (err) {
     result.loadTimeMs = Date.now() - start;
     result.issues.push(`Navigation failed: ${(err as Error).message.slice(0, 200)}`);
@@ -206,7 +213,7 @@ async function testNavigation(page: Page): Promise<TestResult[]> {
         text: a.textContent?.trim() ?? "",
       }))
       .filter((l) => l.href.includes("spike.land") && !l.href.includes("#"))
-      .slice(0, 20)
+      .slice(0, 20),
   );
 
   for (const link of navLinks) {
@@ -246,9 +253,9 @@ async function testLinks(page: Page): Promise<string[]> {
       .filter(
         (l) =>
           l.href.startsWith("javascript:") ||
-          (l.href.startsWith("data:") && !l.href.startsWith("data:image"))
+          (l.href.startsWith("data:") && !l.href.startsWith("data:image")),
       )
-      .map((l) => `"${l.text}" -> ${l.href.slice(0, 80)}`)
+      .map((l) => `"${l.text}" -> ${l.href.slice(0, 80)}`),
   );
   return suspiciousLinks;
 }
@@ -285,7 +292,7 @@ async function main(): Promise<void> {
       });
       window.addEventListener("unhandledrejection", (e) => {
         (window as unknown as { __pageErrors: string[] }).__pageErrors.push(
-          `Unhandled rejection: ${String(e.reason).slice(0, 150)}`
+          `Unhandled rejection: ${String(e.reason).slice(0, 150)}`,
         );
       });
     });
@@ -344,7 +351,6 @@ async function main(): Promise<void> {
     const { writeFileSync } = await import("fs");
     writeFileSync(reportPath, JSON.stringify(results, null, 2));
     console.log(`\nFull report: ${reportPath}`);
-
   } finally {
     if (context) await context.close();
     if (browser) await browser.close();

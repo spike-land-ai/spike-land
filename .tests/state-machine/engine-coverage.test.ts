@@ -378,8 +378,8 @@ describe("Engine extra coverage", () => {
 
       const log = getHistory(id);
       expect(log).toHaveLength(1);
-      expect(log[0]!.event).toBe("GO");
-      expect(log[0]!.toStates).toContain("b");
+      expect(log[0]?.event).toBe("GO");
+      expect(log[0]?.toStates).toContain("b");
     });
 
     it("returns empty log initially", () => {
@@ -418,8 +418,8 @@ describe("Engine extra coverage", () => {
       addTransition(id, { source: "s1", target: "s2", event: "GO", actions: [], internal: false });
 
       const list = listMachines("counter");
-      expect(list[0]!.stateCount).toBe(2);
-      expect(list[0]!.transitionCount).toBe(1);
+      expect(list[0]?.stateCount).toBe(2);
+      expect(list[0]?.transitionCount).toBe(1);
     });
   });
 

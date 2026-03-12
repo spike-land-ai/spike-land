@@ -53,8 +53,7 @@ function createTrackingD1({
       };
       return stmt;
     },
-    batch: async (stmts: unknown[]) =>
-      stmts.map(() => ({ results: [], success: true, meta: {} })),
+    batch: async (stmts: unknown[]) => stmts.map(() => ({ results: [], success: true, meta: {} })),
     dump: async () => new ArrayBuffer(0),
     exec: async () => ({ count: 0, duration: 0 }),
   } as unknown as D1Database;

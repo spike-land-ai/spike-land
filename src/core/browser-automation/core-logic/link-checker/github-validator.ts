@@ -11,8 +11,8 @@ export function parseGitHubUrl(url: string): ParsedGitHubUrl | null {
   const rawMatch = RAW_GH_RE.exec(url);
   if (rawMatch) {
     return {
-      org: rawMatch[1]!,
-      repo: rawMatch[2]!,
+      org: rawMatch[1],
+      repo: rawMatch[2],
       type: "raw",
       branch: rawMatch[3],
       path: rawMatch[4],
@@ -38,8 +38,8 @@ export function parseShieldsBadge(url: string): ParsedGitHubUrl | null {
   if (!match) return null;
 
   return {
-    org: match[1]!,
-    repo: match[2]!,
+    org: match[1],
+    repo: match[2],
     type: "badge",
     workflow: match[3],
     url,

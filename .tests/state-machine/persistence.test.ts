@@ -101,7 +101,7 @@ describe("shareMachine", () => {
     expect(typeof token).toBe("string");
     expect(token.length).toBeGreaterThan(0);
     expect(mockUpsert).toHaveBeenCalledOnce();
-    const upsertCall = mockUpsert.mock.calls[0]![0];
+    const upsertCall = mockUpsert.mock.calls[0]?.[0];
     expect(upsertCall.create.userId).toBe("user-1");
     expect(upsertCall.create.name).toBe("Test Machine");
     expect(upsertCall.create.isPublic).toBe(true);
@@ -117,7 +117,7 @@ describe("shareMachine", () => {
 
     expect(token).toBe(existingToken);
     expect(mockUpsert).toHaveBeenCalledOnce();
-    const upsertCall = mockUpsert.mock.calls[0]![0];
+    const upsertCall = mockUpsert.mock.calls[0]?.[0];
     expect(upsertCall.create.shareToken).toBe(existingToken);
   });
 
@@ -144,7 +144,7 @@ describe("shareMachine", () => {
 
     await shareMachine("user-1", instance);
 
-    const upsertCall = mockUpsert.mock.calls[0]![0];
+    const upsertCall = mockUpsert.mock.calls[0]?.[0];
     expect(upsertCall.create.context).toEqual({ count: 5, label: "test" });
     expect(upsertCall.create.history).toEqual({ parent: ["child1"] });
     expect(upsertCall.create.transitionLog).toHaveLength(1);
@@ -171,7 +171,7 @@ describe("shareMachine", () => {
 
     await shareMachine("user-1", makeMachineInstance());
 
-    const upsertCall = mockUpsert.mock.calls[0]![0];
+    const upsertCall = mockUpsert.mock.calls[0]?.[0];
     expect(upsertCall.create.isPublic).toBe(true);
     expect(upsertCall.update.isPublic).toBe(true);
   });
@@ -182,7 +182,7 @@ describe("shareMachine", () => {
 
     await shareMachine("user-1", makeMachineInstance());
 
-    const upsertCall = mockUpsert.mock.calls[0]![0];
+    const upsertCall = mockUpsert.mock.calls[0]?.[0];
     expect(upsertCall.update.shareToken).toBeUndefined();
     expect(upsertCall.update.userId).toBeUndefined();
   });

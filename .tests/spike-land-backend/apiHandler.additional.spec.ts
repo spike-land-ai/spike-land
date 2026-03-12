@@ -149,8 +149,8 @@ describe("apiHandler additional coverage", () => {
   describe("room routing with Sec-Fetch-Dest: script", () => {
     it("appends /index to pathname when Sec-Fetch-Dest is script", async () => {
       const mockRoomFetch = vi.fn().mockResolvedValue(new Response("script response"));
-      (mockEnv.CODE!.get as Mock).mockReturnValue({ fetch: mockRoomFetch });
-      (mockEnv.CODE!.idFromName as Mock).mockReturnValue("id-1");
+      (mockEnv.CODE?.get as Mock).mockReturnValue({ fetch: mockRoomFetch });
+      (mockEnv.CODE?.idFromName as Mock).mockReturnValue("id-1");
 
       const req = new Request("https://example.com/room/myspace", {
         headers: { "Sec-Fetch-Dest": "script" },

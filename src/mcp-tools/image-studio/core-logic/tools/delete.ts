@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { errorResult, jsonResult, toolEvent } from "../../mcp/types.js";
 import type { ImageRow, ImageStudioDeps, ToolEvent } from "../../mcp/types.js";
-import { tryCatch } from "../../mcp/try-catch.js";
 import {
   createImageProcedure,
   imageProcedure,
@@ -44,8 +43,8 @@ export const deleteTool = imageProcedure
   .use(withOwnership(["image_id"]))
   .tool("delete", "Delete an image from the library", {
     image_id: z.string().describe("ID of the image to delete"),
-    confirm: z
-      .coerce.boolean()
+    confirm: z.coerce
+      .boolean()
       .refine((val) => val === true, "Set confirm=true to delete the image permanently")
       .describe("Must be true to confirm permanent deletion"),
   })
@@ -66,11 +65,61 @@ export function createDeleteTool(
     .use(withOwnership(["image_id"]))
     .tool("delete", "Delete an image from the library", {
       image_id: z.string().describe("ID of the image to delete"),
-      confirm: z
-        .coerce.boolean()
+      confirm: z.coerce
+        .boolean()
         .refine((val) => val === true, "Set confirm=true to delete the image permanently")
         .describe("Must be true to confirm permanent deletion"),
     })
     .output(z.object({ deleted: z.boolean(), image_id: z.string() }))
     .handler(createHandler());
+}
+
+// --- Inlined Result and tryCatch ---
+type Result<T> =
+  | {
+      ok: true;
+      data: T;
+      error?: never;
+      unwrap(): T;
+      map<U>(fn: (val: T) => U): Result<U>;
+      flatMap<U>(fn: (val: T) => Result<U>): Result<U>;
+    }
+  | {
+      ok: false;
+      data?: never;
+      error: Error;
+      unwrap(): never;
+      map<U>(fn: (val: T) => U): Result<U>;
+      flatMap<U>(fn: (val: T) => Result<U>): Result<U>;
+    };
+
+function ok<T>(data: T): Result<T> {
+  return {
+    ok: true,
+    data,
+    unwrap: () => data,
+    map: <U>(fn: (val: T) => U) => ok(fn(data)),
+    flatMap: <U>(fn: (val: T) => Result<U>) => fn(data),
+  };
+}
+
+function fail<T = never>(error: Error): Result<T> {
+  return {
+    ok: false,
+    error,
+    unwrap: () => {
+      throw error;
+    },
+    map: () => fail(error),
+    flatMap: () => fail(error),
+  };
+}
+
+async function tryCatch<T>(promise: Promise<T>): Promise<Result<T>> {
+  try {
+    const data = await promise;
+    return ok(data);
+  } catch (err) {
+    return fail(err instanceof Error ? err : new Error(String(err)));
+  }
 }

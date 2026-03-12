@@ -63,7 +63,7 @@ checkout.post("/api/checkout", async (c) => {
     return c.json({ error: `No price found for tier '${tier}'` }, 404);
   }
 
-  const priceId = prices[0]!.id;
+  const priceId = prices[0]?.id;
 
   // Create checkout session
   const idempotencyKey = `${userId}-checkout-${tier}-${Math.floor(Date.now() / 60000)}`;
@@ -120,7 +120,7 @@ checkout.post("/api/checkout/service", async (c) => {
     return c.json({ error: `Invalid service. Must be one of: ${validServices.join(", ")}` }, 400);
   }
 
-  const product = SERVICE_PRODUCTS[service]!;
+  const product = SERVICE_PRODUCTS[service];
 
   // Look up price by lookup key
   const priceRes = await stripeGet(stripeKey, "/v1/prices", {
@@ -139,7 +139,7 @@ checkout.post("/api/checkout/service", async (c) => {
     return c.json({ error: `No price found for service '${service}'` }, 404);
   }
 
-  const priceId = prices[0]!.id;
+  const priceId = prices[0]?.id;
 
   // Build checkout session params
   const sessionParams: Record<string, string> = {
@@ -147,7 +147,7 @@ checkout.post("/api/checkout/service", async (c) => {
     "line_items[0][price]": priceId,
     "line_items[0][quantity]": "1",
     success_url: `https://spike.land${product.successPath}`,
-    cancel_url: `https://spike.land${product.successPath.split("?")[0]!}`,
+    cancel_url: `https://spike.land${product.successPath.split("?")[0]}`,
     "metadata[type]": "service_purchase",
     "metadata[service]": service,
     ...(body.gclid && { "metadata[gclid]": body.gclid }),

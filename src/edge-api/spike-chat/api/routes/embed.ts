@@ -11,20 +11,23 @@ embedRouter.get("/:workspace/:channel", async (c) => {
   const workspaceId = c.req.param("workspace");
   const channelSlug = c.req.param("channel");
   const guestAccess = c.req.query("guest") !== "false";
-  
+
   const db = createDb(c.env.DB);
-  
+
   // Find the channel
-  const [channel] = await db.select()
+  const [channel] = await db
+    .select()
     .from(channels)
     .where(and(eq(channels.workspaceId, workspaceId), eq(channels.slug, channelSlug)));
-    
-  let initialMessages: { id: string; content: string; userId: string; createdAt: number | null }[] = [];
+
+  let initialMessages: { id: string; content: string; userId: string; createdAt: number | null }[] =
+    [];
   let channelId = "unknown";
-  
+
   if (channel) {
     channelId = channel.id;
-    const msgs = await db.select()
+    const msgs = await db
+      .select()
       .from(messages)
       .where(eq(messages.channelId, channel.id))
       .orderBy(desc(messages.createdAt))
@@ -213,7 +216,9 @@ embedRouter.get("/:workspace/:channel", async (c) => {
     </head>
     <body class="flex flex-col h-screen text-slate-100 bg-slate-900/90">
       <div class="flex-1 overflow-y-auto p-4 space-y-4" id="messages">
-        ${initialMessages.length === 0 ? html`
+        ${
+          initialMessages.length === 0
+            ? html`
         <div class="flex items-start gap-3">
           <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center font-bold text-sm">S</div>
           <div>
@@ -223,18 +228,22 @@ embedRouter.get("/:workspace/:channel", async (c) => {
             <p class="text-sm mt-1 text-slate-300">Welcome to #${channelSlug}. This is the start of the channel.</p>
           </div>
         </div>
-        ` : ''}
-        ${initialMessages.map(msg => html`
+        `
+            : ""
+        }
+        ${initialMessages.map(
+          (msg) => html`
         <div class="flex items-start gap-3">
-          <div class="w-8 h-8 rounded-full ${msg.userId.startsWith('visitor') ? 'bg-slate-700' : 'bg-blue-500'} flex items-center justify-center font-bold text-sm">${msg.userId.startsWith('visitor') ? 'V' : msg.userId.charAt(0).toUpperCase()}</div>
+          <div class="w-8 h-8 rounded-full ${msg.userId.startsWith("visitor") ? "bg-slate-700" : "bg-blue-500"} flex items-center justify-center font-bold text-sm">${msg.userId.startsWith("visitor") ? "V" : msg.userId.charAt(0).toUpperCase()}</div>
           <div>
             <div class="flex items-baseline gap-2">
-              <span class="font-semibold text-sm">${msg.userId.startsWith('visitor') ? 'Visitor' : msg.userId}</span>
+              <span class="font-semibold text-sm">${msg.userId.startsWith("visitor") ? "Visitor" : msg.userId}</span>
             </div>
             <p class="text-sm mt-1 text-slate-300">${msg.content}</p>
           </div>
         </div>
-        `)}
+        `,
+        )}
       </div>
       
       <form id="chat-form" class="p-3 border-t border-slate-800 flex gap-2">
@@ -244,9 +253,9 @@ embedRouter.get("/:workspace/:channel", async (c) => {
           placeholder="Type a message as a guest..." 
           class="flex-1 bg-slate-800 text-sm rounded-full px-4 py-2 border border-slate-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-200"
           required
-          ${channelId === 'unknown' ? 'disabled' : ''}
+          ${channelId === "unknown" ? "disabled" : ""}
         />
-        <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white rounded-full px-4 py-2 text-sm font-medium transition-colors" ${channelId === 'unknown' ? 'disabled' : ''}>
+        <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white rounded-full px-4 py-2 text-sm font-medium transition-colors" ${channelId === "unknown" ? "disabled" : ""}>
           Send
         </button>
       </form>

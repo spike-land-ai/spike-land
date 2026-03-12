@@ -154,7 +154,7 @@ describe("arbor tools", () => {
     expect(extractText(briefResult)).toContain("Project Arbor");
     const briefJson = extractJson(briefResult) as { pillars: Array<{ key: string }> };
     expect(briefJson.pillars).toHaveLength(1);
-    expect(briefJson.pillars[0]!.key).toBe("asset_synthesis");
+    expect(briefJson.pillars[0]?.key).toBe("asset_synthesis");
 
     const pitchResult = await registry.callToolDirect("arbor_write_pitch", {
       audience: "investor",

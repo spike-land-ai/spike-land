@@ -237,7 +237,7 @@ const bazdmegRules: ReviewRule[] = [
 
       const outOfScope = ctx.files.filter((file) => {
         const normalized = file.replace(/^\.\//, "").replace(/^\//, "");
-        return !ctx.allowedPaths!.some((allowed) => normalized.startsWith(allowed));
+        return !ctx.allowedPaths?.some((allowed) => normalized.startsWith(allowed));
       });
 
       if (outOfScope.length === 0) {

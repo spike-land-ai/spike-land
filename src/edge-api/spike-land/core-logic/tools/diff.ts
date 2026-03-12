@@ -84,9 +84,9 @@ function parseUnifiedDiff(diffText: string): FileDiff[] {
       const match = line.match(/@@ -(\d+),?(\d*) \+(\d+),?(\d*) @@/);
       if (match) {
         currentHunk = {
-          oldStart: parseInt(match[1]!, 10),
+          oldStart: parseInt(match[1], 10),
           oldLines: parseInt(match[2] || "1", 10),
-          newStart: parseInt(match[3]!, 10),
+          newStart: parseInt(match[3], 10),
           newLines: parseInt(match[4] || "1", 10),
           lines: [],
         };
@@ -109,7 +109,7 @@ function applyPatch(base: string, hunks: DiffHunk[]): string {
   let currentLine = 1;
   for (const hunk of hunks) {
     while (currentLine < hunk.oldStart) {
-      result.push(lines[currentLine - 1]!);
+      result.push(lines[currentLine - 1]);
       currentLine++;
     }
     for (const hunkLine of hunk.lines) {
@@ -122,7 +122,7 @@ function applyPatch(base: string, hunks: DiffHunk[]): string {
     }
   }
   while (currentLine <= lines.length) {
-    result.push(lines[currentLine - 1]!);
+    result.push(lines[currentLine - 1]);
     currentLine++;
   }
   return result.join("\n");

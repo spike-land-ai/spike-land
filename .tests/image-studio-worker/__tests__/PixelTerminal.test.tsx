@@ -22,7 +22,13 @@ vi.mock("@/api/client", () => ({
 
 // Mock DynamicToolForm to avoid rendering complex nested components
 vi.mock("@/components/ui/DynamicToolForm", () => ({
-  DynamicToolForm: ({ onSubmit, toolName }: { onSubmit: (data: Record<string, unknown>) => void; toolName: string }) => (
+  DynamicToolForm: ({
+    onSubmit,
+    toolName,
+  }: {
+    onSubmit: (data: Record<string, unknown>) => void;
+    toolName: string;
+  }) => (
     <div data-testid={`mock-form-${toolName}`}>
       <button onClick={() => onSubmit({ prompt: "test prompt" })}>Submit {toolName}</button>
     </div>
@@ -64,7 +70,9 @@ describe("PixelTerminal", () => {
 
   it("renders the welcome message initially", () => {
     render(<PixelTerminal />);
-    expect(screen.getByText(/for commands, or enter a tool name to get started/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/for commands, or enter a tool name to get started/),
+    ).toBeInTheDocument();
   });
 
   it("handles the 'help' command", async () => {
@@ -93,7 +101,9 @@ describe("PixelTerminal", () => {
 
     // Help output should be gone, only welcome remains
     expect(screen.queryByText("Available commands:")).not.toBeInTheDocument();
-    expect(screen.getByText(/for commands, or enter a tool name to get started/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/for commands, or enter a tool name to get started/),
+    ).toBeInTheDocument();
   });
 
   it("handles the 'history' command", async () => {
@@ -126,7 +136,9 @@ describe("PixelTerminal", () => {
     const creditsPromise = new Promise<unknown>((resolve) => {
       resolveCredits = resolve;
     });
-    vi.mocked(callTool).mockReturnValue(creditsPromise as Promise<unknown> as ReturnType<typeof callTool>);
+    vi.mocked(callTool).mockReturnValue(
+      creditsPromise as Promise<unknown> as ReturnType<typeof callTool>,
+    );
 
     await user.type(input, "credits{Enter}");
 
@@ -250,10 +262,7 @@ describe("PixelTerminal", () => {
 
     // Add another tool to test partial match
     vi.mocked(useTools).mockReturnValue({
-      tools: [
-        ...mockTools,
-        { name: "test_generate_large", description: "", tier: "PRO" },
-      ],
+      tools: [...mockTools, { name: "test_generate_large", description: "", tier: "PRO" }],
       categories: mockCategories,
       grouped: mockGrouped,
       byName: mockByName,

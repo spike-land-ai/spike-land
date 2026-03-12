@@ -67,19 +67,19 @@ function prepareForPreview(transpiled: string): { code: string; appRef: string }
   // export default function Name(
   const namedFn = code.match(/export\s+default\s+function\s+(\w+)/);
   if (namedFn) {
-    appRef = namedFn[1]!;
+    appRef = namedFn[1];
     code = code.replace(/export\s+default\s+function\s+/, "function ");
   } else {
     // export default class Name
     const namedClass = code.match(/export\s+default\s+class\s+(\w+)/);
     if (namedClass) {
-      appRef = namedClass[1]!;
+      appRef = namedClass[1];
       code = code.replace(/export\s+default\s+class\s+/, "class ");
     } else {
       // export default Identifier;
       const ident = code.match(/export\s+default\s+(\w+)\s*;/);
       if (ident) {
-        appRef = ident[1]!;
+        appRef = ident[1];
         code = code.replace(/export\s+default\s+\w+\s*;/, "");
       } else if (/export\s+default\s+/.test(code)) {
         // Anonymous: export default () => ... or export default (props) => ...
@@ -263,7 +263,7 @@ export function useTranspiler(
 
       return {
         ...prev,
-        html: buildPreviewHtml(lastTranspiledRef.current!, isDarkMode),
+        html: buildPreviewHtml(lastTranspiledRef.current, isDarkMode),
       };
     });
   }, [isDarkMode]);

@@ -445,7 +445,7 @@ function generateInterviewQuestions(
   count: number,
 ): InterviewQuestion[] {
   const techPool: InterviewQuestion[] = [
-    ...TECHNICAL_BANKS.default!,
+    ...TECHNICAL_BANKS.default,
     ...(level === "senior" || level === "lead" ? (TECHNICAL_BANKS.senior ?? []) : []),
     ...(level === "lead" ? (TECHNICAL_BANKS.lead ?? []) : []),
   ];

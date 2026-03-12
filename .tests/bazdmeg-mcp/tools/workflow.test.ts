@@ -220,12 +220,12 @@ describe("workflow tools", () => {
     const text = firstResult.content[0].text;
     const sessionIdMatch = text.match(/`(pi_[a-z0-9]+)`/);
     expect(sessionIdMatch).not.toBeNull();
-    const sessionId = sessionIdMatch![1];
+    const sessionId = sessionIdMatch?.[1];
 
     // Get the session to find correct answers
     const session = getInterviewSession(sessionId);
     expect(session).toBeDefined();
-    const correctAnswers = session!.currentRound.questions.map((q) => q.correctIndex) as [
+    const correctAnswers = session?.currentRound.questions.map((q) => q.correctIndex) as [
       number,
       number,
       number,
@@ -252,12 +252,12 @@ describe("workflow tools", () => {
     });
     const text = firstResult.content[0].text;
     const sessionIdMatch = text.match(/`(pi_[a-z0-9]+)`/);
-    const sessionId = sessionIdMatch![1];
+    const sessionId = sessionIdMatch?.[1];
 
     // Get session and compute wrong answers
     const session = getInterviewSession(sessionId);
     expect(session).toBeDefined();
-    const wrongAnswers = session!.currentRound.questions.map((q) => (q.correctIndex + 1) % 4) as [
+    const wrongAnswers = session?.currentRound.questions.map((q) => (q.correctIndex + 1) % 4) as [
       number,
       number,
       number,
@@ -280,11 +280,11 @@ describe("workflow tools", () => {
       taskDescription: "Test borderline fail",
     });
     const sessionIdMatch = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/);
-    const sessionId = sessionIdMatch![1];
+    const sessionId = sessionIdMatch?.[1];
 
     const session = getInterviewSession(sessionId);
     expect(session).toBeDefined();
-    const questions = session!.currentRound.questions;
+    const questions = session?.currentRound.questions;
 
     // 1 correct, 2 wrong
     const answers: [number, number, number] = [
@@ -306,11 +306,11 @@ describe("workflow tools", () => {
       taskDescription: "Test passing round",
     });
     const sessionIdMatch = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/);
-    const sessionId = sessionIdMatch![1];
+    const sessionId = sessionIdMatch?.[1];
 
     const session = getInterviewSession(sessionId);
     expect(session).toBeDefined();
-    const questions = session!.currentRound.questions;
+    const questions = session?.currentRound.questions;
 
     // 2 correct, 1 wrong
     const answers: [number, number, number] = [
@@ -336,7 +336,7 @@ describe("workflow tools", () => {
       taskDescription: "Test no answers",
     });
     const sessionIdMatch = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/);
-    const sessionId = sessionIdMatch![1];
+    const sessionId = sessionIdMatch?.[1];
 
     const followUp = await server.call("bazdmeg_planning_interview", {
       sessionId,
@@ -361,7 +361,7 @@ describe("workflow tools", () => {
       taskDescription: "Full mastery test",
     });
     const sessionIdMatch = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/);
-    const sessionId = sessionIdMatch![1];
+    const sessionId = sessionIdMatch?.[1];
 
     // Keep answering correctly until all mastered
     // Each round tests 3 concepts, mastery needs 2+ correct per concept.
@@ -401,7 +401,7 @@ describe("workflow tools", () => {
       taskDescription: "Conflict test",
     });
     const sessionIdMatch = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/);
-    const sessionId = sessionIdMatch![1];
+    const sessionId = sessionIdMatch?.[1];
 
     // Get session and directly seed the answerHistory with a "correct" answer
     // so the next wrong answer for the same variantIndex triggers conflict detection
@@ -409,11 +409,11 @@ describe("workflow tools", () => {
     expect(session).toBeDefined();
 
     // Get first round questions
-    const firstRoundQuestions = session!.currentRound.questions;
+    const firstRoundQuestions = session?.currentRound.questions;
 
     // Seed answerHistory for the first question with correct answer (simulating a prior correct response)
     const firstQ = firstRoundQuestions[0];
-    const conceptState = session!.conceptStates[firstQ.conceptIndex]!;
+    const conceptState = session?.conceptStates[firstQ.conceptIndex];
     // Mark this variant as previously answered correctly
     conceptState.answerHistory.set(firstQ.variantIndex, firstQ.correctIndex);
 
@@ -443,28 +443,28 @@ describe("workflow tools", () => {
       taskDescription: "Multi-contradiction test",
     });
     const sessionIdMatch = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/);
-    const sessionId = sessionIdMatch![1];
+    const sessionId = sessionIdMatch?.[1];
 
     // Pre-seed 3 conflicts directly in the session to test FAILED_CONTRADICTIONS path
     const session = getInterviewSession(sessionId);
     expect(session).toBeDefined();
 
     // Directly add 2 conflicts to session (we'll create the 3rd via the answer)
-    session!.conflicts.push(
+    session?.conflicts.push(
       { concept: "file_awareness", round: 0, detail: "Previously correct, now wrong" },
       { concept: "test_strategy", round: 1, detail: "Previously correct, now wrong" },
     );
 
     // Seed one question's answerHistory for conflict
-    const currentQ = session!.currentRound.questions[0];
-    const conceptState = session!.conceptStates[currentQ.conceptIndex]!;
+    const currentQ = session?.currentRound.questions[0];
+    const conceptState = session?.conceptStates[currentQ.conceptIndex];
     conceptState.answerHistory.set(currentQ.variantIndex, currentQ.correctIndex);
 
     // Answer: Q1 wrong (creates 3rd conflict), Q2+Q3 correct (passes score check of 2/3)
     const answers: [number, number, number] = [
       (currentQ.correctIndex + 1) % 4, // wrong for Q1 — triggers 3rd conflict
-      session!.currentRound.questions[1].correctIndex, // correct
-      session!.currentRound.questions[2].correctIndex, // correct
+      session?.currentRound.questions[1].correctIndex, // correct
+      session?.currentRound.questions[2].correctIndex, // correct
     ];
 
     const result = await server.call("bazdmeg_planning_interview", {
@@ -483,7 +483,7 @@ describe("workflow tools", () => {
       taskDescription: "Contradiction test",
     });
     const sessionIdMatch = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/);
-    const sessionId = sessionIdMatch![1];
+    const sessionId = sessionIdMatch?.[1];
 
     // Record which concept+variant combos we answered correctly
     const correctlyAnswered: Array<{
@@ -544,11 +544,11 @@ describe("workflow tools", () => {
       taskDescription: "Complete early",
     });
     const sessionIdMatch = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/);
-    const sessionId = sessionIdMatch![1];
+    const sessionId = sessionIdMatch?.[1];
 
     // Fail with all wrong answers
     const session = getInterviewSession(sessionId);
-    const wrongAnswers = session!.currentRound.questions.map((q) => (q.correctIndex + 1) % 4) as [
+    const wrongAnswers = session?.currentRound.questions.map((q) => (q.correctIndex + 1) % 4) as [
       number,
       number,
       number,
@@ -571,8 +571,8 @@ describe("workflow tools", () => {
     const firstResult = await server.call("bazdmeg_planning_interview", {
       taskDescription: "Few concepts test",
     });
-    const sessionId = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/)![1];
-    const session = getInterviewSession(sessionId)!;
+    const sessionId = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/)?.[1];
+    const session = getInterviewSession(sessionId);
 
     // Manually master 5/6 concepts
     for (let i = 0; i < 5; i++) {
@@ -593,7 +593,7 @@ describe("workflow tools", () => {
 
     // The new round should have been generated hitting the while loop
     expect(result.content[0].text).toContain("Q1");
-    const newSession = getInterviewSession(sessionId)!;
+    const newSession = getInterviewSession(sessionId);
     // Round should have 3 questions, even if only 1 concept was unmastered (it repeats)
     expect(newSession.currentRound.questions.length).toBe(3);
   });
@@ -602,8 +602,8 @@ describe("workflow tools", () => {
     const firstResult = await server.call("bazdmeg_planning_interview", {
       taskDescription: "Mastered branch test",
     });
-    const sessionId = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/)![1];
-    const session = getInterviewSession(sessionId)!;
+    const sessionId = firstResult.content[0].text.match(/`(pi_[a-z0-9]+)`/)?.[1];
+    const session = getInterviewSession(sessionId);
 
     // Manually master the concept used in Q1
     const q1 = session.currentRound.questions[0];

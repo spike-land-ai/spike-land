@@ -193,8 +193,8 @@ function normalizeColor(value: string, fallback: string): string {
     return fallback;
   }
 
-  const [red = 0, green = 0, blue = 0, alpha = "1"] = rgbMatch[1]!
-    .split(",")
+  const [red = 0, green = 0, blue = 0, alpha = "1"] = rgbMatch[1]
+    ?.split(",")
     .map((part) => part.trim());
 
   return rgbaToHex(Number(red), Number(green), Number(blue), Number(alpha));
@@ -250,13 +250,17 @@ function fallbackTokens(isDark: boolean): PlatformThemeTokens {
     foreground: isDark ? TOKEN_CONFIG.foreground.dark : TOKEN_CONFIG.foreground.light,
     card: isDark ? TOKEN_CONFIG.card.dark : TOKEN_CONFIG.card.light,
     muted: isDark ? TOKEN_CONFIG.muted.dark : TOKEN_CONFIG.muted.light,
-    mutedForeground: isDark ? TOKEN_CONFIG.mutedForeground.dark : TOKEN_CONFIG.mutedForeground.light,
+    mutedForeground: isDark
+      ? TOKEN_CONFIG.mutedForeground.dark
+      : TOKEN_CONFIG.mutedForeground.light,
     border: isDark ? TOKEN_CONFIG.border.dark : TOKEN_CONFIG.border.light,
     input: isDark ? TOKEN_CONFIG.input.dark : TOKEN_CONFIG.input.light,
     primary: isDark ? TOKEN_CONFIG.primary.dark : TOKEN_CONFIG.primary.light,
     primaryLight: isDark ? TOKEN_CONFIG.primaryLight.dark : TOKEN_CONFIG.primaryLight.light,
     chatAccent: isDark ? TOKEN_CONFIG.chatAccent.dark : TOKEN_CONFIG.chatAccent.light,
-    chatAccentLight: isDark ? TOKEN_CONFIG.chatAccentLight.dark : TOKEN_CONFIG.chatAccentLight.light,
+    chatAccentLight: isDark
+      ? TOKEN_CONFIG.chatAccentLight.dark
+      : TOKEN_CONFIG.chatAccentLight.light,
     accentForeground: isDark
       ? TOKEN_CONFIG.accentForeground.dark
       : TOKEN_CONFIG.accentForeground.light,
@@ -362,8 +366,16 @@ export function createMonacoThemeData(
     base: isDark ? "vs-dark" : "vs",
     inherit: true,
     rules: [
-      { token: "", foreground: tokens.foreground.replace(/^#/, ""), background: tokens.background.replace(/^#/, "") },
-      { token: "comment", foreground: tokens.mutedForeground.replace(/^#/, ""), fontStyle: "italic" },
+      {
+        token: "",
+        foreground: tokens.foreground.replace(/^#/, ""),
+        background: tokens.background.replace(/^#/, ""),
+      },
+      {
+        token: "comment",
+        foreground: tokens.mutedForeground.replace(/^#/, ""),
+        fontStyle: "italic",
+      },
       { token: "keyword", foreground: accent, fontStyle: "bold" },
       { token: "operator", foreground: accent },
       { token: "type", foreground: accentLight },
@@ -379,7 +391,11 @@ export function createMonacoThemeData(
       { token: "attribute.value", foreground: tokens.foreground.replace(/^#/, "") },
       { token: "variable", foreground: tokens.foreground.replace(/^#/, "") },
       { token: "identifier", foreground: tokens.foreground.replace(/^#/, "") },
-      { token: "invalid", foreground: tokens.destructiveForeground.replace(/^#/, ""), fontStyle: "underline" },
+      {
+        token: "invalid",
+        foreground: tokens.destructiveForeground.replace(/^#/, ""),
+        fontStyle: "underline",
+      },
     ],
     colors: {
       "editor.background": tokens.background,
@@ -387,7 +403,10 @@ export function createMonacoThemeData(
       "editorCursor.foreground": tokens.chatAccent,
       "editor.selectionBackground": coverTheme.selection,
       "editor.inactiveSelectionBackground": withAlpha(tokens.chatAccent, isDark ? 0.14 : 0.08),
-      "editor.selectionHighlightBackground": withAlpha(tokens.chatAccentLight, isDark ? 0.16 : 0.08),
+      "editor.selectionHighlightBackground": withAlpha(
+        tokens.chatAccentLight,
+        isDark ? 0.16 : 0.08,
+      ),
       "editor.wordHighlightBackground": withAlpha(tokens.chatAccentLight, isDark ? 0.12 : 0.08),
       "editor.wordHighlightStrongBackground": withAlpha(tokens.chatAccent, isDark ? 0.16 : 0.1),
       "editor.lineHighlightBackground": coverTheme.lineHighlight,
@@ -415,7 +434,7 @@ export function createMonacoThemeData(
       "editor.findMatchBorder": tokens.chatAccentLight,
       "editor.findMatchHighlightBackground": withAlpha(tokens.chatAccent, isDark ? 0.14 : 0.08),
       "editor.findRangeHighlightBackground": withAlpha(tokens.muted, isDark ? 0.4 : 0.6),
-      "editorRangeHighlightBackground": withAlpha(tokens.muted, isDark ? 0.3 : 0.2),
+      editorRangeHighlightBackground: withAlpha(tokens.muted, isDark ? 0.3 : 0.2),
       "editorLink.activeForeground": tokens.chatAccent,
       "editorInfo.foreground": tokens.chatAccentLight,
       "editorWarning.foreground": tokens.chatAccentLight,
@@ -436,7 +455,7 @@ export function createMonacoThemeData(
       "input.background": tokens.card,
       "input.border": tokens.input,
       "input.foreground": tokens.foreground,
-      "focusBorder": tokens.chatAccent,
+      focusBorder: tokens.chatAccent,
       "dropdown.background": tokens.card,
       "dropdown.border": tokens.border,
       "dropdown.foreground": tokens.foreground,

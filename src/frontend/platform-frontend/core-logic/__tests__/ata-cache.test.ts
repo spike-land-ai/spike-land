@@ -25,10 +25,10 @@ function createFakeIndexedDB() {
       return {} as IDBObjectStore;
     },
     transaction: (storeNames: string | string[], _mode?: string) => {
-      const storeName = Array.isArray(storeNames) ? storeNames[0]! : storeNames;
+      const storeName = Array.isArray(storeNames) ? storeNames[0] : storeNames;
       if (!stores[storeName]) stores[storeName] = new Map();
 
-      const store = stores[storeName]!;
+      const store = stores[storeName];
       const fakeStore = {
         get: (key: string) => {
           const result = {

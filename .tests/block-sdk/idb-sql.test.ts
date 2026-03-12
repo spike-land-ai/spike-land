@@ -47,20 +47,20 @@ describe("sql.js SQL execution (unit tests)", () => {
   it("ORDER BY queries work correctly", () => {
     const result = db.exec("SELECT * FROM tasks ORDER BY priority ASC");
     expect(result).toHaveLength(1);
-    const priorities = result[0]!.values.map((r) => r[3]);
+    const priorities = result[0]?.values.map((r) => r[3]);
     expect(priorities).toEqual([1, 2, 2, 3, 5]);
   });
 
   it("ORDER BY DESC works", () => {
     const result = db.exec("SELECT * FROM tasks ORDER BY priority DESC");
-    const priorities = result[0]!.values.map((r) => r[3]);
+    const priorities = result[0]?.values.map((r) => r[3]);
     expect(priorities).toEqual([5, 3, 2, 2, 1]);
   });
 
   it("LIMIT queries work", () => {
     const result = db.exec("SELECT * FROM tasks ORDER BY priority DESC LIMIT 2");
-    expect(result[0]!.values).toHaveLength(2);
-    expect(result[0]!.values[0]![3]).toBe(5);
+    expect(result[0]?.values).toHaveLength(2);
+    expect(result[0]?.values[0]?.[3]).toBe(5);
   });
 
   it("WHERE with OR conditions", () => {
@@ -68,17 +68,17 @@ describe("sql.js SQL execution (unit tests)", () => {
       "open",
       "blocked",
     ]);
-    expect(result[0]!.values).toHaveLength(3);
-    const statuses = result[0]!.values.map((r) => r[2]);
+    expect(result[0]?.values).toHaveLength(3);
+    const statuses = result[0]?.values.map((r) => r[2]);
     expect(statuses).toContain("open");
     expect(statuses).toContain("blocked");
   });
 
   it("column-specific SELECT (not just SELECT *)", () => {
     const result = db.exec("SELECT id, title FROM tasks WHERE status = ?", ["done"]);
-    expect(result[0]!.columns).toEqual(["id", "title"]);
-    expect(result[0]!.values).toHaveLength(2);
-    expect(result[0]!.values[0]).toHaveLength(2);
+    expect(result[0]?.columns).toEqual(["id", "title"]);
+    expect(result[0]?.values).toHaveLength(2);
+    expect(result[0]?.values[0]).toHaveLength(2);
   });
 
   it("INSERT + SELECT round-trip", () => {
@@ -89,8 +89,8 @@ describe("sql.js SQL execution (unit tests)", () => {
       10,
     ]);
     const result = db.exec("SELECT * FROM tasks WHERE id = ?", ["t6"]);
-    expect(result[0]!.values).toHaveLength(1);
-    expect(result[0]!.values[0]![1]).toBe("New task");
+    expect(result[0]?.values).toHaveLength(1);
+    expect(result[0]?.values[0]?.[1]).toBe("New task");
   });
 
   it("CREATE TABLE IF NOT EXISTS is idempotent", () => {
@@ -98,7 +98,7 @@ describe("sql.js SQL execution (unit tests)", () => {
       db.run("CREATE TABLE IF NOT EXISTS tasks (id TEXT PRIMARY KEY, title TEXT)");
     }).not.toThrow();
     const result = db.exec("SELECT COUNT(*) FROM tasks");
-    expect(result[0]!.values[0]![0]).toBe(5);
+    expect(result[0]?.values[0]?.[0]).toBe(5);
   });
 
   it("UPDATE modifies rows and returns affected count", () => {
@@ -106,7 +106,7 @@ describe("sql.js SQL execution (unit tests)", () => {
     const affected = db.getRowsModified();
     expect(affected).toBe(2);
     const result = db.exec("SELECT * FROM tasks WHERE status = ?", ["closed"]);
-    expect(result[0]!.values).toHaveLength(2);
+    expect(result[0]?.values).toHaveLength(2);
   });
 
   it("DELETE removes rows", () => {
@@ -114,7 +114,7 @@ describe("sql.js SQL execution (unit tests)", () => {
     const affected = db.getRowsModified();
     expect(affected).toBe(1);
     const result = db.exec("SELECT COUNT(*) FROM tasks");
-    expect(result[0]!.values[0]![0]).toBe(4);
+    expect(result[0]?.values[0]?.[0]).toBe(4);
   });
 
   it("complex query: WHERE + ORDER BY + LIMIT", () => {
@@ -122,7 +122,7 @@ describe("sql.js SQL execution (unit tests)", () => {
       "SELECT id, title FROM tasks WHERE status = ? ORDER BY priority DESC LIMIT 1",
       ["open"],
     );
-    expect(result[0]!.values).toHaveLength(1);
-    expect(result[0]!.values[0]![0]).toBe("t2");
+    expect(result[0]?.values).toHaveLength(1);
+    expect(result[0]?.values[0]?.[0]).toBe("t2");
   });
 });

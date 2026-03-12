@@ -17,11 +17,18 @@ export function registerStorytellingTools(server: McpServer, client: ToolClient)
       "Create a themed image album celebrating women in tech. Generates multiple images around a theme (pioneers, leaders, innovators, future_vision, community).",
     schema: {
       theme: z.enum(ALBUM_THEMES).describe("Album theme"),
-      image_count: z.number().int().min(1).max(8).default(4).describe("Number of images to generate"),
+      image_count: z
+        .number()
+        .int()
+        .min(1)
+        .max(8)
+        .default(4)
+        .describe("Number of images to generate"),
       title: z.string().optional().describe("Custom album title"),
     },
     async handler({ theme, image_count, title }) {
-      const albumTitle = title ?? `${IWD_BRAND.tagline} — ${theme.charAt(0).toUpperCase() + theme.slice(1)}`;
+      const albumTitle =
+        title ?? `${IWD_BRAND.tagline} — ${theme.charAt(0).toUpperCase() + theme.slice(1)}`;
 
       const themePrompts: Record<string, string[]> = {
         pioneers: [
@@ -76,7 +83,7 @@ export function registerStorytellingTools(server: McpServer, client: ToolClient)
         ],
       };
 
-      const prompts = themePrompts[theme]!.slice(0, image_count);
+      const prompts = themePrompts[theme]?.slice(0, image_count);
       const albumResult = await client.callTool("img_album_create", {
         name: albumTitle,
         description: `IWD 2026 album: ${theme}`,
@@ -87,7 +94,7 @@ export function registerStorytellingTools(server: McpServer, client: ToolClient)
           client.callTool("img_generate", {
             prompt: `${prompt}. Style: ${IWD_BRAND.tagline} celebration, purple (#A020F0) and green (#44B78B) accents, empowering, modern art.`,
             aspect_ratio: "16:9",
-          })
+          }),
         ),
       );
 

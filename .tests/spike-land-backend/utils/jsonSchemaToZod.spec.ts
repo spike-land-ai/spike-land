@@ -36,7 +36,7 @@ describe("JsonSchemaToZodConverter", () => {
       const readCodeTool = mcpServer.getTools().find((t) => t.name === "read_code");
       expect(readCodeTool).toBeDefined();
 
-      const zodSchema = converter.convert(readCodeTool!.inputSchema);
+      const zodSchema = converter.convert(readCodeTool?.inputSchema);
 
       // Valid parameters
       expect(() => zodSchema.parse({ codeSpace: "test-space" })).not.toThrow();
@@ -55,7 +55,7 @@ describe("JsonSchemaToZodConverter", () => {
       const updateCodeTool = mcpServer.getTools().find((t) => t.name === "update_code");
       expect(updateCodeTool).toBeDefined();
 
-      const zodSchema = converter.convert(updateCodeTool!.inputSchema);
+      const zodSchema = converter.convert(updateCodeTool?.inputSchema);
 
       // Valid parameters
       expect(() =>
@@ -79,7 +79,7 @@ describe("JsonSchemaToZodConverter", () => {
       const searchReplaceTool = mcpServer.getTools().find((t) => t.name === "search_and_replace");
       expect(searchReplaceTool).toBeDefined();
 
-      const zodSchema = converter.convert(searchReplaceTool!.inputSchema);
+      const zodSchema = converter.convert(searchReplaceTool?.inputSchema);
 
       // Valid parameters with required fields only
       expect(() =>
@@ -124,7 +124,7 @@ describe("JsonSchemaToZodConverter", () => {
       const editCodeTool = mcpServer.getTools().find((t) => t.name === "edit_code");
       expect(editCodeTool).toBeDefined();
 
-      const zodSchema = converter.convert(editCodeTool!.inputSchema);
+      const zodSchema = converter.convert(editCodeTool?.inputSchema);
 
       // Valid parameters
       const validData = {
@@ -179,7 +179,7 @@ describe("JsonSchemaToZodConverter", () => {
       const findLinesTool = mcpServer.getTools().find((t) => t.name === "find_lines");
       expect(findLinesTool).toBeDefined();
 
-      const zodSchema = converter.convert(findLinesTool!.inputSchema);
+      const zodSchema = converter.convert(findLinesTool?.inputSchema);
 
       // Valid with required fields only
       expect(() =>
@@ -229,7 +229,7 @@ describe("JsonSchemaToZodConverter", () => {
         const tool = tools.find((t) => t.name === testCase.name);
         expect(tool).toBeDefined();
 
-        const zodSchema = converter.convert(tool!.inputSchema);
+        const zodSchema = converter.convert(tool?.inputSchema);
         expect(() => zodSchema.parse(testCase.data)).not.toThrow();
       }
     });

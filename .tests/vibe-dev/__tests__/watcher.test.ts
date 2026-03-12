@@ -98,7 +98,7 @@ describe("Watcher Module", () => {
         .mocked(writeFile)
         .mock.calls.find(([p]) => String(p).includes(".meta.json"));
       expect(metaCall).toBeDefined();
-      const meta = JSON.parse(String(metaCall![1]));
+      const meta = JSON.parse(String(metaCall?.[1]));
       expect(meta.codespaceId).toBe("space-x");
       expect(meta.originalLength).toBe(10);
       expect(meta.downloadedAt).toBeTruthy();
@@ -121,7 +121,7 @@ describe("Watcher Module", () => {
 
       const changeHandler = vi
         .mocked(mockWatcher.on)
-        .mock.calls.find((call) => call[0] === "change")![1];
+        .mock.calls.find((call) => call[0] === "change")?.[1];
 
       vi.mocked(readFile).mockResolvedValue("new code");
       changeHandler();
@@ -139,7 +139,7 @@ describe("Watcher Module", () => {
 
       const changeHandler = vi
         .mocked(mockWatcher.on)
-        .mock.calls.find((call) => call[0] === "change")![1];
+        .mock.calls.find((call) => call[0] === "change")?.[1];
 
       vi.mocked(readFile).mockResolvedValue("synced code");
       vi.mocked(pushCode).mockResolvedValue({} as never);
@@ -157,7 +157,7 @@ describe("Watcher Module", () => {
 
       const changeHandler = vi
         .mocked(mockWatcher.on)
-        .mock.calls.find((call) => call[0] === "change")![1];
+        .mock.calls.find((call) => call[0] === "change")?.[1];
 
       vi.mocked(readFile).mockResolvedValue("code");
       vi.mocked(withRetry).mockRejectedValue(new Error("push failed"));
@@ -175,7 +175,7 @@ describe("Watcher Module", () => {
 
       const changeHandler = vi
         .mocked(mockWatcher.on)
-        .mock.calls.find((call) => call[0] === "change")![1];
+        .mock.calls.find((call) => call[0] === "change")?.[1];
 
       vi.mocked(readFile).mockResolvedValue("code");
       vi.mocked(withRetry).mockRejectedValue("string error");
@@ -195,7 +195,7 @@ describe("Watcher Module", () => {
 
       const changeHandler = vi
         .mocked(mockWatcher.on)
-        .mock.calls.find((call) => call[0] === "change")![1];
+        .mock.calls.find((call) => call[0] === "change")?.[1];
 
       vi.mocked(readFile).mockResolvedValue("code");
       vi.mocked(pushCode).mockResolvedValue({} as never);
@@ -218,7 +218,7 @@ describe("Watcher Module", () => {
 
       const errorHandler = vi
         .mocked(mockWatcher.on)
-        .mock.calls.find((call) => call[0] === "error")![1];
+        .mock.calls.find((call) => call[0] === "error")?.[1];
 
       errorHandler(new Error("fs error"));
       expect(onError).toHaveBeenCalledWith("code1", expect.any(Error));
@@ -230,7 +230,7 @@ describe("Watcher Module", () => {
 
       const errorHandler = vi
         .mocked(mockWatcher.on)
-        .mock.calls.find((call) => call[0] === "error")![1];
+        .mock.calls.find((call) => call[0] === "error")?.[1];
 
       errorHandler("plain string error");
       expect(onError).toHaveBeenCalledWith(
@@ -245,7 +245,7 @@ describe("Watcher Module", () => {
 
       const changeHandler = vi
         .mocked(mockWatcher.on)
-        .mock.calls.find((call) => call[0] === "change")![1];
+        .mock.calls.find((call) => call[0] === "change")?.[1];
 
       vi.mocked(readFile).mockResolvedValue("code");
       changeHandler();

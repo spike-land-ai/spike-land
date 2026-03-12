@@ -143,7 +143,7 @@ bugbook.post(`${BUGBOOK_API_BASE}/report`, authMiddleware, eloThrottleMiddleware
   }
 
   const severity = ["low", "medium", "high", "critical"].includes(body.severity ?? "")
-    ? body.severity!
+    ? body.severity
     : "medium";
 
   const now = Date.now();
@@ -188,7 +188,7 @@ bugbook.post(`${BUGBOOK_API_BASE}/report`, authMiddleware, eloThrottleMiddleware
       .bind(...insertQ.params)
       .first<{ id: string }>();
 
-    bugId = result!.id;
+    bugId = result?.id;
     isNewBug = true;
   }
 

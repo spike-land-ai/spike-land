@@ -15,7 +15,7 @@ export async function getPosts(options?: {
   let posts: BlogPost[] = await res.json();
 
   if (options?.tag) {
-    posts = posts.filter((p) => p.tags.includes(options.tag!));
+    posts = posts.filter((p) => p.tags.includes(options.tag));
   }
 
   if (options?.category) {

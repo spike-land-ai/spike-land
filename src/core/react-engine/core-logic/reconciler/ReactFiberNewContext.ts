@@ -159,15 +159,15 @@ export function propagateContextChange(
       return;
     }
 
-    while (fiber!.sibling === null) {
-      if (fiber!.return === null || fiber!.return === workInProgress) {
+    while (fiber?.sibling === null) {
+      if (fiber?.return === null || fiber?.return === workInProgress) {
         return;
       }
-      fiber = fiber!.return;
+      fiber = fiber?.return;
     }
 
-    fiber!.sibling!.return = fiber!.return;
-    fiber = fiber!.sibling;
+    fiber?.sibling?.return = fiber?.return;
+    fiber = fiber?.sibling;
   }
 }
 

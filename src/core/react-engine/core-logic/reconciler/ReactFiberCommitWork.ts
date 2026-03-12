@@ -136,7 +136,7 @@ function commitMutationEffectsOnFiber(fiber: Fiber, root: FiberRoot): void {
     const deletions = fiber.deletions;
     if (deletions !== null) {
       for (let i = 0; i < deletions.length; i++) {
-        commitDeletion(root, deletions[i]!, fiber, hostConfig);
+        commitDeletion(root, deletions[i], fiber, hostConfig);
       }
     }
   }

@@ -115,7 +115,7 @@ describe("engine.ts line 222 coverage", () => {
     addState(id, { id: "p", type: "compound" });
     addState(id, { id: "c", type: "atomic", parent: "p" });
     // Adding child again should not duplicate it in parent's children
-    const _parentBefore = [...machine.definition.states["p"]!.children];
+    const _parentBefore = [...machine.definition.states["p"]?.children];
 
     // Manually call addState again with same child
     machine.definition.states["c2"] = {
@@ -127,7 +127,7 @@ describe("engine.ts line 222 coverage", () => {
       exitActions: [],
     };
     // Simulate the parent-link logic: parent already contains "c"
-    const parent = machine.definition.states["p"]!;
+    const parent = machine.definition.states["p"];
     if (!parent.children.includes("c")) {
       parent.children.push("c");
     }

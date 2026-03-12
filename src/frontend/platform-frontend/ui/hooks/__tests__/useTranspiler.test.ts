@@ -134,7 +134,9 @@ describe("useTranspiler", () => {
   });
 
   it("rebuilds preview HTML for dark mode without re-fetching source", async () => {
-    fetchMock.mockResolvedValue(new Response('const App = () => "hello";export default App;', { status: 200 }));
+    fetchMock.mockResolvedValue(
+      new Response('const App = () => "hello";export default App;', { status: 200 }),
+    );
 
     const { result, rerender } = renderHook(
       ({ isDark }: { isDark: boolean }) =>

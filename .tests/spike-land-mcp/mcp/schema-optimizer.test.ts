@@ -27,7 +27,7 @@ describe("optimizeSchema", () => {
     const result = optimizeSchema(schema) as Record<string, unknown>;
     const props = result.properties as Record<string, Record<string, unknown>>;
     expect(props.name).not.toHaveProperty("description");
-    expect(props.age!.description).toBe("User age in years");
+    expect(props.age?.description).toBe("User age in years");
   });
 
   it("strips 'the <name>' descriptions", () => {
@@ -134,7 +134,7 @@ describe("optimizeSchema", () => {
     const props = result.properties as Record<string, Record<string, unknown>>;
     expect(props.name).not.toHaveProperty("default");
     expect(props.age).not.toHaveProperty("default");
-    expect(props.count!.default).toBe(42);
+    expect(props.count?.default).toBe(42);
   });
 
   it("preserves meaningful descriptions and shortens them", () => {
@@ -154,8 +154,8 @@ describe("optimizeSchema", () => {
 
     const result = optimizeSchema(schema) as Record<string, unknown>;
     const props = result.properties as Record<string, Record<string, unknown>>;
-    expect(props.query!.description).toBe("Search query to execute against the index");
-    expect(props.limit!.description).toBe("Maximum number of results to return");
+    expect(props.query?.description).toBe("Search query to execute against the index");
+    expect(props.limit?.description).toBe("Maximum number of results to return");
   });
 
   it("handles nested schemas (items)", () => {
@@ -172,7 +172,7 @@ describe("optimizeSchema", () => {
 
     const result = optimizeSchema(schema) as Record<string, unknown>;
     const props = result.properties as Record<string, Record<string, unknown>>;
-    const items = props.tags!.items as Record<string, unknown>;
+    const items = props.tags?.items as Record<string, unknown>;
     // "tags" description inside items doesn't have a propertyName context for items
     // (items doesn't pass down a property name), so it's kept
     expect(items.type).toBe("string");
@@ -405,7 +405,7 @@ describe("optimizeSchema", () => {
     };
     const result = optimizeSchema(schema) as Record<string, unknown>;
     const props = result.properties as Record<string, Record<string, unknown>>;
-    expect(props.ts!.title).toBe("Timestamp");
+    expect(props.ts?.title).toBe("Timestamp");
   });
 
   it("does not strip title when no property name context exists (root level)", () => {
@@ -490,7 +490,7 @@ describe("optimizeSchema", () => {
     };
     const result = optimizeSchema(schema) as Record<string, unknown>;
     const props = result.properties as Record<string, Record<string, unknown>>;
-    expect(props.config!.type).toBe("object");
+    expect(props.config?.type).toBe("object");
   });
 
   it("preserves non-object root type", () => {
@@ -560,7 +560,7 @@ describe("optimizeSchema", () => {
     };
     const result = optimizeSchema(schema) as Record<string, unknown>;
     const props = result.properties as Record<string, Record<string, unknown>>;
-    expect(props.name!.default).toBe("hello");
+    expect(props.name?.default).toBe("hello");
   });
 
   it("strips default: 0 for type number", () => {
@@ -672,7 +672,7 @@ describe("optimizeSchema", () => {
     };
     const result = optimizeSchema(schema) as Record<string, unknown>;
     const props = result.properties as Record<string, Record<string, unknown>>;
-    expect(props.name!.minLength).toBe(1);
+    expect(props.name?.minLength).toBe(1);
   });
 
   it("strips minItems: 0", () => {
@@ -708,7 +708,7 @@ describe("optimizeSchema", () => {
     };
     const result = optimizeSchema(schema) as Record<string, unknown>;
     const props = result.properties as Record<string, Record<string, unknown>>;
-    expect(props.tags!.uniqueItems).toBe(true);
+    expect(props.tags?.uniqueItems).toBe(true);
   });
 });
 
@@ -837,8 +837,8 @@ describe("getSchemaTokenReport", () => {
     expect(report.totalOptimizedTokens).toBeGreaterThanOrEqual(0);
     expect(report.totalSaved).toBe(report.totalOriginalTokens - report.totalOptimizedTokens);
     expect(report.perTool).toHaveLength(2);
-    expect(report.perTool[0]!.name).toBe("tool_a");
-    expect(report.perTool[1]!.name).toBe("tool_b");
+    expect(report.perTool[0]?.name).toBe("tool_a");
+    expect(report.perTool[1]?.name).toBe("tool_b");
   });
 
   it("perTool saved matches individual measureTokenSavings", () => {
@@ -851,7 +851,7 @@ describe("getSchemaTokenReport", () => {
     const schemas = [{ name: "my_tool", original, optimized }];
     const report = getSchemaTokenReport(schemas);
     const individual = measureTokenSavings(original, optimized);
-    expect(report.perTool[0]!.saved).toBe(individual.approximateTokensSaved);
+    expect(report.perTool[0]?.saved).toBe(individual.approximateTokensSaved);
   });
 
   it("totalSaved equals totalOriginalTokens minus totalOptimizedTokens", () => {

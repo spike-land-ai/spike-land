@@ -24,7 +24,7 @@ import {
   copyAssets,
 } from "./reorganize/execution.js";
 
-async function runReorganization(values: any) {
+async function runReorganization(values: unknown) {
   const MAX_BUCKET_SIZE = 20;
   const outputDir = path.resolve(process.cwd(), values.output as string);
   const srcDir = path.resolve(process.cwd(), values.src as string);

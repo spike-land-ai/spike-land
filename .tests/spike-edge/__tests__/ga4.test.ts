@@ -56,7 +56,7 @@ describe("sendGA4Events", () => {
     await sendGA4Events(env, "client-abc", [{ name: "page_view", params: { page: "/home" } }]);
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    const [url, init] = mockFetch.mock.calls[0]!;
+    const [url, init] = mockFetch.mock.calls[0];
     expect(url).toContain("google-analytics.com/mp/collect");
     expect(url).toContain("measurement_id=G-TEST123");
     expect(url).toContain("api_secret=secret123");
@@ -80,10 +80,10 @@ describe("sendGA4Events", () => {
 
     expect(mockFetch).toHaveBeenCalledTimes(2);
 
-    const batch1 = JSON.parse(mockFetch.mock.calls[0]![1].body);
+    const batch1 = JSON.parse(mockFetch.mock.calls[0]?.[1].body);
     expect(batch1.events).toHaveLength(25);
 
-    const batch2 = JSON.parse(mockFetch.mock.calls[1]![1].body);
+    const batch2 = JSON.parse(mockFetch.mock.calls[1]?.[1].body);
     expect(batch2.events).toHaveLength(5);
   });
 
@@ -103,7 +103,7 @@ describe("sendGA4Events", () => {
     const longString = "x".repeat(600);
     await sendGA4Events(env, "client-abc", [{ name: "test", params: { value: longString } }]);
 
-    const body = JSON.parse(mockFetch.mock.calls[0]![1].body);
+    const body = JSON.parse(mockFetch.mock.calls[0]?.[1].body);
     expect(body.events[0].params.value).toHaveLength(500);
   });
 

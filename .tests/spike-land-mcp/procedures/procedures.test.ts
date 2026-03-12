@@ -103,8 +103,8 @@ describe("freeTool", () => {
     await registry.callToolDirect("test_tool", {});
 
     expect(capturedCtx).toHaveLength(1);
-    expect(capturedCtx[0]!.userId).toBe("user-xyz");
-    expect(capturedCtx[0]!.db).toBeDefined();
+    expect(capturedCtx[0]?.userId).toBe("user-xyz");
+    expect(capturedCtx[0]?.db).toBeDefined();
   });
 });
 
@@ -142,8 +142,8 @@ describe("workspaceTool", () => {
 
     await registry.callToolDirect("ws_test_tool", {});
 
-    expect(capturedCtx[0]!.userId).toBe("ws-user");
-    expect(capturedCtx[0]!.db).toBeDefined();
+    expect(capturedCtx[0]?.userId).toBe("ws-user");
+    expect(capturedCtx[0]?.db).toBeDefined();
   });
 });
 

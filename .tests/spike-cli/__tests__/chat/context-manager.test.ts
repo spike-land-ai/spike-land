@@ -40,8 +40,8 @@ describe("ContextManager", () => {
     expect(summarizer).toHaveBeenCalled();
     // 2 (summary + ack) + 4 (kept) = 6
     expect(messages).toHaveLength(6);
-    expect(typeof messages[0]!.content).toBe("string");
-    expect(messages[0]!.content).toContain("summary");
+    expect(typeof messages[0]?.content).toBe("string");
+    expect(messages[0]?.content).toContain("summary");
   });
 
   it("does not summarize when too few messages", async () => {
@@ -85,7 +85,7 @@ describe("ContextManager", () => {
 
     expect(result).toBe(true);
     // Default summarizer produces text from messages
-    const summaryContent = messages[0]!.content as string;
+    const summaryContent = messages[0]?.content as string;
     expect(summaryContent).toContain("summary");
   });
 });

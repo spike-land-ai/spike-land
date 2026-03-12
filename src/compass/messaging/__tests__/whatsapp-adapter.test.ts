@@ -137,7 +137,7 @@ describe("WhatsAppAdapter", () => {
       await adapter.sendMessage({ chatId: "15551234567", text: "Hello there" });
 
       expect(calls).toHaveLength(1);
-      const call = calls[0]!;
+      const call = calls[0];
       expect(call.url).toContain(PHONE_ID);
       expect(call.url).toContain("messages");
       expect(call.method).toBe("POST");

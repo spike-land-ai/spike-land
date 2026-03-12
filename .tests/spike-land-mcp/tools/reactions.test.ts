@@ -37,19 +37,15 @@ function extractText(result: { content: Array<{ type: string; text?: string }> }
 }
 
 function bootstrapReactionSchema(sqlite: ReturnType<typeof createSqliteD1>["sqlite"]): void {
-  sqlite.exec("CREATE TABLE users (id TEXT PRIMARY KEY, email TEXT, created_at INTEGER, updated_at INTEGER);");
-  sqlite.prepare("INSERT INTO users (id, email, created_at, updated_at) VALUES (?, ?, ?, ?)").run(
-    "user-1",
-    "user-1@example.com",
-    Date.now(),
-    Date.now(),
+  sqlite.exec(
+    "CREATE TABLE users (id TEXT PRIMARY KEY, email TEXT, created_at INTEGER, updated_at INTEGER);",
   );
-  sqlite.prepare("INSERT INTO users (id, email, created_at, updated_at) VALUES (?, ?, ?, ?)").run(
-    "user-2",
-    "user-2@example.com",
-    Date.now(),
-    Date.now(),
-  );
+  sqlite
+    .prepare("INSERT INTO users (id, email, created_at, updated_at) VALUES (?, ?, ?, ?)")
+    .run("user-1", "user-1@example.com", Date.now(), Date.now());
+  sqlite
+    .prepare("INSERT INTO users (id, email, created_at, updated_at) VALUES (?, ?, ?, ?)")
+    .run("user-2", "user-2@example.com", Date.now(), Date.now());
 
   const migration = readFileSync(
     new URL("../../../src/edge-api/spike-land/db/migrations/0013_reactions.sql", import.meta.url),
@@ -116,7 +112,7 @@ describe("reactions tools", () => {
       .prepare("SELECT target_input FROM tool_reactions WHERE user_id = ?")
       .all("user-1") as Array<{ target_input: string }>;
     expect(storedRows).toHaveLength(1);
-    expect(JSON.parse(storedRows[0]!.target_input)).toEqual({ topic: "{{output.topic}}" });
+    expect(JSON.parse(storedRows[0]?.target_input)).toEqual({ topic: "{{output.topic}}" });
   });
 
   it("deletes only owned reactions and returns the empty-state response after removal", async () => {

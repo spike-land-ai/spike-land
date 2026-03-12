@@ -26,7 +26,7 @@ describe("parseRepoSlug", () => {
 
 describe("extractFirstJsonObject", () => {
   it("extracts the first valid JSON object from noisy output", () => {
-    expect(extractFirstJsonObject("noise\n{\"ok\":true}\ntrailing")).toBe("{\"ok\":true}");
+    expect(extractFirstJsonObject('noise\n{"ok":true}\ntrailing')).toBe('{"ok":true}');
   });
 });
 

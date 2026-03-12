@@ -99,7 +99,7 @@ export function memoizeWithAbort<TArgs extends unknown[], TReturn>(
     const key = keyResolver ? keyResolver(...fnArgs) : JSON.stringify(fnArgs);
 
     if (cache.has(key)) {
-      const entry = cache.get(key)!;
+      const entry = cache.get(key);
       const { promise, callbacks } = entry;
 
       if (signal.aborted) {

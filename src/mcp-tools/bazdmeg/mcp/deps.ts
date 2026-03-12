@@ -25,7 +25,7 @@ function buildTree(
 
   if (pkg?.deps) {
     for (let i = 0; i < pkg.deps.length; i++) {
-      const dep = pkg.deps[i]!;
+      const dep = pkg.deps[i];
       const isLast = i === pkg.deps.length - 1;
       const prefix = isLast ? "  └── " : "  ├── ";
       const childIndent = indent + (isLast ? "      " : "  │   ");
@@ -113,7 +113,7 @@ function buildList(packages: Record<string, ManifestPackage>, rootPackage?: stri
 
     let output = "## Topological Order (build order)\n\n";
     for (let i = 0; i < filtered.length; i++) {
-      const name = filtered[i]!;
+      const name = filtered[i];
       const pkg = packages[name];
       const deps = pkg?.deps?.length ?? 0;
       output += `${i + 1}. \`${name}\` (${pkg?.kind ?? "?"}, ${deps} deps)\n`;

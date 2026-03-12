@@ -296,7 +296,7 @@ describe("ToolRegistry.getToolDefinitions", () => {
 
     const defs = registry.getToolDefinitions();
     expect(defs).toHaveLength(1);
-    const def = defs[0]!;
+    const def = defs[0];
     expect(def.stability).toBe("beta");
     expect(def.version).toBe("3.0.0");
     expect(def.alwaysEnabled).toBe(true);
@@ -396,7 +396,7 @@ describe("ToolRegistry.getToolDefinitions — version and stability fields", () 
 
     const defs = registry.getToolDefinitions();
     expect(defs).toHaveLength(1);
-    const def = defs[0]!;
+    const def = defs[0];
     expect(def.version).toBe("2.3.1");
     expect(def.stability).toBe("beta");
   });
@@ -408,7 +408,7 @@ describe("ToolRegistry.getToolDefinitions — version and stability fields", () 
     registerTool(registry, { name: "plain_tool" });
 
     const defs = registry.getToolDefinitions();
-    const def = defs[0]!;
+    const def = defs[0];
     expect(def.version).toBe("1.0.0");
     expect(def.stability).toBe("stable");
   });
@@ -426,9 +426,9 @@ describe("ToolRegistry — version coexistence", () => {
     const v2 = registry.getToolByVersion("multi_ver", "2.0.0");
 
     expect(v1).toBeDefined();
-    expect(v1!.version).toBe("1.0.0");
+    expect(v1?.version).toBe("1.0.0");
     expect(v2).toBeDefined();
-    expect(v2!.version).toBe("2.0.0");
+    expect(v2?.version).toBe("2.0.0");
   });
 
   it("callToolDirect without version param executes the latest (v2) handler", async () => {
@@ -467,7 +467,7 @@ describe("ToolRegistry — version coexistence", () => {
     registerTool(registry, { name: "auto_dep", version: "2.0.0" });
 
     const v1 = registry.getToolByVersion("auto_dep", "1.0.0");
-    expect(v1!.stability).toBe("deprecated");
+    expect(v1?.stability).toBe("deprecated");
   });
 
   it("listVersions returns both versions sorted semver descending", () => {
@@ -479,8 +479,8 @@ describe("ToolRegistry — version coexistence", () => {
 
     const versions = registry.listVersions("sorted_tool");
     expect(versions).toHaveLength(2);
-    expect(versions[0]!.version).toBe("2.0.0");
-    expect(versions[1]!.version).toBe("1.0.0");
+    expect(versions[0]?.version).toBe("2.0.0");
+    expect(versions[1]?.version).toBe("1.0.0");
   });
 });
 

@@ -178,7 +178,7 @@ function tokenize(
     let offset = offsetDelta + scanner.getPosition();
     let type = "";
 
-    const kind = <SyntaxKind>(<any>scanner.scan());
+    const kind = <SyntaxKind>(<unknown>scanner.scan());
     if (kind === SyntaxKind.EOF) {
       break;
     }
@@ -262,7 +262,7 @@ function tokenize(
 
     ret.endState = new JSONState(
       state.getStateData(),
-      <ScanError>(<any>scanner.getTokenError()),
+      <ScanError>(<unknown>scanner.getTokenError()),
       lastWasColon,
       parents,
     );

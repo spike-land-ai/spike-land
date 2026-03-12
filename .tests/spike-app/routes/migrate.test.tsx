@@ -369,7 +369,7 @@ describe("MigratePage", () => {
       const script = container.querySelector('script[type="application/ld+json"]');
       expect(script).not.toBeNull();
 
-      const json = JSON.parse(script!.textContent ?? "{}") as {
+      const json = JSON.parse(script?.textContent ?? "{}") as {
         "@type": string;
         name: string;
         offers: { "@type": string }[];

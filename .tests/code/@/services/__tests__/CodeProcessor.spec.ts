@@ -545,7 +545,7 @@ describe("CodeProcessor", () => {
           },
         },
       } as MessageEvent;
-      messageHandler!(mockEvent);
+      messageHandler(mockEvent);
 
       const result = await processPromise;
 
@@ -588,7 +588,7 @@ describe("CodeProcessor", () => {
           },
         },
       } as MessageEvent;
-      messageHandler!(mockEvent);
+      messageHandler(mockEvent);
 
       const result = await processPromise;
       expect(result).toBe(false);
@@ -624,7 +624,7 @@ describe("CodeProcessor", () => {
           data: { html: "wrong", css: "" },
         },
       } as MessageEvent;
-      messageHandler!(mockEvent);
+      messageHandler(mockEvent);
 
       // Abort to finish the test
       mockAbortController.abort();
@@ -663,7 +663,7 @@ describe("CodeProcessor", () => {
           requestId: "test-id",
         },
       } as MessageEvent;
-      messageHandler!(mockEvent2);
+      messageHandler(mockEvent2);
 
       mockAbortController.abort();
 

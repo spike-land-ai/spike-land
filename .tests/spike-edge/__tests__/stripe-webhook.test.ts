@@ -530,8 +530,8 @@ describe("POST /stripe/webhook", () => {
 
       expect(res.status).toBe(200);
       expect(updateArgs.length).toBeGreaterThan(0);
-      expect(updateArgs[0]!.args).toContain("active");
-      expect(updateArgs[0]!.args).toContain("business");
+      expect(updateArgs[0]?.args).toContain("active");
+      expect(updateArgs[0]?.args).toContain("business");
     });
 
     it("sets status to past_due when subscription is past_due", async () => {

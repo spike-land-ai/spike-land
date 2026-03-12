@@ -36,12 +36,12 @@ export class MainThreadApplier {
   private applyMutation(mut: Mutation): void {
     switch (mut.type) {
       case MutationType.CREATE_ELEMENT: {
-        const el = document.createElement(mut.tagName!);
+        const el = document.createElement(mut.tagName);
         this.register(mut.targetId, el);
         break;
       }
       case MutationType.CREATE_ELEMENT_NS: {
-        const el = document.createElementNS(mut.namespace!, mut.tagName!);
+        const el = document.createElementNS(mut.namespace, mut.tagName);
         this.register(mut.targetId, el);
         break;
       }
@@ -51,20 +51,20 @@ export class MainThreadApplier {
         break;
       }
       case MutationType.APPEND_CHILD: {
-        const parent = this.nodeMap.get(mut.parentId!);
+        const parent = this.nodeMap.get(mut.parentId);
         const child = this.nodeMap.get(mut.targetId);
         if (parent && child) parent.appendChild(child);
         break;
       }
       case MutationType.INSERT_BEFORE: {
-        const parent = this.nodeMap.get(mut.parentId!);
+        const parent = this.nodeMap.get(mut.parentId);
         const child = this.nodeMap.get(mut.targetId);
-        const ref = this.nodeMap.get(mut.refId!);
+        const ref = this.nodeMap.get(mut.refId);
         if (parent && child) parent.insertBefore(child, ref ?? null);
         break;
       }
       case MutationType.REMOVE_CHILD: {
-        const parent = this.nodeMap.get(mut.parentId!);
+        const parent = this.nodeMap.get(mut.parentId);
         const child = this.nodeMap.get(mut.targetId);
         if (parent && child && child.parentNode === parent) {
           parent.removeChild(child);
@@ -74,21 +74,21 @@ export class MainThreadApplier {
       case MutationType.SET_ATTRIBUTE: {
         const el = this.nodeMap.get(mut.targetId);
         if (el && el instanceof Element) {
-          el.setAttribute(mut.name!, mut.value!);
+          el.setAttribute(mut.name, mut.value);
         }
         break;
       }
       case MutationType.REMOVE_ATTRIBUTE: {
         const el = this.nodeMap.get(mut.targetId);
         if (el && el instanceof Element) {
-          el.removeAttribute(mut.name!);
+          el.removeAttribute(mut.name);
         }
         break;
       }
       case MutationType.SET_STYLE: {
         const el = this.nodeMap.get(mut.targetId);
         if (el && el instanceof HTMLElement) {
-          el.style.setProperty(mut.name!, mut.value!);
+          el.style.setProperty(mut.name, mut.value);
         }
         break;
       }

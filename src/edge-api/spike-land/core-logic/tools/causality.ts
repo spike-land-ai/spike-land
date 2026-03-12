@@ -82,7 +82,7 @@ function getLatestEventForProcess(
   processId: string,
 ): CausalEvent | undefined {
   for (let i = system.events.length - 1; i >= 0; i--) {
-    if (system.events[i]!.processId === processId) return system.events[i]!;
+    if (system.events[i]?.processId === processId) return system.events[i];
   }
   return undefined;
 }

@@ -266,11 +266,11 @@ describe("getBoard", () => {
     const game = createGame();
     const board = getBoard(game);
     // Top-left should be black rook
-    expect(board[0]![0]).toEqual({ type: "r", color: "b" });
+    expect(board[0]?.[0]).toEqual({ type: "r", color: "b" });
     // Bottom-right should be white rook
-    expect(board[7]![7]).toEqual({ type: "r", color: "w" });
+    expect(board[7]?.[7]).toEqual({ type: "r", color: "w" });
     // Middle of board should be empty
-    expect(board[3]![3]).toBeNull();
+    expect(board[3]?.[3]).toBeNull();
   });
 });
 

@@ -149,7 +149,7 @@ describe("Quiz Engine", () => {
     it("returns default concepts for empty content", async () => {
       const concepts = await generateConceptsFromContent("", mockEnvNoGemini);
       expect(concepts.length).toBe(3);
-      expect(concepts[0]!.name).toBe("Core understanding");
+      expect(concepts[0]?.name).toBe("Core understanding");
     });
 
     it("each variant has exactly 4 options", async () => {
@@ -181,8 +181,8 @@ describe("Quiz Engine", () => {
     it("prioritizes unmastered concepts", () => {
       const session = createTestSession();
       // Master concept A
-      session.conceptStates[0]!.mastered = true;
-      session.conceptStates[0]!.correctCount = 2;
+      session.conceptStates[0]?.mastered = true;
+      session.conceptStates[0]?.correctCount = 2;
 
       const round = generateNextRound(session);
       // Should include concepts B and C (unmastered)
@@ -199,9 +199,9 @@ describe("Quiz Engine", () => {
       const round = session.currentRound;
       // Answer all correctly
       const answers: [number, number, number] = [
-        round.questions[0]!.correctIndex,
-        round.questions[1]!.correctIndex,
-        round.questions[2]!.correctIndex,
+        round.questions[0]?.correctIndex,
+        round.questions[1]?.correctIndex,
+        round.questions[2]?.correctIndex,
       ];
 
       const { results, conflicts } = evaluateAnswers(session, answers);
@@ -216,9 +216,9 @@ describe("Quiz Engine", () => {
       const round = session.currentRound;
       // Answer all incorrectly
       const answers: [number, number, number] = [
-        (round.questions[0]!.correctIndex + 1) % 4,
-        (round.questions[1]!.correctIndex + 1) % 4,
-        (round.questions[2]!.correctIndex + 1) % 4,
+        (round.questions[0]?.correctIndex + 1) % 4,
+        (round.questions[1]?.correctIndex + 1) % 4,
+        (round.questions[2]?.correctIndex + 1) % 4,
       ];
 
       const { results } = evaluateAnswers(session, answers);
@@ -232,9 +232,9 @@ describe("Quiz Engine", () => {
       // Answer round 1 correctly
       let round = session.currentRound;
       let answers: [number, number, number] = [
-        round.questions[0]!.correctIndex,
-        round.questions[1]!.correctIndex,
-        round.questions[2]!.correctIndex,
+        round.questions[0]?.correctIndex,
+        round.questions[1]?.correctIndex,
+        round.questions[2]?.correctIndex,
       ];
       evaluateAnswers(session, answers);
 
@@ -243,9 +243,9 @@ describe("Quiz Engine", () => {
       session.currentRound = generateNextRound(session);
       round = session.currentRound;
       answers = [
-        round.questions[0]!.correctIndex,
-        round.questions[1]!.correctIndex,
-        round.questions[2]!.correctIndex,
+        round.questions[0]?.correctIndex,
+        round.questions[1]?.correctIndex,
+        round.questions[2]?.correctIndex,
       ];
       const { allMastered: _allMastered } = evaluateAnswers(session, answers);
 
@@ -262,7 +262,7 @@ describe("Quiz Engine", () => {
       const conceptAIdx = round1.questions.findIndex((q) => q.conceptIndex === 0);
       if (conceptAIdx >= 0) {
         const answers: [number, number, number] = [0, 0, 0];
-        answers[conceptAIdx] = round1.questions[conceptAIdx]!.correctIndex;
+        answers[conceptAIdx] = round1.questions[conceptAIdx]?.correctIndex;
         evaluateAnswers(session, answers);
 
         // Next round: answer concept A variant incorrectly
@@ -273,7 +273,7 @@ describe("Quiz Engine", () => {
         if (conceptAIdx2 >= 0) {
           const answers2: [number, number, number] = [0, 0, 0];
           // Give wrong answer for concept A
-          answers2[conceptAIdx2] = (round2.questions[conceptAIdx2]!.correctIndex + 1) % 4;
+          answers2[conceptAIdx2] = (round2.questions[conceptAIdx2]?.correctIndex + 1) % 4;
           const { conflicts } = evaluateAnswers(session, answers2);
 
           // Should detect a conflict for concept A
@@ -286,8 +286,8 @@ describe("Quiz Engine", () => {
     it("resets mastery on conflict", () => {
       const session = createTestSession();
       // Pre-set concept A as having 1 correct answer
-      session.conceptStates[0]!.correctCount = 1;
-      session.conceptStates[0]!.answerHistory.set(0, 0); // variant 0, answered correctly (idx 0)
+      session.conceptStates[0]?.correctCount = 1;
+      session.conceptStates[0]?.answerHistory.set(0, 0); // variant 0, answered correctly (idx 0)
 
       // Now create a round where concept A variant 1 is tested
       // and user gets it wrong — this should trigger conflict
@@ -324,8 +324,8 @@ describe("Quiz Engine", () => {
 
       // Concept A was previously correct (variant 0), now wrong (variant 1) → conflict
       expect(conflicts.some((c) => c.concept === "Concept A")).toBe(true);
-      expect(session.conceptStates[0]!.correctCount).toBe(0);
-      expect(session.conceptStates[0]!.mastered).toBe(false);
+      expect(session.conceptStates[0]?.correctCount).toBe(0);
+      expect(session.conceptStates[0]?.mastered).toBe(false);
     });
 
     it("completes quiz when all concepts mastered", () => {
@@ -339,9 +339,9 @@ describe("Quiz Engine", () => {
       // Answer current round all correctly
       const round = session.currentRound;
       const answers: [number, number, number] = [
-        round.questions[0]!.correctIndex,
-        round.questions[1]!.correctIndex,
-        round.questions[2]!.correctIndex,
+        round.questions[0]?.correctIndex,
+        round.questions[1]?.correctIndex,
+        round.questions[2]?.correctIndex,
       ];
 
       const { allMastered } = evaluateAnswers(session, answers);
@@ -364,10 +364,10 @@ describe("Quiz Engine", () => {
 
       const verified = verifyBadgeToken(token, secret);
       expect(verified).not.toBeNull();
-      expect(verified!.sid).toBe(payload.sid);
-      expect(verified!.topic).toBe(payload.topic);
-      expect(verified!.score).toBe(payload.score);
-      expect(verified!.ts).toBe(payload.ts);
+      expect(verified?.sid).toBe(payload.sid);
+      expect(verified?.topic).toBe(payload.topic);
+      expect(verified?.score).toBe(payload.score);
+      expect(verified?.ts).toBe(payload.ts);
     });
 
     it("rejects token with wrong secret", () => {

@@ -121,13 +121,19 @@ function createRunId(taskType: string): string {
 }
 
 async function getOriginRepoSlug(): Promise<string | null> {
-  const result = await runProcess("git", ["remote", "get-url", "origin"], { cwd: ROOT, timeoutMs: 5000 });
+  const result = await runProcess("git", ["remote", "get-url", "origin"], {
+    cwd: ROOT,
+    timeoutMs: 5000,
+  });
   if (result.exitCode !== 0) return null;
   return parseRepoSlug(result.stdout.trim());
 }
 
 async function detectClaude(): Promise<AgentAvailability> {
-  const version = await runProcess("bash", ["-lc", "command -v claude"], { cwd: ROOT, timeoutMs: 5000 });
+  const version = await runProcess("bash", ["-lc", "command -v claude"], {
+    cwd: ROOT,
+    timeoutMs: 5000,
+  });
   if (version.exitCode !== 0 || !version.stdout.trim()) {
     return {
       agent: "claude",
@@ -155,7 +161,10 @@ async function detectClaude(): Promise<AgentAvailability> {
 }
 
 async function detectGemini(): Promise<AgentAvailability> {
-  const version = await runProcess("bash", ["-lc", "command -v gemini"], { cwd: ROOT, timeoutMs: 5000 });
+  const version = await runProcess("bash", ["-lc", "command -v gemini"], {
+    cwd: ROOT,
+    timeoutMs: 5000,
+  });
   if (version.exitCode !== 0 || !version.stdout.trim()) {
     return {
       agent: "gemini",
@@ -183,7 +192,10 @@ async function detectGemini(): Promise<AgentAvailability> {
 }
 
 async function detectJules(repoSlug: string | null): Promise<AgentAvailability> {
-  const version = await runProcess("bash", ["-lc", "command -v jules"], { cwd: ROOT, timeoutMs: 5000 });
+  const version = await runProcess("bash", ["-lc", "command -v jules"], {
+    cwd: ROOT,
+    timeoutMs: 5000,
+  });
   if (version.exitCode !== 0 || !version.stdout.trim()) {
     return {
       agent: "jules",
@@ -196,7 +208,10 @@ async function detectJules(repoSlug: string | null): Promise<AgentAvailability> 
     };
   }
 
-  const repos = await runProcess("jules", ["remote", "list", "--repo"], { cwd: ROOT, timeoutMs: 15000 });
+  const repos = await runProcess("jules", ["remote", "list", "--repo"], {
+    cwd: ROOT,
+    timeoutMs: 15000,
+  });
   const authenticated = repos.exitCode === 0;
   const connectedRepos = repos.stdout
     .split("\n")
@@ -417,9 +432,7 @@ async function runJulesWrapper(
     latencyMs: ended - started,
     artifacts: [stdoutPath, stderrPath, parsedPath],
     summary:
-      session.id && session.url
-        ? `Queued Jules session ${session.id}`
-        : "Queued Jules session",
+      session.id && session.url ? `Queued Jules session ${session.id}` : "Queued Jules session",
     rawOutputPath: stdoutPath,
     rawErrorPath: stderrPath,
     finding: null,
@@ -482,7 +495,9 @@ async function runOutageTriage(targetUrl: string): Promise<number> {
   const immediateAgents = readyAgents.filter((entry) => entry.agent !== "jules");
   const queuedAgents: Array<{ agent: AgentName; note: string }> = [];
 
-  const tasks = immediateAgents.map((entry) => runLocalWrapper(entry.agent as "claude" | "gemini", prompt, runDir));
+  const tasks = immediateAgents.map((entry) =>
+    runLocalWrapper(entry.agent as "claude" | "gemini", prompt, runDir),
+  );
 
   const julesAvailability = availability.find((entry) => entry.agent === "jules");
   if (julesAvailability?.status === "ready" && repoSlug) {

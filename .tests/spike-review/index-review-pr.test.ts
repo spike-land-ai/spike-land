@@ -51,14 +51,14 @@ describe("review_pr tool handler (lines 46-51)", () => {
     const handler = capturedHandlers["review_pr"];
     expect(handler).toBeDefined();
 
-    const result = (await handler!({
+    const result = (await handler({
       owner: "org",
       repo: "my-repo",
       prNumber: 42,
     })) as { content: Array<{ type: string; text: string }> };
 
-    expect(result.content[0]!.type).toBe("text");
-    const text = result.content[0]!.text;
+    expect(result.content[0]?.type).toBe("text");
+    const text = result.content[0]?.text;
     expect(text).toContain("BAZDMEG Quality Gates");
     expect(text).toContain("Review Prompt");
     expect(text).toContain("APPROVE");
@@ -76,7 +76,7 @@ describe("review_pr tool handler (lines 46-51)", () => {
     });
 
     const handler = capturedHandlers["review_pr"];
-    await handler!({
+    await handler({
       owner: "org",
       repo: "repo",
       prNumber: 1,
@@ -101,12 +101,12 @@ describe("review_pr tool handler (lines 46-51)", () => {
     });
 
     const handler = capturedHandlers["review_pr"];
-    const result = (await handler!({
+    const result = (await handler({
       owner: "org",
       repo: "repo",
       prNumber: 2,
     })) as { content: Array<{ type: string; text: string }> };
 
-    expect(result.content[0]!.text).toContain("REQUEST_CHANGES");
+    expect(result.content[0]?.text).toContain("REQUEST_CHANGES");
   });
 });

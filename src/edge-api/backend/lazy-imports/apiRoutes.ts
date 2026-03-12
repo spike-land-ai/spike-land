@@ -248,9 +248,9 @@ export class ApiRoutes {
       const lineColMatch = line.match(/:(\d+):(\d+):\s*(error|warning)?:?\s*(.+)/i);
       if (lineColMatch) {
         errors.push({
-          line: parseInt(lineColMatch[1]!, 10),
-          column: parseInt(lineColMatch[2]!, 10),
-          message: lineColMatch[4]!.trim(),
+          line: parseInt(lineColMatch[1], 10),
+          column: parseInt(lineColMatch[2], 10),
+          message: lineColMatch[4]?.trim(),
         });
         continue;
       }
@@ -259,8 +259,8 @@ export class ApiRoutes {
       const lineMatch = line.match(/line\s+(\d+):\s*(.+)/i);
       if (lineMatch) {
         errors.push({
-          line: parseInt(lineMatch[1]!, 10),
-          message: lineMatch[2]!.trim(),
+          line: parseInt(lineMatch[1], 10),
+          message: lineMatch[2]?.trim(),
         });
         continue;
       }

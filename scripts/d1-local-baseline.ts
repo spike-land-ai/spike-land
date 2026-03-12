@@ -19,7 +19,9 @@ function parseArgs(argv: string[]): { databaseName: string; applyPending: boolea
   const [databaseName, ...rest] = argv;
 
   if (!databaseName) {
-    console.error("Usage: node --import tsx scripts/d1-local-baseline.ts <database-name> [--apply-pending]");
+    console.error(
+      "Usage: node --import tsx scripts/d1-local-baseline.ts <database-name> [--apply-pending]",
+    );
     process.exit(1);
   }
 
@@ -125,7 +127,11 @@ function main(): void {
   const applied = new Set(repairedState.appliedMigrations);
   const pendingApplied = applyPending ? applyMissingSourceMigrations(dbPath, applied) : [];
 
-  if (repairPlan.sql.length === 0 && repairPlan.migrationsToMarkApplied.length === 0 && pendingApplied.length === 0) {
+  if (
+    repairPlan.sql.length === 0 &&
+    repairPlan.migrationsToMarkApplied.length === 0 &&
+    pendingApplied.length === 0
+  ) {
     console.log(`[d1-local-baseline] ${databaseName}: no reconciliation needed`);
     return;
   }

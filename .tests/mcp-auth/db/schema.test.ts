@@ -23,7 +23,7 @@ describe("mcp-auth Drizzle schema", () => {
       const updatedAtCol = config.columns.find((c) => c.name === "updatedAt");
       expect(updatedAtCol).toBeDefined();
       // Ensure updatedAt is NOT accidentally mapped to "createdAt"
-      expect(updatedAtCol!.name).toBe("updatedAt");
+      expect(updatedAtCol?.name).toBe("updatedAt");
     });
 
     it("has all required columns", () => {
@@ -49,14 +49,14 @@ describe("mcp-auth Drizzle schema", () => {
       const config = getTableConfig(session);
       const updatedAtCol = config.columns.find((c) => c.name === "updatedAt");
       expect(updatedAtCol).toBeDefined();
-      expect(updatedAtCol!.name).toBe("updatedAt");
+      expect(updatedAtCol?.name).toBe("updatedAt");
     });
 
     it("has token column with unique constraint", () => {
       const config = getTableConfig(session);
       const tokenCol = config.columns.find((c) => c.name === "token");
       expect(tokenCol).toBeDefined();
-      expect(tokenCol!.isUnique).toBe(true);
+      expect(tokenCol?.isUnique).toBe(true);
     });
   });
 
@@ -70,7 +70,7 @@ describe("mcp-auth Drizzle schema", () => {
       const config = getTableConfig(account);
       const updatedAtCol = config.columns.find((c) => c.name === "updatedAt");
       expect(updatedAtCol).toBeDefined();
-      expect(updatedAtCol!.name).toBe("updatedAt");
+      expect(updatedAtCol?.name).toBe("updatedAt");
     });
 
     it("has all required columns for Better Auth", () => {
@@ -93,7 +93,7 @@ describe("mcp-auth Drizzle schema", () => {
       const config = getTableConfig(verification);
       const updatedAtCol = config.columns.find((c) => c.name === "updatedAt");
       expect(updatedAtCol).toBeDefined();
-      expect(updatedAtCol!.name).toBe("updatedAt");
+      expect(updatedAtCol?.name).toBe("updatedAt");
     });
   });
 
@@ -160,14 +160,14 @@ describe("mcp-auth Drizzle schema", () => {
       const config = getTableConfig(organization);
       const slugCol = config.columns.find((c) => c.name === "slug");
       expect(slugCol).toBeDefined();
-      expect(slugCol!.isUnique).toBe(true);
+      expect(slugCol?.isUnique).toBe(true);
     });
 
     it("has plan column with default value 'enterprise'", () => {
       const config = getTableConfig(organization);
       const planCol = config.columns.find((c) => c.name === "plan");
       expect(planCol).toBeDefined();
-      expect(planCol!.default).toBe("enterprise");
+      expect(planCol?.default).toBe("enterprise");
     });
 
     it("columns can be inspected with getTableColumns", () => {
@@ -198,7 +198,7 @@ describe("mcp-auth Drizzle schema", () => {
       const config = getTableConfig(orgMember);
       const roleCol = config.columns.find((c) => c.name === "role");
       expect(roleCol).toBeDefined();
-      expect(roleCol!.default).toBe("member");
+      expect(roleCol?.default).toBe("member");
     });
 
     it("has foreign key references to organization and user", () => {
@@ -241,7 +241,7 @@ describe("mcp-auth Drizzle schema", () => {
       const config = getTableConfig(orgInvite);
       const roleCol = config.columns.find((c) => c.name === "role");
       expect(roleCol).toBeDefined();
-      expect(roleCol!.default).toBe("member");
+      expect(roleCol?.default).toBe("member");
     });
 
     it("has foreign key reference to organization", () => {

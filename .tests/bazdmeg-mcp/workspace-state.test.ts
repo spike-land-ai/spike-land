@@ -45,7 +45,7 @@ describe("workspace-state", () => {
     });
 
     expect(getWorkspace()).not.toBeNull();
-    expect(getWorkspace()!.packageName).toBe("test-pkg");
+    expect(getWorkspace()?.packageName).toBe("test-pkg");
     expect(isWorkspaceActive()).toBe(true);
 
     expect(writeFile).toHaveBeenCalledWith(

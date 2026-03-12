@@ -136,7 +136,7 @@ function flushSyncCallbacks(): void {
   syncQueue = null;
   if (queue !== null) {
     for (let i = 0; i < queue.length; i++) {
-      queue[i]!();
+      queue[i]?.();
     }
   }
   isFlushingSyncQueue = false;

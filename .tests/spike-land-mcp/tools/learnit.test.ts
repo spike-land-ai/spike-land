@@ -101,20 +101,17 @@ function hasChunk(
 }
 
 function hasPublishedStatusFilter(condition: unknown): boolean {
-  const hasStatusColumn = hasChunk(
-    condition,
-    (value) =>
-      Boolean(
-        value &&
-          typeof value === "object" &&
-          "name" in value &&
-          value.name === "status" &&
-          "table" in value,
-      ),
+  const hasStatusColumn = hasChunk(condition, (value) =>
+    Boolean(
+      value &&
+        typeof value === "object" &&
+        "name" in value &&
+        value.name === "status" &&
+        "table" in value,
+    ),
   );
-  const hasPublishedValue = hasChunk(
-    condition,
-    (value) => Boolean(value && typeof value === "object" && "value" in value && value.value === "published"),
+  const hasPublishedValue = hasChunk(condition, (value) =>
+    Boolean(value && typeof value === "object" && "value" in value && value.value === "published"),
   );
 
   return hasStatusColumn && hasPublishedValue;
@@ -138,7 +135,17 @@ function createRegistry(selectResponses: unknown[][]) {
 describe("learnit tools", () => {
   it("adds a published filter to direct topic lookups and parent joins", async () => {
     const { registry, whereConditions, updateWhereConditions } = createRegistry([
-      [{ id: "topic-1", slug: "topic", title: "Topic", description: "desc", content: "body", status: "published", viewCount: 3 }],
+      [
+        {
+          id: "topic-1",
+          slug: "topic",
+          title: "Topic",
+          description: "desc",
+          content: "body",
+          status: "published",
+          viewCount: 3,
+        },
+      ],
       [],
     ]);
 

@@ -25,7 +25,10 @@ export function registerApplyTool(server: McpServer): void {
     schema: {
       src: z.string().optional().describe("Source directory (default: 'src')"),
       output: z.string().optional().describe("Output directory (default: 'src-reorganized')"),
-      verify: z.coerce.boolean().optional().describe("Run tsc/eslint/vitest after apply (default: false)"),
+      verify: z.coerce
+        .boolean()
+        .optional()
+        .describe("Run tsc/eslint/vitest after apply (default: false)"),
     },
     handler: async ({ src, output, verify }) => {
       const outputDir = path.resolve(process.cwd(), output ?? "src-reorganized");

@@ -124,7 +124,7 @@ describe("createMemoryAdapter", () => {
         { query: "INSERT INTO items (id, name) VALUES (?, ?)", params: ["2", "banana"] },
       ]);
       expect(results).toHaveLength(2);
-      expect(results[0]!.rowsAffected).toBe(1);
+      expect(results[0]?.rowsAffected).toBe(1);
 
       const all = await adapter.sql.execute("SELECT * FROM items");
       expect(all.rows).toHaveLength(2);
@@ -154,47 +154,47 @@ describe("createMemoryAdapter", () => {
     it("puts and gets ArrayBuffer", async () => {
       const adapter = createMemoryAdapter();
       const data = new TextEncoder().encode("hello").buffer;
-      await adapter.blobs!.put("file1", data);
-      const result = await adapter.blobs!.get("file1");
-      expect(new TextDecoder().decode(result!)).toBe("hello");
+      await adapter.blobs?.put("file1", data);
+      const result = await adapter.blobs?.get("file1");
+      expect(new TextDecoder().decode(result)).toBe("hello");
     });
 
     it("puts Uint8Array", async () => {
       const adapter = createMemoryAdapter();
       const data = new TextEncoder().encode("world");
-      await adapter.blobs!.put("file2", data);
-      const result = await adapter.blobs!.get("file2");
+      await adapter.blobs?.put("file2", data);
+      const result = await adapter.blobs?.get("file2");
       expect(result).not.toBeNull();
-      expect(new TextDecoder().decode(result!)).toBe("world");
+      expect(new TextDecoder().decode(result)).toBe("world");
     });
 
     it("returns null for missing blobs", async () => {
       const adapter = createMemoryAdapter();
-      expect(await adapter.blobs!.get("nope")).toBeNull();
+      expect(await adapter.blobs?.get("nope")).toBeNull();
     });
 
     it("deletes blobs", async () => {
       const adapter = createMemoryAdapter();
-      await adapter.blobs!.put("f", new Uint8Array([1, 2, 3]));
-      expect(await adapter.blobs!.delete("f")).toBe(true);
-      expect(await adapter.blobs!.get("f")).toBeNull();
+      await adapter.blobs?.put("f", new Uint8Array([1, 2, 3]));
+      expect(await adapter.blobs?.delete("f")).toBe(true);
+      expect(await adapter.blobs?.get("f")).toBeNull();
     });
 
     it("lists blobs with prefix", async () => {
       const adapter = createMemoryAdapter();
-      await adapter.blobs!.put("img/1.png", new Uint8Array([1]));
-      await adapter.blobs!.put("img/2.png", new Uint8Array([2]));
-      await adapter.blobs!.put("doc/1.pdf", new Uint8Array([3]));
+      await adapter.blobs?.put("img/1.png", new Uint8Array([1]));
+      await adapter.blobs?.put("img/2.png", new Uint8Array([2]));
+      await adapter.blobs?.put("doc/1.pdf", new Uint8Array([3]));
 
-      const imgs = await adapter.blobs!.list("img/");
+      const imgs = await adapter.blobs?.list("img/");
       expect(imgs.sort()).toEqual(["img/1.png", "img/2.png"]);
     });
 
     it("lists all blobs when no prefix", async () => {
       const adapter = createMemoryAdapter();
-      await adapter.blobs!.put("a.txt", new Uint8Array([1]));
-      await adapter.blobs!.put("b.txt", new Uint8Array([2]));
-      const all = await adapter.blobs!.list();
+      await adapter.blobs?.put("a.txt", new Uint8Array([1]));
+      await adapter.blobs?.put("b.txt", new Uint8Array([2]));
+      const all = await adapter.blobs?.list();
       expect(all.sort()).toEqual(["a.txt", "b.txt"]);
     });
 
@@ -208,15 +208,15 @@ describe("createMemoryAdapter", () => {
           controller.close();
         },
       });
-      await adapter.blobs!.put("stream-key", stream);
-      const result = await adapter.blobs!.get("stream-key");
+      await adapter.blobs?.put("stream-key", stream);
+      const result = await adapter.blobs?.get("stream-key");
       expect(result).not.toBeNull();
-      expect(new TextDecoder().decode(result!)).toBe(text);
+      expect(new TextDecoder().decode(result)).toBe(text);
     });
 
     it("delete returns false for missing key", async () => {
       const adapter = createMemoryAdapter();
-      expect(await adapter.blobs!.delete("nonexistent")).toBe(false);
+      expect(await adapter.blobs?.delete("nonexistent")).toBe(false);
     });
   });
 

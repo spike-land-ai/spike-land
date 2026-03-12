@@ -6,9 +6,9 @@ export const pipelineRunTestsTool: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      suite: { type: "string" }
-    }
-  }
+      suite: { type: "string" },
+    },
+  },
 };
 
 export const pipelineBuildTool: Tool = {
@@ -16,8 +16,8 @@ export const pipelineBuildTool: Tool = {
   description: "trigger Next.js build, stream output",
   inputSchema: {
     type: "object",
-    properties: {}
-  }
+    properties: {},
+  },
 };
 
 export const pipelineDeployPreviewTool: Tool = {
@@ -25,8 +25,8 @@ export const pipelineDeployPreviewTool: Tool = {
   description: "deploy to Vercel preview, return URL",
   inputSchema: {
     type: "object",
-    properties: {}
-  }
+    properties: {},
+  },
 };
 
 export const pipelineCheckTypesTool: Tool = {
@@ -34,8 +34,8 @@ export const pipelineCheckTypesTool: Tool = {
   description: "TypeScript type checking",
   inputSchema: {
     type: "object",
-    properties: {}
-  }
+    properties: {},
+  },
 };
 
 export const pipelineLintTool: Tool = {
@@ -43,8 +43,8 @@ export const pipelineLintTool: Tool = {
   description: "ESLint with file:line violations",
   inputSchema: {
     type: "object",
-    properties: {}
-  }
+    properties: {},
+  },
 };
 
 export const pipelineRunTool: Tool = {
@@ -53,10 +53,10 @@ export const pipelineRunTool: Tool = {
   inputSchema: {
     type: "object",
     properties: {
-      sequence: { type: "string" }
+      sequence: { type: "string" },
     },
-    required: ["sequence"]
-  }
+    required: ["sequence"],
+  },
 };
 
 export const pipelineTools: Tool[] = [
@@ -65,5 +65,5 @@ export const pipelineTools: Tool[] = [
   pipelineDeployPreviewTool,
   pipelineCheckTypesTool,
   pipelineLintTool,
-  pipelineRunTool
+  pipelineRunTool,
 ];

@@ -20,14 +20,7 @@ const REACTION_INDEXES = [
   "reaction_logs_reaction_created_idx",
   "reaction_logs_source_idx",
 ] as const;
-const STORE_COLUMNS = [
-  "category",
-  "tags",
-  "tagline",
-  "pricing",
-  "is_featured",
-  "is_new",
-] as const;
+const STORE_COLUMNS = ["category", "tags", "tagline", "pricing", "is_featured", "is_new"] as const;
 const STORE_TABLES = ["app_ratings", "app_wishlists", "app_installs"] as const;
 const STORE_INDEXES = [
   "idx_mcp_apps_category",
@@ -76,7 +69,9 @@ export function computeLocalD1RepairPlan(state: LocalD1State): LocalD1RepairPlan
   }
 
   const hasAnyReactionArtifacts =
-    tables.has("tool_reactions") || tables.has("reaction_logs") || hasAll(REACTION_INDEXES, indexes);
+    tables.has("tool_reactions") ||
+    tables.has("reaction_logs") ||
+    hasAll(REACTION_INDEXES, indexes);
 
   if (hasAnyReactionArtifacts || tables.has("users")) {
     if (!tables.has("tool_reactions")) {

@@ -368,7 +368,7 @@ export function createD1Db(env: Env): ImageStudioDeps["db"] {
         .prepare("SELECT * FROM images WHERE id = ?")
         .bind(id)
         .first<D1ImageRow>();
-      return mapImageRow(row!);
+      return mapImageRow(row);
     },
 
     async imageCount(userId) {
@@ -407,7 +407,7 @@ export function createD1Db(env: Env): ImageStudioDeps["db"] {
         .prepare("SELECT * FROM enhancement_jobs WHERE id = ?")
         .bind(id)
         .first<D1JobRow>();
-      return mapJobRow(row!);
+      return mapJobRow(row);
     },
 
     async jobFindById(id) {
@@ -514,7 +514,7 @@ export function createD1Db(env: Env): ImageStudioDeps["db"] {
         .prepare("SELECT * FROM enhancement_jobs WHERE id = ?")
         .bind(id)
         .first<D1JobRow>();
-      return mapJobRow(row!);
+      return mapJobRow(row);
     },
 
     // ── Album CRUD ──
@@ -549,7 +549,7 @@ export function createD1Db(env: Env): ImageStudioDeps["db"] {
         .prepare("SELECT * FROM albums WHERE id = ?")
         .bind(id)
         .first<D1AlbumRow>();
-      return mapAlbumRow(row!);
+      return mapAlbumRow(row);
     },
 
     async albumFindByHandle(handle) {
@@ -663,7 +663,7 @@ export function createD1Db(env: Env): ImageStudioDeps["db"] {
         .prepare("SELECT * FROM albums WHERE handle = ?")
         .bind(handle)
         .first<D1AlbumRow>();
-      return mapAlbumRow(row!);
+      return mapAlbumRow(row);
     },
 
     async albumDelete(handle) {
@@ -805,7 +805,7 @@ export function createD1Db(env: Env): ImageStudioDeps["db"] {
         .prepare("SELECT * FROM pipelines WHERE id = ?")
         .bind(id)
         .first<D1PipelineRow>();
-      return mapPipelineRow(row!);
+      return mapPipelineRow(row);
     },
 
     async pipelineFindById(id) {
@@ -893,7 +893,7 @@ export function createD1Db(env: Env): ImageStudioDeps["db"] {
         .prepare("SELECT * FROM pipelines WHERE id = ?")
         .bind(id)
         .first<D1PipelineRow>();
-      return mapPipelineRow(row!);
+      return mapPipelineRow(row);
     },
 
     async pipelineDelete(id) {
@@ -928,7 +928,7 @@ export function createD1Db(env: Env): ImageStudioDeps["db"] {
         .prepare("SELECT * FROM generation_jobs WHERE id = ?")
         .bind(id)
         .first<D1GenJobRow>();
-      return mapGenJobRow(row!);
+      return mapGenJobRow(row);
     },
 
     async generationJobFindById(id) {
@@ -1073,7 +1073,7 @@ export function createD1Db(env: Env): ImageStudioDeps["db"] {
         .prepare("SELECT * FROM generation_jobs WHERE id = ?")
         .bind(id)
         .first<D1GenJobRow>();
-      return mapGenJobRow(row!);
+      return mapGenJobRow(row);
     },
 
     // ── Subject CRUD (optional methods) ──
@@ -1092,7 +1092,7 @@ export function createD1Db(env: Env): ImageStudioDeps["db"] {
         .prepare("SELECT * FROM subjects WHERE id = ?")
         .bind(id)
         .first<D1SubjectRow>();
-      return mapSubjectRow(row!);
+      return mapSubjectRow(row);
     },
 
     async subjectFindMany(opts) {

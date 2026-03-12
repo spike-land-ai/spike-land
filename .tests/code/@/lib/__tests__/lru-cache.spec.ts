@@ -637,8 +637,8 @@ describe("LRUCache", () => {
 
       const aEntry = dumped.find(([key]) => key === "a");
       const bEntry = dumped.find(([key]) => key === "b");
-      expect(aEntry![1].value).toEqual({ value: 1 });
-      expect(bEntry![1].value).toEqual({ value: 2 });
+      expect(aEntry?.[1].value).toEqual({ value: 1 });
+      expect(bEntry?.[1].value).toEqual({ value: 2 });
     });
 
     it("should load cache contents", () => {

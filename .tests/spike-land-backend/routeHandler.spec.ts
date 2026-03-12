@@ -134,7 +134,7 @@ describe("RouteHandler", () => {
           // If WebSocketPair is available (CF Workers env), verify the response
           expect(response.status).toBe(101);
           expect(response.webSocket).toBeDefined();
-          expect(mockCode.getState!().acceptWebSocket).toHaveBeenCalled();
+          expect(mockCode.getState().acceptWebSocket).toHaveBeenCalled();
         } catch {
           // WebSocketPair not available in Node.js — expected in test environment
         }

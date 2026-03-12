@@ -123,7 +123,7 @@ describe("CopilotService", () => {
       }),
     );
 
-    const body = JSON.parse(vi.mocked(fetch).mock.calls[0]![1]!.body as string);
+    const body = JSON.parse(vi.mocked(fetch).mock.calls[0]?.[1]?.body as string);
     expect(body.model).toBe("claude-sonnet-4-20250514");
     expect(body.max_tokens).toBe(256);
     expect(body.messages[0].content).toContain("pre");

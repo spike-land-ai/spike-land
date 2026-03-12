@@ -17,7 +17,10 @@ export function registerCampaignTools(server: McpServer, client: ToolClient): vo
       name: z.string().describe("Name of the person to spotlight"),
       role: z.string().describe("Their role or title"),
       achievement: z.string().describe("Key achievement"),
-      campaign_title: z.string().default("Women in Tech 2026").describe("Campaign title for the banner"),
+      campaign_title: z
+        .string()
+        .default("Women in Tech 2026")
+        .describe("Campaign title for the banner"),
     },
     async handler({ name, role, achievement, campaign_title }) {
       const [banner, card, avatar] = await Promise.all([
@@ -48,7 +51,9 @@ export function registerCampaignTools(server: McpServer, client: ToolClient): vo
     name: "iwd_campaign_avatar",
     description: "Generate an IWD-themed profile avatar with purple and green accents.",
     schema: {
-      description: z.string().describe("Description of the avatar (e.g. 'software engineer with laptop')"),
+      description: z
+        .string()
+        .describe("Description of the avatar (e.g. 'software engineer with laptop')"),
       style: z.string().optional().describe("Additional style instructions"),
     },
     async handler({ description, style }) {
@@ -58,7 +63,9 @@ export function registerCampaignTools(server: McpServer, client: ToolClient): vo
         `Colors: purple (#A020F0), green (#44B78B).`,
         "Modern, bold, empowering style.",
         style ?? "",
-      ].join(" ").trim();
+      ]
+        .join(" ")
+        .trim();
 
       return client.callTool("img_avatar", { prompt });
     },

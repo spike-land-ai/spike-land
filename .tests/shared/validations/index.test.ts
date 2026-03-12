@@ -670,15 +670,15 @@ describe("dual-read helpers", () => {
 
       // Should use typed model values, not JSON
       expect(result).toHaveLength(2);
-      expect(result![0]!.type).toBe("AWARENESS");
-      expect(result![0]!.metric).toBe("impressions");
-      expect(result![0]!.targetValue).toBe(1000000);
-      expect(result![0]!.deadline).toBe("2024-06-30T00:00:00.000Z");
-      expect(result![0]!.priority).toBe(1);
+      expect(result?.[0]?.type).toBe("AWARENESS");
+      expect(result?.[0]?.metric).toBe("impressions");
+      expect(result?.[0]?.targetValue).toBe(1000000);
+      expect(result?.[0]?.deadline).toBe("2024-06-30T00:00:00.000Z");
+      expect(result?.[0]?.priority).toBe(1);
 
-      expect(result![1]!.type).toBe("CONVERSION");
-      expect(result![1]!.targetValue).toBe(5000);
-      expect(result![1]!.deadline).toBeUndefined();
+      expect(result?.[1]?.type).toBe("CONVERSION");
+      expect(result?.[1]?.targetValue).toBe(5000);
+      expect(result?.[1]?.deadline).toBeUndefined();
     });
 
     it("should handle null target values in typed models", () => {
@@ -698,8 +698,8 @@ describe("dual-read helpers", () => {
 
       const result = getCampaignObjectivesWithFallback(typedWithNulls, null);
 
-      expect(result[0]!.targetValue).toBeUndefined();
-      expect(result[0]!.deadline).toBeUndefined();
+      expect(result[0]?.targetValue).toBeUndefined();
+      expect(result[0]?.deadline).toBeUndefined();
     });
 
     it("should fall back to JSON when typed array is empty", () => {
@@ -714,8 +714,8 @@ describe("dual-read helpers", () => {
       const result = getCampaignObjectivesWithFallback([], jsonObjectives);
 
       expect(result).toHaveLength(1);
-      expect(result![0]!.type).toBe("ENGAGEMENT");
-      expect(result![0]!.metric).toBe("likes");
+      expect(result?.[0]?.type).toBe("ENGAGEMENT");
+      expect(result?.[0]?.metric).toBe("likes");
     });
 
     it("should fall back to JSON when typed array is null", () => {
@@ -724,7 +724,7 @@ describe("dual-read helpers", () => {
       const result = getCampaignObjectivesWithFallback(null, jsonObjectives);
 
       expect(result).toHaveLength(1);
-      expect(result![0]!.type).toBe("RETENTION");
+      expect(result?.[0]?.type).toBe("RETENTION");
     });
 
     it("should fall back to JSON when typed array is undefined", () => {
@@ -733,7 +733,7 @@ describe("dual-read helpers", () => {
       const result = getCampaignObjectivesWithFallback(undefined, jsonObjectives);
 
       expect(result).toHaveLength(1);
-      expect(result![0]!.type).toBe("AWARENESS");
+      expect(result?.[0]?.type).toBe("AWARENESS");
     });
 
     it("should return empty array when both typed and JSON are invalid", () => {

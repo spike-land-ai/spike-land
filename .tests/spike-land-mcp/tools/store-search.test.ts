@@ -49,7 +49,7 @@ function createRegistry(userId = "user-store") {
 function getText(result: { content: Array<{ type: string; text?: string }> }): string {
   return result.content
     .filter((c) => c.type === "text" && typeof c.text === "string")
-    .map((c) => c.text!)
+    .map((c) => c.text)
     .join("\n");
 }
 
@@ -117,7 +117,7 @@ describe("store_list_apps_with_tools", () => {
     const { registry } = createRegistry();
     mockFetchOk([]);
     await registry.callToolDirect("store_list_apps_with_tools", { limit: 25, cursor: "next-page" });
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).toContain("limit=25");
     expect(url as string).toContain("cursor=next-page");
   });
@@ -126,7 +126,7 @@ describe("store_list_apps_with_tools", () => {
     const { registry } = createRegistry();
     mockFetchOk([]);
     await registry.callToolDirect("store_list_apps_with_tools", {});
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).not.toContain("limit=");
     expect(url as string).not.toContain("cursor=");
   });
@@ -169,7 +169,7 @@ describe("store_search", () => {
     const { registry } = createRegistry();
     mockFetchOk([]);
     await registry.callToolDirect("store_search", { query: "productivity tools" });
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).toContain("query=productivity+tools");
   });
 
@@ -177,7 +177,7 @@ describe("store_search", () => {
     const { registry } = createRegistry();
     mockFetchOk([]);
     await registry.callToolDirect("store_search", { query: "image", category: "creative" });
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).toContain("category=creative");
   });
 
@@ -185,7 +185,7 @@ describe("store_search", () => {
     const { registry } = createRegistry();
     mockFetchOk([]);
     await registry.callToolDirect("store_search", { query: "any", limit: 5 });
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).toContain("limit=5");
   });
 
@@ -231,7 +231,7 @@ describe("store_browse_category", () => {
     const { registry } = createRegistry();
     mockFetchOk([]);
     await registry.callToolDirect("store_browse_category", { category: "productivity" });
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).toContain("/api/store/category/productivity");
   });
 
@@ -269,7 +269,7 @@ describe("store_featured_apps", () => {
     const { registry } = createRegistry();
     mockFetchOk([]);
     await registry.callToolDirect("store_featured_apps", {});
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).toContain("/api/store/featured");
   });
 
@@ -307,7 +307,7 @@ describe("store_new_apps", () => {
     const { registry } = createRegistry();
     mockFetchOk([]);
     await registry.callToolDirect("store_new_apps", {});
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).toContain("/api/store/new");
   });
 
@@ -378,7 +378,7 @@ describe("store_app_detail", () => {
     const { registry } = createRegistry();
     mockFetchOk(fullApp);
     await registry.callToolDirect("store_app_detail", { slug: "my-special-app" });
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).toContain("/api/store/apps/my-special-app");
   });
 

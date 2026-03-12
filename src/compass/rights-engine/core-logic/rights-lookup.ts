@@ -302,13 +302,13 @@ export class RightsDatabase {
     if (!this.domainIndex.has(right.domain)) {
       this.domainIndex.set(right.domain, new Map());
     }
-    const domainMap = this.domainIndex.get(right.domain)!;
+    const domainMap = this.domainIndex.get(right.domain);
 
     const jk = right.jurisdiction.toUpperCase();
     if (!domainMap.has(jk)) {
       domainMap.set(jk, new Set());
     }
-    domainMap.get(jk)!.add(right.id);
+    domainMap.get(jk)?.add(right.id);
   }
 
   private stageKey(processId: string, stageId: string): string {

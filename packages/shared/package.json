@@ -49,11 +49,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@radix-ui/react-slot": "^1.2.4",
-    "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.577.0",
     "react": "^19.2.4",
-    "tailwind-merge": "^3.5.0",
     "zod": "4.3.6"
   },
   "devDependencies": {

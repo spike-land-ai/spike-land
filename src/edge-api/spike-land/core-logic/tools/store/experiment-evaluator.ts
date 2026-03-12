@@ -14,19 +14,17 @@ export function registerExperimentEvaluatorTools(
 
   registry.registerBuilt(
     t
-      .tool(
-        "evaluate_experiment",
-        "Run the Bayesian evaluation engine for an A/B experiment.",
-        {
-          variants: z.array(
+      .tool("evaluate_experiment", "Run the Bayesian evaluation engine for an A/B experiment.", {
+        variants: z
+          .array(
             z.object({
               id: z.string(),
               impressions: z.number(),
               donations: z.number(),
-            })
-          ).describe("Metrics for each variant."),
-        },
-      )
+            }),
+          )
+          .describe("Metrics for each variant."),
+      })
       .meta({ category: "store-ab", tier: "free" })
       .handler(async ({ input }) => {
         return safeToolCall("evaluate_experiment", async () => {

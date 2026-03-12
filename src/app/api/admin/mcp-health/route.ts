@@ -9,8 +9,6 @@ export async function GET() {
     totalCalls: 1000,
     errorRate: "0.5%",
     topErrors: [{ skillName: "test_tool", errorCount: 5 }],
-    latencyStats: [
-      { toolName: "test_tool", avgLatency: 120, calls: 500 },
-    ]
+    latencyStats: [{ toolName: "test_tool", avgLatency: 120, calls: 500 }],
   });
 }

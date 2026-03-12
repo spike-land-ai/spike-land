@@ -818,7 +818,7 @@ chat.post("/api/chat", async (c) => {
 
   const threadSummary = body.threadId
     ? await (async () => {
-        const existingThread = await getThreadForUser(c.env.DB, body.threadId!, userId);
+        const existingThread = await getThreadForUser(c.env.DB, body.threadId, userId);
         if (!existingThread) {
           return null;
         }

@@ -37,7 +37,10 @@ describe("healthRouteLogic", () => {
     await expect(checkFetchBindingHealth(okBinding)).resolves.toBe("ok");
     await expect(checkFetchBindingHealth(nonOkBinding)).resolves.toBe("degraded");
     await expect(checkFetchBindingHealth(failingBinding)).resolves.toBe("degraded");
-    expect(okBinding.fetch).toHaveBeenCalledWith(expect.any(Request), expect.objectContaining({ signal: expect.any(AbortSignal) }));
+    expect(okBinding.fetch).toHaveBeenCalledWith(
+      expect.any(Request),
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 
   it("clears the timeout when fetch throws", async () => {

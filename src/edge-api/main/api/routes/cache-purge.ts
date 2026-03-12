@@ -27,7 +27,9 @@ cachePurge.post("/api/cache/purge", async (c) => {
   }
 
   const payload =
-    body.purge_everything || !body.files?.length ? { purge_everything: true } : { files: body.files };
+    body.purge_everything || !body.files?.length
+      ? { purge_everything: true }
+      : { files: body.files };
 
   const resp = await fetch(
     `https://api.cloudflare.com/client/v4/zones/${c.env.CF_ZONE_ID}/purge_cache`,
@@ -82,7 +84,7 @@ cachePurge.post("/api/cache/purge", async (c) => {
   }
 
   return c.json(
-    { ...result as Record<string, unknown>, workers_cache_purged: workersCachePurged },
+    { ...(result as Record<string, unknown>), workers_cache_purged: workersCachePurged },
     resp.ok ? 200 : 502,
   );
 });

@@ -84,13 +84,13 @@ describe("defineBlock", () => {
     // Add an item
     const addResult = await procs.addItem.handler({ name: "widget", count: 5 });
     expect(addResult.isError).toBeUndefined();
-    const added = JSON.parse(addResult.content[0]!.text!);
+    const added = JSON.parse(addResult.content[0]?.text);
     expect(added.name).toBe("widget");
     expect(added.id).toBeTruthy();
 
     // List items
     const listResult = await procs.listItems.handler({});
-    const items = JSON.parse(listResult.content[0]!.text!);
+    const items = JSON.parse(listResult.content[0]?.text);
     expect(items).toHaveLength(1);
     expect(items[0].name).toBe("widget");
     expect(items[0].count).toBe(5);
@@ -223,8 +223,8 @@ describe("defineBlock", () => {
     // Generate multiple items and check IDs are unique
     const r1 = await procs.addItem.handler({ name: "a", count: 1 });
     const r2 = await procs.addItem.handler({ name: "b", count: 1 });
-    const id1 = JSON.parse(r1.content[0]!.text!).id;
-    const id2 = JSON.parse(r2.content[0]!.text!).id;
+    const id1 = JSON.parse(r1.content[0]?.text).id;
+    const id2 = JSON.parse(r2.content[0]?.text).id;
     expect(id1).not.toBe(id2);
     expect(typeof id1).toBe("string");
     expect(id1.length).toBe(8);
@@ -292,6 +292,6 @@ describe("defineBlock", () => {
 
     const tools = block.getTools(storage, "u");
     expect(tools).toHaveLength(1);
-    expect(tools[0]!.name).toBe("tool_a");
+    expect(tools[0]?.name).toBe("tool_a");
   });
 });

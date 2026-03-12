@@ -250,7 +250,7 @@ describe("apiRequest", () => {
     } as Response);
 
     await apiRequest("/api/secure", {}, "my-token");
-    const [, options] = mockFetch.mock.calls[0]!;
+    const [, options] = mockFetch.mock.calls[0];
     expect(
       (options as RequestInit & { headers: Record<string, string> }).headers.Authorization,
     ).toBe("Bearer my-token");

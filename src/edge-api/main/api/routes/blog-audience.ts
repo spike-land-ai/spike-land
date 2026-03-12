@@ -83,7 +83,11 @@ export function deriveBlogAudienceSignal(input: BlogAudienceInput): BlogAudience
         ? "ai_build"
         : "general";
   const targetAudience =
-    researchFit !== "none" ? "ai_researchers" : contentCluster === "ai_build" ? "ai_builders" : "developers";
+    researchFit !== "none"
+      ? "ai_researchers"
+      : contentCluster === "ai_build"
+        ? "ai_builders"
+        : "developers";
 
   return {
     contentCluster,

@@ -180,9 +180,7 @@ export function HackerNewsApp() {
                       </a>
                     )}
                     {story.url && (
-                      <span className="text-muted-foreground/60">
-                        ({getDomain(story.url)})
-                      </span>
+                      <span className="text-muted-foreground/60">({getDomain(story.url)})</span>
                     )}
                   </div>
                 </div>

@@ -49,7 +49,7 @@ export const StartWithPrompt: React.FC = () => {
     if (files && files.length > 0 && images.length < 5) {
       const file = files[0];
       try {
-        const imageData = await processImage(file!);
+        const imageData = await processImage(file);
         setImages((prevImages) => [...prevImages, imageData]);
       } catch (error) {
         console.error("Error processing image:", error);
@@ -66,7 +66,7 @@ export const StartWithPrompt: React.FC = () => {
     if (files && files.length > 0 && images.length < 5) {
       const file = files[0];
       try {
-        const imageData = await processImage(file!);
+        const imageData = await processImage(file);
         setImages((prevImages) => [...prevImages, imageData]);
       } catch (error) {
         console.error("Error processing dropped image:", error);
@@ -255,13 +255,13 @@ const EnlargedImageModal: React.FC<{
       >
         <div className="flex flex-col items-center">
           <motion.img
-            src={images[enlargedImage]!.src}
+            src={images[enlargedImage]?.src}
             alt="Enlarged"
             className="max-w-full max-h-[80vh] object-contain"
             layoutId={`image-${enlargedImage}`}
           />
           <span className="mt-4 text-sm text-gray-300 text-center max-w-full px-4 break-words">
-            {images[enlargedImage]!.imageName}
+            {images[enlargedImage]?.imageName}
           </span>
         </div>
       </motion.div>

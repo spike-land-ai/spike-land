@@ -79,7 +79,7 @@ describe("workspace tools", () => {
 
       const workspace = getWorkspace();
       expect(workspace).not.toBeNull();
-      expect(workspace!.packageName).toBe("test-pkg");
+      expect(workspace?.packageName).toBe("test-pkg");
     } finally {
       process.cwd = originalCwd;
     }

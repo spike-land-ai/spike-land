@@ -4,7 +4,12 @@ import { createMockServer } from "@spike-land-ai/mcp-server-base";
 import { createMockToolClient } from "../../src/mcp-tools/iwd-spotlight/core-logic/tool-client.js";
 import { registerAmplifierTools } from "../../src/mcp-tools/iwd-spotlight/core-logic/amplifier.js";
 
-function setup(responses: Record<string, { content: Array<{ type: "text"; text: string }>; isError?: boolean }> = {}) {
+function setup(
+  responses: Record<
+    string,
+    { content: Array<{ type: "text"; text: string }>; isError?: boolean }
+  > = {},
+) {
   const server = createMockServer();
   const client = createMockToolClient(responses);
   registerAmplifierTools(server as unknown as McpServer, client);
@@ -19,7 +24,9 @@ describe("iwd_amplify_stories", () => {
 
   it("searches HN and generates a summary image", async () => {
     const server = setup({
-      hn_search: { content: [{ type: "text", text: JSON.stringify({ hits: [{ title: "test" }] }) }] },
+      hn_search: {
+        content: [{ type: "text", text: JSON.stringify({ hits: [{ title: "test" }] }) }],
+      },
       img_generate: { content: [{ type: "text", text: "summary_image_url" }] },
     });
 

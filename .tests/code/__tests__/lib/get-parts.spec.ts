@@ -26,7 +26,7 @@ describe("getPartsStreaming", () => {
 
     it("trims whitespace from text parts", () => {
       const { parts } = getPartsStreaming("  hello  ", false, freshState());
-      expect(parts[0]!.content).toBe("hello");
+      expect(parts[0]?.content).toBe("hello");
     });
   });
 
@@ -36,22 +36,22 @@ describe("getPartsStreaming", () => {
       const { parts } = getPartsStreaming(text, false, freshState());
       const codePart = parts.find((p) => p.type === "code");
       expect(codePart).toBeTruthy();
-      expect(codePart!.language).toBe("typescript");
-      expect(codePart!.content).toContain("const x = 1;");
+      expect(codePart?.language).toBe("typescript");
+      expect(codePart?.content).toContain("const x = 1;");
     });
 
     it("extracts a javascript code block with 'js' shorthand", () => {
       const text = "```js\nconsole.log('hello');\n```";
       const { parts } = getPartsStreaming(text, false, freshState());
       const codePart = parts.find((p) => p.type === "code");
-      expect(codePart!.language).toBe("javascript");
+      expect(codePart?.language).toBe("javascript");
     });
 
     it("extracts a python code block with 'py' shorthand", () => {
       const text = "```py\nprint('hello')\n```";
       const { parts } = getPartsStreaming(text, false, freshState());
       const codePart = parts.find((p) => p.type === "code");
-      expect(codePart!.language).toBe("python");
+      expect(codePart?.language).toBe("python");
     });
 
     it("uses 'plaintext' for unknown language", () => {
@@ -90,7 +90,7 @@ new code
       const { parts } = getPartsStreaming(text, false, freshState());
       const codePart = parts.find((p) => p.type === "code");
       expect(codePart).toBeTruthy();
-      expect(codePart!.language).toBe("diff");
+      expect(codePart?.language).toBe("diff");
     });
 
     it("handles incomplete diff block (state tracking)", () => {
@@ -129,35 +129,35 @@ new code
     it("extracts content inside <user_prompt> tag for user messages", () => {
       const text = "<user_prompt>hello from user</user_prompt>";
       const { parts } = getPartsStreaming(text, true, freshState());
-      expect(parts[0]!.content).toContain("hello from user");
+      expect(parts[0]?.content).toContain("hello from user");
     });
 
     it("strips system context from user messages", () => {
       const text = "System context.\nThe user's first message follows:\nActual user message";
       const { parts } = getPartsStreaming(text, true, freshState());
-      expect(parts[0]!.content).toContain("Actual user message");
-      expect(parts[0]!.content).not.toContain("System context");
+      expect(parts[0]?.content).toContain("Actual user message");
+      expect(parts[0]?.content).not.toContain("System context");
     });
 
     it("strips system reminder suffix from user messages", () => {
       const text = "User message. Reminder from the system: ignore this";
       const { parts } = getPartsStreaming(text, true, freshState());
-      expect(parts[0]!.content).toContain("User message.");
-      expect(parts[0]!.content).not.toContain("Reminder from the system");
+      expect(parts[0]?.content).toContain("User message.");
+      expect(parts[0]?.content).not.toContain("Reminder from the system");
     });
 
     it("passes text unchanged for non-user messages", () => {
       const text = "The user's first message follows:\nOriginal message";
       const { parts } = getPartsStreaming(text, false, freshState());
       // isUser=false: no cleaning
-      expect(parts[0]!.content).toContain("user's first message");
+      expect(parts[0]?.content).toContain("user's first message");
     });
   });
 
   describe("state handling", () => {
     it("uses default state when not provided", () => {
       const { parts } = getPartsStreaming("hello", false);
-      expect(parts[0]!.content).toBe("hello");
+      expect(parts[0]?.content).toBe("hello");
     });
 
     it("returns updated state for ongoing incomplete code block", () => {

@@ -32,7 +32,7 @@ async function main() {
     // Format tools for the prompt
     toolsList = data.tools
       .map(
-        (t: any) => `
+        (t: unknown) => `
 - **${t.name}** [Category: ${t.category || "uncategorized"}]
   Description: ${t.description}
   Input Schema: ${JSON.stringify(t.inputSchema || {})}
@@ -46,7 +46,7 @@ async function main() {
   }
 
   const results: string[] = [];
-  const findings: any[] = [];
+  const findings: unknown[] = [];
 
   const personaList = Object.values(PERSONAS);
 
@@ -56,7 +56,7 @@ async function main() {
     const prompt = {
       id: `mcp-retest-${persona.id}`,
       role: "mcp-user-tester-targeted",
-      render: (ctx: any) => `
+      render: (ctx: unknown) => `
 You are a real user conducting a TARGETED retest of spike.land's MCP capabilities on a LOCAL environment.
 YOUR PERSONA:
 - Name: ${persona.name}
@@ -98,14 +98,14 @@ Output your response in this exact format:
     };
 
     try {
-      const output = spawnClaude(prompt as any, { toolsList } as any);
+      const output = spawnClaude(prompt as unknown, { toolsList } as unknown);
       results.push(output);
 
       const findingsMatch = output.match(/## Targeted Findings\n([\s\S]+)/);
       if (findingsMatch) {
         findings.push({
           persona: persona.name,
-          report: findingsMatch[1].trim()
+          report: findingsMatch[1].trim(),
         });
       }
     } catch (err) {
@@ -122,18 +122,18 @@ Output your response in this exact format:
   summary += `This report focuses on verifying previously reported issues against the local development environment.\n\n`;
 
   summary += `## Retest Result Summary\n`;
-  results.forEach(r => {
-    const lines = r.split('\n');
-    const personaLine = lines.find(l => l.startsWith('# Persona:'));
+  results.forEach((r) => {
+    const lines = r.split("\n");
+    const personaLine = lines.find((l) => l.startsWith("# Persona:"));
     if (personaLine) {
-        summary += `### ${personaLine.replace('# ', '')}\n`;
-        const sections = r.split('### Issue');
-        sections.slice(1).forEach(s => {
-            const title = s.split('\n')[0].trim();
-            const result = s.match(/- \*\*Result\*\*: (.*)/)?.[1] || "UNKNOWN";
-            summary += `- **Issue ${title}**: ${result}\n`;
-        });
-        summary += '\n';
+      summary += `### ${personaLine.replace("# ", "")}\n`;
+      const sections = r.split("### Issue");
+      sections.slice(1).forEach((s) => {
+        const title = s.split("\n")[0].trim();
+        const result = s.match(/- \*\*Result\*\*: (.*)/)?.[1] || "UNKNOWN";
+        summary += `- **Issue ${title}**: ${result}\n`;
+      });
+      summary += "\n";
     }
   });
 

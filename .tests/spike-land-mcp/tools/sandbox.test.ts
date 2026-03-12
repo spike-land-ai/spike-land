@@ -53,7 +53,7 @@ function createRegistry(userId = "user-1") {
 function getText(result: { content: Array<{ type: string; text?: string }> }): string {
   return result.content
     .filter((c) => c.type === "text" && typeof c.text === "string")
-    .map((c) => c.text!)
+    .map((c) => c.text)
     .join("\n");
 }
 

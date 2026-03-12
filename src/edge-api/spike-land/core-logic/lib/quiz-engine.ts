@@ -683,7 +683,7 @@ export function generateNextRound(session: QuizSession): QuizRound {
   // Fisher-Yates with deterministic seed
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.abs((session.roundNumber * 31 + i * 17) % (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   for (const item of shuffled) {
     if (selected.length >= QUESTIONS_PER_ROUND) break;
@@ -705,13 +705,13 @@ export function generateNextRound(session: QuizSession): QuizRound {
   while (selected.length < QUESTIONS_PER_ROUND) {
     const idx = selected.length % session.conceptStates.length;
     selected.push({
-      state: session.conceptStates[idx]!,
+      state: session.conceptStates[idx],
       idx,
     });
   }
 
   const questions = selected.map(({ state, idx }) => {
-    const concept = session.concepts[idx]!;
+    const concept = session.concepts[idx];
     // Pick a variant not yet answered
     const usedVariants = new Set(state.answerHistory.keys());
     let variantIdx = 0;
@@ -726,7 +726,7 @@ export function generateNextRound(session: QuizSession): QuizRound {
       variantIdx = state.attempts % concept.variants.length;
     }
 
-    const variant = concept.variants[variantIdx]!;
+    const variant = concept.variants[variantIdx];
     return {
       conceptIndex: idx,
       variantIndex: variantIdx,
@@ -757,10 +757,10 @@ export function evaluateAnswers(
   const newConflicts: ConflictRecord[] = [];
 
   for (let i = 0; i < QUESTIONS_PER_ROUND; i++) {
-    const question = session.currentRound.questions[i]!;
-    const answer = answers[i]!;
-    const conceptState = session.conceptStates[question.conceptIndex]!;
-    const concept = session.concepts[question.conceptIndex]!;
+    const question = session.currentRound.questions[i];
+    const answer = answers[i];
+    const conceptState = session.conceptStates[question.conceptIndex];
+    const concept = session.concepts[question.conceptIndex];
     const isCorrect = answer === question.correctIndex;
 
     // Check for conflict: did user previously answer a different variant of this concept

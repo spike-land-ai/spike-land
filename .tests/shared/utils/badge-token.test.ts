@@ -29,7 +29,7 @@ describe("generateBadgeToken", () => {
   it("encodes the payload as base64 in the first part", () => {
     const payload = makePayload();
     const token = generateBadgeToken(payload, SECRET);
-    const payloadPart = token.split(".")[0]!;
+    const payloadPart = token.split(".")[0];
     const decoded = JSON.parse(atob(payloadPart)) as BadgePayload;
     expect(decoded).toEqual(payload);
   });
@@ -125,9 +125,9 @@ describe("verifyBadgeToken", () => {
     const token = generateBadgeToken(payload, SECRET);
     const verified = verifyBadgeToken(token, SECRET);
     expect(verified).not.toBeNull();
-    expect(verified!.sid).toBe(payload.sid);
-    expect(verified!.topic).toBe(payload.topic);
-    expect(verified!.score).toBe(payload.score);
-    expect(verified!.ts).toBe(payload.ts);
+    expect(verified?.sid).toBe(payload.sid);
+    expect(verified?.topic).toBe(payload.topic);
+    expect(verified?.score).toBe(payload.score);
+    expect(verified?.ts).toBe(payload.ts);
   });
 });

@@ -184,7 +184,7 @@ describe("categoryRules", () => {
   const emptyDeps = new Set<string>();
 
   it("MCP rule matches @modelcontextprotocol/sdk", () => {
-    const mcpRule = categoryRules.find((r) => r.category === "mcp-tools")!;
+    const mcpRule = categoryRules.find((r) => r.category === "mcp-tools");
     expect(mcpRule.predicate(emptyDeps, new Set(["@modelcontextprotocol/sdk"]), undefined)).toBe(
       true,
     );
@@ -192,20 +192,20 @@ describe("categoryRules", () => {
   });
 
   it("frontend rule matches react", () => {
-    const frontendRule = categoryRules.find((r) => r.category === "frontend")!;
+    const frontendRule = categoryRules.find((r) => r.category === "frontend");
     expect(frontendRule.predicate(emptyDeps, new Set(["react"]), undefined)).toBe(true);
     expect(frontendRule.predicate(emptyDeps, new Set(["react-dom"]), undefined)).toBe(true);
   });
 
   it("AI rule matches various AI SDKs", () => {
-    const aiRule = categoryRules.find((r) => r.category === "ai")!;
+    const aiRule = categoryRules.find((r) => r.category === "ai");
     expect(aiRule.predicate(emptyDeps, new Set(["@ai-sdk/anthropic"]), undefined)).toBe(true);
     expect(aiRule.predicate(emptyDeps, new Set(["@anthropic-ai/sdk"]), undefined)).toBe(true);
     expect(aiRule.predicate(emptyDeps, new Set(["replicate"]), undefined)).toBe(true);
   });
 
   it("core rule matches library and block kinds", () => {
-    const coreRule = categoryRules.find((r) => r.category === "core")!;
+    const coreRule = categoryRules.find((r) => r.category === "core");
     expect(coreRule.predicate(emptyDeps, emptyDeps, "library")).toBe(true);
     expect(coreRule.predicate(emptyDeps, emptyDeps, "block")).toBe(true);
     expect(coreRule.predicate(emptyDeps, emptyDeps, "worker")).toBe(false);

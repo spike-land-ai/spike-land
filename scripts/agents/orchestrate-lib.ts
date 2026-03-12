@@ -158,7 +158,8 @@ function toStringArray(value: unknown): string[] {
 }
 
 export function normalizeOutageFinding(value: unknown): OutageFinding {
-  const record = typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
+  const record =
+    typeof value === "object" && value !== null ? (value as Record<string, unknown>) : {};
   const confidenceValue = typeof record.confidence === "number" ? record.confidence : 0;
 
   return {
@@ -214,8 +215,8 @@ export function buildIncidentBrief(input: {
 
   for (const result of successful) {
     probableCauses.set(
-      result.finding!.probableCause,
-      (probableCauses.get(result.finding!.probableCause) ?? 0) + 1,
+      result.finding?.probableCause,
+      (probableCauses.get(result.finding?.probableCause) ?? 0) + 1,
     );
   }
 
@@ -252,7 +253,11 @@ export function buildIncidentBrief(input: {
       ].join("\n");
     }),
     ...(queuedAgents.length > 0
-      ? ["", "## Queued / Deferred Agents", ...queuedAgents.map((item) => `- ${item.agent}: ${item.note}`)]
+      ? [
+          "",
+          "## Queued / Deferred Agents",
+          ...queuedAgents.map((item) => `- ${item.agent}: ${item.note}`),
+        ]
       : []),
   ].join("\n");
 }

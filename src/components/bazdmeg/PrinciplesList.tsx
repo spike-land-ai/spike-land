@@ -80,9 +80,12 @@ export function PrinciplesList() {
     <section id="principles" className="py-24 bg-background/50">
       <div className="container mx-auto px-4">
         <div className="mb-16 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-5xl mb-4">The 8 Core Principles</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-5xl mb-4">
+            The 8 Core Principles
+          </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            These guidelines shape how we interact with LLMs, ensuring high-quality output and maintainable codebases.
+            These guidelines shape how we interact with LLMs, ensuring high-quality output and
+            maintainable codebases.
           </p>
         </div>
 

@@ -105,8 +105,8 @@ function getRound(cluster: BftCluster, roundSeq: number): ConsensusRound {
 function doPropose(cluster: BftCluster, value: string): ConsensusRound {
   cluster.currentSequence++;
   const seqNum = cluster.currentSequence;
-  const leaderId = cluster.nodeOrder[0]!;
-  const leader = cluster.nodes.get(leaderId)!;
+  const leaderId = cluster.nodeOrder[0];
+  const leader = cluster.nodes.get(leaderId);
   const prePrepareMsg: PbftMessage = {
     id: generateMessageId(cluster),
     type: "pre_prepare",
@@ -144,7 +144,7 @@ function doPrepare(cluster: BftCluster, roundSeq: number): ConsensusRound {
   }
   const prepareMessages: PbftMessage[] = [];
   for (const nodeId of cluster.nodeOrder) {
-    const node = cluster.nodes.get(nodeId)!;
+    const node = cluster.nodes.get(nodeId);
     if (node.behavior === "silent") continue;
     if (node.behavior === "equivocating") {
       const msg: PbftMessage = {
@@ -190,7 +190,7 @@ function doCommit(cluster: BftCluster, roundSeq: number): ConsensusRound {
   const q = quorumSize(n);
   const commitMessages: PbftMessage[] = [];
   for (const nodeId of cluster.nodeOrder) {
-    const node = cluster.nodes.get(nodeId)!;
+    const node = cluster.nodes.get(nodeId);
     if (node.behavior === "silent") continue;
     if (node.behavior === "equivocating") {
       const msg: PbftMessage = {
@@ -473,7 +473,7 @@ export function registerBftTools(registry: ToolRegistry, userId: string, db: Dri
         const f = maxFaults(n);
         const nodeRows = cluster.nodeOrder
           .map((nodeId) => {
-            const node = cluster.nodes.get(nodeId)!;
+            const node = cluster.nodes.get(nodeId);
             return `| ${node.id} | ${node.behavior} | ${node.phase} | ${
               node.decidedValue ?? "-"
             } |`;

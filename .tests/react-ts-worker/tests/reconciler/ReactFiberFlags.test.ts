@@ -76,7 +76,7 @@ describe("ReactFiberFlags", () => {
     ];
     for (let i = 0; i < flags.length; i++) {
       for (let j = i + 1; j < flags.length; j++) {
-        expect(flags[i]! & flags[j]!).toBe(0);
+        expect(flags[i] & flags[j]).toBe(0);
       }
     }
   });

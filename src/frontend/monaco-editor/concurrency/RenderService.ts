@@ -52,7 +52,7 @@ export class RenderService {
       const cnArr = transpiled.split(`cn("`);
       for (let i = 1; i < cnArr.length; i++) {
         if (cnArr[i]) {
-          cnArr[i] = cnArr[i]!.split(" ").join("  ");
+          cnArr[i] = cnArr[i]?.split(" ").join("  ");
         }
       }
       transpiled = cnArr.join(`cn( "`);

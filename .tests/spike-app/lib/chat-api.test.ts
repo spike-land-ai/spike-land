@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { resolveChatBase, toWebSocketBase } from "../../../src/frontend/platform-frontend/core-logic/api";
+import {
+  resolveChatBase,
+  toWebSocketBase,
+} from "../../../src/frontend/platform-frontend/core-logic/api";
 
 describe("chat api helpers", () => {
   it("disables chat when no production base URL is configured", () => {

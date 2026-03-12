@@ -24,7 +24,7 @@ describe("mapChildren", () => {
     const el = createElement("div", null);
     const result = mapChildren(el, (child) => child);
     expect(result).toHaveLength(1);
-    expect(isValidElement(result![0])).toBe(true);
+    expect(isValidElement(result?.[0])).toBe(true);
   });
 
   it("maps an array of elements", () => {
@@ -36,13 +36,13 @@ describe("mapChildren", () => {
   it("maps string children", () => {
     const result = mapChildren("hello", (child) => child);
     expect(result).toHaveLength(1);
-    expect(result![0]).toBe("hello");
+    expect(result?.[0]).toBe("hello");
   });
 
   it("maps number children", () => {
     const result = mapChildren(42, (child) => child);
     expect(result).toHaveLength(1);
-    expect(result![0]).toBe(42);
+    expect(result?.[0]).toBe(42);
   });
 
   it("provides correct index to callback", () => {
@@ -63,7 +63,7 @@ describe("mapChildren", () => {
     const el = createElement("div", null);
     const result = mapChildren(el, () => createElement("span", null));
     expect(result).toHaveLength(1);
-    expect((result![0] as { type: string }).type).toBe("span");
+    expect((result?.[0] as { type: string }).type).toBe("span");
   });
 
   it("skips null returns from callback", () => {

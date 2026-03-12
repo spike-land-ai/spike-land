@@ -93,7 +93,11 @@ describe("browser MCP client", () => {
       .mockResolvedValueOnce(new Response(null, { status: 202 }))
       .mockResolvedValueOnce(
         new Response(
-          JSON.stringify({ jsonrpc: "2.0", result: { content: [{ type: "text", text: "ok" }] }, id: "call-2" }),
+          JSON.stringify({
+            jsonrpc: "2.0",
+            result: { content: [{ type: "text", text: "ok" }] },
+            id: "call-2",
+          }),
           {
             status: 200,
             headers: { "Content-Type": "application/json" },

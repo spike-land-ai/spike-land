@@ -397,20 +397,20 @@ describe("MCP tool: verify-session", () => {
     mockGetSession.mockResolvedValueOnce(null);
     const tool = await getVerifySessionTool();
     expect(tool).toBeDefined();
-    const result = (await tool!.handler({ sessionToken: "invalid-token" })) as {
+    const result = (await tool?.handler({ sessionToken: "invalid-token" })) as {
       content: Array<{ text: string }>;
     };
-    const data = JSON.parse(result.content[0]!.text);
+    const data = JSON.parse(result.content[0]?.text);
     expect(data.valid).toBe(false);
   });
 
   it("returns valid:false when sessionResult has no session property", async () => {
     mockGetSession.mockResolvedValueOnce({ user: { id: "u1" } });
     const tool = await getVerifySessionTool();
-    const result = (await tool!.handler({ sessionToken: "token" })) as {
+    const result = (await tool?.handler({ sessionToken: "token" })) as {
       content: Array<{ text: string }>;
     };
-    const data = JSON.parse(result.content[0]!.text);
+    const data = JSON.parse(result.content[0]?.text);
     expect(data.valid).toBe(false);
   });
 
@@ -420,10 +420,10 @@ describe("MCP tool: verify-session", () => {
       user: { id: "user-1", email: "test@example.com", name: "Test User" },
     });
     const tool = await getVerifySessionTool();
-    const result = (await tool!.handler({ sessionToken: "valid-token" })) as {
+    const result = (await tool?.handler({ sessionToken: "valid-token" })) as {
       content: Array<{ text: string }>;
     };
-    const data = JSON.parse(result.content[0]!.text);
+    const data = JSON.parse(result.content[0]?.text);
     expect(data.valid).toBe(true);
     expect(data.user.id).toBe("user-1");
     expect(data.user.email).toBe("test@example.com");
@@ -437,16 +437,16 @@ describe("MCP tool: verify-session", () => {
       return { session: { id: "s1" }, user: { id: "u1" } };
     });
     const tool = await getVerifySessionTool();
-    await tool!.handler({ sessionToken: "my-token" });
+    await tool?.handler({ sessionToken: "my-token" });
   });
 
   it("returns text content type in response", async () => {
     mockGetSession.mockResolvedValueOnce(null);
     const tool = await getVerifySessionTool();
-    const result = (await tool!.handler({ sessionToken: "tok" })) as {
+    const result = (await tool?.handler({ sessionToken: "tok" })) as {
       content: Array<{ type: string }>;
     };
-    expect(result.content[0]!.type).toBe("text");
+    expect(result.content[0]?.type).toBe("text");
   });
 });
 
@@ -467,10 +467,10 @@ describe("MCP tool: get-user-by-email", () => {
     mockFindFirst.mockResolvedValueOnce(null);
     const tool = await getEmailTool();
     expect(tool).toBeDefined();
-    const result = (await tool!.handler({ email: "notfound@example.com" })) as {
+    const result = (await tool?.handler({ email: "notfound@example.com" })) as {
       content: Array<{ text: string }>;
     };
-    const data = JSON.parse(result.content[0]!.text);
+    const data = JSON.parse(result.content[0]?.text);
     expect(data.found).toBe(false);
   });
 
@@ -483,10 +483,10 @@ describe("MCP tool: get-user-by-email", () => {
       image: "https://example.com/avatar.png",
     });
     const tool = await getEmailTool();
-    const result = (await tool!.handler({ email: "alice@example.com" })) as {
+    const result = (await tool?.handler({ email: "alice@example.com" })) as {
       content: Array<{ text: string }>;
     };
-    const data = JSON.parse(result.content[0]!.text);
+    const data = JSON.parse(result.content[0]?.text);
     expect(data.found).toBe(true);
     expect(data.user.id).toBe("user-42");
     expect(data.user.email).toBe("alice@example.com");
@@ -503,10 +503,10 @@ describe("MCP tool: get-user-by-email", () => {
       image: "https://secret-image.example.com/photo.jpg",
     });
     const tool = await getEmailTool();
-    const result = (await tool!.handler({ email: "bob@example.com" })) as {
+    const result = (await tool?.handler({ email: "bob@example.com" })) as {
       content: Array<{ text: string }>;
     };
-    const data = JSON.parse(result.content[0]!.text);
+    const data = JSON.parse(result.content[0]?.text);
     expect(data.user).not.toHaveProperty("image");
   });
 
@@ -518,10 +518,10 @@ describe("MCP tool: get-user-by-email", () => {
       role: null,
     });
     const tool = await getEmailTool();
-    const result = (await tool!.handler({ email: "charlie@example.com" })) as {
+    const result = (await tool?.handler({ email: "charlie@example.com" })) as {
       content: Array<{ text: string }>;
     };
-    const data = JSON.parse(result.content[0]!.text);
+    const data = JSON.parse(result.content[0]?.text);
     expect(data.found).toBe(true);
     expect(data.user.role).toBeNull();
   });
@@ -529,9 +529,9 @@ describe("MCP tool: get-user-by-email", () => {
   it("returns text content type", async () => {
     mockFindFirst.mockResolvedValueOnce(null);
     const tool = await getEmailTool();
-    const result = (await tool!.handler({ email: "x@example.com" })) as {
+    const result = (await tool?.handler({ email: "x@example.com" })) as {
       content: Array<{ type: string }>;
     };
-    expect(result.content[0]!.type).toBe("text");
+    expect(result.content[0]?.type).toBe("text");
   });
 });

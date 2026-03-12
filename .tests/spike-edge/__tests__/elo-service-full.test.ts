@@ -111,8 +111,8 @@ describe("getUserElo", () => {
 
     const result = await getUserElo(db, "user2");
     expect(result).not.toBeNull();
-    expect(result!.elo).toBe(1100);
-    expect(result!.tier).toBe("free");
+    expect(result?.elo).toBe(1100);
+    expect(result?.tier).toBe("free");
   });
 
   it("uses cache when available", async () => {
@@ -134,7 +134,7 @@ describe("getUserElo", () => {
 
     // getUserElo should hit cache
     const result = await getUserElo(db, "user-cached");
-    expect(result!.elo).toBe(1250);
+    expect(result?.elo).toBe(1250);
     expect((prepare as ReturnType<typeof vi.fn>).mock.calls.length).toBe(prepareCalls);
   });
 });

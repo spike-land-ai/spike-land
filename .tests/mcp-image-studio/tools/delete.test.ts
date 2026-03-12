@@ -122,7 +122,7 @@ describe("createDeleteTool (new builder)", () => {
     expect(notify).toHaveBeenCalledWith(
       expect.objectContaining({ type: "image:deleted", entityId: image.id }),
     );
-    const data = JSON.parse(result.content[0].text!);
+    const data = JSON.parse(result.content[0].text);
     expect(data.deleted).toBe(true);
     expect(data.image_id).toBe(image.id);
     expect(mocks.storage.delete).toHaveBeenCalledWith("key/to/delete");

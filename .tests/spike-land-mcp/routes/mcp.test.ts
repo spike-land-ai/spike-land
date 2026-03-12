@@ -125,11 +125,13 @@ vi.mock("@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js", () => {
     initialized = false;
     closed = false;
 
-    constructor(options: {
-      sessionIdGenerator?: () => string;
-      onsessionclosed?: (sessionId: string) => void | Promise<void>;
-      enableJsonResponse?: boolean;
-    } = {}) {
+    constructor(
+      options: {
+        sessionIdGenerator?: () => string;
+        onsessionclosed?: (sessionId: string) => void | Promise<void>;
+        enableJsonResponse?: boolean;
+      } = {},
+    ) {
       this.options = options;
       _transportCreateCount += 1;
     }

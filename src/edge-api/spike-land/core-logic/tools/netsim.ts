@@ -115,8 +115,8 @@ export function registerNetsimTools(registry: ToolRegistry, userId: string, db: 
         for (let i = 0; i < nodeOrder.length; i++) {
           for (let j = 0; j < nodeOrder.length; j++) {
             if (i === j) continue;
-            const from = nodeOrder[i]!,
-              to = nodeOrder[j]!;
+            const from = nodeOrder[i],
+              to = nodeOrder[j];
             links.set(linkKey(from, to), {
               from,
               to,

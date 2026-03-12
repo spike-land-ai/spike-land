@@ -11,7 +11,7 @@ async function runPlaywrightTest() {
   // and manually triggering an evaluation or checking the DOM for "Winner: variant-a"
   // Since we don't have a real running server to point Playwright to for this exact benchmark
   // we simulate the network overhead and browser rendering cycle.
-  
+
   // Mock page content for the "Dashboard"
   await page.setContent(`
     <html>
@@ -33,7 +33,7 @@ async function runPlaywrightTest() {
     </html>
   `);
 
-  await page.click('#evaluate-btn');
+  await page.click("#evaluate-btn");
   await page.waitForSelector('#result:has-text("Winner: variant-a")');
 
   await browser.close();

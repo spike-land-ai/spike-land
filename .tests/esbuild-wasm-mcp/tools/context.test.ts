@@ -28,7 +28,7 @@ class MockMcpServer {
 function makeServer() {
   const server = new MockMcpServer();
   registerContextTool(server as unknown as McpServer);
-  const handler = server.tools.get("esbuild_wasm_context")!;
+  const handler = server.tools.get("esbuild_wasm_context");
   return { server, handler };
 }
 

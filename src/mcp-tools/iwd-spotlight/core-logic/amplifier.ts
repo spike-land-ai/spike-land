@@ -14,7 +14,10 @@ export function registerAmplifierTools(server: McpServer, client: ToolClient): v
     description:
       "Find top women-in-tech HN stories and generate a visual summary image. Combines search with image generation.",
     schema: {
-      topic: z.string().optional().describe("Specific topic to search (defaults to curated IWD terms)"),
+      topic: z
+        .string()
+        .optional()
+        .describe("Specific topic to search (defaults to curated IWD terms)"),
       limit: z.number().int().min(1).max(20).default(5).describe("Number of stories to find"),
     },
     async handler({ topic, limit }) {
@@ -54,7 +57,10 @@ export function registerAmplifierTools(server: McpServer, client: ToolClient): v
       "Draft a supportive, thoughtful comment for a HN story about women in tech. NEVER auto-posts — returns draft text only.",
     schema: {
       story_id: z.number().int().describe("HackerNews story ID"),
-      tone: z.enum(["supportive", "celebratory", "insightful"]).default("supportive").describe("Comment tone"),
+      tone: z
+        .enum(["supportive", "celebratory", "insightful"])
+        .default("supportive")
+        .describe("Comment tone"),
     },
     async handler({ story_id, tone }) {
       const itemResult = await client.callTool("hn_get_item_with_comments", {

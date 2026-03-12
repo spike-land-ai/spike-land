@@ -8,7 +8,7 @@ describe("Tool-First Benchmark: evaluate_experiment", () => {
       { id: "control", impressions: 1000, donations: 20 }, // 2%
       { id: "variant-a", impressions: 1000, donations: 50 }, // 5%
     ]);
-    
+
     expect(result.shouldGraduate).toBe(true);
     expect(result.bestVariant).toBe("variant-a");
     expect(result.improvement).toBeGreaterThan(0.1);

@@ -138,7 +138,7 @@ describe("StartWithPrompt Integration Flow", () => {
       const storedData = sessionStorage.getItem("test-hash-123");
       expect(storedData).toBeTruthy();
 
-      const parsedData = JSON.parse(storedData!);
+      const parsedData = JSON.parse(storedData ?? "{}");
       expect(parsedData).toEqual({
         prompt: testPrompt,
         images: [],
@@ -190,7 +190,7 @@ describe("StartWithPrompt Integration Flow", () => {
 
       // 4. Verify data was stored with images
       const storedData = sessionStorage.getItem("test-hash-123");
-      const parsedData = JSON.parse(storedData!);
+      const parsedData = JSON.parse(storedData ?? "{}");
 
       expect(parsedData).toEqual({
         prompt: testPrompt,
@@ -255,7 +255,7 @@ describe("StartWithPrompt Integration Flow", () => {
         const storedData = sessionStorage.getItem("test-hash-123");
         expect(storedData).toBeTruthy();
 
-        const parsedData = JSON.parse(storedData!);
+        const parsedData = JSON.parse(storedData);
         expect(parsedData.images).toHaveLength(1);
         expect(parsedData.prompt).toBe(testPrompt);
       });
@@ -270,12 +270,12 @@ describe("StartWithPrompt Integration Flow", () => {
       });
 
       // Simulate drag over
-      fireEvent.dragOver(dropZone!, {
+      fireEvent.dragOver(dropZone, {
         dataTransfer: { files: [] },
       });
 
       // Simulate drop
-      fireEvent.drop(dropZone!, {
+      fireEvent.drop(dropZone, {
         dataTransfer: { files: [file] },
       });
 
@@ -371,7 +371,7 @@ describe("StartWithPrompt Integration Flow", () => {
 
       // Should still navigate with empty prompt
       const storedData = sessionStorage.getItem("test-hash-123");
-      const parsedData = JSON.parse(storedData!);
+      const parsedData = JSON.parse(storedData);
 
       expect(parsedData).toEqual({
         prompt: "",

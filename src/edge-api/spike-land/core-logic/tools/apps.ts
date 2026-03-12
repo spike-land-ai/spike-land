@@ -661,7 +661,7 @@ export function registerAppsTools(
           "knit",
           "leap",
         ];
-        const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)]!;
+        const pick = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
         const suffix = Math.random().toString(36).substring(2, 6);
         const id = `${pick(adjectives)}.${pick(nouns)}.${pick(verbs)}.${suffix}`;
 

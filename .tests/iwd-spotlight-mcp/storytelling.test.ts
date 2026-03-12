@@ -4,7 +4,12 @@ import { createMockServer } from "@spike-land-ai/mcp-server-base";
 import { createMockToolClient } from "../../src/mcp-tools/iwd-spotlight/core-logic/tool-client.js";
 import { registerStorytellingTools } from "../../src/mcp-tools/iwd-spotlight/core-logic/storytelling.js";
 
-function setup(responses: Record<string, { content: Array<{ type: "text"; text: string }>; isError?: boolean }> = {}) {
+function setup(
+  responses: Record<
+    string,
+    { content: Array<{ type: "text"; text: string }>; isError?: boolean }
+  > = {},
+) {
   const server = createMockServer();
   const client = createMockToolClient(responses);
   registerStorytellingTools(server as unknown as McpServer, client);
@@ -63,6 +68,8 @@ describe("iwd_timeline", () => {
       end_year: 2026,
     });
     const data = JSON.parse(result.content[0].text);
-    expect(data.milestones.every((m: { year: number }) => m.year >= 2000 && m.year <= 2026)).toBe(true);
+    expect(data.milestones.every((m: { year: number }) => m.year >= 2000 && m.year <= 2026)).toBe(
+      true,
+    );
   });
 });

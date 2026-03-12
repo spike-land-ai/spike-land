@@ -20,7 +20,7 @@ describe("createMcpBridge", () => {
     expect(tools).toHaveLength(2);
     expect(tools.map((t) => t.name)).toContain("chat");
     expect(tools.map((t) => t.name)).toContain("openclaw_feedback");
-    const chatTool = tools.find((t) => t.name === "chat")!;
+    const chatTool = tools.find((t) => t.name === "chat");
     expect(chatTool.description).toContain("OpenClaw");
   });
 

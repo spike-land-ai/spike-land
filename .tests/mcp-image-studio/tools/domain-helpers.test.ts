@@ -37,9 +37,9 @@ describe("resolveImageOrError", () => {
 
     expect(result.image).toBeUndefined();
     expect(result.error).toBeDefined();
-    expect(result.error!.isError).toBe(true);
-    expect(result.error!.content[0].text).toContain("IMAGE_NOT_FOUND");
-    expect(result.error!.content[0].text).toContain("Image not found in DB");
+    expect(result.error?.isError).toBe(true);
+    expect(result.error?.content[0].text).toContain("IMAGE_NOT_FOUND");
+    expect(result.error?.content[0].text).toContain("Image not found in DB");
   });
 
   it("should return IMAGE_NOT_FOUND error when resolveImage returns null", async () => {
@@ -50,9 +50,9 @@ describe("resolveImageOrError", () => {
 
     expect(result.image).toBeUndefined();
     expect(result.error).toBeDefined();
-    expect(result.error!.isError).toBe(true);
-    expect(result.error!.content[0].text).toContain("IMAGE_NOT_FOUND");
-    expect(result.error!.content[0].text).toContain("img-null");
+    expect(result.error?.isError).toBe(true);
+    expect(result.error?.content[0].text).toContain("IMAGE_NOT_FOUND");
+    expect(result.error?.content[0].text).toContain("img-null");
   });
 
   it("should use fallback message when error has no message", async () => {
@@ -61,7 +61,7 @@ describe("resolveImageOrError", () => {
 
     const result = await resolveImageOrError(deps, imageId);
 
-    expect(result.error!.content[0].text).toContain("IMAGE_NOT_FOUND");
+    expect(result.error?.content[0].text).toContain("IMAGE_NOT_FOUND");
   });
 });
 
@@ -94,9 +94,9 @@ describe("resolveImagesOrError", () => {
 
     expect(result.images).toBeUndefined();
     expect(result.error).toBeDefined();
-    expect(result.error!.isError).toBe(true);
-    expect(result.error!.content[0].text).toContain("RESOLVE_FAILED");
-    expect(result.error!.content[0].text).toContain("DB connection failed");
+    expect(result.error?.isError).toBe(true);
+    expect(result.error?.content[0].text).toContain("RESOLVE_FAILED");
+    expect(result.error?.content[0].text).toContain("DB connection failed");
   });
 
   it("should return RESOLVE_FAILED error when resolveImages returns null", async () => {
@@ -107,9 +107,9 @@ describe("resolveImagesOrError", () => {
 
     expect(result.images).toBeUndefined();
     expect(result.error).toBeDefined();
-    expect(result.error!.isError).toBe(true);
-    expect(result.error!.content[0].text).toContain("RESOLVE_FAILED");
-    expect(result.error!.content[0].text).toContain("Failed to resolve images");
+    expect(result.error?.isError).toBe(true);
+    expect(result.error?.content[0].text).toContain("RESOLVE_FAILED");
+    expect(result.error?.content[0].text).toContain("Failed to resolve images");
   });
 
   it("should use fallback message when error has no message", async () => {
@@ -118,7 +118,7 @@ describe("resolveImagesOrError", () => {
 
     const result = await resolveImagesOrError(deps, imageIds);
 
-    expect(result.error!.content[0].text).toContain("RESOLVE_FAILED");
+    expect(result.error?.content[0].text).toContain("RESOLVE_FAILED");
   });
 });
 
@@ -163,9 +163,9 @@ describe("consumeCreditsOrError", () => {
     const result = await consumeCreditsOrError(deps, "user-1", 10, "enhance");
 
     expect(result.error).toBeDefined();
-    expect(result.error!.isError).toBe(true);
-    expect(result.error!.content[0].text).toContain("CREDIT_CONSUME_FAILED");
-    expect(result.error!.content[0].text).toContain("Balance too low");
+    expect(result.error?.isError).toBe(true);
+    expect(result.error?.content[0].text).toContain("CREDIT_CONSUME_FAILED");
+    expect(result.error?.content[0].text).toContain("Balance too low");
   });
 
   it("should return CREDIT_CONSUME_FAILED when consume throws", async () => {
@@ -174,8 +174,8 @@ describe("consumeCreditsOrError", () => {
     const result = await consumeCreditsOrError(deps, "user-1", 10, "enhance");
 
     expect(result.error).toBeDefined();
-    expect(result.error!.isError).toBe(true);
-    expect(result.error!.content[0].text).toContain("CREDIT_CONSUME_FAILED");
+    expect(result.error?.isError).toBe(true);
+    expect(result.error?.content[0].text).toContain("CREDIT_CONSUME_FAILED");
   });
 
   it("should use fallback error message when consume returns no error string", async () => {
@@ -183,7 +183,7 @@ describe("consumeCreditsOrError", () => {
 
     const result = await consumeCreditsOrError(deps, "user-1", 10, "enhance");
 
-    expect(result.error!.content[0].text).toContain("Failed to consume credits");
+    expect(result.error?.content[0].text).toContain("Failed to consume credits");
   });
 
   it("should notify with credits:consumed event when ctx.notify is provided", async () => {

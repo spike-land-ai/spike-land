@@ -125,7 +125,7 @@ describe("TelegramAdapter", () => {
       await adapter.sendMessage({ chatId: "987654321", text: "Hello Amina" });
 
       expect(calls).toHaveLength(1);
-      const call = calls[0]!;
+      const call = calls[0];
       expect(call.url).toContain(BOT_TOKEN);
       expect(call.url).toContain("sendMessage");
       expect(call.method).toBe("POST");
@@ -165,7 +165,7 @@ describe("TelegramAdapter", () => {
       // Each row should have exactly one button.
       expect(keyboard[0]).toHaveLength(1);
 
-      const firstButton = (keyboard[0] as R[])[0]!;
+      const firstButton = (keyboard[0] as R[])[0];
       expect(firstButton["text"]).toBe("Housing");
       expect(firstButton["callback_data"]).toBe("housing");
     });

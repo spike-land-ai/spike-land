@@ -259,7 +259,7 @@ describe("ReactFiber", () => {
       const wip = createWorkInProgress(current, null);
       expect(wip.dependencies).not.toBeNull();
       expect(wip.dependencies).not.toBe(current.dependencies); // Cloned
-      expect(wip.dependencies!.lanes).toBe(SyncLane);
+      expect(wip.dependencies?.lanes).toBe(SyncLane);
     });
 
     it("sets null dependencies when current.dependencies is null", () => {

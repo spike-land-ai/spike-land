@@ -28,7 +28,7 @@ export function parseImports(code: string): string[] {
     const regex = new RegExp(pattern.source, pattern.flags);
     let match: RegExpExecArray | null;
     while ((match = regex.exec(code)) !== null) {
-      const specifier = match[1]!;
+      const specifier = match[1];
       // Skip relative imports
       if (specifier.startsWith(".") || specifier.startsWith("/")) continue;
       // Normalize scoped packages: @scope/pkg/subpath -> @scope/pkg
@@ -37,7 +37,7 @@ export function parseImports(code: string): string[] {
         externals.add(parts.slice(0, 2).join("/"));
       } else {
         // bare: pkg/subpath -> pkg
-        externals.add(specifier.split("/")[0]!);
+        externals.add(specifier.split("/")[0]);
       }
     }
   }

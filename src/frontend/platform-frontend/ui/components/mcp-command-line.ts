@@ -172,7 +172,11 @@ function resolveKnownToolCommand(name: string, args: string[]): ResolvedCommand 
 }
 
 function resolveFlagToolCommand(name: string, args: string[]): ResolvedCommand | null {
-  if (!name.includes("_") || args.length === 0 || !args.every((arg) => arg.startsWith("--") || !arg.startsWith("-"))) {
+  if (
+    !name.includes("_") ||
+    args.length === 0 ||
+    !args.every((arg) => arg.startsWith("--") || !arg.startsWith("-"))
+  ) {
     return null;
   }
 

@@ -174,7 +174,7 @@ describe("Worker fetch handler", () => {
       await worker.fetch(req, mockEnv, mockCtx);
 
       // The waitUntil promise should handle the error internally (console.error)
-      const waitUntilPromise = mockCtx.waitUntil.mock.calls[0]![0];
+      const waitUntilPromise = mockCtx.waitUntil.mock.calls[0]?.[0];
       const mockConsoleError = vi.spyOn(console, "error").mockImplementation(() => {});
       await expect(waitUntilPromise).resolves.toBeUndefined();
       mockConsoleError.mockRestore();

@@ -51,7 +51,10 @@ export function AppShowcase() {
   const browseCopy = useDevModeCopy("Browse all tools", "Inspect all capabilities");
 
   return (
-    <section aria-labelledby="showcase-heading" className="rubik-container-wide rubik-section-compact border-t border-border">
+    <section
+      aria-labelledby="showcase-heading"
+      className="rubik-container-wide rubik-section-compact border-t border-border"
+    >
       <div>
         <header className="mx-auto mb-12 max-w-3xl text-center">
           <h2
@@ -78,7 +81,11 @@ export function AppShowcase() {
                       className="group block rounded-2xl border border-border bg-background/80 p-4 transition-[border-color,box-shadow] duration-200 hover:border-primary/24 hover:shadow-[var(--panel-shadow)]"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-muted text-xl" role="img" aria-label={app.name}>
+                        <span
+                          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-border bg-muted text-xl"
+                          role="img"
+                          aria-label={app.name}
+                        >
                           {app.icon}
                         </span>
                         <div className="flex-1 min-w-0">

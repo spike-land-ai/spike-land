@@ -191,7 +191,7 @@ describe("browser-session", () => {
       const active = getActiveTab();
 
       expect(active).not.toBeNull();
-      expect(active!.index).toBe(index);
+      expect(active?.index).toBe(index);
     });
 
     it("returns null if active tab is closed", async () => {
@@ -207,7 +207,7 @@ describe("browser-session", () => {
       await getOrCreateTab(); // index 1
 
       const active = getActiveTab();
-      expect(active!.index).toBe(1);
+      expect(active?.index).toBe(1);
     });
   });
 
@@ -297,7 +297,7 @@ describe("browser-session", () => {
 
       const active = getActiveTab();
       // Active should now be tab 0
-      expect(active!.index).toBe(0);
+      expect(active?.index).toBe(0);
     });
 
     it("sets activeTabIndex to 0 when last tab is closed", async () => {
@@ -392,7 +392,7 @@ describe("browser-session", () => {
       // Find and invoke the 'console' listener registered via page.on
       const consoleCall = mockPageOn.mock.calls.find((c: unknown[]) => c[0] === "console");
       expect(consoleCall).toBeDefined();
-      const consoleHandler = consoleCall![1] as (msg: unknown) => void;
+      const consoleHandler = consoleCall?.[1] as (msg: unknown) => void;
 
       consoleHandler({
         type: () => "log",
@@ -413,7 +413,7 @@ describe("browser-session", () => {
       const { entry } = await getOrCreateTab();
 
       const consoleCall = mockPageOn.mock.calls.find((c: unknown[]) => c[0] === "console");
-      const consoleHandler = consoleCall![1] as (msg: unknown) => void;
+      const consoleHandler = consoleCall?.[1] as (msg: unknown) => void;
 
       consoleHandler({
         type: () => "warn",
@@ -427,8 +427,8 @@ describe("browser-session", () => {
       });
 
       expect(entry.consoleMessages).toHaveLength(2);
-      expect(entry.consoleMessages[0]!.type).toBe("warn");
-      expect(entry.consoleMessages[1]!.type).toBe("error");
+      expect(entry.consoleMessages[0]?.type).toBe("warn");
+      expect(entry.consoleMessages[1]?.type).toBe("error");
     });
 
     it("records network requests via requestfinished listener", async () => {
@@ -436,7 +436,7 @@ describe("browser-session", () => {
 
       const reqCall = mockPageOn.mock.calls.find((c: unknown[]) => c[0] === "requestfinished");
       expect(reqCall).toBeDefined();
-      const reqHandler = reqCall![1] as (req: unknown) => void;
+      const reqHandler = reqCall?.[1] as (req: unknown) => void;
 
       reqHandler({
         url: () => "https://api.example.com/data",
@@ -466,7 +466,7 @@ describe("browser-session", () => {
       const { entry } = await getOrCreateTab();
 
       const reqCall = mockPageOn.mock.calls.find((c: unknown[]) => c[0] === "requestfinished");
-      const reqHandler = reqCall![1] as (req: unknown) => void;
+      const reqHandler = reqCall?.[1] as (req: unknown) => void;
 
       reqHandler({
         url: () => "https://api.example.com/fail",
@@ -487,7 +487,7 @@ describe("browser-session", () => {
       const { entry } = await getOrCreateTab();
 
       const reqCall = mockPageOn.mock.calls.find((c: unknown[]) => c[0] === "requestfinished");
-      const reqHandler = reqCall![1] as (req: unknown) => void;
+      const reqHandler = reqCall?.[1] as (req: unknown) => void;
 
       reqHandler({
         url: () => "https://api.example.com/nolen",

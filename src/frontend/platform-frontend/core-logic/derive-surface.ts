@@ -218,7 +218,7 @@ function deriveField(name: string, prop: JsonSchemaProperty, required: boolean):
   if (prop.type === "array" && prop.items) {
     if (prop.items.properties) {
       field.nested = Object.entries(prop.items.properties).map(([k, v]) =>
-        deriveField(k, v, prop.items!.required?.includes(k) ?? false),
+        deriveField(k, v, prop.items?.required?.includes(k) ?? false),
       );
     }
   }
@@ -275,7 +275,7 @@ export function deriveSurface(tool: ToolDefinition): SurfaceSpec {
     .filter((ex) => ex.args)
     .map((ex, i) => ({
       label: ex.label ?? `Example ${i + 1}`,
-      data: ex.args!,
+      data: ex.args,
     }));
 
   return {

@@ -119,8 +119,8 @@ describe("elo-service", () => {
 
       const result = await getUserElo(db, "user-4");
       expect(result).not.toBeNull();
-      expect(result!.elo).toBe(900);
-      expect(result!.tier).toBe("free");
+      expect(result?.elo).toBe(900);
+      expect(result?.tier).toBe("free");
     });
   });
 

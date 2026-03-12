@@ -360,13 +360,13 @@ describe("FormFiller.getCompletionStatus", () => {
 
 describe("validateAgainstRules", () => {
   it("validates a signature field by character count", () => {
-    const sigField = sampleTemplate.fields.find((f: FormField) => f.id === "applicantSignature")!;
+    const sigField = sampleTemplate.fields.find((f: FormField) => f.id === "applicantSignature");
     expect(validateAgainstRules(sigField, "AB").valid).toBe(true);
     expect(validateAgainstRules(sigField, "A").valid).toBe(false);
   });
 
   it("accepts any checkbox value", () => {
-    const cbField = sampleTemplate.fields.find((f: FormField) => f.id === "hasTravelPlans")!;
+    const cbField = sampleTemplate.fields.find((f: FormField) => f.id === "hasTravelPlans");
     expect(validateAgainstRules(cbField, true).valid).toBe(true);
     expect(validateAgainstRules(cbField, false).valid).toBe(true);
   });

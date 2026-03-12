@@ -231,10 +231,10 @@ describe("Code Durable Object", () => {
       );
       (mockEnv.R2.get as ReturnType<typeof vi.fn>).mockImplementation(async (key: string) => {
         if (key === `r2_html_${roomName}`) {
-          return mockR2Object(initialSession.html!);
+          return mockR2Object(initialSession.html);
         }
         if (key === `r2_css_${roomName}`) {
-          return mockR2Object(initialSession.css!);
+          return mockR2Object(initialSession.css);
         }
         return undefined;
       });

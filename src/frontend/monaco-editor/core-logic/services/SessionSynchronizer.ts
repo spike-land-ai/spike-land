@@ -51,7 +51,7 @@ export class SessionSynchronizer implements ISessionSynchronizer {
     if (!this.session) {
       this.session = await this.init();
     }
-    return this.session!.code;
+    return this.session?.code;
   }
 
   getSession(): ICodeSession | null {
@@ -62,7 +62,7 @@ export class SessionSynchronizer implements ISessionSynchronizer {
     if (session) {
       this.setSession(sanitizeSession(session), "INIT");
       this.ensureRealtimeConnection();
-      return this.session!;
+      return this.session;
     }
 
     if (this.session) {
@@ -97,7 +97,7 @@ export class SessionSynchronizer implements ISessionSynchronizer {
     }
 
     this.ensureRealtimeConnection();
-    return this.session!;
+    return this.session;
   }
 
   subscribe(callback: (session: ICodeSession & { sender: string }) => void): () => void {

@@ -29,8 +29,8 @@ export function registerBazdmegFaqTools(
           .string()
           .optional()
           .describe("Filter by category (e.g., 'general', 'methodology', 'testing')."),
-        include_unpublished: z
-          .coerce.boolean()
+        include_unpublished: z.coerce
+          .boolean()
           .optional()
           .default(false)
           .describe("Include unpublished entries (admin only)."),

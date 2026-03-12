@@ -79,7 +79,7 @@ describe("generateChecklist", () => {
     const checklist = generateChecklist("US-passport-renewal", passportRenewalSteps, []);
     for (const item of checklist.items) {
       expect(typeof item.howToObtain).toBe("string");
-      expect(item.howToObtain!.length).toBeGreaterThan(0);
+      expect(item.howToObtain?.length).toBeGreaterThan(0);
     }
   });
 });

@@ -40,16 +40,16 @@ export function propagateDeps(nodes: FileNode[]) {
     changed = false;
     rounds++;
     for (const n of nodes) {
-      const sizeBefore = n.resolvedDeps!.size;
+      const sizeBefore = n.resolvedDeps?.size;
       for (const importPath of n.relativeImports) {
         const target = resolveImportTarget(importPath, lookup);
         if (target?.resolvedDeps) {
           for (const dep of target.resolvedDeps) {
-            n.resolvedDeps!.add(dep);
+            n.resolvedDeps?.add(dep);
           }
         }
       }
-      if (n.resolvedDeps!.size > sizeBefore) changed = true;
+      if (n.resolvedDeps?.size > sizeBefore) changed = true;
     }
   }
 }
@@ -82,7 +82,7 @@ export function computePackageCategories(
     for (const n of pkgNodes) {
       let fileCategory = fallbackCategory;
       for (const rule of categoryRules) {
-        if (rule.predicate(n.resolvedDeps!, n.externalDeps, pkgKind)) {
+        if (rule.predicate(n.resolvedDeps, n.externalDeps, pkgKind)) {
           fileCategory = rule.category;
           break;
         }

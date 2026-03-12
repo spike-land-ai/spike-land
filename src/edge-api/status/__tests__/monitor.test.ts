@@ -104,7 +104,7 @@ describe("probeService", () => {
 
     vi.spyOn(Date, "now").mockReturnValueOnce(0).mockReturnValueOnce(1500);
 
-    await expect(probeService(SERVICES[0]!, env)).resolves.toMatchObject({
+    await expect(probeService(SERVICES[0], env)).resolves.toMatchObject({
       status: "degraded",
       httpStatus: 200,
       latencyMs: 1500,
@@ -120,7 +120,7 @@ describe("probeService", () => {
 
     vi.spyOn(Date, "now").mockReturnValueOnce(10).mockReturnValueOnce(25);
 
-    await expect(probeService(SERVICES[4]!, env)).resolves.toMatchObject({
+    await expect(probeService(SERVICES[4], env)).resolves.toMatchObject({
       status: "down",
       httpStatus: null,
       latencyMs: 15,

@@ -164,7 +164,7 @@ describe("PuppeteerAdapter", () => {
     const tree = await page.getAccessibilityTree();
 
     expect(tree).not.toBeNull();
-    expect(tree!.role).toBe("RootWebArea");
+    expect(tree?.role).toBe("RootWebArea");
     expect(mockCreateCDPSession).toHaveBeenCalled();
     expect(mockCdpSend).toHaveBeenCalledWith("Accessibility.getFullAXTree");
   });

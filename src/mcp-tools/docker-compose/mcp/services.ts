@@ -1,8 +1,59 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { createZodTool, jsonResult, errorResult, tryCatch } from "@spike-land-ai/mcp-server-base";
 import { ServiceRegistry } from "../core-logic/service-registry.js";
 import { HealthChecker } from "../core-logic/health-checker.js";
+
+// ─── Trivial Utilities (Inlined) ─────────────────────────────────────────────
+
+type Result<T> = { ok: true; data: T; error?: never } | { ok: false; data?: never; error: Error };
+
+async function tryCatch<T>(promise: Promise<T>): Promise<Result<T>> {
+  try {
+    return { ok: true, data: await promise };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err : new Error(String(err)) };
+  }
+}
+
+function jsonResult(data: unknown) {
+  return {
+    content: [{ type: "text" as const, text: JSON.stringify(data, null, 2) }],
+  };
+}
+
+function errorResult(code: string, message: string, retryable = false) {
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text: `**Error: ${code}**\n${message}\n**Retryable:** ${retryable}`,
+      },
+    ],
+    isError: true,
+  };
+}
+
+/**
+ * Register a tool with Zod validation and automatic error wrapping.
+ */
+function createZodTool<TSchema extends z.ZodRawShape>(
+  server: McpServer,
+  options: {
+    name: string;
+    description: string;
+    schema: TSchema;
+    handler: (args: z.infer<z.ZodObject<TSchema>>) => Promise<unknown> | unknown;
+  },
+) {
+  server.tool(options.name, options.description, options.schema, (async (args: unknown) => {
+    try {
+      return await options.handler(args);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return errorResult("INTERNAL_ERROR", message);
+    }
+  }) as unknown);
+}
 
 export function registerServiceTools(server: McpServer): void {
   const registry = new ServiceRegistry();

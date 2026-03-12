@@ -320,8 +320,8 @@ function selectRoundQuestions(session: InterviewSession): InterviewRound {
 
   for (let i = 0; i < Math.min(3, unmastered.length); i++) {
     const pickIdx = (roundOffset + i) % unmastered.length;
-    const pick = unmastered[pickIdx]!;
-    const concept = session.concepts[pick.index]!;
+    const pick = unmastered[pickIdx];
+    const concept = session.concepts[pick.index];
     const variantIndex = pick.state.attempts % concept.variants.length;
     selected.push({ conceptIndex: pick.index, variantIndex });
   }
@@ -329,15 +329,15 @@ function selectRoundQuestions(session: InterviewSession): InterviewRound {
   // If fewer than 3 unmastered, cycle and pick different variants
   while (selected.length < 3 && unmastered.length > 0) {
     const pickIdx = selected.length % unmastered.length;
-    const pick = unmastered[pickIdx]!;
-    const concept = session.concepts[pick.index]!;
+    const pick = unmastered[pickIdx];
+    const concept = session.concepts[pick.index];
     const variantIndex = (pick.state.attempts + selected.length) % concept.variants.length;
     selected.push({ conceptIndex: pick.index, variantIndex });
   }
 
   const questions = selected.map((s) => {
-    const concept = session.concepts[s.conceptIndex]!;
-    const variant = concept.variants[s.variantIndex]!;
+    const concept = session.concepts[s.conceptIndex];
+    const variant = concept.variants[s.variantIndex];
     return {
       conceptIndex: s.conceptIndex,
       variantIndex: s.variantIndex,
@@ -367,7 +367,7 @@ function formatMCQsForResponse(round: InterviewRound, session: InterviewSession)
   lines.push("");
 
   round.questions.forEach((q, i) => {
-    const conceptName = session.concepts[q.conceptIndex]!.name;
+    const conceptName = session.concepts[q.conceptIndex]?.name;
     lines.push(`### Q${i + 1} [${conceptName}]`);
     lines.push(`${q.question}`);
     lines.push("");
@@ -466,11 +466,11 @@ export function registerWorkflowTools(server: McpServer): void {
         const roundResults: string[] = [];
 
         for (let i = 0; i < 3; i++) {
-          const q = round.questions[i]!;
+          const q = round.questions[i];
           const givenAnswer = answers[i] as number;
           const isCorrect = givenAnswer === q.correctIndex;
-          const conceptState = session.conceptStates[q.conceptIndex]!;
-          const conceptName = session.concepts[q.conceptIndex]!.name;
+          const conceptState = session.conceptStates[q.conceptIndex];
+          const conceptName = session.concepts[q.conceptIndex]?.name;
 
           conceptState.attempts++;
 

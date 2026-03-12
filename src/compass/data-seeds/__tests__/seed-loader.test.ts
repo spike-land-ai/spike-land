@@ -131,7 +131,7 @@ describe("SeedLoader.validateSeed", () => {
       ...germanySeed,
       processes: [
         {
-          ...germanySeed.processes[0]!,
+          ...germanySeed.processes[0],
           programId: "non-existent-program-id",
         },
         ...germanySeed.processes.slice(1),

@@ -11,6 +11,7 @@ import { proxy } from "./routes/proxy.js";
 import { live } from "./routes/live.js";
 import { openAiCompatible } from "./routes/openai-compatible.js";
 import { analytics } from "./routes/analytics.js";
+import { analyticsGa4 } from "./routes/analytics-ga4.js";
 import { quizBadge } from "./routes/quiz-badge.js";
 import { version } from "./routes/version.js";
 import { blog } from "./routes/blog.js";
@@ -200,6 +201,7 @@ app.get("/analytics/summary", authMiddleware);
 app.get("/analytics/funnel", authMiddleware);
 app.get("/analytics/dashboard", authMiddleware);
 app.get("/analytics/mcp/*", authMiddleware);
+app.get("/analytics/ga4/*", authMiddleware);
 
 // Auth middleware for error log listing (BUG 3: protect stack traces)
 app.get("/errors", authMiddleware);
@@ -266,6 +268,7 @@ app.route("/", proxy);
 app.route("/", live);
 app.route("/", openAiCompatible);
 app.route("/", analytics);
+app.route("/", analyticsGa4);
 app.route("/", quizBadge);
 app.route("/", version);
 app.route("/", blog);

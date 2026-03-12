@@ -51,7 +51,7 @@ describe("ToolBuilder", () => {
       }));
 
     const result = await tool.handler({ message: "hello" });
-    expect(result.content[0]!.text).toBe("hello");
+    expect(result.content[0]?.text).toBe("hello");
     expect(result.isError).toBeUndefined();
   });
 
@@ -96,7 +96,7 @@ describe("ToolBuilder", () => {
     // Pass a string instead of number
     const result = await tool.handler({ count: "not-a-number" } as never);
     expect(result.isError).toBe(true);
-    expect(result.content[0]!.text).toContain("Validation Error");
+    expect(result.content[0]?.text).toContain("Validation Error");
   });
 
   it("handler catches generic errors and returns isError true", async () => {
@@ -108,7 +108,7 @@ describe("ToolBuilder", () => {
 
     const result = await tool.handler({ x: "test" });
     expect(result.isError).toBe(true);
-    expect(result.content[0]!.text).toContain("Something went wrong");
+    expect(result.content[0]?.text).toContain("Something went wrong");
   });
 
   it("handler catches non-Error throws and returns isError true", async () => {
@@ -120,7 +120,7 @@ describe("ToolBuilder", () => {
 
     const result = await tool.handler({ x: "test" });
     expect(result.isError).toBe(true);
-    expect(result.content[0]!.text).toContain("raw string error");
+    expect(result.content[0]?.text).toContain("raw string error");
   });
 
   it("handler catches DomainError and formats it", async () => {
@@ -138,9 +138,9 @@ describe("ToolBuilder", () => {
 
     const result = await tool.handler({ x: "test" });
     expect(result.isError).toBe(true);
-    expect(result.content[0]!.text).toContain("NOT_FOUND");
-    expect(result.content[0]!.text).toContain("Resource not found");
-    expect(result.content[0]!.text).toContain("Retryable:");
+    expect(result.content[0]?.text).toContain("NOT_FOUND");
+    expect(result.content[0]?.text).toContain("Resource not found");
+    expect(result.content[0]?.text).toContain("Retryable:");
   });
 
   it("handler catches McpError and formats it", async () => {
@@ -157,8 +157,8 @@ describe("ToolBuilder", () => {
 
     const result = await tool.handler({ x: "test" });
     expect(result.isError).toBe(true);
-    expect(result.content[0]!.text).toContain("TOOL_NOT_FOUND");
-    expect(result.content[0]!.text).toContain("Tool not found");
+    expect(result.content[0]?.text).toContain("TOOL_NOT_FOUND");
+    expect(result.content[0]?.text).toContain("Tool not found");
   });
 
   it("output validation passes for valid JSON response", async () => {
@@ -172,7 +172,7 @@ describe("ToolBuilder", () => {
 
     const result = await tool.handler({ x: "input" });
     expect(result.isError).toBeUndefined();
-    expect(result.content[0]!.text).toContain("value");
+    expect(result.content[0]?.text).toContain("value");
   });
 
   it("output validation fails for invalid JSON response", async () => {
@@ -187,7 +187,7 @@ describe("ToolBuilder", () => {
 
     const result = await tool.handler({ x: "input" });
     expect(result.isError).toBe(true);
-    expect(result.content[0]!.text).toContain("Output Validation Error");
+    expect(result.content[0]?.text).toContain("Output Validation Error");
   });
 
   it("output validation skips non-JSON text content", async () => {
@@ -217,7 +217,7 @@ describe("ToolBuilder", () => {
     const result = await tool.handler({ x: "input" });
     expect(result.isError).toBe(true);
     // Should not try to validate error result
-    expect(result.content[0]!.text).toBe("error content");
+    expect(result.content[0]?.text).toBe("error content");
   });
 
   it("handler can return synchronously (non-Promise)", async () => {
@@ -228,7 +228,7 @@ describe("ToolBuilder", () => {
       }));
 
     const result = await tool.handler({ x: "world" });
-    expect(result.content[0]!.text).toBe("sync: world");
+    expect(result.content[0]?.text).toBe("sync: world");
   });
 
   it("examples sets examples on the built tool", () => {
@@ -238,7 +238,7 @@ describe("ToolBuilder", () => {
       .handler(async () => ({ content: [{ type: "text", text: "ok" }] }));
 
     expect(tool.meta.examples).toHaveLength(1);
-    expect(tool.meta.examples![0]!.name).toBe("basic");
+    expect(tool.meta.examples?.[0]?.name).toBe("basic");
   });
 
   it("examples appends to existing examples from meta", () => {
@@ -249,8 +249,8 @@ describe("ToolBuilder", () => {
       .handler(async () => ({ content: [{ type: "text", text: "ok" }] }));
 
     expect(tool.meta.examples).toHaveLength(2);
-    expect(tool.meta.examples![0]!.name).toBe("first");
-    expect(tool.meta.examples![1]!.name).toBe("second");
+    expect(tool.meta.examples?.[0]?.name).toBe("first");
+    expect(tool.meta.examples?.[1]?.name).toBe("second");
   });
 });
 
@@ -267,8 +267,8 @@ describe("middleware", () => {
   });
 
   it("middleware can be used in a procedure chain", async () => {
-    const withUserId = middleware<Record<string, unknown>, { userId: string }>(async ({ ctx, next }) =>
-      next({ ...ctx, userId: "user-123" }),
+    const withUserId = middleware<Record<string, unknown>, { userId: string }>(
+      async ({ ctx, next }) => next({ ...ctx, userId: "user-123" }),
     );
 
     const t = createProcedure().use(withUserId);
@@ -280,16 +280,18 @@ describe("middleware", () => {
       }));
 
     const result = await tool.handler({ name: "Alice" }, {});
-    expect(result.content[0]!.text).toBe("Alice by user-123");
+    expect(result.content[0]?.text).toBe("Alice by user-123");
   });
 
   it("middleware receives input and context", async () => {
     const capturedParams: { input: unknown; ctx: unknown }[] = [];
 
-    const captureMw = middleware<Record<string, unknown>, Record<string, unknown>>(async ({ input, ctx, next }) => {
-      capturedParams.push({ input, ctx });
-      return next(ctx);
-    });
+    const captureMw = middleware<Record<string, unknown>, Record<string, unknown>>(
+      async ({ input, ctx, next }) => {
+        capturedParams.push({ input, ctx });
+        return next(ctx);
+      },
+    );
 
     const tool = createProcedure()
       .use(captureMw)
@@ -300,8 +302,8 @@ describe("middleware", () => {
 
     await tool.handler({ value: 42 }, { existingKey: "hello" });
     expect(capturedParams).toHaveLength(1);
-    expect(capturedParams[0]!.input).toEqual({ value: 42 });
-    expect(capturedParams[0]!.ctx).toEqual({ existingKey: "hello" });
+    expect(capturedParams[0]?.input).toEqual({ value: 42 });
+    expect(capturedParams[0]?.ctx).toEqual({ existingKey: "hello" });
   });
 
   it("multiple middleware compose correctly", async () => {
@@ -358,7 +360,7 @@ describe("middleware", () => {
 
     const result = await tool.handler({ x: "test" }, {});
     expect(result.isError).toBe(true);
-    expect(result.content[0]!.text).toBe("Unauthorized");
+    expect(result.content[0]?.text).toBe("Unauthorized");
     expect(handlerCalled.value).toBe(false);
   });
 
@@ -370,7 +372,7 @@ describe("middleware", () => {
       }));
 
     const result = await tool.handler({ x: "test" }, { myKey: "myValue" });
-    expect(result.content[0]!.text).toContain("myValue");
+    expect(result.content[0]?.text).toContain("myValue");
   });
 
   it("handler receives empty object ctx when ctx arg omitted", async () => {
@@ -381,6 +383,6 @@ describe("middleware", () => {
       }));
 
     const result = await tool.handler({ x: "test" });
-    expect(result.content[0]!.text).toBe("{}");
+    expect(result.content[0]?.text).toBe("{}");
   });
 });

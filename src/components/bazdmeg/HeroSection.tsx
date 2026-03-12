@@ -22,8 +22,8 @@ export function HeroSection() {
           </h1>
 
           <p className="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-muted-foreground sm:text-2xl">
-            Eight principles for AI-assisted development. Born from pain. Tested in production.
-            Stop reviewing slop and start shipping quality.
+            Eight principles for AI-assisted development. Born from pain. Tested in production. Stop
+            reviewing slop and start shipping quality.
           </p>
 
           <motion.div

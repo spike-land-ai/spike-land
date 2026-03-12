@@ -48,11 +48,7 @@ export const buildOptions: BuildOptions = {
     "node:fs": "./src/@/lib/memfs",
     "node:fs/promises": "./src/@/lib/memfs",
   },
-  external: [
-    "__STATIC_CONTENT_MANIFEST",
-    "monaco-editor",
-    "monaco-editor/package.json",
-  ],
+  external: ["__STATIC_CONTENT_MANIFEST", "monaco-editor", "monaco-editor/package.json"],
   legalComments: "none",
   resolveExtensions: [
     ".tsx",

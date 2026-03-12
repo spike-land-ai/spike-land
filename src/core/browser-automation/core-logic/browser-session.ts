@@ -70,7 +70,7 @@ export async function getOrCreateTab(index?: number): Promise<{
 
   if (index !== undefined && tabs.has(index)) {
     activeTabIndex = index;
-    const entry = tabs.get(index)!;
+    const entry = tabs.get(index);
     return { page: entry.page, entry, index };
   }
 
@@ -123,7 +123,7 @@ export async function closeTab(index: number): Promise<boolean> {
   tabs.delete(index);
   if (activeTabIndex === index) {
     const remaining = [...tabs.keys()];
-    activeTabIndex = remaining.length > 0 ? remaining[0]! : 0;
+    activeTabIndex = remaining.length > 0 ? remaining[0] : 0;
   }
   return true;
 }

@@ -78,7 +78,7 @@ export class HNWriteClient {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        Cookie: this.session.getCookie()!,
+        Cookie: this.session.getCookie(),
       },
       body: body.toString(),
       redirect: "manual",
@@ -117,7 +117,7 @@ export class HNWriteClient {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          Cookie: this.session.getCookie()!,
+          Cookie: this.session.getCookie(),
         },
         body: retryBody.toString(),
         redirect: "manual",
@@ -147,7 +147,7 @@ export class HNWriteClient {
 
     // Step 1: GET item page to extract vote auth token
     const resp = await this.fetchFn(`${HN_WEB_BASE}/item?id=${itemId}`, {
-      headers: { Cookie: this.session.getCookie()! },
+      headers: { Cookie: this.session.getCookie() },
     });
 
     if (!resp.ok) {
@@ -171,7 +171,7 @@ export class HNWriteClient {
     // Step 2: GET the vote URL
     const voteUrl = (voteMatch[1] as string).replace(/&amp;/g, "&");
     const voteResp = await this.fetchFn(`${HN_WEB_BASE}/${voteUrl}`, {
-      headers: { Cookie: this.session.getCookie()! },
+      headers: { Cookie: this.session.getCookie() },
       redirect: "manual",
     });
 
@@ -199,7 +199,7 @@ export class HNWriteClient {
 
     // Step 1: GET item page to extract hmac CSRF token
     const resp = await this.fetchFn(`${HN_WEB_BASE}/item?id=${parentId}`, {
-      headers: { Cookie: this.session.getCookie()! },
+      headers: { Cookie: this.session.getCookie() },
     });
 
     if (!resp.ok) {
@@ -232,7 +232,7 @@ export class HNWriteClient {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        Cookie: this.session.getCookie()!,
+        Cookie: this.session.getCookie(),
       },
       body: body.toString(),
       redirect: "manual",
@@ -259,7 +259,7 @@ export class HNWriteClient {
     // CSRF expired — retry once
     if (commentHtml.includes("Unknown") || commentHtml.includes("expired")) {
       const retryResp = await this.fetchFn(`${HN_WEB_BASE}/item?id=${parentId}`, {
-        headers: { Cookie: this.session.getCookie()! },
+        headers: { Cookie: this.session.getCookie() },
       });
       const retryPageHtml = await retryResp.text();
       const retryHmac = retryPageHtml.match(/name="hmac"\s+value="([^"]+)"/);
@@ -282,7 +282,7 @@ export class HNWriteClient {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          Cookie: this.session.getCookie()!,
+          Cookie: this.session.getCookie(),
         },
         body: retryBody.toString(),
         redirect: "manual",
@@ -326,7 +326,7 @@ export class HNWriteClient {
       }
   > {
     const resp = await this.fetchFn(`${HN_WEB_BASE}/submit`, {
-      headers: { Cookie: this.session.getCookie()! },
+      headers: { Cookie: this.session.getCookie() },
     });
 
     const html = await resp.text();

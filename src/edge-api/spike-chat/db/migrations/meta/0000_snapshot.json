@@ -91,17 +91,12 @@
       "indexes": {
         "bookmarks_user_id_idx": {
           "name": "bookmarks_user_id_idx",
-          "columns": [
-            "userId"
-          ],
+          "columns": ["userId"],
           "isUnique": false
         },
         "bookmarks_userId_messageId_unique": {
           "name": "bookmarks_userId_messageId_unique",
-          "columns": [
-            "userId",
-            "messageId"
-          ],
+          "columns": ["userId", "messageId"],
           "isUnique": true
         }
       },
@@ -110,12 +105,8 @@
           "name": "bookmarks_messageId_messages_id_fk",
           "tableFrom": "bookmarks",
           "tableTo": "messages",
-          "columnsFrom": [
-            "messageId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["messageId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -179,22 +170,15 @@
           "name": "channel_members_channelId_channels_id_fk",
           "tableFrom": "channel_members",
           "tableTo": "channels",
-          "columnsFrom": [
-            "channelId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["channelId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "channel_members_channelId_userId_pk": {
-          "columns": [
-            "channelId",
-            "userId"
-          ],
+          "columns": ["channelId", "userId"],
           "name": "channel_members_channelId_userId_pk"
         }
       },
@@ -272,9 +256,7 @@
       "indexes": {
         "channels_workspace_id_idx": {
           "name": "channels_workspace_id_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -369,23 +351,17 @@
       "indexes": {
         "messages_channel_id_idx": {
           "name": "messages_channel_id_idx",
-          "columns": [
-            "channelId"
-          ],
+          "columns": ["channelId"],
           "isUnique": false
         },
         "messages_thread_id_idx": {
           "name": "messages_thread_id_idx",
-          "columns": [
-            "threadId"
-          ],
+          "columns": ["threadId"],
           "isUnique": false
         },
         "messages_user_id_idx": {
           "name": "messages_user_id_idx",
-          "columns": [
-            "userId"
-          ],
+          "columns": ["userId"],
           "isUnique": false
         }
       },
@@ -394,12 +370,8 @@
           "name": "messages_channelId_channels_id_fk",
           "tableFrom": "messages",
           "tableTo": "channels",
-          "columnsFrom": [
-            "channelId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["channelId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -450,10 +422,7 @@
       "indexes": {
         "pins_channelId_messageId_unique": {
           "name": "pins_channelId_messageId_unique",
-          "columns": [
-            "channelId",
-            "messageId"
-          ],
+          "columns": ["channelId", "messageId"],
           "isUnique": true
         }
       },
@@ -462,12 +431,8 @@
           "name": "pins_channelId_channels_id_fk",
           "tableFrom": "pins",
           "tableTo": "channels",
-          "columnsFrom": [
-            "channelId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["channelId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -475,12 +440,8 @@
           "name": "pins_messageId_messages_id_fk",
           "tableFrom": "pins",
           "tableTo": "messages",
-          "columnsFrom": [
-            "messageId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["messageId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -531,18 +492,12 @@
       "indexes": {
         "reactions_message_id_idx": {
           "name": "reactions_message_id_idx",
-          "columns": [
-            "messageId"
-          ],
+          "columns": ["messageId"],
           "isUnique": false
         },
         "reactions_messageId_userId_emoji_unique": {
           "name": "reactions_messageId_userId_emoji_unique",
-          "columns": [
-            "messageId",
-            "userId",
-            "emoji"
-          ],
+          "columns": ["messageId", "userId", "emoji"],
           "isUnique": true
         }
       },
@@ -551,12 +506,8 @@
           "name": "reactions_messageId_messages_id_fk",
           "tableFrom": "reactions",
           "tableTo": "messages",
-          "columnsFrom": [
-            "messageId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["messageId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -603,22 +554,15 @@
           "name": "read_cursors_channelId_channels_id_fk",
           "tableFrom": "read_cursors",
           "tableTo": "channels",
-          "columnsFrom": [
-            "channelId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["channelId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "read_cursors_userId_channelId_pk": {
-          "columns": [
-            "userId",
-            "channelId"
-          ],
+          "columns": ["userId", "channelId"],
           "name": "read_cursors_userId_channelId_pk"
         }
       },
@@ -674,10 +618,7 @@
       "indexes": {
         "slash_commands_workspaceId_command_unique": {
           "name": "slash_commands_workspaceId_command_unique",
-          "columns": [
-            "workspaceId",
-            "command"
-          ],
+          "columns": ["workspaceId", "command"],
           "isUnique": true
         }
       },
@@ -742,9 +683,7 @@
       "indexes": {
         "webhooks_workspace_id_idx": {
           "name": "webhooks_workspace_id_idx",
-          "columns": [
-            "workspaceId"
-          ],
+          "columns": ["workspaceId"],
           "isUnique": false
         }
       },
@@ -753,12 +692,8 @@
           "name": "webhooks_channelId_channels_id_fk",
           "tableFrom": "webhooks",
           "tableTo": "channels",
-          "columnsFrom": [
-            "channelId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["channelId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

@@ -1,0 +1,23 @@
+   8
+   98
+  130
+  137
+  139
+  19
+  20
+  21
+  22
+  30
+  36
+  45
+  51
+  53
+  55
+  56
+  62
+  66
+  69
+  70
+  73
+/Users/z/Developer/spike-land-ai/src/core/server-base/core-logic/error-shipper.ts
+/Users/z/Developer/spike-land-ai/src/edge-api/main/api/routes/errors.ts

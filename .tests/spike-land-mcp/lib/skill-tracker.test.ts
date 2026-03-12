@@ -78,10 +78,7 @@ function createMockD1WithFirstResults({ cnt, days }: { cnt: number; days: number
 
 function makeSpikeEdgeFetcher(impl?: () => Promise<Response>): Fetcher {
   return {
-    fetch: vi.fn(
-      impl ??
-        (() => Promise.resolve(new Response("{}", { status: 200 }))),
-    ),
+    fetch: vi.fn(impl ?? (() => Promise.resolve(new Response("{}", { status: 200 })))),
   } as unknown as Fetcher;
 }
 

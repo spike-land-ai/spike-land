@@ -74,8 +74,8 @@ export const cropTool = imageProcedure
       targetHeight = customHeight;
     } else {
       const dims = PRESET_DIMENSIONS[preset];
-      targetWidth = dims!.width;
-      targetHeight = dims!.height;
+      targetWidth = dims?.width;
+      targetHeight = dims?.height;
     }
 
     return jsonResult({

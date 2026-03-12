@@ -18,7 +18,7 @@ describe("Plan Generator", () => {
         const answers = getAnswersForPersona(persona.slug);
         expect(answers).not.toBeNull();
         expect(answers).toHaveLength(4);
-        for (const a of answers!) {
+        for (const a of answers) {
           expect(typeof a).toBe("boolean");
         }
       }
@@ -34,9 +34,9 @@ describe("Plan Generator", () => {
         const answers = getAnswersForPersona(persona.slug);
         expect(answers).not.toBeNull();
 
-        const result = getPersonaFromAnswers(answers!);
+        const result = getPersonaFromAnswers(answers);
         expect(result).not.toBeNull();
-        expect(result!.slug).toBe(persona.slug);
+        expect(result?.slug).toBe(persona.slug);
       }
     });
   });
@@ -58,10 +58,10 @@ describe("Plan Generator", () => {
         // Simulate what generatePersonaAuditPlan does
         // We verify the answer path generates a valid question sequence
         for (let i = 0; i < 4; i++) {
-          const partialAnswers = answers!.slice(0, i);
+          const partialAnswers = answers?.slice(0, i);
           const sequence = getQuestionSequence(partialAnswers);
           expect(sequence.length).toBeGreaterThanOrEqual(1);
-          const lastQ = sequence[sequence.length - 1]!;
+          const lastQ = sequence[sequence.length - 1];
           expect(lastQ.yesLabel).toBeTruthy();
           expect(lastQ.noLabel).toBeTruthy();
         }
@@ -72,7 +72,7 @@ describe("Plan Generator", () => {
       const paths = new Set<string>();
       for (const persona of PERSONAS) {
         const answers = getAnswersForPersona(persona.slug);
-        const key = answers!.map((a) => (a ? "Y" : "N")).join("");
+        const key = answers?.map((a) => (a ? "Y" : "N")).join("");
         expect(paths.has(key)).toBe(false);
         paths.add(key);
       }
@@ -95,8 +95,8 @@ describe("Plan Generator", () => {
 
     it("first question is always q1 'Do you write code?'", () => {
       const seq = getQuestionSequence([]);
-      expect(seq[0]!.id).toBe("q1");
-      expect(seq[0]!.text).toBe("Do you write code?");
+      expect(seq[0]?.id).toBe("q1");
+      expect(seq[0]?.text).toBe("Do you write code?");
     });
   });
 });

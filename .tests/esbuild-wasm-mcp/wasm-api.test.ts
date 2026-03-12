@@ -157,7 +157,7 @@ describe("wasm-api", () => {
       const secondCall = initializeWasm();
 
       // Complete init
-      resolveInit!(undefined);
+      resolveInit(undefined);
 
       const [res1, res2] = await Promise.all([firstCall, secondCall]);
 

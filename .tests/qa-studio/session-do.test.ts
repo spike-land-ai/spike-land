@@ -146,7 +146,7 @@ describe("BrowserSessionDO", () => {
     await dObj.navigate("https://example.com");
     const tabs = await dObj.listTabs();
     expect(tabs).toHaveLength(1);
-    expect(tabs[0]!.url).toBe("https://example.com");
+    expect(tabs[0]?.url).toBe("https://example.com");
   });
 
   it("closeTab closes and removes tab", async () => {

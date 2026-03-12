@@ -37,7 +37,8 @@ export function EffortSplit() {
             Where your time actually goes
           </p>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            Stop typing. Start thinking. The BAZDMEG method radically reallocates engineering effort from writing syntax to designing systems and proving correctness.
+            Stop typing. Start thinking. The BAZDMEG method radically reallocates engineering effort
+            from writing syntax to designing systems and proving correctness.
           </p>
         </div>
 
@@ -73,14 +74,14 @@ export function EffortSplit() {
                   className="relative pl-12"
                 >
                   <dt className="text-base font-semibold leading-7">
-                    <div className={`absolute left-0 top-1 h-8 w-8 rounded-full ${phase.color} flex items-center justify-center text-xs font-bold text-white shadow-sm ring-1 ring-inset ring-black/10`}>
+                    <div
+                      className={`absolute left-0 top-1 h-8 w-8 rounded-full ${phase.color} flex items-center justify-center text-xs font-bold text-white shadow-sm ring-1 ring-inset ring-black/10`}
+                    >
                       {phase.percentage}%
                     </div>
                     {phase.name}
                   </dt>
-                  <dd className="mt-2 text-base leading-7 text-muted-foreground">
-                    {phase.desc}
-                  </dd>
+                  <dd className="mt-2 text-base leading-7 text-muted-foreground">{phase.desc}</dd>
                 </motion.div>
               ))}
             </dl>

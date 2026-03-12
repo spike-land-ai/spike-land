@@ -7,7 +7,7 @@ export const websocketRouter = new Hono<{ Bindings: Env; Variables: Variables }>
 websocketRouter.get("/channels/:channelId/ws", async (c) => {
   const channelId = c.req.param("channelId");
   const userId = c.get("userId") || c.req.query("userId");
-  
+
   if (!userId) {
     return c.json({ error: "Unauthorized" }, 401);
   }
@@ -22,7 +22,7 @@ websocketRouter.get("/channels/:channelId/ws", async (c) => {
 websocketRouter.get("/workspaces/:workspaceId/presence/ws", async (c) => {
   const workspaceId = c.req.param("workspaceId");
   const userId = c.get("userId") || c.req.query("userId");
-  
+
   if (!userId) {
     return c.json({ error: "Unauthorized" }, 401);
   }

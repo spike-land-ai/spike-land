@@ -71,7 +71,7 @@ export class TypeScriptWorker implements ts.LanguageServiceHost, ITypeScriptWork
   private _getModel(fileName: string): worker.IMirrorModel | null {
     let models = this._ctx.getMirrorModels();
     for (let i = 0; i < models.length; i++) {
-      const uri = models[i]!.uri;
+      const uri = models[i]?.uri;
       if (uri.toString() === fileName || uri.toString(true) === fileName) {
         return models[i] || null;
       }
@@ -104,12 +104,12 @@ export class TypeScriptWorker implements ts.LanguageServiceHost, ITypeScriptWork
       // a true editor model
       text = model.getValue();
     } else if (fileName in libFileMap) {
-      text = libFileMap[fileName]!;
+      text = libFileMap[fileName];
     } else if (libizedFileName in libFileMap) {
-      text = libFileMap[libizedFileName]!;
+      text = libFileMap[libizedFileName];
     } else if (fileName in this._extraLibs) {
       // extra lib
-      text = this._extraLibs[fileName]!.content;
+      text = this._extraLibs[fileName]?.content;
     } else {
       return;
     }

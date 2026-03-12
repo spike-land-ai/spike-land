@@ -4,7 +4,12 @@ import { createMockServer } from "@spike-land-ai/mcp-server-base";
 import { createMockToolClient } from "../../src/mcp-tools/iwd-spotlight/core-logic/tool-client.js";
 import { registerDashboardTools } from "../../src/mcp-tools/iwd-spotlight/core-logic/dashboard.js";
 
-function setup(responses: Record<string, { content: Array<{ type: "text"; text: string }>; isError?: boolean }> = {}) {
+function setup(
+  responses: Record<
+    string,
+    { content: Array<{ type: "text"; text: string }>; isError?: boolean }
+  > = {},
+) {
   const server = createMockServer();
   const client = createMockToolClient(responses);
   registerDashboardTools(server as unknown as McpServer, client);
@@ -20,7 +25,9 @@ describe("iwd_impact_dashboard", () => {
   it("combines Stripe, GA4 data and generates dashboard image", async () => {
     const server = setup({
       stripe_revenue_summary: {
-        content: [{ type: "text", text: JSON.stringify({ total_revenue: 5000, net_revenue: 4500 }) }],
+        content: [
+          { type: "text", text: JSON.stringify({ total_revenue: 5000, net_revenue: 4500 }) },
+        ],
       },
       ga4_run_report: {
         content: [{ type: "text", text: JSON.stringify({ rows: [{ sessions: 1200 }] }) }],

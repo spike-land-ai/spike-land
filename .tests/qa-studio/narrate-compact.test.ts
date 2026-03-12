@@ -60,7 +60,7 @@ describe("narrateCompact", () => {
     const result = narrateCompact(tree, "Test", "https://test.com");
     const textLine = result.text.split("\n").find((l) => l.includes("[text]"));
     expect(textLine).toBeDefined();
-    expect(textLine!.length).toBeLessThan(100);
+    expect(textLine?.length).toBeLessThan(100);
     expect(textLine).toContain("\u2026");
   });
 

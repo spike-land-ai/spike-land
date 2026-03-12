@@ -31,7 +31,7 @@ describe("lazy", () => {
     // Status should now be 0 (Pending) or 1 (Resolved) depending on timing
     expect(lazyComp._payload._status).toBeGreaterThanOrEqual(0);
     // Suppress unhandled promise rejection
-    resolveFn!({ default: () => null });
+    resolveFn({ default: () => null });
   });
 
   it("resolves after promise resolves", async () => {

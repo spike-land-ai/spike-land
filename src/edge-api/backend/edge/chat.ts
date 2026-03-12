@@ -203,7 +203,7 @@ export async function handleRequest(request: Request, env: Env, ctx: ExecutionCo
       body.file = formData.get("record.wav") as unknown as File;
     }
 
-    const blob = await body.file!.arrayBuffer();
+    const blob = await body.file?.arrayBuffer();
 
     const inputs = {
       audio: [...new Uint8Array(blob)],

@@ -52,7 +52,7 @@ describe("challenge-manager", () => {
       },
     });
 
-    const callArgs = mockPrisma.chessChallenge.create.mock.calls[0]![0];
+    const callArgs = mockPrisma.chessChallenge.create.mock.calls[0]?.[0];
     const expiresAt = callArgs.data.expiresAt.getTime();
     expect(expiresAt).toBeGreaterThanOrEqual(now + 5 * 60 * 1000 - 1000);
     expect(expiresAt).toBeLessThanOrEqual(now + 5 * 60 * 1000 + 1000);

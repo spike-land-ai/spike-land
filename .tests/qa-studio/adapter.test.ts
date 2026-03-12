@@ -62,8 +62,8 @@ describe("rebuildTree", () => {
     ];
     const tree = rebuildTree(nodes);
     expect(tree).not.toBeNull();
-    expect(tree!.role).toBe("RootWebArea");
-    expect(tree!.name).toBe("Test");
+    expect(tree?.role).toBe("RootWebArea");
+    expect(tree?.name).toBe("Test");
   });
 
   it("links children via childIds", () => {
@@ -73,15 +73,15 @@ describe("rebuildTree", () => {
       { nodeId: "3", role: { value: "banner" } },
     ];
     const tree = rebuildTree(nodes);
-    expect(tree!.children).toHaveLength(2);
-    expect(tree!.children![0]!.role).toBe("main");
-    expect(tree!.children![1]!.role).toBe("banner");
+    expect(tree?.children).toHaveLength(2);
+    expect(tree?.children?.[0]?.role).toBe("main");
+    expect(tree?.children?.[1]?.role).toBe("banner");
   });
 
   it("defaults role to generic when missing", () => {
     const nodes: CdpAxNode[] = [{ nodeId: "1" }];
     const tree = rebuildTree(nodes);
-    expect(tree!.role).toBe("generic");
+    expect(tree?.role).toBe("generic");
   });
 
   it("maps CDP properties correctly", () => {
@@ -102,19 +102,19 @@ describe("rebuildTree", () => {
       },
     ];
     const tree = rebuildTree(nodes);
-    expect(tree!.checked).toBe(true);
-    expect(tree!.disabled).toBe(true);
-    expect(tree!.expanded).toBe(true);
-    expect(tree!.selected).toBe(true);
-    expect(tree!.pressed).toBe("mixed");
-    expect(tree!.level).toBe(3);
-    expect(tree!.value).toBe("on");
+    expect(tree?.checked).toBe(true);
+    expect(tree?.disabled).toBe(true);
+    expect(tree?.expanded).toBe(true);
+    expect(tree?.selected).toBe(true);
+    expect(tree?.pressed).toBe("mixed");
+    expect(tree?.level).toBe(3);
+    expect(tree?.value).toBe("on");
   });
 
   it("converts numeric value to string", () => {
     const nodes: CdpAxNode[] = [{ nodeId: "1", role: { value: "slider" }, value: { value: 42 } }];
     const tree = rebuildTree(nodes);
-    expect(tree!.value).toBe("42");
+    expect(tree?.value).toBe("42");
   });
 
   it("skips unknown childIds", () => {
@@ -123,6 +123,6 @@ describe("rebuildTree", () => {
       { nodeId: "2", role: { value: "main" } },
     ];
     const tree = rebuildTree(nodes);
-    expect(tree!.children).toHaveLength(1);
+    expect(tree?.children).toHaveLength(1);
   });
 });

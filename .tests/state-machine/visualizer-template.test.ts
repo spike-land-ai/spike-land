@@ -313,7 +313,7 @@ describe("generateVisualizerCode", () => {
     expect(match).not.toBeNull();
     if (match) {
       // The value inside JSON.parse() is itself a JSON-stringified string literal
-      const jsonStr = JSON.parse(match[1]!) as string;
+      const jsonStr = JSON.parse(match[1]) as string;
       const data = JSON.parse(jsonStr) as MachineExport;
       expect(data.definition.name).toBe("Traffic Light");
     }

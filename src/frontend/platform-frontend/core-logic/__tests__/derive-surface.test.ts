@@ -66,10 +66,10 @@ describe("deriveSurface", () => {
     expect(configField.name).toBe("config");
     expect(configField.inputType).toBe("object");
     expect(configField.nested).toHaveLength(2);
-    expect(configField.nested![0].name).toBe("host");
-    expect(configField.nested![0].required).toBe(true);
-    expect(configField.nested![1].name).toBe("port");
-    expect(configField.nested![1].required).toBe(false);
+    expect(configField.nested?.[0].name).toBe("host");
+    expect(configField.nested?.[0].required).toBe(true);
+    expect(configField.nested?.[1].name).toBe("port");
+    expect(configField.nested?.[1].required).toBe(false);
   });
 
   it("handles array of objects with nested items", () => {
@@ -100,10 +100,10 @@ describe("deriveSurface", () => {
     expect(filesField.name).toBe("files");
     expect(filesField.inputType).toBe("array");
     expect(filesField.nested).toHaveLength(2);
-    expect(filesField.nested![0].name).toBe("path");
-    expect(filesField.nested![0].required).toBe(true);
-    expect(filesField.nested![1].name).toBe("content");
-    expect(filesField.nested![1].required).toBe(false);
+    expect(filesField.nested?.[0].name).toBe("path");
+    expect(filesField.nested?.[0].required).toBe(true);
+    expect(filesField.nested?.[1].name).toBe("content");
+    expect(filesField.nested?.[1].required).toBe(false);
   });
 
   it("parses [hint] prefixes from description", () => {
@@ -197,8 +197,8 @@ describe("deriveSurface", () => {
     expect(result.fieldGroups).toHaveLength(1); // "Options" with first 5
     expect(result.fieldGroups[0].fields).toHaveLength(5);
     expect(result.advancedGroup).toBeDefined();
-    expect(result.advancedGroup!.label).toBe("Advanced");
-    expect(result.advancedGroup!.fields).toHaveLength(3);
+    expect(result.advancedGroup?.label).toBe("Advanced");
+    expect(result.advancedGroup?.fields).toHaveLength(3);
   });
 
   it("handles empty schema", () => {

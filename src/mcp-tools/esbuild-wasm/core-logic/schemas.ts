@@ -182,7 +182,10 @@ export const BuildOnlySchema = {
     .optional()
     .describe("Use stdin as entry point instead of files"),
   write: z.coerce.boolean().optional().describe("Write output files to disk"),
-  allowOverwrite: z.coerce.boolean().optional().describe("Allow output files to overwrite input files"),
+  allowOverwrite: z.coerce
+    .boolean()
+    .optional()
+    .describe("Allow output files to overwrite input files"),
   absWorkingDir: z.string().optional().describe("Absolute working directory path"),
 };
 

@@ -65,7 +65,9 @@ function runCheck(name: string, command: string, options: CheckRunOptions = {}):
     // Vitest may exit non-zero despite all tests passing (e.g. deprecation warnings).
     // Detect this: output contains "X passed" with no "failed" count.
     const allTestsPassed =
-      name === "test" && /\d+ passed/.test(normalizedOutput) && !/\d+ failed/.test(normalizedOutput);
+      name === "test" &&
+      /\d+ passed/.test(normalizedOutput) &&
+      !/\d+ failed/.test(normalizedOutput);
 
     if (allTestsPassed) {
       if (verbose) {

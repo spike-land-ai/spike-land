@@ -69,7 +69,7 @@ export function processClassUpdateQueue<S>(
     queue.shared.pending = null;
 
     const lastPendingUpdate = pendingQueue;
-    const firstPendingUpdate = lastPendingUpdate.next!;
+    const firstPendingUpdate = lastPendingUpdate.next;
     lastPendingUpdate.next = null;
 
     if (lastBaseUpdate === null) {
@@ -87,28 +87,28 @@ export function processClassUpdateQueue<S>(
 
     do {
       // Process update
-      if (update!.tag === UpdateState) {
-        const payload = update!.payload;
+      if (update?.tag === UpdateState) {
+        const payload = update?.payload;
         if (typeof payload === "function") {
           newState = payload.call(instance, newState, props);
         } else {
           newState = assign({}, newState, payload);
         }
-      } else if (update!.tag === ReplaceState) {
-        newState = update!.payload as S;
-      } else if (update!.tag === ForceUpdate) {
+      } else if (update?.tag === ReplaceState) {
+        newState = update?.payload as S;
+      } else if (update?.tag === ForceUpdate) {
         // Force update doesn't change state
       }
 
-      if (update!.callback !== null) {
+      if (update?.callback !== null) {
         fiber.flags |= Callback;
         if (queue.callbacks === null) {
           queue.callbacks = [];
         }
-        queue.callbacks.push(update!.callback);
+        queue.callbacks.push(update?.callback);
       }
 
-      update = update!.next;
+      update = update?.next;
       if (update === null) break;
     } while (true);
 

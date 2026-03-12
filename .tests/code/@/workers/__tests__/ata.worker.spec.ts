@@ -207,7 +207,7 @@ import { useState } from "react";
         // Simulate ATA calling finished immediately
         const lastCall =
           mockSetupTypeAcquisition.mock.calls[mockSetupTypeAcquisition.mock.calls.length - 1];
-        const config = lastCall![0];
+        const config = lastCall?.[0];
         const delegate = config.delegate;
         const vfsMap = new Map(vfsEntries);
         // Use setTimeout to allow the promise to be set up
@@ -261,9 +261,9 @@ import { useState } from "react";
       const reactLib = result.find((lib) => lib.filePath.includes("react"));
       expect(reactLib).toBeDefined();
       // filePath should not contain origin
-      expect(reactLib!.filePath).not.toContain(origin);
+      expect(reactLib?.filePath).not.toContain(origin);
       // content should not contain origin
-      expect(reactLib!.content).not.toContain(origin);
+      expect(reactLib?.content).not.toContain(origin);
     });
 
     it("appends implicit react/emotion imports to code", async () => {
@@ -273,10 +273,10 @@ import { useState } from "react";
       await ata({ code: "const x = 1;", originToUse: origin });
 
       // The code passed to ATA should include implicit imports
-      const ataCall = mockSetupTypeAcquisition.mock.calls[0]![0];
+      const ataCall = mockSetupTypeAcquisition.mock.calls[0]?.[0];
       expect(ataCall).toBeDefined();
       // Verify setupTypeAcquisition was called (the returned function is invoked with extCode)
-      const ataRunner = mockSetupTypeAcquisition.mock.results[0]!.value;
+      const ataRunner = mockSetupTypeAcquisition.mock.results[0]?.value;
       expect(ataRunner).toBeDefined();
     });
 
@@ -301,7 +301,7 @@ import { useState } from "react";
       // The fetched content should appear in results
       const utilsLib = result.find((lib) => lib.filePath.includes("lib/utils"));
       expect(utilsLib).toBeDefined();
-      expect(utilsLib!.content).toContain("cn");
+      expect(utilsLib?.content).toContain("cn");
     });
 
     it("fetches /live/ cross-codespace imports", async () => {
@@ -321,7 +321,7 @@ import { useState } from "react";
       expect(mockFetch).toHaveBeenCalledWith(`${origin}/live/vibe-pulse/index.tsx`, undefined);
       const liveLib = result.find((lib) => lib.filePath === "/live/vibe-pulse.d.ts");
       expect(liveLib).toBeDefined();
-      expect(liveLib!.content).toContain("VibePulse");
+      expect(liveLib?.content).toContain("VibePulse");
     });
 
     it("registers /live/ source at both .d.ts and bare paths", async () => {
@@ -342,7 +342,7 @@ import { useState } from "react";
       const bareLib = result.find((lib) => lib.filePath === "/live/vibe-pulse");
       expect(dtsLib).toBeDefined();
       expect(bareLib).toBeDefined();
-      expect(dtsLib!.content).toBe(bareLib!.content);
+      expect(dtsLib?.content).toBe(bareLib?.content);
     });
 
     it("skips /live/ imports with empty codespace name", async () => {
@@ -439,7 +439,7 @@ import { helper } from "/live/vibe-pulse/utils";
       mockSetupTypeAcquisition.mockReturnValue((_code: string) => {
         const lastCall =
           mockSetupTypeAcquisition.mock.calls[mockSetupTypeAcquisition.mock.calls.length - 1];
-        const config = lastCall![0];
+        const config = lastCall?.[0];
         const delegate = config.delegate;
         // Trigger errorMessage before finishing
         delegate.errorMessage("Could not fetch types", testError);
@@ -597,7 +597,7 @@ import { z } from "z-lib";
 
       // Verify sorted order
       for (let i = 1; i < result.length; i++) {
-        expect(result[i - 1]!.filePath.localeCompare(result[i]!.filePath)).toBeLessThanOrEqual(0);
+        expect(result[i - 1]?.filePath.localeCompare(result[i]?.filePath)).toBeLessThanOrEqual(0);
       }
     });
 
@@ -616,7 +616,7 @@ import { z } from "z-lib";
       // Both paths clean to /react/index.d.ts — first one wins
       const reactLibs = result.filter((lib) => lib.filePath === "/react/index.d.ts");
       expect(reactLibs).toHaveLength(1);
-      expect(reactLibs[0]!.content).toBe("content1");
+      expect(reactLibs[0]?.content).toBe("content1");
     });
   });
 });

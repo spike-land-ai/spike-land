@@ -26,7 +26,8 @@ messagesRouter.get("/", async (c) => {
     conditions.push(gt(messages.id, since));
   }
 
-  const msgs = await db.select()
+  const msgs = await db
+    .select()
     .from(messages)
     .where(and(...conditions))
     .orderBy(since ? messages.createdAt : desc(messages.createdAt))
@@ -76,25 +77,29 @@ messagesRouter.post("/", async (c) => {
   const doId = c.env.CHANNEL_DO.idFromName(body.channelId);
   const stub = c.env.CHANNEL_DO.get(doId);
 
-  await stub.fetch(new Request("http://internal/broadcast", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ type: "message_new", message: msg }),
-  }));
+  await stub.fetch(
+    new Request("http://internal/broadcast", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "message_new", message: msg }),
+    }),
+  );
 
   // For app_updated, send a second structured event for live clients to act on
   if (body.contentType === "app_updated") {
-    await stub.fetch(new Request("http://internal/broadcast", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "app_updated",
-        appSlug: body.channelId.replace(/^app-/, ""),
-        version: body.metadata?.version,
-        changedFiles: body.metadata?.changedFiles,
-        messageId: id,
+    await stub.fetch(
+      new Request("http://internal/broadcast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "app_updated",
+          appSlug: body.channelId.replace(/^app-/, ""),
+          version: body.metadata?.version,
+          changedFiles: body.metadata?.changedFiles,
+          messageId: id,
+        }),
       }),
-    }));
+    );
   }
 
   return c.json(msg, 201);
@@ -110,17 +115,17 @@ messagesRouter.delete("/:id", async (c) => {
   const [msg] = await db.select().from(messages).where(eq(messages.id, id));
   if (!msg) return c.json({ error: "Not found" }, 404);
 
-  await db.update(messages)
-    .set({ deletedAt: Date.now() })
-    .where(eq(messages.id, id));
+  await db.update(messages).set({ deletedAt: Date.now() }).where(eq(messages.id, id));
 
   const doId = c.env.CHANNEL_DO.idFromName(msg.channelId);
   const stub = c.env.CHANNEL_DO.get(doId);
-  await stub.fetch(new Request("http://internal/broadcast", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ type: "message_deleted", id }),
-  }));
+  await stub.fetch(
+    new Request("http://internal/broadcast", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "message_deleted", id }),
+    }),
+  );
 
   return c.json({ success: true });
 });
@@ -134,7 +139,8 @@ async function ensureAppChannel(
   channelId: string,
   userId: string,
 ): Promise<void> {
-  const [existing] = await db.select({ id: channels.id })
+  const [existing] = await db
+    .select({ id: channels.id })
     .from(channels)
     .where(eq(channels.slug, channelId))
     .limit(1);
@@ -160,7 +166,8 @@ async function ensureAppChannel(
 
   // Auto-join the creator
   try {
-    const [ch] = await db.select({ id: channels.id })
+    const [ch] = await db
+      .select({ id: channels.id })
       .from(channels)
       .where(eq(channels.slug, channelId))
       .limit(1);

@@ -21,7 +21,13 @@ vi.mock("remotion", () => ({
     inOut: vi.fn((x) => x),
     bezier: vi.fn(() => (x: unknown) => x),
   },
-  AbsoluteFill: ({ children, style }: { children?: React.ReactNode; style?: React.CSSProperties }) => {
+  AbsoluteFill: ({
+    children,
+    style,
+  }: {
+    children?: React.ReactNode;
+    style?: React.CSSProperties;
+  }) => {
     return React.createElement("div", { style }, children);
   },
   Sequence: ({ children }: { children?: React.ReactNode }) => {

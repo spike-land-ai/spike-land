@@ -25,7 +25,7 @@ describe("messagesPush", () => {
   it("adds first message to empty array", () => {
     const result = messagesPush([], { id: "1", role: "user", content: "hello" });
     expect(result).toHaveLength(1);
-    expect(result[0]!.content).toBe("hello");
+    expect(result[0]?.content).toBe("hello");
   });
 
   it("appends message with different role", () => {
@@ -44,14 +44,14 @@ describe("messagesPush", () => {
     const existing: Message[] = [{ id: "1", role: "assistant", content: "hello" }];
     const result = messagesPush(existing, { id: "2", role: "assistant", content: "hello world" });
     expect(result).toHaveLength(1);
-    expect(result[0]!.content).toBe("hello world");
+    expect(result[0]?.content).toBe("hello world");
   });
 
   it("concatenates consecutive assistant messages (new does not start with old)", () => {
     const existing: Message[] = [{ id: "1", role: "assistant", content: "hello" }];
     const result = messagesPush(existing, { id: "2", role: "assistant", content: " world" });
     expect(result).toHaveLength(1);
-    expect(result[0]!.content).toBe("hello world");
+    expect(result[0]?.content).toBe("hello world");
   });
 
   it("handles array message content", () => {
@@ -69,7 +69,7 @@ describe("messagesPush", () => {
 
   it("uses current timestamp as id when id is missing", () => {
     const result = messagesPush([], { role: "user", content: "hi" } as Message);
-    expect(result[0]!.id).toBeTruthy();
+    expect(result[0]?.id).toBeTruthy();
   });
 });
 
@@ -255,8 +255,8 @@ describe("loadMessages", () => {
     const result = loadMessages("my-space");
     // Only first "user" message kept, then "assistant"
     expect(result).toHaveLength(2);
-    expect(result[0]!.role).toBe("user");
-    expect(result[1]!.role).toBe("assistant");
+    expect(result[0]?.role).toBe("user");
+    expect(result[1]?.role).toBe("assistant");
   });
 
   it("returns empty array when JSON is invalid", () => {

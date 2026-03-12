@@ -103,7 +103,7 @@ export function groupMetricsByVariant(
     if (!byVariant[metric.variant_id]) {
       byVariant[metric.variant_id] = {};
     }
-    const variantBucket = byVariant[metric.variant_id]!;
+    const variantBucket = byVariant[metric.variant_id];
     variantBucket[metric.metric_name] = {
       value: metric.metric_value,
       sampleSize: metric.sample_size,

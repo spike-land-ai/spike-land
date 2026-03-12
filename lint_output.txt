@@ -1,0 +1,53 @@
+
+/Users/z/Developer/spike-land-ai/.tests/spike-edge/__tests__/index-full.test.ts
+   98:53  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  130:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  137:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  139:8   error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/.tests/spike-land-backend/__tests__/chat.spec.ts
+  55:10  error  'handleRequest' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/z/Developer/spike-land-ai/.tests/spike-land-mcp/auth/middleware.test.ts
+   8:15  error  'Env' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  45:10  error  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+  53:33  error  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+  62:37  error  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+  66:24  error  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+  73:15  error  Unexpected any. Specify a different type                               @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/.tests/spike-land-mcp/routes/oauth.test.ts
+  51:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/.tests/spike-land-mcp/routes/well-known.test.ts
+  36:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/src/core/shared-utils/styling/cva.ts
+  19:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  20:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  30:54  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  56:36  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  69:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  70:69  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/src/core/shared-utils/ui/slot.tsx
+  19:29  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  20:7   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  21:25  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  21:80  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  22:10  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  36:17  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/ui/components/tool-surface/ToolSurface.tsx
+  112:6  error  React Hook useEffect has a missing dependency: 'session'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/ui/hooks/__tests__/useDarkMode.test.ts
+  1:44  error  'vi' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/Users/z/Developer/spike-land-ai/src/frontend/platform-frontend/ui/routes/tools/$appSlug.tsx
+  61:6  error  React Hook useEffect has a missing dependency: 'app'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+✖ 30 problems (30 errors, 0 warnings)
+

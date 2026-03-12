@@ -509,7 +509,7 @@ export class Code implements DurableObject {
         this.session = sanitizeSession({ ...loadedSession, codeSpace });
       } else {
         // No valid stored session found, or codespace mismatch, initialize a new one
-        const codeSpaceParts = codeSpace!.split("-");
+        const codeSpaceParts = codeSpace?.split("-");
         if (codeSpaceParts.length > 2) {
           throw new Error("Invalid codeSpace");
         }

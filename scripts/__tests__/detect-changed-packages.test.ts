@@ -43,7 +43,11 @@ function createFixtureRepo(): string {
   );
   write(repoRoot, ".tests/vitest.config.ts", "export default {};\n");
   write(repoRoot, "src/edge-api/main/api/routes/example.ts", "export const example = 1;\n");
-  write(repoRoot, "src/frontend/platform-frontend/ui/routes/store.tsx", "export const store = 1;\n");
+  write(
+    repoRoot,
+    "src/frontend/platform-frontend/ui/routes/store.tsx",
+    "export const store = 1;\n",
+  );
 
   git(repoRoot, "add", ".");
   git(repoRoot, "commit", "-m", "base");
@@ -54,7 +58,13 @@ function createFixtureRepo(): string {
 function detect(repoRoot: string, baseRef: string, headRef: string): string[] {
   const output = execFileSync(
     "bash",
-    [path.join(repoRoot, "scripts/detect-changed-packages.sh"), "--base", baseRef, "--head", headRef],
+    [
+      path.join(repoRoot, "scripts/detect-changed-packages.sh"),
+      "--base",
+      baseRef,
+      "--head",
+      headRef,
+    ],
     {
       cwd: repoRoot,
       encoding: "utf-8",
@@ -99,8 +109,17 @@ describe("detect-changed-packages.sh", () => {
     reposToClean.push(repoRoot);
 
     write(repoRoot, ".tests/vitest.config.ts", "export default { changed: true };\n");
-    write(repoRoot, "src/frontend/platform-frontend/ui/routes/store.tsx", "export const store = 2;\n");
-    git(repoRoot, "add", ".tests/vitest.config.ts", "src/frontend/platform-frontend/ui/routes/store.tsx");
+    write(
+      repoRoot,
+      "src/frontend/platform-frontend/ui/routes/store.tsx",
+      "export const store = 2;\n",
+    );
+    git(
+      repoRoot,
+      "add",
+      ".tests/vitest.config.ts",
+      "src/frontend/platform-frontend/ui/routes/store.tsx",
+    );
     git(repoRoot, "commit", "-m", "change test config and spike-app");
 
     expect(detect(repoRoot, "HEAD~1", "HEAD")).toEqual(["spike-app"]);
@@ -153,7 +172,11 @@ describe("detect-changed-packages.sh", () => {
         2,
       ),
     );
-    write(repoRoot, "src/frontend/platform-frontend/ui/routes/store.tsx", "export const store = 2;\n");
+    write(
+      repoRoot,
+      "src/frontend/platform-frontend/ui/routes/store.tsx",
+      "export const store = 2;\n",
+    );
 
     expect(detect(repoRoot, "HEAD", "WORKTREE")).toEqual(["spike-app"]);
   });

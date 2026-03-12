@@ -4,7 +4,7 @@ import { tryCatch as _tryCatch } from "../../lazy-imports/try-catch"; // Added i
 
 class SharedWorkerPolyfill {
   private worker: Worker | null = null; // Can be null if construction fails
-  public port: MessagePort = null!; // Will be initialized if worker is created
+  public port: MessagePort = null; // Will be initialized if worker is created
 
   constructor(url: string, opts?: WorkerOptions) {
     if (process.env.VI_TEST) {

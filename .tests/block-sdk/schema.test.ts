@@ -39,8 +39,8 @@ describe("Schema DSL", () => {
         timestamp: t.u64(),
         active: t.boolean(),
       });
-      expect(table.columns.timestamp!.type).toBe("u64");
-      expect(table.columns.active!.type).toBe("boolean");
+      expect(table.columns.timestamp?.type).toBe("u64");
+      expect(table.columns.active?.type).toBe("boolean");
     });
   });
 

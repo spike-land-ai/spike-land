@@ -117,7 +117,7 @@ describe("POST /api/experiments/assign", () => {
     expect(data.assignments).toBeDefined();
     const expAssign = data.assignments["exp-test"];
     expect(expAssign).toBeDefined();
-    expect(expAssign!.variantId).toBeTruthy();
+    expect(expAssign?.variantId).toBeTruthy();
   });
 
   it("deterministic: same clientId always gets same variant", async () => {
@@ -135,7 +135,7 @@ describe("POST /api/experiments/assign", () => {
     const data1 = (await res1.json()) as { assignments: Record<string, { variantId: string }> };
     const data2 = (await res2.json()) as { assignments: Record<string, { variantId: string }> };
 
-    expect(data1.assignments["exp-test"]!.variantId).toBe(data2.assignments["exp-test"]!.variantId);
+    expect(data1.assignments["exp-test"]?.variantId).toBe(data2.assignments["exp-test"]?.variantId);
   });
 });
 
@@ -245,8 +245,8 @@ describe("GET /api/experiments/active", () => {
 
     const data = (await res.json()) as { experiments: Array<{ id: string; variants: unknown[] }> };
     expect(data.experiments).toHaveLength(1);
-    expect(data.experiments[0]!.id).toBe("exp-test");
-    expect(Array.isArray(data.experiments[0]!.variants)).toBe(true);
+    expect(data.experiments[0]?.id).toBe("exp-test");
+    expect(Array.isArray(data.experiments[0]?.variants)).toBe(true);
   });
 
   it("sets cache header", async () => {

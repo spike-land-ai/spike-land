@@ -11,7 +11,10 @@ export function registerDiscoverTool(server: McpServer): void {
       "Returns file count, package list with categories and dependency info.",
     schema: {
       src: z.string().optional().describe("Source directory (default: 'src')"),
-      incremental: z.coerce.boolean().optional().describe("Only process git-changed files (default: false)"),
+      incremental: z.coerce
+        .boolean()
+        .optional()
+        .describe("Only process git-changed files (default: false)"),
     },
     handler: async ({ src, incremental }) => {
       const { nodes, packageCategories } = await runPipeline(src, incremental ?? false);

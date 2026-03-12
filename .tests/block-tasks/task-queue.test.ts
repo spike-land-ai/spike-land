@@ -44,7 +44,7 @@ describe("taskQueue block", () => {
       });
 
       expect(result.isError).toBeUndefined();
-      const task = JSON.parse(result.content[0]!.text!) as Task;
+      const task = JSON.parse(result.content[0]?.text) as Task;
       expect(task.title).toBe("Fix bug");
       expect(task.description).toBe("Fix the login bug");
       expect(task.status).toBe("pending");
@@ -59,7 +59,7 @@ describe("taskQueue block", () => {
       await procs.createTask.handler({ title: "Task 2", description: "" });
 
       const result = await procs.listTasks.handler({});
-      const tasks = JSON.parse(result.content[0]!.text!) as Task[];
+      const tasks = JSON.parse(result.content[0]?.text) as Task[];
       expect(tasks).toHaveLength(2);
     });
 
@@ -68,18 +68,18 @@ describe("taskQueue block", () => {
       await procs.createTask.handler({ title: "Pending 1", description: "" });
 
       const createResult = await procs.createTask.handler({ title: "To Claim", description: "" });
-      const task = JSON.parse(createResult.content[0]!.text!) as Task;
+      const task = JSON.parse(createResult.content[0]?.text) as Task;
       await procs.claimTask.handler({ taskId: task.id });
 
       const pendingResult = await procs.listTasks.handler({ status: "pending" });
-      const pending = JSON.parse(pendingResult.content[0]!.text!) as Task[];
+      const pending = JSON.parse(pendingResult.content[0]?.text) as Task[];
       expect(pending).toHaveLength(1);
-      expect(pending[0]!.title).toBe("Pending 1");
+      expect(pending[0]?.title).toBe("Pending 1");
 
       const claimedResult = await procs.listTasks.handler({ status: "claimed" });
-      const claimed = JSON.parse(claimedResult.content[0]!.text!) as Task[];
+      const claimed = JSON.parse(claimedResult.content[0]?.text) as Task[];
       expect(claimed).toHaveLength(1);
-      expect(claimed[0]!.title).toBe("To Claim");
+      expect(claimed[0]?.title).toBe("To Claim");
     });
 
     it("get_task returns a specific task", async () => {
@@ -88,10 +88,10 @@ describe("taskQueue block", () => {
         title: "My Task",
         description: "details",
       });
-      const created = JSON.parse(createResult.content[0]!.text!) as Task;
+      const created = JSON.parse(createResult.content[0]?.text) as Task;
 
       const getResult = await procs.getTask.handler({ taskId: created.id });
-      const task = JSON.parse(getResult.content[0]!.text!) as Task;
+      const task = JSON.parse(getResult.content[0]?.text) as Task;
       expect(task.title).toBe("My Task");
       expect(task.description).toBe("details");
     });
@@ -100,23 +100,23 @@ describe("taskQueue block", () => {
       const { procs } = await setup();
       const result = await procs.getTask.handler({ taskId: "nonexistent" });
       expect(result.isError).toBe(true);
-      expect(result.content[0]!.text).toContain("NOT_FOUND");
+      expect(result.content[0]?.text).toContain("NOT_FOUND");
     });
 
     it("claim_task claims a pending task", async () => {
       const { procs } = await setup();
       const createResult = await procs.createTask.handler({ title: "Claimable", description: "" });
-      const task = JSON.parse(createResult.content[0]!.text!) as Task;
+      const task = JSON.parse(createResult.content[0]?.text) as Task;
 
       const claimResult = await procs.claimTask.handler({ taskId: task.id });
       expect(claimResult.isError).toBeUndefined();
-      const data = JSON.parse(claimResult.content[0]!.text!);
+      const data = JSON.parse(claimResult.content[0]?.text);
       expect(data.claimed).toBe(true);
       expect(data.assignee).toBe("alice");
 
       // Verify the task is now claimed
       const getResult = await procs.getTask.handler({ taskId: task.id });
-      const updated = JSON.parse(getResult.content[0]!.text!) as Task;
+      const updated = JSON.parse(getResult.content[0]?.text) as Task;
       expect(updated.status).toBe("claimed");
       expect(updated.assignee).toBe("alice");
     });
@@ -124,30 +124,30 @@ describe("taskQueue block", () => {
     it("claim_task fails if already claimed", async () => {
       const { procs } = await setup();
       const createResult = await procs.createTask.handler({ title: "Race", description: "" });
-      const task = JSON.parse(createResult.content[0]!.text!) as Task;
+      const task = JSON.parse(createResult.content[0]?.text) as Task;
 
       await procs.claimTask.handler({ taskId: task.id });
 
       // Second claim should fail
       const secondClaim = await procs.claimTask.handler({ taskId: task.id });
       expect(secondClaim.isError).toBe(true);
-      expect(secondClaim.content[0]!.text).toContain("ALREADY_CLAIMED");
+      expect(secondClaim.content[0]?.text).toContain("ALREADY_CLAIMED");
     });
 
     it("complete_task marks a claimed task as done", async () => {
       const { procs } = await setup();
       const createResult = await procs.createTask.handler({ title: "Finishable", description: "" });
-      const task = JSON.parse(createResult.content[0]!.text!) as Task;
+      const task = JSON.parse(createResult.content[0]?.text) as Task;
 
       await procs.claimTask.handler({ taskId: task.id });
       const completeResult = await procs.completeTask.handler({ taskId: task.id });
       expect(completeResult.isError).toBeUndefined();
-      const data = JSON.parse(completeResult.content[0]!.text!);
+      const data = JSON.parse(completeResult.content[0]?.text);
       expect(data.completed).toBe(true);
 
       // Verify status
       const getResult = await procs.getTask.handler({ taskId: task.id });
-      const updated = JSON.parse(getResult.content[0]!.text!) as Task;
+      const updated = JSON.parse(getResult.content[0]?.text) as Task;
       expect(updated.status).toBe("done");
     });
 
@@ -160,24 +160,24 @@ describe("taskQueue block", () => {
         title: "Alice's task",
         description: "",
       });
-      const task = JSON.parse(createResult.content[0]!.text!) as Task;
+      const task = JSON.parse(createResult.content[0]?.text) as Task;
       await aliceProcs.claimTask.handler({ taskId: task.id });
 
       // Try to complete as bob
       const bobProcs = taskQueue.createProcedures(storage, "bob");
       const result = await bobProcs.completeTask.handler({ taskId: task.id });
       expect(result.isError).toBe(true);
-      expect(result.content[0]!.text).toContain("NOT_CLAIMABLE");
+      expect(result.content[0]?.text).toContain("NOT_CLAIMABLE");
     });
 
     it("delete_task removes a task", async () => {
       const { procs } = await setup();
       const createResult = await procs.createTask.handler({ title: "Deletable", description: "" });
-      const task = JSON.parse(createResult.content[0]!.text!) as Task;
+      const task = JSON.parse(createResult.content[0]?.text) as Task;
 
       const deleteResult = await procs.deleteTask.handler({ taskId: task.id });
       expect(deleteResult.isError).toBeUndefined();
-      const data = JSON.parse(deleteResult.content[0]!.text!);
+      const data = JSON.parse(deleteResult.content[0]?.text);
       expect(data.deleted).toBe(true);
 
       // Verify it's gone
@@ -189,7 +189,7 @@ describe("taskQueue block", () => {
       const { procs } = await setup();
       const result = await procs.deleteTask.handler({ taskId: "ghost" });
       expect(result.isError).toBe(true);
-      expect(result.content[0]!.text).toContain("NOT_FOUND");
+      expect(result.content[0]?.text).toContain("NOT_FOUND");
     });
   });
 
@@ -202,13 +202,13 @@ describe("taskQueue block", () => {
       expect(tools).toHaveLength(6);
 
       // Use a tool through getTools
-      const createTool = tools.find((t) => t.name === "create_task")!;
+      const createTool = tools.find((t) => t.name === "create_task");
       const result = await createTool.handler({ title: "MCP task", description: "via tools" });
       expect(result.isError).toBeUndefined();
 
-      const listTool = tools.find((t) => t.name === "list_tasks")!;
+      const listTool = tools.find((t) => t.name === "list_tasks");
       const listResult = await listTool.handler({});
-      const items = JSON.parse(listResult.content[0]!.text!);
+      const items = JSON.parse(listResult.content[0]?.text);
       expect(items).toHaveLength(1);
     });
   });

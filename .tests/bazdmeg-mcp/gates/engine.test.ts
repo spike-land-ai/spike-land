@@ -74,7 +74,7 @@ describe("getRuleByName", () => {
   it("finds a rule by name", () => {
     const rule = getRuleByName("Change Size");
     expect(rule).toBeDefined();
-    expect(rule!.name).toBe("Change Size");
+    expect(rule?.name).toBe("Change Size");
   });
 
   it("returns undefined for unknown rule", () => {
@@ -83,7 +83,7 @@ describe("getRuleByName", () => {
 });
 
 describe("Unit Tests Present gate", () => {
-  const rule = getRuleByName("Unit Tests Present")!;
+  const rule = getRuleByName("Unit Tests Present");
 
   it("GREEN when test files included", () => {
     const result = rule.check(makeContext({ files: ["src/index.ts", "src/index.test.ts"] }));
@@ -102,7 +102,7 @@ describe("Unit Tests Present gate", () => {
 });
 
 describe("TypeScript Strict Compliance gate", () => {
-  const rule = getRuleByName("TypeScript Strict Compliance")!;
+  const rule = getRuleByName("TypeScript Strict Compliance");
 
   it("GREEN for clean code", () => {
     const diff = "+const x: string = 'hello';";
@@ -130,7 +130,7 @@ describe("TypeScript Strict Compliance gate", () => {
 });
 
 describe("PR Description Quality gate", () => {
-  const rule = getRuleByName("PR Description Quality")!;
+  const rule = getRuleByName("PR Description Quality");
 
   it("GREEN for substantive description", () => {
     const result = rule.check(
@@ -159,7 +159,7 @@ describe("PR Description Quality gate", () => {
 });
 
 describe("Security Patterns gate", () => {
-  const rule = getRuleByName("Security Patterns")!;
+  const rule = getRuleByName("Security Patterns");
 
   it("GREEN for clean code", () => {
     const diff = "+const config = loadConfig();";
@@ -181,7 +181,7 @@ describe("Security Patterns gate", () => {
 });
 
 describe("Change Size gate", () => {
-  const rule = getRuleByName("Change Size")!;
+  const rule = getRuleByName("Change Size");
 
   it("GREEN for small changes", () => {
     const result = rule.check(makeContext({ additions: 50, deletions: 20 }));
@@ -200,7 +200,7 @@ describe("Change Size gate", () => {
 });
 
 describe("Workspace Scope Compliance gate", () => {
-  const rule = getRuleByName("Workspace Scope Compliance")!;
+  const rule = getRuleByName("Workspace Scope Compliance");
 
   it("GREEN when no restrictions", () => {
     const result = rule.check(makeContext({ files: ["any/file.ts"] }));
@@ -315,11 +315,11 @@ describe("Diff parsing edge cases", () => {
     const ctx = makeContext({ diff });
     const rules = getBuiltinRules();
 
-    const complianceRule = rules.find((r) => r.name === "TypeScript Strict Compliance")!;
+    const complianceRule = rules.find((r) => r.name === "TypeScript Strict Compliance");
     expect(complianceRule.check(ctx).status).toBe("RED");
     expect(complianceRule.check(ctx).detail).toContain("@ts-nocheck");
 
-    const securityRule = rules.find((r) => r.name === "Security Patterns")!;
+    const securityRule = rules.find((r) => r.name === "Security Patterns");
     const res = securityRule.check(ctx);
     expect(res.status).toBe("RED");
     expect(res.detail).toContain("Hardcoded password");
@@ -333,7 +333,7 @@ describe("Workspace scope edge cases", () => {
       files: ["a.ts", "b.ts", "c.ts", "d.ts", "e.ts"],
       allowedPaths: ["src/"],
     });
-    const rule = getBuiltinRules().find((r) => r.name === "Workspace Scope Compliance")!;
+    const rule = getBuiltinRules().find((r) => r.name === "Workspace Scope Compliance");
     const res = rule.check(ctx);
     expect(res.status).toBe("RED");
     expect(res.detail).toContain("...");

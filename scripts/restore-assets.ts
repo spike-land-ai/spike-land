@@ -30,7 +30,7 @@ async function main() {
       if (sibling.endsWith(".ts") || sibling.endsWith(".tsx")) {
         const siblingPath = path.join(oldDir, sibling).replace("src-old/", "src/");
         if (oldToNew.has(siblingPath)) {
-          targetDir = path.dirname(oldToNew.get(siblingPath)!);
+          targetDir = path.dirname(oldToNew.get(siblingPath));
           break;
         }
       }

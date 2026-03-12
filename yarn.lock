@@ -3583,7 +3583,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radix-ui/react-slot@npm:1.2.4, @radix-ui/react-slot@npm:^1.2.4":
+"@radix-ui/react-slot@npm:1.2.4":
   version: 1.2.4
   resolution: "@radix-ui/react-slot@npm:1.2.4"
   dependencies:
@@ -5241,13 +5241,10 @@ __metadata:
   resolution: "@spike-land-ai/shared@workspace:packages/shared"
   dependencies:
     "@changesets/cli": "npm:2.30.0"
-    "@radix-ui/react-slot": "npm:^1.2.4"
     "@types/react": "npm:^19.2.14"
     "@vitest/coverage-v8": "npm:4.1.0"
-    class-variance-authority: "npm:^0.7.1"
     lucide-react: "npm:^0.577.0"
     react: "npm:^19.2.4"
-    tailwind-merge: "npm:^3.5.0"
     tsup: "npm:8.5.1"
     typescript: "npm:5.9.3"
     vitest: "npm:4.1.0"
@@ -5473,7 +5470,6 @@ __metadata:
     "@types/node": "npm:25.4.0"
     chokidar: "npm:5.0.0"
     commander: "npm:14.0.3"
-    cross-spawn: "npm:^7.0.6"
     eslint: "npm:10.0.3"
     tsup: "npm:8.5.1"
     tsx: "npm:4.21.0"
@@ -6424,6 +6420,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/prop-types@npm:*":
+  version: 15.7.15
+  resolution: "@types/prop-types@npm:15.7.15"
+  checksum: 10c0/b59aad1ad19bf1733cf524fd4e618196c6c7690f48ee70a327eb450a42aab8e8a063fbe59ca0a5701aebe2d92d582292c0fb845ea57474f6a15f6994b0e260b2
+  languageName: node
+  linkType: hard
+
 "@types/qs@npm:*":
   version: 6.15.0
   resolution: "@types/qs@npm:6.15.0"
@@ -6438,12 +6441,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-dom@npm:^18.2.0":
+  version: 18.3.7
+  resolution: "@types/react-dom@npm:18.3.7"
+  peerDependencies:
+    "@types/react": ^18.0.0
+  checksum: 10c0/8bd309e2c3d1604a28a736a24f96cbadf6c05d5288cfef8883b74f4054c961b6b3a5e997fd5686e492be903c8f3380dba5ec017eff3906b1256529cd2d39603e
+  languageName: node
+  linkType: hard
+
 "@types/react-dom@npm:^19.2.3":
   version: 19.2.3
   resolution: "@types/react-dom@npm:19.2.3"
   peerDependencies:
     "@types/react": ^19.2.0
   checksum: 10c0/b486ebe0f4e2fb35e2e108df1d8fc0927ca5d6002d5771e8a739de11239fe62d0e207c50886185253c99eb9dedfeeb956ea7429e5ba17f6693c7acb4c02f8cd1
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^18.2.0":
+  version: 18.3.28
+  resolution: "@types/react@npm:18.3.28"
+  dependencies:
+    "@types/prop-types": "npm:*"
+    csstype: "npm:^3.2.2"
+  checksum: 10c0/683e19cd12b5c691215529af2e32b5ffbaccae3bf0ba93bfafa0e460e8dfee18423afed568be2b8eadf4b837c3749dd296a4f64e2d79f68fa66962c05f5af661
   languageName: node
   linkType: hard
 
@@ -11109,6 +11131,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"framer-motion@npm:^11.0.0":
+  version: 11.18.2
+  resolution: "framer-motion@npm:11.18.2"
+  dependencies:
+    motion-dom: "npm:^11.18.1"
+    motion-utils: "npm:^11.18.1"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    "@emotion/is-prop-valid": "*"
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@emotion/is-prop-valid":
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/41b1ef1b4e54ea13adaf01d61812a8783d2352f74641c91b50519775704bc6274db6b6863ff494a1f705fa6c6ed8f4df3497292327c906d53ea0129cef3ec361
+  languageName: node
+  linkType: hard
+
 "framer-motion@npm:^12.36.0":
   version: 12.36.0
   resolution: "framer-motion@npm:12.36.0"
@@ -13387,23 +13431,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:0.575.0":
-  version: 0.575.0
-  resolution: "lucide-react@npm:0.575.0"
+"lucide-react@workspace:*, lucide-react@workspace:packages/spike-icons":
+  version: 0.0.0-use.local
+  resolution: "lucide-react@workspace:packages/spike-icons"
+  dependencies:
+    "@types/react": "npm:^18.2.0"
+    "@types/react-dom": "npm:^18.2.0"
+    framer-motion: "npm:^11.0.0"
+    real-lucide-react: "npm:lucide-react@^0.300.0"
+    tsup: "npm:^8.0.0"
+    typescript: "npm:^5.0.0"
   peerDependencies:
-    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/4f42e81c88f60c8f904b178c0b28e8ac9a99da8ef24eba5f26ed97b63124304a847baea2f71125629a272df58dbb61cd799ff6a7e4878e5a4c28d8a699b84730
-  languageName: node
-  linkType: hard
-
-"lucide-react@npm:^0.577.0":
-  version: 0.577.0
-  resolution: "lucide-react@npm:0.577.0"
-  peerDependencies:
-    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10c0/f5f56d66d5072b69ab74af2196833e35b888c18d92906d75aff81afc0aeabf00a4092a5b9dbc1bddd250bf54ec3c5d5933c7353589b5cb7efd75b21651cda399
-  languageName: node
-  linkType: hard
+    framer-motion: ^11.0.0
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  languageName: unknown
+  linkType: soft
 
 "lz-string@npm:^1.5.0":
   version: 1.5.0
@@ -14525,6 +14568,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"motion-dom@npm:^11.18.1":
+  version: 11.18.1
+  resolution: "motion-dom@npm:11.18.1"
+  dependencies:
+    motion-utils: "npm:^11.18.1"
+  checksum: 10c0/98378bdf9d77870829cdf3624c5eff02e48cfa820dfc74450364d7421884700048d60e277bfbf477df33270fbae4c1980e5914586f5b6dff28d4921fdca8ac47
+  languageName: node
+  linkType: hard
+
 "motion-dom@npm:^12.34.3":
   version: 12.35.1
   resolution: "motion-dom@npm:12.35.1"
@@ -14540,6 +14592,13 @@ __metadata:
   dependencies:
     motion-utils: "npm:^12.36.0"
   checksum: 10c0/7f97b1e310310b44e6144f7303604d7c3f37f1e278b41ac5b57dca2abe082213d40a9f59cf5a2cb3442d27b8fd82e29f17f31d7b24d4b240f9b908fc97b42d80
+  languageName: node
+  linkType: hard
+
+"motion-utils@npm:^11.18.1":
+  version: 11.18.1
+  resolution: "motion-utils@npm:11.18.1"
+  checksum: 10c0/dac083bdeb6e433a277ac4362211b0fdce59ff09d6f7897f0f49d1e3561209c6481f676876daf99a33485054bc7e4b1d1b8d1de16f7b1e5c6f117fe76358ca00
   languageName: node
   linkType: hard
 
@@ -16145,6 +16204,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"real-lucide-react@npm:lucide-react@^0.300.0":
+  version: 0.300.0
+  resolution: "lucide-react@npm:0.300.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0
+  checksum: 10c0/cd532ee6eca64662abd3850d8b2f9135a5c8ca239a0f7ab0d01cf743271e953aa2b3b6af2027d3eaefc33564eb2c4c51d4664865920c4b6adc332f4c59cebc74
+  languageName: node
+  linkType: hard
+
 "recast@npm:0.23.11, recast@npm:^0.23.11":
   version: 0.23.11
   resolution: "recast@npm:0.23.11"
@@ -17483,7 +17551,6 @@ __metadata:
     "@changesets/cli": "npm:2.30.0"
     "@cloudflare/puppeteer": "npm:^1.0.6"
     "@modelcontextprotocol/sdk": "npm:^1.27.1"
-    "@radix-ui/react-slot": "npm:^1.2.4"
     "@remotion/cli": "npm:^4.0.435"
     "@remotion/transitions": "npm:^4.0.435"
     "@spike-land-ai/mcp-server-base": "workspace:*"
@@ -17494,11 +17561,9 @@ __metadata:
     "@tanstack/router-cli": "npm:^1.166.7"
     "@testing-library/user-event": "npm:^14.6.1"
     "@types/cors": "npm:^2.8.19"
-    "@types/cross-spawn": "npm:^6.0.6"
     "@types/express": "npm:^5.0.6"
     "@types/node": "npm:^25.4.0"
     "@vitest/coverage-v8": "npm:4.1.0"
-    class-variance-authority: "npm:^0.7.1"
     esbuild: "npm:^0.27.4"
     eslint: "npm:10.0.3"
     eslint-plugin-react: "npm:7.37.5"
@@ -18442,7 +18507,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsup@npm:8.5.1":
+"tsup@npm:8.5.1, tsup@npm:^8.0.0":
   version: 8.5.1
   resolution: "tsup@npm:8.5.1"
   dependencies:

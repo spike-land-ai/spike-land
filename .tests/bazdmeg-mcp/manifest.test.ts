@@ -131,7 +131,7 @@ describe("readManifest", () => {
     const manifest = await readManifest(root);
     expect(manifest.packages["shared"]).toBeDefined();
     expect(manifest.packages["chess-engine"]).toBeDefined();
-    expect(manifest.packages["chess-engine"]!.deps).toContain("shared");
+    expect(manifest.packages["chess-engine"]?.deps).toContain("shared");
   });
 
   it("parses worker config with all fields", async () => {
@@ -140,29 +140,29 @@ describe("readManifest", () => {
     cleanup = tmp.cleanup;
 
     const manifest = await readManifest(root);
-    const worker = manifest.packages["spike-edge"]!.worker!;
+    const worker = manifest.packages["spike-edge"]?.worker;
     expect(worker.name).toBe("spike-edge");
     expect(worker.compatibility_date).toBe("2024-01-01");
     expect(worker.compatibility_flags).toContain("nodejs_compat");
     expect(worker.kv_namespaces).toBeDefined();
-    expect(worker.kv_namespaces![0]!.binding).toBe("KV");
+    expect(worker.kv_namespaces?.[0]?.binding).toBe("KV");
     expect(worker.d1_databases).toBeDefined();
-    expect(worker.d1_databases![0]!.binding).toBe("DB");
+    expect(worker.d1_databases?.[0]?.binding).toBe("DB");
     expect(worker.r2_buckets).toBeDefined();
-    expect(worker.r2_buckets![0]!.binding).toBe("BUCKET");
+    expect(worker.r2_buckets?.[0]?.binding).toBe("BUCKET");
     expect(worker.durable_objects).toBeDefined();
-    expect(worker.durable_objects![0]!.name).toBe("ROOM");
-    expect(worker.durable_objects![0]!.sqlite).toBe(true);
+    expect(worker.durable_objects?.[0]?.name).toBe("ROOM");
+    expect(worker.durable_objects?.[0]?.sqlite).toBe(true);
     expect(worker.routes).toBeDefined();
-    expect(worker.routes![0]!.pattern).toBe("api.example.com/*");
-    expect(worker.routes![0]!.custom_domain).toBe(true);
-    expect(worker.routes![0]!.zone_name).toBe("example.com");
+    expect(worker.routes?.[0]?.pattern).toBe("api.example.com/*");
+    expect(worker.routes?.[0]?.custom_domain).toBe(true);
+    expect(worker.routes?.[0]?.zone_name).toBe("example.com");
     expect(worker.rules).toBeDefined();
     expect(worker.assets).toBeDefined();
-    expect(worker.assets!.directory).toBe("./dist");
-    expect(worker.assets!.not_found_handling).toBe("single-page-application");
+    expect(worker.assets?.directory).toBe("./dist");
+    expect(worker.assets?.not_found_handling).toBe("single-page-application");
     expect(worker.site).toBeDefined();
-    expect(worker.site!.bucket).toBe("./public");
+    expect(worker.site?.bucket).toBe("./public");
   });
 
   it("parses inline arrays used by worker manifest fields", async () => {
@@ -191,7 +191,7 @@ packages:
     cleanup = tmp.cleanup;
 
     const manifest = await readManifest(root);
-    const worker = manifest.packages["spike-edge"]!.worker!;
+    const worker = manifest.packages["spike-edge"]?.worker;
     expect(worker.compatibility_flags).toEqual(["nodejs_compat", "trace_events"]);
     expect(worker.migrations?.[0]?.new_classes).toEqual(["RateLimiter", "AnotherClass"]);
   });
@@ -284,8 +284,8 @@ describe("getManifestPackage", () => {
 
     const pkg = await getManifestPackage("chess-engine", root);
     expect(pkg).toBeDefined();
-    expect(pkg!.kind).toBe("library");
-    expect(pkg!.version).toBe("1.2.0");
+    expect(pkg?.kind).toBe("library");
+    expect(pkg?.version).toBe("1.2.0");
   });
 
   it("returns null for non-existent package", async () => {
@@ -304,7 +304,7 @@ describe("getManifestPackage", () => {
 
     const pkg = await getManifestPackage("shared", root);
     expect(pkg).toBeDefined();
-    expect(pkg!.deps).toBeUndefined();
+    expect(pkg?.deps).toBeUndefined();
   });
 });
 
@@ -449,8 +449,8 @@ packages:
     cleanup = tmp.cleanup;
 
     const manifest = await readManifest(root);
-    expect(manifest.packages["test-pkg"]!.private).toBe(true);
-    expect(manifest.packages["test-pkg"]!.vite).toBe(false);
+    expect(manifest.packages["test-pkg"]?.private).toBe(true);
+    expect(manifest.packages["test-pkg"]?.vite).toBe(false);
   });
 
   it("handles null/empty values in YAML", async () => {
@@ -498,7 +498,7 @@ packages:
 
     const manifest = await readManifest(root);
     expect(manifest.defaults.scope).toBe("@spike-land-ai");
-    expect(manifest.packages["test-pkg"]!.kind).toBe("library");
+    expect(manifest.packages["test-pkg"]?.kind).toBe("library");
   });
 
   it("handles quoted strings with spaces", async () => {
@@ -521,7 +521,7 @@ packages:
     cleanup = tmp.cleanup;
 
     const manifest = await readManifest(root);
-    expect(manifest.packages["test-pkg"]!.description).toBe("A test package with spaces");
+    expect(manifest.packages["test-pkg"]?.description).toBe("A test package with spaces");
   });
 
   it("handles single-quoted strings", async () => {
@@ -545,7 +545,7 @@ packages:
 
     const manifest = await readManifest(root);
     expect(manifest.defaults.scope).toBe("@spike-land-ai");
-    expect(manifest.packages["test-pkg"]!.description).toBe("single quoted description");
+    expect(manifest.packages["test-pkg"]?.description).toBe("single quoted description");
   });
 
   it("handles numeric version values", async () => {
@@ -568,7 +568,7 @@ packages:
     cleanup = tmp.cleanup;
 
     const manifest = await readManifest(root);
-    expect(manifest.packages["test-pkg"]!.version).toBeDefined();
+    expect(manifest.packages["test-pkg"]?.version).toBeDefined();
   });
 
   it("handles packages with publish config", async () => {
@@ -595,8 +595,8 @@ packages:
     cleanup = tmp.cleanup;
 
     const manifest = await readManifest(root);
-    expect(manifest.packages["test-pkg"]!.publish).toBeDefined();
-    expect(manifest.packages["test-pkg"]!.publish!.registries).toContain("npm.pkg.github.com");
+    expect(manifest.packages["test-pkg"]?.publish).toBeDefined();
+    expect(manifest.packages["test-pkg"]?.publish?.registries).toContain("npm.pkg.github.com");
   });
 
   it("handles multiple packages with a dep chain", async () => {
@@ -636,8 +636,8 @@ packages:
     cleanup = tmp.cleanup;
 
     const manifest = await readManifest(root);
-    expect(manifest.packages["c"]!.deps).toContain("a");
-    expect(manifest.packages["c"]!.deps).toContain("b");
+    expect(manifest.packages["c"]?.deps).toContain("a");
+    expect(manifest.packages["c"]?.deps).toContain("b");
   });
 
   it("handles empty deps list", async () => {
@@ -689,7 +689,7 @@ packages:
 
     const manifest = await readManifest(root);
     // The simple YAML parser parses nested maps - exports should be defined
-    expect(manifest.packages["test-pkg"]!.exports).toBeDefined();
+    expect(manifest.packages["test-pkg"]?.exports).toBeDefined();
   });
 
   it("handles non-key lines by skipping them", async () => {
@@ -732,7 +732,7 @@ packages:
     cleanup = tmp.cleanup;
 
     const manifest = await readManifest(root);
-    expect(manifest.packages["test-pkg"]!.deps).toBeNull();
+    expect(manifest.packages["test-pkg"]?.deps).toBeNull();
     // Use any casting since 'other' is not in the type
     expect((manifest.packages["test-pkg"] as Record<string, unknown>).other).toBe("value");
   });

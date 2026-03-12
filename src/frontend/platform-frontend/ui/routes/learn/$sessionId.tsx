@@ -144,12 +144,7 @@ function generateMockSession(content: string): SessionState {
             conceptIndex: 0,
             question:
               "Not enough content was provided to generate a quiz. Please go back and paste article text.",
-            options: ["I understand", "OK", "Got it", "Noted"] as [
-              string,
-              string,
-              string,
-              string,
-            ],
+            options: ["I understand", "OK", "Got it", "Noted"] as [string, string, string, string],
             correctIndex: 0,
           },
         ],
@@ -172,14 +167,16 @@ function generateMockSession(content: string): SessionState {
     concepts.push(raw.slice(0, 80));
   }
 
-  const questions: QuizQuestion[] = concepts.slice(0, 3).map((name, idx) =>
-    buildQuestion(
-      idx,
-      sourcePool[idx % sourcePool.length] ?? name,
-      sourcePool,
-      (n) => `Which of the following best describes: "${n}..."?`,
-    )
-  );
+  const questions: QuizQuestion[] = concepts
+    .slice(0, 3)
+    .map((name, idx) =>
+      buildQuestion(
+        idx,
+        sourcePool[idx % sourcePool.length] ?? name,
+        sourcePool,
+        (n) => `Which of the following best describes: "${n}..."?`,
+      ),
+    );
 
   return {
     article: content,
@@ -280,7 +277,8 @@ function evaluateMockAnswers(
   const nextQuestions: QuizQuestion[] = [];
   for (let i = 0; i < 3; i++) {
     const idx = unmasteredIndices[i % unmasteredIndices.length] ?? i;
-    const conceptSentence = sourcePool[idx % sourcePool.length] ?? state.concepts[idx] ?? `Concept ${idx}`;
+    const conceptSentence =
+      sourcePool[idx % sourcePool.length] ?? state.concepts[idx] ?? `Concept ${idx}`;
     nextQuestions.push(
       buildQuestion(
         idx,

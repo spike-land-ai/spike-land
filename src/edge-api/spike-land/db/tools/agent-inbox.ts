@@ -92,7 +92,7 @@ export function registerAgentInboxTools(
           const filtered = sinceTs > 0 ? msgs.filter((m) => m.createdAt > sinceTs) : msgs;
 
           if (filtered.length > 0) {
-            const latest = filtered[0]!;
+            const latest = filtered[0];
             agentMap.set(agent.id, {
               agentId: agent.id,
               agentName: agent.name,

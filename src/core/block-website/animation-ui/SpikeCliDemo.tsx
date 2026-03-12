@@ -324,7 +324,7 @@ export function SpikeCliDemo() {
                     />
                   </svg>
                 </div>
-                <ServerBox server={s} active={serverActive[i]!} />
+                <ServerBox server={s} active={serverActive[i]} />
               </div>
             ))}
           </div>

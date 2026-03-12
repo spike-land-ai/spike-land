@@ -386,11 +386,11 @@ describe("createR2Storage", () => {
 });
 
 it("uploads bytes with fallback bin extension", async () => {
-  const { createR2Storage } = await import(
-    "../../src/edge-api/image-studio-worker/mcp/storage.ts"
-  );
+  const { createR2Storage } = await import("../../src/edge-api/image-studio-worker/mcp/storage.ts");
   const mockPut = vi.fn().mockResolvedValue(undefined);
-  const mockEnv = { IMAGE_R2: { put: mockPut } } as unknown as import("../../src/edge-api/image-studio-worker/env.d.ts").Env;
+  const mockEnv = {
+    IMAGE_R2: { put: mockPut },
+  } as unknown as import("../../src/edge-api/image-studio-worker/env.d.ts").Env;
   const storage = createR2Storage(mockEnv, "https://cdn.example.com");
   const result = await storage.upload("user-xyz", new Uint8Array([0xff]), {
     filename: "noextension",
@@ -407,7 +407,9 @@ describe("validateSession", () => {
   });
 
   it("returns session when auth service responds with valid session", async () => {
-    const { validateSession } = await import("../../src/edge-api/image-studio-worker/core-logic/auth.ts");
+    const { validateSession } = await import(
+      "../../src/edge-api/image-studio-worker/core-logic/auth.ts"
+    );
 
     const fakeSession = {
       user: { id: "user-auth-1", email: "test@example.com", name: "Test User" },
@@ -434,7 +436,9 @@ describe("validateSession", () => {
   });
 
   it("returns null when auth service responds with 401", async () => {
-    const { validateSession } = await import("../../src/edge-api/image-studio-worker/core-logic/auth.ts");
+    const { validateSession } = await import(
+      "../../src/edge-api/image-studio-worker/core-logic/auth.ts"
+    );
 
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
 
@@ -446,7 +450,9 @@ describe("validateSession", () => {
   });
 
   it("returns null when session has no user.id", async () => {
-    const { validateSession } = await import("../../src/edge-api/image-studio-worker/core-logic/auth.ts");
+    const { validateSession } = await import(
+      "../../src/edge-api/image-studio-worker/core-logic/auth.ts"
+    );
 
     vi.stubGlobal(
       "fetch",
@@ -464,7 +470,9 @@ describe("validateSession", () => {
   });
 
   it("returns null when the network fetch throws", async () => {
-    const { validateSession } = await import("../../src/edge-api/image-studio-worker/core-logic/auth.ts");
+    const { validateSession } = await import(
+      "../../src/edge-api/image-studio-worker/core-logic/auth.ts"
+    );
 
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Network error")));
 
@@ -476,7 +484,9 @@ describe("validateSession", () => {
   });
 
   it("returns null when auth service returns null body", async () => {
-    const { validateSession } = await import("../../src/edge-api/image-studio-worker/core-logic/auth.ts");
+    const { validateSession } = await import(
+      "../../src/edge-api/image-studio-worker/core-logic/auth.ts"
+    );
 
     vi.stubGlobal(
       "fetch",
@@ -494,7 +504,9 @@ describe("validateSession", () => {
   });
 
   it("forwards cookies and Authorization header to auth service", async () => {
-    const { validateSession } = await import("../../src/edge-api/image-studio-worker/core-logic/auth.ts");
+    const { validateSession } = await import(
+      "../../src/edge-api/image-studio-worker/core-logic/auth.ts"
+    );
 
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -837,7 +849,7 @@ describe("Gallery API route logic (unit-level)", () => {
       expect(result.images).toHaveLength(limit);
       expect(result.nextCursor).not.toBeNull();
       // Cursor is parseable as ISO date
-      expect(new Date(result.nextCursor!).toISOString()).toBe(result.nextCursor);
+      expect(new Date(result.nextCursor).toISOString()).toBe(result.nextCursor);
     });
   });
 });
@@ -881,7 +893,7 @@ describe("Credits system (D1-backed)", () => {
     const balance = await credits.getBalance("user-123");
     expect(balance).not.toBeNull();
     expect(balance).toHaveProperty("remaining");
-    expect(typeof balance!.remaining).toBe("number");
+    expect(typeof balance?.remaining).toBe("number");
   });
 });
 

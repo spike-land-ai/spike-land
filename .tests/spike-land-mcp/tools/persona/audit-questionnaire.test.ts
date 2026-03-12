@@ -130,7 +130,7 @@ describe("Audit Questionnaire", () => {
         if (!segmentScores[seg]) {
           segmentScores[seg] = { total: 0, ux: 0, content: 0, cta: 0, apps: 0, signups: 0 };
         }
-        const s = segmentScores[seg]!;
+        const s = segmentScores[seg];
         s.total++;
         s.ux += r.uxScore;
         s.content += r.contentRelevance;
@@ -140,16 +140,16 @@ describe("Audit Questionnaire", () => {
       }
 
       // Developer segment: 2 results (ai-indie + classic-indie)
-      expect(segmentScores["Developer"]!.total).toBe(2);
-      expect(segmentScores["Developer"]!.ux / segmentScores["Developer"]!.total).toBe(3.5);
+      expect(segmentScores["Developer"]?.total).toBe(2);
+      expect(segmentScores["Developer"]?.ux / segmentScores["Developer"]?.total).toBe(3.5);
 
       // Business segment: 1 result (technical-founder)
-      expect(segmentScores["Business"]!.total).toBe(1);
-      expect(segmentScores["Business"]!.ux / segmentScores["Business"]!.total).toBe(5);
+      expect(segmentScores["Business"]?.total).toBe(1);
+      expect(segmentScores["Business"]?.ux / segmentScores["Business"]?.total).toBe(5);
 
       // Creator segment: 1 result (content-creator)
-      expect(segmentScores["Creator"]!.total).toBe(1);
-      expect(segmentScores["Creator"]!.signups / segmentScores["Creator"]!.total).toBe(0);
+      expect(segmentScores["Creator"]?.total).toBe(1);
+      expect(segmentScores["Creator"]?.signups / segmentScores["Creator"]?.total).toBe(0);
     });
 
     it("best/worst persona sorting works correctly", () => {
@@ -160,8 +160,8 @@ describe("Audit Questionnaire", () => {
       ];
       scored.sort((a, b) => b.avg - a.avg);
 
-      expect(scored[0]!.slug).toBe("technical-founder");
-      expect(scored[scored.length - 1]!.slug).toBe("content-creator");
+      expect(scored[0]?.slug).toBe("technical-founder");
+      expect(scored[scored.length - 1]?.slug).toBe("content-creator");
     });
   });
 });

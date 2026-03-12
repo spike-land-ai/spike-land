@@ -22,7 +22,10 @@ export function isJsxLikeFile(fileName?: string): boolean {
   return ext !== undefined && JSX_EXTENSIONS.has(ext);
 }
 
-export function collectEditorHighlightSegments(code: string, fileName?: string): HighlightSegment[] {
+export function collectEditorHighlightSegments(
+  code: string,
+  fileName?: string,
+): HighlightSegment[] {
   const segments: HighlightSegment[] = [];
 
   if (isJsxLikeFile(fileName)) {
@@ -72,7 +75,7 @@ function collectHelperTailwindSegments(code: string): HighlightSegment[] {
   const segments: HighlightSegment[] = [];
 
   for (const match of code.matchAll(TAILWIND_HELPERS)) {
-    const openParenIndex = match.index! + match[0].length - 1;
+    const openParenIndex = match.index + match[0].length - 1;
     const expressionEnd = findMatchingBracket(code, openParenIndex, "(", ")");
     if (expressionEnd === -1) continue;
 
@@ -155,8 +158,7 @@ function parseJsxTag(
     index += 1;
     WHITESPACE.lastIndex = index;
     const postEqualsWhitespace = WHITESPACE.exec(code);
-    index =
-      postEqualsWhitespace?.index === index ? postEqualsWhitespace[0].length + index : index;
+    index = postEqualsWhitespace?.index === index ? postEqualsWhitespace[0].length + index : index;
 
     const current = code[index];
     if (current === undefined) break;
@@ -166,7 +168,9 @@ function parseJsxTag(
       if (stringEnd === -1) break;
 
       if (TAILWIND_ATTRS.has(attrName)) {
-        segments.push(...collectTailwindSegmentsFromLiteral(code.slice(index + 1, stringEnd), index + 1));
+        segments.push(
+          ...collectTailwindSegmentsFromLiteral(code.slice(index + 1, stringEnd), index + 1),
+        );
       } else {
         segments.push({
           startOffset: index + 1,
@@ -238,20 +242,28 @@ function collectTailwindStringSegments(expression: string, offsetBase: number): 
     const end = findStringEnd(expression, index);
     if (end === -1) break;
 
-    segments.push(...collectTailwindSegmentsFromLiteral(expression.slice(index + 1, end), offsetBase + index + 1));
+    segments.push(
+      ...collectTailwindSegmentsFromLiteral(
+        expression.slice(index + 1, end),
+        offsetBase + index + 1,
+      ),
+    );
     index = end + 1;
   }
 
   return segments;
 }
 
-function collectTailwindSegmentsFromLiteral(value: string, startOffset: number): HighlightSegment[] {
+function collectTailwindSegmentsFromLiteral(
+  value: string,
+  startOffset: number,
+): HighlightSegment[] {
   const segments: HighlightSegment[] = [];
   const tokenRegex = /\S+/g;
 
   for (const match of value.matchAll(tokenRegex)) {
     const token = match[0];
-    const tokenStart = startOffset + match.index!;
+    const tokenStart = startOffset + match.index;
     const tokenParts = splitTailwindToken(token);
 
     if (tokenParts.length === 0) continue;
@@ -266,7 +278,7 @@ function collectTailwindSegmentsFromLiteral(value: string, startOffset: number):
       cursor += prefix.length + 1;
     }
 
-    const utility = tokenParts[tokenParts.length - 1]!;
+    const utility = tokenParts[tokenParts.length - 1];
     segments.push({
       startOffset: cursor,
       endOffset: cursor + utility.length,

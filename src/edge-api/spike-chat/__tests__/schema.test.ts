@@ -9,7 +9,7 @@ import {
   bookmarks,
   webhooks,
   agentProfiles,
-  slashCommands
+  slashCommands,
 } from "../db/schema";
 
 describe("schema", () => {

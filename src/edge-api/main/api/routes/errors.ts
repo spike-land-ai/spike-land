@@ -76,7 +76,7 @@ errors.post("/errors/ingest", async (c) => {
       e.stack_trace ? truncate(e.stack_trace, MAX_STACK) : null,
       metadataStr,
       clientIp,
-      VALID_SEVERITIES.has(e.severity ?? "") ? e.severity! : "error",
+      VALID_SEVERITIES.has(e.severity ?? "") ? e.severity : "error",
     );
   });
 

@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildBlogAnalyticsEvents,
-  deriveBlogAudienceSignal,
-} from "../routes/blog-audience.js";
+import { buildBlogAnalyticsEvents, deriveBlogAudienceSignal } from "../routes/blog-audience.js";
 
 describe("blog audience targeting", () => {
   it("classifies research-heavy posts for AI researcher audiences", () => {

@@ -42,7 +42,7 @@ interface ReaderPreferences {
 
 const DEFAULT_PREFERENCES: ReaderPreferences = {
   autoFollow: true,
-  elevenLabsVoice: ELEVENLABS_VOICES[0]!.id,
+  elevenLabsVoice: ELEVENLABS_VOICES[0]?.id,
   engine: "browser",
   fontScale: 1,
   rate: 1,

@@ -20,7 +20,7 @@ describe("SQLite StorageAdapter", () => {
         const result = await fileAdapter.sql.execute<{ journal_mode: string }>(
           "PRAGMA journal_mode",
         );
-        expect(result.rows[0]!.journal_mode).toBe("wal");
+        expect(result.rows[0]?.journal_mode).toBe("wal");
       } finally {
         // Clean up temp files
         for (const suffix of ["", "-wal", "-shm"]) {
@@ -33,7 +33,7 @@ describe("SQLite StorageAdapter", () => {
 
     it("should report memory journal mode for in-memory databases", async () => {
       const result = await adapter.sql.execute<{ journal_mode: string }>("PRAGMA journal_mode");
-      expect(result.rows[0]!.journal_mode).toBe("memory");
+      expect(result.rows[0]?.journal_mode).toBe("memory");
     });
   });
 
@@ -97,7 +97,7 @@ describe("SQLite StorageAdapter", () => {
       await adapter.sql.execute("INSERT INTO items (id, name) VALUES (?, ?)", [2, "bar"]);
       const result = await adapter.sql.execute<{ id: number; name: string }>("SELECT * FROM items");
       expect(result.rows).toHaveLength(2);
-      expect(result.rows[0]!.name).toBe("foo");
+      expect(result.rows[0]?.name).toBe("foo");
     });
 
     it("should execute UPDATE", async () => {
@@ -112,7 +112,7 @@ describe("SQLite StorageAdapter", () => {
         "SELECT name FROM items WHERE id = ?",
         [1],
       );
-      expect(check.rows[0]!.name).toBe("bar");
+      expect(check.rows[0]?.name).toBe("bar");
     });
 
     it("should execute DELETE", async () => {
@@ -157,51 +157,51 @@ describe("SQLite StorageAdapter", () => {
       ]);
 
       expect(results).toHaveLength(3);
-      expect(results[0]!.rowsAffected).toBe(1);
-      expect(results[1]!.rowsAffected).toBe(1);
-      expect(results[2]!.rows).toHaveLength(2);
+      expect(results[0]?.rowsAffected).toBe(1);
+      expect(results[1]?.rowsAffected).toBe(1);
+      expect(results[2]?.rows).toHaveLength(2);
     });
   });
 
   describe("Blob adapter", () => {
     it("should return null for missing blob", async () => {
-      expect(await adapter.blobs!.get("missing")).toBeNull();
+      expect(await adapter.blobs?.get("missing")).toBeNull();
     });
 
     it("should put and get ArrayBuffer", async () => {
       const data = new Uint8Array([1, 2, 3, 4]).buffer;
-      await adapter.blobs!.put("blob1", data as ArrayBuffer);
-      const result = await adapter.blobs!.get("blob1");
+      await adapter.blobs?.put("blob1", data as ArrayBuffer);
+      const result = await adapter.blobs?.get("blob1");
       expect(result).not.toBeNull();
-      expect(new Uint8Array(result!)).toEqual(new Uint8Array([1, 2, 3, 4]));
+      expect(new Uint8Array(result)).toEqual(new Uint8Array([1, 2, 3, 4]));
     });
 
     it("should put and get Uint8Array", async () => {
       const data = new Uint8Array([10, 20, 30]);
-      await adapter.blobs!.put("blob2", data);
-      const result = await adapter.blobs!.get("blob2");
-      expect(new Uint8Array(result!)).toEqual(new Uint8Array([10, 20, 30]));
+      await adapter.blobs?.put("blob2", data);
+      const result = await adapter.blobs?.get("blob2");
+      expect(new Uint8Array(result)).toEqual(new Uint8Array([10, 20, 30]));
     });
 
     it("should delete a blob and return true", async () => {
-      await adapter.blobs!.put("blob1", new Uint8Array([1]));
-      expect(await adapter.blobs!.delete("blob1")).toBe(true);
-      expect(await adapter.blobs!.get("blob1")).toBeNull();
+      await adapter.blobs?.put("blob1", new Uint8Array([1]));
+      expect(await adapter.blobs?.delete("blob1")).toBe(true);
+      expect(await adapter.blobs?.get("blob1")).toBeNull();
     });
 
     it("should return false when deleting non-existent blob", async () => {
-      expect(await adapter.blobs!.delete("nope")).toBe(false);
+      expect(await adapter.blobs?.delete("nope")).toBe(false);
     });
 
     it("should list blobs with prefix", async () => {
-      await adapter.blobs!.put("img:1", new Uint8Array([1]));
-      await adapter.blobs!.put("img:2", new Uint8Array([2]));
-      await adapter.blobs!.put("doc:1", new Uint8Array([3]));
+      await adapter.blobs?.put("img:1", new Uint8Array([1]));
+      await adapter.blobs?.put("img:2", new Uint8Array([2]));
+      await adapter.blobs?.put("doc:1", new Uint8Array([3]));
 
-      const imgs = await adapter.blobs!.list("img:");
+      const imgs = await adapter.blobs?.list("img:");
       expect(imgs).toEqual(["img:1", "img:2"]);
 
-      const all = await adapter.blobs!.list();
+      const all = await adapter.blobs?.list();
       expect(all).toHaveLength(3);
     });
   });

@@ -5,9 +5,8 @@
  * Extracted from scripts/agent-poll.ts for use in Docker container.
  */
 
-import { type ChildProcess } from "child_process";
-import spawn from "cross-spawn";
-import { existsSync, mkdirSync } from "fs";
+import { spawn, type ChildProcess } from "node:child_process";
+import { existsSync, mkdirSync } from "node:fs";
 import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -74,7 +73,7 @@ export const TEST_KEYWORD_HANDLERS: Record<string, TestKeywordHandler> = {
 
   "E2E_TEST_DELAY:": async (content) => {
     const delayMatch = content.match(/E2E_TEST_DELAY:(\d+)/);
-    const delayMs = delayMatch ? parseInt(delayMatch[1]!, 10) : 1000;
+    const delayMs = delayMatch ? parseInt(delayMatch[1], 10) : 1000;
     const clampedDelay = Math.min(delayMs, 30000);
     await new Promise((resolve) => setTimeout(resolve, clampedDelay));
     return {

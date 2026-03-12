@@ -214,7 +214,9 @@ describe("constructClassInstance", () => {
       SimpleComponent as unknown as Parameters<typeof constructClassInstance>[1],
       {},
     );
-    const updater = (instance as unknown as Record<string, { enqueueSetState: (...args: unknown[]) => unknown }>).updater;
+    const updater = (
+      instance as unknown as Record<string, { enqueueSetState: (...args: unknown[]) => unknown }>
+    ).updater;
     expect(typeof updater.enqueueSetState).toBe("function");
     // Should not throw
     expect(() => updater.enqueueSetState(instance, { newState: true }, null)).not.toThrow();
@@ -228,8 +230,12 @@ describe("constructClassInstance", () => {
       SimpleComponent as unknown as Parameters<typeof constructClassInstance>[1],
       {},
     );
-    const updater = (instance as unknown as Record<string, { enqueueReplaceState: (...args: unknown[]) => unknown }>)
-      .updater;
+    const updater = (
+      instance as unknown as Record<
+        string,
+        { enqueueReplaceState: (...args: unknown[]) => unknown }
+      >
+    ).updater;
     expect(() => updater.enqueueReplaceState(instance, {}, null)).not.toThrow();
   });
 
@@ -241,8 +247,9 @@ describe("constructClassInstance", () => {
       SimpleComponent as unknown as Parameters<typeof constructClassInstance>[1],
       {},
     );
-    const updater = (instance as unknown as Record<string, { enqueueForceUpdate: (...args: unknown[]) => unknown }>)
-      .updater;
+    const updater = (
+      instance as unknown as Record<string, { enqueueForceUpdate: (...args: unknown[]) => unknown }>
+    ).updater;
     expect(() => updater.enqueueForceUpdate(instance, null)).not.toThrow();
   });
 
@@ -254,7 +261,9 @@ describe("constructClassInstance", () => {
       SimpleComponent as unknown as Parameters<typeof constructClassInstance>[1],
       {},
     );
-    const updater = (instance as unknown as Record<string, { isMounted: (...args: unknown[]) => unknown }>).updater;
+    const updater = (
+      instance as unknown as Record<string, { isMounted: (...args: unknown[]) => unknown }>
+    ).updater;
     expect(updater.isMounted()).toBe(true);
   });
 });

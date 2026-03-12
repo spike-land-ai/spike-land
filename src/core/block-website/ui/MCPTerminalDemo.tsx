@@ -136,7 +136,7 @@ export function MCPTerminalDemo() {
   const [paused, setPaused] = useState(false);
   const [started, setStarted] = useState(false);
 
-  const tab = TABS[activeTab]!;
+  const tab = TABS[activeTab];
 
   const startAnimation = useCallback(() => {
     setTyped("");

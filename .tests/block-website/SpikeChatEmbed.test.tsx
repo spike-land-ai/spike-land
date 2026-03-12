@@ -40,7 +40,11 @@ describe("SpikeChatEmbed", () => {
       value: { hostname: "spike.land", origin: "https://spike.land" },
     });
 
-    const result = SpikeChatEmbed({ channelSlug: "test-chan", workspaceSlug: "test-work", guestAccess: true });
+    const result = SpikeChatEmbed({
+      channelSlug: "test-chan",
+      workspaceSlug: "test-work",
+      guestAccess: true,
+    });
     expect(result).toBeDefined();
     expect(typeof result).toBe("object");
 

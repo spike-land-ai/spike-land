@@ -109,7 +109,7 @@ export class Code implements ICode {
       throw new Error(`Failed to fetch session: ${fetchError?.message || "Unknown error"}`);
     }
 
-    const { data: sessionData, error: jsonError } = await tryCatch(response!.json());
+    const { data: sessionData, error: jsonError } = await tryCatch(response?.json());
 
     if (jsonError) {
       throw new Error(`Failed to parse session JSON: ${jsonError.message}`);

@@ -273,7 +273,7 @@ export function registerGatewayMetaTools(
           const audience = CATEGORY_AUDIENCES[cat.name];
           if (audience) {
             if (!grouped.has(audience)) grouped.set(audience, []);
-            grouped.get(audience)!.push(cat);
+            grouped.get(audience)?.push(cat);
           } else {
             ungrouped.push(cat);
           }

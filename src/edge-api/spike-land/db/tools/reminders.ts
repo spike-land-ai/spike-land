@@ -104,7 +104,7 @@ export function registerRemindersTools(
         }
 
         return textResult(
-          `**Reminder Completed!**\n\nID: \`${updated[0]!.id}\`\nText: ${updated[0]!.text}`,
+          `**Reminder Completed!**\n\nID: \`${updated[0]?.id}\`\nText: ${updated[0]?.text}`,
         );
       }),
   );

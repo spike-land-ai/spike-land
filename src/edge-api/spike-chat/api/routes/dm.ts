@@ -13,9 +13,9 @@ dmRouter.post("/workspaces/:workspaceId/dm", async (c) => {
   const workspaceId = c.req.param("workspaceId");
   const body = await c.req.json();
   const userId = c.get("userId");
-  
+
   if (!userId) return c.json({ error: "Unauthorized" }, 401);
-  
+
   const targetUserId = body.userId;
   if (!targetUserId) return c.json({ error: "Missing target userId" }, 400);
 
@@ -24,12 +24,10 @@ dmRouter.post("/workspaces/:workspaceId/dm", async (c) => {
   const slug = `dm-${sortedIds.join("-")}`;
 
   // Check if DM channel already exists
-  const existingChannels = await db.select().from(channels).where(
-    and(
-      eq(channels.workspaceId, workspaceId),
-      eq(channels.slug, slug)
-    )
-  );
+  const existingChannels = await db
+    .select()
+    .from(channels)
+    .where(and(eq(channels.workspaceId, workspaceId), eq(channels.slug, slug)));
 
   if (existingChannels.length > 0) {
     return c.json({ id: existingChannels[0]?.id });
@@ -50,7 +48,7 @@ dmRouter.post("/workspaces/:workspaceId/dm", async (c) => {
 
   await db.insert(channelMembers).values([
     { channelId: id, userId, role: "member", joinedAt: now },
-    { channelId: id, userId: targetUserId, role: "member", joinedAt: now }
+    { channelId: id, userId: targetUserId, role: "member", joinedAt: now },
   ]);
 
   return c.json({ id }, 201);

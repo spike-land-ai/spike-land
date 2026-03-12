@@ -83,7 +83,7 @@ async function mutate(
     method: "POST",
     headers: {
       Authorization: `Bearer ${ACCESS_TOKEN}`,
-      "developer-token": DEVELOPER_TOKEN!,
+      "developer-token": DEVELOPER_TOKEN,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ operations }),
@@ -105,7 +105,7 @@ async function googleAdsMutate(
     method: "POST",
     headers: {
       Authorization: `Bearer ${ACCESS_TOKEN}`,
-      "developer-token": DEVELOPER_TOKEN!,
+      "developer-token": DEVELOPER_TOKEN,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ mutateOperations }),
@@ -125,7 +125,7 @@ async function search(query: string): Promise<Record<string, unknown>[]> {
     method: "POST",
     headers: {
       Authorization: `Bearer ${ACCESS_TOKEN}`,
-      "developer-token": DEVELOPER_TOKEN!,
+      "developer-token": DEVELOPER_TOKEN,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ query }),
@@ -453,7 +453,7 @@ async function verifyAccount(): Promise<boolean> {
     const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${ACCESS_TOKEN}`,
-        "developer-token": DEVELOPER_TOKEN!,
+        "developer-token": DEVELOPER_TOKEN,
       },
     });
     const data = (await res.json()) as Record<string, unknown>;

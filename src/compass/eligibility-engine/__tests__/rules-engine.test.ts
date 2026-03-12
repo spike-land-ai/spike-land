@@ -506,11 +506,11 @@ describe("RulesEngine.findEligiblePrograms", () => {
     const results = engine.findEligiblePrograms(profile, programs);
     expect(results).toHaveLength(3);
     // Eligible programs (score 1.0) must come first
-    expect(results[0]!.eligible).toBe(true);
-    expect(results[1]!.eligible).toBe(true);
+    expect(results[0]?.eligible).toBe(true);
+    expect(results[1]?.eligible).toBe(true);
     // Ineligible last
-    expect(results[2]!.eligible).toBe(false);
-    expect(results[2]!.programId).toBe("WEALTHY-ONLY");
+    expect(results[2]?.eligible).toBe(false);
+    expect(results[2]?.programId).toBe("WEALTHY-ONLY");
   });
 
   it("returns empty array for empty program list", () => {

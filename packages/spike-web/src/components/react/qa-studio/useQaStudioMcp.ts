@@ -110,7 +110,7 @@ export function useQaStudioMcp() {
           try {
             const msg = JSON.parse(e.data);
             if (msg.id !== undefined && pendingRequestsRef.current.has(msg.id)) {
-              const { resolve, reject } = pendingRequestsRef.current.get(msg.id)!;
+              const { resolve, reject } = pendingRequestsRef.current.get(msg.id);
               pendingRequestsRef.current.delete(msg.id);
               if (msg.error) reject(msg.error);
               else resolve(msg.result);

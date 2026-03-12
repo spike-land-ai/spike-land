@@ -91,17 +91,17 @@ function resolveValue(state: ReplicaState): string {
   switch (state.type) {
     case "g_counter": {
       let sum = 0;
-      for (const key of Object.keys(state.counts)) sum += state.counts[key]!;
+      for (const key of Object.keys(state.counts)) sum += state.counts[key];
       return String(sum);
     }
     case "pn_counter": {
       let pos = 0;
       for (const key of Object.keys(state.positive)) {
-        pos += state.positive[key]!;
+        pos += state.positive[key];
       }
       let neg = 0;
       for (const key of Object.keys(state.negative)) {
-        neg += state.negative[key]!;
+        neg += state.negative[key];
       }
       return String(pos - neg);
     }
@@ -217,7 +217,7 @@ function applyOperation(
       if (operation === "add") {
         if (!state.elements[value]) state.elements[value] = [];
         set.tagCounter++;
-        state.elements[value]!.push(`tag-${set.tagCounter}`);
+        state.elements[value]?.push(`tag-${set.tagCounter}`);
       } else {
         state.elements[value] = [];
       }
@@ -445,17 +445,17 @@ export function registerCrdtTools(registry: ToolRegistry, userId: string, db: Dr
       .meta({ category: "crdt", tier: "free" })
       .handler(async ({ input }) => {
         const set = getSet(input.set_id, userId);
-        const allStates = set.replicaOrder.map((rid) => set.replicas.get(rid)!.state);
-        const merged = cloneState(allStates[0]!);
+        const allStates = set.replicaOrder.map((rid) => set.replicas.get(rid)?.state);
+        const merged = cloneState(allStates[0]);
         for (let i = 1; i < allStates.length; i++) {
-          mergeStates(merged, cloneState(allStates[i]!));
+          mergeStates(merged, cloneState(allStates[i]));
         }
         for (const replicaId of set.replicaOrder) {
-          set.replicas.get(replicaId)!.state = cloneState(merged);
+          set.replicas.get(replicaId)?.state = cloneState(merged);
         }
         const rows = set.replicaOrder
           .map((rid) => {
-            const r = set.replicas.get(rid)!;
+            const r = set.replicas.get(rid);
             return formatReplicaState(r.id, r.state, resolveValue(r.state));
           })
           .join("\n");
@@ -501,14 +501,14 @@ export function registerCrdtTools(registry: ToolRegistry, userId: string, db: Dr
         const set = getSet(input.set_id, userId);
         const replicaValues = set.replicaOrder.map((rid) => ({
           id: rid,
-          value: resolveValue(set.replicas.get(rid)!.state),
+          value: resolveValue(set.replicas.get(rid)?.state),
         }));
         const diffs: Array<{ replicaA: string; replicaB: string; valueA: string; valueB: string }> =
           [];
         for (let i = 0; i < replicaValues.length; i++) {
           for (let j = i + 1; j < replicaValues.length; j++) {
-            const a = replicaValues[i]!,
-              b = replicaValues[j]!;
+            const a = replicaValues[i],
+              b = replicaValues[j];
             if (a.value !== b.value) {
               diffs.push({
                 replicaA: a.id,
@@ -550,7 +550,7 @@ export function registerCrdtTools(registry: ToolRegistry, userId: string, db: Dr
       .handler(async ({ input }) => {
         const set = getSet(input.set_id, userId);
         const replicaValues = set.replicaOrder.map((rid) =>
-          resolveValue(set.replicas.get(rid)!.state),
+          resolveValue(set.replicas.get(rid)?.state),
         );
         const converged = replicaValues.every((v) => v === replicaValues[0]);
         const currentState = converged

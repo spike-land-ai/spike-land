@@ -36,11 +36,15 @@ describe("categorizeLink", () => {
   });
 
   it("classifies raw GitHub links", () => {
-    expect(categorizeLink("https://raw.githubusercontent.com/org/repo/main/logo.svg")).toBe("github_raw");
+    expect(categorizeLink("https://raw.githubusercontent.com/org/repo/main/logo.svg")).toBe(
+      "github_raw",
+    );
   });
 
   it("classifies shields.io badges", () => {
-    expect(categorizeLink("https://img.shields.io/github/actions/workflow/status/org/repo/ci.yml")).toBe("github_badge");
+    expect(
+      categorizeLink("https://img.shields.io/github/actions/workflow/status/org/repo/ci.yml"),
+    ).toBe("github_badge");
   });
 
   it("classifies external URLs", () => {
@@ -95,9 +99,9 @@ describe("extractLinks", () => {
     const md = "Check [Google](https://google.com) for info.";
     const links = extractLinks(md, "test.md");
     expect(links).toHaveLength(1);
-    expect(links[0]!.target).toBe("https://google.com");
-    expect(links[0]!.text).toBe("Google");
-    expect(links[0]!.line).toBe(1);
+    expect(links[0]?.target).toBe("https://google.com");
+    expect(links[0]?.text).toBe("Google");
+    expect(links[0]?.line).toBe(1);
   });
 
   it("extracts multiple links on same line", () => {
@@ -110,21 +114,21 @@ describe("extractLinks", () => {
     const md = "[docs]: https://docs.example.com";
     const links = extractLinks(md, "test.md");
     expect(links).toHaveLength(1);
-    expect(links[0]!.target).toBe("https://docs.example.com");
+    expect(links[0]?.target).toBe("https://docs.example.com");
   });
 
   it("extracts HTML href links", () => {
     const md = '<a href="https://test.com">click</a>';
     const links = extractLinks(md, "test.md");
     expect(links).toHaveLength(1);
-    expect(links[0]!.target).toBe("https://test.com");
+    expect(links[0]?.target).toBe("https://test.com");
   });
 
   it("extracts img src links", () => {
     const md = '<img src="https://example.com/logo.png" alt="logo">';
     const links = extractLinks(md, "test.md");
     expect(links).toHaveLength(1);
-    expect(links[0]!.target).toBe("https://example.com/logo.png");
+    expect(links[0]?.target).toBe("https://example.com/logo.png");
   });
 
   it("skips links inside code blocks", () => {
@@ -132,25 +136,25 @@ describe("extractLinks", () => {
     const links = extractLinks(md, "test.md");
     // Code block links are skipped during extraction (not even added)
     expect(links).toHaveLength(1);
-    expect(links[0]!.target).toBe("https://real.com");
+    expect(links[0]?.target).toBe("https://real.com");
   });
 
   it("handles relative file links", () => {
     const md = "[see](./other.md)";
     const links = extractLinks(md, "test.md");
-    expect(links[0]!.category).toBe("relative_file");
+    expect(links[0]?.category).toBe("relative_file");
   });
 
   it("handles links with anchors", () => {
     const md = "[section](./doc.md#usage)";
     const links = extractLinks(md, "test.md");
-    expect(links[0]!.category).toBe("file_with_anchor");
+    expect(links[0]?.category).toBe("file_with_anchor");
   });
 
   it("records correct line numbers", () => {
     const md = "line1\n[link1](a.md)\nline3\n[link2](b.md)";
     const links = extractLinks(md, "test.md");
-    expect(links[0]!.line).toBe(2);
-    expect(links[1]!.line).toBe(4);
+    expect(links[0]?.line).toBe(2);
+    expect(links[1]?.line).toBe(4);
   });
 });

@@ -96,7 +96,10 @@ function sanitizeKeyPart(value, fallback) {
 function normalizePolicy(rawPolicy, updatedAt) {
   const policy = rawPolicy && typeof rawPolicy === "object" ? rawPolicy : {};
   const version = sanitizeKeyPart(policy.version || "v1", "v1");
-  const cacheNamespace = sanitizeKeyPart(policy.cacheNamespace || DEFAULT_CACHE_NAMESPACE, DEFAULT_CACHE_NAMESPACE);
+  const cacheNamespace = sanitizeKeyPart(
+    policy.cacheNamespace || DEFAULT_CACHE_NAMESPACE,
+    DEFAULT_CACHE_NAMESPACE,
+  );
   const manifestTtlSeconds =
     typeof policy.manifestTtlSeconds === "number" && Number.isFinite(policy.manifestTtlSeconds)
       ? Math.max(30, Math.floor(policy.manifestTtlSeconds))
@@ -226,7 +229,9 @@ async function applyRuleStrategy(policy, rule, request) {
   const cachedResponse = await matchCachedResponse(policy, rule, request);
 
   if (strategy === "cache-only") {
-    return cachedResponse || new Response("Cache miss", { status: 504, statusText: "Gateway Timeout" });
+    return (
+      cachedResponse || new Response("Cache miss", { status: 504, statusText: "Gateway Timeout" })
+    );
   }
 
   if (strategy === "network-only") {
@@ -300,7 +305,10 @@ function matchesRule(rule, request) {
   if (typeof match.pathname === "string" && requestUrl.pathname !== match.pathname) {
     return false;
   }
-  if (typeof match.pathnamePrefix === "string" && !requestUrl.pathname.startsWith(match.pathnamePrefix)) {
+  if (
+    typeof match.pathnamePrefix === "string" &&
+    !requestUrl.pathname.startsWith(match.pathnamePrefix)
+  ) {
     return false;
   }
   if (typeof match.regex === "string") {
@@ -315,7 +323,10 @@ function matchesRule(rule, request) {
   if (typeof match.requestMode === "string" && request.mode !== match.requestMode) {
     return false;
   }
-  if (typeof match.requestDestination === "string" && request.destination !== match.requestDestination) {
+  if (
+    typeof match.requestDestination === "string" &&
+    request.destination !== match.requestDestination
+  ) {
     return false;
   }
 
@@ -324,7 +335,9 @@ function matchesRule(rule, request) {
 
 function findMatchingRule(policy, request) {
   const rules = [...policy.precache, ...policy.runtime];
-  return rules.find((rule) => rule && typeof rule === "object" && matchesRule(rule, request)) || null;
+  return (
+    rules.find((rule) => rule && typeof rule === "object" && matchesRule(rule, request)) || null
+  );
 }
 
 async function precachePolicyEntries(policy) {

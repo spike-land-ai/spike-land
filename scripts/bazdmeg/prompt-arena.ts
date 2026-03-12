@@ -14,12 +14,7 @@ import reviewerV3 from "./prompts/reviewer-v3.js";
 import reviewFixerV3 from "./prompts/review-fixer-v3.js";
 import reviewerPersona from "./prompts/reviewer-persona.js";
 
-const ALL_PROMPTS: PromptVariant[] = [
-  fixerV3,
-  reviewerV3,
-  reviewFixerV3,
-  reviewerPersona,
-];
+const ALL_PROMPTS: PromptVariant[] = [fixerV3, reviewerV3, reviewFixerV3, reviewerPersona];
 
 const DATA_DIR = join(process.cwd(), ".bazdmeg");
 const ELO_FILE = join(DATA_DIR, "prompt-elo.json");

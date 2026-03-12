@@ -83,7 +83,7 @@ describe("useOnlineStatus", () => {
 
     expect(result.current.lastChangedAt).not.toBeNull();
     // Should be a valid ISO string
-    expect(() => new Date(result.current.lastChangedAt!)).not.toThrow();
+    expect(() => new Date(result.current.lastChangedAt)).not.toThrow();
   });
 
   it("updates lastChangedAt on each transition", () => {

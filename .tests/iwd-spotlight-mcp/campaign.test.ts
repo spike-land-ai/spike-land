@@ -4,7 +4,12 @@ import { createMockServer } from "@spike-land-ai/mcp-server-base";
 import { createMockToolClient } from "../../src/mcp-tools/iwd-spotlight/core-logic/tool-client.js";
 import { registerCampaignTools } from "../../src/mcp-tools/iwd-spotlight/core-logic/campaign.js";
 
-function setup(responses: Record<string, { content: Array<{ type: "text"; text: string }>; isError?: boolean }> = {}) {
+function setup(
+  responses: Record<
+    string,
+    { content: Array<{ type: "text"; text: string }>; isError?: boolean }
+  > = {},
+) {
   const server = createMockServer();
   const client = createMockToolClient(responses);
   registerCampaignTools(server as unknown as McpServer, client);

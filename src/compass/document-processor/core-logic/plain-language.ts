@@ -51,7 +51,7 @@ export function explainForm(template: FormTemplate): string[] {
   const selectFields = template.fields.filter((f) => f.type === "select" && f.options?.length);
   if (selectFields.length > 0) {
     for (const f of selectFields) {
-      steps.push(`For "${f.label}", you will choose from: ${f.options!.join(", ")}.`);
+      steps.push(`For "${f.label}", you will choose from: ${f.options?.join(", ")}.`);
     }
   }
 
@@ -134,7 +134,7 @@ function groupByType(fields: readonly FormField[]): Record<string, FormField[]> 
   const groups: Record<string, FormField[]> = {};
   for (const field of fields) {
     if (!groups[field.type]) groups[field.type] = [];
-    groups[field.type]!.push(field);
+    groups[field.type]?.push(field);
   }
   return groups;
 }

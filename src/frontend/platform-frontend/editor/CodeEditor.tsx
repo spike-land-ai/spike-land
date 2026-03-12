@@ -124,37 +124,34 @@ function LocalMonacoEditor({
     beforeMount,
   };
 
-  const applyHighlightDecorations = useCallback(
-    (code: string) => {
-      if (!editorRef.current) return;
+  const applyHighlightDecorations = useCallback((code: string) => {
+    if (!editorRef.current) return;
 
-      const model = editorRef.current.getModel();
-      if (!model) return;
+    const model = editorRef.current.getModel();
+    if (!model) return;
 
-      const decorations = collectEditorHighlightSegments(code, propsRef.current.fileName).map(
-        (segment) => {
-          const start = model.getPositionAt(segment.startOffset);
-          const end = model.getPositionAt(segment.endOffset);
+    const decorations = collectEditorHighlightSegments(code, propsRef.current.fileName).map(
+      (segment) => {
+        const start = model.getPositionAt(segment.startOffset);
+        const end = model.getPositionAt(segment.endOffset);
 
-          return {
-            range: {
-              startLineNumber: start.lineNumber,
-              startColumn: start.column,
-              endLineNumber: end.lineNumber,
-              endColumn: end.column,
-            },
-            options: { inlineClassName: segment.className },
-          };
-        },
-      );
+        return {
+          range: {
+            startLineNumber: start.lineNumber,
+            startColumn: start.column,
+            endLineNumber: end.lineNumber,
+            endColumn: end.column,
+          },
+          options: { inlineClassName: segment.className },
+        };
+      },
+    );
 
-      decorationIdsRef.current = editorRef.current.deltaDecorations(
-        decorationIdsRef.current,
-        decorations,
-      );
-    },
-    [],
-  );
+    decorationIdsRef.current = editorRef.current.deltaDecorations(
+      decorationIdsRef.current,
+      decorations,
+    );
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -179,7 +176,7 @@ function LocalMonacoEditor({
           monaco.editor.setModelLanguage(model, props.language || "typescript");
         }
 
-        editorRef.current = monaco.editor.create(containerRef.current!, {
+        editorRef.current = monaco.editor.create(containerRef.current, {
           model,
           theme: props.theme,
           ...props.options,
@@ -190,7 +187,7 @@ function LocalMonacoEditor({
         }
 
         editorRef.current.onDidChangeModelContent(() => {
-          const currentValue = editorRef.current!.getValue();
+          const currentValue = editorRef.current?.getValue();
           applyHighlightDecorations(currentValue);
           propsRef.current.onChange?.(currentValue);
         });
@@ -346,44 +343,50 @@ export function CodeEditor({
     }
   }, [value]);
 
-  const handleBeforeMount = useCallback((monaco: MonacoModule) => {
-    if (monacoTheme === SPIKE_PLATFORM_MONACO_THEME) {
-      definePlatformMonacoTheme(monaco as unknown as { editor: MonacoModule["editor"] }, isDarkMode);
-    }
+  const handleBeforeMount = useCallback(
+    (monaco: MonacoModule) => {
+      if (monacoTheme === SPIKE_PLATFORM_MONACO_THEME) {
+        definePlatformMonacoTheme(
+          monaco as unknown as { editor: MonacoModule["editor"] },
+          isDarkMode,
+        );
+      }
 
-    // Local monaco package exports typescript directly on the root object
-    const typescript = monaco?.typescript || monaco?.languages?.typescript;
-    if (!typescript) return;
+      // Local monaco package exports typescript directly on the root object
+      const typescript = monaco?.typescript || monaco?.languages?.typescript;
+      if (!typescript) return;
 
-    const tsDefaults = typescript.typescriptDefaults;
-    if (!tsDefaults) return;
+      const tsDefaults = typescript.typescriptDefaults;
+      if (!tsDefaults) return;
 
-    tsDefaults.setCompilerOptions({
-      target: 9, // ScriptTarget.ES2022
-      module: 99, // ModuleKind.ESNext
-      moduleResolution: 2, // ModuleResolutionKind.NodeJs
-      jsx: 2, // JsxEmit.React
-      allowNonTsExtensions: true,
-      allowSyntheticDefaultImports: true,
-      esModuleInterop: true,
-      strict: false,
-      noEmit: true,
-      skipLibCheck: true,
-      lib: ["dom", "dom.iterable", "es2015", "es2016", "esnext"],
-    });
+      tsDefaults.setCompilerOptions({
+        target: 9, // ScriptTarget.ES2022
+        module: 99, // ModuleKind.ESNext
+        moduleResolution: 2, // ModuleResolutionKind.NodeJs
+        jsx: 2, // JsxEmit.React
+        allowNonTsExtensions: true,
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true,
+        strict: false,
+        noEmit: true,
+        skipLibCheck: true,
+        lib: ["dom", "dom.iterable", "es2015", "es2016", "esnext"],
+      });
 
-    // Eagerly opt-in to validation but suppress "missing module" noise
-    // that fires before ATA has fetched the type definitions.
-    tsDefaults.setDiagnosticsOptions({
-      noSemanticValidation: false,
-      noSyntaxValidation: false,
-      noSuggestionDiagnostics: true,
-      diagnosticCodesToIgnore: [2307, 7016],
-    });
+      // Eagerly opt-in to validation but suppress "missing module" noise
+      // that fires before ATA has fetched the type definitions.
+      tsDefaults.setDiagnosticsOptions({
+        noSemanticValidation: false,
+        noSyntaxValidation: false,
+        noSuggestionDiagnostics: true,
+        diagnosticCodesToIgnore: [2307, 7016],
+      });
 
-    // Enable automatic type acquisition for the editor model
-    tsDefaults.setEagerModelSync(true);
-  }, [isDarkMode, monacoTheme]);
+      // Enable automatic type acquisition for the editor model
+      tsDefaults.setEagerModelSync(true);
+    },
+    [isDarkMode, monacoTheme],
+  );
 
   // Capture Monaco so type acquisition can attach once the editor is ready.
   const handleMount = useCallback((_editor: MonacoEditorInstance, monaco: MonacoModule) => {
@@ -399,9 +402,7 @@ export function CodeEditor({
       style={{ height }}
     >
       {/* Toolbar */}
-      <div
-        className="flex shrink-0 items-center justify-between border-b border-border bg-muted/40 px-3 py-2"
-      >
+      <div className="flex shrink-0 items-center justify-between border-b border-border bg-muted/40 px-3 py-2">
         <div className="flex items-center gap-2">
           <FileCode className="h-4 w-4 text-muted-foreground" />
           {fileName && <span className="text-sm font-medium text-foreground">{fileName}</span>}
@@ -480,8 +481,7 @@ export function CodeEditor({
             minimap: { enabled: false },
             fontSize: 14,
             lineHeight: 22,
-            fontFamily:
-              '"JetBrains Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace',
+            fontFamily: '"JetBrains Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace',
             fontLigatures: true,
             lineNumbers: "off",
             lineNumbersMinChars: 0,

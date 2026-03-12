@@ -70,9 +70,9 @@ describe("CREDIT_PACKS", () => {
 
   it("provides volume discount — lower price per credit as pack size grows", () => {
     const [small, medium, large] = CREDIT_PACKS;
-    const pricePerCreditSmall = small!.priceCents / small!.credits;
-    const pricePerCreditMedium = medium!.priceCents / medium!.credits;
-    const pricePerCreditLarge = large!.priceCents / large!.credits;
+    const pricePerCreditSmall = small?.priceCents / small?.credits;
+    const pricePerCreditMedium = medium?.priceCents / medium?.credits;
+    const pricePerCreditLarge = large?.priceCents / large?.credits;
 
     expect(pricePerCreditMedium).toBeLessThan(pricePerCreditSmall);
     expect(pricePerCreditLarge).toBeLessThan(pricePerCreditMedium);
@@ -155,38 +155,38 @@ describe("SERVICE_PRODUCTS", () => {
   });
 
   it("migration products have lookup keys present in VALID_LOOKUP_KEYS", () => {
-    expect(VALID_LOOKUP_KEYS.has(SERVICE_PRODUCTS.migration_blog!.lookupKey)).toBe(true);
-    expect(VALID_LOOKUP_KEYS.has(SERVICE_PRODUCTS.migration_script!.lookupKey)).toBe(true);
-    expect(VALID_LOOKUP_KEYS.has(SERVICE_PRODUCTS.migration_mcp!.lookupKey)).toBe(true);
+    expect(VALID_LOOKUP_KEYS.has(SERVICE_PRODUCTS.migration_blog?.lookupKey)).toBe(true);
+    expect(VALID_LOOKUP_KEYS.has(SERVICE_PRODUCTS.migration_script?.lookupKey)).toBe(true);
+    expect(VALID_LOOKUP_KEYS.has(SERVICE_PRODUCTS.migration_mcp?.lookupKey)).toBe(true);
   });
 
   it("migration_blog has correct lookup key and success path", () => {
-    const product = SERVICE_PRODUCTS.migration_blog!;
+    const product = SERVICE_PRODUCTS.migration_blog;
     expect(product.lookupKey).toBe("migration_blog_42000");
     expect(product.successPath).toBe("/migrate?success=blog");
   });
 
   it("migration_script has correct lookup key and success path", () => {
-    const product = SERVICE_PRODUCTS.migration_script!;
+    const product = SERVICE_PRODUCTS.migration_script;
     expect(product.lookupKey).toBe("migration_script_100000");
     expect(product.successPath).toBe("/migrate?success=script");
   });
 
   it("migration_mcp has correct lookup key and success path", () => {
-    const product = SERVICE_PRODUCTS.migration_mcp!;
+    const product = SERVICE_PRODUCTS.migration_mcp;
     expect(product.lookupKey).toBe("migration_mcp_1000000");
     expect(product.successPath).toBe("/migrate?success=mcp");
   });
 
   it("app_builder has correct lookup key and a /build success path", () => {
-    const product = SERVICE_PRODUCTS.app_builder!;
+    const product = SERVICE_PRODUCTS.app_builder;
     expect(product.lookupKey).toBe("app_builder_1997");
     expect(product.successPath).toContain("/build");
   });
 
   it("workshop_seat and workshop_team both succeed at /workshop", () => {
-    expect(SERVICE_PRODUCTS.workshop_seat!.successPath).toContain("/workshop");
-    expect(SERVICE_PRODUCTS.workshop_team!.successPath).toContain("/workshop");
+    expect(SERVICE_PRODUCTS.workshop_seat?.successPath).toContain("/workshop");
+    expect(SERVICE_PRODUCTS.workshop_team?.successPath).toContain("/workshop");
   });
 
   it("all success paths end with a query string indicating success", () => {
@@ -201,15 +201,15 @@ describe("SERVICE_PRODUCTS", () => {
   it("lookup key prices embedded in migration key names match actual support route amounts", () => {
     // migration_blog_42000 → $420, migration_script_100000 → $1000, migration_mcp_1000000 → $10000
     const blogKeyPrice = parseInt(
-      SERVICE_PRODUCTS.migration_blog!.lookupKey.split("_").pop() ?? "0",
+      SERVICE_PRODUCTS.migration_blog?.lookupKey.split("_").pop() ?? "0",
       10,
     );
     const scriptKeyPrice = parseInt(
-      SERVICE_PRODUCTS.migration_script!.lookupKey.split("_").pop() ?? "0",
+      SERVICE_PRODUCTS.migration_script?.lookupKey.split("_").pop() ?? "0",
       10,
     );
     const mcpKeyPrice = parseInt(
-      SERVICE_PRODUCTS.migration_mcp!.lookupKey.split("_").pop() ?? "0",
+      SERVICE_PRODUCTS.migration_mcp?.lookupKey.split("_").pop() ?? "0",
       10,
     );
 

@@ -99,8 +99,8 @@ describe("PostHandler - Tool Schema Validation", () => {
 
       expect(streamGemini).toHaveBeenCalled();
 
-      const callArgs = vi.mocked(streamGemini).mock.calls[0]![0];
-      const tools = callArgs.tools!;
+      const callArgs = vi.mocked(streamGemini).mock.calls[0]?.[0];
+      const tools = callArgs.tools;
 
       expect(typeof tools).toBe("object");
 
@@ -122,7 +122,7 @@ describe("PostHandler - Tool Schema Validation", () => {
 
       await postHandler.handle(request, new URL("https://test.spike.land"));
 
-      const callArgs = vi.mocked(streamGemini).mock.calls[0]![0];
+      const callArgs = vi.mocked(streamGemini).mock.calls[0]?.[0];
       expect(callArgs.tools).toBeUndefined();
     });
   });
@@ -141,8 +141,8 @@ describe("PostHandler - Tool Schema Validation", () => {
 
       await postHandler.handle(request, new URL("https://test.spike.land"));
 
-      const callArgs = vi.mocked(streamGemini).mock.calls[0]![0];
-      const tools = callArgs.tools!;
+      const callArgs = vi.mocked(streamGemini).mock.calls[0]?.[0];
+      const tools = callArgs.tools;
 
       if (tools.read_code) {
         const result = await tools.read_code.execute({ codeSpace: "test" });
@@ -167,8 +167,8 @@ describe("PostHandler - Tool Schema Validation", () => {
 
       await postHandler.handle(request, new URL("https://test.spike.land"));
 
-      const callArgs = vi.mocked(streamGemini).mock.calls[0]![0];
-      const tools = callArgs.tools!;
+      const callArgs = vi.mocked(streamGemini).mock.calls[0]?.[0];
+      const tools = callArgs.tools;
 
       const toolEntry = Object.values(tools)[0];
       if (toolEntry?.execute) {

@@ -25,7 +25,11 @@ export function MdxCommandCard({ command, toolName, args }: ExecutableMdxCommand
           aria-label={`Run ${toolName}`}
         >
           <span className="flex items-center gap-2">
-            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+            {isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Play className="h-4 w-4" />
+            )}
             Run
           </span>
         </button>
@@ -34,7 +38,9 @@ export function MdxCommandCard({ command, toolName, args }: ExecutableMdxCommand
       <div className="space-y-3 px-4 py-4">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span>Mapped to</span>
-          <code className="rounded bg-background px-1.5 py-0.5 font-mono text-primary">{toolName}</code>
+          <code className="rounded bg-background px-1.5 py-0.5 font-mono text-primary">
+            {toolName}
+          </code>
         </div>
 
         <pre className="overflow-x-auto rounded-lg border border-border bg-background p-3 text-xs text-foreground">

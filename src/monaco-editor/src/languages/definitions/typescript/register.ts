@@ -10,7 +10,7 @@ registerLanguage({
   extensions: [".ts", ".tsx", ".cts", ".mts"],
   aliases: ["TypeScript", "ts", "typescript"],
   mimetypes: ["text/typescript"],
-  loader: (): Promise<any> => {
+  loader: (): Promise<unknown> => {
     return import("./typescript");
   },
 });

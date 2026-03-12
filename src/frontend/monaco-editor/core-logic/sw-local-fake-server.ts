@@ -124,7 +124,7 @@ export async function fakeServer(request: Request) {
     initialisedSessions.add(codeSpace); // Mark as initialized after the first successful fetch
   }
 
-  const session = await cSessions[codeSpace]!.init();
+  const session = await cSessions[codeSpace]?.init();
   if (!session) {
     console.error(`Session is null after init for ${codeSpace}`);
     return new Response(`Error initializing session: Session is null`, {
@@ -263,7 +263,7 @@ async function handleSessionJson(
       // Or, we might need a method on SessionSynchronizer to update its internal session.
       // This part of the logic might need further review based on SessionSynchronizer's capabilities.
       // For simplicity, we'll re-assign if it's different.
-      const currentSyncSession = await cSessions[codeSpace]!.getSession();
+      const currentSyncSession = await cSessions[codeSpace]?.getSession();
       if (JSON.stringify(currentSyncSession) !== JSON.stringify(sessionToReturn)) {
         cSessions[codeSpace] = new SessionSynchronizer(codeSpace, sessionToReturn);
       }

@@ -88,7 +88,7 @@ export function SpikeChatPanel({ channelId, onAppUpdated, className = "" }: Spik
     ];
     let hash = 0;
     for (let i = 0; i < uid.length; i++) hash = (hash * 31 + uid.charCodeAt(i)) | 0;
-    return vars[Math.abs(hash) % vars.length] ?? vars[0]!;
+    return vars[Math.abs(hash) % vars.length] ?? vars[0];
   };
 
   const isBot = (uid: string) => uid.startsWith("agent-") || uid === "system";

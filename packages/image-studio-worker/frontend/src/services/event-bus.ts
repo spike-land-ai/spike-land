@@ -21,7 +21,7 @@ class EventBus {
     if (!this.handlers.has(event)) {
       this.handlers.set(event, new Set());
     }
-    this.handlers.get(event)!.add(handler as (...args: unknown[]) => void);
+    this.handlers.get(event)?.add(handler as (...args: unknown[]) => void);
 
     // Return unsubscribe function
     return () => {

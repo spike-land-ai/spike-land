@@ -43,7 +43,7 @@ async function main() {
   }
   for (const exp of sourceFile.getExportDeclarations()) {
     if (exp.hasModuleSpecifier()) {
-      const spec = exp.getModuleSpecifierValue()!;
+      const spec = exp.getModuleSpecifierValue();
       exp.setModuleSpecifier(rewrite(spec));
     }
   }

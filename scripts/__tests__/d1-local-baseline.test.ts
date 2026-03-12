@@ -11,14 +11,29 @@ describe("d1 local baseline reconciliation", () => {
       appliedMigrations: ["0011_persona_audit.sql"],
       tables: ["users", "mcp_apps"],
       indexes: [],
-      mcpAppsColumns: ["slug", "name", "description", "emoji", "status", "tools", "graph", "markdown", "tool_count", "sort_order"],
+      mcpAppsColumns: [
+        "slug",
+        "name",
+        "description",
+        "emoji",
+        "status",
+        "tools",
+        "graph",
+        "markdown",
+        "tool_count",
+        "sort_order",
+      ],
     };
 
     const plan = computeLocalD1RepairPlan(state);
 
     expect(plan.migrationsToMarkApplied).toContain("0012_mcp_apps.sql");
-    expect(plan.sql).toContain("CREATE INDEX IF NOT EXISTS idx_mcp_apps_status ON mcp_apps(status);");
-    expect(plan.sql).toContain("CREATE INDEX IF NOT EXISTS idx_mcp_apps_sort ON mcp_apps(sort_order);");
+    expect(plan.sql).toContain(
+      "CREATE INDEX IF NOT EXISTS idx_mcp_apps_status ON mcp_apps(status);",
+    );
+    expect(plan.sql).toContain(
+      "CREATE INDEX IF NOT EXISTS idx_mcp_apps_sort ON mcp_apps(sort_order);",
+    );
   });
 
   it("repairs partial store-social state before marking the migration", () => {
@@ -44,7 +59,9 @@ describe("d1 local baseline reconciliation", () => {
     const plan = computeLocalD1RepairPlan(state);
 
     expect(plan.sql.some((sql) => sql.includes("ADD COLUMN tags"))).toBe(true);
-    expect(plan.sql.some((sql) => sql.includes("CREATE TABLE IF NOT EXISTS app_ratings"))).toBe(true);
+    expect(plan.sql.some((sql) => sql.includes("CREATE TABLE IF NOT EXISTS app_ratings"))).toBe(
+      true,
+    );
     expect(plan.migrationsToMarkApplied).toContain("0014_store_social.sql");
   });
 
@@ -69,8 +86,12 @@ describe("d1 local baseline reconciliation", () => {
 
     const plan = computeLocalD1RepairPlan(state);
 
-    expect(plan.sql.some((sql) => sql.includes("CREATE TABLE IF NOT EXISTS tool_reactions"))).toBe(true);
-    expect(plan.sql.some((sql) => sql.includes("CREATE TABLE IF NOT EXISTS reaction_logs"))).toBe(true);
+    expect(plan.sql.some((sql) => sql.includes("CREATE TABLE IF NOT EXISTS tool_reactions"))).toBe(
+      true,
+    );
+    expect(plan.sql.some((sql) => sql.includes("CREATE TABLE IF NOT EXISTS reaction_logs"))).toBe(
+      true,
+    );
     expect(plan.migrationsToMarkApplied).toContain("0013_reactions.sql");
   });
 

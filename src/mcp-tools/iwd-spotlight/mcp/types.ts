@@ -33,18 +33,62 @@ export interface Milestone {
 }
 
 export const IWD_MILESTONES: Milestone[] = [
-  { year: 1843, title: "Ada Lovelace", description: "Published the first algorithm intended for machine processing" },
-  { year: 1906, title: "Grace Hopper Born", description: "Pioneer of computer programming, invented the first compiler" },
-  { year: 1962, title: "NASA Hidden Figures", description: "Katherine Johnson's orbital calculations enabled John Glenn's spaceflight" },
-  { year: 1972, title: "Adele Goldberg", description: "Co-developed Smalltalk, influenced modern GUI design" },
-  { year: 1985, title: "Radia Perlman", description: "Invented the Spanning Tree Protocol, enabling modern networks" },
-  { year: 1995, title: "Marissa Mayer at Google", description: "First female engineer at Google, shaped early search products" },
-  { year: 1999, title: "Megan Smith", description: "VP at Google, later became US CTO under President Obama" },
-  { year: 2012, title: "Sheryl Sandberg", description: "Published 'Lean In', sparking global conversation on women in leadership" },
-  { year: 2014, title: "#ILookLikeAnEngineer", description: "Isis Anchalee's campaign challenged stereotypes of engineers" },
-  { year: 2018, title: "Fei-Fei Li", description: "Co-founded Stanford HAI, pioneering ethical AI research" },
+  {
+    year: 1843,
+    title: "Ada Lovelace",
+    description: "Published the first algorithm intended for machine processing",
+  },
+  {
+    year: 1906,
+    title: "Grace Hopper Born",
+    description: "Pioneer of computer programming, invented the first compiler",
+  },
+  {
+    year: 1962,
+    title: "NASA Hidden Figures",
+    description: "Katherine Johnson's orbital calculations enabled John Glenn's spaceflight",
+  },
+  {
+    year: 1972,
+    title: "Adele Goldberg",
+    description: "Co-developed Smalltalk, influenced modern GUI design",
+  },
+  {
+    year: 1985,
+    title: "Radia Perlman",
+    description: "Invented the Spanning Tree Protocol, enabling modern networks",
+  },
+  {
+    year: 1995,
+    title: "Marissa Mayer at Google",
+    description: "First female engineer at Google, shaped early search products",
+  },
+  {
+    year: 1999,
+    title: "Megan Smith",
+    description: "VP at Google, later became US CTO under President Obama",
+  },
+  {
+    year: 2012,
+    title: "Sheryl Sandberg",
+    description: "Published 'Lean In', sparking global conversation on women in leadership",
+  },
+  {
+    year: 2014,
+    title: "#ILookLikeAnEngineer",
+    description: "Isis Anchalee's campaign challenged stereotypes of engineers",
+  },
+  {
+    year: 2018,
+    title: "Fei-Fei Li",
+    description: "Co-founded Stanford HAI, pioneering ethical AI research",
+  },
   { year: 2023, title: "Mira Murati", description: "Led the launch of ChatGPT as CTO of OpenAI" },
-  { year: 2026, title: "International Women's Day", description: "Celebrating women who continue to shape technology" },
+  {
+    year: 2026,
+    title: "International Women's Day",
+    description: "Celebrating women who continue to shape technology",
+  },
 ];
 
 // ─── Search Terms ─────────────────────────────────────────────────────────────

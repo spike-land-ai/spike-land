@@ -68,7 +68,7 @@ async function bundleMonaco() {
   });
 
   const fileHashes = await Promise.all(
-    Object.keys(buildResult.metafile!.outputs)
+    Object.keys(buildResult.metafile?.outputs)
       .sort()
       .map(async (file) => {
         const content = await fs.promises.readFile(path.resolve(ROOT_DIR, file));
@@ -89,7 +89,7 @@ async function main() {
   let oldHash = "";
   try {
     oldHash = (await fs.promises.readFile(CACHE_FILE, "utf-8")).trim();
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err.code !== "ENOENT") throw err;
   }
 

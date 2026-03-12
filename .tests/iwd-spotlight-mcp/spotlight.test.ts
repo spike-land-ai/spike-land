@@ -4,7 +4,12 @@ import { createMockServer } from "@spike-land-ai/mcp-server-base";
 import { createMockToolClient } from "../../src/mcp-tools/iwd-spotlight/core-logic/tool-client.js";
 import { registerSpotlightTools } from "../../src/mcp-tools/iwd-spotlight/core-logic/spotlight.js";
 
-function setup(responses: Record<string, { content: Array<{ type: "text"; text: string }>; isError?: boolean }> = {}) {
+function setup(
+  responses: Record<
+    string,
+    { content: Array<{ type: "text"; text: string }>; isError?: boolean }
+  > = {},
+) {
   const server = createMockServer();
   const client = createMockToolClient(responses);
   registerSpotlightTools(server as unknown as McpServer, client);
@@ -36,7 +41,10 @@ describe("iwd_spotlight_search", () => {
       },
     });
 
-    const result = await server.call("iwd_spotlight_search", { query: "machine learning", limit: 5 });
+    const result = await server.call("iwd_spotlight_search", {
+      query: "machine learning",
+      limit: 5,
+    });
     expect(result.isError).toBeUndefined();
   });
 });

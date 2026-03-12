@@ -217,7 +217,7 @@ function PlanCard({
       {plan.tier ? (
         <button
           type="button"
-          onClick={() => handleCheckout(plan.tier!, annual, isAuthenticated, trackEvent, showToast)}
+          onClick={() => handleCheckout(plan.tier, annual, isAuthenticated, trackEvent, showToast)}
           className={buttonClass}
         >
           {!isAuthenticated && plan.tier ? getStartedLabel : plan.cta}

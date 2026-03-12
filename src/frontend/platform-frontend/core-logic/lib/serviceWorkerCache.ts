@@ -42,7 +42,13 @@ function buildMessageTarget(
   registration: ServiceWorkerRegistration | undefined,
   container: ServiceWorkerContainer,
 ): ServiceWorker | null {
-  return container.controller ?? registration?.active ?? registration?.waiting ?? registration?.installing ?? null;
+  return (
+    container.controller ??
+    registration?.active ??
+    registration?.waiting ??
+    registration?.installing ??
+    null
+  );
 }
 
 export function shouldEnableServiceWorkerCacheController(
@@ -80,9 +86,12 @@ export async function registerServiceWorkerCacheController(
     return null;
   }
 
-  const registration = await navigator.serviceWorker.register(buildServiceWorkerScriptUrl(options), {
-    scope: options.scope ?? DEFAULT_SCOPE,
-  });
+  const registration = await navigator.serviceWorker.register(
+    buildServiceWorkerScriptUrl(options),
+    {
+      scope: options.scope ?? DEFAULT_SCOPE,
+    },
+  );
 
   if (options.syncOnStart !== false) {
     await syncServiceWorkerCacheManifest(options.scope);
@@ -102,16 +111,14 @@ async function clearManagedServiceWorkerCaches(): Promise<void> {
 
   const cacheNames = await window.caches.keys();
   await Promise.all(
-    cacheNames
-      .filter(shouldDeleteManagedCache)
-      .map(async (cacheName) => {
-        try {
-          await window.caches.delete(cacheName);
-        } catch {
-          return false;
-        }
-        return true;
-      }),
+    cacheNames.filter(shouldDeleteManagedCache).map(async (cacheName) => {
+      try {
+        await window.caches.delete(cacheName);
+      } catch {
+        return false;
+      }
+      return true;
+    }),
   );
 }
 
@@ -122,7 +129,9 @@ export async function disableServiceWorkerCacheController(
     return 0;
   }
 
-  const targetScope = options.scope ? new URL(options.scope, window.location.origin).toString() : null;
+  const targetScope = options.scope
+    ? new URL(options.scope, window.location.origin).toString()
+    : null;
   const registrations = await navigator.serviceWorker.getRegistrations();
   const matchingRegistrations = targetScope
     ? registrations.filter((registration) => registration.scope === targetScope)

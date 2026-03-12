@@ -94,7 +94,7 @@ function nanoid(length = 21): string {
   crypto.getRandomValues(bytes);
   let id = "";
   for (let i = 0; i < length; i++) {
-    id += ALPHABET[bytes[i]! % ALPHABET.length];
+    id += ALPHABET[bytes[i] % ALPHABET.length];
   }
   return id;
 }

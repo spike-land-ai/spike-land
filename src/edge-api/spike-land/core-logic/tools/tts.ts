@@ -88,7 +88,7 @@ export function registerTtsTools(
           // Convert to base64 in chunks to avoid stack overflow
           let binary = "";
           for (let i = 0; i < bytes.length; i++) {
-            binary += String.fromCharCode(bytes[i]!);
+            binary += String.fromCharCode(bytes[i]);
           }
           const base64Audio = btoa(binary);
 

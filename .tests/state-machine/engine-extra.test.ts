@@ -194,7 +194,7 @@ describe("removeTransition", () => {
 
   it("removes a transition by ID", () => {
     const { machine, id } = buildToggleMachine();
-    const transitionId = machine.definition.transitions[0]!.id;
+    const transitionId = machine.definition.transitions[0]?.id;
     removeTransition(id, transitionId);
     expect(
       getMachine(id).definition.transitions.find((t) => t.id === transitionId),
@@ -249,7 +249,7 @@ describe("getHistory", () => {
     sendEvent(id, "TOGGLE");
     const log = getHistory(id);
     expect(log).toHaveLength(2);
-    expect(log[0]!.event).toBe("TOGGLE");
+    expect(log[0]?.event).toBe("TOGGLE");
   });
 
   it("log entry contains before/after context snapshots", () => {
@@ -271,8 +271,8 @@ describe("getHistory", () => {
     machine.currentStates = ["idle"];
     sendEvent(id, "INC");
     const log = getHistory(id);
-    expect(log[0]!.beforeContext.count).toBe(0);
-    expect(log[0]!.afterContext.count).toBe(1);
+    expect(log[0]?.beforeContext.count).toBe(0);
+    expect(log[0]?.afterContext.count).toBe(1);
   });
 });
 
@@ -327,7 +327,7 @@ describe("listMachines", () => {
     const { id } = buildToggleMachine("user-1");
     const summaries = listMachines("user-1");
     expect(summaries).toHaveLength(1);
-    const summary = summaries[0]!;
+    const summary = summaries[0];
     expect(summary.id).toBe(id);
     expect(summary.name).toBe("Toggle");
     expect(Array.isArray(summary.currentStates)).toBe(true);

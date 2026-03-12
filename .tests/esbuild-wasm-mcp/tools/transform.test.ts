@@ -26,7 +26,7 @@ class MockMcpServer {
 function makeServer() {
   const server = new MockMcpServer();
   registerTransformTool(server as unknown as McpServer);
-  const handler = server.tools.get("esbuild_wasm_transform")!;
+  const handler = server.tools.get("esbuild_wasm_transform");
   return { server, handler };
 }
 
@@ -53,8 +53,8 @@ describe("registerTransformTool", () => {
       "const x: number = 1;",
       expect.objectContaining({ loader: "ts" }),
     );
-    expect(result.content[0]!.type).toBe("text");
-    const parsed = JSON.parse(result.content[0]!.text);
+    expect(result.content[0]?.type).toBe("text");
+    const parsed = JSON.parse(result.content[0]?.text);
     expect(parsed.code).toBe("const x = 1;\n");
     expect(parsed.warnings).toEqual([]);
   });
@@ -70,7 +70,7 @@ describe("registerTransformTool", () => {
     const result = (await handler({ code: "console.log(1);" })) as {
       content: { text: string }[];
     };
-    const parsed = JSON.parse(result.content[0]!.text);
+    const parsed = JSON.parse(result.content[0]?.text);
 
     // Empty map string is falsy — should not appear in output
     expect("map" in parsed).toBe(false);
@@ -88,7 +88,7 @@ describe("registerTransformTool", () => {
       code: "const x: number = 1;",
       sourcemap: true,
     })) as { content: { text: string }[] };
-    const parsed = JSON.parse(result.content[0]!.text);
+    const parsed = JSON.parse(result.content[0]?.text);
 
     expect(parsed.map).toBe('{"version":3}');
   });
@@ -106,7 +106,7 @@ describe("registerTransformTool", () => {
       code: "const longName = 1;",
       mangleProps: "^long",
     })) as { content: { text: string }[] };
-    const parsed = JSON.parse(result.content[0]!.text);
+    const parsed = JSON.parse(result.content[0]?.text);
 
     expect(parsed.mangleCache).toEqual({ longName: "a" });
   });
@@ -154,7 +154,7 @@ describe("registerTransformTool", () => {
     await handler({ code: "const _private = {};", mangleProps: "^_" });
 
     // Use the last call since prior tests in this file also invoke transform
-    const lastCall = mockEsbuild.transform.mock.calls.at(-1)!;
+    const lastCall = mockEsbuild.transform.mock.calls.at(-1);
     const callArgs = lastCall[1] as Record<string, unknown>;
     expect(callArgs.mangleProps).toBeInstanceOf(RegExp);
     expect((callArgs.mangleProps as RegExp).source).toBe("^_");
@@ -187,7 +187,7 @@ describe("registerTransformTool", () => {
     };
 
     expect(result.isError).toBe(true);
-    const parsed = JSON.parse(result.content[0]!.text);
+    const parsed = JSON.parse(result.content[0]?.text);
     expect(parsed.errors).toBeDefined();
   });
 

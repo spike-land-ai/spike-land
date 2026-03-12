@@ -55,7 +55,7 @@ export const language = <languages.IMonarchLanguage>{
   ],
 
   tokenizer: {
-    root: <any[]>[
+    root: <unknown[]>[
       { include: "@nestedJSBegin" },
 
       ["[ \\t\\r\\n]+", ""],
@@ -123,7 +123,7 @@ export const language = <languages.IMonarchLanguage>{
       ["\\)", { token: "tag", next: "@pop" }],
     ],
 
-    attribute: <any[]>[
+    attribute: <unknown[]>[
       { include: "@nestedJSBegin" },
       { include: "@comments" },
       { include: "@strings" },
@@ -171,23 +171,23 @@ export const language = <languages.IMonarchLanguage>{
     ],
 
     strings: [
-      <any[]>['~?"', { token: "string.delimiter", next: "@stringsEndDoubleQuote" }],
-      <any[]>["~?'", { token: "string.delimiter", next: "@stringsEndQuote" }],
+      <unknown[]>['~?"', { token: "string.delimiter", next: "@stringsEndDoubleQuote" }],
+      <unknown[]>["~?'", { token: "string.delimiter", next: "@stringsEndQuote" }],
     ],
 
     stringsEndDoubleQuote: [
       ['\\\\"', "string"],
-      <any[]>['"', { token: "string.delimiter", next: "@popall" }],
+      <unknown[]>['"', { token: "string.delimiter", next: "@popall" }],
       [".", "string"],
     ],
 
     stringsEndQuote: [
       ["\\\\'", "string"],
-      <any[]>["'", { token: "string.delimiter", next: "@popall" }],
+      <unknown[]>["'", { token: "string.delimiter", next: "@popall" }],
       [".", "string"],
     ],
 
-    atRules: <any[]>[
+    atRules: <unknown[]>[
       { include: "@comments" },
       { include: "@strings" },
       ["[()]", "delimiter"],

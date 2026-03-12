@@ -16,8 +16,8 @@ describe("JWT sign + verify", () => {
 
     const result = await verifyJwt(token, SECRET);
     expect(result).not.toBeNull();
-    expect(result!.sub).toBe("user-123");
-    expect(result!.iat).toBeTypeOf("number");
+    expect(result?.sub).toBe("user-123");
+    expect(result?.iat).toBeTypeOf("number");
   });
 
   it("preserves custom fields in payload", async () => {
@@ -30,7 +30,7 @@ describe("JWT sign + verify", () => {
     const result = await verifyJwt(token, SECRET);
 
     expect(result).not.toBeNull();
-    expect(result!.role).toBe("admin");
+    expect(result?.role).toBe("admin");
   });
 
   it("rejects token signed with different secret", async () => {
@@ -73,7 +73,7 @@ describe("JWT sign + verify", () => {
     const parts = token.split(".");
 
     // Tamper with the payload (change a character)
-    const tamperedPayload = parts[1]!.slice(0, -1) + "X";
+    const tamperedPayload = parts[1]?.slice(0, -1) + "X";
     const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
 
     const result = await verifyJwt(tamperedToken, SECRET);

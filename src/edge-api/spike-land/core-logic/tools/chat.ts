@@ -67,7 +67,7 @@ export function registerChatTools(
             throw new McpError("ANTHROPIC_API_KEY not configured.", McpErrorCode.AUTH_ERROR, false);
           }
 
-          const resolvedModel = MODEL_MAP[model] ?? MODEL_MAP.sonnet!;
+          const resolvedModel = MODEL_MAP[model] ?? MODEL_MAP.sonnet;
 
           const body: Record<string, unknown> = {
             model: resolvedModel,

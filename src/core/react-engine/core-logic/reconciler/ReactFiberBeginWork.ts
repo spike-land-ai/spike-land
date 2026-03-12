@@ -119,7 +119,7 @@ function updateClassComponent(
     }
   }
 
-  const nextChildren = instance!.render();
+  const nextChildren = instance?.render();
   workInProgress.flags |= PerformedWork;
   reconcileChildren(current, workInProgress, nextChildren, renderLanes);
   return workInProgress.child;
@@ -267,7 +267,7 @@ function updateMemoComponent(
   }
 
   // Update path
-  const currentChild = current.child!;
+  const currentChild = current.child;
   const prevProps = currentChild.memoizedProps;
   const compare = (comp["compare"] || shallowEqual) as (a: unknown, b: unknown) => boolean;
 
@@ -473,7 +473,7 @@ export function beginWork(
       return updateClassComponent(current, workInProgress, Component, unresolvedProps, renderLanes);
     }
     case HostRoot:
-      return updateHostRoot(current!, workInProgress, renderLanes);
+      return updateHostRoot(current, workInProgress, renderLanes);
     case HostComponent:
       return updateHostComponent(current, workInProgress, renderLanes);
     case HostText:

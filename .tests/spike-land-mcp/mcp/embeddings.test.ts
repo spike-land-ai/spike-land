@@ -214,7 +214,7 @@ describe("ToolEmbeddingIndex", () => {
 
     const results = idx.search("file storage");
     expect(results.length).toBeGreaterThan(0);
-    expect(results[0]!.name).toBe("upload_file");
+    expect(results[0]?.name).toBe("upload_file");
   });
 
   it("returns empty array for unrelated query", () => {
@@ -260,7 +260,7 @@ describe("ToolEmbeddingIndex", () => {
 
     const results = idx.search("upload file storage");
     for (let i = 1; i < results.length; i++) {
-      expect(results[i - 1]!.score).toBeGreaterThanOrEqual(results[i]!.score);
+      expect(results[i - 1]?.score).toBeGreaterThanOrEqual(results[i]?.score);
     }
   });
 

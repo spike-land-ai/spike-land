@@ -162,15 +162,15 @@ function shuffleFour(correct: Category): Category[] {
     const idx = Math.floor(Math.random() * others.length);
     if (!indices.has(idx)) {
       indices.add(idx);
-      picked.push(others[idx]!);
+      picked.push(others[idx]);
     }
   }
   const four = [correct, ...picked];
   // Fisher-Yates shuffle
   for (let i = four.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    const tmp = four[i]!;
-    four[i] = four[j]!;
+    const tmp = four[i];
+    four[i] = four[j];
     four[j] = tmp;
   }
   return four;
@@ -193,13 +193,13 @@ export function CodeCategorizerQuiz() {
   );
   const [showResult, setShowResult] = useState(false);
 
-  const currentQuestion = QUESTIONS[currentIdx]!;
-  const currentOptions = SHUFFLED_OPTIONS[currentIdx]!;
+  const currentQuestion = QUESTIONS[currentIdx];
+  const currentOptions = SHUFFLED_OPTIONS[currentIdx];
   const currentSelection = selected[currentIdx];
   const hasAnswered = currentSelection !== null;
   const isLast = currentIdx === QUESTIONS.length - 1;
 
-  const score = selected.filter((ans, i) => ans === QUESTIONS[i]!.correct).length;
+  const score = selected.filter((ans, i) => ans === QUESTIONS[i]?.correct).length;
 
   const handleSelect = useCallback(
     (category: Category) => {
@@ -232,7 +232,7 @@ export function CodeCategorizerQuiz() {
 
   if (showResult) {
     const feedbackKey = Math.min(score, 7) as keyof typeof SCORE_FEEDBACK;
-    const feedback = SCORE_FEEDBACK[feedbackKey] ?? SCORE_FEEDBACK[0]!;
+    const feedback = SCORE_FEEDBACK[feedbackKey] ?? SCORE_FEEDBACK[0];
     return (
       <div className="flex flex-col items-center gap-6 px-6 py-10 text-center">
         <div className="text-6xl font-black tracking-tighter text-foreground">

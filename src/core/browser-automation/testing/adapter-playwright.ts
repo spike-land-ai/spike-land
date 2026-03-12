@@ -188,7 +188,7 @@ export class PlaywrightAdapter implements BrowserAdapter {
 
   async newPage(): Promise<BrowserPage> {
     await this.launch();
-    const rawPage = await this._browser!.newPage();
+    const rawPage = await this._browser?.newPage();
     return new PlaywrightPageWrapper(rawPage);
   }
 

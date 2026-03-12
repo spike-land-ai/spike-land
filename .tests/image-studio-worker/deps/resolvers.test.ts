@@ -22,22 +22,33 @@ describe("resolvers", () => {
 
   it("resolveImage", async () => {
     (db.imageFindById as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
-    await expect(resolvers.resolveImage("img-1" as ImageId)).rejects.toThrow(ImageStudioResolverError);
+    await expect(resolvers.resolveImage("img-1" as ImageId)).rejects.toThrow(
+      ImageStudioResolverError,
+    );
 
     (db.imageFindById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ userId: "other" });
-    await expect(resolvers.resolveImage("img-1" as ImageId)).rejects.toThrow(ImageStudioResolverError);
+    await expect(resolvers.resolveImage("img-1" as ImageId)).rejects.toThrow(
+      ImageStudioResolverError,
+    );
 
-    (db.imageFindById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ userId: "user-1", id: "img-1" });
+    (db.imageFindById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      userId: "user-1",
+      id: "img-1",
+    });
     const img = await resolvers.resolveImage("img-1" as ImageId);
     expect(img.id).toBe("img-1");
   });
 
   it("resolveAlbum", async () => {
     (db.albumFindByHandle as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
-    await expect(resolvers.resolveAlbum("alb-1" as AlbumHandle)).rejects.toThrow(ImageStudioResolverError);
+    await expect(resolvers.resolveAlbum("alb-1" as AlbumHandle)).rejects.toThrow(
+      ImageStudioResolverError,
+    );
 
     (db.albumFindByHandle as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ userId: "other" });
-    await expect(resolvers.resolveAlbum("alb-1" as AlbumHandle)).rejects.toThrow(ImageStudioResolverError);
+    await expect(resolvers.resolveAlbum("alb-1" as AlbumHandle)).rejects.toThrow(
+      ImageStudioResolverError,
+    );
 
     (db.albumFindByHandle as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       userId: "user-1",
@@ -79,7 +90,10 @@ describe("resolvers", () => {
     (db.jobFindById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ userId: "other" });
     await expect(resolvers.resolveJob("job-1" as JobId)).rejects.toThrow(ImageStudioResolverError);
 
-    (db.jobFindById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ userId: "user-1", id: "job-1" });
+    (db.jobFindById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      userId: "user-1",
+      id: "job-1",
+    });
     const job = await resolvers.resolveJob("job-1" as JobId);
     expect(job.id).toBe("job-1");
   });
@@ -90,7 +104,9 @@ describe("resolvers", () => {
       ImageStudioResolverError,
     );
 
-    (db.generationJobFindById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ userId: "other" });
+    (db.generationJobFindById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      userId: "other",
+    });
     await expect(resolvers.resolveGenerationJob("gjob-1" as JobId)).rejects.toThrow(
       ImageStudioResolverError,
     );
@@ -114,7 +130,10 @@ describe("resolvers", () => {
       ImageStudioResolverError,
     );
 
-    (db.imageFindById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ userId: "user-1", id: "img-1" });
+    (db.imageFindById as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      userId: "user-1",
+      id: "img-1",
+    });
     const imgs = await resolvers.resolveImages(["img-1" as ImageId]);
     expect(imgs[0].id).toBe("img-1");
   });

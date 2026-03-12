@@ -46,7 +46,7 @@ export function isAllowedBlogImageSrc(src?: string | null): boolean {
 }
 
 export function sanitizeBlogImageSrc(src?: string | null): string | null {
-  return isAllowedBlogImageSrc(src) ? src!.trim() : null;
+  return isAllowedBlogImageSrc(src) ? src?.trim() : null;
 }
 
 export function hashImagePrompt(prompt: string): string {

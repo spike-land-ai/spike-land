@@ -86,7 +86,7 @@ describe("validate_comment_target tool handler - file found", () => {
     });
 
     const handler = capturedHandlers["validate_comment_target"];
-    const result = (await handler!({
+    const result = (await handler({
       owner: "org",
       repo: "repo",
       prNumber: 1,
@@ -95,8 +95,8 @@ describe("validate_comment_target tool handler - file found", () => {
       side: "RIGHT",
     })) as { content: Array<{ type: string; text: string }> };
 
-    expect(result.content[0]!.type).toBe("text");
-    const parsed = JSON.parse(result.content[0]!.text);
+    expect(result.content[0]?.type).toBe("text");
+    const parsed = JSON.parse(result.content[0]?.text);
     expect(parsed.valid).toBe(true);
     expect(mockGitHubMethods.validateCommentTarget).toHaveBeenCalled();
   });
@@ -121,7 +121,7 @@ describe("validate_comment_target tool handler - file found", () => {
     });
 
     const handler = capturedHandlers["validate_comment_target"];
-    const result = (await handler!({
+    const result = (await handler({
       owner: "org",
       repo: "repo",
       prNumber: 1,
@@ -130,7 +130,7 @@ describe("validate_comment_target tool handler - file found", () => {
       side: "LEFT",
     })) as { content: Array<{ type: string; text: string }> };
 
-    const parsed = JSON.parse(result.content[0]!.text);
+    const parsed = JSON.parse(result.content[0]?.text);
     expect(parsed.valid).toBe(false);
     expect(parsed.nearestValidLine).toBeDefined();
   });
@@ -141,7 +141,7 @@ describe("post_check_run tool handler", () => {
     mockGitHubMethods.createCheckRun.mockResolvedValue({ id: 54321 });
 
     const handler = capturedHandlers["post_check_run"];
-    const result = (await handler!({
+    const result = (await handler({
       owner: "org",
       repo: "repo",
       headSha: "abc123",
@@ -151,8 +151,8 @@ describe("post_check_run tool handler", () => {
       details: "Detailed output here",
     })) as { content: Array<{ type: string; text: string }> };
 
-    expect(result.content[0]!.type).toBe("text");
-    expect(result.content[0]!.text).toContain("54321");
+    expect(result.content[0]?.type).toBe("text");
+    expect(result.content[0]?.text).toContain("54321");
     expect(mockGitHubMethods.createCheckRun).toHaveBeenCalledWith("org", "repo", {
       name: "Spike Review",
       headSha: "abc123",
@@ -167,7 +167,7 @@ describe("post_check_run tool handler", () => {
     mockGitHubMethods.createCheckRun.mockResolvedValue({ id: 99 });
 
     const handler = capturedHandlers["post_check_run"];
-    const result = (await handler!({
+    const result = (await handler({
       owner: "acme",
       repo: "monorepo",
       headSha: "deadbeef",
@@ -175,7 +175,7 @@ describe("post_check_run tool handler", () => {
       summary: "Queued for review",
     })) as { content: Array<{ type: string; text: string }> };
 
-    expect(result.content[0]!.text).toContain("99");
+    expect(result.content[0]?.text).toContain("99");
   });
 });
 
@@ -194,11 +194,11 @@ describe("get_pr_files tool handler", () => {
     mockGitHubMethods.getPRFiles.mockResolvedValue(mockFiles);
 
     const handler = capturedHandlers["get_pr_files"];
-    const result = (await handler!({ owner: "org", repo: "repo", prNumber: 1 })) as {
+    const result = (await handler({ owner: "org", repo: "repo", prNumber: 1 })) as {
       content: Array<{ type: string; text: string }>;
     };
 
-    const parsed = JSON.parse(result.content[0]!.text);
+    const parsed = JSON.parse(result.content[0]?.text);
     expect(Array.isArray(parsed)).toBe(true);
     expect(parsed[0].filename).toBe("src/a.ts");
   });
@@ -227,7 +227,7 @@ describe("submit_review tool handler", () => {
     mockGitHubMethods.submitReview.mockResolvedValue({ id: 777 });
 
     const handler = capturedHandlers["submit_review"];
-    const result = (await handler!({
+    const result = (await handler({
       owner: "org",
       repo: "repo",
       prNumber: 1,
@@ -236,15 +236,17 @@ describe("submit_review tool handler", () => {
       comments: [],
     })) as { content: Array<{ type: string; text: string }> };
 
-    expect(result.content[0]!.text).toContain("777");
-    expect(result.content[0]!.text).toContain("APPROVE");
+    expect(result.content[0]?.text).toContain("777");
+    expect(result.content[0]?.text).toContain("APPROVE");
   });
 });
 
 describe("review_pr tool handler", () => {
   it("calls reviewPR and formats the response", async () => {
     // Mock the reviewPR function to avoid GitHub API calls
-    const { reviewPR: _reviewPR } = await import("../../src/mcp-tools/code-review/tools/review-pr.js");
+    const { reviewPR: _reviewPR } = await import(
+      "../../src/mcp-tools/code-review/tools/review-pr.js"
+    );
 
     // The review_pr handler calls reviewPR internally
     // We need to mock at the tool level - inject a mock via vi.mock

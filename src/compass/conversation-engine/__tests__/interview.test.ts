@@ -226,16 +226,16 @@ describe("validateAnswer", () => {
 
 describe("isQuestionVisible", () => {
   it("returns true for unconditional questions", () => {
-    expect(isQuestionVisible(SIMPLE_QUESTIONS[0]!, {})).toBe(true);
+    expect(isQuestionVisible(SIMPLE_QUESTIONS[0], {})).toBe(true);
   });
 
   it("returns false when condition is not met", () => {
-    const conditional = SIMPLE_QUESTIONS[3]!; // employer_name, requires employed=yes
+    const conditional = SIMPLE_QUESTIONS[3]; // employer_name, requires employed=yes
     expect(isQuestionVisible(conditional, { employed: "no" })).toBe(false);
   });
 
   it("returns true when condition is met", () => {
-    const conditional = SIMPLE_QUESTIONS[3]!;
+    const conditional = SIMPLE_QUESTIONS[3];
     expect(isQuestionVisible(conditional, { employed: "yes" })).toBe(true);
   });
 });

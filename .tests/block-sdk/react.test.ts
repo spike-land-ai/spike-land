@@ -56,7 +56,7 @@ describe("createBlockClient", () => {
     const result = await client.call("addItem", { label: "test" });
     expect(result.isError).toBeUndefined();
 
-    const data = JSON.parse(result.content[0]!.text!);
+    const data = JSON.parse(result.content[0]?.text);
     expect(data.label).toBe("test");
   });
 

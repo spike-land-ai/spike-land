@@ -17,7 +17,7 @@ export function extractLinks(source: string, _filePath: string): ExtractedLink[]
   let inComment = false;
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]!;
+    const line = lines[i];
     const lineNum = i + 1;
 
     // Track code block state
@@ -50,8 +50,8 @@ export function extractLinks(source: string, _filePath: string): ExtractedLink[]
     let match: RegExpExecArray | null;
     INLINE_LINK_RE.lastIndex = 0;
     while ((match = INLINE_LINK_RE.exec(line)) !== null) {
-      const text = match[1]!;
-      const target = match[2]!.trim();
+      const text = match[1];
+      const target = match[2]?.trim();
       links.push({
         target,
         text,
@@ -66,8 +66,8 @@ export function extractLinks(source: string, _filePath: string): ExtractedLink[]
     // Reference-style links: [label]: url
     const refMatch = REFERENCE_LINK_RE.exec(line);
     if (refMatch) {
-      const text = refMatch[1]!;
-      const target = refMatch[2]!.trim();
+      const text = refMatch[1];
+      const target = refMatch[2]?.trim();
       links.push({
         target,
         text,
@@ -82,7 +82,7 @@ export function extractLinks(source: string, _filePath: string): ExtractedLink[]
     // HTML <a href="..."> tags
     HTML_HREF_RE.lastIndex = 0;
     while ((match = HTML_HREF_RE.exec(line)) !== null) {
-      const target = match[1]!;
+      const target = match[1];
       links.push({
         target,
         text: "",
@@ -97,7 +97,7 @@ export function extractLinks(source: string, _filePath: string): ExtractedLink[]
     // HTML <img src="..."> tags
     HTML_SRC_RE.lastIndex = 0;
     while ((match = HTML_SRC_RE.exec(line)) !== null) {
-      const target = match[1]!;
+      const target = match[1];
       links.push({
         target,
         text: "",
@@ -177,7 +177,7 @@ export function extractHeadings(source: string): string[] {
 
     const match = HEADING_RE.exec(line);
     if (match) {
-      headings.push(slugifyHeading(match[2]!));
+      headings.push(slugifyHeading(match[2]));
     }
   }
 

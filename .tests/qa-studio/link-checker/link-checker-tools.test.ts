@@ -13,7 +13,10 @@ vi.mock("../../../src/core/browser-automation/core-logic/link-checker/checker.js
 
 import { createMockServer } from "@spike-land-ai/mcp-server-base";
 import { registerLinkCheckerTools } from "../../../src/core/browser-automation/mcp/link-checker-tools.js";
-import type { ScanReport, FileReport } from "../../../src/core/browser-automation/core-logic/link-checker/types.js";
+import type {
+  ScanReport,
+  FileReport,
+} from "../../../src/core/browser-automation/core-logic/link-checker/types.js";
 
 describe("link checker MCP tools", () => {
   const server = createMockServer();
@@ -41,10 +44,8 @@ describe("link checker MCP tools", () => {
       mockFormatReport.mockReturnValue("# Report\nBroken: 1");
 
       const result = await server.call("check_links", { root_dir: "/project" });
-      expect(result.content[0]!.text).toContain("Report");
-      expect(mockCheckLinks).toHaveBeenCalledWith(
-        expect.objectContaining({ rootDir: "/project" }),
-      );
+      expect(result.content[0]?.text).toContain("Report");
+      expect(mockCheckLinks).toHaveBeenCalledWith(expect.objectContaining({ rootDir: "/project" }));
     });
 
     it("returns JSON when format=json", async () => {
@@ -62,7 +63,7 @@ describe("link checker MCP tools", () => {
         root_dir: "/project",
         format: "json",
       });
-      const parsed = JSON.parse(result.content[0]!.text);
+      const parsed = JSON.parse(result.content[0]?.text);
       expect(parsed.rootDir).toBe("/project");
     });
 
@@ -106,20 +107,22 @@ describe("link checker MCP tools", () => {
       const fileReport: FileReport = {
         filePath: "/project/README.md",
         totalLinks: 5,
-        broken: [{
-          link: {
-            target: "./missing.md",
-            text: "link",
-            line: 3,
-            column: 1,
-            category: "relative_file",
-            inCodeBlock: false,
-            inComment: false,
+        broken: [
+          {
+            link: {
+              target: "./missing.md",
+              text: "link",
+              line: 3,
+              column: 1,
+              category: "relative_file",
+              inCodeBlock: false,
+              inComment: false,
+            },
+            status: "broken",
+            reason: "File not found",
+            durationMs: 2,
           },
-          status: "broken",
-          reason: "File not found",
-          durationMs: 2,
-        }],
+        ],
         warnings: [],
         ok: [],
         skipped: [],
@@ -130,8 +133,8 @@ describe("link checker MCP tools", () => {
       const result = await server.call("check_file_links", {
         file_path: "/project/README.md",
       });
-      expect(result.content[0]!.text).toContain("Broken Links");
-      expect(result.content[0]!.text).toContain("./missing.md");
+      expect(result.content[0]?.text).toContain("Broken Links");
+      expect(result.content[0]?.text).toContain("./missing.md");
     });
 
     it("returns JSON when format=json", async () => {
@@ -150,7 +153,7 @@ describe("link checker MCP tools", () => {
         file_path: "test.md",
         format: "json",
       });
-      const parsed = JSON.parse(result.content[0]!.text);
+      const parsed = JSON.parse(result.content[0]?.text);
       expect(parsed.filePath).toBe("test.md");
     });
   });

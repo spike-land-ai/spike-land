@@ -35,8 +35,8 @@ function isAllowedUrl(urlString: string): boolean {
     // Block private IP ranges (RFC 1918)
     const ipParts = hostname.split(".");
     if (ipParts.length === 4) {
-      const firstOctet = parseInt(ipParts[0]!, 10);
-      const secondOctet = parseInt(ipParts[1]!, 10);
+      const firstOctet = parseInt(ipParts[0], 10);
+      const secondOctet = parseInt(ipParts[1], 10);
 
       // 10.x.x.x
       if (firstOctet === 10) return false;

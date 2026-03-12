@@ -156,7 +156,7 @@ describe("Code Durable Object — additional coverage", () => {
       });
       const list = await code.getVersionsList();
       expect(list).toHaveLength(1);
-      expect(list[0]!.number).toBe(1);
+      expect(list[0]?.number).toBe(1);
     });
   });
 
@@ -229,8 +229,8 @@ describe("Code Durable Object — additional coverage", () => {
       code.registerSwarmAgent("agent-1", "Agent One", ["chat", "code"]);
       const agents = code.getSwarmAgents();
       expect(agents.has("agent-1")).toBe(true);
-      expect(agents.get("agent-1")!.displayName).toBe("Agent One");
-      expect(agents.get("agent-1")!.capabilities).toEqual(["chat", "code"]);
+      expect(agents.get("agent-1")?.displayName).toBe("Agent One");
+      expect(agents.get("agent-1")?.capabilities).toEqual(["chat", "code"]);
     });
 
     it("unregisterSwarmAgent removes agent from registry", async () => {
@@ -279,8 +279,8 @@ describe("Code Durable Object — additional coverage", () => {
 
     it("webSocketMessage calls wsHandler.handleMessage when initialized", async () => {
       await initCode(code);
-      const wsHandlerInstance = (WebSocketHandler as ReturnType<typeof vi.fn>).mock.results[0]!
-        .value as {
+      const wsHandlerInstance = (WebSocketHandler as ReturnType<typeof vi.fn>).mock.results[0]
+        ?.value as {
         handleMessage: ReturnType<typeof vi.fn>;
       };
       await code.webSocketMessage(mockWs, "hello");
@@ -289,8 +289,8 @@ describe("Code Durable Object — additional coverage", () => {
 
     it("webSocketMessage initializes session when not yet initialized", async () => {
       // Don't call initCode - Code is not initialized
-      const wsHandlerInstance = (WebSocketHandler as ReturnType<typeof vi.fn>).mock.results[0]!
-        .value as {
+      const wsHandlerInstance = (WebSocketHandler as ReturnType<typeof vi.fn>).mock.results[0]
+        ?.value as {
         handleMessage: ReturnType<typeof vi.fn>;
       };
 
@@ -301,8 +301,8 @@ describe("Code Durable Object — additional coverage", () => {
 
     it("webSocketClose calls wsHandler.handleClose", async () => {
       await initCode(code);
-      const wsHandlerInstance = (WebSocketHandler as ReturnType<typeof vi.fn>).mock.results[0]!
-        .value as {
+      const wsHandlerInstance = (WebSocketHandler as ReturnType<typeof vi.fn>).mock.results[0]
+        ?.value as {
         handleClose: ReturnType<typeof vi.fn>;
       };
       await code.webSocketClose(mockWs, 1000, "done", true);
@@ -311,8 +311,8 @@ describe("Code Durable Object — additional coverage", () => {
 
     it("webSocketError calls wsHandler.handleError", async () => {
       await initCode(code);
-      const wsHandlerInstance = (WebSocketHandler as ReturnType<typeof vi.fn>).mock.results[0]!
-        .value as {
+      const wsHandlerInstance = (WebSocketHandler as ReturnType<typeof vi.fn>).mock.results[0]
+        ?.value as {
         handleError: ReturnType<typeof vi.fn>;
       };
       const err = new Error("ws error");
@@ -429,8 +429,8 @@ describe("Code Durable Object — additional coverage", () => {
     it("skips broadcast when hash is unchanged", async () => {
       await initCode(code);
       const session = code.getSession();
-      const wsHandlerInstance = (WebSocketHandler as ReturnType<typeof vi.fn>).mock.results[0]!
-        .value as {
+      const wsHandlerInstance = (WebSocketHandler as ReturnType<typeof vi.fn>).mock.results[0]
+        ?.value as {
         broadcast: ReturnType<typeof vi.fn>;
       };
       const broadcastBefore = wsHandlerInstance.broadcast.mock.calls.length;

@@ -102,7 +102,7 @@ export class WebSocketHandler {
         if (!this.topics.has(topic)) {
           this.topics.set(topic, new Set());
         }
-        this.topics.get(topic)!.add(ws);
+        this.topics.get(topic)?.add(ws);
       }
       ws.serializeAttachment(attachment);
       this.safeSend(ws, {

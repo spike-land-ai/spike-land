@@ -206,7 +206,7 @@ describe("ToolSearch.search", () => {
 
     const results = search.search(tools, "upload");
     // upload_tool has "upload" in name (score +3), generic_tool has "upload" in desc (score +1)
-    expect(results[0]!.name).toBe("upload_tool");
+    expect(results[0]?.name).toBe("upload_tool");
   });
 
   it("includes enabled status in results", () => {
@@ -248,7 +248,7 @@ describe("ToolSearch.search", () => {
 
     const results = search.search(tools, "test");
     if (results.length > 0) {
-      expect(results[0]!.description.length).toBeLessThanOrEqual(200);
+      expect(results[0]?.description.length).toBeLessThanOrEqual(200);
     }
   });
 });
@@ -322,8 +322,8 @@ describe("ToolSearch.searchSemantic", () => {
 
     const results = search.searchSemantic(tools, "upload file");
     if (results.length > 0) {
-      expect(typeof results[0]!.score).toBe("number");
-      expect(results[0]!.score).toBeGreaterThan(0);
+      expect(typeof results[0]?.score).toBe("number");
+      expect(results[0]?.score).toBeGreaterThan(0);
     }
   });
 

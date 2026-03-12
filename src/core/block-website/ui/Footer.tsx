@@ -1,13 +1,5 @@
 import { Link } from "../lazy-imports/link";
-import {
-  Github,
-  Twitter,
-  Mail,
-  ShieldCheck,
-  Globe,
-  Cpu,
-  Zap,
-} from "lucide-react";
+import { Github, Twitter, Mail, ShieldCheck, Globe, Cpu, Zap } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -26,8 +18,8 @@ export function Footer() {
                 One surface for discovery, docs, and deployment.
               </h2>
               <p className="rubik-lede">
-                spike.land packages MCP capability into product-grade interfaces
-                with a shared runtime, trust model, and shipping loop.
+                spike.land packages MCP capability into product-grade interfaces with a shared
+                runtime, trust model, and shipping loop.
               </p>
             </div>
           </div>
@@ -66,8 +58,8 @@ export function Footer() {
               </Link>
 
               <p className="max-w-sm text-sm leading-7 text-muted-foreground">
-                Build apps, tools, and operational workflows with one design
-                system and one runtime model.
+                Build apps, tools, and operational workflows with one design system and one runtime
+                model.
               </p>
 
               <div className="flex items-center gap-3">
@@ -109,31 +101,21 @@ export function Footer() {
                     href="/tools"
                     className="hover:text-primary transition-colors flex items-center gap-2"
                   >
-                    Tools{" "}
-                    <Zap size={12} className="text-primary fill-primary" />
+                    Tools <Zap size={12} className="text-primary fill-primary" />
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/pricing"
-                    className="hover:text-primary transition-colors"
-                  >
+                  <Link href="/pricing" className="hover:text-primary transition-colors">
                     Pricing
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/apps/new"
-                    className="hover:text-primary transition-colors"
-                  >
+                  <Link href="/apps/new" className="hover:text-primary transition-colors">
                     Create Tool
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/store"
-                    className="hover:text-primary transition-colors"
-                  >
+                  <Link href="/store" className="hover:text-primary transition-colors">
                     Store
                   </Link>
                 </li>
@@ -146,34 +128,22 @@ export function Footer() {
               </p>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li>
-                  <Link
-                    href="/docs"
-                    className="hover:text-primary transition-colors"
-                  >
+                  <Link href="/docs" className="hover:text-primary transition-colors">
                     Documentation
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/blog"
-                    className="hover:text-primary transition-colors"
-                  >
+                  <Link href="/blog" className="hover:text-primary transition-colors">
                     Engineering Blog
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/about"
-                    className="hover:text-primary transition-colors"
-                  >
+                  <Link href="/about" className="hover:text-primary transition-colors">
                     Our Mission
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/bugbook"
-                    className="hover:text-primary transition-colors"
-                  >
+                  <Link href="/bugbook" className="hover:text-primary transition-colors">
                     Bug Tracker
                   </Link>
                 </li>
@@ -186,18 +156,12 @@ export function Footer() {
               </p>
               <ul className="space-y-3 text-sm text-muted-foreground">
                 <li>
-                  <Link
-                    href="/privacy"
-                    className="hover:text-primary transition-colors"
-                  >
+                  <Link href="/privacy" className="hover:text-primary transition-colors">
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/terms"
-                    className="hover:text-primary transition-colors"
-                  >
+                  <Link href="/terms" className="hover:text-primary transition-colors">
                     Terms of Service
                   </Link>
                 </li>
@@ -218,8 +182,7 @@ export function Footer() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1">
               <p className="text-xs font-semibold tracking-[0.04em] text-muted-foreground">
-                &copy; {currentYear} spike.land. Built for edge-native AI
-                product surfaces.
+                &copy; {currentYear} spike.land. Built for edge-native AI product surfaces.
               </p>
               <div className="flex flex-wrap items-center gap-4">
                 <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground/80">

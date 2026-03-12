@@ -36,7 +36,7 @@ describe("esbuild_wasm_mcp tools", () => {
       errors: [],
     });
 
-    await handler!({
+    await handler({
       entryPoints: ["in.js"],
     });
 
@@ -66,7 +66,7 @@ describe("esbuild_wasm_mcp tools", () => {
     };
     mockEsbuild.context.mockResolvedValue(mockCtx);
 
-    await handler!({
+    await handler({
       entryPoints: ["in.js"],
     });
 
@@ -94,10 +94,10 @@ describe("esbuild_wasm_mcp tools", () => {
       mangleCache: { a: "b" },
     });
 
-    const result = (await handler!({ entryPoints: ["in.js"] })) as {
+    const result = (await handler({ entryPoints: ["in.js"] })) as {
       content: { text: string }[];
     };
-    const parsed = JSON.parse(result.content[0]!.text);
+    const parsed = JSON.parse(result.content[0]?.text);
     expect(parsed.metafile).toBeDefined();
     expect(parsed.mangleCache).toBeDefined();
   });
@@ -108,7 +108,7 @@ describe("esbuild_wasm_mcp tools", () => {
     const handler = server.tools.get("esbuild_wasm_build");
 
     mockEsbuild.build.mockRejectedValue(new Error("Build failed"));
-    const result = (await handler!({ entryPoints: ["in.js"] })) as {
+    const result = (await handler({ entryPoints: ["in.js"] })) as {
       isError: boolean;
     };
     expect(result.isError).toBe(true);
@@ -125,7 +125,7 @@ describe("esbuild_wasm_mcp tools", () => {
       // outputFiles missing
     });
 
-    const result = (await handler!({ entryPoints: ["in.js"] })) as {
+    const result = (await handler({ entryPoints: ["in.js"] })) as {
       content: { text: string }[];
     };
     const parsed = JSON.parse(result.content[0].text);
@@ -143,7 +143,7 @@ describe("esbuild_wasm_mcp tools", () => {
       errors: [],
     });
 
-    await handler!({
+    await handler({
       entryPoints: ["in.js"],
       reserveProps: "^myProp$",
     });

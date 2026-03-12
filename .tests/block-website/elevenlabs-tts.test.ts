@@ -33,9 +33,9 @@ describe("groupBlocksIntoChunks", () => {
     const chunks = groupBlocksIntoChunks(blocks, "voice-1");
 
     expect(chunks).toHaveLength(1);
-    expect(chunks[0]!.blockStart).toBe(0);
-    expect(chunks[0]!.blockEnd).toBe(1);
-    expect(chunks[0]!.words).toBe(50);
+    expect(chunks[0]?.blockStart).toBe(0);
+    expect(chunks[0]?.blockEnd).toBe(1);
+    expect(chunks[0]?.words).toBe(50);
   });
 
   it("splits into multiple chunks at 60s boundary", () => {
@@ -50,12 +50,12 @@ describe("groupBlocksIntoChunks", () => {
     // Block 1: adding 100 words would be 200 words ≈ 72.7s (over 60s, flush chunk 1, start chunk 2)
     // Block 2: adding 100 words would be 200 words ≈ 72.7s (over 60s, flush chunk 2, start chunk 3)
     expect(chunks).toHaveLength(3);
-    expect(chunks[0]!.blockStart).toBe(0);
-    expect(chunks[0]!.blockEnd).toBe(0);
-    expect(chunks[1]!.blockStart).toBe(1);
-    expect(chunks[1]!.blockEnd).toBe(1);
-    expect(chunks[2]!.blockStart).toBe(2);
-    expect(chunks[2]!.blockEnd).toBe(2);
+    expect(chunks[0]?.blockStart).toBe(0);
+    expect(chunks[0]?.blockEnd).toBe(0);
+    expect(chunks[1]?.blockStart).toBe(1);
+    expect(chunks[1]?.blockEnd).toBe(1);
+    expect(chunks[2]?.blockStart).toBe(2);
+    expect(chunks[2]?.blockEnd).toBe(2);
   });
 
   it("groups small blocks together under 60s", () => {
@@ -64,9 +64,9 @@ describe("groupBlocksIntoChunks", () => {
     const chunks = groupBlocksIntoChunks(blocks, "voice-1");
 
     expect(chunks).toHaveLength(1);
-    expect(chunks[0]!.blockStart).toBe(0);
-    expect(chunks[0]!.blockEnd).toBe(9);
-    expect(chunks[0]!.words).toBe(100);
+    expect(chunks[0]?.blockStart).toBe(0);
+    expect(chunks[0]?.blockEnd).toBe(9);
+    expect(chunks[0]?.words).toBe(100);
   });
 
   it("correctly handles a single large block", () => {
@@ -75,15 +75,15 @@ describe("groupBlocksIntoChunks", () => {
 
     // Single block always goes into its own chunk regardless of size
     expect(chunks).toHaveLength(1);
-    expect(chunks[0]!.blockStart).toBe(0);
-    expect(chunks[0]!.blockEnd).toBe(0);
+    expect(chunks[0]?.blockStart).toBe(0);
+    expect(chunks[0]?.blockEnd).toBe(0);
   });
 
   it("includes cache key with voice ID", () => {
     const blocks = [makeBlockWithWords(10)];
     const chunks = groupBlocksIntoChunks(blocks, "voice-abc");
 
-    expect(chunks[0]!.cacheKey).toContain("voice-abc:");
+    expect(chunks[0]?.cacheKey).toContain("voice-abc:");
   });
 });
 

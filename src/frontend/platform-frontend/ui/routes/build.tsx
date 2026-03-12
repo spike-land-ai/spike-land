@@ -287,7 +287,9 @@ export function BuildPage() {
   const atlasSections = useMemo(() => groupAppsByCategory(atlasApps), [atlasApps]);
   const activeCategorySection = useMemo(() => {
     if (atlasSections.length === 0) return null;
-    return atlasSections.find((section) => section.category === search.category) ?? atlasSections[0];
+    return (
+      atlasSections.find((section) => section.category === search.category) ?? atlasSections[0]
+    );
   }, [atlasSections, search.category]);
   const visibleApps = useMemo(() => activeCategorySection?.apps ?? [], [activeCategorySection]);
 
@@ -299,7 +301,9 @@ export function BuildPage() {
   useEffect(() => {
     if (!activeCategorySection) return;
 
-    const appExistsInCategory = activeCategorySection.apps.some((app) => app.slug === selectedAppSlug);
+    const appExistsInCategory = activeCategorySection.apps.some(
+      (app) => app.slug === selectedAppSlug,
+    );
     const nextAppSlug = appExistsInCategory ? selectedAppSlug : activeCategorySection.apps[0]?.slug;
 
     if (
@@ -319,7 +323,14 @@ export function BuildPage() {
       }),
       replace: true,
     });
-  }, [activeCategorySection, navigate, search.category, search.surface, selectedAppSlug, selectedSurface]);
+  }, [
+    activeCategorySection,
+    navigate,
+    search.category,
+    search.surface,
+    selectedAppSlug,
+    selectedSurface,
+  ]);
 
   const activeApp = useMemo(() => {
     return visibleApps.find((app) => app.slug === selectedAppSlug) ?? visibleApps[0] ?? null;
@@ -431,8 +442,10 @@ export function BuildPage() {
                 Vibe-code is the product page for a different operating model: each MCP app gets its
                 own spike-chat channel, can be browsed from an atlas, opened in terminal mode,
                 published as an MDX app, and even edited at the MCP server layer using spike.land
-                tools first. The building blocks are MCP apps like <span className="font-bold text-foreground">auth</span>,
-                <span className="font-mono text-foreground"> auth_get_profile</span> is just one tool inside that app.
+                tools first. The building blocks are MCP apps like{" "}
+                <span className="font-bold text-foreground">auth</span>,
+                <span className="font-mono text-foreground"> auth_get_profile</span> is just one
+                tool inside that app.
               </p>
             </div>
 
@@ -721,7 +734,9 @@ export function BuildPage() {
                       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                         tools
                       </p>
-                      <p className="mt-2 text-2xl font-black text-foreground">{activeApp.tool_count}</p>
+                      <p className="mt-2 text-2xl font-black text-foreground">
+                        {activeApp.tool_count}
+                      </p>
                     </div>
                     <div
                       className="rounded-[22px] border px-4 py-3"
@@ -733,7 +748,9 @@ export function BuildPage() {
                       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                         category
                       </p>
-                      <p className="mt-2 text-sm font-black text-foreground">{activeApp.category}</p>
+                      <p className="mt-2 text-sm font-black text-foreground">
+                        {activeApp.category}
+                      </p>
                     </div>
                     <div
                       className="rounded-[22px] border px-4 py-3"
@@ -745,7 +762,9 @@ export function BuildPage() {
                       <p className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
                         route
                       </p>
-                      <p className="mt-2 text-sm font-black text-foreground">/apps/{activeApp.slug}</p>
+                      <p className="mt-2 text-sm font-black text-foreground">
+                        /apps/{activeApp.slug}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -921,9 +940,10 @@ export function BuildPage() {
               Code should stay inside the spike.land ecosystem.
             </h2>
             <p className="mt-3 text-sm leading-7 text-muted-foreground">
-              If vibe-code writes a feature, it should reach for spike.land tools, internal packages,
-              and MCP contracts before inventing random infrastructure around them. New MCP apps
-              should emerge by composing existing app capabilities into a sharper product surface.
+              If vibe-code writes a feature, it should reach for spike.land tools, internal
+              packages, and MCP contracts before inventing random infrastructure around them. New
+              MCP apps should emerge by composing existing app capabilities into a sharper product
+              surface.
             </p>
 
             <div className="mt-5 grid gap-3">
@@ -990,8 +1010,8 @@ export function BuildPage() {
                   Frontend and MCP logic stay linked.
                 </p>
                 <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  UI changes, MDX flows, terminal commands, and server patches should resolve back to
-                  the same package graph.
+                  UI changes, MDX flows, terminal commands, and server patches should resolve back
+                  to the same package graph.
                 </p>
               </div>
             </div>
@@ -1023,8 +1043,8 @@ export function BuildPage() {
                 can become the new default surface.
               </p>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-muted-foreground">
-                That is the real difference: the conversation is not commentary around the app. It is
-                how the app gets shaped, run, reviewed, and evolved.
+                That is the real difference: the conversation is not commentary around the app. It
+                is how the app gets shaped, run, reviewed, and evolved.
               </p>
             </div>
           </div>

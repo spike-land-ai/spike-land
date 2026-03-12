@@ -120,7 +120,7 @@ export class LibFiles {
       return model;
     }
     if (this.isLibFile(uri) && this._hasFetchedLibFiles) {
-      return editor.createModel(this._libFiles[uri.path.slice(1)]!, "typescript", uri);
+      return editor.createModel(this._libFiles[uri.path.slice(1)], "typescript", uri);
     }
     const matchedLibFile = typescriptDefaults.getExtraLibs()[fileName];
     if (matchedLibFile) {
@@ -574,7 +574,7 @@ function tagToString(tag: ts.JSDocTagInfo): string {
   let tagLabel = `*@${tag.name}*`;
   if (tag.name === "param" && tag.text) {
     const [paramName, ...rest] = tag.text;
-    tagLabel += `\`${paramName!.text}\``;
+    tagLabel += `\`${paramName?.text}\``;
     if (rest.length > 0) tagLabel += ` — ${rest.map((r) => r.text).join(" ")}`;
   } else if (Array.isArray(tag.text)) {
     tagLabel += ` — ${tag.text.map((r) => r.text).join(" ")}`;
@@ -889,7 +889,7 @@ export class OutlineAdapter extends Adapter implements languages.DocumentSymbolP
       item: ts.NavigationTree,
       containerLabel?: string,
     ): languages.DocumentSymbol => {
-      const span = item.spans![0]!;
+      const span = item.spans?.[0];
       const result: languages.DocumentSymbol = {
         name: item.text,
         detail: "",

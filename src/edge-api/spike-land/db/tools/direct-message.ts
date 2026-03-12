@@ -63,7 +63,10 @@ export function registerDirectMessageTools(
   registry.registerBuilt(
     freeTool(userId, db)
       .tool("dm_list", "List direct messages for the current user.", {
-        unreadOnly: z.coerce.boolean().optional().describe("When true, only return unread messages."),
+        unreadOnly: z.coerce
+          .boolean()
+          .optional()
+          .describe("When true, only return unread messages."),
         limit: z.number().optional().describe("Maximum number of messages to return (default 20)."),
       })
       .meta({ category: "direct-message", tier: "free" })

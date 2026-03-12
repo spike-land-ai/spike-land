@@ -126,8 +126,8 @@ export function extractImportSpecifiers(code: string): string[] {
     ) {
       const commentText = sourceFile.text.substring(pos, end);
       const match = commentText.match(/<reference\s+path=["']([^"']+)["']\s*\/>/);
-      if (match && match[1]!) {
-        imports.push(match[1]!);
+      if (match && match[1]) {
+        imports.push(match[1]);
       }
     }
   });

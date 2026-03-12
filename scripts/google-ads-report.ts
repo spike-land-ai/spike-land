@@ -33,7 +33,7 @@ async function searchStream(query: string): Promise<Record<string, unknown>[]> {
     method: "POST",
     headers: {
       Authorization: `Bearer ${ACCESS_TOKEN}`,
-      "developer-token": DEVELOPER_TOKEN!,
+      "developer-token": DEVELOPER_TOKEN,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ query }),

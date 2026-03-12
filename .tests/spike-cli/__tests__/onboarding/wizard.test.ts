@@ -20,32 +20,32 @@ describe("onboarding wizard — decision tree", () => {
     it("returns AI Indie for all-yes path", () => {
       const persona = getPersonaFromAnswers([true, true, true, true]);
       expect(persona).not.toBeNull();
-      expect(persona!.id).toBe(1);
-      expect(persona!.slug).toBe("ai-indie");
+      expect(persona?.id).toBe(1);
+      expect(persona?.slug).toBe("ai-indie");
     });
 
     // All-no path: q1(n) → q2-nontech(n) → q3-personal(n) → q4-casual(n) → persona 16 (Solo Explorer)
     it("returns Solo Explorer for all-no path", () => {
       const persona = getPersonaFromAnswers([false, false, false, false]);
       expect(persona).not.toBeNull();
-      expect(persona!.id).toBe(16);
-      expect(persona!.slug).toBe("solo-explorer");
+      expect(persona?.id).toBe(16);
+      expect(persona?.slug).toBe("solo-explorer");
     });
 
     // q1(y) → q2-tech(n) → q3-platform(y) → q4-ai(y) → persona 5 (ML Engineer)
     it("returns ML Engineer for [y, n, y, y]", () => {
       const persona = getPersonaFromAnswers([true, false, true, true]);
       expect(persona).not.toBeNull();
-      expect(persona!.id).toBe(5);
-      expect(persona!.slug).toBe("ml-engineer");
+      expect(persona?.id).toBe(5);
+      expect(persona?.slug).toBe("ml-engineer");
     });
 
     // q1(n) → q2-nontech(y) → q3-business(n) → q4-teamlead(y) → persona 11 (Growth Leader)
     it("returns Growth Leader for [n, y, n, y]", () => {
       const persona = getPersonaFromAnswers([false, true, false, true]);
       expect(persona).not.toBeNull();
-      expect(persona!.id).toBe(11);
-      expect(persona!.slug).toBe("growth-leader");
+      expect(persona?.id).toBe(11);
+      expect(persona?.slug).toBe("growth-leader");
     });
   });
 
@@ -75,13 +75,13 @@ describe("onboarding wizard — decision tree", () => {
       it(`[${label}] → persona ${expectedId} (${expectedSlug})`, () => {
         const persona = getPersonaFromAnswers(answers);
         expect(persona).not.toBeNull();
-        expect(persona!.id).toBe(expectedId);
-        expect(persona!.slug).toBe(expectedSlug);
+        expect(persona?.id).toBe(expectedId);
+        expect(persona?.slug).toBe(expectedSlug);
       });
     }
 
     it("covers all 16 personas", () => {
-      const reachedIds = new Set(allPaths.map(([answers]) => getPersonaFromAnswers(answers)!.id));
+      const reachedIds = new Set(allPaths.map(([answers]) => getPersonaFromAnswers(answers)?.id));
       expect(reachedIds.size).toBe(16);
       for (let i = 1; i <= 16; i++) {
         expect(reachedIds.has(i)).toBe(true);

@@ -165,7 +165,7 @@ describe("R2BucketHandler", () => {
         size: mockBlob.size,
       });
 
-      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+      const response = await R2BucketHandler.fetch(mockRequest, mockEnv, {} as ExecutionContext);
 
       expect(mockEnv.R2.put).toHaveBeenCalledWith("test-key", mockBlob);
       expect(response.status).toBe(200);
@@ -178,7 +178,7 @@ describe("R2BucketHandler", () => {
         value: () => Promise.resolve(null),
       });
 
-      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+      const response = await R2BucketHandler.fetch(mockRequest, mockEnv, {} as ExecutionContext);
 
       expect(mockEnv.R2.put).not.toHaveBeenCalled();
       expect(response.status).toBe(400);
@@ -193,7 +193,7 @@ describe("R2BucketHandler", () => {
         body: emptyBlob,
       });
 
-      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+      const response = await R2BucketHandler.fetch(mockRequest, mockEnv, {} as ExecutionContext);
 
       expect(mockEnv.R2.put).not.toHaveBeenCalled();
       expect(response.status).toBe(400);
@@ -240,7 +240,7 @@ describe("R2BucketHandler", () => {
         body: mockBody,
       });
 
-      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+      const response = await R2BucketHandler.fetch(mockRequest, mockEnv, {} as ExecutionContext);
 
       expect(mockEnv.R2.get).toHaveBeenCalledWith("test-key");
       expect(response.status).toBe(200);
@@ -253,7 +253,7 @@ describe("R2BucketHandler", () => {
 
       (mockEnv.R2.get as Mock).mockResolvedValue(null);
 
-      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+      const response = await R2BucketHandler.fetch(mockRequest, mockEnv, {} as ExecutionContext);
 
       expect(mockEnv.R2.get).toHaveBeenCalledWith("test-key");
       expect(response.status).toBe(404);
@@ -265,7 +265,7 @@ describe("R2BucketHandler", () => {
     it("should successfully delete object from R2 bucket", async () => {
       const mockRequest = createMockRequest("DELETE");
 
-      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+      const response = await R2BucketHandler.fetch(mockRequest, mockEnv, {} as ExecutionContext);
 
       expect(mockEnv.R2.delete).toHaveBeenCalledWith("test-key");
       expect(response.status).toBe(200);
@@ -277,7 +277,7 @@ describe("R2BucketHandler", () => {
     it("should return 405 for unsupported HTTP methods", async () => {
       const mockRequest = createMockRequest("POST");
 
-      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+      const response = await R2BucketHandler.fetch(mockRequest, mockEnv, {} as ExecutionContext);
 
       expect(response.status).toBe(405);
       expect(response.headers.get("Allow")).toBe("PUT, GET, DELETE");
@@ -293,7 +293,7 @@ describe("R2BucketHandler", () => {
       const error = new Error("Unexpected error");
       (mockEnv.R2.get as Mock).mockRejectedValueOnce(error);
 
-      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+      const response = await R2BucketHandler.fetch(mockRequest, mockEnv, {} as ExecutionContext);
 
       expect(mockConsoleError).toHaveBeenCalledWith("R2 get error:", error);
       expect(response.status).toBe(500);
@@ -306,7 +306,7 @@ describe("R2BucketHandler", () => {
       const error = new Error("Delete failed");
       (mockEnv.R2.delete as Mock).mockRejectedValueOnce(error);
 
-      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+      const response = await R2BucketHandler.fetch(mockRequest, mockEnv, {} as ExecutionContext);
 
       expect(mockConsoleError).toHaveBeenCalledWith("R2 delete error:", error);
       expect(response.status).toBe(500);
@@ -323,7 +323,7 @@ describe("R2BucketHandler", () => {
       const error = new Error("Put failed");
       (mockEnv.R2.put as Mock).mockRejectedValueOnce(error);
 
-      const response = await R2BucketHandler.fetch!(mockRequest, mockEnv, {} as ExecutionContext);
+      const response = await R2BucketHandler.fetch(mockRequest, mockEnv, {} as ExecutionContext);
 
       expect(mockConsoleError).toHaveBeenCalledWith("R2 put error:", error);
       expect(response.status).toBe(500);
@@ -332,7 +332,7 @@ describe("R2BucketHandler", () => {
 
     it("should handle outer fetch error (lines 72-73) — invalid URL", async () => {
       const request = { method: "GET", url: "not-a-url" } as unknown as Request;
-      const response = await R2BucketHandler.fetch!(request, mockEnv, {} as ExecutionContext);
+      const response = await R2BucketHandler.fetch(request, mockEnv, {} as ExecutionContext);
 
       expect(mockConsoleError).toHaveBeenCalledWith("R2 Bucket Handler Error:", expect.any(Error));
       expect(response.status).toBe(500);

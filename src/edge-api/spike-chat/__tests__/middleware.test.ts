@@ -20,7 +20,7 @@ describe("authMiddleware", () => {
   it("handles guest access", async () => {
     const c = {
       req: {
-        header: (name: string) => name === "x-guest-access" ? "true" : null,
+        header: (name: string) => (name === "x-guest-access" ? "true" : null),
       },
       json: vi.fn(),
       set: vi.fn(),
@@ -40,7 +40,7 @@ describe("authMiddleware", () => {
     });
     const c = {
       req: {
-        header: (name: string) => name === "cookie" ? "session=123" : null,
+        header: (name: string) => (name === "cookie" ? "session=123" : null),
       },
       env: {
         AUTH_MCP: { fetch: mockFetch },
@@ -63,7 +63,7 @@ describe("authMiddleware", () => {
     });
     const c = {
       req: {
-        header: (name: string) => name === "authorization" ? "Bearer 123" : null,
+        header: (name: string) => (name === "authorization" ? "Bearer 123" : null),
       },
       env: {
         AUTH_MCP: { fetch: mockFetch },
@@ -83,7 +83,7 @@ describe("authMiddleware", () => {
     });
     const c = {
       req: {
-        header: (name: string) => name === "cookie" ? "session=123" : null,
+        header: (name: string) => (name === "cookie" ? "session=123" : null),
       },
       env: {
         AUTH_MCP: { fetch: mockFetch },
@@ -100,11 +100,11 @@ describe("authMiddleware", () => {
   it("returns 401 if AUTH_MCP session format is invalid", async () => {
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
-      json: () => Promise.resolve({ }),
+      json: () => Promise.resolve({}),
     });
     const c = {
       req: {
-        header: (name: string) => name === "cookie" ? "session=123" : null,
+        header: (name: string) => (name === "cookie" ? "session=123" : null),
       },
       env: {
         AUTH_MCP: { fetch: mockFetch },
@@ -127,7 +127,7 @@ describe("authMiddleware", () => {
     const mockFetch = vi.fn().mockRejectedValue(new Error("Binding missing"));
     const c = {
       req: {
-        header: (name: string) => name === "cookie" ? "session=123" : null,
+        header: (name: string) => (name === "cookie" ? "session=123" : null),
       },
       env: {
         AUTH_MCP: { fetch: mockFetch },
@@ -149,11 +149,11 @@ describe("authMiddleware", () => {
     }) as unknown as typeof fetch;
 
     const mockFetch = vi.fn().mockResolvedValue({
-        status: 503
+      status: 503,
     });
     const c = {
       req: {
-        header: (name: string) => name === "cookie" ? "session=123" : null,
+        header: (name: string) => (name === "cookie" ? "session=123" : null),
       },
       env: {
         AUTH_MCP: { fetch: mockFetch },

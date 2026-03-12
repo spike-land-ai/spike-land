@@ -33,7 +33,7 @@ async function main() {
   }
 
   const results: string[] = [];
-  const findings: any[] = [];
+  const findings: unknown[] = [];
 
   // 2. Run test for each of the 16 personas
   for (const persona of PERSONAS) {
@@ -42,7 +42,7 @@ async function main() {
     const prompt = {
       id: `user-test-${persona.slug}`,
       role: "user-tester",
-      render: (ctx: any) => `
+      render: (ctx: unknown) => `
 You are a real user visiting spike.land for the first time.
 YOUR PERSONA:
 - Name: ${persona.name}
@@ -79,7 +79,7 @@ Output your response in this format:
 `,
     };
 
-    const output = spawnClaude(prompt as any, { narration: homepageNarration } as any);
+    const output = spawnClaude(prompt as unknown, { narration: homepageNarration } as unknown);
     results.push(output);
 
     // Simple parsing for summary

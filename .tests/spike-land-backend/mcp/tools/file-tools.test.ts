@@ -41,7 +41,7 @@ describe("executeListFiles", () => {
     const result = executeListFiles(files, "new code", "cs1");
 
     expect(result.totalFiles).toBe(1);
-    expect(result.files[0]!.size).toBe("new code".length);
+    expect(result.files[0]?.size).toBe("new code".length);
   });
 
   it("handles empty session code", () => {
@@ -49,7 +49,7 @@ describe("executeListFiles", () => {
     const result = executeListFiles(files, "", "cs1");
 
     expect(result.totalFiles).toBe(1);
-    expect(result.files[0]!.path).toBe("/src/utils.tsx");
+    expect(result.files[0]?.path).toBe("/src/utils.tsx");
   });
 });
 

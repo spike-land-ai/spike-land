@@ -260,7 +260,7 @@ describe("React rendering - all component types", () => {
   });
 
   it("useState - updates state", async () => {
-    let setter: (v: string) => void = null!;
+    let setter: (v: string) => void = null;
     const Comp = () => {
       const [val, set] = useState("before");
       setter = set;
@@ -278,7 +278,7 @@ describe("React rendering - all component types", () => {
   });
 
   it("useState - functional update", async () => {
-    let setter: (fn: (v: number) => number) => void = null!;
+    let setter: (fn: (v: number) => number) => void = null;
     const Comp = () => {
       const [val, set] = useState(0);
       setter = set as (fn: (v: number) => number) => void;
@@ -313,7 +313,7 @@ describe("React rendering - all component types", () => {
       if (action.type === "inc") return { count: state.count + 1 };
       return state;
     };
-    let dispatch: (a: A) => void = null!;
+    let dispatch: (a: A) => void = null;
     const Comp = () => {
       const [state, d] = useReducer(reducer, { count: 0 });
       dispatch = d;
@@ -345,7 +345,7 @@ describe("React rendering - all component types", () => {
   });
 
   it("useRef - holds mutable value", async () => {
-    let capturedRef: { current: number } = null!;
+    let capturedRef: { current: number } = null;
     const Comp = () => {
       const r = useRef(42);
       capturedRef = r;
@@ -417,7 +417,7 @@ describe("React rendering - all component types", () => {
   });
 
   it("useId - generates stable id", async () => {
-    let capturedId: string = null!;
+    let capturedId: string = null;
     const Comp = () => {
       const id = useId();
       capturedId = id;
@@ -432,8 +432,8 @@ describe("React rendering - all component types", () => {
   });
 
   it("useTransition - returns [false, fn]", async () => {
-    let capturedPending: boolean = null!;
-    let capturedStart: (fn: () => void) => void = null!;
+    let capturedPending: boolean = null;
+    let capturedStart: (fn: () => void) => void = null;
     const Comp = () => {
       const [isPending, startTransition] = useTransition();
       capturedPending = isPending;

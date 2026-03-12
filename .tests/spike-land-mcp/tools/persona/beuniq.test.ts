@@ -43,10 +43,10 @@ describe("beUniq Quiz", () => {
         const answers = [Boolean(i & 8), Boolean(i & 4), Boolean(i & 2), Boolean(i & 1)];
         const persona = getPersonaFromAnswers(answers);
         expect(persona).not.toBeNull();
-        expect(persona!.id).toBeGreaterThanOrEqual(1);
-        expect(persona!.id).toBeLessThanOrEqual(16);
-        expect(persona!.slug).toBeTruthy();
-        expect(persona!.name).toBeTruthy();
+        expect(persona?.id).toBeGreaterThanOrEqual(1);
+        expect(persona?.id).toBeLessThanOrEqual(16);
+        expect(persona?.slug).toBeTruthy();
+        expect(persona?.name).toBeTruthy();
       }
     });
 
@@ -105,7 +105,7 @@ describe("beUniq Quiz", () => {
       const ids = PERSONAS.map((p) => p.id);
       expect(new Set(ids).size).toBe(ids.length);
       for (let i = 0; i < PERSONAS.length; i++) {
-        expect(PERSONAS[i]!.id).toBe(i + 1);
+        expect(PERSONAS[i]?.id).toBe(i + 1);
       }
     });
   });

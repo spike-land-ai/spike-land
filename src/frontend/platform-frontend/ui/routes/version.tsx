@@ -125,7 +125,9 @@ export function VersionPage() {
         <div className="border-b border-border px-4 py-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="font-semibold text-foreground">Deployed Assets ({data.assets.length})</h2>
+              <h2 className="font-semibold text-foreground">
+                Deployed Assets ({data.assets.length})
+              </h2>
               {hasHiddenAssets && (
                 <p className="mt-1 text-sm text-muted-foreground">
                   Showing the first {defaultVisibleAssetCount} assets by default to keep this page

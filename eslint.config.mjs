@@ -115,8 +115,12 @@ export default tseslint.config(
   // separately via `yarn typecheck:tests`)
   {
     files: [
-      "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx",
-      ".tests/**/*.ts", ".tests/**/*.tsx",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.spec.tsx",
+      ".tests/**/*.ts",
+      ".tests/**/*.tsx",
     ],
     languageOptions: {
       parserOptions: {
@@ -134,9 +138,12 @@ export default tseslint.config(
   // (typechecked via their own tsconfigs separately)
   {
     files: [
-      "src/frontend/platform-frontend/**/*.ts", "src/frontend/platform-frontend/**/*.tsx",
-      "src/frontend/monaco-editor/**/*.ts", "src/frontend/monaco-editor/**/*.tsx",
-      "src/media/educational-videos/**/*.ts", "src/media/educational-videos/**/*.tsx",
+      "src/frontend/platform-frontend/**/*.ts",
+      "src/frontend/platform-frontend/**/*.tsx",
+      "src/frontend/monaco-editor/**/*.ts",
+      "src/frontend/monaco-editor/**/*.tsx",
+      "src/media/educational-videos/**/*.ts",
+      "src/media/educational-videos/**/*.tsx",
     ],
     languageOptions: {
       parserOptions: {

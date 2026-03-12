@@ -4,7 +4,12 @@ import { createMockServer } from "@spike-land-ai/mcp-server-base";
 import { createMockToolClient } from "../../src/mcp-tools/iwd-spotlight/core-logic/tool-client.js";
 import { registerContributorTools } from "../../src/mcp-tools/iwd-spotlight/core-logic/contributors.js";
 
-function setup(responses: Record<string, { content: Array<{ type: "text"; text: string }>; isError?: boolean }> = {}) {
+function setup(
+  responses: Record<
+    string,
+    { content: Array<{ type: "text"; text: string }>; isError?: boolean }
+  > = {},
+) {
   const server = createMockServer();
   const client = createMockToolClient(responses);
   registerContributorTools(server as unknown as McpServer, client);
@@ -20,7 +25,9 @@ describe("iwd_contributor_spotlight", () => {
   it("fetches PR details and generates a recognition card", async () => {
     const server = setup({
       get_pr_details: {
-        content: [{ type: "text", text: JSON.stringify({ title: "Add dark mode", author: "alice" }) }],
+        content: [
+          { type: "text", text: JSON.stringify({ title: "Add dark mode", author: "alice" }) },
+        ],
       },
       img_generate: { content: [{ type: "text", text: "card_image_url" }] },
     });

@@ -102,7 +102,7 @@ export function standardScenarios(config: {
 
       expect(result.isError).toBeFalsy();
 
-      for (const eventType of config.emitsEvent!) {
+      for (const eventType of config.emitsEvent) {
         expect(notify).toHaveBeenCalledWith(expect.objectContaining({ type: eventType }));
       }
     });

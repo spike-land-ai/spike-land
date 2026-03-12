@@ -190,7 +190,7 @@ async function runStreamLoop(
     throw new Error(`Gemini API error ${response.status}: ${errorText}`);
   }
 
-  const reader = response.body!.getReader();
+  const reader = response.body?.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
   const functionCalls: { name: string; args: Record<string, unknown> }[] = [];
@@ -203,7 +203,7 @@ async function runStreamLoop(
 
     // Process complete SSE lines
     const lines = buffer.split("\n");
-    buffer = lines.pop()!; // keep incomplete line
+    buffer = lines.pop(); // keep incomplete line
 
     for (const line of lines) {
       if (!line.startsWith("data: ")) continue;

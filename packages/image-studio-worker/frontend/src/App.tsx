@@ -329,8 +329,6 @@ export function App() {
               Crafted by Spike.Land Neural Dept.
             </p>
           </footer>
-
-
         </div>
       </DragDropProvider>
     );
@@ -434,8 +432,6 @@ export function App() {
             <MainContent workspace={workspace} />
           </div>
         </div>
-
-
       </div>
     </DragDropProvider>
   );

@@ -5,9 +5,17 @@ import { Project } from "ts-morph";
 import { excludeGlobs } from "../../../../scripts/reorganize-config.js";
 import { readPackagesYaml } from "../../../../scripts/reorganize/utils.js";
 import { discoverFiles } from "../../../../scripts/reorganize/discovery.js";
-import { propagateDeps, computePackageCategories } from "../../../../scripts/reorganize/grouping.js";
+import {
+  propagateDeps,
+  computePackageCategories,
+} from "../../../../scripts/reorganize/grouping.js";
 import { computeMovePlans } from "../../../../scripts/reorganize/planning.js";
-import type { FileNode, MovePlan, AliasMap, ManifestPkg } from "../../../../scripts/reorganize/types.js";
+import type {
+  FileNode,
+  MovePlan,
+  AliasMap,
+  ManifestPkg,
+} from "../../../../scripts/reorganize/types.js";
 
 export interface PipelineResult {
   project: Project;
@@ -19,10 +27,7 @@ export interface PipelineResult {
   srcDir: string;
 }
 
-export async function runPipeline(
-  srcDir?: string,
-  _incremental = false,
-): Promise<PipelineResult> {
+export async function runPipeline(srcDir?: string, _incremental = false): Promise<PipelineResult> {
   const resolvedSrcDir = srcDir
     ? path.resolve(process.cwd(), srcDir)
     : path.resolve(process.cwd(), "src");

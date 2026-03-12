@@ -104,7 +104,7 @@ export const ata = async ({
       >,
     );
     if (error) throw error;
-    return data!;
+    return data;
   } finally {
     (await init()).releaseWorker(worker);
   }
@@ -117,7 +117,7 @@ export const tsx = async (code: string): Promise<Array<{ content: string; filePa
       worker.rpc.rpc("tsc", code) as Promise<Array<{ content: string; filePath: string }>>,
     );
     if (error) throw error;
-    return data!;
+    return data;
   } finally {
     (await init()).releaseWorker(worker);
   }
@@ -128,7 +128,7 @@ export const createWorkflow = async (q: string): Promise<string> => {
   try {
     const { data, error } = await tryCatch(worker.rpc.rpc("createWorkflow", q) as Promise<string>);
     if (error) throw error;
-    return data!;
+    return data;
   } finally {
     (await init()).releaseWorker(worker);
   }
@@ -182,7 +182,7 @@ export const transpile = async ({
         console.error(error);
         throw error;
       }
-      return data!;
+      return data;
     } finally {
       (await init()).releaseWorker(worker);
     }
@@ -210,7 +210,7 @@ export const build = async ({
       }) as Promise<string>,
     );
     if (error) throw error;
-    return data!;
+    return data;
   } finally {
     (await init()).releaseWorker(worker);
   }

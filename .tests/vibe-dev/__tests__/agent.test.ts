@@ -34,28 +34,28 @@ function makeMockProcess(): ChildProcess & EventEmitter {
 
 describe("TEST_KEYWORD_HANDLERS", () => {
   it("E2E_TEST_ECHO handler returns echoed message", async () => {
-    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_ECHO:"]!;
+    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_ECHO:"];
     const result = await handler("E2E_TEST_ECHO:hello world", "app1");
     expect(result.response).toBe("ECHO: hello world");
     expect(result.codeUpdated).toBe(false);
   });
 
   it("E2E_TEST_CODE_UPDATE handler returns mock update", async () => {
-    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_CODE_UPDATE"]!;
+    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_CODE_UPDATE"];
     const result = await handler("E2E_TEST_CODE_UPDATE", "app1");
     expect(result.codeUpdated).toBe(true);
     expect(result.codespaceId).toBe("e2e-test-app1");
   });
 
   it("E2E_TEST_ERROR handler returns error result", async () => {
-    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_ERROR"]!;
+    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_ERROR"];
     const result = await handler("E2E_TEST_ERROR", "app1");
     expect(result.error).toBe("E2E_TEST_ERROR triggered");
   });
 
   it("E2E_TEST_DELAY handler uses default 1000ms delay", async () => {
     vi.useFakeTimers();
-    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_DELAY:"]!;
+    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_DELAY:"];
     const promise = handler("E2E_TEST_DELAY:", "app1");
     await vi.advanceTimersByTimeAsync(1000);
     const result = await promise;
@@ -65,7 +65,7 @@ describe("TEST_KEYWORD_HANDLERS", () => {
 
   it("E2E_TEST_DELAY handler clamps delay to 30000ms", async () => {
     vi.useFakeTimers();
-    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_DELAY:"]!;
+    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_DELAY:"];
     const promise = handler("E2E_TEST_DELAY:99999", "app1");
     await vi.advanceTimersByTimeAsync(30000);
     const result = await promise;
@@ -75,7 +75,7 @@ describe("TEST_KEYWORD_HANDLERS", () => {
 
   it("E2E_TEST_DELAY handler uses provided ms value", async () => {
     vi.useFakeTimers();
-    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_DELAY:"]!;
+    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_DELAY:"];
     const promise = handler("E2E_TEST_DELAY:500", "app1");
     await vi.advanceTimersByTimeAsync(500);
     const result = await promise;
@@ -84,14 +84,14 @@ describe("TEST_KEYWORD_HANDLERS", () => {
   });
 
   it("E2E_TEST_MCP handler uses content codespace id", async () => {
-    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_MCP:"]!;
+    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_MCP:"];
     const result = await handler("E2E_TEST_MCP:my-space", "app1");
     expect(result.codespaceId).toBe("my-space");
     expect(result.codeUpdated).toBe(true);
   });
 
   it("E2E_TEST_MCP handler falls back to app id when no codespace given", async () => {
-    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_MCP:"]!;
+    const handler = agent.TEST_KEYWORD_HANDLERS["E2E_TEST_MCP:"];
     const result = await handler("E2E_TEST_MCP:", "app1");
     expect(result.codespaceId).toBe("e2e-mcp-app1");
   });
@@ -105,7 +105,7 @@ describe("findTestKeywordHandler", () => {
   it("returns handler for matching keyword prefix", () => {
     const result = agent.findTestKeywordHandler("E2E_TEST_ECHO:hi");
     expect(result).not.toBeNull();
-    expect(result!.keyword).toBe("E2E_TEST_ECHO:");
+    expect(result?.keyword).toBe("E2E_TEST_ECHO:");
   });
 
   it("returns null when no keyword matches", () => {
@@ -1366,7 +1366,7 @@ describe("spawnClaudeCode AGENT_REQUIRE_PERMISSIONS branch", () => {
     proc.emit("close", 0);
     await promise;
 
-    const callArgs = vi.mocked(spawn).mock.calls[0]![1] as string[];
+    const callArgs = vi.mocked(spawn).mock.calls[0]?.[1] as string[];
     expect(callArgs).not.toContain("--dangerously-skip-permissions");
 
     delete process.env.AGENT_REQUIRE_PERMISSIONS;

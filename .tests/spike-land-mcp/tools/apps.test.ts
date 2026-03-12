@@ -51,7 +51,7 @@ function createRegistry(userId = "user-42") {
 function getText(result: { content: Array<{ type: string; text?: string }> }): string {
   return result.content
     .filter((c) => c.type === "text" && typeof c.text === "string")
-    .map((c) => c.text!)
+    .map((c) => c.text)
     .join("\n");
 }
 
@@ -126,7 +126,7 @@ describe("apps_create", () => {
       template_id: "dashboard",
     });
 
-    const [, options] = vi.mocked(fetch).mock.calls[0]!;
+    const [, options] = vi.mocked(fetch).mock.calls[0];
     const body = JSON.parse((options as RequestInit).body as string);
     expect(body.codespaceId).toBe("my.custom.id");
     expect(body.imageIds).toEqual(["img-1", "img-2"]);
@@ -145,7 +145,7 @@ describe("apps_create", () => {
     });
 
     await registry.callToolDirect("apps_create", { prompt: "Make something" });
-    const [, options] = vi.mocked(fetch).mock.calls[0]!;
+    const [, options] = vi.mocked(fetch).mock.calls[0];
     const body = JSON.parse((options as RequestInit).body as string);
     expect(body.codespaceId).toBeUndefined();
     expect(body.imageIds).toBeUndefined();
@@ -215,7 +215,7 @@ describe("apps_list", () => {
     const { registry } = createRegistry();
     mockFetchOk([]);
     await registry.callToolDirect("apps_list", { status: "LIVE", limit: 10 });
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).toContain("status=LIVE");
     expect(url as string).toContain("limit=10");
   });
@@ -302,7 +302,7 @@ describe("apps_get", () => {
     const { registry } = createRegistry();
     mockFetchOk(baseApp);
     await registry.callToolDirect("apps_get", { app_id: "my app/id" });
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).toContain(encodeURIComponent("my app/id"));
   });
 });
@@ -371,7 +371,7 @@ describe("apps_chat", () => {
       message: "Use this image",
       image_ids: ["img-abc"],
     });
-    const [, options] = vi.mocked(fetch).mock.calls[0]!;
+    const [, options] = vi.mocked(fetch).mock.calls[0];
     const body = JSON.parse((options as RequestInit).body as string);
     expect(body.imageIds).toEqual(["img-abc"]);
     expect(body.role).toBe("USER");
@@ -385,7 +385,7 @@ describe("apps_chat", () => {
       message: "No images",
       image_ids: [],
     });
-    const [, options] = vi.mocked(fetch).mock.calls[0]!;
+    const [, options] = vi.mocked(fetch).mock.calls[0];
     const body = JSON.parse((options as RequestInit).body as string);
     expect(body.imageIds).toBeUndefined();
   });
@@ -442,7 +442,7 @@ describe("apps_get_messages", () => {
       cursor: "cur-xyz",
       limit: 5,
     });
-    const [url] = vi.mocked(fetch).mock.calls[0]!;
+    const [url] = vi.mocked(fetch).mock.calls[0];
     expect(url as string).toContain("cursor=cur-xyz");
     expect(url as string).toContain("limit=5");
   });
@@ -562,7 +562,7 @@ describe("apps_delete_permanent", () => {
       text: async () => "",
     } as Response);
     await registry.callToolDirect("apps_delete_permanent", { app_id: "a1", confirm: true });
-    const [, options] = vi.mocked(fetch).mock.calls[0]!;
+    const [, options] = vi.mocked(fetch).mock.calls[0];
     expect((options as RequestInit).method).toBe("DELETE");
   });
 });

@@ -135,7 +135,10 @@ export function createSqliteD1(): {
         };
       },
       raw: async () => {
-        return sqlite.prepare(sql).raw(true).all(...boundValues) as unknown[][];
+        return sqlite
+          .prepare(sql)
+          .raw(true)
+          .all(...boundValues) as unknown[][];
       },
     };
 

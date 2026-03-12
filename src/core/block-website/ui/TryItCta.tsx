@@ -5,13 +5,9 @@ import { commandSurfaceVars } from "./commandSurfaceTheme";
 
 export function TryItCta() {
   const [copied, setCopied] = useState(false);
-  const command =
-    "claude mcp add spike-land --transport http https://spike.land/mcp";
+  const command = "claude mcp add spike-land --transport http https://spike.land/mcp";
   const headingCopy = useDevModeCopy("Ready to try?", "Ready to ship?");
-  const browseCopy = useDevModeCopy(
-    "Or browse tools first",
-    "Or inspect capabilities first",
-  );
+  const browseCopy = useDevModeCopy("Or browse tools first", "Or inspect capabilities first");
 
   const handleCopy = () => {
     navigator.clipboard.writeText(command);
@@ -40,9 +36,7 @@ export function TryItCta() {
           >
             <div className="font-mono text-sm overflow-x-auto w-full text-left flex gap-2">
               <span className="text-primary shrink-0">$</span>
-              <span className="break-all [color:var(--command-surface-code)]">
-                {command}
-              </span>
+              <span className="break-all [color:var(--command-surface-code)]">{command}</span>
             </div>
             <button
               onClick={handleCopy}
@@ -68,12 +62,7 @@ export function TryItCta() {
                 </>
               ) : (
                 <>
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -93,10 +82,7 @@ export function TryItCta() {
           className="inline-flex items-center justify-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
         >
           {browseCopy.text}
-          <span
-            className="ml-1 group-hover:translate-x-1 transition-transform"
-            aria-hidden="true"
-          >
+          <span className="ml-1 group-hover:translate-x-1 transition-transform" aria-hidden="true">
             &rarr;
           </span>
         </Link>

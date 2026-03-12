@@ -49,44 +49,44 @@ describe("templateExtract", () => {
   it("extracts 'fix' pattern as debugging intent", () => {
     const result = templateExtract("fix the broken authentication flow");
     expect(result).not.toBeNull();
-    expect(result!.intent).toBe("debugging");
-    expect(result!.task).toContain("fix the broken authentication flow");
+    expect(result?.intent).toBe("debugging");
+    expect(result?.task).toContain("fix the broken authentication flow");
   });
 
   it("extracts 'build' pattern as implementation intent", () => {
     const result = templateExtract("build a user settings page with profile editing");
     expect(result).not.toBeNull();
-    expect(result!.intent).toBe("implementation");
+    expect(result?.intent).toBe("implementation");
   });
 
   it("extracts 'deploy' pattern as deployment intent", () => {
     const result = templateExtract("deploy the new worker to production");
     expect(result).not.toBeNull();
-    expect(result!.intent).toBe("deployment");
+    expect(result?.intent).toBe("deployment");
   });
 
   it("extracts 'what is' pattern as query intent", () => {
     const result = templateExtract("what is the MCP registry used for");
     expect(result).not.toBeNull();
-    expect(result!.intent).toBe("query");
+    expect(result?.intent).toBe("query");
   });
 
   it("extracts 'configure' pattern as configuration intent", () => {
     const result = templateExtract("configure the rate limiter for 100 requests per minute");
     expect(result).not.toBeNull();
-    expect(result!.intent).toBe("configuration");
+    expect(result?.intent).toBe("configuration");
   });
 
   it("extracts 'analyze' pattern as analysis intent", () => {
     const result = templateExtract("analyze the API response times over the past week");
     expect(result).not.toBeNull();
-    expect(result!.intent).toBe("analysis");
+    expect(result?.intent).toBe("analysis");
   });
 
   it("extracts 'write' pattern as creative intent", () => {
     const result = templateExtract("write a blog post about the new MCP tools");
     expect(result).not.toBeNull();
-    expect(result!.intent).toBe("creative");
+    expect(result?.intent).toBe("creative");
   });
 
   it("returns null for unrecognized patterns", () => {
@@ -97,10 +97,10 @@ describe("templateExtract", () => {
   it("defaults to normal priority and empty arrays", () => {
     const result = templateExtract("fix the login bug");
     expect(result).not.toBeNull();
-    expect(result!.priority).toBe("normal");
-    expect(result!.constraints).toEqual([]);
-    expect(result!.acceptance).toEqual([]);
-    expect(result!.context).toBe("");
+    expect(result?.priority).toBe("normal");
+    expect(result?.constraints).toEqual([]);
+    expect(result?.acceptance).toEqual([]);
+    expect(result?.context).toBe("");
   });
 });
 
@@ -186,7 +186,7 @@ describe("compressMessage", () => {
     expect(result.compressed).toBe(true);
     expect(result.tier).toBe("template");
     expect(result.prd).not.toBeNull();
-    expect(result.prd!.intent).toBe("implementation");
+    expect(result.prd?.intent).toBe("implementation");
   });
 
   it("uses template extraction in always mode even for short messages", async () => {
@@ -195,7 +195,7 @@ describe("compressMessage", () => {
 
     expect(result.compressed).toBe(true);
     expect(result.tier).toBe("template");
-    expect(result.prd!.intent).toBe("debugging");
+    expect(result.prd?.intent).toBe("debugging");
   });
 
   it("falls through to passthrough when no template matches and no API key", async () => {
@@ -243,9 +243,9 @@ describe("compressWithModel (Tier 3)", () => {
 
     const result = await compressWithModel("some long message", "fake-key");
     expect(result).not.toBeNull();
-    expect(result!.intent).toBe("implementation");
-    expect(result!.task).toBe("Build user settings page");
-    expect(result!.priority).toBe("high");
+    expect(result?.intent).toBe("implementation");
+    expect(result?.task).toBe("Build user settings page");
+    expect(result?.priority).toBe("high");
   });
 
   it("returns null on API error (500)", async () => {
@@ -314,7 +314,7 @@ describe("compressWithModel (Tier 3)", () => {
 
     const result = await compressWithModel("some message", "fake-key");
     expect(result).not.toBeNull();
-    expect(result!.intent).toBe("debugging");
-    expect(result!.priority).toBe("critical");
+    expect(result?.intent).toBe("debugging");
+    expect(result?.priority).toBe("critical");
   });
 });

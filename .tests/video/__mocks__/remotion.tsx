@@ -20,7 +20,10 @@ export const spring = vi.fn(() => 0);
 export const AbsoluteFill = ({
   children,
   style,
-}: { children: React.ReactNode; style?: React.CSSProperties }) => <div style={style}>{children}</div>;
+}: {
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}) => <div style={style}>{children}</div>;
 export const Sequence = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 export const Audio = () => null;
 export const staticFile = (path: string) => path;

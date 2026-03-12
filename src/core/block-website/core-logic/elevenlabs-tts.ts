@@ -45,7 +45,7 @@ export function groupBlocksIntoChunks(blocks: ReaderBlock[], voiceId: string): T
   let currentTexts: string[] = [];
 
   for (let i = 0; i < blocks.length; i++) {
-    const block = blocks[i]!;
+    const block = blocks[i];
     const blockSeconds = (block.words / WORDS_PER_MINUTE) * 60;
     const currentSeconds = (currentWords / WORDS_PER_MINUTE) * 60;
 
@@ -165,7 +165,7 @@ export class ElevenLabsTtsEngine {
   private status: ElevenLabsStatus = "idle";
   private timeline: ReaderTimelineEntry[] = [];
   private timeUpdateHandler: (() => void) | null = null;
-  private voiceId = ELEVENLABS_VOICES[0]!.id;
+  private voiceId = ELEVENLABS_VOICES[0]?.id;
 
   onBlockChange: (blockIndex: number) => void = () => {};
   onProgress: (seconds: number) => void = () => {};
@@ -192,7 +192,7 @@ export class ElevenLabsTtsEngine {
     this.setStatus("loading");
 
     try {
-      const audioData = await getOrFetchAudio(this.chunks[ci]!, this.voiceId);
+      const audioData = await getOrFetchAudio(this.chunks[ci], this.voiceId);
       if (localRunId !== this.runId) return;
       await this.playAudioData(audioData, ci, localRunId);
     } catch {
@@ -275,7 +275,7 @@ export class ElevenLabsTtsEngine {
     const audio = new Audio(url);
     this.audio = audio;
 
-    const chunk = this.chunks[chunkIndex]!;
+    const chunk = this.chunks[chunkIndex];
 
     // Start prefetching next chunk
     this.prefetchNext(chunkIndex);
@@ -317,7 +317,7 @@ export class ElevenLabsTtsEngine {
 
         const nextChunkIndex = chunkIndex + 1;
         if (nextChunkIndex < this.chunks.length) {
-          const nextChunk = this.chunks[nextChunkIndex]!;
+          const nextChunk = this.chunks[nextChunkIndex];
 
           const playNext = async () => {
             try {
@@ -367,7 +367,7 @@ export class ElevenLabsTtsEngine {
     if (nextIndex >= this.chunks.length) return;
     if (this.prefetchPromise) return;
 
-    const nextChunk = this.chunks[nextIndex]!;
+    const nextChunk = this.chunks[nextIndex];
     this.prefetchPromise = getOrFetchAudio(nextChunk, this.voiceId).catch(() => {
       this.prefetchPromise = null;
       return new ArrayBuffer(0);

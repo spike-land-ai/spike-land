@@ -1,4 +1,4 @@
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "../../../../../../core/shared-utils/styling/cva";
 import * as React from "react";
 import { AlertTriangle, CheckCircle2, Info, XCircle } from "lucide-react";
 

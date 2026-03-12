@@ -222,8 +222,8 @@ export function registerAuditQuestionnaireTools(
         });
         scored.sort((a, b) => b.avg - a.avg);
 
-        const best = scored[0]!;
-        const worst = scored[scored.length - 1]!;
+        const best = scored[0];
+        const worst = scored[scored.length - 1];
 
         const insights = [
           `**Best performing**: ${best.name} (avg ${best.avg.toFixed(1)})`,

@@ -3,7 +3,7 @@ import { embedRouter } from "../api/routes/embed";
 import * as dbIndex from "../db/db-index";
 
 vi.mock("../db/db-index", () => ({
-  createDb: vi.fn()
+  createDb: vi.fn(),
 }));
 
 describe("embedRouter", () => {
@@ -14,21 +14,26 @@ describe("embedRouter", () => {
         from: () => ({
           where: () => {
             // we can return a mock that is an array for channel and has an orderBy/limit chain for messages
-            const result: Array<Record<string, unknown>> & { orderBy?: unknown } = [{ id: "chan1", workspaceId: "workspace-1", slug: "channel-1" }];
+            const result: Array<Record<string, unknown>> & { orderBy?: unknown } = [
+              { id: "chan1", workspaceId: "workspace-1", slug: "channel-1" },
+            ];
             result.orderBy = () => ({
               limit: () => [
                 { id: "msg1", content: "hello", userId: "visitor-1", createdAt: 123 },
-                { id: "msg2", content: "hello2", userId: "user-1", createdAt: 124 }
-              ]
+                { id: "msg2", content: "hello2", userId: "user-1", createdAt: 124 },
+              ],
             });
             return result;
-          }
-        })
-      })
+          },
+        }),
+      }),
     });
 
     const env = { DB: {} };
-    const res = await embedRouter.fetch(new Request("http://localhost/workspace-1/channel-1"), env as unknown as Record<string, unknown>);
+    const res = await embedRouter.fetch(
+      new Request("http://localhost/workspace-1/channel-1"),
+      env as unknown as Record<string, unknown>,
+    );
 
     expect(res.status).toBe(200);
     const text = await res.text();
@@ -43,13 +48,16 @@ describe("embedRouter", () => {
           where: () => {
             const result: Array<Record<string, unknown>> = [];
             return result;
-          }
-        })
-      })
+          },
+        }),
+      }),
     });
 
     const env = { DB: {} };
-    const res = await embedRouter.fetch(new Request("http://localhost/workspace-1/channel-2"), env as unknown as Record<string, unknown>);
+    const res = await embedRouter.fetch(
+      new Request("http://localhost/workspace-1/channel-2"),
+      env as unknown as Record<string, unknown>,
+    );
 
     expect(res.status).toBe(200);
     const text = await res.text();

@@ -103,7 +103,7 @@ export function completeWork(
       while (root !== null && root.tag !== HostRoot) {
         root = root.return;
       }
-      const fiberRoot = root!.stateNode as FiberRoot;
+      const fiberRoot = root?.stateNode as FiberRoot;
       const hostConfig = fiberRoot.hostConfig;
 
       if (current !== null && workInProgress.stateNode != null) {
@@ -154,7 +154,7 @@ export function completeWork(
       while (root !== null && root.tag !== HostRoot) {
         root = root.return;
       }
-      const fiberRoot = root!.stateNode as FiberRoot;
+      const fiberRoot = root?.stateNode as FiberRoot;
       const hostConfig = fiberRoot.hostConfig;
 
       if (current !== null && workInProgress.stateNode != null) {

@@ -323,7 +323,7 @@ function normalizeLanguageTag(tag: string): string[] {
   const parts = lower.split("-");
   const candidates = [lower];
   if (parts.length > 1) {
-    candidates.push(parts[0]!);
+    candidates.push(parts[0]);
   }
   return candidates;
 }
@@ -2396,8 +2396,8 @@ iwd.post("/api/iwd/checkin", async (c) => {
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
     const randomArray = new Uint32Array(1);
     crypto.getRandomValues(randomArray);
-    const fallbackIndex = randomArray[0]! % DEV_FALLBACK_LOCATIONS.length;
-    const fallback = DEV_FALLBACK_LOCATIONS[fallbackIndex]!;
+    const fallbackIndex = randomArray[0] % DEV_FALLBACK_LOCATIONS.length;
+    const fallback = DEV_FALLBACK_LOCATIONS[fallbackIndex];
     latitude = fallback.latitude;
     longitude = fallback.longitude;
     city = fallback.city;

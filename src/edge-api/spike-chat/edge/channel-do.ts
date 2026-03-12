@@ -39,10 +39,10 @@ export class ChannelDurableObject extends DurableObject {
       };
 
       // Accept the connection using Hibernation API
-      this.ctx.acceptWebSocket(server!, [channelId]);
+      this.ctx.acceptWebSocket(server, [channelId]);
 
       // Store attachment
-      server!.serializeAttachment(attachment);
+      server?.serializeAttachment(attachment);
 
       // Broadcast user_joined (optional, maybe too noisy for large channels)
       return new Response(null, { status: 101, webSocket: client || null });

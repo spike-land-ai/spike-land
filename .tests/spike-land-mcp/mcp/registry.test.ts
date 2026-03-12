@@ -234,7 +234,7 @@ describe("ToolRegistry", () => {
 
     const categories = registry.listCategories();
     expect(categories).toHaveLength(1);
-    expect(categories[0]!.name).toBe("storage");
+    expect(categories[0]?.name).toBe("storage");
   });
 
   it("getEnabledCategories returns only non-gateway enabled categories", () => {
@@ -426,7 +426,7 @@ describe("ToolRegistry", () => {
 
     const examples = registry.getToolExamples("ex_tool");
     expect(examples).toBeDefined();
-    expect(examples![0].name).toBe("test");
+    expect(examples?.[0].name).toBe("test");
   });
 
   describe("getToolsWithExamples", () => {
@@ -455,8 +455,8 @@ describe("ToolRegistry", () => {
 
       const result = registry.getToolsWithExamples();
       expect(result).toHaveLength(1);
-      expect(result[0]!.name).toBe("with_examples");
-      expect(result[0]!.exampleCount).toBe(2);
+      expect(result[0]?.name).toBe("with_examples");
+      expect(result[0]?.exampleCount).toBe(2);
     });
 
     it("returns empty array when no tools have examples", () => {
@@ -513,7 +513,7 @@ describe("ToolRegistry", () => {
 
     const examples = registry.getToolExamples("tool_with_expected_output");
     expect(examples).toBeDefined();
-    expect(examples![0]!.expected_output).toBe("Returns a greeting");
+    expect(examples?.[0]?.expected_output).toBe("Returns a greeting");
   });
 
   describe("Versioning", () => {

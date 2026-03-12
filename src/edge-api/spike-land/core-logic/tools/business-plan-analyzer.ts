@@ -82,7 +82,7 @@ export async function fetchWebsiteContent(url: string): Promise<ExtractedContent
 
   // Extract title
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  const title = titleMatch ? decodeHtmlEntities(titleMatch[1]!.trim()) : "";
+  const title = titleMatch ? decodeHtmlEntities(titleMatch[1]?.trim()) : "";
 
   // Extract meta tags
   const metaTags: Record<string, string> = {};
@@ -92,10 +92,10 @@ export async function fetchWebsiteContent(url: string): Promise<ExtractedContent
     /<meta\s+(?:[^>]*?\s)?content=["']([^"']*?)["'][^>]*?\s(?:name|property)=["']([^"']+)["'][^>]*?>/gi;
   let metaMatch: RegExpExecArray | null;
   while ((metaMatch = metaRegex.exec(html)) !== null) {
-    metaTags[metaMatch[1]!] = decodeHtmlEntities(metaMatch[2]!);
+    metaTags[metaMatch[1]] = decodeHtmlEntities(metaMatch[2]);
   }
   while ((metaMatch = metaRegexAlt.exec(html)) !== null) {
-    metaTags[metaMatch[2]!] = decodeHtmlEntities(metaMatch[1]!);
+    metaTags[metaMatch[2]] = decodeHtmlEntities(metaMatch[1]);
   }
   const description = metaTags["description"] ?? metaTags["og:description"] ?? "";
 
@@ -104,7 +104,7 @@ export async function fetchWebsiteContent(url: string): Promise<ExtractedContent
   const linkRegex = /<a\s+[^>]*?href=["']([^"'#][^"']*?)["'][^>]*?>/gi;
   let linkMatch: RegExpExecArray | null;
   while ((linkMatch = linkRegex.exec(html)) !== null) {
-    const href = linkMatch[1]!.trim();
+    const href = linkMatch[1]?.trim();
     if (href.startsWith("http") || href.startsWith("/")) {
       links.push(href);
     }

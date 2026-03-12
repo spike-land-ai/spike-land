@@ -24,7 +24,7 @@ class MockMcpServer {
 function makeServer() {
   const server = new MockMcpServer();
   registerInitializeTool(server as unknown as McpServer);
-  const handler = server.tools.get("esbuild_wasm_initialize")!;
+  const handler = server.tools.get("esbuild_wasm_initialize");
   return { server, handler };
 }
 
@@ -51,9 +51,9 @@ describe("registerInitializeTool", () => {
     };
 
     expect(mockInitializeWasm).toHaveBeenCalledWith({});
-    expect(result.content[0]!.type).toBe("text");
+    expect(result.content[0]?.type).toBe("text");
 
-    const parsed = JSON.parse(result.content[0]!.text);
+    const parsed = JSON.parse(result.content[0]?.text);
     expect(parsed.status).toBe("ready");
     expect(parsed.version).toBe("0.27.4");
   });
@@ -110,7 +110,7 @@ describe("registerInitializeTool", () => {
     };
 
     expect(result.isError).toBe(true);
-    expect(result.content[0]!.text).toContain("WASM init failed");
+    expect(result.content[0]?.text).toContain("WASM init failed");
   });
 
   it("serializes the full state object as pretty-printed JSON", async () => {
@@ -118,7 +118,7 @@ describe("registerInitializeTool", () => {
     mockInitializeWasm.mockResolvedValue(readyState);
 
     const result = (await handler({})) as { content: { text: string }[] };
-    const text = result.content[0]!.text;
+    const text = result.content[0]?.text;
 
     // Pretty-printed — should contain newlines
     expect(text).toContain("\n");

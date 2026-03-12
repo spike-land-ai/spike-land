@@ -167,7 +167,7 @@ export async function handleReplicateRequest(
       throw new Error("Invalid image URL from Replicate API");
     }
 
-    resp = await fetchAndSaveImage(image_url, env, md5Prompt, input.output_format, ctx)!;
+    resp = await fetchAndSaveImage(image_url, env, md5Prompt, input.output_format, ctx);
 
     ctx.waitUntil(getCacheDefault().put(cacheKey, resp.clone()));
     return resp;

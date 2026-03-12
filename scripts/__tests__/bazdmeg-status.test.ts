@@ -39,12 +39,7 @@ describe("bazdmeg status helpers", () => {
         "index-full.test.ts",
         "spa.test.ts",
       ]),
-    ).toEqual([
-      "index-full.test.ts",
-      "coverage-gaps.test.ts",
-      "spa.test.ts",
-      "proxy.test.ts",
-    ]);
+    ).toEqual(["index-full.test.ts", "coverage-gaps.test.ts", "spa.test.ts", "proxy.test.ts"]);
   });
 
   it("builds a readable dry-run phase preview", () => {

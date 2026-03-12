@@ -210,7 +210,7 @@ export interface Message {
    * Optional user-specified data that is passed through unmodified. You can
    * use this to stash the original error, for example.
    */
-  detail: any;
+  detail: unknown;
 }
 
 export interface Note {
@@ -381,7 +381,7 @@ export interface ResolveOptions {
   namespace?: string;
   resolveDir?: string;
   kind?: ImportKind;
-  pluginData?: any;
+  pluginData?: unknown;
   with?: Record<string, string>;
 }
 
@@ -395,7 +395,7 @@ export interface ResolveResult {
   sideEffects: boolean;
   namespace: string;
   suffix: string;
-  pluginData: any;
+  pluginData: unknown;
 }
 
 export interface OnStartResult {
@@ -421,7 +421,7 @@ export interface OnResolveArgs {
   namespace: string;
   resolveDir: string;
   kind: ImportKind;
-  pluginData: any;
+  pluginData: unknown;
   with: Record<string, string>;
 }
 
@@ -449,7 +449,7 @@ export interface OnResolveResult {
   sideEffects?: boolean;
   namespace?: string;
   suffix?: string;
-  pluginData?: any;
+  pluginData?: unknown;
 
   watchFiles?: string[];
   watchDirs?: string[];
@@ -466,7 +466,7 @@ export interface OnLoadArgs {
   path: string;
   namespace: string;
   suffix: string;
-  pluginData: any;
+  pluginData: unknown;
   with: Record<string, string>;
 }
 
@@ -480,7 +480,7 @@ export interface OnLoadResult {
   contents?: string | Uint8Array;
   resolveDir?: string;
   loader?: Loader;
-  pluginData?: any;
+  pluginData?: unknown;
 
   watchFiles?: string[];
   watchDirs?: string[];
@@ -492,7 +492,7 @@ export interface PartialMessage {
   text?: string;
   location?: Partial<Location> | null;
   notes?: PartialNote[];
-  detail?: any;
+  detail?: unknown;
 }
 
 export interface PartialNote {

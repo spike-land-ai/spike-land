@@ -378,9 +378,9 @@ describe("define-tool framework", () => {
         throw new Error("Normal error");
       });
 
-      await expect(tool.handler({}, { userId: "u1", deps: {} as unknown as ImageStudioDeps })).rejects.toThrow(
-        "Normal error",
-      );
+      await expect(
+        tool.handler({}, { userId: "u1", deps: {} as unknown as ImageStudioDeps }),
+      ).rejects.toThrow("Normal error");
     });
   });
 

@@ -68,9 +68,9 @@ describe("permissions", () => {
         select: vi.fn().mockReturnValue({
           from: vi.fn().mockReturnValue({
             where: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([
-                { id: "chan-1", type: "public", workspaceId: "ws-1" },
-              ]),
+              limit: vi
+                .fn()
+                .mockResolvedValue([{ id: "chan-1", type: "public", workspaceId: "ws-1" }]),
             }),
           }),
         }),
@@ -85,9 +85,9 @@ describe("permissions", () => {
         select: vi.fn().mockReturnValue({
           from: vi.fn().mockReturnValue({
             where: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([
-                { id: "chan-1", type: "private", workspaceId: "ws-1" },
-              ]),
+              limit: vi
+                .fn()
+                .mockResolvedValue([{ id: "chan-1", type: "private", workspaceId: "ws-1" }]),
             }),
           }),
         }),
@@ -102,9 +102,7 @@ describe("permissions", () => {
         select: vi.fn().mockReturnValue({
           from: vi.fn().mockReturnValue({
             where: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([
-                { id: "chan-1", type: "dm", workspaceId: "ws-1" },
-              ]),
+              limit: vi.fn().mockResolvedValue([{ id: "chan-1", type: "dm", workspaceId: "ws-1" }]),
             }),
           }),
         }),

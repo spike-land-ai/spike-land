@@ -42,10 +42,7 @@ interface MockStmt {
   run: () => Promise<{ success: boolean; meta: { changes: number } }>;
 }
 
-function createMockDB(state: {
-  visitors?: VisitorRecord[];
-  messages?: MessageRecord[];
-}) {
+function createMockDB(state: { visitors?: VisitorRecord[]; messages?: MessageRecord[] }) {
   const visitors = [...(state.visitors ?? [])];
   const messages = [...(state.messages ?? [])];
   let visitorCounter = visitors.length + 1;
@@ -84,7 +81,7 @@ function createMockDB(state: {
             const counts = visitors
               .filter((visitor) => visitor.created_at >= dayStart && visitor.country)
               .reduce<Map<string, number>>((acc, visitor) => {
-                const key = visitor.country!;
+                const key = visitor.country;
                 acc.set(key, (acc.get(key) ?? 0) + 1);
                 return acc;
               }, new Map());
@@ -92,7 +89,9 @@ function createMockDB(state: {
             return {
               results: Array.from(counts.entries())
                 .map(([country, count]) => ({ country, count }))
-                .sort((a, b) => (b.count === a.count ? a.country.localeCompare(b.country) : b.count - a.count)),
+                .sort((a, b) =>
+                  b.count === a.count ? a.country.localeCompare(b.country) : b.count - a.count,
+                ),
             };
           }
 
@@ -225,9 +224,13 @@ describe("GET /iwd", () => {
     const { db } = createMockDB({});
     const { app, env } = createApp({ DB: db });
 
-    const response = await app.request("/iwd", {
-      headers: { "Accept-Language": "ja-JP,ja;q=0.9" },
-    }, env);
+    const response = await app.request(
+      "/iwd",
+      {
+        headers: { "Accept-Language": "ja-JP,ja;q=0.9" },
+      },
+      env,
+    );
 
     expect(response.status).toBe(200);
     const html = await response.text();
@@ -247,10 +250,14 @@ describe("POST /api/iwd/checkin", () => {
     const { db } = createMockDB({});
     const { app, env } = createApp({ DB: db });
 
-    const response = await app.request("/api/iwd/checkin", {
-      method: "POST",
-      headers: { "Accept-Language": "es-ES,es;q=0.9" },
-    }, env);
+    const response = await app.request(
+      "/api/iwd/checkin",
+      {
+        method: "POST",
+        headers: { "Accept-Language": "es-ES,es;q=0.9" },
+      },
+      env,
+    );
 
     expect(response.status).toBe(200);
     expect(response.headers.get("set-cookie")).toContain("iwd_visitor=");
@@ -377,14 +384,18 @@ describe("POST /api/iwd/message", () => {
     });
 
     const { app, env } = createApp({ DB: db });
-    const response = await app.request("/api/iwd/message", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: "iwd_visitor=visitor-x",
+    const response = await app.request(
+      "/api/iwd/message",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: "iwd_visitor=visitor-x",
+        },
+        body: JSON.stringify({ text: "   ", emojis: [] }),
       },
-      body: JSON.stringify({ text: "   ", emojis: [] }),
-    }, env);
+      env,
+    );
 
     expect(response.status).toBe(400);
     const data = (await response.json()) as { error: string };

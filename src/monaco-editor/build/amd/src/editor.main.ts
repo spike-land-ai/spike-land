@@ -2,10 +2,10 @@
 import * as require from "require";
 
 if (
-  typeof (globalThis as any).require !== "undefined" &&
-  typeof (globalThis as any).require.config === "function"
+  typeof (globalThis as unknown).require !== "undefined" &&
+  typeof (globalThis as unknown).require.config === "function"
 ) {
-  (globalThis as any).require.config({
+  (globalThis as unknown).require.config({
     ignoreDuplicateModules: [
       "vscode-languageserver-types",
       "vscode-languageserver-types/main",
@@ -91,7 +91,7 @@ export * from "../../../src/index";
 
 globalThis.monaco = monaco;
 
-const lang = monaco.languages as any;
+const lang = monaco.languages as unknown;
 lang.css = monaco.css;
 lang.html = monaco.html;
 lang.typescript = monaco.typescript;

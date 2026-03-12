@@ -199,13 +199,13 @@ export class ProfileBuilder {
     // At this point all required fields are defined — the non-null assertions
     // are safe because we validated above.
     const profile: UserProfile = {
-      age: this.state.age!,
-      incomeAnnualCents: this.state.incomeAnnualCents!,
-      location: this.state.location!,
-      familySize: this.state.familySize!,
+      age: this.state.age,
+      incomeAnnualCents: this.state.incomeAnnualCents,
+      location: this.state.location,
+      familySize: this.state.familySize,
       disabilities: Object.freeze([...this.state.disabilities]),
-      employmentStatus: this.state.employmentStatus!,
-      citizenshipStatus: this.state.citizenshipStatus!,
+      employmentStatus: this.state.employmentStatus,
+      citizenshipStatus: this.state.citizenshipStatus,
       languages: Object.freeze([...this.state.languages]),
       customFields: new Map(this.state.customFields),
     };

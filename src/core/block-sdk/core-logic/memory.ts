@@ -54,7 +54,7 @@ function createMemorySQL(): SQLAdapter {
     if (!tables.has(name)) {
       tables.set(name, []);
     }
-    return tables.get(name)!;
+    return tables.get(name);
   }
 
   function executeOne<T extends Row>(query: string, params?: unknown[]): QueryResult<T> {
@@ -63,7 +63,7 @@ function createMemorySQL(): SQLAdapter {
     // CREATE TABLE — just ensure table exists
     const createMatch = trimmed.match(/^CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)/i);
     if (createMatch) {
-      const tableName = createMatch[1]!;
+      const tableName = createMatch[1];
       getTable(tableName);
       return { rows: [] as T[], rowsAffected: 0 };
     }
@@ -73,12 +73,12 @@ function createMemorySQL(): SQLAdapter {
       /^INSERT\s+INTO\s+(\w+)\s*\(([^)]+)\)\s*VALUES\s*\(([^)]+)\)/i,
     );
     if (insertMatch) {
-      const tableName = insertMatch[1]!;
-      const cols = insertMatch[2]!.split(",").map((c) => c.trim());
+      const tableName = insertMatch[1];
+      const cols = insertMatch[2]?.split(",").map((c) => c.trim());
       const table = getTable(tableName);
       const row: Row = {};
       for (let i = 0; i < cols.length; i++) {
-        row[cols[i]!] = params?.[i] ?? null;
+        row[cols[i]] = params?.[i] ?? null;
       }
       table.push(row);
       return { rows: [row] as T[], rowsAffected: 1 };
@@ -87,7 +87,7 @@ function createMemorySQL(): SQLAdapter {
     // SELECT * FROM table WHERE col = ? AND col2 = ?
     const selectMatch = trimmed.match(/^SELECT\s+\*\s+FROM\s+(\w+)(?:\s+WHERE\s+(.+))?/i);
     if (selectMatch) {
-      const tableName = selectMatch[1]!;
+      const tableName = selectMatch[1];
       const table = getTable(tableName);
       if (!selectMatch[2]) {
         return { rows: [...table] as T[], rowsAffected: 0 };
@@ -98,7 +98,7 @@ function createMemorySQL(): SQLAdapter {
         return conditions.every((cond) => {
           const [col] = cond.split(/\s*=\s*/);
           const value = params?.[paramIdx++];
-          return row[col!.trim()] === value;
+          return row[col?.trim()] === value;
         });
       });
       return { rows: filtered as T[], rowsAffected: 0 };
@@ -107,9 +107,9 @@ function createMemorySQL(): SQLAdapter {
     // UPDATE table SET col = ? WHERE col2 = ? AND col3 = ?
     const updateMatch = trimmed.match(/^UPDATE\s+(\w+)\s+SET\s+(.+?)\s+WHERE\s+(.+)/i);
     if (updateMatch) {
-      const tableName = updateMatch[1]!;
-      const setClauses = updateMatch[2]!.split(",").map((s) => s.trim());
-      const whereClauses = updateMatch[3]!.split(/\s+AND\s+/i).map((w) => w.trim());
+      const tableName = updateMatch[1];
+      const setClauses = updateMatch[2]?.split(",").map((s) => s.trim());
+      const whereClauses = updateMatch[3]?.split(/\s+AND\s+/i).map((w) => w.trim());
       const table = getTable(tableName);
 
       const setColCount = setClauses.length;
@@ -119,12 +119,12 @@ function createMemorySQL(): SQLAdapter {
         let whereIdx = setColCount;
         const matches = whereClauses.every((cond) => {
           const [col] = cond.split(/\s*=\s*/);
-          return row[col!.trim()] === params?.[whereIdx++];
+          return row[col?.trim()] === params?.[whereIdx++];
         });
         if (matches) {
           for (let i = 0; i < setClauses.length; i++) {
-            const [col] = setClauses[i]!.split(/\s*=\s*/);
-            row[col!.trim()] = params?.[i] ?? null;
+            const [col] = setClauses[i]?.split(/\s*=\s*/);
+            row[col?.trim()] = params?.[i] ?? null;
           }
           rowsAffected++;
         }
@@ -136,7 +136,7 @@ function createMemorySQL(): SQLAdapter {
     // DELETE FROM table WHERE col = ?
     const deleteMatch = trimmed.match(/^DELETE\s+FROM\s+(\w+)(?:\s+WHERE\s+(.+))?/i);
     if (deleteMatch) {
-      const tableName = deleteMatch[1]!;
+      const tableName = deleteMatch[1];
       const table = getTable(tableName);
       if (!deleteMatch[2]) {
         const count = table.length;
@@ -149,7 +149,7 @@ function createMemorySQL(): SQLAdapter {
         let paramIdx = 0;
         return !conditions.every((cond) => {
           const [col] = cond.split(/\s*=\s*/);
-          return row[col!.trim()] === params?.[paramIdx++];
+          return row[col?.trim()] === params?.[paramIdx++];
         });
       });
       tables.set(tableName, remaining);
@@ -159,7 +159,7 @@ function createMemorySQL(): SQLAdapter {
     // DROP TABLE
     const dropMatch = trimmed.match(/^DROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?(\w+)/i);
     if (dropMatch) {
-      tables.delete(dropMatch[1]!);
+      tables.delete(dropMatch[1]);
       return { rows: [] as T[], rowsAffected: 0 };
     }
 

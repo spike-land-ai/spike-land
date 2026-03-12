@@ -59,8 +59,8 @@ const DEFAULT_URGENCY_THRESHOLD_DAYS = 30;
  */
 function minMax(values: number[]): { min: number; max: number } {
   if (values.length === 0) return { min: 0, max: 0 };
-  let min = values[0]!;
-  let max = values[0]!;
+  let min = values[0];
+  let max = values[0];
   for (const v of values) {
     if (v < min) min = v;
     if (v > max) max = v;
@@ -137,25 +137,25 @@ export function rankByImpact(
 
   // Gather raw dimension values so we can normalise across the candidate set
   const benefitValues = candidates.map((m) => {
-    const p = programById.get(m.programId)!;
+    const p = programById.get(m.programId);
     return totalBenefitCents(p);
   });
 
   // For application ease: invert step count so fewer steps = higher ease score
   // Programs without a step count get the median step count of the set.
   const stepCounts = candidates.map((m) => {
-    const p = programById.get(m.programId)!;
+    const p = programById.get(m.programId);
     return p.applicationStepCount ?? undefined;
   });
   const knownSteps = stepCounts.filter((s): s is number => s !== undefined);
   const medianSteps =
     knownSteps.length > 0
-      ? knownSteps.slice().sort((a, b) => a - b)[Math.floor(knownSteps.length / 2)]!
+      ? knownSteps.slice().sort((a, b) => a - b)[Math.floor(knownSteps.length / 2)]
       : 5; // sensible default when no step data at all
   const effectiveSteps = stepCounts.map((s) => s ?? medianSteps);
 
   const urgencyValues = candidates.map((m) => {
-    const p = programById.get(m.programId)!;
+    const p = programById.get(m.programId);
     return deadlineUrgencyScore(p, urgencyThreshold);
   });
 
@@ -165,22 +165,22 @@ export function rankByImpact(
   const urgencyRange = minMax(urgencyValues);
 
   const ranked: RankedMatch[] = candidates.map((match, idx) => {
-    const normBenefit = normalise(benefitValues[idx]!, benefitRange.min, benefitRange.max);
+    const normBenefit = normalise(benefitValues[idx], benefitRange.min, benefitRange.max);
 
     // Ease is INVERSE of step count: fewer steps → higher ease normalised score
-    const rawSteps = effectiveSteps[idx]!;
+    const rawSteps = effectiveSteps[idx];
     const normEaseRaw = normalise(rawSteps, stepRange.min, stepRange.max);
     // Flip so that the program with the fewest steps scores 1.0
     const normEase = 1 - normEaseRaw;
 
-    const normUrgency = normalise(urgencyValues[idx]!, urgencyRange.min, urgencyRange.max);
+    const normUrgency = normalise(urgencyValues[idx], urgencyRange.min, urgencyRange.max);
 
     const impactScore =
       weights.benefitValue * normBenefit +
       weights.applicationEase * normEase +
       weights.deadlineUrgency * normUrgency;
 
-    const program = programById.get(match.programId)!;
+    const program = programById.get(match.programId);
     return { matchResult: match, program, impactScore };
   });
 

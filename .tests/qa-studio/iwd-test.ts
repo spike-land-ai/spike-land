@@ -36,9 +36,9 @@ async function main() {
   console.log("Load time:", Date.now() - start, "ms");
   console.log("Title:", await page.title());
 
-  await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() =>
-    console.log("WARN: network did not idle in 15s")
-  );
+  await page
+    .waitForLoadState("networkidle", { timeout: 15000 })
+    .catch(() => console.log("WARN: network did not idle in 15s"));
 
   // Check map rendered
   const mapEl = await page.$("#map");
@@ -53,10 +53,14 @@ async function main() {
 
   // Check banner
   console.log("\n--- Banner ---");
-  const bannerText = await page.$eval("#banner", (el) => el.textContent?.trim() ?? "").catch(() => "MISSING");
+  const bannerText = await page
+    .$eval("#banner", (el) => el.textContent?.trim() ?? "")
+    .catch(() => "MISSING");
   console.log("Banner text:", bannerText);
 
-  const counterText = await page.$eval("#counter", (el) => el.textContent?.trim() ?? "").catch(() => "MISSING");
+  const counterText = await page
+    .$eval("#counter", (el) => el.textContent?.trim() ?? "")
+    .catch(() => "MISSING");
   console.log("Counter value:", counterText);
 
   // Wait for checkin + visitor load
@@ -89,4 +93,7 @@ async function main() {
   process.exit(passed ? 0 : 1);
 }
 
-main().catch((e) => { console.error("Fatal:", e); process.exit(1); });
+main().catch((e) => {
+  console.error("Fatal:", e);
+  process.exit(1);
+});

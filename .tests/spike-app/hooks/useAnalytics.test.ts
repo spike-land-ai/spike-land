@@ -88,15 +88,15 @@ describe("useAnalytics", () => {
       }),
     );
 
-    const body = JSON.parse(mockFetch.mock.calls[0]![1].body) as {
+    const body = JSON.parse(mockFetch.mock.calls[0]?.[1].body) as {
       source: string;
       eventType: string;
       metadata: Record<string, unknown>;
     }[];
     expect(Array.isArray(body)).toBe(true);
-    expect(body[0]!.source).toBe("spike-app");
-    expect(body[0]!.eventType).toBe("test_event");
-    expect(body[0]!.metadata.key).toBe("value");
+    expect(body[0]?.source).toBe("spike-app");
+    expect(body[0]?.eventType).toBe("test_event");
+    expect(body[0]?.metadata.key).toBe("value");
   });
 
   it("trackEvent enqueues an event with correct source and eventType", async () => {
@@ -111,15 +111,15 @@ describe("useAnalytics", () => {
     vi.advanceTimersByTime(35_000);
 
     expect(mockFetch).toHaveBeenCalled();
-    const body = JSON.parse(mockFetch.mock.calls[0]![1].body) as {
+    const body = JSON.parse(mockFetch.mock.calls[0]?.[1].body) as {
       source: string;
       eventType: string;
       metadata: Record<string, unknown>;
     }[];
-    expect(body[0]!.source).toBe("spike-app");
-    expect(body[0]!.eventType).toBe("custom_test");
-    expect(body[0]!.metadata.key1).toBe("val1");
-    expect(body[0]!.metadata.key2).toBe(42);
+    expect(body[0]?.source).toBe("spike-app");
+    expect(body[0]?.eventType).toBe("custom_test");
+    expect(body[0]?.metadata.key1).toBe("val1");
+    expect(body[0]?.metadata.key2).toBe(42);
   });
 
   // ── sendBeacon on hidden page ─────────────────────────────────────────────
@@ -181,19 +181,19 @@ describe("useAnalytics", () => {
     mockFetch.mockClear();
 
     // Simulate navigation to a new path
-    const onResolved = mockSubscribe.mock.calls[0]![1] as (arg: {
+    const onResolved = mockSubscribe.mock.calls[0]?.[1] as (arg: {
       toLocation: { pathname: string };
     }) => void;
     onResolved({ toLocation: { pathname: "/dashboard" } });
     vi.advanceTimersByTime(35_000);
 
     expect(mockFetch).toHaveBeenCalled();
-    const body = JSON.parse(mockFetch.mock.calls[0]![1].body) as {
+    const body = JSON.parse(mockFetch.mock.calls[0]?.[1].body) as {
       eventType: string;
       metadata: { path: string };
     }[];
-    expect(body[0]!.eventType).toBe("page_view");
-    expect(body[0]!.metadata.path).toBe("/dashboard");
+    expect(body[0]?.eventType).toBe("page_view");
+    expect(body[0]?.metadata.path).toBe("/dashboard");
   });
 
   it("deduplicates consecutive page_view events for the same path", async () => {
@@ -209,7 +209,7 @@ describe("useAnalytics", () => {
     vi.advanceTimersByTime(35_000);
 
     if (mockFetch.mock.calls.length > 0) {
-      const body = JSON.parse(mockFetch.mock.calls[0]![1].body) as {
+      const body = JSON.parse(mockFetch.mock.calls[0]?.[1].body) as {
         metadata: { path: string };
       }[];
       const pageViews = body.filter((e) => (e as { eventType?: string }).eventType === "page_view");
@@ -238,10 +238,10 @@ describe("useAnalytics", () => {
     flushAnalyticsQueue();
 
     expect(mockFetch).toHaveBeenCalled();
-    const body = JSON.parse(mockFetch.mock.calls[0]![1].body) as {
+    const body = JSON.parse(mockFetch.mock.calls[0]?.[1].body) as {
       eventType: string;
     }[];
-    expect(body[0]!.eventType).toBe("urgent_event");
+    expect(body[0]?.eventType).toBe("urgent_event");
   });
 
   // ── Queue overflow flush ──────────────────────────────────────────────────
@@ -255,7 +255,7 @@ describe("useAnalytics", () => {
 
     // Flush should happen synchronously without waiting for timer
     expect(mockFetch).toHaveBeenCalled();
-    const body = JSON.parse(mockFetch.mock.calls[0]![1].body) as unknown[];
+    const body = JSON.parse(mockFetch.mock.calls[0]?.[1].body) as unknown[];
     expect(body.length).toBe(20);
   });
 
@@ -268,14 +268,14 @@ describe("useAnalytics", () => {
     vi.advanceTimersByTime(35_000);
 
     expect(mockFetch).toHaveBeenCalled();
-    const body = JSON.parse(mockFetch.mock.calls[0]![1].body) as {
+    const body = JSON.parse(mockFetch.mock.calls[0]?.[1].body) as {
       eventType: string;
       metadata: { path: string; sessionDuration: number };
     }[];
     const ev = body.find((e) => e.eventType === "page_view");
     expect(ev).toBeDefined();
-    expect(ev!.metadata.path).toBe("/pricing");
-    expect(ev!.metadata.sessionDuration).toBe(5000);
+    expect(ev?.metadata.path).toBe("/pricing");
+    expect(ev?.metadata.sessionDuration).toBe(5000);
   });
 
   // ── trackToolInvocation ───────────────────────────────────────────────────
@@ -287,13 +287,13 @@ describe("useAnalytics", () => {
     vi.advanceTimersByTime(35_000);
 
     expect(mockFetch).toHaveBeenCalled();
-    const body = JSON.parse(mockFetch.mock.calls[0]![1].body) as {
+    const body = JSON.parse(mockFetch.mock.calls[0]?.[1].body) as {
       eventType: string;
       metadata: { toolName: string; durationMs: number };
     }[];
     const ev = body.find((e) => e.eventType === "tool_use");
     expect(ev).toBeDefined();
-    expect(ev!.metadata.toolName).toBe("esbuild_compile");
-    expect(ev!.metadata.durationMs).toBe(123);
+    expect(ev?.metadata.toolName).toBe("esbuild_compile");
+    expect(ev?.metadata.durationMs).toBe(123);
   });
 });

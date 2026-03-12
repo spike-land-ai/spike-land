@@ -14,15 +14,21 @@ interface TerminalSurfaceProps {
   className?: string;
 }
 
-export function TerminalSurface({ appSlug, availableTools = [], className = "" }: TerminalSurfaceProps) {
-  const [history, setHistory] = useState<Array<{
-    command: string;
-    tool: string;
-    input: Record<string, unknown>;
-    output: string;
-    isError: boolean;
-    timestamp: number;
-  }>>([]);
+export function TerminalSurface({
+  appSlug,
+  availableTools = [],
+  className = "",
+}: TerminalSurfaceProps) {
+  const [history, setHistory] = useState<
+    Array<{
+      command: string;
+      tool: string;
+      input: Record<string, unknown>;
+      output: string;
+      isError: boolean;
+      timestamp: number;
+    }>
+  >([]);
   const [commandInput, setCommandInput] = useState("");
   const [isRunning, setIsRunning] = useState(false);
   const commandExamples = getCommandExamples(availableTools);
@@ -83,7 +89,9 @@ export function TerminalSurface({ appSlug, availableTools = [], className = "" }
   };
 
   return (
-    <div className={`flex flex-col h-full bg-card rounded-xl border border-border overflow-hidden ${className}`}>
+    <div
+      className={`flex flex-col h-full bg-card rounded-xl border border-border overflow-hidden ${className}`}
+    >
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-muted/30">
         <Terminal className="w-4 h-4 text-muted-foreground" />

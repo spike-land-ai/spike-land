@@ -208,7 +208,7 @@ if (typeof MessageChannel !== "undefined") {
 } else {
   // Fallback to setTimeout in non-browser environments.
   schedulePerformWorkUntilDeadline = () => {
-    localSetTimeout!(performWorkUntilDeadline, 0);
+    localSetTimeout?.(performWorkUntilDeadline, 0);
   };
 }
 
@@ -220,13 +220,13 @@ function requestHostCallback(): void {
 }
 
 function requestHostTimeout(callback: (currentTime: number) => void, ms: number): void {
-  taskTimeoutID = localSetTimeout!(() => {
+  taskTimeoutID = localSetTimeout?.(() => {
     callback(getCurrentTime());
   }, ms);
 }
 
 function cancelHostTimeout(): void {
-  localClearTimeout!(taskTimeoutID as ReturnType<typeof setTimeout>);
+  localClearTimeout?.(taskTimeoutID as ReturnType<typeof setTimeout>);
   taskTimeoutID = -1;
 }
 

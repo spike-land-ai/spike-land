@@ -223,7 +223,7 @@ export const build = async ({
       if (splitting) {
         return result.outputFiles;
       } else {
-        return result.outputFiles[0]!.text;
+        return result.outputFiles[0]?.text;
       }
     };
 

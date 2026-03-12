@@ -89,7 +89,7 @@ export async function fireOutboundWebhooks(
   await Promise.allSettled(
     outboundHooks.map(async (hook) => {
       try {
-        await fetch(hook.url!, {
+        await fetch(hook.url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

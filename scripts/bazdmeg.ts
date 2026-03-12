@@ -62,7 +62,11 @@ function header(mode: BazdmegMode): void {
   const verbose = isVerbose();
   const verboseLabel = verbose ? " (VERBOSE)" : "";
   const label =
-    mode === "status" ? "BAZDMEG Status" : mode === "dry-run" ? "BAZDMEG Dry Run" : "BAZDMEG Pipeline";
+    mode === "status"
+      ? "BAZDMEG Status"
+      : mode === "dry-run"
+        ? "BAZDMEG Dry Run"
+        : "BAZDMEG Pipeline";
   const inner = `  ${label}${verboseLabel}  |  ${branch} @ ${sha}  `;
   const bar = "═".repeat(inner.length);
   console.log(`
@@ -117,7 +121,9 @@ function printPhase3Plan(): void {
   console.log(`  Last deployed SHA: ${plan.lastDeployedSha || "<none>"}`);
   console.log(`  spike-app dist ready: ${plan.spaDistExists ? "yes" : "no"}`);
   console.log(`  spike-app deploy needed: ${plan.spaNeedsDeploy ? "yes" : "no"}`);
-  console.log(`  Workers pending: ${plan.workersPending.length > 0 ? plan.workersPending.join(", ") : "none"}`);
+  console.log(
+    `  Workers pending: ${plan.workersPending.length > 0 ? plan.workersPending.join(", ") : "none"}`,
+  );
   console.log("");
 }
 
@@ -168,7 +174,9 @@ function runDryRunMode(): void {
   console.log("");
   console.log(formatTrend());
   console.log("");
-  console.log("Dry run complete. No agent was spawned, nothing was committed, and nothing was deployed.");
+  console.log(
+    "Dry run complete. No agent was spawned, nothing was committed, and nothing was deployed.",
+  );
   console.log("Checks were run in read-only mode with a 60s timeout per command.");
 }
 

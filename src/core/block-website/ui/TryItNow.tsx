@@ -5,9 +5,7 @@ import { useDevModeCopy } from "./useDevModeCopy";
 import { commandSurfaceVars } from "./commandSurfaceTheme";
 
 export function TryItNow() {
-  const [activeTab, setActiveTab] = useState<
-    "claude-code" | "cursor" | "vscode"
-  >("claude-code");
+  const [activeTab, setActiveTab] = useState<"claude-code" | "cursor" | "vscode">("claude-code");
   const [copied, setCopied] = useState(false);
   const headingCopy = useDevModeCopy(
     "Try spike.land in one command",
@@ -21,14 +19,8 @@ export function TryItNow() {
     "This installs the spike.land CLI or configures your editor. Requires Node.js 18+.",
     "This attaches the hosted MCP endpoint and developer tooling surface. Requires Node.js 18+.",
   );
-  const nextCopy = useDevModeCopy(
-    "What happens next:",
-    "What the agent changes next:",
-  );
-  const browseCopy = useDevModeCopy(
-    "Browse all tools",
-    "Browse the runtime surface",
-  );
+  const nextCopy = useDevModeCopy("What happens next:", "What the agent changes next:");
+  const browseCopy = useDevModeCopy("Browse all tools", "Browse the runtime surface");
 
   const getCommand = () => {
     switch (activeTab) {
@@ -77,9 +69,7 @@ export function TryItNow() {
             <h2 className="text-3xl font-bold mb-3 text-foreground tracking-tight">
               {headingCopy.text}
             </h2>
-            <p className="text-muted-foreground text-lg mb-8 max-w-2xl">
-              {bodyCopy.text}
-            </p>
+            <p className="text-muted-foreground text-lg mb-8 max-w-2xl">{bodyCopy.text}</p>
 
             <div
               className="overflow-hidden rounded-xl border shadow-2xl [background:var(--command-surface-bg)]"
@@ -124,8 +114,7 @@ export function TryItNow() {
                     <div className="flex gap-2">
                       <span className="text-primary shrink-0">$</span>
                       <span className="break-all [color:var(--command-surface-code)]">
-                        claude mcp add spike-land --transport http
-                        https://spike.land/mcp
+                        claude mcp add spike-land --transport http https://spike.land/mcp
                       </span>
                     </div>
                   )}
@@ -193,23 +182,14 @@ export function TryItNow() {
               </div>
             </div>
 
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              {footerCopy.text}
-            </p>
+            <p className="mt-4 text-center text-sm text-muted-foreground">{footerCopy.text}</p>
           </div>
 
           <div className="p-6 sm:p-8 bg-muted/30">
-            <h3 className="font-semibold text-foreground mb-4">
-              {nextCopy.text}
-            </h3>
+            <h3 className="font-semibold text-foreground mb-4">{nextCopy.text}</h3>
             <ol className="mb-8 ml-1 list-inside list-decimal space-y-3 text-sm text-foreground/72">
-              <li>
-                Registers spike.land as an MCP server with your AI client.
-              </li>
-              <li>
-                First use will automatically open your browser for a quick
-                1-click approval.
-              </li>
+              <li>Registers spike.land as an MCP server with your AI client.</li>
+              <li>First use will automatically open your browser for a quick 1-click approval.</li>
               <li>Instant access to all tools. Try asking your AI:</li>
             </ol>
 
@@ -231,10 +211,7 @@ export function TryItNow() {
                 className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:text-foreground/80 transition-colors group"
               >
                 {browseCopy.text}
-                <span
-                  className="group-hover:translate-x-1 transition-transform"
-                  aria-hidden="true"
-                >
+                <span className="group-hover:translate-x-1 transition-transform" aria-hidden="true">
                   &rarr;
                 </span>
               </Link>

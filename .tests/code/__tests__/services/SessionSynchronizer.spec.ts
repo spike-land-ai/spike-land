@@ -27,7 +27,7 @@ describe("SessionSynchronizer", () => {
       const ss = new SessionSynchronizer("test-space", session);
       const s = ss.getSession();
       expect(s).not.toBeNull();
-      expect(s!.code).toBe(session.code);
+      expect(s?.code).toBe(session.code);
     });
   });
 
@@ -49,7 +49,7 @@ describe("SessionSynchronizer", () => {
       const session = makeSession({ code: "let y = 2;" });
       const result = await ss.init(session);
       expect(result.code).toBe("let y = 2;");
-      expect(ss.getSession()!.code).toBe("let y = 2;");
+      expect(ss.getSession()?.code).toBe("let y = 2;");
     });
 
     it("returns existing session when already set (no args)", async () => {
@@ -168,7 +168,7 @@ describe("SessionSynchronizer", () => {
       ss.subscribe(cb);
       const newSession = { ...makeSession({ code: "first" }), sender: "user" };
       ss.broadcastSession(newSession);
-      expect(ss.getSession()!.code).toBe("first");
+      expect(ss.getSession()?.code).toBe("first");
       expect(cb).toHaveBeenCalledTimes(1);
     });
 
@@ -177,7 +177,7 @@ describe("SessionSynchronizer", () => {
       const session = makeSession({ code: "same", transpiled: "export default () => null;" });
       const ss = new SessionSynchronizer("space", session);
       // After construction, session is sanitized internally; get actual stored session
-      const storedSession = ss.getSession()!;
+      const storedSession = ss.getSession();
       const cb = vi.fn();
       ss.subscribe(cb);
       // Broadcast the exact stored session — hash should be equal, no notification
@@ -191,7 +191,7 @@ describe("SessionSynchronizer", () => {
       const cb = vi.fn();
       ss.subscribe(cb);
       ss.broadcastSession({ ...makeSession({ code: "v2" }), sender: "user" });
-      expect(ss.getSession()!.code).toBe("v2");
+      expect(ss.getSession()?.code).toBe("v2");
       expect(cb).toHaveBeenCalledTimes(1);
     });
   });

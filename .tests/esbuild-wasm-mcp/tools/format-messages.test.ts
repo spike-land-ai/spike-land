@@ -26,7 +26,7 @@ class MockMcpServer {
 function makeServer() {
   const server = new MockMcpServer();
   registerFormatMessagesTool(server as unknown as McpServer);
-  const handler = server.tools.get("esbuild_wasm_format_messages")!;
+  const handler = server.tools.get("esbuild_wasm_format_messages");
   return { server, handler };
 }
 
@@ -64,8 +64,8 @@ describe("registerFormatMessagesTool", () => {
       kind: "error",
       color: false,
     });
-    expect(result.content[0]!.type).toBe("text");
-    const parsed = JSON.parse(result.content[0]!.text);
+    expect(result.content[0]?.type).toBe("text");
+    const parsed = JSON.parse(result.content[0]?.text);
     expect(Array.isArray(parsed)).toBe(true);
     expect(parsed[0]).toContain("Cannot find module");
   });
@@ -100,7 +100,7 @@ describe("registerFormatMessagesTool", () => {
       kind: "warning",
     })) as { content: { text: string }[] };
 
-    expect(result.content[0]!.text).toBeTruthy();
+    expect(result.content[0]?.text).toBeTruthy();
   });
 
   it("returns error response when formatMessages throws", async () => {

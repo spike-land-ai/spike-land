@@ -9,7 +9,7 @@
  *   vibe-dev claude [args]             # Run Claude Code with MCP configured
  */
 
-import spawn from "cross-spawn";
+import { spawn } from "node:child_process";
 import { program } from "commander";
 import { readFile, writeFile } from "fs/promises";
 import { tmpdir } from "os";

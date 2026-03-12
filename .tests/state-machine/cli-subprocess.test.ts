@@ -73,7 +73,7 @@ describe("state-machine CLI module", () => {
     mockRlEmitter.emit("line", command);
 
     expect(stdoutWrites.length).toBeGreaterThan(0);
-    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim());
+    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim());
     expect(output.id).toBe(1);
     expect(output.result).toBeDefined();
     expect(output.result.definition.name).toBe("CLI Test Machine");
@@ -87,7 +87,7 @@ describe("state-machine CLI module", () => {
       params: { name: "AddState Machine", userId: "u1" },
     });
     mockRlEmitter.emit("line", createCmd);
-    const createOutput = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim());
+    const createOutput = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim());
     const machineId = createOutput.result.definition.id;
 
     // Now addState
@@ -97,7 +97,7 @@ describe("state-machine CLI module", () => {
       params: { machineId, state: { id: "idle", type: "atomic" } },
     });
     mockRlEmitter.emit("line", addStateCmd);
-    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim());
+    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim());
     expect(output.id).toBe(11);
     expect(output.result.id).toBe("idle");
   });
@@ -109,7 +109,7 @@ describe("state-machine CLI module", () => {
       params: { name: "Trans Machine", userId: "u1" },
     });
     mockRlEmitter.emit("line", createCmd);
-    const machineId = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim()).result.definition
+    const machineId = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim()).result.definition
       .id;
 
     mockRlEmitter.emit(
@@ -140,7 +140,7 @@ describe("state-machine CLI module", () => {
         },
       }),
     );
-    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim());
+    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim());
     expect(output.id).toBe(23);
     expect(output.result.event).toBe("GO");
   });
@@ -152,14 +152,14 @@ describe("state-machine CLI module", () => {
       params: { name: "GetState Machine", userId: "u1", context: { x: 99 } },
     });
     mockRlEmitter.emit("line", createCmd);
-    const machineId = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim()).result.definition
+    const machineId = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim()).result.definition
       .id;
 
     mockRlEmitter.emit(
       "line",
       JSON.stringify({ id: 31, method: "getState", params: { machineId } }),
     );
-    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim());
+    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim());
     expect(output.id).toBe(31);
     expect(output.result.context.x).toBe(99);
   });
@@ -171,11 +171,11 @@ describe("state-machine CLI module", () => {
       params: { name: "Reset Machine", userId: "u1" },
     });
     mockRlEmitter.emit("line", createCmd);
-    const machineId = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim()).result.definition
+    const machineId = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim()).result.definition
       .id;
 
     mockRlEmitter.emit("line", JSON.stringify({ id: 41, method: "reset", params: { machineId } }));
-    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim());
+    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim());
     expect(output.id).toBe(41);
     expect(output.result.status).toBe("reset");
   });
@@ -187,14 +187,14 @@ describe("state-machine CLI module", () => {
       params: { name: "Validate Machine", userId: "u1" },
     });
     mockRlEmitter.emit("line", createCmd);
-    const machineId = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim()).result.definition
+    const machineId = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim()).result.definition
       .id;
 
     mockRlEmitter.emit(
       "line",
       JSON.stringify({ id: 51, method: "validate", params: { machineId } }),
     );
-    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim());
+    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim());
     expect(output.id).toBe(51);
     expect(Array.isArray(output.result)).toBe(true);
   });
@@ -207,7 +207,7 @@ describe("state-machine CLI module", () => {
       params: { name: "SendEvent Machine", userId: "u1", initial: "a" },
     });
     mockRlEmitter.emit("line", createCmd);
-    const machineId = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim()).result.definition
+    const machineId = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim()).result.definition
       .id;
 
     mockRlEmitter.emit(
@@ -253,7 +253,7 @@ describe("state-machine CLI module", () => {
         params: { machineId, event: "NEXT", payload: { extra: true } },
       }),
     );
-    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim());
+    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim());
     expect(output.id).toBe(64);
     expect(output.result.toStates).toContain("b");
 
@@ -262,13 +262,13 @@ describe("state-machine CLI module", () => {
 
   it("writes error JSON for unknown method", () => {
     mockRlEmitter.emit("line", JSON.stringify({ id: 99, method: "unknownCommand", params: {} }));
-    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim());
+    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim());
     expect(output.error).toContain("Unknown method");
   });
 
   it("writes error JSON for invalid JSON input", () => {
     mockRlEmitter.emit("line", "{ this is not valid json }");
-    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim());
+    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim());
     expect(output.error).toBeDefined();
   });
 
@@ -277,7 +277,7 @@ describe("state-machine CLI module", () => {
       "line",
       JSON.stringify({ id: 100, method: "getState", params: { machineId: "nonexistent-uuid" } }),
     );
-    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]!.trim());
+    const output = JSON.parse(stdoutWrites[stdoutWrites.length - 1]?.trim());
     expect(output.error).toContain("nonexistent-uuid");
   });
 });

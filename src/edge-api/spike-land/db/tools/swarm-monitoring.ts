@@ -47,7 +47,7 @@ export function registerSwarmMonitoringTools(
           "7d": 7 * 24 * 60 * 60 * 1000,
           "30d": 30 * 24 * 60 * 60 * 1000,
         };
-        const since = Date.now() - (periodMs[period] ?? periodMs["24h"]!);
+        const since = Date.now() - (periodMs[period] ?? periodMs["24h"]);
 
         const agents = await ctx.db
           .select({

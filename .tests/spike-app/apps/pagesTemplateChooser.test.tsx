@@ -96,7 +96,9 @@ describe("PagesTemplateChooserApp", () => {
     fireEvent.click(card);
     expect(card).toHaveAttribute("aria-selected", "true");
 
-    fireEvent.keyDown(grid.parentElement!, { key: "Escape" });
+    if (grid.parentElement) {
+      fireEvent.keyDown(grid.parentElement, { key: "Escape" });
+    }
 
     expect(card).toHaveAttribute("aria-selected", "false");
   });

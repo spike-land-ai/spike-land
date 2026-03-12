@@ -116,7 +116,7 @@ function semanticName(dep: string): string {
   // Check exact match first
   if (depSemanticMap[dep]) return depSemanticMap[dep];
   // Check partial matches (e.g. "@scope/package" → "package")
-  const short = dep.includes("/") ? dep.split("/").pop()! : dep;
+  const short = dep.includes("/") ? dep.split("/").pop() : dep;
   if (depSemanticMap[short]) return depSemanticMap[short];
   return "";
 }

@@ -52,8 +52,8 @@ function repoKey(userId: string, repoUrl: string): string {
 function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
   const match = url.match(/github\.com\/([^/]+)\/([^/]+)/);
   if (!match) return null;
-  const repo = match[2]!.replace(/\.git$/, "");
-  return { owner: match[1]!, repo };
+  const repo = match[2]?.replace(/\.git$/, "");
+  return { owner: match[1], repo };
 }
 
 function getExtension(filePath: string): string {
@@ -268,9 +268,9 @@ export function registerContextArchitectTools(
         const files: FileEntry[] = data.tree
           .filter((entry) => entry.type === "blob" && entry.path)
           .map((entry) => ({
-            path: entry.path!,
+            path: entry.path,
             size: entry.size ?? 0,
-            type: getExtension(entry.path!),
+            type: getExtension(entry.path),
           }));
 
         const key = repoKey(userId, repo_url);
@@ -378,7 +378,7 @@ export function registerContextArchitectTools(
         text += `| # | Score | Path | Size |\n`;
         text += `|---|-------|------|------|\n`;
         for (let i = 0; i < scored.length; i++) {
-          const { file, score } = scored[i]!;
+          const { file, score } = scored[i];
           const sizeStr =
             file.size > 1024 ? `${(file.size / 1024).toFixed(1)} KB` : `${file.size} B`;
           text += `| ${i + 1} | ${score} | \`${file.path}\` | ${sizeStr} |\n`;

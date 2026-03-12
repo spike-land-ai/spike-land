@@ -121,8 +121,8 @@ describe("web tools", () => {
     it("navigates and returns narration", async () => {
       const result = await server.call("web_navigate", { url: "https://example.com" });
       expect(mockGoto).toHaveBeenCalledWith("https://example.com", { waitUntil: "load" });
-      expect(result.content[0]!.text).toContain("Test Page");
-      expect(result.content[0]!.text).toContain("ref=1");
+      expect(result.content[0]?.text).toContain("Test Page");
+      expect(result.content[0]?.text).toContain("ref=1");
     });
 
     it("uses custom wait_until", async () => {
@@ -137,27 +137,27 @@ describe("web tools", () => {
   describe("web_read", () => {
     it("returns compact narration by default", async () => {
       const result = await server.call("web_read", {});
-      expect(result.content[0]!.text).toContain("[main]");
-      expect(result.content[0]!.text).toContain("ref=1");
+      expect(result.content[0]?.text).toContain("[main]");
+      expect(result.content[0]?.text).toContain("ref=1");
     });
 
     it("returns full narration when detail=full", async () => {
       const result = await server.call("web_read", { detail: "full" });
-      expect(result.content[0]!.text).toContain("main landmark");
-      expect(result.content[0]!.text).toContain("heading level 1 ref=1");
+      expect(result.content[0]?.text).toContain("main landmark");
+      expect(result.content[0]?.text).toContain("heading level 1 ref=1");
     });
 
     it("filters by landmark", async () => {
       const result = await server.call("web_read", { landmark: "main", detail: "full" });
-      expect(result.content[0]!.text).toContain("main landmark");
+      expect(result.content[0]?.text).toContain("main landmark");
       // Inside main: heading ref=1, link ref=2, button ref=3, textbox ref=4
-      expect(result.content[0]!.text).toContain("button ref=3");
+      expect(result.content[0]?.text).toContain("button ref=3");
     });
 
     it("returns message when no active tab", async () => {
       setPageSnapshot(null);
       const result = await server.call("web_read", {});
-      expect(result.content[0]!.text).toContain("No active browser tab");
+      expect(result.content[0]?.text).toContain("No active browser tab");
     });
   });
 
@@ -177,20 +177,20 @@ describe("web tools", () => {
     it("returns error when ref not found", async () => {
       const result = await server.call("web_click", { ref: 99 });
       expect(result.isError).toBe(true);
-      expect(result.content[0]!.text).toContain("REF_NOT_FOUND");
+      expect(result.content[0]?.text).toContain("REF_NOT_FOUND");
     });
 
     it("returns error when no page", async () => {
       setPageSnapshot(null);
       const result = await server.call("web_click", { ref: 1 });
       expect(result.isError).toBe(true);
-      expect(result.content[0]!.text).toContain("NO_PAGE");
+      expect(result.content[0]?.text).toContain("NO_PAGE");
     });
 
     it("returns error when no ref or role provided", async () => {
       const result = await server.call("web_click", {});
       expect(result.isError).toBe(true);
-      expect(result.content[0]!.text).toContain("INVALID_INPUT");
+      expect(result.content[0]?.text).toContain("INVALID_INPUT");
     });
   });
 
@@ -263,13 +263,13 @@ describe("web tools", () => {
         { index: 1, url: "https://b.com", title: "Page B" },
       ]);
       const result = await server.call("web_tabs", { action: "list" });
-      expect(result.content[0]!.text).toContain("Page A");
-      expect(result.content[0]!.text).toContain("Page B");
+      expect(result.content[0]?.text).toContain("Page A");
+      expect(result.content[0]?.text).toContain("Page B");
     });
 
     it("returns message when no tabs", async () => {
       const result = await server.call("web_tabs", { action: "list" });
-      expect(result.content[0]!.text).toContain("No open tabs");
+      expect(result.content[0]?.text).toContain("No open tabs");
     });
 
     it("switches tab", async () => {
@@ -280,7 +280,7 @@ describe("web tools", () => {
     it("closes tab", async () => {
       const result = await server.call("web_tabs", { action: "close", tab: 0 });
       expect(mockCloseTab).toHaveBeenCalledWith(0);
-      expect(result.content[0]!.text).toContain("closed");
+      expect(result.content[0]?.text).toContain("closed");
     });
 
     it("returns error when switch without tab index", async () => {
@@ -291,7 +291,7 @@ describe("web tools", () => {
     it("returns error for unknown action", async () => {
       const result = await server.call("web_tabs", { action: "unknown_action" as "list" });
       expect(result.isError).toBe(true);
-      expect(result.content[0]!.text).toContain("INVALID_INPUT");
+      expect(result.content[0]?.text).toContain("INVALID_INPUT");
     });
   });
 
@@ -319,8 +319,8 @@ describe("web tools", () => {
   describe("web_forms", () => {
     it("lists form fields", async () => {
       const result = await server.call("web_forms", {});
-      expect(result.content[0]!.text).toContain("textbox");
-      expect(result.content[0]!.text).toContain("Email");
+      expect(result.content[0]?.text).toContain("textbox");
+      expect(result.content[0]?.text).toContain("Email");
     });
 
     it("returns message when no fields", async () => {
@@ -330,7 +330,7 @@ describe("web tools", () => {
       };
       setPageSnapshot(emptyTree);
       const result = await server.call("web_forms", {});
-      expect(result.content[0]!.text).toContain("No form fields");
+      expect(result.content[0]?.text).toContain("No form fields");
     });
 
     it("returns error when no page", async () => {

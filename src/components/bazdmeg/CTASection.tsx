@@ -17,7 +17,8 @@ export function CTASection() {
             Adopt the BAZDMEG Method
           </h2>
           <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
-            Stop letting AI generate slop. Start using quality gates. Enforce the 8 principles on every pull request, and watch your velocity and codebase health soar.
+            Stop letting AI generate slop. Start using quality gates. Enforce the 8 principles on
+            every pull request, and watch your velocity and codebase health soar.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <a

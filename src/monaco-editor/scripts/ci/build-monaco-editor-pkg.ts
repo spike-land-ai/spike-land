@@ -102,8 +102,8 @@ async function prepareMonacoEditorRelease(monacoEditorCoreVersion: string) {
 }
 
 function objectMergeThrowIfSet(
-  target: Record<string, any>,
-  source: Record<string, any>,
+  target: Record<string, unknown>,
+  source: Record<string, unknown>,
   fieldName: string,
 ): void {
   for (const [key, value] of Object.entries(source)) {

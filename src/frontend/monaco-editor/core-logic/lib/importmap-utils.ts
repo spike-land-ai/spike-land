@@ -163,7 +163,7 @@ function parseNamedExports(match: string): Array<{ name: string; alias?: string 
     .filter(Boolean)
     .map((s) => {
       const parts = s.split(/\s+as\s+/);
-      return parts.length > 1 ? { name: parts[0]!, alias: parts[1]! } : { name: parts[0]! };
+      return parts.length > 1 ? { name: parts[0], alias: parts[1] } : { name: parts[0] };
     });
 }
 
@@ -318,7 +318,7 @@ export function importMapReplace(code: string): string {
     if (split) return split;
 
     const exportsParam = getExportsString(match);
-    const mappedPath = getMappedPath(importPath!, exportsParam, true);
+    const mappedPath = getMappedPath(importPath, exportsParam, true);
     return match.replace(/['"][^'"]+['"]/, `"${mappedPath}"`);
   });
 
@@ -337,7 +337,7 @@ export function importMapReplace(code: string): string {
     if (split) return split;
 
     const exportsParam = getExportsString(match);
-    const mappedPath = getMappedPath(exportPath!, exportsParam, true);
+    const mappedPath = getMappedPath(exportPath, exportsParam, true);
     return match.replace(/['"][^'"]+['"]/, `"${mappedPath}"`);
   });
 
@@ -349,7 +349,7 @@ export function importMapReplace(code: string): string {
     const importPath = pathMatch[1];
     if (!importPath || !shouldTransformPath(importPath)) return match;
 
-    const mappedPath = getMappedPath(importPath!, "", true);
+    const mappedPath = getMappedPath(importPath, "", true);
     return match.replace(/['"][^'"]+['"]/, `"${mappedPath}"`);
   });
 

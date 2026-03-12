@@ -64,7 +64,7 @@ export class BrowserSessionDO extends DurableObject<Env> {
 
     if (index !== undefined && this.tabs.has(index)) {
       this.activeTabIndex = index;
-      return this.tabs.get(index)!;
+      return this.tabs.get(index);
     }
 
     await adapter.launch();
@@ -229,7 +229,7 @@ export class BrowserSessionDO extends DurableObject<Env> {
     this.tabs.delete(index);
     if (this.activeTabIndex === index) {
       const remaining = [...this.tabs.keys()];
-      this.activeTabIndex = remaining.length > 0 ? remaining[0]! : 0;
+      this.activeTabIndex = remaining.length > 0 ? remaining[0] : 0;
     }
     return true;
   }

@@ -318,9 +318,13 @@ export function registerSkillStoreTools(
             .optional()
             .default(0)
             .describe("Display sort order (lower = earlier)."),
-          isActive: z.coerce.boolean().optional().default(true).describe("Whether the skill is active."),
-          isFeatured: z
-            .coerce.boolean()
+          isActive: z.coerce
+            .boolean()
+            .optional()
+            .default(true)
+            .describe("Whether the skill is active."),
+          isFeatured: z.coerce
+            .boolean()
             .optional()
             .default(false)
             .describe("Whether the skill is featured."),

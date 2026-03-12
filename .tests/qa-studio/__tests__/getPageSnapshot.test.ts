@@ -95,9 +95,9 @@ describe("getPageSnapshot", () => {
 
     const result = await getPageSnapshot();
     expect(result).not.toBeNull();
-    expect(result!.title).toBe("Example");
-    expect(result!.url).toBe("https://example.com");
-    expect(result!.page).toBeDefined();
+    expect(result?.title).toBe("Example");
+    expect(result?.url).toBe("https://example.com");
+    expect(result?.page).toBeDefined();
   });
 
   it("returns tree as null when CDP returns empty nodes", async () => {
@@ -106,7 +106,7 @@ describe("getPageSnapshot", () => {
 
     const result = await getPageSnapshot();
     expect(result).not.toBeNull();
-    expect(result!.tree).toBeNull();
+    expect(result?.tree).toBeNull();
   });
 
   it("returns tree when CDP returns a root node", async () => {
@@ -124,9 +124,9 @@ describe("getPageSnapshot", () => {
 
     const result = await getPageSnapshot();
     expect(result).not.toBeNull();
-    expect(result!.tree).not.toBeNull();
-    expect(result!.tree!.role).toBe("RootWebArea");
-    expect(result!.tree!.name).toBe("Test Page");
+    expect(result?.tree).not.toBeNull();
+    expect(result?.tree?.role).toBe("RootWebArea");
+    expect(result?.tree?.name).toBe("Test Page");
   });
 
   it("builds tree with children linked by childIds", async () => {
@@ -154,10 +154,10 @@ describe("getPageSnapshot", () => {
     });
 
     const result = await getPageSnapshot();
-    expect(result!.tree).not.toBeNull();
-    expect(result!.tree!.children).toHaveLength(2);
-    expect(result!.tree!.children![0]!.role).toBe("main");
-    expect(result!.tree!.children![1]!.role).toBe("banner");
+    expect(result?.tree).not.toBeNull();
+    expect(result?.tree?.children).toHaveLength(2);
+    expect(result?.tree?.children?.[0]?.role).toBe("main");
+    expect(result?.tree?.children?.[1]?.role).toBe("banner");
   });
 
   it("handles CDP node with no role (defaults to generic)", async () => {
@@ -173,8 +173,8 @@ describe("getPageSnapshot", () => {
     });
 
     const result = await getPageSnapshot();
-    expect(result!.tree).not.toBeNull();
-    expect(result!.tree!.role).toBe("generic");
+    expect(result?.tree).not.toBeNull();
+    expect(result?.tree?.role).toBe("generic");
   });
 
   it("maps CDP node properties: checked, disabled, expanded, selected, pressed, level", async () => {
@@ -199,7 +199,7 @@ describe("getPageSnapshot", () => {
     });
 
     const result = await getPageSnapshot();
-    const tree = result!.tree!;
+    const tree = result?.tree;
     expect(tree.checked).toBe(true);
     expect(tree.disabled).toBe(true);
     expect(tree.expanded).toBe(true);
@@ -225,8 +225,8 @@ describe("getPageSnapshot", () => {
     });
 
     const result = await getPageSnapshot();
-    expect(result!.tree!.checked).toBe(false);
-    expect(result!.tree!.pressed).toBe(false);
+    expect(result?.tree?.checked).toBe(false);
+    expect(result?.tree?.pressed).toBe(false);
   });
 
   it("maps CDP value to string representation", async () => {
@@ -243,7 +243,7 @@ describe("getPageSnapshot", () => {
     });
 
     const result = await getPageSnapshot();
-    expect(result!.tree!.value).toBe("42");
+    expect(result?.tree?.value).toBe("42");
   });
 
   it("returns tree as null when CDP returns no nodes array", async () => {
@@ -252,7 +252,7 @@ describe("getPageSnapshot", () => {
 
     const result = await getPageSnapshot();
     expect(result).not.toBeNull();
-    expect(result!.tree).toBeNull();
+    expect(result?.tree).toBeNull();
   });
 
   it("handles CDP error gracefully and returns null tree", async () => {
@@ -261,7 +261,7 @@ describe("getPageSnapshot", () => {
 
     const result = await getPageSnapshot();
     expect(result).not.toBeNull();
-    expect(result!.tree).toBeNull();
+    expect(result?.tree).toBeNull();
   });
 
   it("skips unknown childIds during tree linking", async () => {
@@ -282,7 +282,7 @@ describe("getPageSnapshot", () => {
     });
 
     const result = await getPageSnapshot();
-    expect(result!.tree!.children).toHaveLength(1);
-    expect(result!.tree!.children![0]!.role).toBe("main");
+    expect(result?.tree?.children).toHaveLength(1);
+    expect(result?.tree?.children?.[0]?.role).toBe("main");
   });
 });

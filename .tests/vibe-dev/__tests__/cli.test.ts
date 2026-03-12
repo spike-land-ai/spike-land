@@ -59,7 +59,7 @@ vi.mock("commander", async (importOriginal) => {
     );
     const origAction = cmd.action.bind(cmd);
     cmd.action = (fn: (...a: unknown[]) => unknown) => {
-      const commandName = (nameAndArgs as string).split(" ")[0]!;
+      const commandName = (nameAndArgs as string).split(" ")[0];
       capturedActions[commandName] = fn as (...args: unknown[]) => Promise<void>;
       return origAction(fn);
     };
@@ -260,7 +260,7 @@ describe("CLI poll command", () => {
     // Let the poll loop run once
     await vi.advanceTimersByTimeAsync(2001);
 
-    if (sigintHandlers.length > 0) sigintHandlers[0]!();
+    if (sigintHandlers.length > 0) sigintHandlers[0]();
 
     expect(agentModule.poll).toHaveBeenCalled();
 
@@ -285,7 +285,7 @@ describe("CLI poll command", () => {
     await vi.advanceTimersByTimeAsync(200);
 
     // Trigger SIGINT to stop the loop
-    if (sigintHandlers.length > 0) sigintHandlers[0]!();
+    if (sigintHandlers.length > 0) sigintHandlers[0]();
 
     vi.useRealTimers();
     onSpy.mockRestore();
@@ -309,7 +309,7 @@ describe("CLI poll command", () => {
     // Let the poll loop run (error will be caught and logged)
     await vi.advanceTimersByTimeAsync(200);
 
-    if (sigintHandlers.length > 0) sigintHandlers[0]!();
+    if (sigintHandlers.length > 0) sigintHandlers[0]();
 
     vi.useRealTimers();
     onSpy.mockRestore();
@@ -332,7 +332,7 @@ describe("CLI poll command", () => {
     getAction("poll")({ once: false, stats: false, interval: "100" });
     await vi.advanceTimersByTimeAsync(50);
 
-    if (sigtermHandlers.length > 0) sigtermHandlers[0]!();
+    if (sigtermHandlers.length > 0) sigtermHandlers[0]();
 
     expect(exitSpy).toHaveBeenCalledWith(0);
 
@@ -401,7 +401,7 @@ describe("CLI dev command", () => {
     await new Promise((r) => setTimeout(r, 10));
 
     // Trigger SIGINT
-    if (sigintHandlers.length > 0) await sigintHandlers[0]!();
+    if (sigintHandlers.length > 0) await sigintHandlers[0]();
 
     expect(stopFn).toHaveBeenCalled();
     expect(exitSpy).toHaveBeenCalledWith(0);
@@ -424,7 +424,7 @@ describe("CLI dev command", () => {
     getAction("dev")({ codespace: ["my-space"], debounce: "100" });
     await new Promise((r) => setTimeout(r, 10));
 
-    if (sigtermHandlers.length > 0) await sigtermHandlers[0]!();
+    if (sigtermHandlers.length > 0) await sigtermHandlers[0]();
 
     expect(stopFn).toHaveBeenCalled();
     expect(exitSpy).toHaveBeenCalledWith(0);
@@ -453,7 +453,7 @@ describe("CLI dev command", () => {
 
     // Invoke the onSync callback directly
     expect(capturedOnSync).toBeDefined();
-    capturedOnSync!("my-space");
+    capturedOnSync("my-space");
 
     expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("my-space"));
 
@@ -513,7 +513,7 @@ describe("CLI claude command", () => {
     await exitCalled;
 
     // mock.calls[0] is for this test since we cleared spawn in beforeEach
-    const spawnArgs = vi.mocked(spawn).mock.calls[0]![1] as string[];
+    const spawnArgs = vi.mocked(spawn).mock.calls[0]?.[1] as string[];
     expect(spawnArgs).not.toContain("--system-prompt");
     exitSpy.mockRestore();
   });

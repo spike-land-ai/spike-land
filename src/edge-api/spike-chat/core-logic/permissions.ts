@@ -45,11 +45,7 @@ export async function checkChannelAccess(
   try {
     const db = createDb(env.DB);
 
-    const [channel] = await db
-      .select()
-      .from(channels)
-      .where(eq(channels.id, channelId))
-      .limit(1);
+    const [channel] = await db.select().from(channels).where(eq(channels.id, channelId)).limit(1);
 
     if (!channel) {
       return false;

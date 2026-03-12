@@ -59,16 +59,16 @@ Body content here.
 `;
     const post = parseMdxContent(mdx, "my-post.mdx");
     expect(post).not.toBeNull();
-    expect(post!.title).toBe("My Post");
-    expect(post!.slug).toBe("my-post");
-    expect(post!.description).toBe("A description");
-    expect(post!.date).toBe("2026-03-01");
-    expect(post!.author).toBe("Test Author");
-    expect(post!.category).toBe("Testing");
-    expect(post!.tags).toEqual(["a", "b"]);
-    expect(post!.featured).toBe(true);
-    expect(post!.primer).toBe("Short primer");
-    expect(post!.content).toBe("Body content here.");
+    expect(post?.title).toBe("My Post");
+    expect(post?.slug).toBe("my-post");
+    expect(post?.description).toBe("A description");
+    expect(post?.date).toBe("2026-03-01");
+    expect(post?.author).toBe("Test Author");
+    expect(post?.category).toBe("Testing");
+    expect(post?.tags).toEqual(["a", "b"]);
+    expect(post?.featured).toBe(true);
+    expect(post?.primer).toBe("Short primer");
+    expect(post?.content).toBe("Body content here.");
   });
 
   it("extracts unlisted from frontmatter", () => {
@@ -82,7 +82,7 @@ unlisted: true
 Body content here.
 `;
     const post = parseMdxContent(mdx, "hidden-post.mdx");
-    expect(post!.unlisted).toBe(true);
+    expect(post?.unlisted).toBe(true);
   });
 
   it("falls back to filename for slug when not in frontmatter", () => {
@@ -94,7 +94,7 @@ date: "2026-01-01"
 Content.
 `;
     const post = parseMdxContent(mdx, "fallback-slug.mdx");
-    expect(post!.slug).toBe("fallback-slug");
+    expect(post?.slug).toBe("fallback-slug");
   });
 
   it("auto-detects hero image from body when not in frontmatter", () => {
@@ -109,10 +109,10 @@ date: "2026-01-01"
 Rest of the content.
 `;
     const post = parseMdxContent(mdx, "auto-hero.mdx");
-    expect(post!.heroImage).toBe("/blog/auto-hero/hero.png");
-    expect(post!.heroPrompt).toBe("Hero");
-    expect(post!.content).not.toContain("![Hero]");
-    expect(post!.content).toBe("Rest of the content.");
+    expect(post?.heroImage).toBe("/blog/auto-hero/hero.png");
+    expect(post?.heroPrompt).toBe("Hero");
+    expect(post?.content).not.toContain("![Hero]");
+    expect(post?.content).toBe("Rest of the content.");
   });
 
   it("skips placehold.co images for auto-detection", () => {
@@ -127,8 +127,8 @@ date: "2026-01-01"
 Content.
 `;
     const post = parseMdxContent(mdx, "placeholder.mdx");
-    expect(post!.heroImage).toBeNull();
-    expect(post!.heroPrompt).toBeNull();
+    expect(post?.heroImage).toBeNull();
+    expect(post?.heroPrompt).toBeNull();
   });
 
   it("strips hero image line from body when heroImage is in frontmatter", () => {
@@ -144,10 +144,10 @@ heroImage: "/blog/fm-hero/hero.png"
 Body after hero.
 `;
     const post = parseMdxContent(mdx, "fm-hero.mdx");
-    expect(post!.heroImage).toBe("/blog/fm-hero/hero.png");
-    expect(post!.heroPrompt).toBe("Alt text");
-    expect(post!.content).not.toContain("![Alt text]");
-    expect(post!.content).toBe("Body after hero.");
+    expect(post?.heroImage).toBe("/blog/fm-hero/hero.png");
+    expect(post?.heroPrompt).toBe("Alt text");
+    expect(post?.content).not.toContain("![Alt text]");
+    expect(post?.content).toBe("Body after hero.");
   });
 
   it("prefers explicit heroPrompt from frontmatter", () => {
@@ -164,7 +164,7 @@ heroPrompt: "A deliberate prompt"
 Body after hero.
 `;
     const post = parseMdxContent(mdx, "prompted-hero.mdx");
-    expect(post!.heroPrompt).toBe("A deliberate prompt");
+    expect(post?.heroPrompt).toBe("A deliberate prompt");
   });
 
   it("defaults missing fields to empty values", () => {
@@ -176,15 +176,15 @@ date: "2026-01-01"
 Content.
 `;
     const post = parseMdxContent(mdx, "minimal.mdx");
-    expect(post!.description).toBe("");
-    expect(post!.primer).toBe("");
-    expect(post!.author).toBe("");
-    expect(post!.category).toBe("");
-    expect(post!.tags).toEqual([]);
-    expect(post!.featured).toBe(false);
-    expect(post!.unlisted).toBe(false);
-    expect(post!.heroImage).toBeNull();
-    expect(post!.heroPrompt).toBeNull();
+    expect(post?.description).toBe("");
+    expect(post?.primer).toBe("");
+    expect(post?.author).toBe("");
+    expect(post?.category).toBe("");
+    expect(post?.tags).toEqual([]);
+    expect(post?.featured).toBe(false);
+    expect(post?.unlisted).toBe(false);
+    expect(post?.heroImage).toBeNull();
+    expect(post?.heroPrompt).toBeNull();
   });
 });
 

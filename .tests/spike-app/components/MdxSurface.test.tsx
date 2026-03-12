@@ -27,12 +27,7 @@ describe("MdxSurface", () => {
   });
 
   it("leaves unsupported bash blocks as normal code", () => {
-    render(
-      <MdxSurface
-        appSlug="qa-studio"
-        content={"```bash\nnpm install react\n```"}
-      />,
-    );
+    render(<MdxSurface appSlug="qa-studio" content={"```bash\nnpm install react\n```"} />);
 
     expect(screen.queryByText("Executable Bash")).not.toBeInTheDocument();
     expect(screen.getByText("npm install react")).toBeInTheDocument();

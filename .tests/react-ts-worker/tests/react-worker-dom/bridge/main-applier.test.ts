@@ -87,7 +87,7 @@ describe("MainThreadApplier", () => {
       { type: MutationType.APPEND_CHILD, targetId: 4, parentId: 0 },
     ]);
     expect(container.children).toHaveLength(1);
-    expect(container.children[0]!.tagName.toLowerCase()).toBe("span");
+    expect(container.children[0]?.tagName.toLowerCase()).toBe("span");
   });
 
   it("APPEND_CHILD skips missing parent", () => {
@@ -107,7 +107,7 @@ describe("MainThreadApplier", () => {
       { type: MutationType.INSERT_BEFORE, targetId: 7, parentId: 0, refId: 6 },
     ]);
     expect(container.children).toHaveLength(2);
-    expect(container.children[0]!.tagName.toLowerCase()).toBe("span");
+    expect(container.children[0]?.tagName.toLowerCase()).toBe("span");
   });
 
   it("INSERT_BEFORE with missing ref (inserts at end)", () => {

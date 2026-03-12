@@ -108,7 +108,7 @@ export class ToolSearch {
         return true;
       })
       .map((r) => {
-        const tracked = tools.get(r.name)!;
+        const tracked = tools.get(r.name);
         const stability = tracked.definition.stability ?? "stable";
 
         return {

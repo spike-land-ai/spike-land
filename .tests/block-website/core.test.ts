@@ -42,7 +42,7 @@ describe("getPosts", () => {
 
     expect(fetch).toHaveBeenCalledWith(`${BASE}/api/blog`);
     expect(result).toHaveLength(2);
-    expect(result[0]!.slug).toBe("a");
+    expect(result[0]?.slug).toBe("a");
   });
 
   it("returns empty array when fetch fails", async () => {
@@ -85,7 +85,7 @@ describe("getPosts", () => {
     const result = await getPosts({ category: "tech" });
 
     expect(result).toHaveLength(1);
-    expect(result[0]!.slug).toBe("a");
+    expect(result[0]?.slug).toBe("a");
   });
 
   it("limits the number of posts returned", async () => {
@@ -116,7 +116,7 @@ describe("getPosts", () => {
     const result = await getPosts({ tag: "js", category: "tech", limit: 1 });
 
     expect(result).toHaveLength(1);
-    expect(result[0]!.slug).toBe("a");
+    expect(result[0]?.slug).toBe("a");
   });
 
   it("returns all posts when no options provided", async () => {

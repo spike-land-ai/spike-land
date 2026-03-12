@@ -30,7 +30,11 @@ export function registerEsbuildTools(
         {
           code: z.string().min(1).describe("Source code to transpile."),
           loader: z.enum(LOADER_ENUM).optional().default("tsx").describe("Source language loader."),
-          minify: z.coerce.boolean().optional().default(false).describe("Whether to minify the output."),
+          minify: z.coerce
+            .boolean()
+            .optional()
+            .default(false)
+            .describe("Whether to minify the output."),
           jsx_import_source: z
             .string()
             .optional()
@@ -129,9 +133,9 @@ export function registerEsbuildTools(
             const match = line.match(errorPattern);
             if (match) {
               errors.push({
-                line: parseInt(match[1]!, 10),
-                column: parseInt(match[2]!, 10),
-                text: match[3]!,
+                line: parseInt(match[1], 10),
+                column: parseInt(match[2], 10),
+                text: match[3],
               });
             } else if (line.startsWith("error:") || line.includes("ERROR:")) {
               errors.push({ text: line.trim() });

@@ -246,11 +246,11 @@ describe("PostHandler", () => {
       await postHandler.handle(mockRequest, mockUrl);
 
       // Verify streamGemini was called with onToolResult callback
-      const callArgs = vi.mocked(streamGemini).mock.calls[0]![0];
+      const callArgs = vi.mocked(streamGemini).mock.calls[0]?.[0];
       expect(callArgs.onToolResult).toBeTypeOf("function");
 
       // Simulate calling the onToolResult callback
-      await callArgs.onToolResult!("test_tool", { output: "test" });
+      await callArgs.onToolResult("test_tool", { output: "test" });
 
       expect(mockStorageService.saveRequestBody).toHaveBeenCalledTimes(2);
     });
@@ -274,8 +274,8 @@ describe("PostHandler", () => {
 
       await postHandler.handle(mockRequest, mockUrl);
 
-      const callArgs = vi.mocked(streamGemini).mock.calls[0]![0];
-      await callArgs.onToolResult!("test_tool", { output: "test" });
+      const callArgs = vi.mocked(streamGemini).mock.calls[0]?.[0];
+      await callArgs.onToolResult("test_tool", { output: "test" });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining("Error saving messages after tool call:"),
