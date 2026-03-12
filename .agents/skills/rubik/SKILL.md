@@ -239,6 +239,11 @@ Good sample structures:
 - Primary: `bg-foreground text-background rounded-xl hover:opacity-90`
 - Secondary: `bg-background border border-border text-foreground rounded-xl hover:bg-muted/50`
 
+### Article Layout
+- `ArticleLayout` wrapper → `bg-amber-50 font-sans article-base` body, `container mx-auto max-w-screen-md` content
+- Article typography: `small-caps` for author/dates, `space-y-4` for paragraphs
+- Use for blog posts, privacy pages, and any long-form content
+
 ### Blog Prose
 The `prose` classes in `BlogPost.tsx` apply Rubik via `font-sans`:
 - `prose-headings:font-display prose-headings:font-bold`

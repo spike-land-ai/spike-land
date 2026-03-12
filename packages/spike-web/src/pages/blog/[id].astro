@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import Layout from '../../layouts/Layout.astro';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
 import Analytics from '../../components/Analytics.astro';
@@ -144,165 +144,67 @@ try {
 }
 ---
 
-<Layout
+<ArticleLayout
   title={`${post.data.title} - spike.land`}
   description={post.data.description ?? 'Read this article on spike.land.'}
   ogImage={post.data.heroImage ?? '/android-chrome-512x512.png'}
-  ogType="article"
 >
   <Analytics slot="head" />
 
-  <div class="page-shell">
-    <Nav activePath="/blog" />
+  <Nav activePath="/blog" />
 
-    <main class="post-main">
-      <!-- Hero header -->
-      <header class="post-header">
-        <div class="rubik-container post-header-inner">
-          <a href="/blog" class="back-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            All articles
-          </a>
+  <!-- Hero header -->
+  <header class="space-y-5 my-8">
+    <a href="/blog" class="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      All articles
+    </a>
 
-          <div class="post-meta">
-            <time datetime={post.data.date.toISOString()} class="post-date">
-              {post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </time>
-            {post.data.author && <span class="post-author">· {post.data.author}</span>}
-            {post.data.category && <span class="rubik-chip">{post.data.category}</span>}
-          </div>
+    <div class="flex items-center gap-2.5 flex-wrap text-sm text-muted-foreground">
+      <time datetime={post.data.date.toISOString()}>
+        {post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+      </time>
+      {post.data.author && <span class="small-caps">· {post.data.author}</span>}
+      {post.data.category && <span class="rubik-chip">{post.data.category}</span>}
+    </div>
 
-          <h1 class="post-title">{post.data.title}</h1>
+    <h1 class="font-black tracking-tight leading-tight max-w-[22ch]" style="font-size: clamp(1.75rem, 4vw, 3rem);">{post.data.title}</h1>
 
-          {post.data.description && (
-            <p class="post-lede">{post.data.description}</p>
-          )}
-        </div>
-      </header>
+    {post.data.description && (
+      <p class="text-muted-foreground max-w-[56ch]" style="font-size: clamp(1rem, 1.5vw + 0.5rem, 1.25rem); line-height: 1.65;">{post.data.description}</p>
+    )}
+  </header>
 
-      {post.data.heroImage && (
-        <div class="rubik-container hero-image-container">
-          <div class="hero-image-wrap">
-            <img
-              src={post.data.heroImage}
-              alt={post.data.heroPrompt || post.data.title}
-              class="hero-image"
-              loading="eager"
-            />
-          </div>
-        </div>
-      )}
-
-      <!-- Article content -->
-      <div class="rubik-container post-content-container">
-        <PersonaBlogViewer 
-          client:load 
-          rawPrd={rawPrd} 
-          variants={variants} 
-          slug={post.id} 
+  {post.data.heroImage && (
+    <div class="my-6">
+      <div class="rounded-xl overflow-hidden border border-border shadow-lg">
+        <img
+          src={post.data.heroImage}
+          alt={post.data.heroPrompt || post.data.title}
+          class="w-full h-auto block max-h-[28rem] object-cover"
+          loading="eager"
         />
-        
-        {/* Hidden SEO Content */}
-        <div class="hidden" aria-hidden="true">
-          <article class="prose post-prose prose-p:font-sans prose-headings:font-display prose-headings:font-bold prose-p:leading-loose max-w-none">
-            <Content components={MDX_COMPONENTS} />
-          </article>
-        </div>
       </div>
-    </main>
+    </div>
+  )}
 
-    <Footer />
-    <CookieConsent />
+  <!-- Article content -->
+  <div class="space-y-4 my-8">
+    <PersonaBlogViewer
+      client:load
+      rawPrd={rawPrd}
+      variants={variants}
+      slug={post.id}
+    />
+
+    {/* Hidden SEO Content */}
+    <div class="hidden" aria-hidden="true">
+      <article class="prose prose-p:font-sans prose-headings:font-display prose-headings:font-bold prose-p:leading-loose max-w-none">
+        <Content components={MDX_COMPONENTS} />
+      </article>
+    </div>
   </div>
-</Layout>
 
-<style>
-  .page-shell {
-    min-height: 100svh;
-    display: flex;
-    flex-direction: column;
-    background: var(--bg);
-  }
-
-  .post-main { flex: 1; }
-
-  .post-header {
-    padding-block: clamp(3rem, 6vw, 5rem);
-    border-bottom: 1px solid var(--border-color);
-    background: radial-gradient(ellipse 60% 50% at 50% 0%, color-mix(in srgb, var(--primary-color) 6%, transparent), transparent);
-  }
-
-  .post-header-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    max-width: 52rem;
-  }
-
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.875rem;
-    color: var(--muted-fg);
-    text-decoration: none;
-    transition: color var(--duration-fast) var(--ease);
-  }
-
-  .back-link:hover { color: var(--fg); }
-
-  .post-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.625rem;
-    flex-wrap: wrap;
-  }
-
-  .post-date, .post-author {
-    font-size: 0.875rem;
-    color: var(--muted-fg);
-  }
-
-  .post-title {
-    font-size: clamp(1.75rem, 4vw, 3rem);
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    line-height: 1.1;
-    max-width: 22ch;
-  }
-
-  .post-lede {
-    font-size: clamp(1rem, 1.5vw + 0.5rem, 1.25rem);
-    line-height: 1.65;
-    color: var(--muted-fg);
-    max-width: 56ch;
-    margin: 0;
-  }
-
-  .hero-image-container {
-    padding-block: 2rem;
-  }
-
-  .hero-image-wrap {
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-lg);
-  }
-
-  .hero-image {
-    width: 100%;
-    height: auto;
-    display: block;
-    max-height: 28rem;
-    object-fit: cover;
-  }
-
-  .post-content-container {
-    padding-block: clamp(2rem, 4vw, 3.5rem);
-  }
-
-  .post-prose {
-    max-width: 68ch;
-  }
-</style>
+  <Footer />
+  <CookieConsent />
+</ArticleLayout>
