@@ -95,7 +95,13 @@ function createMockEnv(overrides: Partial<Env> = {}): Env {
   };
 }
 
-function mockContext(req: Request, env: Env, extra: any = {}) {
+interface MockContextExtra {
+  params?: Record<string, string>;
+  userId?: string;
+  get?: Record<string, unknown>;
+}
+
+function mockContext(req: Request, env: Env, extra: MockContextExtra = {}) {
   const url = new URL(req.url);
   // Pre-parse JSON if possible to simulate c.req.json()
   let jsonPromise;
@@ -127,16 +133,16 @@ function mockContext(req: Request, env: Env, extra: any = {}) {
     },
     set: vi.fn(),
     header: vi.fn(),
-    json: (obj: any, status: number = 200) => {
+    json: (obj: unknown, status: number = 200) => {
       return new Response(JSON.stringify(obj), {
         status,
         headers: { "content-type": "application/json" },
       });
     },
     text: (data: string, status: number = 200) => new Response(data, { status }),
-    body: (data: any, status: number = 200, headers: any = {}) =>
+    body: (data: BodyInit | null, status: number = 200, headers: HeadersInit = {}) =>
       new Response(data, { status, headers }),
-  } as any;
+  } as unknown;
 }
 
 let appFetch: (req: Request, env: Env, ctx: ExecutionContext) => Promise<Response>;

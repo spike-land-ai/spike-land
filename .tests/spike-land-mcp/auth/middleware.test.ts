@@ -5,7 +5,6 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
-import type { Env } from "../../../src/edge-api/spike-land/core-logic/env";
 import { createMockD1, createMockKV } from "../__test-utils__/mock-env";
 
 // Mock lookupApiKey to allow per-test control
@@ -42,7 +41,7 @@ function createMockContext(
   headers: Record<string, string> = {},
   env?: ReturnType<typeof makeEnv>,
   method: string = "GET",
-  body?: any,
+  body?: unknown,
 ) {
   const req = new Request(`http://localhost${path}`, {
     method,
@@ -50,7 +49,7 @@ function createMockContext(
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  const store = new Map<string, any>();
+  const store = new Map<string, unknown>();
 
   const c = {
     req: {
@@ -59,18 +58,18 @@ function createMockContext(
       method: req.method,
     },
     env: env ?? makeEnv(),
-    set: vi.fn((key: string, value: any) => {
+    set: vi.fn((key: string, value: unknown) => {
       store.set(key, value);
     }),
     get: vi.fn((key: string) => store.get(key)),
-    json: vi.fn((body: any, status: number = 200, headers?: Record<string, string>) => {
+    json: vi.fn((body: unknown, status: number = 200, headers?: Record<string, string>) => {
       const responseHeaders = new Headers(headers);
       responseHeaders.set("Content-Type", "application/json");
       return new Response(JSON.stringify(body), { status, headers: responseHeaders });
     }),
   };
 
-  return c as any;
+  return c as unknown;
 }
 
 describe("authMiddleware", () => {

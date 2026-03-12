@@ -52,7 +52,7 @@ vi.mock("../../../src/edge-api/backend/core-logic/staticContent.mjs", () => ({
 
 // Import the main handler after mocks are set up
 import { handleAnthropicRequest } from "../../../src/edge-api/backend/core-logic/anthropicHandler.js";
-import { handleRequest, handleCMSIndexRequest } from "../../../src/edge-api/backend/edge/chat.js";
+import { handleCMSIndexRequest } from "../../../src/edge-api/backend/edge/chat.js";
 import { handleMainFetch } from "../../../src/edge-api/backend/lazy-imports/mainFetchHandler.js";
 import { handleGPT4Request } from "../../../src/edge-api/backend/core-logic/openaiHandler.js";
 import { handleReplicateRequest } from "../../../src/edge-api/backend/ai/replicateHandler.js";

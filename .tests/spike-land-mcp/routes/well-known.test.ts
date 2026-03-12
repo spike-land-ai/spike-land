@@ -33,7 +33,7 @@ function createMockContext(env: Env = mockEnvObj) {
     header: (name: string, value: string) => {
       headers.set(name, value);
     },
-    json: (body: any, status: number = 200) => {
+    json: (body: unknown, status: number = 200) => {
       const resHeaders = new Headers();
       resHeaders.set("Content-Type", "application/json");
       for (const [k, v] of headers.entries()) {
