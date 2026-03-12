@@ -27,7 +27,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint --quiet src/"
+    "lint": "eslint --quiet ."
   },
   "devDependencies": {
     "@types/node": "25.3.5",

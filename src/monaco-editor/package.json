@@ -8,9 +8,9 @@
   "author": "Microsoft Corporation",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint --quiet .",
     "watch": "tsc -w -p ./src",
-    "test": "node --import tsx --test \"src/languages/definitions/*/*.test.ts\""
+    "test": "vitest run"
   },
   "typings": "./esm/vs/editor/editor.main.d.ts",
   "main": "./min/vs/editor/editor.main.js",

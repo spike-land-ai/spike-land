@@ -12,7 +12,7 @@
     "build": "echo 'CF Worker — no build step required'",
     "deploy": "wrangler deploy --minify",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint --quiet index.ts",
+    "lint": "eslint --quiet .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
   },

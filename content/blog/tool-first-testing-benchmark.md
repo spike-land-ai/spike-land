@@ -7,11 +7,9 @@ heroImage: "/blog/tool-first-testing-benchmark/hero.png"
 heroPrompt: "A sleek futuristic lab where neon-lit robotic tools process data at hyper-speed while a bulky, slow mechanical browser trails behind in the background."
 ---
 
-![A sleek futuristic lab where neon-lit robotic tools process data at hyper-speed while a bulky, slow mechanical browser trails behind in the background.](/images/blog/tool-first-benchmark-hero.png)
-
 At spike.land, our core thesis is that exposing business logic as typed MCP tools fundamentally changes the developer experience. We believe it enables faster, cheaper, and more reliable testing. But a thesis without evidence is just a claim. 
 
-To prove this, we brought the concepts from our [A/B Testing Bug Detection](/docs/features/AB_TESTING_BUG_DETECTION.md) strategy to life. We implemented a core piece of our business logic—the Bayesian evaluation engine for A/B experiments—as a typed MCP tool (`evaluate_experiment`), and benchmarked its testing approach against a conventional browser-level Playwright test.
+To prove this, we brought the concepts from our [A/B Testing Bug Detection](#) strategy to life. We implemented a core piece of our business logic—the Bayesian evaluation engine for A/B experiments—as a typed MCP tool (`evaluate_experiment`), and benchmarked its testing approach against a conventional browser-level Playwright test.
 
 Here are the raw, verifiable numbers from our 100-run comparison.
 

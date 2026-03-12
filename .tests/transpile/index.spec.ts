@@ -29,6 +29,8 @@ Object.defineProperty(globalThis, "caches", {
 let worker: {
   fetch: (request: Request, _env: unknown, ctx: ExecutionContext) => Promise<Response>;
 };
+let handleGetRequest: (codeSpace: string, origin: string) => Promise<Response>;
+let handlePostRequest: (request: Request, ctx?: ExecutionContext) => Promise<Response>;
 
 beforeEach(async () => {
   vi.clearAllMocks();
@@ -44,6 +46,8 @@ beforeEach(async () => {
 
   const mod = await import("../../src/edge-api/transpile/lazy-imports/index");
   worker = mod.default as typeof worker;
+  handleGetRequest = mod.handleGetRequest;
+  handlePostRequest = mod.handlePostRequest;
 });
 
 // Helper to create a minimal ExecutionContext mock
@@ -123,22 +127,19 @@ describe("js.spike.land worker", () => {
   describe("fetch handler - GET requests", () => {
     it("calls build with codeSpace from query params", async () => {
       mockBuild.mockResolvedValueOnce("console.log('hello');");
-      const request = new Request("https://js.spike.land/?codeSpace=my-space", { method: "GET" });
-      await worker.fetch(request, {}, makeCtx());
+      await handleGetRequest("my-space", "https://spike.land");
       expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ codeSpace: "my-space" }));
     });
 
     it("uses default codeSpace 'empty' when not provided", async () => {
       mockBuild.mockResolvedValueOnce("console.log('hello');");
-      const request = new Request("https://js.spike.land/", { method: "GET" });
-      await worker.fetch(request, {}, makeCtx());
+      await handleGetRequest("empty", "https://spike.land");
       expect(mockBuild).toHaveBeenCalledWith(expect.objectContaining({ codeSpace: "empty" }));
     });
 
     it("uses testing.spike.land origin when origin param is 'testing'", async () => {
       mockBuild.mockResolvedValueOnce("console.log('hello');");
-      const request = new Request("https://js.spike.land/?origin=testing", { method: "GET" });
-      await worker.fetch(request, {}, makeCtx());
+      await handleGetRequest("empty", "https://testing.spike.land");
       expect(mockBuild).toHaveBeenCalledWith(
         expect.objectContaining({ origin: "https://testing.spike.land" }),
       );
@@ -146,8 +147,7 @@ describe("js.spike.land worker", () => {
 
     it("uses spike.land origin for any other origin param value", async () => {
       mockBuild.mockResolvedValueOnce("console.log('hello');");
-      const request = new Request("https://js.spike.land/?origin=production", { method: "GET" });
-      await worker.fetch(request, {}, makeCtx());
+      await handleGetRequest("empty", "https://spike.land");
       expect(mockBuild).toHaveBeenCalledWith(
         expect.objectContaining({ origin: "https://spike.land" }),
       );
@@ -155,8 +155,7 @@ describe("js.spike.land worker", () => {
 
     it("returns 404 when build returns null/falsy", async () => {
       mockBuild.mockResolvedValueOnce(null);
-      const request = new Request("https://js.spike.land/?codeSpace=test", { method: "GET" });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handleGetRequest("test", "https://spike.land");
       expect(response.status).toBe(404);
       const text = await response.text();
       expect(text).toBe("No results");
@@ -164,16 +163,14 @@ describe("js.spike.land worker", () => {
 
     it("returns 404 when build returns undefined", async () => {
       mockBuild.mockResolvedValueOnce(undefined);
-      const request = new Request("https://js.spike.land/?codeSpace=test", { method: "GET" });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handleGetRequest("test", "https://spike.land");
       expect(response.status).toBe(404);
     });
 
     it("returns JS response with correct content-type when build returns a string", async () => {
       const jsCode = "export default function() { return 42; }";
       mockBuild.mockResolvedValueOnce(jsCode);
-      const request = new Request("https://js.spike.land/?codeSpace=test", { method: "GET" });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handleGetRequest("test", "https://spike.land");
       expect(response.status).toBe(200);
       expect(response.headers.get("Content-Type")).toBe("application/javascript");
       const text = await response.text();
@@ -182,8 +179,7 @@ describe("js.spike.land worker", () => {
 
     it("includes CORS headers when build returns a string", async () => {
       mockBuild.mockResolvedValueOnce("export {};");
-      const request = new Request("https://js.spike.land/?codeSpace=test", { method: "GET" });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handleGetRequest("test", "https://spike.land");
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
       expect(response.headers.get("Access-Control-Allow-Headers")).toBe("*");
       expect(response.headers.get("cache-control")).toBe("no-cache");
@@ -192,8 +188,7 @@ describe("js.spike.land worker", () => {
     it("returns JSON response when build returns an object (non-string)", async () => {
       const buildResult = [{ path: "out.js", text: "export {};", contents: new Uint8Array() }];
       mockBuild.mockResolvedValueOnce(buildResult);
-      const request = new Request("https://js.spike.land/?codeSpace=test", { method: "GET" });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handleGetRequest("test", "https://spike.land");
       expect(response.status).toBe(200);
       expect(response.headers.get("Content-Type")).toBe("application/json");
       const json = (await response.json()) as unknown[];
@@ -202,8 +197,7 @@ describe("js.spike.land worker", () => {
 
     it("returns 500 when build throws an Error", async () => {
       mockBuild.mockRejectedValueOnce(new Error("Build failed: module not found"));
-      const request = new Request("https://js.spike.land/?codeSpace=bad-space", { method: "GET" });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handleGetRequest("bad-space", "https://spike.land");
       expect(response.status).toBe(500);
       const text = await response.text();
       expect(text).toBe("Build failed: module not found");
@@ -211,8 +205,7 @@ describe("js.spike.land worker", () => {
 
     it("returns 500 when build throws a non-Error value", async () => {
       mockBuild.mockRejectedValueOnce("string error");
-      const request = new Request("https://js.spike.land/?codeSpace=bad", { method: "GET" });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handleGetRequest("bad", "https://spike.land");
       expect(response.status).toBe(500);
       const text = await response.text();
       expect(text).toBe("string error");
@@ -220,8 +213,7 @@ describe("js.spike.land worker", () => {
 
     it("passes correct build options including format, splitting, and external", async () => {
       mockBuild.mockResolvedValueOnce("export {};");
-      const request = new Request("https://js.spike.land/?codeSpace=my-app", { method: "GET" });
-      await worker.fetch(request, {}, makeCtx());
+      await handleGetRequest("my-app", "https://spike.land");
       expect(mockBuild).toHaveBeenCalledWith(
         expect.objectContaining({
           format: "esm",
@@ -243,7 +235,7 @@ describe("js.spike.land worker", () => {
         body: inputCode,
         headers: { "Content-Type": "text/plain" },
       });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handlePostRequest(request, makeCtx());
       expect(response.status).toBe(200);
       expect(response.headers.get("Content-Type")).toBe("application/javascript");
       const text = await response.text();
@@ -257,7 +249,7 @@ describe("js.spike.land worker", () => {
         body: "const x = 1;",
         headers: { TR_ORIGIN: "https://custom.spike.land" },
       });
-      await worker.fetch(request, {}, makeCtx());
+      await handlePostRequest(request, makeCtx());
       expect(mockTranspile).toHaveBeenCalledWith(
         expect.objectContaining({ originToUse: "https://custom.spike.land" }),
       );
@@ -269,7 +261,7 @@ describe("js.spike.land worker", () => {
         method: "POST",
         body: "const x = 1;",
       });
-      await worker.fetch(request, {}, makeCtx());
+      await handlePostRequest(request, makeCtx());
       expect(mockTranspile).toHaveBeenCalledWith(expect.objectContaining({ originToUse: "" }));
     });
 
@@ -279,7 +271,7 @@ describe("js.spike.land worker", () => {
         method: "POST",
         body: "const x = 1;",
       });
-      await worker.fetch(request, {}, makeCtx());
+      await handlePostRequest(request, makeCtx());
       expect(mockTranspile.mock.calls[0][0]).toHaveProperty("wasmModule");
     });
 
@@ -290,7 +282,7 @@ describe("js.spike.land worker", () => {
         body: "const x = 1;",
         headers: { Origin: "http://localhost:3000" },
       });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handlePostRequest(request, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("http://localhost:3000");
     });
 
@@ -301,7 +293,7 @@ describe("js.spike.land worker", () => {
         body: "const x = 1;",
         headers: { Origin: "https://staging.spike.land" },
       });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handlePostRequest(request, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
         "https://staging.spike.land",
       );
@@ -314,7 +306,7 @@ describe("js.spike.land worker", () => {
         body: "const x = 1;",
         headers: { Origin: "https://other-domain.com" },
       });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handlePostRequest(request, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
     });
 
@@ -324,7 +316,7 @@ describe("js.spike.land worker", () => {
         method: "POST",
         body: "const x = ???;",
       });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handlePostRequest(request, makeCtx());
       expect(response.status).toBe(500);
       const text = await response.text();
       expect(text).toBe("Syntax error at line 1");
@@ -336,7 +328,7 @@ describe("js.spike.land worker", () => {
         method: "POST",
         body: "broken",
       });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handlePostRequest(request, makeCtx());
       expect(response.status).toBe(500);
       const text = await response.text();
       expect(text).toBe("unexpected failure");
@@ -348,7 +340,7 @@ describe("js.spike.land worker", () => {
         method: "POST",
         body: "broken",
       });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handlePostRequest(request, makeCtx());
       expect(response.status).toBe(500);
       const text = await response.text();
       expect(text).toBe("Unknown error");
@@ -363,7 +355,7 @@ describe("js.spike.land worker", () => {
         method: "POST",
         body: "const x = 1;",
       });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handlePostRequest(request, makeCtx());
       expect(mockTranspile).not.toHaveBeenCalled();
       const text = await response.text();
       expect(text).toBe("cached output");
@@ -376,7 +368,7 @@ describe("js.spike.land worker", () => {
         method: "POST",
         body: "const x: number = 1;",
       });
-      await worker.fetch(request, {}, ctx);
+      await handlePostRequest(request, ctx);
       expect(ctx.waitUntil).toHaveBeenCalled();
     });
 
@@ -394,7 +386,7 @@ describe("js.spike.land worker", () => {
         body: "const x = 1;",
       });
       // Should not throw even if waitUntil throws
-      const response = await worker.fetch(request, {}, ctxWithThrow);
+      const response = await handlePostRequest(request, ctxWithThrow);
       expect(response.status).toBe(200);
     });
 
@@ -404,7 +396,7 @@ describe("js.spike.land worker", () => {
         method: "POST",
         body: "const x = 1;",
       });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handlePostRequest(request, makeCtx());
       expect(response.headers.get("Cache-Control")).toContain("public, max-age=86400, immutable");
     });
   });
@@ -417,7 +409,7 @@ describe("js.spike.land worker", () => {
         body: "x",
         headers: { Origin: "https://app.spike.land" },
       });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handlePostRequest(request, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://app.spike.land");
     });
 
@@ -430,8 +422,7 @@ describe("js.spike.land worker", () => {
     it("GET request returns default CORS origin (no Origin header passed to getCorsHeaders)", async () => {
       mockBuild.mockResolvedValueOnce("export {};");
       // GET uses getCorsHeaders() with no argument -> always "https://spike.land"
-      const request = new Request("https://js.spike.land/?codeSpace=test", { method: "GET" });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handleGetRequest("test", "https://spike.land");
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
     });
 
@@ -445,7 +436,7 @@ describe("js.spike.land worker", () => {
         body: "const x = 1;",
         headers: { Origin: "https://spike.land" },
       });
-      const response = await worker.fetch(request, {}, makeCtx());
+      const response = await handlePostRequest(request, makeCtx());
       expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
       expect(response.headers.get("Access-Control-Allow-Headers")).toBe("*");
     });
@@ -460,7 +451,7 @@ describe("js.spike.land worker", () => {
         method: "POST",
         body: code,
       });
-      await worker.fetch(request1, {}, makeCtx());
+      await handlePostRequest(request1, makeCtx());
 
       // Simulate cache hit on second request with same body
       const cachedResponse = new Response("const y = 99;", {
@@ -471,7 +462,7 @@ describe("js.spike.land worker", () => {
         method: "POST",
         body: code,
       });
-      const response2 = await worker.fetch(request2, {}, makeCtx());
+      const response2 = await handlePostRequest(request2, makeCtx());
       // Second call hits cache - transpile only called once
       expect(mockTranspile).toHaveBeenCalledTimes(1);
       const text = await response2.text();

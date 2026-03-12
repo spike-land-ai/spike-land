@@ -12,7 +12,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "typecheck": "tsc --noEmit",
-    "deploy": "bash ../../scripts/deploy-spa.sh"
+    "deploy": "bash ../../scripts/deploy-spa.sh",
+    "test": "vitest run",
+    "lint": "eslint --quiet ."
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.0",

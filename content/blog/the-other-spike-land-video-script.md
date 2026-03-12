@@ -1,3 +1,7 @@
+---
+heroImage: "/images/blog/the-other-spike-land-video-script-hero.png"
+heroPrompt: "A dark moody split screen showing the spike.land platform interface on the left and a vintage coat of arms for the Principality of Spikeland on the right, connected by digital glowing threads."
+---
 # "The AI Found Another Spike Land. In My City."
 ## YouTube Video Script — ~10 Minutes
 ### Format: Veritasium x Tech Demo x Mystery Investigation

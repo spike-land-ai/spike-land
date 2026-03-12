@@ -677,5 +677,5 @@ The codebase currently has some inconsistencies that should be addressed:
 - [RFC 9110 - HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110)
 - [RFC 9457 - Problem Details for HTTP APIs](https://www.rfc-editor.org/rfc/rfc9457)
 - [MDN HTTP Status Codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)
-- [spike.land API Reference](../API_REFERENCE.md)
+- [spike.land API Reference](./API_REFERENCE.md)
 - [spike.land API Design Best Practices](./api-design.md)

@@ -10,7 +10,10 @@
   "scripts": {
     "build": "npx remotion bundle index.ts dist/bundle.js",
     "start": "npx remotion preview index.ts",
-    "render": "npx remotion render index.ts out/video.mp4"
+    "render": "npx remotion render index.ts out/video.mp4",
+    "test": "vitest run",
+    "lint": "eslint --quiet .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.434",

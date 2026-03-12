@@ -570,7 +570,7 @@ describe("Image Enhancement Flow", () => {
 
 ## Next Steps
 
-1. Review [API Reference](../API_REFERENCE.md) for detailed endpoint
+1. Review [API Reference](./API_REFERENCE.md) for detailed endpoint
    documentation
 2. Check [OpenAPI Specification](./openapi.yaml) for all available schemas
 3. Set up error handling and retry logic

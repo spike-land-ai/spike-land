@@ -147,7 +147,7 @@ Building an SDK or integrating server-to-server:
    [IMAGE_ENDPOINTS.md](./IMAGE_ENDPOINTS.md) (20 min)
 4. Validate: [openapi.yaml](./openapi.yaml) - Complete OpenAPI specification
 5. Generate: SDKs using OpenAPI Generator or similar tools
-6. Review: [../API_REFERENCE.md](../API_REFERENCE.md) - Full endpoint reference
+6. Review: [./API_REFERENCE.md](./API_REFERENCE.md) - Full endpoint reference
 
 **Total time to understand**: 60 minutes
 
@@ -158,7 +158,7 @@ Testing the API endpoints:
 1. Read: [CURL_EXAMPLES.md](./CURL_EXAMPLES.md) - Testing with cURL (25 min)
 2. Reference: [ALBUM_ENDPOINTS.md](./ALBUM_ENDPOINTS.md) &
    [IMAGE_ENDPOINTS.md](./IMAGE_ENDPOINTS.md) - Endpoint details (20 min)
-3. Check: [../API_REFERENCE.md](../API_REFERENCE.md) - Expected responses
+3. Check: [./API_REFERENCE.md](./API_REFERENCE.md) - Expected responses
 4. Copy cURL commands and start testing!
 
 **Total time to start testing**: 45 minutes
@@ -188,9 +188,9 @@ Deploying or monitoring the API:
 Understanding the API design:
 
 1. Read: [README.md](./README.md) - Architecture overview (10 min)
-2. Review: [../API_REFERENCE.md](../API_REFERENCE.md) - Complete API catalog (30
+2. Review: [./API_REFERENCE.md](./API_REFERENCE.md) - Complete API catalog (30
    min)
-3. Check: [../FEATURES.md](../FEATURES.md) - Platform capabilities
+3. Check: [../features/FEATURES.md](../features/FEATURES.md) - Platform capabilities
 4. Reference: [openapi.yaml](./openapi.yaml) - Technical specification
 
 ## File Guide
@@ -204,9 +204,9 @@ Understanding the API design:
 | **[ALBUM_ENDPOINTS.md](./ALBUM_ENDPOINTS.md)**     | Album API details           | 15 min    | Understanding album operations            |
 | **[IMAGE_ENDPOINTS.md](./IMAGE_ENDPOINTS.md)**     | Image API details           | 15 min    | Understanding image operations            |
 | **[INDEX.md](./INDEX.md)**                         | Documentation navigation    | 10 min    | Finding what you need                     |
-| **[../API_REFERENCE.md](../API_REFERENCE.md)**     | Complete endpoint reference | 30 min    | Detailed endpoint documentation           |
-| **[../TOKEN_SYSTEM.md](../TOKEN_SYSTEM.md)**       | Token economy guide         | 15 min    | Understanding tokens and costs            |
-| **[../DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md)** | Database structure          | 20 min    | Data model and relationships              |
+| **[./API_REFERENCE.md](./API_REFERENCE.md)**     | Complete endpoint reference | 30 min    | Detailed endpoint documentation           |
+| **[../develop/TOKEN_SYSTEM.md](../develop/TOKEN_SYSTEM.md)**       | Token economy guide         | 15 min    | Understanding tokens and costs            |
+| **[../develop/JSON_SCHEMAS.md](../develop/JSON_SCHEMAS.md)** | Database structure          | 20 min    | Data model and relationships              |
 
 ## Common Questions
 
@@ -217,7 +217,7 @@ Session-based or Bearer tokens
 
 ### What are tokens?
 
-See [../TOKEN_SYSTEM.md](../TOKEN_SYSTEM.md) - Complete token economy
+See [../develop/TOKEN_SYSTEM.md](../develop/TOKEN_SYSTEM.md) - Complete token economy
 documentation
 
 ### How do I enhance an image?
@@ -302,11 +302,11 @@ See [openapi.yaml](./openapi.yaml) - Complete specification
 
 ### Documentation Links
 
-- **API Reference**: [API_REFERENCE.md](../API_REFERENCE.md)
-- **Token System**: [TOKEN_SYSTEM.md](../TOKEN_SYSTEM.md)
-- **Image Enhancement**: [IMAGE_ENHANCEMENT.md](../IMAGE_ENHANCEMENT.md)
-- **Database Schema**: [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md)
-- **Security**: [SECURITY_AUDIT_REPORT.md](../SECURITY_AUDIT_REPORT.md)
+- **API Reference**: [API_REFERENCE.md](./API_REFERENCE.md)
+- **Token System**: [TOKEN_SYSTEM.md](../develop/TOKEN_SYSTEM.md)
+- **Image Enhancement**: [IMAGE_ENHANCEMENT.md](./IMAGE_ENDPOINTS.md)
+- **Database Schema**: [DATABASE_SCHEMA.md](../develop/JSON_SCHEMAS.md)
+- **Security**: [SECURITY_AUDIT_REPORT.md](../security/SECURITY_AUDIT_REPORT.md)
 
 ### External Tools
 

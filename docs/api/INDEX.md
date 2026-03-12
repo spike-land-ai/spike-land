@@ -770,11 +770,11 @@ Detailed documentation for image operations:
 
 For additional context, see:
 
-- [API_REFERENCE.md](../API_REFERENCE.md) - Detailed endpoint reference
-- [TOKEN_SYSTEM.md](../TOKEN_SYSTEM.md) - Token economy details
-- [IMAGE_ENHANCEMENT.md](../IMAGE_ENHANCEMENT.md) - Enhancement pipeline
-- [DATABASE_SCHEMA.md](../DATABASE_SCHEMA.md) - Data models
-- [SECURITY_AUDIT_REPORT.md](../SECURITY_AUDIT_REPORT.md) - Security details
+- [API_REFERENCE.md](./API_REFERENCE.md) - Detailed endpoint reference
+- [TOKEN_SYSTEM.md](../develop/TOKEN_SYSTEM.md) - Token economy details
+- [IMAGE_ENHANCEMENT.md](./IMAGE_ENDPOINTS.md) - Enhancement pipeline
+- [DATABASE_SCHEMA.md](../develop/JSON_SCHEMAS.md) - Data models
+- [SECURITY_AUDIT_REPORT.md](../security/SECURITY_AUDIT_REPORT.md) - Security details
 
 ---
 

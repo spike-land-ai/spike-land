@@ -1226,9 +1226,9 @@ curl -X POST $API_BASE/mcp/modify \
 
 ## Related Documentation
 
-- [API Reference](../API_REFERENCE.md) - Complete API endpoint documentation
-- [Token System](../TOKEN_SYSTEM.md) - Token pricing and regeneration details
-- [Database Schema](../DATABASE_SCHEMA.md) - Database structure and
+- [API Reference](./API_REFERENCE.md) - Complete API endpoint documentation
+- [Token System](../develop/TOKEN_SYSTEM.md) - Token pricing and regeneration details
+- [Database Schema](../develop/JSON_SCHEMAS.md) - Database structure and
   relationships
 
 ## Rate Limits

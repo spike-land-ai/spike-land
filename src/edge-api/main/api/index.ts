@@ -302,7 +302,9 @@ async function fetchMcpWithFallback(env: Env, url: string, init?: RequestInit): 
 }
 
 // MCP tools listing proxy (public, no auth required)
-app.get("/mcp/tools", async (c) => {
+export const getMcpToolsHandler = async (
+  c: import("hono").Context<{ Bindings: Env; Variables: Variables }>,
+) => {
   const url = "https://mcp.spike.land/tools";
   const response = await fetchMcpWithFallback(c.env, url, {
     headers: { "X-Request-Id": c.get("requestId") },
@@ -312,9 +314,12 @@ app.get("/mcp/tools", async (c) => {
     statusText: response.statusText,
     headers: new Headers(response.headers),
   });
-});
+};
+app.get("/mcp/tools", getMcpToolsHandler);
 
-app.get("/api/apps", async (c) => {
+export const getApiAppsHandler = async (
+  c: import("hono").Context<{ Bindings: Env; Variables: Variables }>,
+) => {
   const url = "https://mcp.spike.land/apps";
   const response = await fetchMcpWithFallback(c.env, url, {
     headers: { "X-Request-Id": c.get("requestId") },
@@ -324,9 +329,12 @@ app.get("/api/apps", async (c) => {
     statusText: response.statusText,
     headers: new Headers(response.headers),
   });
-});
+};
+app.get("/api/apps", getApiAppsHandler);
 
-app.get("/api/apps/:slug", async (c) => {
+export const getApiAppsSlugHandler = async (
+  c: import("hono").Context<{ Bindings: Env; Variables: Variables }>,
+) => {
   const slug = c.req.param("slug");
   const url = `https://mcp.spike.land/apps/${slug}`;
   const response = await fetchMcpWithFallback(c.env, url, {
@@ -337,10 +345,13 @@ app.get("/api/apps/:slug", async (c) => {
     statusText: response.statusText,
     headers: new Headers(response.headers),
   });
-});
+};
+app.get("/api/apps/:slug", getApiAppsSlugHandler);
 
 // Store tools endpoint — groups MCP registry tools by category for the store UI
-app.get("/api/store/tools", async (c) => {
+export const getApiStoreToolsHandler = async (
+  c: import("hono").Context<{ Bindings: Env; Variables: Variables }>,
+) => {
   const requestId = c.get("requestId");
   const response = await fetchMcpWithFallback(c.env, "https://mcp.spike.land/tools", {
     headers: { "X-Request-Id": requestId },
@@ -384,12 +395,13 @@ app.get("/api/store/tools", async (c) => {
 
   c.header("Cache-Control", "public, max-age=1800, stale-while-revalidate=14400");
   return c.json({ categories, featured, total: tools.length });
-});
+};
+app.get("/api/store/tools", getApiStoreToolsHandler);
 
 // --- MCP Gateway ---
 
 // Helper: proxy request to MCP service binding (with fallback for local dev)
-async function mcpProxy(c: import("hono").Context<{ Bindings: Env; Variables: Variables }>) {
+export async function mcpProxy(c: import("hono").Context<{ Bindings: Env; Variables: Variables }>) {
   const url = new URL(c.req.url);
   url.hostname = "mcp.spike.land";
   url.port = "";
@@ -417,7 +429,9 @@ async function mcpProxy(c: import("hono").Context<{ Bindings: Env; Variables: Va
 }
 
 // OAuth well-known discovery (inline, not proxied)
-app.get("/.well-known/oauth-authorization-server", (c) => {
+export const mainOauthAuthorizationServerHandler = (
+  c: import("hono").Context<{ Bindings: Env; Variables: Variables }>,
+) => {
   c.header("Cache-Control", "public, max-age=86400");
   return c.json({
     issuer: "https://spike.land",
@@ -429,9 +443,12 @@ app.get("/.well-known/oauth-authorization-server", (c) => {
     token_endpoint_auth_methods_supported: ["none"],
     code_challenge_methods_supported: ["S256"],
   });
-});
+};
+app.get("/.well-known/oauth-authorization-server", mainOauthAuthorizationServerHandler);
 
-app.get("/.well-known/oauth-protected-resource/mcp", (c) => {
+export const oauthProtectedResourceMcpHandler = (
+  c: import("hono").Context<{ Bindings: Env; Variables: Variables }>,
+) => {
   c.header("Cache-Control", "public, max-age=86400");
   return c.json({
     resource: "https://spike.land/mcp",
@@ -439,14 +456,17 @@ app.get("/.well-known/oauth-protected-resource/mcp", (c) => {
     bearer_methods_supported: ["header"],
     resource_documentation: "https://spike.land/docs/mcp",
   });
-});
+};
+app.get("/.well-known/oauth-protected-resource/mcp", oauthProtectedResourceMcpHandler);
 
 // OAuth device flow proxy routes
 app.post("/oauth/device", mcpProxy);
 app.post("/oauth/token", mcpProxy);
 
 // Device approval requires session auth + internal secret injection
-app.post("/oauth/device/approve", authMiddleware, async (c) => {
+export const mainOauthDeviceApproveHandler = async (
+  c: import("hono").Context<{ Bindings: Env; Variables: Variables }>,
+) => {
   const url = new URL(c.req.url);
   url.hostname = "mcp.spike.land";
   url.port = "";
@@ -468,19 +488,24 @@ app.post("/oauth/device/approve", authMiddleware, async (c) => {
     status: response.status,
     headers: new Headers(response.headers),
   });
-});
+};
+app.post("/oauth/device/approve", authMiddleware, mainOauthDeviceApproveHandler);
 
 // MCP Streamable HTTP proxy — POST and DELETE always; GET only for SSE (not browser nav)
 app.post("/mcp", mcpProxy);
 app.delete("/mcp", mcpProxy);
-app.get("/mcp", async (c, next) => {
+export const mcpGetHandler = async (
+  c: import("hono").Context<{ Bindings: Env; Variables: Variables }>,
+  next: import("hono").Next,
+) => {
   const accept = c.req.header("accept") ?? "";
   if (accept.includes("text/event-stream")) {
     return mcpProxy(c);
   }
   // Browser navigation (text/html) — fall through to SPA catch-all
   return next();
-});
+};
+app.get("/mcp", mcpGetHandler);
 
 /** Track whether AUTH_MCP binding is functional (avoids repeated failures in local dev). */
 let authServiceAvailable = true;
@@ -513,7 +538,9 @@ async function fetchAuthWithFallback(env: Env, request: Request): Promise<Respon
 }
 
 // Better Auth proxy via service binding (sub-1ms internal call)
-app.all("/api/auth/*", async (c) => {
+export const apiAuthAllHandler = async (
+  c: import("hono").Context<{ Bindings: Env; Variables: Variables }>,
+) => {
   const url = new URL(c.req.url);
   const isGetSession = url.pathname.endsWith("/get-session");
   url.hostname = "auth-mcp.spike.land";
@@ -551,7 +578,8 @@ app.all("/api/auth/*", async (c) => {
     statusText: response.statusText,
     headers,
   });
-});
+};
+app.all("/api/auth/*", apiAuthAllHandler);
 
 app.route("/", wellKnown);
 app.route("/", sitemap);
@@ -559,9 +587,12 @@ app.route("/", githubStars);
 app.route("/", docsApi);
 
 // Catch-all for unmatched API routes — return JSON 404 instead of SPA HTML
-app.all("/api/*", (c) => {
+export const apiCatchAllHandler = (
+  c: import("hono").Context<{ Bindings: Env; Variables: Variables }>,
+) => {
   return c.json({ error: "Not Found", path: c.req.path }, 404);
-});
+};
+app.all("/api/*", apiCatchAllHandler);
 
 app.route("/", spa);
 

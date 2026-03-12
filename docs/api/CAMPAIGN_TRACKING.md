@@ -208,7 +208,7 @@ Tracking data is stored in these tables:
 - `analytics_events`: Custom events (scroll, time, conversions)
 - `campaign_attribution`: Links users to campaigns for ROI tracking
 
-See [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) for full schema details.
+See [DATABASE_SCHEMA.md](../develop/JSON_SCHEMAS.md) for full schema details.
 
 ## API Endpoints
 

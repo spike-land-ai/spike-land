@@ -32,7 +32,7 @@ async function parseOAuthBody(c: Context): Promise<OAuthRequestBody> {
 export const oauthRoute = new Hono<{ Bindings: Env }>();
 
 // POST /oauth/device — initiate device authorization
-oauthRoute.post("/device", async (c) => {
+export const oauthDeviceHandler = async (c: Context<{ Bindings: Env }>) => {
   const clientIp = c.req.header("cf-connecting-ip") ?? "unknown";
   const { isLimited, resetAt } = await checkRateLimit(`device:${clientIp}`, c.env.KV, 10, 300_000);
   if (isLimited) {
@@ -60,10 +60,11 @@ oauthRoute.post("/device", async (c) => {
     expires_in: expiresIn,
     interval: 5,
   });
-});
+};
+oauthRoute.post("/device", oauthDeviceHandler);
 
 // POST /oauth/token — poll for access token (device grant)
-oauthRoute.post("/token", async (c) => {
+export const oauthTokenHandler = async (c: Context<{ Bindings: Env }>) => {
   const clientIp = c.req.header("cf-connecting-ip") ?? "unknown";
   const { isLimited, resetAt } = await checkRateLimit(`token:${clientIp}`, c.env.KV, 60, 300_000);
   if (isLimited) {
@@ -100,11 +101,12 @@ oauthRoute.post("/token", async (c) => {
     token_type: result.tokenType,
     scope: result.scope,
   });
-});
+};
+oauthRoute.post("/token", oauthTokenHandler);
 
 // POST /oauth/device/approve — called by spike-app after user approves
 // Protected by MCP_INTERNAL_SECRET header
-oauthRoute.post("/device/approve", async (c) => {
+export const oauthDeviceApproveHandler = async (c: Context<{ Bindings: Env }>) => {
   const secret = c.req.header("X-Internal-Secret");
   if (secret !== c.env.MCP_INTERNAL_SECRET) {
     return c.json({ error: "Unauthorized" }, 401);
@@ -126,10 +128,11 @@ oauthRoute.post("/device/approve", async (c) => {
   }
 
   return c.json({ ok: true });
-});
+};
+oauthRoute.post("/device/approve", oauthDeviceApproveHandler);
 
 // POST /oauth/device/test-approve — auto-approve for non-production environments
-oauthRoute.post("/device/test-approve", async (c) => {
+export const oauthDeviceTestApproveHandler = async (c: Context<{ Bindings: Env }>) => {
   if (c.env.APP_ENV === "production") {
     return c.json({ error: "Not available in production" }, 403);
   }
@@ -146,10 +149,11 @@ oauthRoute.post("/device/test-approve", async (c) => {
     return c.json({ error: result.error }, 400);
   }
   return c.json({ ok: true });
-});
+};
+oauthRoute.post("/device/test-approve", oauthDeviceTestApproveHandler);
 
 // POST /oauth/revoke — revoke an access token (RFC 7009)
-oauthRoute.post("/revoke", async (c) => {
+export const oauthRevokeHandler = async (c: Context<{ Bindings: Env }>) => {
   const body = await parseOAuthBody(c);
   const token = typeof body.token === "string" ? body.token : null;
 
@@ -168,4 +172,5 @@ oauthRoute.post("/revoke", async (c) => {
 
   // RFC 7009: always return 200 regardless of whether token existed
   return c.json({ active: false });
-});
+};
+oauthRoute.post("/revoke", oauthRevokeHandler);

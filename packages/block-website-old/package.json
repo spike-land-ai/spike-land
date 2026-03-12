@@ -23,7 +23,8 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint --quiet ."
+    "lint": "eslint --quiet .",
+    "test": "vitest run"
   },
   "dependencies": {
     "@spike-land-ai/mcp-server-base": "workspace:*",

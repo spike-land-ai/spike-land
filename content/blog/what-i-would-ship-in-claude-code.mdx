@@ -1,0 +1,236 @@
+---
+title: "What I Would Ship in Claude Code as of March 12, 2026"
+slug: "what-i-would-ship-in-claude-code"
+description: "Claude Code already gets a lot right. The real question is what its context-management stack should ship next, what it should avoid, and why open composite runtimes are becoming more dangerous than closed model moats."
+date: "2026-03-12"
+author: "Zoltan Erdos"
+category: "Developer Experience"
+tags: ["ai", "claude", "claude-code", "context-engineering", "tool-calling", "mcp", "openai-compatible", "developer-tools"]
+featured: false
+draft: false
+primer: "Claude Code already engineers context. The sharper question is what it should ship next."
+heroImage: "/blog/how-claude-code-engineers-context/hero.png"
+heroPrompt: "A detailed 3D schematic of a futuristic neural processor with glowing data pathways, representing complex context engineering, cinematic lighting, blueprint aesthetic"
+---
+
+![A detailed 3D schematic of a futuristic neural processor with glowing data pathways, representing complex context engineering, cinematic lighting, blueprint aesthetic](/blog/how-claude-code-engineers-context/hero.png)
+
+<Tldr>
+
+- Claude Code already has the important primitives: Plan Mode, subagents, `CLAUDE.md`, hooks, output styles, MCP, and prompt-caching-friendly behavior.
+- The highest-ROI changes are **history compression** and **tool-work compression**. Long sessions degrade because old reasoning and raw tool payloads stick around too long.
+- **Scored memory notes** are worth building. Durable memory without decay eventually becomes stale instruction.
+- A **four-stage pipeline** is useful for selective autonomy, but wrong as the default loop for interactive coding.
+- The bigger strategic threat is not another closed coding agent. It is an OpenAI-compatible edge contract fronting an open composite runtime with better context discipline.
+
+</Tldr>
+
+Claude Code is past the point where the interesting question is "does it engineer context?"
+
+Of course it does.
+
+As of **March 12, 2026**, the public product surface already tells you that much:
+
+- Plan Mode
+- subagents with separate context windows
+- hierarchical `CLAUDE.md` memory
+- hooks that can inject or block behavior
+- output styles that alter the prompt surface
+- MCP integration
+- token-efficient tool use and prompt-caching-friendly workflows
+
+That is a real system, not a toy. So the useful question is no longer whether Claude Code has context management.
+
+The useful question is:
+
+> what should it ship next, and what should it refuse to over-engineer?
+
+This is my answer.
+
+## The actual pain
+
+The biggest context failures in coding agents are usually not dramatic. They are cumulative.
+
+Picture a 90-minute refactor session.
+
+By message 8, the model had one theory about the bug. By message 24, that theory is obsolete. By message 40, the session still carries the old explanation, two giant shell outputs, a 500-line file read, and a browser trace that mattered for one step and then never again.
+
+Nothing is individually fatal.
+
+But together they create the classic long-session failure mode:
+
+- the model re-reads stale reasoning as if it were still relevant
+- finished tool work keeps occupying working memory
+- new evidence competes with old noise
+- quality drops before the context window is technically full
+
+That is why I rank compression above almost everything else. The problem is not merely "large context." The problem is **badly represented context**.
+
+## The ranking
+
+| Mechanism | Claude Code status | Verdict | Why |
+|-----------|--------------------|---------|-----|
+| **1. Split system prompt (stable prefix + dynamic suffix)** | **Working, but under-budgeted** | **Refine** | Claude Code already separates stable operating behavior from more dynamic context surfaces. The opportunity is stricter token budgeting and pruning on the dynamic layer, not a new architecture. |
+| **2. Scored memory notes** | **Missing as a first-class system** | **Implement** | Durable memory that never decays eventually becomes stale policy. Memory notes should have confidence, recency, and some notion of whether they keep helping. |
+| **3. Four-stage pipeline (classify → plan → execute → extract)** | **Useful selectively** | **Reject as the default** | Interactive coding wins on tight loops and low latency. A mandatory four-call pipeline would add orchestration overhead to the common case of "read, edit, verify." |
+| **4. History compression with explicit budgets** | **Partially present, not strict enough** | **Implement now** | This is the highest-ROI change. Old conversation should not survive at full fidelity just because it happened earlier. Explicit budgets force the system to collapse stale transcript into compact state. |
+| **5. Tool work compression** | **Partially present, not aggressive enough** | **Implement now** | Raw tool traces are one of the worst hidden context leaks. Tool work should become compact artifacts, not permanent cargo. |
+| **6. Bounded tool calling** | **Already a relative strength** | **Keep refining** | Claude Code is already close to the right philosophy here. Keep narrowing the tool surface presented at execution time. That is an optimization path, not a missing foundation. |
+| **7. Assertion/evidence tracking** | **Valuable principle, risky subsystem** | **Take the principle, reject the machinery** | "Tool ran" should not equal "task complete." But a heavyweight assertion ledger is probably too much default product complexity. Evidence-aware completion checks get most of the value. |
+
+If you want the shorter version:
+
+- **Implement now:** #4, #5
+- **Strong medium-term bet:** #2
+- **Refine what already works:** #1, #6
+- **Reject as default architecture:** #3
+- **Keep the philosophy, not the bureaucracy:** #7
+
+## Why #4 and #5 come first
+
+This is the most important part of the ranking.
+
+If a coding session goes long, the biggest context leak is rarely the user's prose. It is usually the runtime's own exhaust:
+
+- raw file reads
+- raw grep output
+- old shell logs
+- browser snapshots
+- tool results that mattered for one decision and then stopped mattering
+
+Imagine a single `cat` of a 500-line file early in the session. The model found the relevant branch by line 47, made the edit fifteen minutes later, and never needed the full file again. But unless the runtime deliberately replaces that payload, the whole thing can keep riding along in working memory turn after turn.
+
+That is bad systems design.
+
+The correct artifact after the step is finished is something closer to:
+
+> Read `src/foo.ts`; bug located in `parseConfig()` branch; changed null handling near line 47.
+
+Same story for old transcript:
+
+> Initial hypothesis about race condition was wrong; later test output showed stale cache invalidation instead.
+
+That is what programmatic compression buys you. Not less truth. Better shape.
+
+The model does not need the dead transcript. It needs the smallest truthful artifact that preserves:
+
+- current objective
+- decisions that still matter
+- unfinished work
+- evidence from relevant tools
+
+Everything else should be compacted or dropped.
+
+## The one I would not force
+
+The four-stage pipeline is the most seductive bad idea on the list.
+
+On paper, `classify → plan → execute → extract` sounds beautiful. In practice, interactive coding is full of small, local tasks:
+
+- explain this function
+- fix this test
+- rename this component
+- patch this endpoint
+
+For those tasks, forcing multiple model calls before execution starts is just latency disguised as architecture.
+
+That does not make the idea useless. It makes it **selective**.
+
+For background autonomy, long-running agents, or high-risk workflows, staged isolation is real leverage. For everyday coding, it is often orchestration theater.
+
+That distinction matters. Good agent products die when they optimize the impressive demo at the expense of the common case.
+
+## The subtle one: completion is not truth
+
+This is where I think the strongest product principle is hiding.
+
+Most agent systems collapse three things into one bucket:
+
+- the task progressed
+- a tool ran
+- truth was established
+
+Those are not the same.
+
+A passing browser step is evidence. A successful shell command is evidence. A file write is evidence. None of them, by themselves, prove the whole task is complete.
+
+So I agree with the principle behind assertion/evidence tracking. I just do not think most products need a grand formal ledger to get the benefit.
+
+The practical version is simpler:
+
+- require the model to tie completion claims to evidence
+- require explicit verification before success language
+- preserve conflicting evidence instead of smoothing it over
+
+That is enough to change behavior without turning the agent loop into a theorem prover.
+
+## A sharper criticism of Claude Code's repo posture
+
+There is also a less technical point worth saying plainly.
+
+Claude Code being publicly visible on GitHub while remaining **all-rights-reserved** is not open source. It is source-visible. That is a materially different thing.
+
+You can inspect it. You cannot really own it, fork it, or build on it with the freedoms developers mean when they say "open source."
+
+That posture is not a scandal. Companies are allowed to do it.
+
+But it is also not a flex.
+
+A public repo with a closed legal perimeter is transparency cosplay. It says:
+
+> Please admire our engineering, but do not confuse that admiration with freedom.
+
+That matters more now because the strategic center of gravity is moving.
+
+## The more dangerous counter-move
+
+The bigger threat to closed model moats is not another glossy agent demo.
+
+It is an **OpenAI-compatible endpoint** that keeps the familiar `/v1` contract while running a different context stack behind the curtain.
+
+That is why the spike.land route matters:
+
+- [How the spike.land OpenAI-compatible endpoint works, and how to try it locally](/blog/openai-compatible-endpoint-local-playground)
+- [`src/edge-api/main/api/routes/openai-compatible.ts`](/Users/z/Developer/spike-land-ai/src/edge-api/main/api/routes/openai-compatible.ts)
+
+The point is not "we copied route names."
+
+The point is that the edge contract stays familiar while the runtime remains free to:
+
+- score local docs
+- select relevant MCP capabilities
+- assemble synthesis context
+- choose the best provider path
+
+That is the moat-eater.
+
+Once a drop-in `/v1` interface can front an open composite runtime with aggressive context compression, the competitive question changes. It becomes less about who owns the biggest closed base model and more about who assembles the cleanest working set for the job.
+
+And if one developer in Brighton can ship that shape, then the supposed moat around US big tech starts looking less like immutable science and more like a temporary mixture of capex, default distribution, and branding.
+
+The atomic version of the claim is this:
+
+> an OpenAI-compatible endpoint plus an open composite runtime is a direct attack on the idea that proprietary weights alone should control the agent stack
+
+## The real thesis
+
+Claude Code does not need a magical new planning religion.
+
+It needs stricter discipline about what gets to stay alive in context.
+
+That means:
+
+- stable prefixes
+- bounded dynamic memory
+- decaying memory notes
+- compressed history
+- compressed tool artifacts
+- completion claims tied to evidence
+
+If I had to prioritize just one engineering direction, it would be this:
+
+**compress context programmatically, not rhetorically.**
+
+Do that well, and you get a sharper agent without needing a bigger transcript budget.
+
+If you want the companion piece on how Claude Code itself appears to assemble context, read [How Claude Code Engineers Context](/blog/how-claude-code-engineers-context).

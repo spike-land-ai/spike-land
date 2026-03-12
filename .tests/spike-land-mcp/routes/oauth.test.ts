@@ -5,16 +5,14 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { Hono } from "hono";
-import { oauthRoute } from "../../../src/edge-api/spike-land/api/oauth";
+import {
+  oauthDeviceHandler,
+  oauthTokenHandler,
+  oauthDeviceApproveHandler,
+} from "../../../src/edge-api/spike-land/api/oauth";
 import { createMockD1, createMockKV } from "../__test-utils__/mock-env";
 import type { Env } from "../../../src/edge-api/spike-land/core-logic/env";
-
-function makeApp(_d1Handler?: Parameters<typeof createMockD1>[0]) {
-  const app = new Hono<{ Bindings: Env }>();
-  app.route("/oauth", oauthRoute);
-  return app;
-}
+import type { Context } from "hono";
 
 function makeEnv(d1Handler?: Parameters<typeof createMockD1>[0]) {
   return {
@@ -31,19 +29,47 @@ function makeEnv(d1Handler?: Parameters<typeof createMockD1>[0]) {
   };
 }
 
+function createMockContext(req: Request, env: Env) {
+  const headers = new Map<string, string>();
+  return {
+    req: {
+      header: (name: string) => req.headers.get(name) || req.headers.get(name.toLowerCase()),
+      json: async () => await req.clone().json(),
+      parseBody: async () => {
+        const formData = await req.clone().formData();
+        const body: Record<string, string> = {};
+        formData.forEach((value, key) => {
+          body[key] = value.toString();
+        });
+        return body;
+      },
+    },
+    env,
+    header: (name: string, value: string) => {
+      headers.set(name, value);
+    },
+    json: (body: any, status: number = 200) => {
+      const resHeaders = new Headers();
+      resHeaders.set("Content-Type", "application/json");
+      for (const [k, v] of headers.entries()) {
+        resHeaders.set(k, v);
+      }
+      return new Response(JSON.stringify(body), { status, headers: resHeaders });
+    },
+  } as unknown as Context<{ Bindings: Env }>;
+}
+
 // ─── POST /oauth/device ───────────────────────────────────────────────────────
 
 describe("POST /oauth/device", () => {
   it("returns device_code, user_code, verification_uri, expires_in, interval", async () => {
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/device", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ client_id: "client-1", scope: "mcp" }),
-      }),
-      makeEnv(),
-    );
+    const req = new Request("http://localhost/oauth/device", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ client_id: "client-1", scope: "mcp" }),
+    });
+    const c = createMockContext(req, makeEnv());
+    const res = await oauthDeviceHandler(c);
 
     expect(res.status).toBe(200);
     const body = (await res.json()) as Record<string, unknown>;
@@ -56,15 +82,13 @@ describe("POST /oauth/device", () => {
   });
 
   it("works with empty body (no client_id or scope)", async () => {
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/device", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: "{}",
-      }),
-      makeEnv(),
-    );
+    const req = new Request("http://localhost/oauth/device", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    });
+    const c = createMockContext(req, makeEnv());
+    const res = await oauthDeviceHandler(c);
 
     expect(res.status).toBe(200);
     const body = (await res.json()) as { device_code: string };
@@ -75,29 +99,25 @@ describe("POST /oauth/device", () => {
     const env = makeEnv();
     env.SPIKE_LAND_URL = "https://custom.example.com";
 
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/device", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: "{}",
-      }),
-      env,
-    );
+    const req = new Request("http://localhost/oauth/device", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    });
+    const c = createMockContext(req, env);
+    const res = await oauthDeviceHandler(c);
 
     const body = (await res.json()) as { verification_uri: string };
     expect(body.verification_uri).toContain("custom.example.com");
   });
 
   it("handles invalid JSON body gracefully", async () => {
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/device", {
-        method: "POST",
-        body: "not-json",
-      }),
-      makeEnv(),
-    );
+    const req = new Request("http://localhost/oauth/device", {
+      method: "POST",
+      body: "not-json",
+    });
+    const c = createMockContext(req, makeEnv());
+    const res = await oauthDeviceHandler(c);
 
     // Should still return 200 (defaults to empty object)
     expect(res.status).toBe(200);
@@ -108,15 +128,13 @@ describe("POST /oauth/device", () => {
 
 describe("POST /oauth/token", () => {
   it("returns 400 for unsupported grant type", async () => {
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ grant_type: "authorization_code" }),
-      }),
-      makeEnv(),
-    );
+    const req = new Request("http://localhost/oauth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ grant_type: "authorization_code" }),
+    });
+    const c = createMockContext(req, makeEnv());
+    const res = await oauthTokenHandler(c);
 
     expect(res.status).toBe(400);
     const body = (await res.json()) as { error: string };
@@ -124,17 +142,15 @@ describe("POST /oauth/token", () => {
   });
 
   it("returns 400 when device_code is missing", async () => {
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          grant_type: "urn:ietf:params:oauth:grant-type:device_code",
-        }),
+    const req = new Request("http://localhost/oauth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        grant_type: "urn:ietf:params:oauth:grant-type:device_code",
       }),
-      makeEnv(),
-    );
+    });
+    const c = createMockContext(req, makeEnv());
+    const res = await oauthTokenHandler(c);
 
     expect(res.status).toBe(400);
     const body = (await res.json()) as { error: string };
@@ -142,18 +158,17 @@ describe("POST /oauth/token", () => {
   });
 
   it("returns 400 with expired_token when code not found", async () => {
-    const app = makeApp(() => ({ results: [], success: true, meta: {} }));
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          grant_type: "urn:ietf:params:oauth:grant-type:device_code",
-          device_code: "dc_nonexistent",
-        }),
+    const req = new Request("http://localhost/oauth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+        device_code: "dc_nonexistent",
       }),
-      makeEnv(() => ({ results: [], success: true, meta: {} })),
-    );
+    });
+    const env = makeEnv(() => ({ results: [], success: true, meta: {} }));
+    const c = createMockContext(req, env);
+    const res = await oauthTokenHandler(c);
 
     expect(res.status).toBe(400);
     const body = (await res.json()) as { error: string };
@@ -185,18 +200,16 @@ describe("POST /oauth/token", () => {
       return { results: [], success: true, meta: {} };
     };
 
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          grant_type: "urn:ietf:params:oauth:grant-type:device_code",
-          device_code: "dc_pending",
-        }),
+    const req = new Request("http://localhost/oauth/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+        device_code: "dc_pending",
       }),
-      makeEnv(d1Handler),
-    );
+    });
+    const c = createMockContext(req, makeEnv(d1Handler));
+    const res = await oauthTokenHandler(c);
 
     expect(res.status).toBe(400);
     const body = (await res.json()) as { error: string };
@@ -204,14 +217,12 @@ describe("POST /oauth/token", () => {
   });
 
   it("handles invalid JSON body gracefully", async () => {
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/token", {
-        method: "POST",
-        body: "not-json",
-      }),
-      makeEnv(),
-    );
+    const req = new Request("http://localhost/oauth/token", {
+      method: "POST",
+      body: "not-json",
+    });
+    const c = createMockContext(req, makeEnv());
+    const res = await oauthTokenHandler(c);
 
     // Falls through to unsupported_grant_type since grant_type is undefined
     expect(res.status).toBe(400);
@@ -224,83 +235,74 @@ describe("POST /oauth/token", () => {
 
 describe("POST /oauth/device/approve", () => {
   it("returns 401 when X-Internal-Secret header is missing", async () => {
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/device/approve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_code: "ABCD-EFGH", user_id: "user-1" }),
-      }),
-      makeEnv(),
-    );
+    const req = new Request("http://localhost/oauth/device/approve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_code: "ABCD-EFGH", user_id: "user-1" }),
+    });
+    const c = createMockContext(req, makeEnv());
+    const res = await oauthDeviceApproveHandler(c);
 
     expect(res.status).toBe(401);
   });
 
   it("returns 401 when X-Internal-Secret is wrong", async () => {
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/device/approve", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Internal-Secret": "wrong-secret",
-        },
-        body: JSON.stringify({ user_code: "ABCD-EFGH", user_id: "user-1" }),
-      }),
-      makeEnv(),
-    );
+    const req = new Request("http://localhost/oauth/device/approve", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Internal-Secret": "wrong-secret",
+      },
+      body: JSON.stringify({ user_code: "ABCD-EFGH", user_id: "user-1" }),
+    });
+    const c = createMockContext(req, makeEnv());
+    const res = await oauthDeviceApproveHandler(c);
 
     expect(res.status).toBe(401);
   });
 
   it("returns 400 when user_code is missing", async () => {
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/device/approve", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Internal-Secret": "test-internal-secret",
-        },
-        body: JSON.stringify({ user_id: "user-1" }),
-      }),
-      makeEnv(),
-    );
+    const req = new Request("http://localhost/oauth/device/approve", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Internal-Secret": "test-internal-secret",
+      },
+      body: JSON.stringify({ user_id: "user-1" }),
+    });
+    const c = createMockContext(req, makeEnv());
+    const res = await oauthDeviceApproveHandler(c);
 
     expect(res.status).toBe(400);
   });
 
   it("returns 400 when user_id is missing", async () => {
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/device/approve", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Internal-Secret": "test-internal-secret",
-        },
-        body: JSON.stringify({ user_code: "ABCD-EFGH" }),
-      }),
-      makeEnv(),
-    );
+    const req = new Request("http://localhost/oauth/device/approve", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Internal-Secret": "test-internal-secret",
+      },
+      body: JSON.stringify({ user_code: "ABCD-EFGH" }),
+    });
+    const c = createMockContext(req, makeEnv());
+    const res = await oauthDeviceApproveHandler(c);
 
     expect(res.status).toBe(400);
   });
 
   it("returns 400 when user_code not found in DB", async () => {
-    const app = makeApp();
-    const res = await app.fetch(
-      new Request("http://localhost/oauth/device/approve", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Internal-Secret": "test-internal-secret",
-        },
-        body: JSON.stringify({ user_code: "FAKE-CODE", user_id: "user-1" }),
-      }),
-      makeEnv(() => ({ results: [], success: true, meta: {} })),
-    );
+    const req = new Request("http://localhost/oauth/device/approve", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Internal-Secret": "test-internal-secret",
+      },
+      body: JSON.stringify({ user_code: "FAKE-CODE", user_id: "user-1" }),
+    });
+    const env = makeEnv(() => ({ results: [], success: true, meta: {} }));
+    const c = createMockContext(req, env);
+    const res = await oauthDeviceApproveHandler(c);
 
     expect(res.status).toBe(400);
     const body = (await res.json()) as { error: string };

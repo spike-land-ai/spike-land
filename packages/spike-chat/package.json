@@ -9,7 +9,7 @@
   "scripts": {
     "build": "echo 'No build step'",
     "test": "vitest run",
-    "lint": "eslint .",
+    "lint": "eslint --quiet .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

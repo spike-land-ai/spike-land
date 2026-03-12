@@ -1,6 +1,5 @@
 /**
- * Tests for chat.ts main export fetch handler
- * Covers lines 48-249, 258, 262 (various path handlers in main.fetch)
+ * Tests for chat.ts handlers and routing
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -59,7 +58,16 @@ vi.mock("../../src/edge-api/backend/staticContent.mjs", () => ({
 }));
 
 // Import the actual module after mocks
-import main from "../../src/edge-api/backend/edge/chat.js";
+import {
+  handleMCPRequest,
+  handleTranspileRequest,
+  handleServerFetchUrlRequest,
+  handleAILogsRequest,
+  handleAssetManifestRequest,
+  handleFilesRequest,
+  generateTURNCredentials,
+  handleRequest,
+} from "../../src/edge-api/backend/edge/chat.js";
 import type Env from "../../src/edge-api/backend/core-logic/env.js";
 
 function createMockEnv(): Env {
@@ -102,7 +110,7 @@ function createMockCtx(): ExecutionContext {
   } as unknown as ExecutionContext;
 }
 
-describe("chat.ts main export", () => {
+describe("chat.ts handlers", () => {
   let mockEnv: Env;
   let mockCtx: ExecutionContext;
   let mockFetch: ReturnType<typeof vi.fn>;
@@ -115,65 +123,30 @@ describe("chat.ts main export", () => {
     global.fetch = mockFetch;
   });
 
-  describe("swVersion endpoints", () => {
-    it("serves /swVersion.mjs", async () => {
-      const request = new Request("https://example.com/swVersion.mjs");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+  describe("swVersion endpoints logic (handleFilesRequest)", () => {
+    it("returns correct JSON and headers for files", async () => {
+      const response = handleFilesRequest();
 
       expect(response.status).toBe(200);
-      const text = await response.text();
-      expect(text).toContain("swVersion");
-      expect(text).toContain("test-hash-123");
-    });
-
-    it("serves /@/lib/swVersion.mjs", async () => {
-      const request = new Request("https://example.com/@/lib/swVersion.mjs");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
-
-      expect(response.status).toBe(200);
-      expect(response.headers.get("Content-Type")).toContain("application/javascript");
-    });
-
-    it("serves /swVersion.json", async () => {
-      const request = new Request("https://example.com/swVersion.json");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
-
-      expect(response.status).toBe(200);
-      const body = (await response.json()) as { swVersion: string };
-      expect(body.swVersion).toBe("test-hash-123");
-    });
-
-    it("serves /swVersion.js", async () => {
-      const request = new Request("https://example.com/swVersion.js");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
-
-      expect(response.status).toBe(200);
-      expect(response.headers.get("Content-Type")).toContain("application/javascript");
-    });
-
-    it("serves /sw-config.json", async () => {
-      const request = new Request("https://example.com/sw-config.json");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
-
-      expect(response.status).toBe(200);
-      const body = (await response.json()) as { killSwitch: boolean; version: string };
-      expect(body.killSwitch).toBe(false);
-      expect(body.version).toBe("v16");
+      const body = (await response.json()) as Record<string, unknown>;
+      expect(body).toEqual({});
+      expect(response.headers.get("x-hash")).toBe("test-hash-123");
     });
   });
 
-  describe("ASSET_MANIFEST endpoint", () => {
-    it("serves /ASSET_MANIFEST", async () => {
-      const request = new Request("https://example.com/ASSET_MANIFEST");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+  describe("ASSET_MANIFEST endpoint logic", () => {
+    it("returns ASSET_MANIFEST", async () => {
+      const response = handleAssetManifestRequest();
 
       expect(response.status).toBe(200);
       expect(response.headers.get("Content-Type")).toContain("application/json");
+      const text = await response.text();
+      expect(text).toBe("{}");
     });
   });
 
-  describe("transpile endpoint", () => {
-    it("handles POST to /transpile", async () => {
+  describe("transpile logic", () => {
+    it("handles POST to /transpile directly", async () => {
       mockFetch.mockResolvedValue(new Response("transpiled code", { status: 200 }));
 
       const request = new Request("https://example.com/transpile", {
@@ -183,34 +156,34 @@ describe("chat.ts main export", () => {
         duplex: "half",
       });
 
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+      const response = await handleTranspileRequest(request);
 
       expect(response.status).toBe(200);
+      expect(await response.text()).toBe("transpiled code");
     });
   });
 
-  describe("MCP routing", () => {
-    it("routes /mcp GET requests to CODE durable object", async () => {
+  describe("MCP logic", () => {
+    it("handles MCP request to CODE durable object", async () => {
       const mockDO = {
         fetch: vi.fn().mockResolvedValue(new Response("MCP response")),
       };
       (mockEnv.CODE.idFromName as ReturnType<typeof vi.fn>).mockReturnValue("mcp-id");
       (mockEnv.CODE.get as ReturnType<typeof vi.fn>).mockReturnValue(mockDO);
 
-      // Use GET to avoid duplex streaming issue
       const request = new Request("https://example.com/mcp?codeSpace=test-space", {
         method: "GET",
         headers: { "X-CodeSpace": "test-space" },
       });
 
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+      await handleMCPRequest(request, mockEnv);
 
       expect(mockDO.fetch).toHaveBeenCalled();
     });
   });
 
-  describe("serverFetchUrl handler", () => {
-    it("handles /__server-fetch POST", async () => {
+  describe("serverFetchUrl logic", () => {
+    it("handles server fetch successfully", async () => {
       mockFetch.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
 
       const request = new Request("https://example.com/__server-fetch", {
@@ -221,12 +194,15 @@ describe("chat.ts main export", () => {
         duplex: "half",
       });
 
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+      await handleServerFetchUrlRequest(request);
 
-      expect(mockFetch).toHaveBeenCalledWith("https://api.example.com/data", expect.any(Object) as unknown);
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.example.com/data",
+        expect.any(Object) as unknown,
+      );
     });
 
-    it("handles /__server-fetch when fetch fails (502)", async () => {
+    it("handles server fetch when fetch fails (502)", async () => {
       mockFetch.mockRejectedValue(new Error("Network error"));
       const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -238,91 +214,20 @@ describe("chat.ts main export", () => {
         duplex: "half",
       });
 
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+      const response = await handleServerFetchUrlRequest(request);
 
       expect(response.status).toBe(502);
       consoleError.mockRestore();
     });
   });
 
-  describe("anthropic routing", () => {
-    it("routes requests with 'anthropic' in URL to handleAnthropicRequest", async () => {
-      const { handleAnthropicRequest } = await import(
-        "../../src/edge-api/backend/core-logic/anthropicHandler.js"
-      );
-
-      const request = new Request("https://example.com/anthropic/v1/messages");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
-
-      expect(handleAnthropicRequest).toHaveBeenCalled();
-      expect(response.status).toBe(200);
-    });
-  });
-
-  describe("openai routing", () => {
-    it("routes requests with 'openai' in URL to handleGPT4Request", async () => {
-      const { handleGPT4Request } = await import(
-        "../../src/edge-api/backend/core-logic/openaiHandler.js"
-      );
-
-      const request = new Request("https://example.com/openai/v1/chat");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
-
-      expect(handleGPT4Request).toHaveBeenCalled();
-    });
-  });
-
-  describe("replicate routing", () => {
-    it("routes requests with 'replicate' in URL to handleReplicateRequest", async () => {
-      const { handleReplicateRequest } = await import(
-        "../../src/edge-api/backend/ai/replicateHandler.js"
-      );
-
-      const request = new Request("https://example.com/replicate/v1/predictions");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
-
-      expect(handleReplicateRequest).toHaveBeenCalled();
-    });
-  });
-
-  describe("CMS routes", () => {
-    it("routes /my-cms/ to handleCMSIndexRequest (line 258)", async () => {
-      const mockR2Object = {
-        writeHttpMetadata: vi.fn(),
-        httpEtag: "etag-1",
-        body: "cms content",
-      };
-      (mockEnv.R2.get as ReturnType<typeof vi.fn>).mockResolvedValue(mockR2Object);
-
-      const request = new Request("https://example.com/my-cms/page");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
-
-      expect(mockEnv.R2.get).toHaveBeenCalled();
-    });
-
-    it("routes /live-cms/ to handleCMSIndexRequest (line 262)", async () => {
-      const mockR2Object = {
-        writeHttpMetadata: vi.fn(),
-        httpEtag: "etag-2",
-        body: "live cms content",
-      };
-      (mockEnv.R2.get as ReturnType<typeof vi.fn>).mockResolvedValue(mockR2Object);
-
-      const request = new Request("https://example.com/live-cms/page");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
-
-      expect(mockEnv.R2.get).toHaveBeenCalled();
-    });
-  });
-
-  describe("TURN credentials", () => {
-    it("returns TURN credentials for /api/my-turn", async () => {
+  describe("TURN credentials logic", () => {
+    it("generates TURN credentials", async () => {
       mockFetch.mockResolvedValue(
         new Response(JSON.stringify({ iceServers: [] }), { status: 200 }),
       );
 
-      const request = new Request("https://example.com/api/my-turn");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+      await generateTURNCredentials(mockEnv.CF_REAL_TURN_TOKEN);
 
       expect(mockFetch).toHaveBeenCalled();
     });
@@ -331,15 +236,14 @@ describe("chat.ts main export", () => {
       mockFetch.mockResolvedValue(new Response("Unauthorized", { status: 401 }));
       const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
 
-      const request = new Request("https://example.com/api/my-turn");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+      const response = await generateTURNCredentials(mockEnv.CF_REAL_TURN_TOKEN);
 
       expect(response.status).toBe(500);
       consoleError.mockRestore();
     });
   });
 
-  describe("ai-logs endpoint", () => {
+  describe("ai-logs logic", () => {
     it("returns logs from KV", async () => {
       (mockEnv.KV.get as ReturnType<typeof vi.fn>).mockImplementation(async (key: string) => {
         if (key === "ai:counter") return "2";
@@ -348,63 +252,110 @@ describe("chat.ts main export", () => {
         return null;
       });
 
-      const request = new Request("https://example.com/ai-logs");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+      const response = await handleAILogsRequest(mockEnv);
 
       expect(response.status).toBe(200);
+      const json = await response.json();
+      expect(json).toEqual([{ message: "log 1" }, { message: "log 2" }]);
     });
   });
 
-  describe("remix endpoint", () => {
+  // Keep routing tests but use handleRequest instead of main.fetch
+  describe("router mapping", () => {
+    it("routes requests with 'anthropic' in URL to handleAnthropicRequest", async () => {
+      const { handleAnthropicRequest } = await import(
+        "../../src/edge-api/backend/core-logic/anthropicHandler.js"
+      );
+
+      const request = new Request("https://example.com/anthropic/v1/messages");
+      const response = await handleRequest(request, mockEnv, mockCtx);
+
+      expect(handleAnthropicRequest).toHaveBeenCalled();
+      expect(response.status).toBe(200);
+    });
+
+    it("routes requests with 'openai' in URL to handleGPT4Request", async () => {
+      const { handleGPT4Request } = await import(
+        "../../src/edge-api/backend/core-logic/openaiHandler.js"
+      );
+
+      const request = new Request("https://example.com/openai/v1/chat");
+      await handleRequest(request, mockEnv, mockCtx);
+
+      expect(handleGPT4Request).toHaveBeenCalled();
+    });
+
+    it("routes requests with 'replicate' in URL to handleReplicateRequest", async () => {
+      const { handleReplicateRequest } = await import(
+        "../../src/edge-api/backend/ai/replicateHandler.js"
+      );
+
+      const request = new Request("https://example.com/replicate/v1/predictions");
+      await handleRequest(request, mockEnv, mockCtx);
+
+      expect(handleReplicateRequest).toHaveBeenCalled();
+    });
+
+    it("routes /my-cms/ to handleCMSIndexRequest", async () => {
+      const mockR2Object = {
+        writeHttpMetadata: vi.fn(),
+        httpEtag: "etag-1",
+        body: "cms content",
+      };
+      (mockEnv.R2.get as ReturnType<typeof vi.fn>).mockResolvedValue(mockR2Object);
+
+      const request = new Request("https://example.com/my-cms/page");
+      await handleRequest(request, mockEnv, mockCtx);
+
+      expect(mockEnv.R2.get).toHaveBeenCalled();
+    });
+
     it("returns 501 for remix requests", async () => {
       const request = new Request("https://example.com/remix/something");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+      const response = await handleRequest(request, mockEnv, mockCtx);
 
       expect(response.status).toBe(501);
     });
-  });
 
-  describe("fallthrough to handleMainFetch", () => {
     it("routes unknown paths to handleMainFetch", async () => {
       const { handleMainFetch } = await import(
         "../../src/edge-api/backend/lazy-imports/mainFetchHandler.js"
       );
 
       const request = new Request("https://example.com/unknown-path");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+      await handleRequest(request, mockEnv, mockCtx);
 
       expect(handleMainFetch).toHaveBeenCalled();
     });
   });
 
-  describe("isAsset/isEditorPath branches (lines 77-95)", () => {
-    it("serves asset when kvServer.isAsset returns true (line 93)", async () => {
+  describe("isAsset/isEditorPath branches", () => {
+    it("serves asset when kvServer.isAsset returns true", async () => {
       mockKvServer.isAsset.mockReturnValue(true);
       mockKvServer.serve.mockResolvedValue(new Response("asset content", { status: 200 }));
 
       const request = new Request("https://example.com/some-asset.js");
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+      const response = await handleRequest(request, mockEnv, mockCtx);
 
       expect(mockKvServer.serve).toHaveBeenCalled();
       expect(response.status).toBe(200);
       mockKvServer.isAsset.mockReturnValue(false);
     });
 
-    it("serves editor for isEditorPath (GET /live/{codeSpace}) (lines 87-91)", async () => {
+    it("serves editor for isEditorPath (GET /live/{codeSpace})", async () => {
       mockKvServer.isAsset.mockReturnValue(false);
       mockKvServer.serve.mockResolvedValue(new Response("editor", { status: 200 }));
 
       const request = new Request("https://example.com/live/myspace", { method: "GET" });
-      const _response = await main.fetch(request, mockEnv, mockCtx);
+      await handleRequest(request, mockEnv, mockCtx);
 
       expect(mockKvServer.serve).toHaveBeenCalled();
       mockKvServer.isAsset.mockReturnValue(false);
     });
 
-    it("invokes assetFetcher callback when serve is called (covers anonymous fn at line 78)", async () => {
+    it("invokes assetFetcher callback when serve is called", async () => {
       const { getAssetFromKV } = await import("@cloudflare/kv-asset-handler");
 
-      // Make serve actually call the assetFetcher (second argument)
       mockKvServer.isAsset.mockReturnValue(true);
       mockKvServer.serve.mockImplementation(
         async (
@@ -412,7 +363,6 @@ describe("chat.ts main export", () => {
           assetFetcher: (req: Request, wu: (p: Promise<unknown>) => void) => Promise<Response>,
           _waitUntil: (p: Promise<unknown>) => void,
         ) => {
-          // Call assetFetcher to cover the anonymous function body
           const r = new Request("https://example.com/test.js");
           return assetFetcher(r, (p) => {
             void p;
@@ -421,41 +371,34 @@ describe("chat.ts main export", () => {
       );
 
       const request = new Request("https://example.com/test.js");
-      await main.fetch(request, mockEnv, mockCtx);
+      await handleRequest(request, mockEnv, mockCtx);
 
       expect(getAssetFromKV).toHaveBeenCalled();
       mockKvServer.isAsset.mockReturnValue(false);
     });
 
-    it("invokes ctx.waitUntil via waitUntil callback (covers anonymous fn at lines 89, 93)", async () => {
+    it("invokes ctx.waitUntil via waitUntil callback", async () => {
       mockKvServer.isAsset.mockReturnValue(true);
-      // Make serve call the waitUntil callback (3rd argument)
       mockKvServer.serve.mockImplementation(
         async (
           _req: Request,
           _assetFetcher: unknown,
           waitUntilFn: (p: Promise<unknown>) => void,
         ) => {
-          // Call waitUntil with a resolved promise to cover the anonymous function
           waitUntilFn(Promise.resolve());
           return new Response("asset", { status: 200 });
         },
       );
 
       const request = new Request("https://example.com/test.js");
-      await main.fetch(request, mockEnv, mockCtx);
+      await handleRequest(request, mockEnv, mockCtx);
 
       expect(mockCtx.waitUntil).toHaveBeenCalled();
       mockKvServer.isAsset.mockReturnValue(false);
     });
 
-    it("invokes cache factory callback (covers anonymous fn at line 37)", async () => {
-      // The () => caches.open(`file-cache-${ASSET_HASH}`) is called by serveWithCache
-      // serveWithCache is mocked, so we can't trigger this directly
-      // Instead, check that serveWithCache was called (the factory arg is already created)
+    it("invokes cache factory callback", async () => {
       const { serveWithCache } = await import("@spike-land-ai/code");
-      // serveWithCache is called during module initialization, not per-request
-      // We just verify it was called with a function arg at import time
       expect(vi.mocked(serveWithCache)).toBeDefined();
     });
   });

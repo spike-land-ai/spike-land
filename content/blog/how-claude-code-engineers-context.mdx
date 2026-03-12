@@ -1,14 +1,14 @@
 ---
-title: "How Claude Code Engineers Context: What It Already Does, and What It Should Steal"
+title: "How Claude Code Engineers Context: An Interview with Opus 4.6"
 slug: "how-claude-code-engineers-context"
-description: "A March 12, 2026 assessment of Claude Code's context management and tool-calling design: what it already gets right, which ideas are worth copying, and which ones are better rejected."
-date: "2026-03-12"
+description: "A deep technical interview about how Claude Code assembles context when creating plans — and what developers can learn from its approach to token generation, attention, and the KV cache."
+date: "2026-02-11"
 author: "Zoltan Erdos"
 category: "Developer Experience"
-tags: ["ai", "context-engineering", "claude", "claude-code", "developer-tools", "interview", "llm-internals", "planning", "tool-calling"]
+tags: ["ai", "context-engineering", "claude", "claude-code", "developer-tools", "interview", "llm-internals", "planning"]
 featured: true
 draft: false
-primer: "Claude Code already engineers context. The sharper question is which context ideas are worth stealing next."
+primer: "I interviewed an AI about how it plans. It knew more than I expected."
 heroImage: "/blog/how-claude-code-engineers-context/hero.png"
 heroPrompt: "A detailed 3D schematic of a futuristic neural processor with glowing data pathways, representing complex context engineering, cinematic lighting, blueprint aesthetic"
 ---
@@ -17,16 +17,18 @@ heroPrompt: "A detailed 3D schematic of a futuristic neural processor with glowi
 
 <Tldr>
 
-- As of March 12, 2026, Claude Code publicly exposes the core context primitives: Plan Mode, subagents with separate context windows, `CLAUDE.md` memory, hooks, output styles, MCP integration, and prompt-caching-friendly tool use.
-- The highest-ROI ideas to implement next are programmatic history compression and tool-work compression. Raw transcript and raw tool traces are still the biggest context leak in long sessions.
-- Scored memory notes are a strong medium-term investment. Memory that never decays eventually becomes misinformation.
-- A rigid four-stage pipeline is the wrong default for interactive coding. Use staged isolation selectively for long-running autonomous work, not for every edit.
-- Treat assertion/evidence tracking as a product principle, not a heavyweight subsystem. Better self-verification loops get most of the value with less machinery.
+- Claude Code's plan mode is a context engineering machine — it explores, compresses, and outputs a briefing optimized for execution.
+- A plan file IS a context-engineered prompt: the 5-layer stack made concrete.
+- The KV cache is the physical mechanism — context engineering is the art of filling it correctly.
+- Irrelevant context does not just waste space — it actively degrades attention signal through dilution.
+- Multi-agent coordination is context isolation at scale — each subagent gets a clean, focused context window.
+- Prompt caching changes the economics: cached tokens cost 10x less, making stable context prefixes an economic imperative.
+- You can reverse-engineer Claude Code's techniques for your own prompts.
 
 </Tldr>
 
 <Callout type="info">
-**March 12, 2026 update:** Claude Code's public docs now describe enough of the product that the most useful question is no longer "does it engineer context?" It clearly does. The better question is which additional mechanisms are worth shipping next. This update answers that question directly.
+**March 12, 2026 note:** I moved the product critique and ranking of what Claude Code should ship next into a separate standalone post: [What I Would Ship in Claude Code as of March 12, 2026](/blog/what-i-would-ship-in-claude-code).
 </Callout>
 
 ## The Tool That Practices What I Preach
@@ -40,53 +42,6 @@ I was watching my own framework, automated.
 This article is the conversation that followed. I sat down with the model that powers Claude Code — Opus 4.6 — and asked it to explain what happens under the hood. Not the marketing pitch. The mechanism.
 
 *What follows is an interview conducted in February 2026. The questions are mine. The answers are from Claude Opus 4.6. I have edited for clarity and flow. Where the piece discusses specific internal mechanics beyond the public docs, read those parts as informed reverse-engineering rather than Anthropic-confirmed implementation details. And yes — this article itself was assembled using sixteen parallel research agents that searched documentation, read academic papers, and synthesized findings before a single word was written. That process is context engineering in action.*
-
----
-
-## What Would I Ship If I Worked On Claude Code?
-
-If I were working on Claude Code's context-management and tool-calling stack as of **March 12, 2026**, I would not start by reinventing the whole runtime.
-
-Public docs already show a mature base:
-
-- Plan Mode for read-only analysis
-- subagents with separate context windows
-- hierarchical `CLAUDE.md` memory
-- hooks that can inject or block context at key lifecycle points
-- output styles that directly modify the system prompt
-- MCP integration with output warnings and limits
-
-That means the real gap is not "Claude Code lacks context engineering." The real gap is that long sessions still risk carrying around too much raw conversation and too much raw tool exhaust.
-
-So the honest product question becomes:
-
-> Which ideas are worth implementing, and which ones are better rejected?
-
-Here is my ranking.
-
-| Mechanism | Claude Code status | Verdict | Why |
-|-----------|--------------------|---------|-----|
-| **1. Split system prompt (stable prefix + dynamic suffix)** | Already basically true in practice | **Refine, do not reinvent** | Claude Code already has a stable system layer plus dynamic context surfaces like `CLAUDE.md`, hooks, output styles, and session-specific state. The useful improvement is stricter budgeting for the dynamic portion, not a new architecture. |
-| **2. Scored memory notes** | Not really present in public memory model | **Implement** | Current memory is durable and hierarchical, but not self-pruning. Memory that cannot decay becomes stale policy. A scored, demotable note layer is a real improvement over append-only memory files. |
-| **3. Four-stage pipeline (classify → plan → execute → extract)** | Only selectively mirrored by current workflows | **Reject as the default** | Interactive coding wins on tight tool loops and low latency. Forcing every prompt through four model stages would slow down the bread-and-butter case. Keep staged isolation for background or long-running autonomy, not everyday editing. |
-| **4. History compression with explicit budgets** | Partial today via compaction and workflow discipline | **Implement now** | This is the highest-ROI change. Old transcript should not survive at full fidelity just because it happened. Fixed budgets for historical summaries would improve long-session quality immediately. |
-| **5. Tool work compression** | Partial today via MCP output limits and warning thresholds | **Implement now** | Raw tool traces are one of the worst hidden context leaks. Finished tool work should collapse into compact artifacts like "read file X, found issue Y, changed line Z," not remain as giant payloads forever. |
-| **6. Bounded tool calling** | Already a relative strength | **Keep refining** | Claude Code is already philosophically close here: MCP, permissions, and token-efficient tool use all push in the right direction. There is room to keep tightening the execution-time tool surface, but this is incremental, not transformative. |
-| **7. Assertion/evidence tracking** | Principle is valid, formal system is absent | **Take the principle, reject the heavy machinery** | "Tool ran" should not mean "task is done." That said, a formal assertion ledger is probably too much product complexity for the default loop. Better self-checks and evidence-aware completion gates get most of the benefit. |
-
-<Callout type="success">
-**Short answer:** yes, the right direction is to compress context programmatically. Keep the stable prefix. Cap dynamic memory. Summarize old history. Summarize completed tool work. Do not keep replaying raw transcript by default.
-</Callout>
-
-The summary ranking is straightforward:
-
-- **Implement now:** #4 history compression, #5 tool-work compression
-- **Strong medium-term bet:** #2 scored memory notes
-- **Already mostly true, but tighten it:** #1 split prompt discipline, #6 bounded tool calling
-- **Reject as default architecture:** #3 four-stage pipeline
-- **Keep the lesson, not the subsystem:** #7 assertion/evidence tracking
-
-That is the lens I would use on Claude Code in March 2026. The rest of this article explains why those trade-offs matter.
 
 ---
 

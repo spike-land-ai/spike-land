@@ -68,7 +68,7 @@ consistent across all enhancement operations.
 - **Regeneration Rate**: 1 token per 15 minutes
 - **Maximum Balance**: 100 tokens
 - **Initial Balance**: New users start with tokens (see
-  [TOKEN_SYSTEM.md](../TOKEN_SYSTEM.md))
+  [TOKEN_SYSTEM.md](../develop/TOKEN_SYSTEM.md))
 
 ### Token Operations
 
@@ -1542,4 +1542,4 @@ For API issues or questions:
 - GitHub Issues: https://github.com/spike-land-ai/spike.land/issues
 - Documentation: https://spike.land/docs
 - API Reference: [API_REFERENCE.md](./API_REFERENCE.md)
-- Token System: [TOKEN_SYSTEM.md](../TOKEN_SYSTEM.md)
+- Token System: [TOKEN_SYSTEM.md](../develop/TOKEN_SYSTEM.md)

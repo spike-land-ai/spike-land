@@ -45,8 +45,9 @@
   "scripts": {
     "prebuild": "rimraf -rf dist/",
     "build": "rollup -c",
-    "test": "mocha",
-    "pretest": "yarn build"
+    "test": "vitest run",
+    "pretest": "yarn build",
+    "lint": "eslint --quiet ."
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.6",

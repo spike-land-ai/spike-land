@@ -16,6 +16,17 @@
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Env } from "../../../src/edge-api/main/core-logic/env.js";
+import {
+  getMcpToolsHandler,
+  getApiStoreToolsHandler,
+  mainOauthAuthorizationServerHandler,
+  oauthProtectedResourceMcpHandler,
+  mcpProxy,
+  mainOauthDeviceApproveHandler,
+  mcpGetHandler,
+  apiAuthAllHandler,
+  apiCatchAllHandler,
+} from "../../../src/edge-api/main/api/index.js";
 
 function makeCtx() {
   return {
@@ -84,6 +95,50 @@ function createMockEnv(overrides: Partial<Env> = {}): Env {
   };
 }
 
+function mockContext(req: Request, env: Env, extra: any = {}) {
+  const url = new URL(req.url);
+  // Pre-parse JSON if possible to simulate c.req.json()
+  let jsonPromise;
+  if (req.body && !req.bodyUsed) {
+    jsonPromise = req
+      .clone()
+      .json()
+      .catch(() => ({}));
+  } else {
+    jsonPromise = Promise.resolve({});
+  }
+
+  return {
+    req: {
+      raw: req,
+      url: req.url,
+      method: req.method,
+      header: (k: string) => req.headers.get(k),
+      param: (k: string) => extra.params?.[k],
+      json: () => jsonPromise,
+      path: url.pathname,
+    },
+    env,
+    executionCtx: makeCtx(),
+    get: (k: string) => {
+      if (k === "requestId") return req.headers.get("x-request-id") || "test-req-id";
+      if (k === "userId") return extra.userId;
+      return extra.get?.[k];
+    },
+    set: vi.fn(),
+    header: vi.fn(),
+    json: (obj: any, status: number = 200) => {
+      return new Response(JSON.stringify(obj), {
+        status,
+        headers: { "content-type": "application/json" },
+      });
+    },
+    text: (data: string, status: number = 200) => new Response(data, { status }),
+    body: (data: any, status: number = 200, headers: any = {}) =>
+      new Response(data, { status, headers }),
+  } as any;
+}
+
 let appFetch: (req: Request, env: Env, ctx: ExecutionContext) => Promise<Response>;
 
 beforeEach(async () => {
@@ -103,22 +158,18 @@ describe("GET /mcp/tools (inline route)", () => {
       } as unknown as Fetcher,
     });
 
-    const res = await appFetch(
-      new Request("https://spike.land/mcp/tools"),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/mcp/tools");
+    const res = await getMcpToolsHandler(mockContext(req, env));
     expect(res.status).toBe(200);
     expect(env.MCP_SERVICE.fetch).toHaveBeenCalled();
   });
 
   it("forwards request ID to MCP_SERVICE", async () => {
     const env = createMockEnv();
-    const res = await appFetch(
-      new Request("https://spike.land/mcp/tools", { headers: { "x-request-id": "req-abc" } }),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/mcp/tools", {
+      headers: { "x-request-id": "req-abc" },
+    });
+    const res = await getMcpToolsHandler(mockContext(req, env));
     expect(res.status).toBe(200);
     const calls = (env.MCP_SERVICE.fetch as ReturnType<typeof vi.fn>).mock.calls;
     expect(calls.length).toBeGreaterThan(0);
@@ -140,11 +191,8 @@ describe("GET /api/store/tools (inline route)", () => {
       } as unknown as Fetcher,
     });
 
-    const res = await appFetch(
-      new Request("https://spike.land/api/store/tools"),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/api/store/tools");
+    const res = await getApiStoreToolsHandler(mockContext(req, env));
     expect(res.status).toBe(200);
     const body = await res.json<{ categories: unknown[]; featured: unknown[]; total: number }>();
     expect(body.total).toBe(3);
@@ -162,11 +210,8 @@ describe("GET /api/store/tools (inline route)", () => {
       } as unknown as Fetcher,
     });
 
-    const res = await appFetch(
-      new Request("https://spike.land/api/store/tools"),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/api/store/tools");
+    const res = await getApiStoreToolsHandler(mockContext(req, env));
     expect(res.status).toBe(502);
     const body = await res.json<{ error: string }>();
     expect(body.error).toContain("Failed to fetch tools");
@@ -182,11 +227,8 @@ describe("GET /api/store/tools (inline route)", () => {
         ),
       } as unknown as Fetcher,
     });
-    const res = await appFetch(
-      new Request("https://spike.land/api/store/tools"),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/api/store/tools");
+    const res = await getApiStoreToolsHandler(mockContext(req, env));
     const body = await res.json<{ categories: Array<{ name: string }> }>();
     expect(body.categories.some((c) => c.name === "other")).toBe(true);
   });
@@ -197,11 +239,8 @@ describe("GET /api/store/tools (inline route)", () => {
 describe("GET /.well-known/* (OAuth metadata)", () => {
   it("returns oauth-authorization-server metadata", async () => {
     const env = createMockEnv();
-    const res = await appFetch(
-      new Request("https://spike.land/.well-known/oauth-authorization-server"),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/.well-known/oauth-authorization-server");
+    const res = await mainOauthAuthorizationServerHandler(mockContext(req, env));
     expect(res.status).toBe(200);
     const body = await res.json<{ issuer: string; device_authorization_endpoint: string }>();
     expect(body.issuer).toBe("https://spike.land");
@@ -211,11 +250,8 @@ describe("GET /.well-known/* (OAuth metadata)", () => {
 
   it("returns oauth-protected-resource/mcp metadata", async () => {
     const env = createMockEnv();
-    const res = await appFetch(
-      new Request("https://spike.land/.well-known/oauth-protected-resource/mcp"),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/.well-known/oauth-protected-resource/mcp");
+    const res = await oauthProtectedResourceMcpHandler(mockContext(req, env));
     expect(res.status).toBe(200);
     const body = await res.json<{ resource: string }>();
     expect(body.resource).toBe("https://spike.land/mcp");
@@ -241,15 +277,12 @@ describe("POST /oauth/device (proxied to MCP_SERVICE)", () => {
       } as unknown as Fetcher,
     });
 
-    const res = await appFetch(
-      new Request("https://spike.land/oauth/device", {
-        method: "POST",
-        body: JSON.stringify({ client_id: "test-client" }),
-        headers: { "content-type": "application/json" },
-      }),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/oauth/device", {
+      method: "POST",
+      body: JSON.stringify({ client_id: "test-client" }),
+      headers: { "content-type": "application/json" },
+    });
+    const res = await mcpProxy(mockContext(req, env));
     expect(res.status).toBe(200);
     expect(env.MCP_SERVICE.fetch).toHaveBeenCalled();
   });
@@ -268,18 +301,15 @@ describe("POST /oauth/token (proxied to MCP_SERVICE)", () => {
       } as unknown as Fetcher,
     });
 
-    const res = await appFetch(
-      new Request("https://spike.land/oauth/token", {
-        method: "POST",
-        body: JSON.stringify({
-          grant_type: "urn:ietf:params:oauth:grant-type:device_code",
-          device_code: "dc-1",
-        }),
-        headers: { "content-type": "application/json" },
+    const req = new Request("https://spike.land/oauth/token", {
+      method: "POST",
+      body: JSON.stringify({
+        grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+        device_code: "dc-1",
       }),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+      headers: { "content-type": "application/json" },
+    });
+    const res = await mcpProxy(mockContext(req, env));
     expect(res.status).toBe(200);
     expect(env.MCP_SERVICE.fetch).toHaveBeenCalled();
   });
@@ -296,15 +326,12 @@ describe("POST /oauth/device/approve", () => {
       } as unknown as Fetcher,
     });
 
-    const res = await appFetch(
-      new Request("https://spike.land/oauth/device/approve", {
-        method: "POST",
-        body: JSON.stringify({ user_code: "ABCD-1234" }),
-        headers: { "content-type": "application/json" },
-      }),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/oauth/device/approve", {
+      method: "POST",
+      body: JSON.stringify({ user_code: "ABCD-1234" }),
+      headers: { "content-type": "application/json" },
+    });
+    const res = await mainOauthDeviceApproveHandler(mockContext(req, env, { userId: "uid-1" }));
     // Auth middleware rejects (no session)
     expect(res.status).toBe(401);
   });
@@ -326,18 +353,15 @@ describe("POST /oauth/device/approve", () => {
       } as unknown as Fetcher,
     });
 
-    const res = await appFetch(
-      new Request("https://spike.land/oauth/device/approve", {
-        method: "POST",
-        body: JSON.stringify({ user_code: "ABCD-1234" }),
-        headers: {
-          "content-type": "application/json",
-          authorization: "Bearer sess-token",
-        },
-      }),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/oauth/device/approve", {
+      method: "POST",
+      body: JSON.stringify({ user_code: "ABCD-1234" }),
+      headers: {
+        "content-type": "application/json",
+        authorization: "Bearer sess-token",
+      },
+    });
+    const res = await mainOauthDeviceApproveHandler(mockContext(req, env, { userId: "uid-1" }));
     expect(res.status).toBe(200);
     // Verify MCP_SERVICE was called with the internal secret
     const [[mcpRequest]] = mcpFetch.mock.calls;
@@ -360,14 +384,12 @@ describe("ALL /mcp (MCP proxy)", () => {
     });
 
     // GET /mcp only proxies when client requests SSE (text/event-stream)
-    const res = await appFetch(
-      new Request("https://spike.land/mcp", {
-        method: "GET",
-        headers: { accept: "text/event-stream" },
-      }),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/mcp", {
+      method: "GET",
+      headers: { accept: "text/event-stream" },
+    });
+    const next = vi.fn();
+    const res = await mcpGetHandler(mockContext(req, env), next);
     expect(res.status).toBe(200);
     expect(env.MCP_SERVICE.fetch).toHaveBeenCalled();
     // URL rewritten to mcp.spike.land
@@ -382,15 +404,12 @@ describe("ALL /mcp (MCP proxy)", () => {
       } as unknown as Fetcher,
     });
 
-    const res = await appFetch(
-      new Request("https://spike.land/mcp", {
-        method: "POST",
-        body: JSON.stringify({ jsonrpc: "2.0", method: "tools/list" }),
-        headers: { "content-type": "application/json", "mcp-session-id": "sess-1" },
-      }),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/mcp", {
+      method: "POST",
+      body: JSON.stringify({ jsonrpc: "2.0", method: "tools/list" }),
+      headers: { "content-type": "application/json", "mcp-session-id": "sess-1" },
+    });
+    const res = await mcpProxy(mockContext(req, env));
     expect(res.status).toBe(200);
   });
 
@@ -401,11 +420,8 @@ describe("ALL /mcp (MCP proxy)", () => {
       } as unknown as Fetcher,
     });
 
-    const res = await appFetch(
-      new Request("https://spike.land/mcp", { method: "DELETE" }),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/mcp", { method: "DELETE" });
+    const res = await mcpProxy(mockContext(req, env));
     expect(res.status).toBe(200);
     expect(env.MCP_SERVICE.fetch).toHaveBeenCalled();
   });
@@ -423,11 +439,8 @@ describe("ALL /api/auth/* (auth proxy)", () => {
       } as unknown as Fetcher,
     });
 
-    const res = await appFetch(
-      new Request("https://spike.land/api/auth/session"),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/api/auth/session");
+    const res = await apiAuthAllHandler(mockContext(req, env));
     expect(res.status).toBe(200);
     expect(env.AUTH_MCP.fetch).toHaveBeenCalled();
     // Verify forwarded headers
@@ -447,15 +460,12 @@ describe("ALL /api/auth/* (auth proxy)", () => {
       } as unknown as Fetcher,
     });
 
-    const res = await appFetch(
-      new Request("https://spike.land/api/auth/sign-in/email", {
-        method: "POST",
-        body: JSON.stringify({ email: "test@example.com", password: "pass" }),
-        headers: { "content-type": "application/json" },
-      }),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/api/auth/sign-in/email", {
+      method: "POST",
+      body: JSON.stringify({ email: "test@example.com", password: "pass" }),
+      headers: { "content-type": "application/json" },
+    });
+    const res = await mcpProxy(mockContext(req, env));
     expect(res.status).toBe(200);
   });
 });
@@ -465,11 +475,8 @@ describe("ALL /api/auth/* (auth proxy)", () => {
 describe("ALL /api/* catch-all", () => {
   it("returns 404 JSON for unknown /api/* routes", async () => {
     const env = createMockEnv();
-    const res = await appFetch(
-      new Request("https://spike.land/api/totally-unknown"),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/api/totally-unknown");
+    const res = await apiCatchAllHandler(mockContext(req, env));
     expect(res.status).toBe(404);
     const body = await res.json<{ error: string; path: string }>();
     expect(body.error).toBe("Not Found");
@@ -478,11 +485,8 @@ describe("ALL /api/* catch-all", () => {
 
   it("returns 404 JSON for POST to unknown /api/* route", async () => {
     const env = createMockEnv();
-    const res = await appFetch(
-      new Request("https://spike.land/api/nonexistent-endpoint", { method: "POST" }),
-      env,
-      makeCtx() as unknown as ExecutionContext,
-    );
+    const req = new Request("https://spike.land/api/nonexistent-endpoint", { method: "POST" });
+    const res = await apiCatchAllHandler(mockContext(req, env));
     expect(res.status).toBe(404);
   });
 });

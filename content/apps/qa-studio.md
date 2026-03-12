@@ -72,4 +72,4 @@ To use QA Studio locally with Playwright, start the local MCP server:
 npx @spike-land-ai/qa-studio --http --visible
 ```
 
-Then visit the [QA Studio Dashboard](/apps/qa-studio) to connect and start automating.
+Then visit the [QA Studio Dashboard](/packages/qa-studio) to connect and start automating.

@@ -514,8 +514,8 @@ yarn test src/workflows/batch-enhance.direct.test.ts
 
 ## Related Documentation
 
-- [Token System](./TOKEN_SYSTEM.md) - Complete token economy documentation
-- [Database Schema](./DATABASE_SCHEMA.md) - Schema for albums, images, and jobs
+- [Token System](../develop/TOKEN_SYSTEM.md) - Complete token economy documentation
+- [Database Schema](../develop/JSON_SCHEMAS.md) - Schema for albums, images, and jobs
 - [API Reference](./API_REFERENCE.md) - All API endpoints
 - [Rate Limiting](../src/lib/rate-limiter.ts) - Rate limiting implementation
 

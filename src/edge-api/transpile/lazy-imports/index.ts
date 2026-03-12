@@ -34,7 +34,7 @@ const getCorsHeaders = (requestOrigin?: string | null) => {
 const initAndTransform = (code: string, origin: string) =>
   transpile({ code, originToUse: origin, wasmModule });
 
-const handleGetRequest = async (codeSpace: string, origin: string) => {
+export const handleGetRequest = async (codeSpace: string, origin: string) => {
   try {
     const results = await build({
       codeSpace,
@@ -80,7 +80,7 @@ async function hashCode(code: string): Promise<string> {
     .slice(0, 32);
 }
 
-const handlePostRequest = async (request: Request, ctx?: ExecutionContext) => {
+export const handlePostRequest = async (request: Request, ctx?: ExecutionContext) => {
   try {
     const code = await request.text();
     const origin = request.headers.get("TR_ORIGIN") ?? "";

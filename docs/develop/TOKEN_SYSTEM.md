@@ -1081,7 +1081,7 @@ STRIPE_PRICE_TIER_PREMIUM=price_...
 ### Related Documentation
 
 - [API Reference](./API_REFERENCE.md) - Complete API documentation
-- [Database Schema](./DATABASE_SCHEMA.md) - Full schema reference
+- [Database Schema](../develop/JSON_SCHEMAS.md) - Full schema reference
 - [Business Structure](./BUSINESS_STRUCTURE.md) - Company information
 
 ### Future Enhancements

@@ -37,7 +37,7 @@ AI Gateway is now two things at once:
 - an OpenAI-compatible HTTP endpoint that lets existing clients talk to spike.land without learning a new request format
 
 If you want the HTTP surface specifically, open the dedicated playground at
-[/packages/ai-gateway/ui](/packages/ai-gateway/ui). That route explains the endpoint, shows the live request shapes, and lets you try the local worker directly.
+[#](#). That route explains the endpoint, shows the live request shapes, and lets you try the local worker directly.
 
 ## OpenAI-Compatible Surface
 
@@ -55,7 +55,7 @@ The `spike-agent-v1` model selector is virtual. The route first assembles local 
 ```bash
 bash scripts/dev-local.sh
 # then open:
-http://local.spike.land:5173/packages/ai-gateway/ui
+http://local.spike.land:5173#
 ```
 
 ### Direct local curl
