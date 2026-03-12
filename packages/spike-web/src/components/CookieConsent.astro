@@ -1,0 +1,59 @@
+---
+---
+<div id="cookie-banner" class="fixed bottom-0 left-0 right-0 z-50 p-4 bg-zinc-900 border-t border-zinc-700 flex flex-col sm:flex-row items-center gap-4 justify-between" style="display:none">
+  <p class="text-sm text-zinc-300">
+    We use cookies to improve your experience and track usage analytics.
+    <a href="/privacy" class="underline text-blue-400">Learn more</a>
+  </p>
+  <div class="flex gap-3 shrink-0">
+    <button id="cookie-decline" class="px-4 py-2 text-sm rounded bg-zinc-700 hover:bg-zinc-600 text-white transition-colors">Decline</button>
+    <button id="cookie-accept" class="px-4 py-2 text-sm rounded bg-blue-600 hover:bg-blue-500 text-white transition-colors">Accept</button>
+  </div>
+</div>
+
+<script is:inline>
+  (function() {
+    const banner = document.getElementById('cookie-banner');
+    const consent = localStorage.getItem('cookie_consent');
+
+    if (!consent) {
+      banner.style.display = 'flex';
+    }
+
+    document.getElementById('cookie-accept').addEventListener('click', function() {
+      localStorage.setItem('cookie_consent', 'accepted');
+      banner.style.display = 'none';
+      if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+          analytics_storage: 'granted',
+          ad_storage: 'granted',
+          ad_user_data: 'granted',
+          ad_personalization: 'granted'
+        });
+      }
+    });
+
+    document.getElementById('cookie-decline').addEventListener('click', function() {
+      localStorage.setItem('cookie_consent', 'declined');
+      banner.style.display = 'none';
+      if (typeof gtag !== 'undefined') {
+        gtag('consent', 'update', {
+          analytics_storage: 'denied',
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied'
+        });
+      }
+    });
+
+    // Track page views
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'page_view', {
+          page_title: document.title,
+          page_location: window.location.href
+        });
+      }
+    });
+  })();
+</script>

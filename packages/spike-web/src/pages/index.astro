@@ -1,0 +1,362 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Crescendo from '../components/typography/Crescendo.astro';
+import Whisper from '../components/typography/Whisper.astro';
+import Analytics from '../components/Analytics.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+import { appCatalog } from '../data/apps';
+
+const features = appCatalog;
+
+const metrics = [
+  { value: '80+', label: 'MCP Tools' },
+  { value: '16', label: 'AI Personas' },
+  { value: '<1s', label: 'Boot Time' },
+  { value: '∞', label: 'Scale' },
+];
+---
+
+<Layout
+  title="spike.land - The Operating System for AI Development"
+  description="The complete operating system for modern AI development. Scaffold, test, and deploy multi-agent systems, data pipelines, and intelligent dashboards in seconds."
+>
+  <Analytics slot="head" />
+
+  <div class="page-shell">
+    <Nav activePath="/" />
+
+    <main>
+      <!-- ── Hero ─────────────────────────────────────────────────────── -->
+      <section class="hero-section">
+        <div class="rubik-container hero-inner">
+          <div class="hero-eyebrow">
+            <span class="rubik-chip">
+              <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
+              Now in open beta
+            </span>
+          </div>
+
+          <h1 class="hero-title">
+            <Crescendo text="Build AI apps at the speed of thought." />
+          </h1>
+
+          <p class="rubik-lede hero-lede">
+            The complete operating system for modern AI development. Scaffold, test, and deploy
+            multi-agent systems, data pipelines, and intelligent dashboards in seconds.
+          </p>
+
+          <div class="hero-ctas">
+            <a href="/login" class="cta-primary">
+              Start Building Free
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="/apps" class="cta-secondary">
+              Explore Apps
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Metrics strip ───────────────────────────────────────────── -->
+      <section class="metrics-strip">
+        <div class="rubik-container metrics-inner">
+          {metrics.map(m => (
+            <div class="metric-item">
+              <span class="metric-value">{m.value}</span>
+              <span class="metric-label">{m.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- ── Apps grid ───────────────────────────────────────────────── -->
+      <section class="apps-section" id="apps">
+        <div class="rubik-container">
+          <div class="section-header">
+            <p class="rubik-eyebrow">Platform Apps</p>
+            <h2 class="section-title">Everything you need to ship AI</h2>
+          </div>
+
+          <div class="apps-grid">
+            {features.map(app => (
+              <a href={`/apps/${app.id}`} class="app-card rubik-panel" style={`--app-accent: ${app.accent}; --app-accent-bg: ${app.accentBg};`}>
+                <div class="app-icon-wrap">
+                  <svg class="app-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={app.iconPath}></path>
+                  </svg>
+                </div>
+                <h3 class="app-name">{app.name}</h3>
+                <p class="app-desc">{app.description}</p>
+                <span class="app-link">
+                  Open app
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- ── CTA band ────────────────────────────────────────────────── -->
+      <section class="cta-band">
+        <div class="rubik-container cta-band-inner">
+          <div class="cta-band-content">
+            <h2 class="cta-band-title">Ready to build?</h2>
+            <p class="rubik-lede cta-band-lede">
+              Join thousands of developers shipping AI-powered apps on spike.land.
+            </p>
+          </div>
+          <a href="/login" class="cta-primary">
+            Get Started Free
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+    <CookieConsent />
+  </div>
+</Layout>
+
+<style>
+  .page-shell {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  /* ── Hero ──────────────────────────────────────────────────────────── */
+  .hero-section {
+    padding-block: clamp(5rem, 12vw, 9rem);
+    background: radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in srgb, var(--primary-color) 12%, transparent), transparent);
+  }
+
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.75rem;
+  }
+
+  .hero-eyebrow {
+    display: flex;
+    justify-content: center;
+  }
+
+  .hero-title {
+    max-width: 18ch;
+  }
+
+  .hero-lede {
+    margin-inline: auto;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 0.875rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 0.5rem;
+  }
+
+  /* ── CTAs ──────────────────────────────────────────────────────────── */
+  .cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--primary-color);
+    color: var(--primary-fg);
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    transition: opacity var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease);
+    box-shadow: var(--shadow-md);
+  }
+
+  .cta-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+  .cta-primary:active { transform: translateY(0); }
+
+  .cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: var(--card-bg);
+    color: var(--fg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    transition: background var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .cta-secondary:hover {
+    background: var(--muted-bg);
+    border-color: color-mix(in srgb, var(--muted-fg) 40%, transparent);
+  }
+
+  /* ── Metrics strip ─────────────────────────────────────────────────── */
+  .metrics-strip {
+    border-block: 1px solid var(--border-color);
+    background: var(--card-bg);
+    padding-block: 1.75rem;
+  }
+
+  .metrics-inner {
+    display: flex;
+    justify-content: center;
+    gap: clamp(2rem, 6vw, 5rem);
+    flex-wrap: wrap;
+  }
+
+  .metric-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .metric-value {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 900;
+    font-family: var(--font-display);
+    letter-spacing: -0.04em;
+    color: var(--fg);
+    font-variation-settings: "wght" 900;
+  }
+
+  .metric-label {
+    font-size: 0.8125rem;
+    color: var(--muted-fg);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Apps section ──────────────────────────────────────────────────── */
+  .apps-section {
+    padding-block: clamp(4rem, 8vw, 6rem);
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-title {
+    max-width: 24ch;
+  }
+
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: 1.25rem;
+  }
+
+  .app-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow var(--duration-normal) var(--ease),
+                border-color var(--duration-normal) var(--ease),
+                transform var(--duration-fast) var(--ease);
+  }
+
+  .app-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: color-mix(in srgb, var(--app-accent) 40%, transparent);
+  }
+
+  .app-icon-wrap {
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-md);
+    background: var(--app-accent-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--app-accent);
+    flex-shrink: 0;
+  }
+
+  .app-icon {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
+  .app-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+    margin: 0;
+  }
+
+  .app-desc {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--muted-fg);
+    flex: 1;
+    margin: 0;
+  }
+
+  .app-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--app-accent);
+    margin-top: 0.25rem;
+    transition: gap var(--duration-fast) var(--ease);
+  }
+
+  .app-card:hover .app-link {
+    gap: 0.625rem;
+  }
+
+  /* ── CTA band ──────────────────────────────────────────────────────── */
+  .cta-band {
+    padding-block: clamp(3rem, 6vw, 5rem);
+    background: color-mix(in srgb, var(--primary-color) 6%, var(--bg));
+    border-block: 1px solid color-mix(in srgb, var(--primary-color) 15%, transparent);
+  }
+
+  .cta-band-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .cta-band-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .cta-band-title {
+    font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  }
+
+  .cta-band-lede {
+    margin: 0;
+  }
+</style>

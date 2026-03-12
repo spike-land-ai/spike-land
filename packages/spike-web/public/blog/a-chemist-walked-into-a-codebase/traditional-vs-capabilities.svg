@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap');
+      
+      .text { font-family: 'Inter', sans-serif; }
+      .title { font-size: 16px; font-weight: 600; fill: #e5e7eb; }
+      .label { font-size: 12px; font-weight: 400; fill: #9ca3af; }
+      .box { fill: #1f2937; stroke: #374151; stroke-width: 2; rx: 8; }
+      .box-active { fill: #2563eb; stroke: #60a5fa; stroke-width: 2; rx: 8; }
+      .box-green { fill: #059669; stroke: #34d399; stroke-width: 2; rx: 8; }
+      .box-yellow { fill: #d97706; stroke: #fbbf24; stroke-width: 2; rx: 8; }
+      .line { stroke: #4b5563; stroke-width: 2; fill: none; stroke-dasharray: 4; }
+      .line-solid { stroke: #60a5fa; stroke-width: 2; fill: none; }
+      
+      /* Animations */
+      @keyframes fade-in {
+        0% { opacity: 0; transform: translateY(10px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes pulse-stroke {
+        0%, 100% { stroke-opacity: 0.5; }
+        50% { stroke-opacity: 1; }
+      }
+      .animate-1 { animation: fade-in 0.5s ease-out forwards; opacity: 0; }
+      .animate-2 { animation: fade-in 0.5s ease-out 0.5s forwards; opacity: 0; }
+      .animate-3 { animation: fade-in 0.5s ease-out 1.0s forwards; opacity: 0; }
+      .animate-4 { animation: fade-in 0.5s ease-out 1.5s forwards; opacity: 0; }
+      
+      .pulse { animation: pulse-stroke 2s infinite; }
+    </style>
+  </defs>
+
+  <!-- Background for Dark Mode -->
+  <rect width="100%" height="100%" fill="#111827" />
+
+  <!-- Title Section -->
+  <text x="400" y="40" text-anchor="middle" class="text title" style="font-size: 20px;">The Mental Models of Building Software</text>
+
+  <!-- Section 1: Traditional Scaffolding -->
+  <g transform="translate(50, 80)">
+    <text x="150" y="0" text-anchor="middle" class="text title">Traditional Developer (Outside-In)</text>
+    
+    <!-- Step 1: UI / Scaffolding -->
+    <g class="animate-1">
+      <rect x="50" y="30" width="200" height="150" class="box" />
+      <text x="150" y="60" text-anchor="middle" class="text title">UI &amp; Components</text>
+      <text x="150" y="80" text-anchor="middle" class="text label">React, Tailwind, Routing</text>
+    </g>
+
+    <!-- Step 2: APIs & State -->
+    <g class="animate-2">
+      <rect x="70" y="95" width="160" height="70" class="box pulse" />
+      <text x="150" y="125" text-anchor="middle" class="text title" style="font-size: 14px;">State &amp; APIs</text>
+    </g>
+
+    <!-- Step 3: Business Logic (The Core) -->
+    <g class="animate-3">
+      <rect x="90" y="140" width="120" height="30" class="box-yellow" />
+      <text x="150" y="160" text-anchor="middle" class="text title" style="font-size: 12px;">Business Logic</text>
+    </g>
+    
+    <text x="150" y="210" text-anchor="middle" class="text label">Builds the shell first, fills it with meaning later.</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="400" y1="80" x2="400" y2="350" class="line" />
+
+  <!-- Section 2: MCP / Capabilities First -->
+  <g transform="translate(450, 80)">
+    <text x="150" y="0" text-anchor="middle" class="text title">The Domain Expert (Inside-Out)</text>
+    
+    <!-- Step 1: Business Logic (The Core) -->
+    <g class="animate-1">
+      <rect x="90" y="140" width="120" height="30" class="box-green pulse" />
+      <text x="150" y="160" text-anchor="middle" class="text title" style="font-size: 12px;">MCP Tools (Logic)</text>
+    </g>
+
+    <!-- Step 2: Testing & Spec -->
+    <g class="animate-2">
+      <rect x="70" y="95" width="160" height="70" fill="none" stroke="#059669" stroke-width="2" rx="8" stroke-dasharray="4" />
+      <text x="150" y="115" text-anchor="middle" class="text label" fill="#059669">Verified by LLM</text>
+    </g>
+
+    <!-- Step 3: Disposable UI Wrap -->
+    <g class="animate-3">
+      <path d="M 40,25 C 100,25 200,25 260,25 C 270,25 280,35 280,45 C 280,105 280,155 280,185 C 280,195 270,205 260,205 C 200,205 100,205 40,205 C 30,205 20,195 20,185 C 20,155 20,105 20,45 C 20,35 30,25 40,25 Z" fill="none" stroke="#60a5fa" stroke-width="2" />
+      <text x="150" y="50" text-anchor="middle" class="text title" fill="#60a5fa">Disposable UI Shell</text>
+    </g>
+    
+    <text x="150" y="230" text-anchor="middle" class="text label">Builds the capabilities first, wraps a UI around them.</text>
+  </g>
+
+</svg>

@@ -1,0 +1,25 @@
+---
+const GA_ID = 'G-9WNEM9ZHE7';
+const gtagSrc = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+---
+<!-- Google Analytics 4 with Consent Mode v2 -->
+<script is:inline define:vars={{ GA_ID }}>
+  // Initialize consent defaults BEFORE gtag loads
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+
+  const consent = localStorage.getItem('cookie_consent');
+  const granted = consent === 'accepted' ? 'granted' : 'denied';
+
+  gtag('consent', 'default', {
+    analytics_storage: granted,
+    ad_storage: granted,
+    ad_user_data: granted,
+    ad_personalization: granted,
+    wait_for_update: 500
+  });
+
+  gtag('js', new Date());
+  gtag('config', GA_ID);
+</script>
+<script async src={gtagSrc}></script>

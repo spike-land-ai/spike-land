@@ -1,0 +1,42 @@
+---
+// This page handles OAuth callbacks.
+// better-auth performs the token exchange automatically when the auth client
+// is initialised on this page. We just wait for a valid session and redirect.
+---
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Signing in... - spike.land</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+</head>
+<body class="bg-background text-foreground font-sans min-h-screen flex items-center justify-center">
+    <p class="text-muted-foreground text-sm">Signing you in...</p>
+
+    <script>
+        import { authClient } from '../lib/auth';
+
+        const MAX_RETRIES = 10;
+        let retryCount = 0;
+
+        async function handleCallback() {
+            const session = await authClient.getSession();
+            if (session?.data?.user) {
+                const params = new URLSearchParams(window.location.search);
+                const redirect = params.get('redirect') || '/dashboard';
+                window.location.href = redirect;
+            } else if (retryCount < MAX_RETRIES) {
+                retryCount++;
+                setTimeout(handleCallback, 500);
+            } else {
+                window.location.href = '/login?error=callback_timeout';
+            }
+        }
+
+        handleCallback();
+    </script>
+</body>
+</html>

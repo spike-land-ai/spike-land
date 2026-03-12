@@ -1,0 +1,59 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Privacy Policy - spike.land"
+  description="spike.land privacy policy. How we collect, use, and protect your data."
+>
+  <div class="bg-background text-foreground font-sans min-h-screen flex flex-col">
+    <nav class="flex items-center justify-between p-6 border-b border-border">
+      <a href="/" class="font-display font-bold text-xl tracking-tight hover:text-primary transition-colors">spike.land</a>
+      <div class="flex gap-6 text-sm text-muted-foreground">
+        <a href="/pricing" class="hover:text-foreground transition-colors">Pricing</a>
+        <a href="/blog" class="hover:text-foreground transition-colors">Blog</a>
+      </div>
+      <a href="/login" class="bg-foreground text-background px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-opacity">
+        Get Started
+      </a>
+    </nav>
+
+    <main class="flex-1 max-w-3xl mx-auto w-full px-6 py-24 space-y-12">
+      <header class="space-y-4">
+        <h1 class="text-4xl font-display font-black tracking-tight">Privacy Policy</h1>
+        <p class="text-muted-foreground">Last updated: March 2026</p>
+      </header>
+
+      <section class="space-y-6 text-foreground/90 leading-relaxed">
+        <div class="space-y-3">
+          <h2 class="text-xl font-display font-bold">What we collect</h2>
+          <p>When you use spike.land we collect basic account information (name, email, OAuth profile) and anonymous usage analytics (page views, feature usage). We do not sell your data to third parties.</p>
+        </div>
+
+        <div class="space-y-3">
+          <h2 class="text-xl font-display font-bold">Cookies</h2>
+          <p>We use essential cookies for authentication and optional analytics cookies to understand how the platform is used. You can decline analytics cookies via the banner shown on your first visit.</p>
+        </div>
+
+        <div class="space-y-3">
+          <h2 class="text-xl font-display font-bold">Data storage</h2>
+          <p>Your data is stored on Cloudflare infrastructure (Workers, D1, R2) within their global network. We retain account data for as long as your account is active.</p>
+        </div>
+
+        <div class="space-y-3">
+          <h2 class="text-xl font-display font-bold">Your rights</h2>
+          <p>You can request a copy of your data or ask us to delete your account at any time by emailing <a href="mailto:hello@spike.land" class="text-primary hover:underline">hello@spike.land</a>.</p>
+        </div>
+
+        <div class="space-y-3">
+          <h2 class="text-xl font-display font-bold">Contact</h2>
+          <p>For privacy-related questions, reach us at <a href="mailto:hello@spike.land" class="text-primary hover:underline">hello@spike.land</a>.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="border-t border-border py-8 text-center text-sm text-muted-foreground">
+      <span>&copy; 2026 spike.land. All rights reserved.</span>
+    </footer>
+  </div>
+</Layout>

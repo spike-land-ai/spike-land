@@ -1,0 +1,46 @@
+---
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+---
+<span class="scroll-weight-container inline-block">
+  <span class="scroll-weight-text transition-all duration-300" style="font-variation-settings: 'wght' 300;">
+    {text}
+  </span>
+</span>
+
+<script>
+  function updateScrollWeight() {
+    const elements = document.querySelectorAll('.scroll-weight-text');
+    const viewportHeight = window.innerHeight;
+
+    elements.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      const elementCenter = rect.top + rect.height / 2;
+      
+      // Calculate how close the element is to the center of the viewport (0 = edge, 1 = center)
+      let progress = 1 - Math.abs(viewportHeight / 2 - elementCenter) / (viewportHeight / 2);
+      progress = Math.max(0, Math.min(1, progress));
+      
+      // Map progress to font weight (300 to 800)
+      const targetWeight = 300 + (progress * 500);
+      (el as HTMLElement).style.fontVariationSettings = `"wght" ${targetWeight}`;
+    });
+  }
+
+  // Use requestAnimationFrame to throttle scroll events
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        updateScrollWeight();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  // Initial calculation
+  updateScrollWeight();
+</script>

@@ -1,0 +1,31 @@
+---
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+const words = text.split(' ');
+---
+<span class="crescendo-container inline-flex flex-wrap gap-[0.25em]">
+  {words.map((word, i) => (
+    <span class="crescendo-word transition-all duration-1000 ease-out" style={`font-variation-settings: "wght" 300; transition-delay: ${i * 150}ms;`}>
+      {word}
+    </span>
+  ))}
+</span>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const words = entry.target.querySelectorAll('.crescendo-word') as NodeListOf<HTMLElement>;
+        words.forEach((word, index) => {
+          // Increase weight progressively or uniformly to 800
+          word.style.fontVariationSettings = '"wght" 800';
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  
+  document.querySelectorAll('.crescendo-container').forEach(el => observer.observe(el));
+</script>

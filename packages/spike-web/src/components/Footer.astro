@@ -1,0 +1,107 @@
+---
+import Whisper from './typography/Whisper.astro';
+
+const year = new Date().getFullYear();
+
+const links = [
+  { href: '/blog', label: 'Blog' },
+  { href: '/pricing', label: 'Pricing' },
+  { href: '/privacy', label: 'Privacy' },
+  { href: 'mailto:hello@spike.land', label: 'Contact' },
+];
+---
+
+<footer class="site-footer">
+  <div class="rubik-container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="/" class="footer-logo">spike.land</a>
+        <p class="footer-tagline">
+          <Whisper text="The open AI app store." />
+        </p>
+      </div>
+
+      <nav class="footer-links" aria-label="Footer navigation">
+        {links.map(link => (
+          <a href={link.href} class="footer-link">{link.label}</a>
+        ))}
+      </nav>
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-copy">© {year} spike.land. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: auto;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg);
+    transition: background var(--duration-normal) var(--ease);
+  }
+
+  .footer-inner {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    padding-top: 3rem;
+    padding-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-logo {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.125rem;
+    letter-spacing: -0.03em;
+    color: var(--fg);
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--fg) 0%, var(--primary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .footer-tagline {
+    font-size: 0.8125rem;
+    color: var(--muted-fg);
+    margin: 0;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .footer-link {
+    font-size: 0.875rem;
+    color: var(--muted-fg);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease);
+  }
+
+  .footer-link:hover {
+    color: var(--fg);
+  }
+
+  .footer-bottom {
+    border-top: 1px solid var(--border-color);
+    padding-block: 1.25rem;
+  }
+
+  .footer-copy {
+    font-size: 0.8125rem;
+    color: var(--muted-fg);
+  }
+</style>

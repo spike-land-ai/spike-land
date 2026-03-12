@@ -1,0 +1,51 @@
+---
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+---
+<span class="glitch-text font-display inline-block relative overflow-hidden">
+  <span class="opacity-0">{text}</span>
+  <span class="absolute top-0 left-0 w-full h-full text-foreground animate-glitch-1 clip-path-glitch-1" aria-hidden="true">{text}</span>
+  <span class="absolute top-0 left-0 w-full h-full text-foreground animate-glitch-2 clip-path-glitch-2" aria-hidden="true">{text}</span>
+  <span class="absolute top-0 left-0 w-full h-full text-foreground animate-glitch-3 clip-path-glitch-3" aria-hidden="true">{text}</span>
+</span>
+
+<style>
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 900;
+  }
+  
+  .clip-path-glitch-1 { clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%); }
+  .clip-path-glitch-2 { clip-path: polygon(0 33%, 100% 33%, 100% 66%, 0 66%); }
+  .clip-path-glitch-3 { clip-path: polygon(0 66%, 100% 66%, 100% 100%, 0 100%); }
+
+  @keyframes glitch-1 {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 1px); }
+    40% { transform: translate(-1px, -1px); }
+    60% { transform: translate(2px, 1px); }
+    80% { transform: translate(1px, -1px); }
+  }
+
+  @keyframes glitch-2 {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(2px, -1px); }
+    40% { transform: translate(1px, 2px); }
+    60% { transform: translate(-1px, -2px); }
+    80% { transform: translate(-2px, 1px); }
+  }
+
+  @keyframes glitch-3 {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-1px, 2px); }
+    40% { transform: translate(2px, -1px); }
+    60% { transform: translate(-2px, 2px); }
+    80% { transform: translate(1px, 1px); }
+  }
+
+  .animate-glitch-1 { animation: glitch-1 2s infinite linear alternate-reverse; }
+  .animate-glitch-2 { animation: glitch-2 2.5s infinite linear alternate-reverse; }
+  .animate-glitch-3 { animation: glitch-3 3s infinite linear alternate-reverse; }
+</style>
