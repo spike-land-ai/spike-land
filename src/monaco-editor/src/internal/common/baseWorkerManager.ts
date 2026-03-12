@@ -68,15 +68,14 @@ export class BaseWorkerManager<TWorker extends object, TDefaults extends Languag
     this._lastUsedTime = Date.now();
 
     if (!this._client) {
-      this._worker = createWebWorker<TWorker>({
+      const worker = createWebWorker<TWorker>({
         moduleId: this._config.moduleId,
         createWorker: this._config.createWorker,
         label: this._config.label ?? this._defaults.languageId,
         createData: this._config.buildCreateData(this._defaults),
       });
-
-      // @ts-ignore — upstream monaco type mismatch on getProxy()
-      this._client = <Promise<TWorker>>this._worker.getProxy();
+      this._worker = worker;
+      this._client = worker.getProxy();
     }
 
     return this._client;

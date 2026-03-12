@@ -43,42 +43,42 @@ const TOOL_CATEGORY_MAP: Record<string, string> = {
 const CATEGORY_META: Record<string, { label: string; colorClass: string; dotClass: string }> = {
   core: {
     label: "Core",
-    colorClass: "bg-slate-500/10 border-slate-500/20 text-slate-700 dark:text-slate-300",
+    colorClass: "bg-slate-500/10 border-slate-500/20 text-slate-400",
     dotClass: "bg-slate-500",
   },
   "mcp-tools": {
     label: "MCP Tools",
-    colorClass: "bg-blue-500/10 border-blue-500/20 text-blue-700 dark:text-blue-300",
+    colorClass: "bg-blue-500/10 border-blue-500/20 text-blue-400",
     dotClass: "bg-blue-500",
   },
   frontend: {
     label: "Frontend",
-    colorClass: "bg-violet-500/10 border-violet-500/20 text-violet-700 dark:text-violet-300",
+    colorClass: "bg-violet-500/10 border-violet-500/20 text-violet-400",
     dotClass: "bg-violet-500",
   },
   "edge-api": {
     label: "Edge API",
-    colorClass: "bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-300",
+    colorClass: "bg-amber-500/10 border-amber-500/20 text-amber-400",
     dotClass: "bg-amber-500",
   },
   utilities: {
     label: "Utilities",
-    colorClass: "bg-teal-500/10 border-teal-500/20 text-teal-700 dark:text-teal-300",
+    colorClass: "bg-teal-500/10 border-teal-500/20 text-teal-400",
     dotClass: "bg-teal-500",
   },
   cli: {
     label: "CLI",
-    colorClass: "bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300",
+    colorClass: "bg-green-500/10 border-green-500/20 text-green-400",
     dotClass: "bg-green-500",
   },
   media: {
     label: "Media",
-    colorClass: "bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-300",
+    colorClass: "bg-rose-500/10 border-rose-500/20 text-rose-400",
     dotClass: "bg-rose-500",
   },
   learn: {
     label: "Learn",
-    colorClass: "bg-indigo-500/10 border-indigo-500/20 text-indigo-700 dark:text-indigo-300",
+    colorClass: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
     dotClass: "bg-indigo-500",
   },
 };
@@ -106,7 +106,7 @@ function groupToolsByCategory(tools: Tool[]): Record<string, Tool[]> {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-3xl border border-border/50 bg-card p-6 animate-pulse">
+    <div className="rounded-[2rem] border border-border/50 bg-card p-6 animate-pulse">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="size-3 rounded-full bg-muted" />
@@ -133,7 +133,7 @@ function CategoryCard({ category, tools, defaultExpanded }: CategoryCardProps) {
   return (
     <div
       className={cn(
-        "rounded-3xl border bg-card shadow-sm transition-all duration-200",
+        "rounded-[2rem] border bg-card shadow-sm transition-all duration-200",
         meta.colorClass,
       )}
     >
@@ -168,7 +168,7 @@ function CategoryCard({ category, tools, defaultExpanded }: CategoryCardProps) {
               </div>
               <a
                 href="/tools"
-                className="shrink-0 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100 transition-opacity mt-0.5"
+                className="shrink-0 flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.24em] opacity-60 hover:opacity-100 transition-opacity mt-0.5"
                 aria-label={`Try ${tool.name}`}
               >
                 Try it

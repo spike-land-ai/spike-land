@@ -424,7 +424,7 @@ export class TypeScriptWorker implements ts.LanguageServiceHost, ITypeScriptWork
     const diagnostics = emitOutput.diagnostics
       ? TypeScriptWorker.clearFiles(emitOutput.diagnostics)
       : undefined;
-    return { ...emitOutput, diagnostics } as any;
+    return { ...emitOutput, diagnostics } as unknown as EmitOutput;
   }
 
   async getCodeFixesAtPosition(

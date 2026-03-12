@@ -39,6 +39,12 @@ export type { RightsEngine } from "./core-logic/routes/rights.js";
 export type { SearchEngine } from "./core-logic/routes/search.js";
 
 // Middleware (for external composition)
-export { authMiddleware } from "./core-logic/middleware/auth.js";
+export {
+  authMiddleware,
+  createAuthMiddleware,
+  HmacSha256Verifier,
+  AuthServiceVerifier,
+} from "./core-logic/middleware/auth.js";
+export type { AuthVerifier } from "./core-logic/middleware/auth.js";
 export { RateLimiter } from "./core-logic/middleware/rate-limit.js";
 export { localeMiddleware } from "./core-logic/middleware/locale.js";

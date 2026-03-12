@@ -14,7 +14,12 @@ type WidgetEventType =
   | "visibility_time"
   | "checkout_started"
   | "checkout_completed"
-  | "thankyou_viewed";
+  | "thankyou_viewed"
+  | "exit_dialog_shown"
+  | "exit_dialog_stay"
+  | "exit_dialog_dismiss"
+  | "humor_round_advance"
+  | "widget_survivor_unlocked";
 
 interface TrackedEvent {
   clientId: string;

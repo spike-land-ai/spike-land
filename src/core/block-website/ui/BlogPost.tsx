@@ -1,9 +1,9 @@
-// @ts-nocheck
 import { useState, useEffect, useCallback, lazy, Suspense, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
+import type { Components } from "react-markdown";
 import type { BlogPost } from "../core-logic/types";
 import { apiUrl } from "../core-logic/api";
 import {
@@ -52,6 +52,11 @@ import {
   CheckCircle2,
   AlertTriangle,
   Tag,
+  Copy,
+  Check,
+  Trophy,
+  Sparkles,
+  type LucideIcon,
 } from "lucide-react";
 import { Button, buttonVariants } from "../lazy-imports/button";
 import {
@@ -67,22 +72,25 @@ import {
 } from "@spike-land-ai/shared";
 
 const DemoFallback = () => (
-  <div className="flex flex-col items-center justify-center py-12 bg-muted/30 rounded-3xl border border-border/50">
+  <div className="flex flex-col items-center justify-center py-12 bg-muted/30 rounded-[2rem] border border-border/60">
     <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-    <p className="mt-4 text-xs font-bold uppercase tracking-widest text-muted-foreground/50">
+    <p className="mt-4 text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground/50">
       Initializing Demo...
     </p>
   </div>
 );
 
-function lazyDemo(load: () => Promise<Record<string, unknown>>, name: string) {
+function lazyDemo(
+  load: () => Promise<Record<string, unknown>>,
+  name: string,
+): React.ComponentType<Record<string, unknown>> {
   const LazyComp = lazy(() =>
     load().then((mod) => ({ default: mod[name] as React.ComponentType<Record<string, unknown>> })),
   );
   return function LazyDemoWrapper(props: Record<string, unknown>) {
     return (
       <Suspense fallback={<DemoFallback />}>
-        <div className="not-prose my-12 overflow-hidden rounded-3xl border border-border/50 bg-card shadow-2xl">
+        <div className="not-prose my-12 overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-[var(--panel-shadow)]">
           <LazyComp {...props} />
         </div>
       </Suspense>
@@ -102,12 +110,14 @@ function ScrollStoryCardCompat(props: Record<string, unknown>) {
       ? props["illustration"]
       : "restaurant";
 
+  const mappings = parseStoryMappings(props["mappings"]);
+
   return (
-    <div className="not-prose my-12 overflow-hidden rounded-3xl border border-border/50 bg-card shadow-2xl">
+    <div className="not-prose my-12 overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-[var(--panel-shadow)]">
       <ScrollStoryCard
         title={typeof props["title"] === "string" ? props["title"] : "Story Mapping"}
         illustration={illustration}
-        mappings={parseStoryMappings(props["mappings"])}
+        {...(mappings !== undefined ? { mappings } : {})}
       />
     </div>
   );
@@ -131,7 +141,7 @@ function SpikeChatEmbedCompat(props: Record<string, unknown>) {
   const height = props["height"];
 
   return (
-    <div className="not-prose my-12 overflow-hidden rounded-3xl border border-border/50 bg-card shadow-2xl">
+    <div className="not-prose my-12 overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-[var(--panel-shadow)]">
       <SpikeChatEmbed
         channelSlug={channelSlug}
         workspaceSlug={workspaceSlug}
@@ -144,7 +154,7 @@ function SpikeChatEmbedCompat(props: Record<string, unknown>) {
 
 function ResponsiveIframe(props: React.IframeHTMLAttributes<HTMLIFrameElement>) {
   return (
-    <div className="not-prose my-12 overflow-hidden rounded-[2rem] border border-border/50 bg-card shadow-2xl">
+    <div className="not-prose my-12 overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-[var(--panel-shadow)]">
       <div className="aspect-video">
         <iframe
           {...props}
@@ -158,7 +168,12 @@ function ResponsiveIframe(props: React.IframeHTMLAttributes<HTMLIFrameElement>) 
   );
 }
 
-const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>> = {
+/**
+ * Custom (non-HTML) components keyed by lowercase MDX tag name.
+ * These are passed to react-markdown via a type assertion since the Components
+ * type only covers keyof JSX.IntrinsicElements.
+ */
+const CUSTOM_COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>> = {
   convergencedemo: lazyDemo(interactiveImport, "ConvergenceDemo"),
   dependencycascadedemo: lazyDemo(interactiveImport, "DependencyCascadeDemo"),
   stackcollapsedemo: lazyDemo(interactiveImport, "StackCollapseDemo"),
@@ -208,8 +223,6 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
   personaswitcher: PersonaSwitcher as React.ComponentType<Record<string, unknown>>,
   blogpoll: BlogPoll as React.ComponentType<Record<string, unknown>>,
   pollanalyticsdashboard: PollAnalyticsDashboard as React.ComponentType<Record<string, unknown>>,
-  pre: ({ children }: { children?: React.ReactNode }) => children,
-  code: CodeBlock as React.ComponentType<Record<string, unknown>>,
   tldr: ({ children, title }: { children?: React.ReactNode; title?: string }) => (
     <div
       data-reader-block="true"
@@ -219,7 +232,7 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
       <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12">
         <Zap size={80} className="text-primary" />
       </div>
-      <h3 className="text-lg font-black uppercase tracking-widest mb-4 text-primary flex items-center gap-2">
+      <h3 className="text-lg font-black uppercase tracking-[0.24em] mb-4 text-primary flex items-center gap-2">
         <Zap className="size-4" />
         {title ?? "The Quick Version"}
       </h3>
@@ -256,32 +269,40 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
       </div>
     );
   },
-  h2: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+} as Record<string, React.ComponentType<Record<string, unknown>>>;
+
+/**
+ * HTML element override components typed against react-markdown's Components.
+ */
+const HTML_COMPONENT_MAP = {
+  pre: ({ children }) => <>{children}</>,
+  code: CodeBlock as Components["code"],
+  h2: ({ children, ...props }) => (
     <h2 data-reader-block="true" data-reader-kind="heading-2" {...props}>
       {children}
     </h2>
   ),
-  h3: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+  h3: ({ children, ...props }) => (
     <h3 data-reader-block="true" data-reader-kind="heading-3" {...props}>
       {children}
     </h3>
   ),
-  h4: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+  h4: ({ children, ...props }) => (
     <h4 data-reader-block="true" data-reader-kind="heading-4" {...props}>
       {children}
     </h4>
   ),
-  h5: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+  h5: ({ children, ...props }) => (
     <h5 data-reader-block="true" data-reader-kind="heading-5" {...props}>
       {children}
     </h5>
   ),
-  h6: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+  h6: ({ children, ...props }) => (
     <h6 data-reader-block="true" data-reader-kind="heading-6" {...props}>
       {children}
     </h6>
   ),
-  p: ({ children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
+  p: ({ children, ...props }) => (
     <p
       data-reader-block="true"
       data-reader-kind="paragraph"
@@ -291,7 +312,7 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
       {children}
     </p>
   ),
-  li: ({ children, ...props }: React.LiHTMLAttributes<HTMLLIElement>) => (
+  li: ({ children, ...props }) => (
     <li
       data-reader-block="true"
       data-reader-kind="list-item"
@@ -301,7 +322,7 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
       {children}
     </li>
   ),
-  blockquote: ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
+  blockquote: ({ children, ...props }) => (
     <blockquote
       data-reader-block="true"
       data-reader-kind="blockquote"
@@ -311,13 +332,13 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
       {children}
     </blockquote>
   ),
-  iframe: ResponsiveIframe as React.ComponentType<Record<string, unknown>>,
-  a: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+  iframe: ResponsiveIframe,
+  a: ({ children, href, ...props }) => (
     <a href={href} {...props}>
       {children}
     </a>
   ),
-  img: ({ src, alt, ...rest }: React.ImgHTMLAttributes<HTMLImageElement>) => {
+  img: ({ src, alt, ...rest }) => {
     const safeSrc = sanitizeBlogImageSrc(src);
     if (!safeSrc) return null;
 
@@ -328,18 +349,28 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
           alt={alt ?? ""}
           loading="lazy"
           decoding="async"
-          className="rounded-3xl shadow-2xl border border-border/50 mx-auto transition-transform hover:scale-[1.01] duration-500"
+          className="rounded-[2rem] shadow-[var(--panel-shadow)] border border-border/60 mx-auto transition-transform hover:scale-[1.01] duration-500"
           {...rest}
         />
         {alt && (
-          <p className="mt-4 text-center text-xs font-bold uppercase tracking-widest text-muted-foreground/40">
+          <p className="mt-4 text-center text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground/40">
             {alt}
           </p>
         )}
       </div>
     );
   },
-};
+} as Components;
+
+/**
+ * Merged component map passed to react-markdown. Custom (non-HTML) component
+ * names are asserted to Components since react-markdown passes unknown tags
+ * through to their registered handler when rehype-raw is active.
+ */
+const COMPONENT_MAP = {
+  ...CUSTOM_COMPONENT_MAP,
+  ...HTML_COMPONENT_MAP,
+} as Components;
 
 function normalizeBlogPost(post: BlogPost): BlogPost {
   const { heroImage, heroPrompt, body } = extractHeroMedia(
@@ -378,6 +409,7 @@ export function BlogPostView({
   const [error, setError] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isHeroExpanded, setIsHeroExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
   const readerScopeRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -468,7 +500,7 @@ export function BlogPostView({
   if (error || !resolvedPost) {
     return (
       <div className="max-w-xl mx-auto py-32 px-6 text-center">
-        <div className="inline-flex size-20 items-center justify-center rounded-3xl bg-destructive/5 text-destructive mb-8">
+        <div className="inline-flex size-20 items-center justify-center rounded-[2rem] bg-destructive/5 text-destructive mb-8">
           <FileWarning size={40} />
         </div>
         <h1 className="text-4xl font-black text-foreground tracking-tighter mb-4 leading-none">
@@ -533,7 +565,7 @@ export function BlogPostView({
           <>
             <motion.div
               layoutId={`hero-image-${slug}`}
-              className="mb-16 rounded-[3rem] overflow-hidden shadow-2xl ring-1 ring-border/5 cursor-zoom-in group"
+              className="mb-16 rounded-[3rem] overflow-hidden shadow-[var(--panel-shadow)] ring-1 ring-border/5 cursor-zoom-in group"
               onClick={() => setIsHeroExpanded(true)}
             >
               <ImageLoader
@@ -561,7 +593,7 @@ export function BlogPostView({
                     layoutId={`hero-image-${slug}`}
                     src={heroImageSrc}
                     alt={resolvedPost.title}
-                    className="max-w-full max-h-full rounded-2xl shadow-2xl object-contain"
+                    className="max-w-full max-h-full rounded-2xl shadow-[var(--panel-shadow)] object-contain"
                   />
                 </motion.div>
               )}
@@ -608,12 +640,12 @@ export function BlogPostView({
               </p>
             )}
 
-            <div className="flex items-center gap-3 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-3 pt-4 border-t border-border/60">
               <div className="size-10 rounded-2xl bg-primary flex items-center justify-center text-xs font-black text-primary-foreground shadow-lg shadow-primary/20">
                 {resolvedPost.author?.[0] || "S"}
               </div>
               <div>
-                <p className="text-xs font-black uppercase tracking-widest text-foreground">
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-foreground">
                   {resolvedPost.author || "Spike land Team"}
                 </p>
                 <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
@@ -621,10 +653,93 @@ export function BlogPostView({
                 </p>
               </div>
             </div>
+
+            {/* Hashtags */}
+            {resolvedPost.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-4">
+                {resolvedPost.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center px-3 py-1 rounded-full bg-primary/[0.06] border border-primary/10 text-[10px] font-black uppercase tracking-[0.24em] text-primary/70 hover:bg-primary/10 hover:text-primary transition-colors cursor-default select-none"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Social Share Bar */}
+            {(() => {
+              const shareUrl = `https://spike.land/blog/${resolvedPost.slug}`;
+              const shareTitle = resolvedPost.title;
+              const xShareIntent = `https://x.com/intent/tweet?text=${encodeURIComponent(shareTitle)}&url=${encodeURIComponent(shareUrl)}`;
+              const liShareIntent = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+              const redditIntent = `https://reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareTitle)}`;
+              const hnIntent = `https://news.ycombinator.com/submitlink?u=${encodeURIComponent(shareUrl)}&t=${encodeURIComponent(shareTitle)}`;
+              const sharePillClass =
+                "inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-border/60 bg-muted/30 text-xs font-bold text-muted-foreground hover:border-primary/30 hover:text-primary hover:bg-primary/5 transition-all";
+              return (
+                <div className="flex flex-wrap items-center gap-3 pt-6 border-t border-border/30">
+                  <span className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/40">
+                    Share
+                  </span>
+                  <a
+                    href={xShareIntent}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={sharePillClass}
+                  >
+                    <Twitter size={14} /> X
+                  </a>
+                  <a
+                    href={liShareIntent}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={sharePillClass}
+                  >
+                    <Linkedin size={14} /> LinkedIn
+                  </a>
+                  <a
+                    href={redditIntent}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={sharePillClass}
+                  >
+                    Reddit
+                  </a>
+                  <a
+                    href={hnIntent}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={sharePillClass}
+                  >
+                    HN
+                  </a>
+                  <button
+                    onClick={() => {
+                      void navigator.clipboard.writeText(shareUrl);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className={sharePillClass}
+                  >
+                    {copied ? (
+                      <>
+                        <Check size={14} /> Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={14} /> Link
+                      </>
+                    )}
+                  </button>
+                </div>
+              );
+            })()}
           </header>
 
           <div
-            className="prose dark:prose-invert max-w-3xl mx-auto
+            className="prose max-w-3xl mx-auto
           prose-headings:font-black prose-headings:text-foreground prose-headings:tracking-tighter
           prose-h1:text-4xl prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-8
           prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-6
@@ -633,19 +748,17 @@ export function BlogPostView({
           prose-strong:text-foreground prose-strong:font-black
           prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:bg-primary/[0.02] prose-blockquote:py-6 prose-blockquote:px-8 prose-blockquote:rounded-r-3xl prose-blockquote:text-foreground prose-blockquote:font-bold prose-blockquote:italic
           prose-code:text-primary prose-code:bg-primary/[0.05] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-lg prose-code:before:content-none prose-code:after:content-none prose-code:font-bold
-          [&_.shiki-container]:bg-muted/50 [&_.shiki-container]:border-2 [&_.shiki-container]:border-border/50 [&_.shiki-container]:rounded-[2rem] [&_.shiki-container]:px-4 [&_.shiki-container]:py-4 sm:[&_.shiki-container]:px-6 sm:[&_.shiki-container]:py-5 [&_.shiki-container]:overflow-x-auto [&_.shiki-container]:my-8 [&_.shiki-container]:pt-10 [&_.shiki-container_code]:bg-transparent [&_.shiki-container_code]:p-0 [&_.shiki-container_code]:text-sm [&_.shiki-container_code]:font-normal [&_.shiki-container_.shiki]:!bg-transparent
-          prose-pre:bg-muted/50 prose-pre:border-2 prose-pre:border-border/50 prose-pre:rounded-[2rem] prose-pre:px-4 prose-pre:py-4 sm:prose-pre:px-6 sm:prose-pre:py-5 prose-pre:overflow-x-auto
+          [&_.shiki-container]:bg-muted/50 [&_.shiki-container]:border-2 [&_.shiki-container]:border-border/60 [&_.shiki-container]:rounded-[2rem] [&_.shiki-container]:px-4 [&_.shiki-container]:py-4 sm:[&_.shiki-container]:px-6 sm:[&_.shiki-container]:py-5 [&_.shiki-container]:overflow-x-auto [&_.shiki-container]:my-8 [&_.shiki-container]:pt-10 [&_.shiki-container_code]:bg-transparent [&_.shiki-container_code]:p-0 [&_.shiki-container_code]:text-sm [&_.shiki-container_code]:font-normal [&_.shiki-container_.shiki]:!bg-transparent
+          prose-pre:bg-muted/50 prose-pre:border-2 prose-pre:border-border/60 prose-pre:rounded-[2rem] prose-pre:px-4 prose-pre:py-4 sm:prose-pre:px-6 sm:prose-pre:py-5 prose-pre:overflow-x-auto
           prose-li:text-muted-foreground prose-li:font-medium
           prose-ul:list-disc prose-ol:list-decimal
-          prose-img:rounded-[2.5rem] prose-img:shadow-2xl prose-img:border prose-img:border-border/50
+          prose-img:rounded-[2.5rem] prose-img:shadow-[var(--panel-shadow)] prose-img:border prose-img:border-border/60
           selection:bg-primary selection:text-primary-foreground"
           >
             <Markdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw]}
-              components={
-                COMPONENT_MAP as Record<string, React.ComponentType<Record<string, unknown>>>
-              }
+              components={COMPONENT_MAP}
             >
               {processedContent}
             </Markdown>
@@ -656,7 +769,7 @@ export function BlogPostView({
           <SupportWidget post={resolvedPost} />
         </div>
 
-        <div className="mt-32 pt-16 border-t border-border/50">
+        <div className="mt-32 pt-16 border-t border-border/60">
           <h2 className="text-3xl font-black tracking-tight text-center mb-16">Continue Reading</h2>
           <BlogListView linkComponent={linkComponent} limit={3} showHeader={false} />
         </div>
@@ -667,7 +780,26 @@ export function BlogPostView({
 
 // ─── Support Widget ─────────────────────────────────────────────────────────
 
-const SLIDER_STOPS = [
+interface SliderStop {
+  readonly amount: number;
+  readonly label: string;
+  readonly sub: string;
+  readonly icon: LucideIcon;
+}
+
+interface HumorRound {
+  readonly heading: string;
+  readonly subtext: string;
+  readonly stops: readonly SliderStop[];
+  readonly exitTitle?: string;
+  readonly exitBody?: string;
+  readonly exitDismiss?: string;
+  readonly exitStay?: string;
+  readonly animation?: "shake" | "bounce" | "pulse" | "grow" | "flip" | "confetti";
+  readonly darkMode?: boolean;
+}
+
+const BASE_STOPS: readonly SliderStop[] = [
   { amount: 0, label: "Moral support", sub: "Keep building awesome stuff!", icon: Heart },
   { amount: 1, label: "A tiny coffee", sub: "Fuel for the next MCP tool.", icon: Coffee },
   { amount: 5, label: "Workers month", sub: "Covers Cloudflare Workers for a month.", icon: Zap },
@@ -685,20 +817,364 @@ const SLIDER_STOPS = [
     sub: "Anything between £411 and £429 gets pulled back here on principle.",
     icon: Gift,
   },
-] as const;
+];
 
-function getArticleCopy(_category: string, _tags: string[]): string {
-  return "Independent development is a labor of love. No VC funding, no bloated team, just code, mass-produced coffee, and a monthly Cloudflare bill. £5 covers Cloudflare Workers for a month. If you find value in these tools, consider supporting the journey.";
+function makeStops(
+  overrides: Partial<Record<number, { label: string; sub: string }>>,
+): readonly SliderStop[] {
+  return BASE_STOPS.map((stop) => {
+    const override = overrides[stop.amount];
+    return override ? { ...stop, ...override } : stop;
+  });
 }
+
+const HUMOR_ROUNDS: readonly HumorRound[] = [
+  // Round 0 — Default
+  {
+    heading: "Support the Journey",
+    subtext:
+      "Independent development is a labor of love. No VC funding, no bloated team, just code, mass-produced coffee, and a monthly Cloudflare bill. £5 covers Cloudflare Workers for a month. If you find value in these tools, consider supporting the journey.",
+    stops: BASE_STOPS,
+  },
+  // Round 1 — Slider touched
+  {
+    heading: "Support the Journey",
+    subtext: "You touched the slider. The slider felt that. Now you owe it at least a coffee.",
+    stops: makeStops({
+      0: { label: "Free-tier freeloader", sub: "We still love you. Allegedly." },
+      1: { label: "A coffee bean", sub: "Not even a full coffee, but it is honest work." },
+    }),
+  },
+  // Round 2 — Custom toggled
+  {
+    heading: "Oh, Going Custom?",
+    subtext:
+      "Big spender energy. We respect the power move. Or is this a power move to type zero? We see you.",
+    stops: makeStops({
+      0: { label: "Custom zero?", sub: "You went custom... to give nothing. Iconic." },
+    }),
+  },
+  // Round 3 — Slider at zero
+  {
+    heading: "The Audacity",
+    subtext:
+      "You scrolled all the way down, read this whole widget, and chose... zero. Respect, honestly. That takes commitment.",
+    stops: makeStops({
+      0: {
+        label: "Professional lurker",
+        sub: "Some people support with their presence. Allegedly.",
+      },
+      1: { label: "Guilt tax", sub: "The minimum price of reading this far." },
+    }),
+    animation: "shake",
+  },
+  // Round 4 — First scroll away
+  {
+    heading: "You Came Back!",
+    subtext:
+      "The widget noticed you tried to leave. The widget has feelings. Serverless feelings, but feelings nonetheless.",
+    stops: makeStops({
+      0: { label: "Heartless", sub: "You tried to leave without saying goodbye." },
+      5: { label: "Apology coffee", sub: "Less than your Spotify. Think about that." },
+    }),
+    exitTitle: "Wait, Where Are You Going?",
+    exitBody:
+      "The widget noticed you leaving. The widget has feelings. Cold-start feelings, but real ones.",
+    exitDismiss: "I have no feelings either",
+    exitStay: "Fine, I'll look at it",
+    animation: "bounce",
+  },
+  // Round 5 — Second exit
+  {
+    heading: "Still Here? Good.",
+    subtext:
+      "Look, we get it. Free is a great price. But Cloudflare Workers cost actual money. Not a lot. But more than zero.",
+    stops: makeStops({
+      0: {
+        label: "Professional mooch",
+        sub: "You've spent more calories scrolling than £1 costs.",
+      },
+      5: { label: "Workers month", sub: "Fun fact: this costs less than your Spotify." },
+      10: { label: "Two months of peace", sub: "The widget promises to chill for two months." },
+    }),
+    exitTitle: "Seriously Though",
+    exitBody:
+      "Cloudflare Workers cost real money. Not a lot, but more than the zero pounds you've contributed. We checked.",
+    exitDismiss: "My contribution is intellectual",
+    exitStay: "Ok guilt works on me",
+  },
+  // Round 6 — Third exit
+  {
+    heading: "The Widget Persists",
+    subtext:
+      "Every time you close this widget, a serverless function somewhere loses its cold start. Think of the functions. They have families (child processes).",
+    stops: makeStops({
+      0: { label: "Monster", sub: "You looked a widget in the eye and said no. Three times." },
+      1: { label: "Function saver", sub: "Save a cold start. Be a hero." },
+      25: { label: "Serious supporter", sub: "At this point we'd name a variable after you." },
+    }),
+    exitTitle: "We've Prepared a Guilt Trip",
+    exitBody:
+      "Every time you close this widget, a serverless function loses its cold start. Think of the functions. They have child processes.",
+    exitDismiss: "Let them suffer",
+    exitStay: "Save the functions",
+    animation: "pulse",
+  },
+  // Round 7 — Fourth exit
+  {
+    heading: "A Quick Math Problem",
+    subtext:
+      "You've now spent approximately 47 seconds on this widget. At minimum wage, that's about 22p. You could have donated 22p by now. Just saying.",
+    stops: makeStops({
+      0: { label: "Time waster", sub: "Your time is worth less than £1, apparently." },
+      1: { label: "22p rounded up", sub: "The mathematical guilt minimum." },
+      100: {
+        label: "Absolute unit",
+        sub: "We will name a variable after you. A good one. Not temp.",
+      },
+    }),
+    exitTitle: "Employee of the Month",
+    exitBody:
+      "You've spent more time dismissing this widget than it would take to donate £1. Your time is worth less than £1, apparently. We did the math.",
+    exitDismiss: "Correct",
+    exitStay: "My time IS worth something",
+  },
+  // Round 8 — Fifth exit (widget grows)
+  {
+    heading: "The Widget Has Evolved",
+    subtext:
+      "It learned from your rejections. It is stronger now. Bigger. You cannot close what you do not understand.",
+    stops: makeStops({
+      0: { label: "Still zero?", sub: "The widget grew and you still said no. Bold." },
+      5: {
+        label: "Edge computing",
+        sub: "A month of edge computing. At the edge of your generosity.",
+      },
+      100: {
+        label: "Legend Tier",
+        sub: "We will name a Durable Object after you. It will outlive us all.",
+      },
+      420: { label: "Transcendence", sub: "The widget achieves final form." },
+    }),
+    exitTitle: "The Widget Has Evolved",
+    exitBody:
+      "It learned from your rejections. It is stronger now. You cannot close what you do not understand. It has grown. Literally.",
+    exitDismiss: "I understand perfectly",
+    exitStay: "What is happening",
+    animation: "grow",
+  },
+  // Round 9 — Sixth exit
+  {
+    heading: "Let's Negotiate",
+    subtext:
+      "What if we lower the minimum? What about 1 penny? We don't actually accept pennies. But the thought counts. Does it though? No. Give us a pound.",
+    stops: makeStops({
+      0: { label: "Not even a penny", sub: "We asked for a penny and you said no." },
+      1: { label: "One pound coin", sub: "8.75 grams of guilt relief." },
+      25: {
+        label: "Agent architect",
+        sub: "You're funding the next AI agent. It will remember this.",
+      },
+    }),
+    exitTitle: "Let's Negotiate",
+    exitBody:
+      "What if we lower the minimum? What about 1 penny? We don't actually accept pennies, but the thought counts. Does it? No. Give us a pound.",
+    exitDismiss: "Not even a thought",
+    exitStay: "Pennies are currency",
+  },
+  // Round 10 — Seventh exit (poem)
+  {
+    heading: "Poetry Corner",
+    subtext:
+      "The widget has been workshopping some material. It's not great. But it's trying harder than you are.",
+    stops: makeStops({
+      0: { label: "Critic", sub: "You rejected the poem AND the donation. Cold." },
+      5: { label: "Five pounds of forgiveness", sub: "Enough to forgive bad poetry." },
+      10: {
+        label: "Infrastructure peace treaty",
+        sub: "A binding agreement between you and the servers.",
+      },
+    }),
+    exitTitle: "The Widget Wrote You a Poem",
+    exitBody:
+      "Roses are red, Workers are blue, this project is free, but the infra is not, and I really thought we had something.",
+    exitDismiss: "Terrible poem",
+    exitStay: "I'm emotionally moved",
+    animation: "flip",
+  },
+  // Round 11 — Eighth exit (dark mode)
+  {
+    heading: "Dark Mode Unlocked",
+    subtext:
+      "You've been here so long the widget switched to its evening aesthetic. It's getting late. Go home. But first, consider £5. Please.",
+    stops: makeStops({
+      0: { label: "Night owl cheapskate", sub: "Even vampires tip their bartenders." },
+      5: { label: "£5 at midnight", sub: "Decisions made at night are the bravest." },
+      100: { label: "You are the main character", sub: "The widget's whole arc was about you." },
+    }),
+    exitTitle: "Unlocked: Dark Mode Widget",
+    exitBody:
+      "You've been here so long the widget switched to its evening aesthetic. It's getting late. Go home. But first, consider £5.",
+    exitDismiss: "It's always dark in my heart",
+    exitStay: "£5? Maybe.",
+    darkMode: true,
+  },
+  // Round 12 — Ninth exit (boss fight)
+  {
+    heading: "Boss Fight",
+    subtext:
+      "This is the final form. We promise. (We are lying.) You've shown incredible dedication to not paying for things. We admire that, in a way.",
+    stops: makeStops({
+      0: {
+        label: "Final boss defeated you",
+        sub: "You beat the boss by... not paying. Unconventional.",
+      },
+      25: {
+        label: '"I dismissed this 8 times" redemption',
+        sub: "The redemption arc no one asked for.",
+      },
+      420: { label: "Widget enlightenment", sub: "Beyond money. Beyond reason. Just vibes." },
+    }),
+    exitTitle: "Boss Fight: Final Widget",
+    exitBody:
+      "This is the last dialog. We promise. (We are lying.) You've shown incredible dedication to not paying for things. We admire that, in a way.",
+    exitDismiss: "You admire me?",
+    exitStay: "Flattery works",
+    animation: "confetti",
+  },
+  // Round 13 — Tenth exit
+  {
+    heading: "Fun Facts",
+    subtext:
+      "Did you know that a single £1 coin weighs 8.75 grams? That's lighter than the guilt you should be feeling. Also lighter than this widget, which keeps getting heavier with disappointment.",
+    stops: makeStops({
+      0: { label: "Absolute legend of cheapness", sub: "We're not even mad. We're impressed." },
+      1: {
+        label: "8.75 grams of generosity",
+        sub: "Lighter than a hamster. Heavier than your conscience.",
+      },
+    }),
+    exitTitle: "We Lied, There's More",
+    exitBody:
+      "Remember when we said that was the last one? Good times. A single £1 coin weighs 8.75 grams. That's lighter than the guilt you should be feeling.",
+    exitDismiss: "Guilt weighs nothing",
+    exitStay: "8.75 grams of support",
+  },
+  // Round 14 — Eleventh exit (tired widget)
+  {
+    heading: "Almost There",
+    subtext:
+      "The widget is tired. You're probably tired. We've both been through a lot. One pound. Just one. That's all. Please. We're begging.",
+    stops: makeStops({
+      0: { label: "Heartless AND tireless", sub: "You've outlasted the widget. Congratulations?" },
+      1: { label: "Minimum viable guilt relief", sub: "One pound. One. Uno. Eins. Un." },
+      5: { label: "Five pounds of mercy", sub: "Put the widget out of its misery." },
+    }),
+    exitTitle: "The Widget is Tired",
+    exitBody:
+      "Look, we've both been at this a while. The widget is tired. You're probably tired. One pound. Just one. Please.",
+    exitDismiss: "Let the widget rest",
+    exitStay: "One pound, fine, FINE",
+  },
+  // Round 15 — Final round (survivor)
+  {
+    heading: "You Won",
+    subtext:
+      "Achievement unlocked: Immovable Object. You've dismissed this widget 12 times. You are officially the most stubborn person on the internet. The widget concedes. But it will remember.",
+    stops: makeStops({
+      0: { label: "Trophy unlocked", sub: "You earned this by giving us nothing. Beautiful." },
+      1: { label: "Victory lap donation", sub: "Winners sometimes tip. Just saying." },
+      420: { label: "Plot twist ending", sub: "The ultimate power move after 15 rounds of no." },
+    }),
+    exitTitle: "Achievement Unlocked: Immovable Object",
+    exitBody:
+      "You've dismissed this widget 12 times. You are the most stubborn person on the internet. We give up. The widget concedes. But know this: it will remember.",
+    exitDismiss: "I accept my trophy",
+    exitStay: "Wait, I feel bad now",
+    animation: "confetti",
+  },
+];
 
 function getClientId(): string {
   const key = "spike_client_id";
-  let id = localStorage.getItem(key);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(key, id);
+  try {
+    let id = localStorage.getItem(key);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(key, id);
+    }
+    return id;
+  } catch {
+    return crypto.randomUUID();
   }
-  return id;
+}
+
+function readStoredRound(slug: string): number {
+  try {
+    const val = localStorage.getItem(`spike_support_round_${slug}`);
+    return val ? Math.min(parseInt(val, 10) || 0, HUMOR_ROUNDS.length - 1) : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function storeRound(slug: string, round: number): void {
+  try {
+    localStorage.setItem(`spike_support_round_${slug}`, String(round));
+  } catch {
+    /* best-effort */
+  }
+}
+
+function isWidgetSurvivor(slug: string): boolean {
+  try {
+    return localStorage.getItem(`spike_widget_survivor_${slug}`) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setWidgetSurvivor(slug: string): void {
+  try {
+    localStorage.setItem(`spike_widget_survivor_${slug}`, "1");
+  } catch {
+    /* best-effort */
+  }
+}
+
+const ANIMATION_CLASSES: Record<string, string> = {
+  shake: "animate-[shake_0.5s_ease-in-out]",
+  bounce: "animate-bounce",
+  pulse: "animate-pulse",
+  grow: "scale-110 transition-transform duration-700",
+  flip: "animate-[flip_0.6s_ease-in-out]",
+  confetti: "",
+};
+
+function ConfettiEffect() {
+  const particles = Array.from({ length: 24 }, (_, i) => i);
+  const colors = ["#f43f5e", "#8b5cf6", "#06b6d4", "#f59e0b", "#10b981", "#ec4899"];
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden z-20">
+      {particles.map((i) => {
+        const style: Record<string, string> = {
+          left: `${Math.random() * 100}%`,
+          top: "-8px",
+          backgroundColor: colors[i % colors.length] ?? "#f43f5e",
+          animationDelay: `${Math.random() * 0.5}s`,
+          "--confetti-x": `${(Math.random() - 0.5) * 200}px`,
+          "--confetti-r": `${Math.random() * 720 - 360}deg`,
+        };
+        return (
+          <div
+            key={i}
+            className="absolute w-2 h-2 rounded-full animate-[confetti_1.5s_ease-out_forwards]"
+            style={style as React.CSSProperties}
+          />
+        );
+      })}
+    </div>
+  );
 }
 
 function SupportWidget({ post }: { post: BlogPost }) {
@@ -710,6 +1186,12 @@ function SupportWidget({ post }: { post: BlogPost }) {
   const { assignments, config } = useExperiment();
   const { widgetRef, track } = useWidgetTracking(slug, assignments);
 
+  const [round, setRound] = useState(() => readStoredRound(slug));
+  const [showExitDialog, setShowExitDialog] = useState(false);
+  const [survivor, setSurvivor] = useState(() => isWidgetSurvivor(slug));
+  const [sliderTouched, setSliderTouched] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+
   const [sliderIdx, setSliderIdx] = useState(config.defaultSliderIdx);
   const [customAmount, setCustomAmount] = useState("");
   const [showCustom, setShowCustom] = useState(false);
@@ -719,7 +1201,9 @@ function SupportWidget({ post }: { post: BlogPost }) {
   const [bumpAnimating, setBumpAnimating] = useState(false);
   const [donating, setDonating] = useState(false);
 
-  const currentStop = SLIDER_STOPS[sliderIdx] || SLIDER_STOPS[0];
+  const currentRound: HumorRound = HUMOR_ROUNDS[round] ?? (HUMOR_ROUNDS[0] as HumorRound);
+  const stops = currentRound.stops;
+  const currentStop: SliderStop = stops[sliderIdx] ?? (stops[0] as SliderStop);
   const parsedCustomAmount = showCustom ? parseSupportAmount(customAmount) : null;
   const selectedAmount = showCustom ? parsedCustomAmount : currentStop.amount;
   const displayAmount = showCustom
@@ -746,9 +1230,30 @@ function SupportWidget({ post }: { post: BlogPost }) {
     : currentStop.icon;
   const canDonate = isValidSupportAmount(selectedAmount);
 
+  const advanceRound = useCallback(
+    (to?: number) => {
+      setRound((prev) => {
+        const next = to !== undefined ? to : Math.min(prev + 1, HUMOR_ROUNDS.length - 1);
+        storeRound(slug, next);
+        track("humor_round_advance", { from: prev, to: next });
+        return next;
+      });
+    },
+    [slug, track],
+  );
+
+  // Trigger confetti for confetti rounds
+  const triggerConfetti = useCallback(() => {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2000);
+  }, []);
+
   useEffect(() => {
-    if (!localStorage.getItem(`spike_bumped_${slug}`)) return;
-    setBumped(true);
+    try {
+      if (localStorage.getItem(`spike_bumped_${slug}`)) setBumped(true);
+    } catch {
+      /* best-effort */
+    }
   }, [slug]);
 
   useEffect(() => {
@@ -762,6 +1267,64 @@ function SupportWidget({ post }: { post: BlogPost }) {
       })
       .catch(() => {});
   }, [slug]);
+
+  // Exit detection: when widget leaves viewport after round >= 3
+  useEffect(() => {
+    const element = widgetRef.current;
+    if (!element || round < 3) return;
+
+    let hasBeenVisible = false;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            hasBeenVisible = true;
+          } else if (
+            hasBeenVisible &&
+            !showExitDialog &&
+            round >= 3 &&
+            round < HUMOR_ROUNDS.length - 1
+          ) {
+            const nextRound = HUMOR_ROUNDS[Math.min(round + 1, HUMOR_ROUNDS.length - 1)];
+            if (nextRound?.exitTitle) {
+              setShowExitDialog(true);
+              track("exit_dialog_shown", { round });
+            }
+          }
+        }
+      },
+      { threshold: 0.3 },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [round, showExitDialog, track, widgetRef]);
+
+  const handleStay = useCallback(() => {
+    setShowExitDialog(false);
+    track("exit_dialog_stay", { round });
+    // Scroll widget back into view
+    widgetRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [round, track, widgetRef]);
+
+  const handleDismiss = useCallback(() => {
+    setShowExitDialog(false);
+    track("exit_dialog_dismiss", { round });
+    const nextRound = Math.min(round + 1, HUMOR_ROUNDS.length - 1);
+    advanceRound(nextRound);
+
+    const nextConfig = HUMOR_ROUNDS[nextRound];
+    if (nextConfig?.animation === "confetti") {
+      triggerConfetti();
+    }
+
+    // Final round: unlock survivor badge
+    if (nextRound === HUMOR_ROUNDS.length - 1 && !survivor) {
+      setSurvivor(true);
+      setWidgetSurvivor(slug);
+      track("widget_survivor_unlocked", { totalDismissals: round + 1 });
+    }
+  }, [round, advanceRound, slug, survivor, track, triggerConfetti]);
 
   const handleBump = useCallback(async () => {
     if (bumped) return;
@@ -777,16 +1340,20 @@ function SupportWidget({ post }: { post: BlogPost }) {
       const data = (await res.json()) as { count: number };
       setBumpCount(data.count);
       setBumped(true);
-      localStorage.setItem(`spike_bumped_${slug}`, "1");
+      try {
+        localStorage.setItem(`spike_bumped_${slug}`, "1");
+      } catch {
+        /* best-effort */
+      }
     } catch {
-      /* best-effort — fistbump is non-critical */
+      /* best-effort */
     }
   }, [bumped, slug, track]);
 
   const handleDonate = useCallback(async () => {
-    if (!canDonate) return;
+    if (!canDonate || selectedAmount === null) return;
 
-    const amount = selectedAmount;
+    const amount: number = selectedAmount;
     track("donate_click", { amount });
     setDonating(true);
     try {
@@ -805,158 +1372,323 @@ function SupportWidget({ post }: { post: BlogPost }) {
     }
   }, [canDonate, selectedAmount, slug, track]);
 
+  const handleSliderChange = useCallback(
+    (idx: number) => {
+      setSliderIdx(idx);
+      track("slider_change", { idx });
+
+      if (!sliderTouched && round < 1) {
+        setSliderTouched(true);
+        advanceRound(1);
+      }
+
+      if (idx === 0 && round < 3) {
+        advanceRound(3);
+      }
+    },
+    [sliderTouched, round, advanceRound, track],
+  );
+
+  const handleCustomToggle = useCallback(() => {
+    const next = !showCustom;
+    setShowCustom(next);
+    track("custom_toggle", { showCustom: next });
+    if (next && round < 2) {
+      advanceRound(2);
+    }
+  }, [showCustom, round, advanceRound, track]);
+
+  // Round 14 auto-moves slider to £1
+  useEffect(() => {
+    if (round === 14) {
+      setSliderIdx(1);
+      setShowCustom(false);
+    }
+  }, [round]);
+
+  const animClass = currentRound.animation ? (ANIMATION_CLASSES[currentRound.animation] ?? "") : "";
+
   return (
-    <div
-      ref={widgetRef}
-      className="mt-20 p-8 sm:p-12 rounded-[3rem] bg-card border border-border/50 shadow-2xl relative overflow-hidden"
-    >
-      <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
-        <Heart size={200} fill="currentColor" />
-      </div>
+    <>
+      <div
+        ref={widgetRef}
+        className={cn(
+          "mt-20 p-8 sm:p-12 rounded-[3rem] border border-border/60 shadow-[var(--panel-shadow)] relative overflow-hidden transition-all duration-700",
+          currentRound.darkMode ? "bg-zinc-900 text-zinc-100 border-zinc-700/50" : "bg-card",
+          animClass,
+        )}
+      >
+        {showConfetti && <ConfettiEffect />}
 
-      <div className="max-w-2xl relative z-10">
-        <h3 className="text-3xl font-black tracking-tight mb-4">Support the Journey</h3>
-        <p className="text-lg text-muted-foreground/80 font-medium leading-relaxed mb-10">
-          {getArticleCopy(post.category, post.tags)}
-        </p>
+        <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
+          <Heart size={200} fill="currentColor" />
+        </div>
 
-        <div className="flex flex-col sm:flex-row gap-6 mb-12">
-          <Button
-            variant={bumped ? "outline" : "default"}
+        {/* Survivor badge */}
+        {survivor && (
+          <div className="absolute top-6 right-6 z-10 flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500">
+            <Trophy size={16} />
+            <span className="text-[10px] font-black uppercase tracking-[0.24em]">
+              Widget Survivor
+            </span>
+          </div>
+        )}
+
+        <div className="max-w-2xl relative z-10">
+          <h3
             className={cn(
-              "rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-xs transition-all duration-500",
-              !bumped && "shadow-xl shadow-primary/20 hover:scale-105 active:scale-95",
+              "text-3xl font-black tracking-tight mb-4",
+              currentRound.darkMode && "text-zinc-100",
             )}
-            onClick={() => {
-              void handleBump();
-            }}
-            disabled={bumped}
           >
-            <Heart
-              className={cn("mr-2 size-4", bumpAnimating && "animate-ping")}
-              fill={bumped ? "currentColor" : "none"}
-            />
-            {bumped ? "Sent Love" : "Fist Bump"}
-          </Button>
-          <div className="flex flex-col justify-center">
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-              Engagement
-            </p>
-            <p className="text-sm font-bold text-foreground">
-              {bumpCount} fist bumps &middot; {supporters} supporters
-            </p>
-          </div>
-        </div>
+            {currentRound.heading}
+          </h3>
+          <p
+            className={cn(
+              "text-lg font-medium leading-relaxed mb-10",
+              currentRound.darkMode ? "text-zinc-400" : "text-muted-foreground/80",
+            )}
+          >
+            {currentRound.subtext}
+          </p>
 
-        <div className="space-y-8 bg-muted/30 rounded-[2rem] p-8 border border-border/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                <DisplayIcon className="size-6" />
-              </div>
-              <div>
-                <p className="text-2xl font-black leading-none">
-                  {SUPPORT_CURRENCY_SYMBOL}
-                  {displayAmount}
-                </p>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">
-                  {displayLabel}
-                </p>
-              </div>
-            </div>
-            <button
+          <div className="flex flex-col sm:flex-row gap-6 mb-12">
+            <Button
+              variant={bumped ? "outline" : "default"}
+              className={cn(
+                "rounded-2xl h-14 px-8 font-black uppercase tracking-[0.24em] text-xs transition-all duration-500",
+                !bumped && "shadow-xl shadow-primary/20 hover:scale-105 active:scale-95",
+              )}
               onClick={() => {
-                const next = !showCustom;
-                setShowCustom(next);
-                track("custom_toggle", { showCustom: next });
+                void handleBump();
               }}
-              className="text-[10px] font-black uppercase tracking-widest text-primary hover:opacity-80 transition-opacity"
+              disabled={bumped}
             >
-              {showCustom ? "Presets" : "Custom"}
-            </button>
+              <Heart
+                className={cn("mr-2 size-4", bumpAnimating && "animate-ping")}
+                fill={bumped ? "currentColor" : "none"}
+              />
+              {bumped ? "Sent Love" : "Fist Bump"}
+            </Button>
+            <div className="flex flex-col justify-center">
+              <p
+                className={cn(
+                  "text-[10px] font-black uppercase tracking-[0.24em]",
+                  currentRound.darkMode ? "text-zinc-600" : "text-muted-foreground/40",
+                )}
+              >
+                Engagement
+              </p>
+              <p
+                className={cn(
+                  "text-sm font-bold",
+                  currentRound.darkMode ? "text-zinc-300" : "text-foreground",
+                )}
+              >
+                {bumpCount} fist bumps &middot; {supporters} supporters
+              </p>
+            </div>
           </div>
 
-          {!showCustom && (
-            <input
-              type="range"
-              min={0}
-              max={SLIDER_STOPS.length - 1}
-              step={1}
-              value={sliderIdx}
-              onPointerDown={() => track("slider_start", { idx: sliderIdx })}
-              onChange={(e) => {
-                const idx = parseInt(e.target.value);
-                setSliderIdx(idx);
-                track("slider_change", { idx });
-              }}
-              onPointerUp={() =>
-                track("slider_final", { idx: sliderIdx, amount: SLIDER_STOPS[sliderIdx]?.amount })
-              }
-              className="w-full h-2 bg-border rounded-full appearance-none cursor-pointer accent-primary"
-            />
-          )}
+          <div
+            className={cn(
+              "space-y-8 rounded-[2rem] p-8 border",
+              currentRound.darkMode
+                ? "bg-zinc-800/50 border-zinc-700/50"
+                : "bg-muted/30 border-border/60",
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                  <DisplayIcon className="size-6" />
+                </div>
+                <div>
+                  <p className="text-2xl font-black leading-none">
+                    {SUPPORT_CURRENCY_SYMBOL}
+                    {displayAmount}
+                  </p>
+                  <p
+                    className={cn(
+                      "text-xs font-bold uppercase tracking-[0.24em] mt-1",
+                      currentRound.darkMode ? "text-zinc-500" : "text-muted-foreground",
+                    )}
+                  >
+                    {displayLabel}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleCustomToggle}
+                className="text-[10px] font-black uppercase tracking-[0.24em] text-primary hover:opacity-80 transition-opacity"
+              >
+                {showCustom ? "Presets" : "Custom"}
+              </button>
+            </div>
 
-          {showCustom && (
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 font-black">
-                {SUPPORT_CURRENCY_SYMBOL}
-              </span>
+            {!showCustom && (
               <input
-                type="number"
-                value={customAmount}
-                min={SUPPORT_AMOUNT_MIN}
-                max={SUPPORT_AMOUNT_MAX}
-                step="0.01"
-                onChange={(e) => setCustomAmount(normalizeSupportAmountInput(e.target.value))}
-                onBlur={() =>
-                  setCustomAmount((currentAmount) => normalizeSupportAmountInput(currentAmount))
+                type="range"
+                min={0}
+                max={stops.length - 1}
+                step={1}
+                value={sliderIdx}
+                onPointerDown={() => track("slider_start", { idx: sliderIdx })}
+                onChange={(e) => handleSliderChange(parseInt(e.target.value))}
+                onPointerUp={() =>
+                  track("slider_final", { idx: sliderIdx, amount: stops[sliderIdx]?.amount })
                 }
-                placeholder="5.00"
-                className="w-full h-14 bg-background border-2 border-border/50 rounded-2xl px-8 font-black text-xl focus:border-primary focus:outline-none transition-all"
+                className="w-full h-2 bg-border rounded-full appearance-none cursor-pointer accent-primary"
               />
+            )}
+
+            {showCustom && (
+              <div className="relative">
+                <span
+                  className={cn(
+                    "absolute left-4 top-1/2 -translate-y-1/2 font-black",
+                    currentRound.darkMode ? "text-zinc-600" : "text-muted-foreground/50",
+                  )}
+                >
+                  {SUPPORT_CURRENCY_SYMBOL}
+                </span>
+                <input
+                  type="number"
+                  value={customAmount}
+                  min={SUPPORT_AMOUNT_MIN}
+                  max={SUPPORT_AMOUNT_MAX}
+                  step="0.01"
+                  onChange={(e) => setCustomAmount(normalizeSupportAmountInput(e.target.value))}
+                  onBlur={() =>
+                    setCustomAmount((currentAmount) => normalizeSupportAmountInput(currentAmount))
+                  }
+                  placeholder="5.00"
+                  className={cn(
+                    "w-full h-14 border-2 rounded-2xl px-8 font-black text-xl focus:border-primary focus:outline-none transition-all",
+                    currentRound.darkMode
+                      ? "bg-zinc-900 border-zinc-700 text-zinc-100"
+                      : "bg-background border-border/60",
+                  )}
+                />
+              </div>
+            )}
+
+            <p
+              className={cn(
+                "text-xs font-medium italic leading-relaxed",
+                currentRound.darkMode ? "text-zinc-500" : "text-muted-foreground",
+              )}
+            >
+              &ldquo;{displaySub}&rdquo;
+            </p>
+
+            <Button
+              className="w-full rounded-2xl h-14 font-black uppercase tracking-[0.24em] text-xs shadow-xl shadow-primary/20"
+              onClick={() => {
+                void handleDonate();
+              }}
+              loading={donating}
+              disabled={!canDonate}
+            >
+              {donating ? "Redirecting..." : "Support Development"}
+            </Button>
+          </div>
+
+          {/* Round indicator */}
+          {round > 0 && (
+            <div className="mt-6 flex items-center gap-2">
+              <Sparkles size={12} className="text-primary/40" />
+              <p
+                className={cn(
+                  "text-[10px] font-bold uppercase tracking-[0.24em]",
+                  currentRound.darkMode ? "text-zinc-600" : "text-muted-foreground/30",
+                )}
+              >
+                Widget persistence level {round + 1}/16
+              </p>
             </div>
           )}
 
-          <p className="text-xs font-medium text-muted-foreground italic leading-relaxed">
-            "{displaySub}"
-          </p>
-
-          <Button
-            className="w-full rounded-2xl h-14 font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20"
-            onClick={() => {
-              void handleDonate();
-            }}
-            loading={donating}
-            disabled={!canDonate}
-          >
-            {donating ? "Redirecting..." : "Support Development"}
-          </Button>
-        </div>
-
-        <div className="mt-12 flex flex-wrap items-center gap-6">
-          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
-            Spread the Word
-          </p>
-          <a
-            href={xIntent}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => track("share_click", { platform: "x" })}
-            className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
-          >
-            <Twitter size={14} /> X / Twitter
-          </a>
-          <a
-            href={linkedInIntent}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => track("share_click", { platform: "linkedin" })}
-            className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
-          >
-            <Linkedin size={14} /> LinkedIn
-          </a>
+          <div className="mt-12 flex flex-wrap items-center gap-6">
+            <p
+              className={cn(
+                "text-[10px] font-black uppercase tracking-[0.24em]",
+                currentRound.darkMode ? "text-zinc-600" : "text-muted-foreground/40",
+              )}
+            >
+              Spread the Word
+            </p>
+            <a
+              href={xIntent}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track("share_click", { platform: "x" })}
+              className={cn(
+                "text-xs font-bold transition-colors flex items-center gap-1.5",
+                currentRound.darkMode
+                  ? "text-zinc-500 hover:text-primary"
+                  : "text-muted-foreground hover:text-primary",
+              )}
+            >
+              <Twitter size={14} /> X / Twitter
+            </a>
+            <a
+              href={linkedInIntent}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track("share_click", { platform: "linkedin" })}
+              className={cn(
+                "text-xs font-bold transition-colors flex items-center gap-1.5",
+                currentRound.darkMode
+                  ? "text-zinc-500 hover:text-primary"
+                  : "text-muted-foreground hover:text-primary",
+              )}
+            >
+              <Linkedin size={14} /> LinkedIn
+            </a>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Exit Dialog */}
+      <AnimatePresence>
+        {showExitDialog && currentRound.exitTitle && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[150] flex items-center justify-center bg-background/80 backdrop-blur-xl p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="max-w-md p-8 rounded-[2rem] bg-card border border-border/60 shadow-[var(--panel-shadow)] relative overflow-hidden"
+            >
+              {currentRound.animation === "confetti" && <ConfettiEffect />}
+
+              <h3 className="text-2xl font-black tracking-tight mb-4">{currentRound.exitTitle}</h3>
+              <p className="text-muted-foreground font-medium leading-relaxed mb-8">
+                {currentRound.exitBody}
+              </p>
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={handleStay}
+                  className="rounded-2xl h-12 font-black uppercase tracking-[0.24em] text-xs w-full"
+                >
+                  {currentRound.exitStay}
+                </Button>
+                <button
+                  onClick={handleDismiss}
+                  className="text-xs font-bold text-muted-foreground/60 hover:text-muted-foreground transition-colors py-2"
+                >
+                  {currentRound.exitDismiss}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

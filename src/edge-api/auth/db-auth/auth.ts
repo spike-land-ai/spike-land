@@ -4,6 +4,7 @@ import { magicLink } from "better-auth/plugins";
 import { createAuthEndpoint } from "better-auth/api";
 import { drizzle } from "drizzle-orm/d1";
 import { z } from "zod";
+import { AUTH_TRUSTED_ORIGINS } from "@spike-land-ai/shared";
 import * as schema from "../db/schema";
 
 export interface Env {
@@ -40,13 +41,7 @@ export function createAuth(env: Env) {
   return betterAuth({
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.APP_URL || "https://auth-mcp.spike.land",
-    trustedOrigins: [
-      "https://spike.land",
-      "https://image-studio-mcp.spike.land",
-      "https://auth-mcp.spike.land",
-      "http://localhost:5173",
-      "http://localhost:3000",
-    ],
+    trustedOrigins: AUTH_TRUSTED_ORIGINS,
     advanced: {
       trustProxy: true,
       ipAddress: {

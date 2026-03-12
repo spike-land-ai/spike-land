@@ -248,7 +248,7 @@ export function CodeCategorizerQuiz() {
               <div
                 key={q.id}
                 className={cn(
-                  "flex items-center justify-between rounded-xl px-4 py-2 text-sm font-bold",
+                  "flex items-center justify-between rounded-2xl px-4 py-2 text-sm font-bold",
                   correct ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400",
                 )}
               >
@@ -279,7 +279,7 @@ export function CodeCategorizerQuiz() {
     <div className="flex flex-col gap-6 p-6">
       {/* Progress */}
       <div className="flex items-center justify-between">
-        <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+        <span className="text-xs font-black uppercase tracking-[0.24em] text-muted-foreground">
           Question {currentIdx + 1} of {QUESTIONS.length}
         </span>
         <div className="flex gap-1">
@@ -303,8 +303,8 @@ export function CodeCategorizerQuiz() {
       )}
 
       {/* Code block */}
-      <pre className="overflow-x-auto rounded-2xl bg-zinc-950 p-5 text-xs leading-relaxed dark:bg-zinc-900">
-        <code className="text-zinc-100 font-mono">
+      <pre className="overflow-x-auto rounded-2xl bg-background p-5 text-xs leading-relaxed">
+        <code className="text-foreground font-mono">
           {currentQuestion.code.split("\n").map((line, lineIdx) => (
             <span key={lineIdx} className="block">
               {line

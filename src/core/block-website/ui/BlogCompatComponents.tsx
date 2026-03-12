@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -74,6 +73,17 @@ const PERSONA_SELECT_GROUPS: Array<{ label: string; personas: OnboardingPersona[
   { label: "Creators & Explorers", personas: PERSONAS.slice(12) },
 ];
 
+const FALLBACK_PERSONA: OnboardingPersona = {
+  id: 16,
+  slug: "solo-explorer",
+  name: "Solo Explorer",
+  description: "Casual user exploring the platform for personal use",
+  heroText: "Discover tools to organize your life, create art, and explore new hobbies.",
+  cta: { label: "Start Exploring", href: "/store" },
+  recommendedAppSlugs: ["cleansweep", "image-studio", "music-creator", "career-navigator"],
+  defaultTheme: "light",
+};
+
 function readStoredValue(key: string): string | null {
   if (typeof window === "undefined") return null;
   try {
@@ -127,7 +137,8 @@ function useActivePersona() {
   }, []);
 
   const persona = useMemo(
-    () => getPersonaBySlug(slug) ?? getPersonaBySlug("solo-explorer") ?? PERSONAS[0],
+    (): OnboardingPersona =>
+      getPersonaBySlug(slug) ?? getPersonaBySlug("solo-explorer") ?? FALLBACK_PERSONA,
     [slug],
   );
 
@@ -192,10 +203,16 @@ export function ToolCount() {
     let cancelled = false;
 
     fetch(apiUrl("/store/tools"))
-      .then((response) => (response.ok ? response.json() : null))
-      .then((data: { total?: number } | null) => {
-        if (!cancelled && typeof data?.total === "number") {
-          setCount(data.total);
+      .then((response) => (response.ok ? response.json() : Promise.resolve(null)))
+      .then((data: unknown) => {
+        if (
+          !cancelled &&
+          data !== null &&
+          typeof data === "object" &&
+          "total" in data &&
+          typeof (data as { total: unknown }).total === "number"
+        ) {
+          setCount((data as { total: number }).total);
         }
       })
       .catch(() => {});

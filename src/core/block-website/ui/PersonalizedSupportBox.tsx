@@ -13,7 +13,7 @@ export function PersonalizedSupportBox() {
   const linkedInIntent = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`;
 
   return (
-    <div className="mt-20 p-8 sm:p-12 rounded-[3rem] bg-card border border-border/50 shadow-2xl relative overflow-hidden">
+    <div className="mt-20 p-8 sm:p-12 rounded-[2rem] bg-card border border-border/50 shadow-[var(--panel-shadow)] relative overflow-hidden">
       <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
         <Heart size={200} fill="currentColor" />
       </div>
@@ -30,7 +30,7 @@ export function PersonalizedSupportBox() {
             href="/support"
             className={cn(
               buttonVariants({ variant: "default" }),
-              "rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-transform",
+              "rounded-2xl h-14 px-8 font-black uppercase tracking-[0.24em] text-xs shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-transform",
             )}
           >
             <Heart className="mr-2 size-4" />
@@ -41,7 +41,7 @@ export function PersonalizedSupportBox() {
             href="/about"
             className={cn(
               buttonVariants({ variant: "ghost" }),
-              "rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-xs",
+              "rounded-2xl h-14 px-8 font-black uppercase tracking-[0.24em] text-xs",
             )}
           >
             Learn More
@@ -49,7 +49,7 @@ export function PersonalizedSupportBox() {
         </div>
 
         <div className="flex flex-wrap items-center gap-6">
-          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/40">
             Spread the Word
           </p>
           <a

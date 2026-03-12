@@ -7,6 +7,12 @@ export const CONFIG_PREREQUISITES: Record<string, string[]> = {
   set_project_root: ["run_tests", "list_tests", "analyze_coverage"],
 };
 
+export interface SessionStateSnapshot {
+  created: Record<string, string[]>;
+  idsByKey: Record<string, string[]>;
+  configToolsCalled: string[];
+}
+
 /** Session state tracking tool invocation context. */
 export class SessionState {
   /** Maps prefix (e.g. "chess") to list of IDs created during this session. */
@@ -76,5 +82,31 @@ export class SessionState {
   /** Check if a config tool has been called. */
   hasConfigBeenCalled(toolName: string): boolean {
     return this.configToolsCalled.has(toolName);
+  }
+
+  getSnapshot(): SessionStateSnapshot {
+    return {
+      created: Object.fromEntries(this.created.entries()),
+      idsByKey: Object.fromEntries(this.idsByKey.entries()),
+      configToolsCalled: [...this.configToolsCalled],
+    };
+  }
+
+  loadSnapshot(snapshot: SessionStateSnapshot | null | undefined): void {
+    this.created.clear();
+    this.idsByKey.clear();
+    this.configToolsCalled.clear();
+
+    if (!snapshot) return;
+
+    for (const [key, ids] of Object.entries(snapshot.created)) {
+      this.created.set(key, [...ids]);
+    }
+    for (const [key, ids] of Object.entries(snapshot.idsByKey)) {
+      this.idsByKey.set(key, [...ids]);
+    }
+    for (const toolName of snapshot.configToolsCalled) {
+      this.configToolsCalled.add(toolName);
+    }
   }
 }

@@ -4,12 +4,12 @@ interface Env {
 }
 
 export function getNightlyEnv(): Env {
-  const env: Env = process.env as any;
-  if (!env.PRERELEASE_VERSION) {
+  const { PRERELEASE_VERSION, VSCODE_REF } = process.env;
+  if (!PRERELEASE_VERSION) {
     throw new Error(`Missing PRERELEASE_VERSION in process.env`);
   }
-  if (!env.VSCODE_REF) {
+  if (!VSCODE_REF) {
     throw new Error(`Missing VSCODE_REF in process.env`);
   }
-  return env;
+  return { PRERELEASE_VERSION, VSCODE_REF };
 }

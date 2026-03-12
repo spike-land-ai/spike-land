@@ -15,11 +15,31 @@ export interface ManifestWorkerConfig {
   entry?: string;
   compatibility_date: string;
   compatibility_flags?: string[];
+  workers_dev?: boolean;
+  dev?: { port: number };
   kv_namespaces?: Array<{ binding: string; id: string }>;
-  d1_databases?: Array<{ binding: string; database_name: string; database_id: string }>;
+  d1_databases?: Array<{
+    binding: string;
+    database_name: string;
+    database_id: string;
+    migrations_dir?: string;
+    preview_id?: string;
+  }>;
   r2_buckets?: Array<{ binding: string; bucket_name: string }>;
   durable_objects?: Array<{ name: string; class_name: string; sqlite?: boolean }>;
+  migrations?: Array<{ tag: string; new_classes?: string[] }>;
+  services?: Array<{ binding: string; service: string }>;
   routes?: Array<{ pattern: string; custom_domain?: boolean; zone_name?: string }>;
+  vars?: Record<string, string | number | boolean>;
+  analytics_engine_datasets?: Array<{ binding: string; dataset: string }>;
+  env?: Record<
+    string,
+    {
+      name?: string;
+      vars?: Record<string, string | number | boolean>;
+      routes?: Array<{ pattern: string; custom_domain?: boolean; zone_name?: string }>;
+    }
+  >;
   rules?: Array<{ type: string; globs: string[] }>;
   assets?: { directory: string; not_found_handling?: string };
   site?: { bucket: string };
@@ -198,7 +218,7 @@ function parseList(lines: string[], start: number, baseIndent: number): ParseRes
   return { value: arr, consumed: i - start };
 }
 
-function parseScalar(value: string): string | number | boolean | null {
+function parseScalar(value: string): string | number | boolean | null | unknown[] {
   if (value === "true") return true;
   if (value === "false") return false;
   if (value === "null" || value === "~" || value === "") return null;
@@ -213,6 +233,43 @@ function parseScalar(value: string): string | number | boolean | null {
     (clean.startsWith("'") && clean.endsWith("'"))
   ) {
     return clean.slice(1, -1);
+  }
+
+  if (clean.startsWith("[") && clean.endsWith("]")) {
+    const body = clean.slice(1, -1).trim();
+    if (!body) return [];
+
+    const items: string[] = [];
+    let current = "";
+    let quote: '"' | "'" | null = null;
+
+    for (const char of body) {
+      if ((char === '"' || char === "'") && quote === null) {
+        quote = char;
+        current += char;
+        continue;
+      }
+
+      if (quote !== null && char === quote) {
+        quote = null;
+        current += char;
+        continue;
+      }
+
+      if (char === "," && quote === null) {
+        items.push(current.trim());
+        current = "";
+        continue;
+      }
+
+      current += char;
+    }
+
+    if (current.trim()) {
+      items.push(current.trim());
+    }
+
+    return items.map((item) => parseScalar(item));
   }
 
   // Try number

@@ -266,8 +266,11 @@ packages:
     entry: index.ts
     worker:
       name: spike-edge
-      compatibility_date: "2025-01-01"
+      compatibility_date: "2026-03-01"
       compatibility_flags: [nodejs_compat]
+      workers_dev: true
+      dev:
+        port: 8787
       r2_buckets:
         - binding: R2
           bucket_name: spike-platform
@@ -276,9 +279,43 @@ packages:
       durable_objects:
         - name: LIMITERS
           class_name: RateLimiter
+      migrations:
+        - tag: v1
+          new_classes: [RateLimiter]
+      d1_databases:
+        - binding: DB
+          database_name: spike-edge-analytics
+          database_id: f7219e86-7dc6-4627-92ad-17fce49ae35a
+          migrations_dir: db/migrations
+      vars:
+        GA_MEASUREMENT_ID: G-9WNEM9ZHE7
+      services:
+        - binding: AUTH_MCP
+          service: mcp-auth
+        - binding: MCP_SERVICE
+          service: spike-land-mcp
       routes:
         - pattern: edge.spike.land
           custom_domain: true
+        - pattern: spike.land/*
+          zone_name: spike.land
+        - pattern: www.spike.land/*
+          zone_name: spike.land
+        - pattern: analytics.spike.land/*
+          zone_name: spike.land
+        - pattern: api.spike.land
+          custom_domain: true
+      analytics_engine_datasets:
+        - binding: ANALYTICS
+          dataset: spike_analytics
+      env:
+        staging:
+          name: spike-edge-staging
+          vars:
+            APP_ENV: staging
+          routes:
+            - pattern: staging-edge.spike.land/*
+              zone_name: spike.land
 
   spike-land-backend:
     kind: worker
@@ -350,12 +387,19 @@ packages:
     entry: index.ts
     worker:
       name: mcp-auth
-      compatibility_date: "2025-02-28"
+      entry: ../../src/edge-api/auth/db/index.ts
+      compatibility_date: "2026-03-01"
       compatibility_flags: [nodejs_compat]
+      workers_dev: true
+      dev:
+        port: 8791
       d1_databases:
         - binding: AUTH_DB
           database_name: spike-auth-production
           database_id: 2afd3ffd-0e4e-4b2d-b395-7510d54af8dc
+        - binding: STATUS_DB
+          database_name: spike-edge-analytics
+          database_id: f7219e86-7dc6-4627-92ad-17fce49ae35a
       r2_buckets:
         - binding: AUTH_R2
           bucket_name: spike-auth-assets
@@ -431,7 +475,7 @@ packages:
     entry: index.ts
     worker:
       name: spike-chat
-      compatibility_date: "2025-07-12"
+      compatibility_date: "2026-03-01"
       compatibility_flags: [nodejs_compat]
       d1_databases:
         - binding: DB
@@ -443,6 +487,14 @@ packages:
           class_name: ChannelDurableObject
         - name: PRESENCE_DO
           class_name: PresenceDurableObject
+      migrations:
+        - tag: v1
+          new_classes: [ChannelDurableObject, PresenceDurableObject]
+      services:
+        - binding: AUTH_MCP
+          service: mcp-auth
+        - binding: MCP_SERVICE
+          service: spike-land-mcp
       routes:
         - pattern: chat.spike.land/*
           zone_name: spike.land

@@ -596,12 +596,12 @@ export class SignatureHelpAdapter extends Adapter implements languages.Signature
           if (context.isRetrigger) {
             return {
               kind: "retrigger",
-              triggerCharacter: context.triggerCharacter as any,
+              triggerCharacter: context.triggerCharacter as unknown as ts.SignatureHelpRetriggerCharacter,
             };
           } else {
             return {
               kind: "characterTyped",
-              triggerCharacter: context.triggerCharacter as any,
+              triggerCharacter: context.triggerCharacter as unknown as ts.SignatureHelpTriggerCharacter,
             };
           }
         } else {

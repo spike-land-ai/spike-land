@@ -34,16 +34,16 @@ export async function sendChallenge(
       senderColor: senderColor ?? null,
       expiresAt: new Date(Date.now() + CHALLENGE_EXPIRY_MS),
     },
-  });
+  }) as Promise<ChessChallenge>;
 }
 
 export async function acceptChallenge(
   challengeId: string,
   playerId: string,
 ): Promise<{ challenge: ChessChallenge; gameId: string }> {
-  const challenge = await prisma.chessChallenge.findUnique({
+  const challenge = (await prisma.chessChallenge.findUnique({
     where: { id: challengeId },
-  });
+  })) as ChessChallenge | null;
 
   if (!challenge) {
     throw new Error("Challenge not found");
@@ -75,7 +75,7 @@ export async function acceptChallenge(
   }
 
   const timeControlMs = (await import("./types")).TIME_CONTROL_MS[challenge.timeControl] ?? 300_000;
-  const game = await prisma.chessGame.create({
+  const game = (await prisma.chessGame.create({
     data: {
       whitePlayerId,
       blackPlayerId,
@@ -85,15 +85,15 @@ export async function acceptChallenge(
       whiteTimeMs: timeControlMs,
       blackTimeMs: timeControlMs,
     },
-  });
+  })) as { id: string };
 
-  const updatedChallenge = await prisma.chessChallenge.update({
+  const updatedChallenge = (await prisma.chessChallenge.update({
     where: { id: challengeId },
     data: {
       status: "ACCEPTED",
       gameId: game.id,
     },
-  });
+  })) as ChessChallenge;
 
   return { challenge: updatedChallenge, gameId: game.id };
 }
@@ -102,9 +102,9 @@ export async function declineChallenge(
   challengeId: string,
   playerId: string,
 ): Promise<ChessChallenge> {
-  const challenge = await prisma.chessChallenge.findUnique({
+  const challenge = (await prisma.chessChallenge.findUnique({
     where: { id: challengeId },
-  });
+  })) as ChessChallenge | null;
 
   if (!challenge) {
     throw new Error("Challenge not found");
@@ -116,16 +116,16 @@ export async function declineChallenge(
   return prisma.chessChallenge.update({
     where: { id: challengeId },
     data: { status: "DECLINED" },
-  });
+  }) as Promise<ChessChallenge>;
 }
 
 export async function cancelChallenge(
   challengeId: string,
   playerId: string,
 ): Promise<ChessChallenge> {
-  const challenge = await prisma.chessChallenge.findUnique({
+  const challenge = (await prisma.chessChallenge.findUnique({
     where: { id: challengeId },
-  });
+  })) as ChessChallenge | null;
 
   if (!challenge) {
     throw new Error("Challenge not found");
@@ -137,7 +137,7 @@ export async function cancelChallenge(
   return prisma.chessChallenge.update({
     where: { id: challengeId },
     data: { status: "CANCELLED" },
-  });
+  }) as Promise<ChessChallenge>;
 }
 
 export async function listChallenges(playerId: string, status?: string): Promise<ChessChallenge[]> {
@@ -163,16 +163,16 @@ export async function listChallenges(playerId: string, status?: string): Promise
       createdAt: true,
       updatedAt: true,
     },
-  });
+  }) as Promise<ChessChallenge[]>;
 }
 
 export async function expireStaleChallenges(): Promise<number> {
-  const result = await prisma.chessChallenge.updateMany({
+  const result = (await prisma.chessChallenge.updateMany({
     where: {
       status: "PENDING",
       expiresAt: { lt: new Date() },
     },
     data: { status: "EXPIRED" },
-  });
+  })) as { count: number };
   return result.count;
 }

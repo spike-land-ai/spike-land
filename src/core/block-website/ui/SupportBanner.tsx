@@ -168,13 +168,13 @@ function BlogBanner({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/60 p-5 sm:p-6",
+        "relative overflow-hidden rounded-[2rem] border border-border/60 p-5 sm:p-6",
         "bg-gradient-to-br from-card via-card to-primary/[0.04]",
-        "shadow-lg shadow-black/5",
+        "shadow-[var(--panel-shadow)]",
       )}
     >
       {/* Subtle ambient glow */}
-      <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/5" />
+      <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-white/5" />
       <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl" />
 
       <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -223,7 +223,7 @@ function BlogBanner({
 
         {/* Right: quick donate */}
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:shrink-0">
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50 mr-1 hidden sm:block">
+          <span className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/50 mr-1 hidden sm:block">
             Support
           </span>
           {DONATE_PRESETS.map((amount) => (
@@ -233,7 +233,7 @@ function BlogBanner({
               disabled={donatingAmount !== null}
               aria-label={`Donate £${amount}`}
               className={cn(
-                "h-9 px-4 rounded-xl border text-xs font-bold tabular-nums transition-all duration-200",
+                "h-9 px-4 rounded-2xl border text-xs font-bold tabular-nums transition-all duration-200",
                 donatingAmount === amount
                   ? "border-primary bg-primary/10 text-primary cursor-wait"
                   : "border-border bg-muted/60 text-muted-foreground hover:border-primary/50 hover:text-foreground hover:bg-primary/5 active:scale-95",
@@ -249,7 +249,7 @@ function BlogBanner({
             }}
             disabled={donatingAmount !== null}
             className={cn(
-              "h-9 px-4 rounded-xl border text-xs font-bold transition-all duration-200",
+              "h-9 px-4 rounded-2xl border text-xs font-bold transition-all duration-200",
               "border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 active:scale-95",
             )}
           >
@@ -284,19 +284,19 @@ function MigrationBanner({ onTrackEvent }: { onTrackEvent?: SupportBannerProps["
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/60 p-5 sm:p-6",
+        "relative overflow-hidden rounded-[2rem] border border-border/60 p-5 sm:p-6",
         "bg-gradient-to-br from-card via-card to-primary/[0.06]",
-        "shadow-lg shadow-black/5",
+        "shadow-[var(--panel-shadow)]",
       )}
     >
       {/* Ambient glow */}
-      <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/5" />
+      <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-white/5" />
       <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-primary/8 blur-3xl" />
 
       <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Headline */}
         <div className="shrink-0">
-          <p className="text-[10px] font-black uppercase tracking-widest text-primary/70 mb-1">
+          <p className="text-[10px] font-black uppercase tracking-[0.24em] text-primary/70 mb-1">
             Migration service
           </p>
           <h3 className="text-lg font-black tracking-tight text-foreground leading-tight">
@@ -316,7 +316,7 @@ function MigrationBanner({ onTrackEvent }: { onTrackEvent?: SupportBannerProps["
               onClick={() => handleTierClick(tier.id, tier.price)}
               className={cn(
                 "group flex flex-col items-center gap-0.5 min-w-[82px] flex-1 sm:flex-none",
-                "rounded-xl border border-border bg-muted/50 px-3 py-3",
+                "rounded-2xl border border-border bg-muted/50 px-3 py-3",
                 "text-center transition-all duration-200",
                 "hover:border-primary/50 hover:bg-primary/5 hover:shadow-md hover:shadow-primary/5",
                 "active:scale-95",
@@ -325,7 +325,7 @@ function MigrationBanner({ onTrackEvent }: { onTrackEvent?: SupportBannerProps["
               <span className="text-base font-black text-foreground leading-none group-hover:text-primary transition-colors">
                 {tier.price}
               </span>
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 group-hover:text-primary/70 transition-colors">
+              <span className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/60 group-hover:text-primary/70 transition-colors">
                 {tier.label}
               </span>
               <span className="text-[10px] text-muted-foreground/50 font-medium leading-tight mt-0.5 hidden sm:block">

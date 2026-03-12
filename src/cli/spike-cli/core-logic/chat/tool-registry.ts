@@ -18,6 +18,10 @@ export interface DynamicToolRegistryOptions {
   alwaysOnPatterns?: string[];
 }
 
+export interface DynamicToolRegistrySnapshot {
+  activeToolNames: string[];
+}
+
 export class DynamicToolRegistry {
   private allTools: NamespacedTool[] = [];
   private activeToolNames: Set<string> = new Set();
@@ -128,6 +132,20 @@ export class DynamicToolRegistry {
   /** Get the number of currently active tools. */
   get activeCount(): number {
     return this.activeToolNames.size;
+  }
+
+  getSnapshot(): DynamicToolRegistrySnapshot {
+    return {
+      activeToolNames: [...this.activeToolNames],
+    };
+  }
+
+  loadSnapshot(snapshot: DynamicToolRegistrySnapshot | null | undefined): void {
+    this.resetToAlwaysOn();
+    if (!snapshot) return;
+    for (const name of snapshot.activeToolNames) {
+      this.activeToolNames.add(name);
+    }
   }
 
   private isAlwaysOn(name: string): boolean {

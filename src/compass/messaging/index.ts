@@ -59,6 +59,6 @@ export {
   WebhookHandler,
   WebhookVerificationError,
   verifyWhatsAppSignature,
-  hasTwilioSignatureHeader,
+  verifyTwilioSignature,
 } from "./core-logic/webhook-handler.js";
 export type { WebhookRequest, WebhookResponse } from "./core-logic/webhook-handler.js";

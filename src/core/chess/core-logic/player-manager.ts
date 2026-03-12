@@ -40,11 +40,11 @@ export async function createPlayer(
       name,
       ...(avatar !== undefined && { avatar }),
     },
-  });
+  }) as Promise<ChessPlayer>;
 }
 
 export async function getPlayer(playerId: string): Promise<ChessPlayer | null> {
-  return prisma.chessPlayer.findUnique({ where: { id: playerId } });
+  return prisma.chessPlayer.findUnique({ where: { id: playerId } }) as Promise<ChessPlayer | null>;
 }
 
 export async function getPlayersByUser(userId: string): Promise<ChessPlayer[]> {
@@ -67,7 +67,7 @@ export async function getPlayersByUser(userId: string): Promise<ChessPlayer[]> {
       createdAt: true,
       updatedAt: true,
     },
-  });
+  }) as Promise<ChessPlayer[]>;
 }
 
 export async function updatePlayer(
@@ -76,10 +76,10 @@ export async function updatePlayer(
   data: { name?: string; avatar?: string; soundEnabled?: boolean },
 ): Promise<ChessPlayer> {
   try {
-    return await prisma.chessPlayer.update({
+    return (await prisma.chessPlayer.update({
       where: { id: playerId, userId },
       data,
-    });
+    })) as ChessPlayer;
   } catch {
     throw new Error("Not authorized to update this player");
   }
@@ -131,13 +131,13 @@ export async function listOnlinePlayers(): Promise<ChessPlayer[]> {
       createdAt: true,
       updatedAt: true,
     },
-  });
+  }) as Promise<ChessPlayer[]>;
 }
 
 export async function getPlayerStats(playerId: string): Promise<PlayerStats> {
-  const player = await prisma.chessPlayer.findUnique({
+  const player = (await prisma.chessPlayer.findUnique({
     where: { id: playerId },
-  });
+  })) as ChessPlayer | null;
   if (!player) {
     throw new Error("Player not found");
   }
@@ -160,7 +160,6 @@ export async function updatePlayerElo(
   newElo: number,
   result: "win" | "loss" | "draw",
 ): Promise<void> {
-
   const winIncrement = result === "win" ? 1 : 0;
   const lossIncrement = result === "loss" ? 1 : 0;
   const drawIncrement = result === "draw" ? 1 : 0;

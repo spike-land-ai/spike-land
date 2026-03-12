@@ -177,7 +177,7 @@ export function MCPTerminalDemo() {
   return (
     <div ref={ref} className="my-8 flex flex-col gap-3">
       <div
-        className="rounded-xl overflow-hidden border border-border bg-card font-mono text-sm shadow-2xl"
+        className="rounded-[2rem] overflow-hidden border border-border bg-card font-mono text-sm shadow-[var(--panel-shadow)]"
         onMouseEnter={() => {
           if (playing) setPaused(true);
         }}
@@ -187,10 +187,12 @@ export function MCPTerminalDemo() {
       >
         {/* Chrome bar */}
         <div className="flex items-center gap-2 px-4 py-3 bg-muted/50 border-b border-border">
-          <span className="w-3 h-3 rounded-full bg-red-500" aria-hidden="true" />
-          <span className="w-3 h-3 rounded-full bg-yellow-400" aria-hidden="true" />
-          <span className="w-3 h-3 rounded-full bg-green-500" aria-hidden="true" />
-          <span className="ml-3 text-xs text-muted-foreground tracking-wide">MCP JSON-RPC</span>
+          <span className="w-3 h-3 rounded-full bg-muted-foreground/40" aria-hidden="true" />
+          <span className="w-3 h-3 rounded-full bg-muted-foreground/30" aria-hidden="true" />
+          <span className="w-3 h-3 rounded-full bg-muted-foreground/20" aria-hidden="true" />
+          <span className="ml-3 inline-flex items-center gap-2 rounded-full border border-primary/18 bg-primary/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-primary">
+            MCP JSON-RPC
+          </span>
         </div>
 
         {/* Tab bar */}
@@ -201,10 +203,10 @@ export function MCPTerminalDemo() {
               type="button"
               onClick={() => resetTab(i)}
               className={[
-                "px-4 py-2 text-xs tracking-wide transition-colors border-b-2 focus:outline-none focus:ring-2 focus:ring-primary",
+                "px-4 py-2 text-xs rounded-2xl font-black uppercase tracking-[0.18em] transition-colors focus:outline-none focus:ring-2 focus:ring-primary",
                 i === activeTab
-                  ? "text-primary border-primary bg-card"
-                  : "text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/30",
+                  ? "bg-primary/12 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
               ].join(" ")}
             >
               {t.label}
@@ -216,7 +218,7 @@ export function MCPTerminalDemo() {
         <div className="p-5 min-h-72 flex flex-col gap-5">
           {/* Request */}
           <div>
-            <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-widest">
+            <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-[0.24em]">
               Request
             </div>
             <div className="text-foreground whitespace-pre leading-relaxed">
@@ -239,7 +241,7 @@ export function MCPTerminalDemo() {
               transition: "opacity 0.4s ease, transform 0.4s ease",
             }}
           >
-            <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-widest">
+            <div className="text-[10px] text-muted-foreground mb-1 uppercase tracking-[0.24em]">
               Response
             </div>
             <div className="text-foreground whitespace-pre leading-relaxed">
@@ -253,7 +255,7 @@ export function MCPTerminalDemo() {
               type="button"
               onClick={startAnimation}
               aria-label={isDone ? "Replay animation" : "Play animation"}
-              className="px-4 py-1.5 rounded-full bg-muted/50 border border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-primary hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-4 py-1.5 rounded-2xl bg-muted/50 border border-border text-[10px] font-black text-muted-foreground uppercase tracking-[0.18em] hover:text-primary hover:border-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {isDone ? "Replay" : "Play"}
             </button>
@@ -261,7 +263,7 @@ export function MCPTerminalDemo() {
         </div>
       </div>
 
-      <p className="text-center text-xs text-muted-foreground italic font-mono">
+      <p className="text-center text-xs text-muted-foreground">
         Click a tab to switch examples. Hover to pause the typewriter effect.
       </p>
     </div>

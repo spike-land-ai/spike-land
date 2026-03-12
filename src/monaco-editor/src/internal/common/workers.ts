@@ -1,31 +1,56 @@
 import { editor } from "monaco-editor-core";
 
+/**
+ * Subset of the Monaco global environment that host pages may attach to
+ * `globalThis.MonacoEnvironment`. Declared here to avoid `as any` casts and
+ * to document the expected shape consumed by this module.
+ */
+interface IMonacoEnvironment {
+  createTrustedTypesPolicy?<Options extends TrustedTypePolicyOptions>(
+    policyName: string,
+    policyOptions?: Options,
+  ):
+    | undefined
+    | Pick<TrustedTypePolicy, "name" | Extract<keyof Options, keyof TrustedTypePolicyOptions>>;
+  getWorker?(moduleId: string, label: string): Worker | Promise<Worker>;
+  getWorkerUrl?(moduleId: string, label: string): string;
+}
+
+/**
+ * Extension of the standard `globalThis` type that accounts for the optional
+ * properties this module reads from the global scope at runtime.
+ *
+ * - `MonacoEnvironment` — host-provided configuration object.
+ * - `trustedTypes` — the browser Trusted Types API (already in the DOM lib;
+ *   re-declared here so non-DOM targets still type-check correctly).
+ * - `workerttPolicy` — a pre-created Trusted Types policy forwarded into
+ *   dedicated workers from the main thread.
+ */
+interface MonacoGlobalThis {
+  readonly MonacoEnvironment?: IMonacoEnvironment;
+  readonly trustedTypes?: { createPolicy: TrustedTypePolicyFactory["createPolicy"] };
+  readonly workerttPolicy?: ReturnType<typeof createTrustedTypesPolicy>;
+}
+
+/** Typed view of `globalThis` — avoids all `as any` casts in this module. */
+const monacoGlobal = globalThis as unknown as MonacoGlobalThis;
+
 function createTrustedTypesPolicy<Options extends TrustedTypePolicyOptions>(
   policyName: string,
   policyOptions?: Options,
 ):
   | undefined
   | Pick<TrustedTypePolicy, "name" | Extract<keyof Options, keyof TrustedTypePolicyOptions>> {
-  interface IMonacoEnvironment {
-    createTrustedTypesPolicy<Options extends TrustedTypePolicyOptions>(
-      policyName: string,
-      policyOptions?: Options,
-    ):
-      | undefined
-      | Pick<TrustedTypePolicy, "name" | Extract<keyof Options, keyof TrustedTypePolicyOptions>>;
-  }
-  const monacoEnvironment: IMonacoEnvironment | undefined = (globalThis as any).MonacoEnvironment;
-
-  if (monacoEnvironment?.createTrustedTypesPolicy) {
+  if (monacoGlobal.MonacoEnvironment?.createTrustedTypesPolicy) {
     try {
-      return monacoEnvironment.createTrustedTypesPolicy(policyName, policyOptions);
+      return monacoGlobal.MonacoEnvironment.createTrustedTypesPolicy(policyName, policyOptions);
     } catch (err) {
       console.error(err);
       return undefined;
     }
   }
   try {
-    return (globalThis as any).trustedTypes?.createPolicy(policyName, policyOptions);
+    return monacoGlobal.trustedTypes?.createPolicy(policyName, policyOptions);
   } catch (err) {
     console.error(err);
     return undefined;
@@ -37,9 +62,9 @@ if (
   typeof self === "object" &&
   self.constructor &&
   self.constructor.name === "DedicatedWorkerGlobalScope" &&
-  (globalThis as any).workerttPolicy !== undefined
+  monacoGlobal.workerttPolicy !== undefined
 ) {
-  ttPolicy = (globalThis as any).workerttPolicy;
+  ttPolicy = monacoGlobal.workerttPolicy;
 } else {
   ttPolicy = createTrustedTypesPolicy("defaultWorkerFactory", {
     createScriptURL: (value) => value,
@@ -53,11 +78,7 @@ function getWorker(descriptor: {
 }): Worker | Promise<Worker> {
   const label = descriptor.label;
   // Option for hosts to overwrite the worker script (used in the standalone editor)
-  interface IMonacoEnvironment {
-    getWorker?(moduleId: string, label: string): Worker | Promise<Worker>;
-    getWorkerUrl?(moduleId: string, label: string): string;
-  }
-  const monacoEnvironment: IMonacoEnvironment | undefined = (globalThis as any).MonacoEnvironment;
+  const monacoEnvironment = monacoGlobal.MonacoEnvironment;
   if (monacoEnvironment) {
     if (typeof monacoEnvironment.getWorker === "function") {
       return monacoEnvironment.getWorker("workerMain.js", label);

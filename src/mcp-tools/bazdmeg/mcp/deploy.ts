@@ -15,6 +15,18 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { ManifestWorkerConfig } from "../node-sys/manifest.js";
 
+function formatTomlValue(value: string | number | boolean): string {
+  if (typeof value === "string") {
+    return `"${value}"`;
+  }
+  return String(value);
+}
+
+function formatInlineTable(values: Record<string, string | number | boolean>): string {
+  const pairs = Object.entries(values).map(([key, value]) => `${key} = ${formatTomlValue(value)}`);
+  return `{ ${pairs.join(", ")} }`;
+}
+
 function generateToml(_packageName: string, worker: ManifestWorkerConfig, entry?: string): string {
   const lines: string[] = [];
 
@@ -27,7 +39,17 @@ function generateToml(_packageName: string, worker: ManifestWorkerConfig, entry?
     lines.push(`compatibility_flags = [${flags}]`);
   }
 
+  if (worker.workers_dev !== undefined) {
+    lines.push(`workers_dev = ${worker.workers_dev}`);
+  }
+
   lines.push("");
+
+  if (worker.dev) {
+    lines.push(`[dev]`);
+    lines.push(`port = ${worker.dev.port}`);
+    lines.push("");
+  }
 
   // KV namespaces
   if (worker.kv_namespaces && worker.kv_namespaces.length > 0) {
@@ -46,6 +68,8 @@ function generateToml(_packageName: string, worker: ManifestWorkerConfig, entry?
       lines.push(`binding = "${d1.binding}"`);
       lines.push(`database_name = "${d1.database_name}"`);
       lines.push(`database_id = "${d1.database_id}"`);
+      if (d1.migrations_dir) lines.push(`migrations_dir = "${d1.migrations_dir}"`);
+      if (d1.preview_id) lines.push(`preview_id = "${d1.preview_id}"`);
       lines.push("");
     }
   }
@@ -72,6 +96,35 @@ function generateToml(_packageName: string, worker: ManifestWorkerConfig, entry?
     lines.push("");
   }
 
+  if (worker.migrations && worker.migrations.length > 0) {
+    for (const migration of worker.migrations) {
+      lines.push(`[[migrations]]`);
+      lines.push(`tag = "${migration.tag}"`);
+      if (migration.new_classes && migration.new_classes.length > 0) {
+        const classes = migration.new_classes.map((name) => `"${name}"`).join(", ");
+        lines.push(`new_classes = [${classes}]`);
+      }
+      lines.push("");
+    }
+  }
+
+  if (worker.vars && Object.keys(worker.vars).length > 0) {
+    lines.push(`[vars]`);
+    for (const [key, value] of Object.entries(worker.vars)) {
+      lines.push(`${key} = ${formatTomlValue(value)}`);
+    }
+    lines.push("");
+  }
+
+  if (worker.services && worker.services.length > 0) {
+    for (const service of worker.services) {
+      lines.push(`[[services]]`);
+      lines.push(`binding = "${service.binding}"`);
+      lines.push(`service = "${service.service}"`);
+      lines.push("");
+    }
+  }
+
   // Routes
   if (worker.routes && worker.routes.length > 0) {
     for (const route of worker.routes) {
@@ -80,6 +133,38 @@ function generateToml(_packageName: string, worker: ManifestWorkerConfig, entry?
       if (route.custom_domain) lines.push(`custom_domain = true`);
       if (route.zone_name) lines.push(`zone_name = "${route.zone_name}"`);
       lines.push("");
+    }
+  }
+
+  if (worker.analytics_engine_datasets && worker.analytics_engine_datasets.length > 0) {
+    for (const dataset of worker.analytics_engine_datasets) {
+      lines.push(`[[analytics_engine_datasets]]`);
+      lines.push(`binding = "${dataset.binding}"`);
+      lines.push(`dataset = "${dataset.dataset}"`);
+      lines.push("");
+    }
+  }
+
+  if (worker.env) {
+    for (const [envName, envConfig] of Object.entries(worker.env)) {
+      lines.push(`[env.${envName}]`);
+      if (envConfig.name) {
+        lines.push(`name = "${envConfig.name}"`);
+      }
+      if (envConfig.vars && Object.keys(envConfig.vars).length > 0) {
+        lines.push(`vars = ${formatInlineTable(envConfig.vars)}`);
+      }
+      lines.push("");
+
+      if (envConfig.routes && envConfig.routes.length > 0) {
+        for (const route of envConfig.routes) {
+          lines.push(`[[env.${envName}.routes]]`);
+          lines.push(`pattern = "${route.pattern}"`);
+          if (route.custom_domain) lines.push(`custom_domain = true`);
+          if (route.zone_name) lines.push(`zone_name = "${route.zone_name}"`);
+          lines.push("");
+        }
+      }
     }
   }
 

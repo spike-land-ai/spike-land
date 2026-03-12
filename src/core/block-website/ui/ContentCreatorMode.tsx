@@ -117,14 +117,16 @@ export function ContentCreatorMode({ slug, initialContent = "" }: ContentCreator
       <div className="flex items-center justify-between px-6 py-4 border-b border-border/50 bg-card shrink-0">
         <div className="flex items-center gap-3">
           <Pencil size={18} className="text-primary" />
-          <span className="text-sm font-black uppercase tracking-widest">Content Creator Mode</span>
+          <span className="text-sm font-black uppercase tracking-[0.24em]">
+            Content Creator Mode
+          </span>
           <span className="text-xs font-bold text-muted-foreground/60 font-mono">/{slug}</span>
         </div>
         <div className="flex items-center gap-3">
           <Button
             variant="default"
             size="sm"
-            className="rounded-xl font-black uppercase tracking-widest text-xs"
+            className="rounded-xl font-black uppercase tracking-[0.24em] text-xs"
             onClick={handleSubmitPR}
             disabled={submitting}
           >
@@ -150,9 +152,9 @@ export function ContentCreatorMode({ slug, initialContent = "" }: ContentCreator
       {toast && (
         <div
           className={cn(
-            "absolute top-20 left-1/2 -translate-x-1/2 z-[60] px-6 py-3 rounded-2xl text-sm font-bold shadow-2xl border transition-all",
+            "absolute top-20 left-1/2 -translate-x-1/2 z-[60] px-6 py-3 rounded-2xl text-sm font-bold shadow-[var(--panel-shadow)] border transition-all",
             toast.type === "success"
-              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300"
+              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
               : "bg-destructive/10 border-destructive/30 text-destructive",
           )}
         >
@@ -165,7 +167,7 @@ export function ContentCreatorMode({ slug, initialContent = "" }: ContentCreator
         {/* Left: Editor */}
         <div className="w-1/2 flex flex-col border-r border-border/50">
           <div className="px-4 py-2 border-b border-border/30 bg-muted/30">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">
+            <span className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/50">
               MDX Source
             </span>
           </div>
@@ -188,13 +190,13 @@ export function ContentCreatorMode({ slug, initialContent = "" }: ContentCreator
         {/* Right: Preview */}
         <div className="w-1/2 flex flex-col overflow-hidden">
           <div className="px-4 py-2 border-b border-border/30 bg-muted/30">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/50">
+            <span className="text-[10px] font-black uppercase tracking-[0.24em] text-muted-foreground/50">
               Preview
             </span>
           </div>
           <div className="flex-1 overflow-y-auto p-6">
             <div
-              className="prose dark:prose-invert max-w-none
+              className="prose prose-invert max-w-none
               prose-headings:font-black prose-headings:tracking-tighter
               prose-p:text-muted-foreground prose-p:leading-relaxed
               prose-a:text-primary prose-a:no-underline hover:prose-a:underline
@@ -243,7 +245,7 @@ export function DevModeFAB({ slug, initialContent }: DevModeFABProps) {
         <button
           onClick={() => setOpen(true)}
           aria-label="Open content creator mode"
-          className="fixed bottom-6 right-6 z-50 size-14 rounded-2xl bg-primary text-primary-foreground shadow-2xl shadow-primary/30 flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+          className="fixed bottom-6 right-6 z-50 size-14 rounded-2xl bg-primary text-primary-foreground shadow-[var(--panel-shadow)] flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
         >
           <Pencil size={22} />
         </button>

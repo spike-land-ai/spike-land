@@ -4,10 +4,6 @@ import { tryCatch } from "./try-catch.ts";
 
 const urlCache = new Map<string, string>();
 
-// import { oo } from "./importMap";
-// import { enhancedFetch } from "./enhancedFetch.ts";
-// import { enhancedFetch } from "./enhancedFetch.ts";
-
 export const fetchPlugin = (origin: string) =>
   ({
     name: "http",

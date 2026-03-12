@@ -28,6 +28,12 @@ export interface WebhookRequest {
   readonly headers: Record<string, string | undefined>;
   /** Already-parsed body. For URL-encoded forms, callers should parse to Record<string, string>. */
   readonly body: unknown;
+  /**
+   * Full request URL including scheme, host, path, and query string.
+   * Required for Twilio HMAC-SHA1 signature validation.
+   * Example: "https://api.example.com/webhook/sms"
+   */
+  readonly url?: string;
 }
 
 export interface WebhookResponse {
@@ -110,15 +116,62 @@ export async function verifyWhatsAppSignature(
 /**
  * Verify a Twilio SMS webhook using the X-Twilio-Signature header.
  *
- * Twilio computes: HMAC-SHA1(authToken, url + sorted_params)
- * For simplicity this implementation verifies the header exists and is
- * non-empty. A full implementation would require the raw request URL.
+ * Twilio's algorithm (https://www.twilio.com/docs/usage/webhooks/webhooks-security):
+ *   1. Take the full request URL (scheme + host + path + query string).
+ *   2. For POST requests, sort all POST parameters alphabetically by key and
+ *      append each key and value (no separator) to the URL string.
+ *   3. Sign the resulting string with HMAC-SHA1 using the Auth Token as the key.
+ *   4. Base64-encode the binary digest.
+ *   5. Compare the result with the X-Twilio-Signature header value.
  *
- * TODO: pass the full request URL for proper Twilio signature validation.
+ * @param requestUrl     Full URL the webhook was delivered to (required).
+ * @param postParams     Parsed POST body fields (Record<string, string>) or
+ *                       undefined / non-Record values (treated as no params).
+ * @param signatureHeader Value of the X-Twilio-Signature header.
+ * @param authToken      Twilio Auth Token used as the HMAC-SHA1 key.
  */
-export function hasTwilioSignatureHeader(headers: Record<string, string | undefined>): boolean {
-  const sig = headers["x-twilio-signature"];
-  return typeof sig === "string" && sig.length > 0;
+export async function verifyTwilioSignature(
+  requestUrl: string,
+  postParams: unknown,
+  signatureHeader: string | undefined,
+  authToken: string,
+): Promise<boolean> {
+  if (signatureHeader === undefined || signatureHeader.length === 0) {
+    return false;
+  }
+
+  // Build the string-to-sign: URL followed by sorted POST params.
+  let stringToSign = requestUrl;
+
+  if (
+    postParams !== null &&
+    postParams !== undefined &&
+    typeof postParams === "object" &&
+    !Array.isArray(postParams)
+  ) {
+    const params = postParams as Record<string, unknown>;
+    const sortedKeys = Object.keys(params).sort();
+    for (const key of sortedKeys) {
+      stringToSign += key + String(params[key] ?? "");
+    }
+  }
+
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(authToken);
+  const msgData = encoder.encode(stringToSign);
+
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-1" },
+    false,
+    ["sign"],
+  );
+
+  const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, msgData);
+  const computedBase64 = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
+
+  return timingSafeEqual(computedBase64, signatureHeader);
 }
 
 // ---------------------------------------------------------------------------
@@ -158,7 +211,7 @@ export class WebhookHandler {
 
     // ---- Signature verification -------------------------------------------
     try {
-      await this._verifySignature(platform, request.headers, config, rawBody);
+      await this._verifySignature(platform, request.headers, config, rawBody, request.url);
     } catch (err) {
       if (err instanceof WebhookVerificationError) {
         return { status: 403, body: { error: err.message } };
@@ -185,6 +238,7 @@ export class WebhookHandler {
     headers: Record<string, string | undefined>,
     config: WebhookConfig,
     rawBody?: string,
+    requestUrl?: string,
   ): Promise<void> {
     if (rawBody === undefined) {
       // Skip verification in development when rawBody is not provided.
@@ -202,11 +256,27 @@ export class WebhookHandler {
     }
 
     if (platform === Platform.SMS) {
-      const hasSig = hasTwilioSignatureHeader(headers);
-      if (!hasSig) {
-        throw new WebhookVerificationError(platform, "missing X-Twilio-Signature header");
+      const sig = headers["x-twilio-signature"];
+
+      if (requestUrl === undefined || requestUrl.length === 0) {
+        // Without the full URL we cannot compute the expected signature.
+        // Reject the request rather than silently skip validation.
+        throw new WebhookVerificationError(
+          platform,
+          "request URL is required for Twilio signature validation but was not provided",
+        );
       }
-      // Full Twilio HMAC-SHA1 validation would happen here with the request URL.
+
+      // body for SMS webhooks is the parsed URL-encoded form fields
+      const valid = await verifyTwilioSignature(
+        requestUrl,
+        this._parseBodyForTwilio(rawBody),
+        sig,
+        config.secret,
+      );
+      if (!valid) {
+        throw new WebhookVerificationError(platform, "HMAC-SHA1 mismatch");
+      }
       return;
     }
 
@@ -220,5 +290,35 @@ export class WebhookHandler {
       }
       return;
     }
+  }
+
+  /**
+   * Parse a URL-encoded form body string into a plain Record<string, string>.
+   *
+   * Twilio delivers POST webhook payloads as application/x-www-form-urlencoded.
+   * The signature algorithm requires the individual key/value pairs (not the raw
+   * string), sorted alphabetically.
+   *
+   * Returns an empty object for blank or malformed input so callers always get
+   * a consistent type.
+   */
+  private _parseBodyForTwilio(rawBody: string): Record<string, string> {
+    if (rawBody.length === 0) {
+      return {};
+    }
+
+    const result: Record<string, string> = {};
+
+    for (const pair of rawBody.split("&")) {
+      const eqIndex = pair.indexOf("=");
+      if (eqIndex === -1) {
+        continue;
+      }
+      const key = decodeURIComponent(pair.slice(0, eqIndex).replace(/\+/g, " "));
+      const value = decodeURIComponent(pair.slice(eqIndex + 1).replace(/\+/g, " "));
+      result[key] = value;
+    }
+
+    return result;
   }
 }

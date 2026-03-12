@@ -3,6 +3,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import * as Sentry from "@sentry/cloudflare";
 import { z } from "zod";
 import { drizzle } from "drizzle-orm/d1";
+import { AUTH_ALLOWED_ORIGINS } from "@spike-land-ai/shared";
 import * as schema from "./schema";
 import { createAuth, type Env } from "../db-auth/auth";
 import {
@@ -16,11 +17,7 @@ import {
 } from "../../common/core-logic/sentry";
 
 // CORS configuration for Better Auth and MCP
-const ALLOWED_ORIGINS = [
-  "https://spike.land",
-  "https://image-studio-mcp.spike.land",
-  "https://auth-mcp.spike.land",
-];
+const ALLOWED_ORIGINS = [...AUTH_ALLOWED_ORIGINS];
 
 function getCorsOrigin(request: Request): string {
   const origin = request.headers.get("Origin") ?? "";
@@ -46,6 +43,19 @@ function withCors(response: Response, request: Request): Response {
     statusText: response.statusText,
     headers,
   });
+}
+
+function normalizeAuthRequest(request: Request): Request {
+  const url = new URL(request.url);
+
+  // Better Auth clients built against newer releases can initiate social login
+  // via /sign-in/oauth2 while this worker still serves the older social route.
+  if (url.pathname === "/api/auth/sign-in/oauth2") {
+    url.pathname = "/api/auth/sign-in/social";
+    return new Request(url.toString(), request);
+  }
+
+  return request;
 }
 
 export default Sentry.withSentry((env: Env) => createWorkerSentryOptions("mcp-auth", env), {
@@ -115,7 +125,7 @@ export default Sentry.withSentry((env: Env) => createWorkerSentryOptions("mcp-au
       // 1. Better Auth catch-all API routes (OAuth, Magic Links, Session queries)
       if (url.pathname.startsWith("/api/auth/")) {
         const auth = createAuth(instrumentedEnv);
-        const authResponse = await auth.handler(request);
+        const authResponse = await auth.handler(normalizeAuthRequest(request));
         return withCors(authResponse, request);
       }
 

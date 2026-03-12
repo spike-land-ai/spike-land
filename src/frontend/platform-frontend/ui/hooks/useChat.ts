@@ -174,7 +174,7 @@ export function buildConversationItems(rounds: ThreadRound[]): ConversationItem[
         toolCallId: block.toolCallId,
         name: block.name,
         args: block.args,
-        result: block.result,
+        ...(block.result !== undefined ? { result: block.result } : {}),
         status: block.status,
         transport: block.transport,
         timestamp: round.createdAt,
@@ -477,17 +477,20 @@ export function useChat({ enabled = true, persona }: UseChatOptions = {}): UseCh
                 payload.name &&
                 payload.transport
               ) {
+                const toolCallId = payload.toolCallId;
+                const toolName = payload.name;
+                const transport = payload.transport;
                 activeAssistantTextIdRef.current = null;
                 setItems((prev) => [
                   ...prev,
                   {
                     id: makeId("tool"),
                     kind: "tool_call",
-                    toolCallId: payload.toolCallId,
-                    name: payload.name,
+                    toolCallId,
+                    name: toolName,
                     args: payload.args ?? {},
                     status: payload.status ?? "pending",
-                    transport: payload.transport,
+                    transport,
                     timestamp: Date.now(),
                   },
                 ]);
@@ -501,7 +504,7 @@ export function useChat({ enabled = true, persona }: UseChatOptions = {}): UseCh
                     item.kind === "tool_call" && item.toolCallId === payload.toolCallId
                       ? {
                           ...item,
-                          result: payload.result,
+                          ...(payload.result !== undefined ? { result: payload.result } : {}),
                           status: payload.status ?? "done",
                           transport: payload.transport ?? item.transport,
                         }

@@ -34,29 +34,3 @@ export const Tv = () => (
     <MdTv />
   </Wrap>
 );
-
-// Import { MdPhoneAndroid, MdShare, MdTabletAndroid, MdTv } from "react-icons/md";
-
-// export const Phone = () => (
-//   <span css={css`font-size:20pt;`}>
-//     <MdPhoneAndroid />
-//   </span>
-// );
-
-// export const Share = () => (
-//   <span css={css`font-size:20pt;`}>
-//     <MdShare />
-//   </span>
-// );
-
-// export const Tablet = () => (
-//   <span css={css`font-size:20pt;`}>
-//     <MdTabletAndroid />
-//   </span>
-// );
-
-// export const Tv = () => (
-//   <span css={css`font-size:20pt;`}>
-//     <MdTv />
-//   </span>
-// );

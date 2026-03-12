@@ -4,11 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { initialize } from "../../../internal/common/initialize";
-import { CSSWorker } from "./cssWorker";
+import { CSSWorker, type ICreateData } from "./cssWorker";
+import type { worker } from "../../../editor";
 
 self.onmessage = () => {
   // ignore the first message
-  initialize((ctx, createData) => {
+  initialize((ctx: worker.IWorkerContext, createData: ICreateData) => {
     return new CSSWorker(ctx, createData);
   });
 };

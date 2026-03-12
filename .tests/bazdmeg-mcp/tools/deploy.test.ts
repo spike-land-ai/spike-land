@@ -213,6 +213,51 @@ describe("deploy tools", () => {
       expect(text).toContain("[[rules]]");
       expect(text).toContain("**/*.txt");
     });
+
+    it("generates toml with dev, services, vars, analytics datasets, migrations, and env routes", async () => {
+      mockGetManifestPackage.mockResolvedValue({
+        kind: "worker",
+        version: "1.0.0",
+        description: "Edge worker",
+        entry: "index.ts",
+        worker: {
+          name: "spike-edge",
+          compatibility_date: "2026-03-01",
+          workers_dev: true,
+          dev: { port: 8787 },
+          migrations: [{ tag: "v1", new_classes: ["RateLimiter"] }],
+          vars: { GA_MEASUREMENT_ID: "G-TEST" },
+          services: [{ binding: "AUTH_MCP", service: "mcp-auth" }],
+          analytics_engine_datasets: [{ binding: "ANALYTICS", dataset: "spike_analytics" }],
+          env: {
+            staging: {
+              name: "spike-edge-staging",
+              vars: { APP_ENV: "staging" },
+              routes: [{ pattern: "staging-edge.example.com/*", zone_name: "example.com" }],
+            },
+          },
+        },
+      });
+
+      const result = await server.call("bazdmeg_generate_wrangler_toml", {
+        packageName: "spike-edge",
+      });
+      const text = result.content[0].text;
+      expect(text).toContain("workers_dev = true");
+      expect(text).toContain("[dev]");
+      expect(text).toContain("port = 8787");
+      expect(text).toContain("[[migrations]]");
+      expect(text).toContain('new_classes = ["RateLimiter"]');
+      expect(text).toContain("[vars]");
+      expect(text).toContain('GA_MEASUREMENT_ID = "G-TEST"');
+      expect(text).toContain("[[services]]");
+      expect(text).toContain('service = "mcp-auth"');
+      expect(text).toContain("[[analytics_engine_datasets]]");
+      expect(text).toContain('dataset = "spike_analytics"');
+      expect(text).toContain("[env.staging]");
+      expect(text).toContain('vars = { APP_ENV = "staging" }');
+      expect(text).toContain("[[env.staging.routes]]");
+    });
   });
 
   describe("bazdmeg_deploy_worker", () => {

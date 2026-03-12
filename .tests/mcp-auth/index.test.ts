@@ -130,6 +130,15 @@ describe("worker fetch handler", () => {
       );
     });
 
+    it("allows analytics.spike.land in CORS preflight responses", async () => {
+      const req = new Request("https://example.com/anything", {
+        method: "OPTIONS",
+        headers: { Origin: "https://analytics.spike.land" },
+      });
+      const res = await worker.fetch(req, makeEnv());
+      expect(res.headers.get("Access-Control-Allow-Origin")).toBe("https://analytics.spike.land");
+    });
+
     it("sets Access-Control-Allow-Origin to fallback when Origin header is missing", async () => {
       const req = makeRequest("OPTIONS", "/anything");
       const res = await worker.fetch(req, makeEnv());
@@ -176,6 +185,23 @@ describe("worker fetch handler", () => {
       const req = makeRequest("POST", "/api/auth/sign-in/email");
       const res = await worker.fetch(req, makeEnv());
       expect(createAuth).toHaveBeenCalled();
+      expect(res.status).toBe(200);
+    });
+
+    it("rewrites /api/auth/sign-in/oauth2 to the social sign-in route", async () => {
+      const { createAuth } = await import("../../src/edge-api/auth/db-auth/auth");
+      const req = makeRequest("POST", "/api/auth/sign-in/oauth2");
+      const res = await worker.fetch(req, makeEnv());
+
+      expect(createAuth).toHaveBeenCalled();
+      const authInstance = vi.mocked(createAuth).mock.results[0]?.value as {
+        handler: ReturnType<typeof vi.fn>;
+      };
+      expect(authInstance.handler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: "https://example.com/api/auth/sign-in/social",
+        }),
+      );
       expect(res.status).toBe(200);
     });
 

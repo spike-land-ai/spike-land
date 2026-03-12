@@ -147,6 +147,34 @@ export async function compressWithModel(
   }
 }
 
+/**
+ * Resolve PRD context for a route or message text.
+ * Returns a serialized PRD string to inject as system context before compression.
+ * Uses lazy import to avoid bundling prd-registry when unused.
+ */
+export async function resolvePrdContext(options: {
+  route?: string;
+  keywords?: string;
+}): Promise<string | null> {
+  try {
+    const { createPrdRegistry } = await import("../../../prd-registry/manifest.js");
+    const registry = createPrdRegistry();
+
+    if (options.route) {
+      const resolved = registry.resolveForRoute(options.route);
+      return resolved.totalTokens > 0 ? resolved.serialized : null;
+    }
+    if (options.keywords) {
+      const resolved = registry.resolveByKeywords(options.keywords);
+      return resolved.totalTokens > 0 ? resolved.serialized : null;
+    }
+    return null;
+  } catch {
+    // PRD registry not available — graceful degradation
+    return null;
+  }
+}
+
 export async function compressMessage(
   message: string,
   config: PrdCompressionConfig,

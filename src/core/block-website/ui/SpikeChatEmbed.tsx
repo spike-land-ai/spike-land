@@ -41,13 +41,13 @@ export function SpikeChatEmbed({
 
   return (
     <div
-      className="relative my-12 w-full overflow-hidden rounded-[2rem] border-2 border-primary/10 bg-background/50 shadow-sm backdrop-blur"
+      className="relative my-12 w-full overflow-hidden rounded-[2rem] border border-border/60 bg-background/50 shadow-[var(--panel-shadow)] backdrop-blur"
       style={{ height }}
     >
       {status === "loading" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 text-primary z-10 backdrop-blur-sm">
           <Loader2 className="mb-4 h-8 w-8 animate-spin" />
-          <p className="text-sm font-medium tracking-wider uppercase">
+          <p className="text-sm font-medium tracking-[0.24em] uppercase">
             Loading Universal Interface...
           </p>
         </div>

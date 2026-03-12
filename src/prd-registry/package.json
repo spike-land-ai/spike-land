@@ -1,0 +1,21 @@
+{
+  "name": "@spike-land-ai/prd-registry",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./core-logic": "./core-logic/index.ts",
+    "./manifest": "./manifest.ts",
+    "./prds/*": "./prds/*"
+  },
+  "dependencies": {
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  }
+}

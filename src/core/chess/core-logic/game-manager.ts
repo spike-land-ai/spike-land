@@ -57,7 +57,7 @@ export async function createGameRecord(
   const timeMs = TIME_CONTROL_MS[timeControl] ?? TIME_CONTROL_MS["BLITZ_5"];
 
   const resolvedTimeMs = timeMs ?? 300_000;
-  const game = await prisma.chessGame.create({
+  const game = (await prisma.chessGame.create({
     data: {
       whitePlayerId,
       status: "WAITING",
@@ -66,13 +66,13 @@ export async function createGameRecord(
       whiteTimeMs: resolvedTimeMs,
       blackTimeMs: resolvedTimeMs,
     },
-  });
+  })) as { id: string };
 
   return { id: game.id };
 }
 
 export async function joinGame(gameId: string, blackPlayerId: string): Promise<{ id: string }> {
-  const game = await prisma.chessGame.findUnique({ where: { id: gameId } });
+  const game = (await prisma.chessGame.findUnique({ where: { id: gameId } })) as GameRecord | null;
 
   if (!game) {
     throw new Error("Game not found");
@@ -84,13 +84,13 @@ export async function joinGame(gameId: string, blackPlayerId: string): Promise<{
     throw new Error("Cannot join your own game");
   }
 
-  const updated = await prisma.chessGame.update({
+  const updated = (await prisma.chessGame.update({
     where: { id: gameId },
     data: {
       blackPlayerId,
       status: "ACTIVE",
     },
-  });
+  })) as { id: string };
 
   return { id: updated.id };
 }

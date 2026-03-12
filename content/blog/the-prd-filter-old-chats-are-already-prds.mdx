@@ -1,0 +1,270 @@
+---
+title: "The PRD Filter: Your Old Chats Are Already PRDs"
+slug: "the-prd-filter-old-chats-are-already-prds"
+description: "Most long AI chats are just badly formatted requirements documents. A PRD filter turns transcript sludge into a compact execution artifact, and that changes what one developer can ship."
+date: "2026-03-12"
+author: "Zoltan Erdos"
+category: "Developer Experience"
+tags: ["prd", "spike-chat", "context-engineering", "ai", "productivity", "requirements", "developer-tools"]
+featured: false
+draft: false
+primer: "Your old chats are not waste. They are latent PRDs."
+heroImage: "/blog/why-spike-chat-stays-sharp/hero.jpg"
+heroPrompt: "A cluttered AI chat transcript being compressed into a sharp engineering blueprint, cinematic tech illustration, steel blue and amber accents"
+---
+
+![A cluttered AI chat transcript being compressed into a sharp engineering blueprint, cinematic tech illustration, steel blue and amber accents](/blog/why-spike-chat-stays-sharp/hero.jpg)
+
+<Tldr>
+
+- Most old AI chats are not conversation. They are broken PRDs spread across too many turns.
+- The right move is not to replay the whole transcript. It is to extract the smallest truthful execution artifact.
+- A PRD filter turns messy chat into task, constraints, acceptance criteria, context, and priority.
+- This is one of the core reasons a solo developer can now outrun teams that still organize around meetings, handoffs, and transcript soup.
+- I built the first rough version of this idea while working at VMO2. I got fired in February 2026 for "performance." That experience only made the thesis sharper.
+
+</Tldr>
+
+Most people think the problem with AI chat is context window size.
+
+That is not the real problem.
+
+The real problem is that most chats preserve the wrong shape.
+
+They keep everything.
+Every false start.
+Every stale tool result.
+Every half-correct explanation.
+Every detour.
+
+Then they call that "context."
+
+It is not context.
+
+It is a badly managed working set.
+
+## The PRD Filter
+
+Here is the claim:
+
+> most long chats are already PRDs. They are just trapped inside transcript form.
+
+By turn 20, the user has usually already said everything that matters:
+
+- what they want
+- what must not break
+- what success looks like
+- what environment they are in
+- what constraints they care about
+- what edge cases are making the task annoying
+
+That is a PRD.
+
+Not a corporate PRD with a steering committee and a fake roadmap section.
+
+A real PRD.
+
+Small.
+Operational.
+Executable.
+
+The mistake is leaving it scattered across old messages.
+
+The right system applies a filter and extracts the useful shape:
+
+- `intent`
+- `task`
+- `constraints`
+- `acceptance`
+- `context`
+- `priority`
+
+That is enough to do real work.
+
+That is enough to build, debug, review, deploy, or analyze.
+
+And once you have that shape, old chats stop being baggage.
+
+They become source material.
+
+## Why old chats should become PRDs
+
+Transcript-first systems keep asking the model to reread the archaeology of the task.
+
+That is expensive and wasteful.
+
+The model does not need to keep reliving the conversation.
+It needs the final truth that emerged from the conversation.
+
+If a user spent forty messages clarifying a feature, the answer is not "great, now send all forty messages back forever."
+
+The answer is:
+
+> extract the requirement and carry that forward instead
+
+This is the deeper point behind the PRD filter.
+
+It is not summarization.
+
+It is not note taking.
+
+It is not chat cleanup.
+
+It is a representation upgrade.
+
+You are converting conversational entropy into an execution artifact.
+
+That changes the economics of building software.
+
+## What the filter actually keeps
+
+A good PRD filter is ruthless.
+
+It does not care about the emotional journey of the conversation.
+It cares about the minimum truthful state required to continue.
+
+That usually means:
+
+- the core task in one sentence
+- up to a handful of hard constraints
+- acceptance criteria tight enough to test
+- relevant implementation or business context
+- an honest priority level
+
+Everything else is optional.
+
+This is why old chats are so valuable.
+
+They contain the negotiation.
+They contain the corrections.
+They contain the hidden constraints the user forgot to say up front.
+
+The transcript is noisy.
+The requirement hidden inside it is not.
+
+## This is personal for me
+
+As of **March 12, 2026**, I am a solo developer with ADHD.
+
+About a month ago, in **February 2026**, I got fired from VMO2.
+
+The stated reason was performance.
+
+That is hard to take seriously.
+
+At VMO2, I watched a team of roughly twenty people spend months on a single
+popup.
+
+Meanwhile, even Opus struggled with that codebase, which tells you something
+about the shape of the system: too much mass, too much ambiguity, too much
+institutional sludge, not enough clean executable intent.
+
+That environment is where the first rough v0 of this idea clicked for me.
+
+Not the full system.
+Not the polished version.
+Just the core realization:
+
+> if you can extract the requirement cleanly enough, one agent can move through a codebase very fast
+
+My read of what happened is simple.
+
+I became too effective with AI-assisted development inside a culture that still
+measures work by visible struggle, meeting count, and how long something takes
+inside the old system.
+
+If your benchmark is a large organization taking months to ship a popup, then a
+developer with an AI runtime, a PRD filter, and actual execution discipline can
+look suspicious.
+
+But that is not underperformance.
+
+That is the new performance.
+
+## What performance means now
+
+I will say it plainly.
+
+With my current system, I believe I could rewrite the whole VMO2 stack for
+them, every app, every platform surface, and their internal tools, in around
+six hours with a single agent.
+
+That sentence sounds insane only if you still think the job is typing code by
+hand.
+
+It is not.
+
+The job is:
+
+1. extract the requirement
+2. formalize the capability
+3. enforce the constraints
+4. verify the output
+
+The code is downstream of that.
+
+Once the requirement is sharp, implementation gets much lighter.
+
+That is why the PRD filter matters so much.
+
+It is not a UI trick.
+It is not a prompt trick.
+It is not "AI magic."
+
+It is a system for keeping the working set honest.
+
+## Why this matters for solo developers
+
+If you are solo, especially if your brain already fights fragmentation, context
+switching, and executive overload, transcript sludge is deadly.
+
+You do not need more chat history.
+
+You need cleaner state.
+
+That is one reason I care about this so much as a solo builder with ADHD.
+
+The PRD filter is not just good for token efficiency.
+
+It is cognitively humane.
+
+It reduces the amount of nonsense that both the model and the human have to
+carry.
+
+It turns "what were we even doing?" into a compact artifact you can trust.
+
+That is how one person starts moving like a team should have moved.
+
+And, in some cases, faster than the team.
+
+## The strategic implication
+
+The future of AI software is not bigger transcript buffers.
+
+It is better compression boundaries.
+
+The winning systems will not be the ones that remember the most.
+
+They will be the ones that preserve the cleanest artifact of what matters now.
+
+Old chats are not dead weight.
+
+They are latent PRDs.
+
+If your system cannot turn them into executable requirements, it is wasting the
+most valuable thing the conversation produced.
+
+## Tune in
+
+This is the system I am building now.
+
+I am building it as a solo developer.
+I am building it after getting fired for "performance."
+I am building it because I have seen what happens when organizations confuse
+motion for output.
+
+If you want more articles like this, tune in.
+
+Because this is not theory for me anymore.
+
+It is how I work.

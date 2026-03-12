@@ -27,12 +27,12 @@ function normalizeMdxComponentProps(segment: string): string {
     (_match: string, tag: string, attrs: string, closing: string) => {
       let normalizedAttrs = attrs.replace(
         LITERAL_PROP_PATTERN,
-        (_: any, name: string, value: string) => ` ${name}="${value}"`,
+        (_: string, name: string, value: string) => ` ${name}="${value}"`,
       );
 
       normalizedAttrs = normalizedAttrs.replace(
         /\s+mappings=\{(\[[\s\S]*?\])\}/g,
-        (_: any, literal: string) => {
+        (_: string, literal: string) => {
           try {
             const normalizedJson = normalizeObjectLiteralKeys(literal);
             const encoded = JSON.stringify(JSON.parse(normalizedJson)).replace(/'/g, "&apos;");

@@ -736,3 +736,29 @@
     transform: translateX(0.18rem);
   }
 }
+
+/* Support widget humor animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+@keyframes flip {
+  0% { transform: perspective(400px) rotateY(0); }
+  40% { transform: perspective(400px) rotateY(170deg); }
+  50% { transform: perspective(400px) rotateY(190deg); }
+  80% { transform: perspective(400px) rotateY(360deg); }
+  100% { transform: perspective(400px) rotateY(360deg); }
+}
+
+@keyframes confetti {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(calc(100vh)) translateX(var(--confetti-x, 0px)) rotate(var(--confetti-r, 720deg));
+    opacity: 0;
+  }
+}

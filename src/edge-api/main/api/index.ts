@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import * as Sentry from "@sentry/cloudflare";
 import type { Env, Variables } from "../core-logic/env.js";
-import { createLogger } from "@spike-land-ai/shared";
+import { createLogger, MAIN_SITE_HOSTS, PLATFORM_HOSTS } from "@spike-land-ai/shared";
 import { RateLimiter } from "../edge/rate-limiter.js";
 import { authMiddleware } from "./middleware/auth.js";
 import { health } from "./routes/health.js";
@@ -56,10 +56,16 @@ import {
 const log = createLogger("spike-edge");
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
+const MAIN_SITE_HOST_SET = new Set<string>(MAIN_SITE_HOSTS);
+
+function getRequestHost(request: Request): string {
+  const url = new URL(request.url);
+  return (request.headers.get("host") ?? url.host).toLowerCase().split(":")[0] ?? "";
+}
 
 function getSpikeEdgeMetricService(request: Request): "Main Site" | "Edge API" | null {
   const url = new URL(request.url);
-  const host = (request.headers.get("host") ?? url.host).toLowerCase();
+  const host = getRequestHost(request);
 
   if (host.startsWith("api.spike.land") || host.startsWith("edge.spike.land")) {
     return "Edge API";
@@ -75,7 +81,7 @@ function getSpikeEdgeMetricService(request: Request): "Main Site" | "Edge API" |
     }
   }
 
-  if (host.startsWith("spike.land") || host.startsWith("www.spike.land")) {
+  if (MAIN_SITE_HOST_SET.has(host)) {
     return url.pathname.startsWith("/api/") ? "Edge API" : "Main Site";
   }
 
@@ -83,6 +89,18 @@ function getSpikeEdgeMetricService(request: Request): "Main Site" | "Edge API" |
 }
 // Request ID middleware (must run before everything else)
 app.use("*", requestIdMiddleware);
+
+app.use("*", async (c, next) => {
+  const host = getRequestHost(c.req.raw);
+  if (host === PLATFORM_HOSTS.analytics) {
+    const url = new URL(c.req.url);
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      url.pathname = "/analytics";
+      return c.redirect(url.toString(), 308);
+    }
+  }
+  return next();
+});
 
 // api.spike.land rewrite: strip subdomain prefix, prepend /api/
 app.use("*", async (c, next) => {

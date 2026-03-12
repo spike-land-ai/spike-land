@@ -1,8 +1,17 @@
-// @ts-nocheck
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import { FastForward, Palette, Pause, Play, Rewind, Square, Type, Volume2 } from "lucide-react";
+import {
+  FastForward,
+  Mic,
+  Palette,
+  Pause,
+  Play,
+  Rewind,
+  Square,
+  Type,
+  Volume2,
+} from "lucide-react";
 import { Button } from "../lazy-imports/button";
 import {
   buildReaderTimeline,
@@ -12,12 +21,20 @@ import {
   type ReaderBlock,
   type ReaderTimelineEntry,
 } from "../core-logic/blog-reader";
+import {
+  ElevenLabsTtsEngine,
+  ELEVENLABS_VOICES,
+  type ElevenLabsStatus,
+} from "../core-logic/elevenlabs-tts";
 
-type ReaderStatus = "ended" | "idle" | "paused" | "playing" | "unsupported";
+type ReaderStatus = "ended" | "idle" | "loading" | "paused" | "playing" | "unsupported";
 type ReaderTone = "mist" | "paper" | "sage";
+type ReaderEngine = "browser" | "elevenlabs";
 
 interface ReaderPreferences {
   autoFollow: boolean;
+  elevenLabsVoice: string;
+  engine: ReaderEngine;
   fontScale: number;
   rate: number;
   tone: ReaderTone;
@@ -25,6 +42,8 @@ interface ReaderPreferences {
 
 const DEFAULT_PREFERENCES: ReaderPreferences = {
   autoFollow: true,
+  elevenLabsVoice: ELEVENLABS_VOICES[0]!.id,
+  engine: "browser",
   fontScale: 1,
   rate: 1,
   tone: "paper",
@@ -67,6 +86,14 @@ function readReaderPreferences(): ReaderPreferences {
     return {
       autoFollow:
         typeof parsed.autoFollow === "boolean" ? parsed.autoFollow : DEFAULT_PREFERENCES.autoFollow,
+      elevenLabsVoice:
+        typeof parsed.elevenLabsVoice === "string"
+          ? parsed.elevenLabsVoice
+          : DEFAULT_PREFERENCES.elevenLabsVoice,
+      engine:
+        parsed.engine === "browser" || parsed.engine === "elevenlabs"
+          ? parsed.engine
+          : DEFAULT_PREFERENCES.engine,
       fontScale:
         typeof parsed.fontScale === "number" ? parsed.fontScale : DEFAULT_PREFERENCES.fontScale,
       rate: typeof parsed.rate === "number" ? parsed.rate : DEFAULT_PREFERENCES.rate,
@@ -127,6 +154,8 @@ export function BlogReaderControls({
   const [autoFollow, setAutoFollow] = useState(preferences.autoFollow);
   const [blocks, setBlocks] = useState<ReaderBlock[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [engine, setEngine] = useState<ReaderEngine>(preferences.engine);
+  const [elevenLabsVoice, setElevenLabsVoice] = useState(preferences.elevenLabsVoice);
   const [fontScale, setFontScale] = useState(preferences.fontScale);
   const [progressSeconds, setProgressSeconds] = useState(0);
   const [rate, setRate] = useState(preferences.rate);
@@ -140,6 +169,9 @@ export function BlogReaderControls({
   const runIdRef = useRef(0);
   const timelineRef = useRef<ReaderTimelineEntry[]>([]);
   const autoFollowRef = useRef(autoFollow);
+  const elevenLabsRef = useRef<ElevenLabsTtsEngine | null>(null);
+
+  const isElevenLabs = engine === "elevenlabs";
 
   const timeline = useMemo(() => buildReaderTimeline(blocks, rate), [blocks, rate]);
   const totalSeconds = timeline.at(-1)?.end ?? 0;
@@ -149,7 +181,7 @@ export function BlogReaderControls({
     () => blocks.filter((block) => block.kind.startsWith("heading-")),
     [blocks],
   );
-  const audioDisabled = blocks.length === 0 || status === "unsupported";
+  const audioDisabled = blocks.length === 0 || (status === "unsupported" && !isElevenLabs);
 
   useEffect(() => {
     blocksRef.current = blocks;
@@ -159,8 +191,8 @@ export function BlogReaderControls({
   useEffect(() => {
     autoFollowRef.current = autoFollow;
     rateRef.current = rate;
-    writeReaderPreferences({ autoFollow, fontScale, rate, tone });
-  }, [autoFollow, fontScale, rate, tone]);
+    writeReaderPreferences({ autoFollow, elevenLabsVoice, engine, fontScale, rate, tone });
+  }, [autoFollow, elevenLabsVoice, engine, fontScale, rate, tone]);
 
   useEffect(() => {
     const scope = scopeRef.current;
@@ -185,6 +217,28 @@ export function BlogReaderControls({
       }
     };
   }, [fontScale, scopeRef, status, tone]);
+
+  // Initialize ElevenLabs engine when blocks or voice change
+  useEffect(() => {
+    if (!isElevenLabs || blocks.length === 0) return;
+
+    if (!elevenLabsRef.current) {
+      elevenLabsRef.current = new ElevenLabsTtsEngine();
+    }
+
+    const ttsEngine = elevenLabsRef.current;
+    ttsEngine.onBlockChange = (blockIndex: number) => {
+      syncActiveBlock(blockIndex);
+    };
+    ttsEngine.onProgress = (seconds: number) => {
+      setProgressSeconds(seconds);
+    };
+    ttsEngine.onStatusChange = (elStatus: ElevenLabsStatus) => {
+      setStatus(elStatus);
+    };
+
+    ttsEngine.initialize(blocks, elevenLabsVoice);
+  }, [blocks, elevenLabsVoice, isElevenLabs]);
 
   function syncActiveBlock(nextIndex: number) {
     const nextBlock = blocksRef.current[nextIndex] ?? null;
@@ -213,6 +267,10 @@ export function BlogReaderControls({
   }
 
   function stopPlayback(nextStatus: Exclude<ReaderStatus, "unsupported"> = "idle") {
+    if (isElevenLabs) {
+      elevenLabsRef.current?.stop();
+      return;
+    }
     cancelSpeech();
     setStatus(getSpeechSupport() ? nextStatus : "unsupported");
   }
@@ -222,13 +280,25 @@ export function BlogReaderControls({
       0,
       Math.min(nextIndex, Math.max(0, blocksRef.current.length - 1)),
     );
+
+    if (isElevenLabs) {
+      if (continuePlayback) {
+        elevenLabsRef.current?.seekToBlock(clampedIndex);
+      } else {
+        syncActiveBlock(clampedIndex);
+        const entry = timelineRef.current[clampedIndex];
+        setProgressSeconds(entry?.start ?? 0);
+      }
+      return;
+    }
+
     const entry = timelineRef.current[clampedIndex];
 
     syncActiveBlock(clampedIndex);
     setProgressSeconds(entry?.start ?? 0);
 
     if (continuePlayback) {
-      startPlayback(clampedIndex);
+      startBrowserPlayback(clampedIndex);
       return;
     }
 
@@ -237,7 +307,7 @@ export function BlogReaderControls({
     }
   }
 
-  function startPlayback(nextIndex: number) {
+  function startBrowserPlayback(nextIndex: number) {
     const synth = getSpeechSynthesisHandle();
     const nextBlock = blocksRef.current[nextIndex];
     const nextEntry = timelineRef.current[nextIndex];
@@ -288,7 +358,7 @@ export function BlogReaderControls({
 
       const followingIndex = nextIndex + 1;
       if (followingIndex < blocksRef.current.length) {
-        startPlayback(followingIndex);
+        startBrowserPlayback(followingIndex);
         return;
       }
 
@@ -318,7 +388,8 @@ export function BlogReaderControls({
     if (!scope) return;
 
     cancelSpeech();
-    setStatus(getSpeechSupport() ? "idle" : "unsupported");
+    elevenLabsRef.current?.stop();
+    setStatus(getSpeechSupport() || engine === "elevenlabs" ? "idle" : "unsupported");
     setProgressSeconds(0);
 
     const schedule =
@@ -327,13 +398,13 @@ export function BlogReaderControls({
         : (callback: FrameRequestCallback) =>
             window.setTimeout(() => callback(performance.now()), 0);
 
-    const cancel =
+    const cancel: (handle: number) => void =
       typeof window !== "undefined" && "cancelAnimationFrame" in window
-        ? window.cancelAnimationFrame.bind(window)
-        : window.clearTimeout.bind(window);
+        ? (handle: number) => cancelAnimationFrame(handle)
+        : (handle: number) => clearTimeout(handle);
 
     const handle = schedule(() => {
-      const nextBlocks = collectReaderBlocks(scope);
+      const nextBlocks = collectReaderBlocks(scope as unknown as ParentNode);
       nextBlocks.forEach((block, index) => {
         block.element.dataset["readerId"] = block.id || `reader-block-${index}`;
         block.element.dataset["readerActive"] = index === 0 ? "true" : "false";
@@ -349,17 +420,37 @@ export function BlogReaderControls({
     return () => {
       cancel(handle);
     };
-  }, [contentKey, scopeRef]);
+  }, [contentKey, scopeRef, engine]);
 
   useEffect(() => {
     return () => {
       cancelSpeech();
+      elevenLabsRef.current?.stop();
     };
   }, []);
 
   const handlePlayPause = () => {
+    if (blocksRef.current.length === 0) return;
+
+    if (isElevenLabs) {
+      const ttsEngine = elevenLabsRef.current;
+      if (!ttsEngine) return;
+
+      const elStatus = ttsEngine.getStatus();
+      if (elStatus === "playing") {
+        ttsEngine.pause();
+        return;
+      }
+      if (elStatus === "paused") {
+        ttsEngine.resume();
+        return;
+      }
+      ttsEngine.play(currentIndexRef.current);
+      return;
+    }
+
     const synth = getSpeechSynthesisHandle();
-    if (!synth || blocksRef.current.length === 0) return;
+    if (!synth) return;
 
     if (status === "playing") {
       synth.pause();
@@ -373,7 +464,7 @@ export function BlogReaderControls({
       return;
     }
 
-    startPlayback(currentIndexRef.current);
+    startBrowserPlayback(currentIndexRef.current);
   };
 
   const handleSeek = (nextValue: number) => {
@@ -384,13 +475,26 @@ export function BlogReaderControls({
   const handleRateChange = (nextRate: number) => {
     setRate(nextRate);
 
+    if (isElevenLabs) {
+      elevenLabsRef.current?.setPlaybackRate(nextRate);
+      return;
+    }
+
     if (status === "playing") {
-      startPlayback(currentIndexRef.current);
+      startBrowserPlayback(currentIndexRef.current);
       return;
     }
 
     if (status === "paused") {
       stopPlayback("idle");
+    }
+  };
+
+  const handleEngineChange = (nextEngine: ReaderEngine) => {
+    stopPlayback("idle");
+    setEngine(nextEngine);
+    if (nextEngine === "elevenlabs" || getSpeechSupport()) {
+      setStatus("idle");
     }
   };
 
@@ -419,6 +523,48 @@ export function BlogReaderControls({
             </div>
           </div>
 
+          {/* Engine toggle */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-2xl border border-border/55 bg-background/55 p-0.5">
+              {(["browser", "elevenlabs"] as ReaderEngine[]).map((eng) => (
+                <button
+                  key={eng}
+                  type="button"
+                  onClick={() => handleEngineChange(eng)}
+                  className={`flex items-center gap-1.5 rounded-[0.85rem] px-3 py-1.5 text-xs font-black uppercase tracking-[0.18em] transition-colors ${
+                    engine === eng
+                      ? "bg-primary/12 text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {eng === "browser" ? (
+                    <Volume2 className="size-3.5" />
+                  ) : (
+                    <Mic className="size-3.5" />
+                  )}
+                  {eng === "browser" ? "Browser" : "ElevenLabs"}
+                </button>
+              ))}
+            </div>
+
+            {isElevenLabs && (
+              <select
+                value={elevenLabsVoice}
+                onChange={(event) => {
+                  stopPlayback("idle");
+                  setElevenLabsVoice(event.target.value);
+                }}
+                className="h-8 rounded-2xl border border-border/60 bg-card/70 px-2 text-xs font-semibold text-foreground outline-none focus:ring-2 focus:ring-primary/25"
+              >
+                {ELEVENLABS_VOICES.map((voice) => (
+                  <option key={voice.id} value={voice.id}>
+                    {voice.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
@@ -428,10 +574,18 @@ export function BlogReaderControls({
             >
               {status === "playing" ? (
                 <Pause className="mr-2 size-4" />
+              ) : status === "loading" ? (
+                <Volume2 className="mr-2 size-4 animate-pulse" />
               ) : (
                 <Play className="mr-2 size-4" />
               )}
-              {status === "playing" ? "Pause" : status === "paused" ? "Resume" : "Read Aloud"}
+              {status === "playing"
+                ? "Pause"
+                : status === "paused"
+                  ? "Resume"
+                  : status === "loading"
+                    ? "Loading..."
+                    : "Read Aloud"}
             </Button>
             <Button
               type="button"
@@ -524,7 +678,7 @@ export function BlogReaderControls({
                   step={0.1}
                   value={rate}
                   onChange={(event) => handleRateChange(Number(event.target.value))}
-                  disabled={status === "unsupported"}
+                  disabled={status === "unsupported" && !isElevenLabs}
                   className="mt-3 w-full accent-primary"
                   aria-label="Speech rate"
                 />
@@ -586,10 +740,10 @@ export function BlogReaderControls({
             </div>
           </div>
 
-          {status === "unsupported" && (
+          {status === "unsupported" && !isElevenLabs && (
             <p className="text-sm leading-relaxed text-muted-foreground">
               Read-aloud controls need the browser Speech Synthesis API. The typography and focus
-              controls still apply.
+              controls still apply. Switch to ElevenLabs for high-quality voices.
             </p>
           )}
         </div>

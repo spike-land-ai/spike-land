@@ -18,6 +18,8 @@ export interface AgentLoopContext {
   manager: ServerManager;
   messages: Message[];
   maxTurns?: number;
+  /** Called immediately before a model request begins. */
+  onModelRequestStart?: (turn: number, maxTurns: number) => void;
   onTextDelta?: (text: string) => void;
   onToolCall?: (name: string) => void;
   /** Called when a tool call begins execution. */
@@ -37,6 +39,10 @@ export interface AgentLoopContext {
   usageTracker?: TokenTracker;
   /** Called after each turn with updated tracker state. */
   onUsageUpdate?: (tracker: TokenTracker) => void;
+  /** Called after the assistant response is appended to history. */
+  onAssistantMessage?: (content: ContentBlock[]) => void;
+  /** Called after tool results are appended to history. */
+  onToolResultsAppended?: (content: Message["content"]) => void;
   /** Dynamic tool registry. When provided, only active tools are sent to Claude. */
   registry?: DynamicToolRegistry;
   /** Context manager for automatic summarization. */
@@ -59,11 +65,15 @@ export async function runAgentLoop(
   userMessage: string | Message["content"],
   ctx: AgentLoopContext,
 ): Promise<void> {
-  const maxTurns = ctx.maxTurns ?? 20;
-  const parallel = ctx.parallelExecution !== false;
-
   // Add user message to history
   ctx.messages.push({ role: "user", content: userMessage });
+
+  await continueAgentLoop(ctx);
+}
+
+export async function continueAgentLoop(ctx: AgentLoopContext): Promise<void> {
+  const maxTurns = ctx.maxTurns ?? 20;
+  const parallel = ctx.parallelExecution !== false;
 
   for (let turn = 0; turn < maxTurns; turn++) {
     log(`Agent loop turn ${turn + 1}/${maxTurns}`);
@@ -96,6 +106,7 @@ export async function runAgentLoop(
     }
     const systemOverride = promptParts.length > 0 ? promptParts.join("\n\n") : undefined;
 
+    ctx.onModelRequestStart?.(turn + 1, maxTurns);
     const stream = ctx.client.createStream(ctx.messages, tools, systemOverride);
     const response = await streamResponse(stream, ctx.onTextDelta);
 
@@ -107,6 +118,7 @@ export async function runAgentLoop(
 
     // Add assistant response to history
     ctx.messages.push({ role: "assistant", content: response.content });
+    ctx.onAssistantMessage?.(response.content);
 
     // Check for tool_use blocks
     const toolUseBlocks = response.content.filter(
@@ -144,6 +156,7 @@ export async function runAgentLoop(
       role: "user",
       content: toolResults as Message["content"],
     });
+    ctx.onToolResultsAppended?.(toolResults);
   }
 
   // Reached maxTurns — call onTurnEnd to avoid leaking UI spinners

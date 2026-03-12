@@ -32,6 +32,7 @@ export interface Env {
   CF_ZONE_ID: string;
   CF_CACHE_PURGE_TOKEN: string;
   XAI_API_KEY: string;
+  ELEVENLABS_API_KEY: string;
   SENTRY_DSN?: string;
   SENTRY_TRACES_SAMPLE_RATE?: string;
   PRD_COMPRESSION_MODE?: string;

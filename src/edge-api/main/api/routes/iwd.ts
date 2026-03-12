@@ -1479,11 +1479,11 @@ function renderClientScript(): string {
       var boot = {};
       try {
         boot = JSON.parse(document.getElementById('iwd-boot').textContent || '{}');
-      } catch {}
+      } catch { /* Malformed JSON in the server-rendered boot script tag must not crash the page; defaults are safe */ }
       var emojiOptions = [];
       try {
         emojiOptions = JSON.parse(document.getElementById('iwd-emojis').textContent || '[]');
-      } catch {}
+      } catch { /* Malformed JSON in the server-rendered emoji script tag must not crash the page; empty array is a safe fallback */ }
 
       var state = {
         visitor: null,
@@ -1877,7 +1877,7 @@ function renderClientScript(): string {
                 await cache.put(request, response.clone());
               }
             }
-          }catch{}
+          }catch{ /* Cache API is unavailable in private/incognito browsing or when storage is blocked by the browser; fall through to direct image load */ }
         }
         await new Promise(function(resolve){
           var image = new Image();
@@ -1893,7 +1893,7 @@ function renderClientScript(): string {
         var firstVisit = false;
         try{
           firstVisit = !localStorage.getItem('iwd-2026-seen');
-        }catch{}
+        }catch{ /* localStorage is unavailable in private browsing, sandboxed iframes, or when storage quota is exceeded; treat as first visit */ }
         if(!firstVisit) return;
 
         var introItems = Array.from(state.messages.values())
@@ -1906,7 +1906,7 @@ function renderClientScript(): string {
           .slice(-${IWD_INTRO_REVEAL_LIMIT});
 
         if(introItems.length === 0){
-          try{ localStorage.setItem('iwd-2026-seen', '1'); }catch{}
+          try{ localStorage.setItem('iwd-2026-seen', '1'); }catch{ /* localStorage write may fail in private browsing or when quota is exceeded; the intro will simply replay on next visit */ }
           return;
         }
 
@@ -1920,7 +1920,7 @@ function renderClientScript(): string {
 
         try{
           localStorage.setItem('iwd-2026-seen', '1');
-        }catch{}
+        }catch{ /* localStorage write may fail in private browsing or when quota is exceeded; the intro will simply replay on next visit */ }
       }
 
       function upsertFeed(feed, isInitial){
@@ -2120,7 +2120,7 @@ function renderClientScript(): string {
           if(!response.ok) return;
           var data = await response.json();
           upsertFeed(data, false);
-        }catch{}
+        }catch{ /* Background poll failures (network errors, offline) are silently ignored; the next scheduled poll will retry */ }
       }
 
       async function bootstrap(){

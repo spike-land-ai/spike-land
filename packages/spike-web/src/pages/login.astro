@@ -87,7 +87,7 @@ import Layout from '../layouts/Layout.astro';
     async function handleLogin(provider: 'github' | 'google') {
       if (errorEl) errorEl.hidden = true;
       try {
-        await authClient.signIn.oauth2({ provider, callbackURL: redirectUrl });
+        await authClient.signIn.social({ provider, callbackURL: redirectUrl });
       } catch (err: unknown) {
         if (errorEl && errorText) {
           errorText.textContent = err instanceof Error ? err.message : 'Login failed';

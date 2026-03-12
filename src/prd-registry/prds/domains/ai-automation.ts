@@ -1,0 +1,50 @@
+import type { PrdDefinition } from "../../core-logic/types.js";
+
+export const aiAutomationDomain: PrdDefinition = {
+  id: "domain:ai-automation",
+  level: "domain",
+  name: "AI & Automation",
+  summary: "AI gateway, agent swarms, orchestration, and automated coding pipelines",
+  purpose:
+    "Domain for AI-powered automation. Covers the AI gateway (OpenAI-compatible API), agent swarm management, code generation pipelines, and reactive tool graphs.",
+  constraints: [
+    "AI responses must include provider attribution",
+    "Swarm agents must respect rate limits and credit budgets",
+    "Orchestration plans require human approval for destructive actions",
+  ],
+  acceptance: [
+    "AI gateway correctly routes to selected provider/model",
+    "Agent swarms can be monitored and stopped",
+  ],
+  toolCategories: [
+    "ai-gateway",
+    "swarm",
+    "swarm-monitoring",
+    "orchestration",
+    "orchestrator",
+    "codegen",
+    "session",
+    "reactions",
+    "chat",
+    "agents",
+    "pipeline",
+  ],
+  tools: [],
+  composesFrom: ["platform"],
+  routePatterns: [],
+  keywords: [
+    "ai",
+    "agent",
+    "swarm",
+    "orchestrate",
+    "automate",
+    "pipeline",
+    "codegen",
+    "llm",
+    "model",
+    "gateway",
+    "chat",
+  ],
+  tokenEstimate: 300,
+  version: "1.0.0",
+};

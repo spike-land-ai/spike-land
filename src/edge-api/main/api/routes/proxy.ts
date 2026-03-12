@@ -270,4 +270,81 @@ proxy.post("/proxy/github", async (c) => {
   });
 });
 
+interface TtsRequestBody {
+  text: string;
+  voice_id?: string;
+}
+
+function validateTtsBody(body: unknown): body is TtsRequestBody {
+  if (typeof body !== "object" || body === null) return false;
+  const b = body as Record<string, unknown>;
+  if (typeof b["text"] !== "string") return false;
+  const text = b["text"] as string;
+  return text.length >= 1 && text.length <= 5000;
+}
+
+const DEFAULT_VOICE_ID = "EXAVITQu4vr4xnSDxMaL"; // Sarah
+
+proxy.post("/proxy/tts", async (c) => {
+  const body = await c.req.json<unknown>();
+  if (!validateTtsBody(body)) {
+    return c.json({ error: "Invalid request: text is required (1-5000 chars)" }, 400);
+  }
+
+  const apiKey = c.env.ELEVENLABS_API_KEY;
+  if (!apiKey) {
+    return c.json({ error: "TTS service not configured" }, 503);
+  }
+
+  const voiceId = body.voice_id ?? DEFAULT_VOICE_ID;
+  const url = `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voiceId)}`;
+
+  const start = Date.now();
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "xi-api-key": apiKey,
+      "Content-Type": "application/json",
+      Accept: "audio/mpeg",
+    },
+    body: JSON.stringify({
+      text: body.text,
+      model_id: "eleven_multilingual_v2",
+      output_format: "mp3_44100_128",
+    }),
+  });
+
+  try {
+    c.executionCtx.waitUntil(
+      getClientId(c.req.raw).then((clientId) =>
+        sendGA4Events(c.env, clientId, [
+          {
+            name: "proxy_api_call",
+            params: {
+              provider: "elevenlabs",
+              status: response.status,
+              duration_ms: Date.now() - start,
+            },
+          },
+        ]),
+      ),
+    );
+  } catch {
+    /* no ExecutionContext in test environment */
+  }
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    return c.json({ error: "TTS generation failed", detail: errorText }, response.status as 400);
+  }
+
+  return new Response(response.body, {
+    status: 200,
+    headers: {
+      "Content-Type": "audio/mpeg",
+      "Cache-Control": "public, max-age=604800, immutable",
+    },
+  });
+});
+
 export { proxy };

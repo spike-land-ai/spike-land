@@ -39,6 +39,20 @@ function withSuspense(
   };
 }
 
+/**
+ * PRD metadata for route-level context resolution.
+ * Maps route paths to their PRD registry IDs for lazy context loading.
+ * Used by AI agents and the compression pipeline to resolve relevant PRDs.
+ */
+export const ROUTE_PRD_MAP: Record<string, string> = {
+  "/apps": "route:/apps",
+  "/blog": "route:/blog",
+  "/dashboard": "route:/dashboard",
+  "/cockpit": "route:/dashboard",
+  "/vibe-code": "route:/vibe-code",
+  "/pricing": "route:/pricing",
+};
+
 const rootRoute = createRootRoute({ component: RootLayout, notFoundComponent: NotFoundPage });
 
 const indexRoute = createRoute({

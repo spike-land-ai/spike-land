@@ -165,6 +165,37 @@ describe("readManifest", () => {
     expect(worker.site!.bucket).toBe("./public");
   });
 
+  it("parses inline arrays used by worker manifest fields", async () => {
+    const tmp = await createTempManifest(`
+defaults:
+  scope: "@spike-land-ai"
+  registry: https://npm.pkg.github.com
+  license: MIT
+  type: module
+
+packages:
+  spike-edge:
+    kind: worker
+    version: 1.0.0
+    description: Edge worker
+    entry: index.ts
+    worker:
+      name: spike-edge
+      compatibility_date: "2026-03-01"
+      compatibility_flags: [nodejs_compat, trace_events]
+      migrations:
+        - tag: v1
+          new_classes: [RateLimiter, AnotherClass]
+`);
+    root = tmp.root;
+    cleanup = tmp.cleanup;
+
+    const manifest = await readManifest(root);
+    const worker = manifest.packages["spike-edge"]!.worker!;
+    expect(worker.compatibility_flags).toEqual(["nodejs_compat", "trace_events"]);
+    expect(worker.migrations?.[0]?.new_classes).toEqual(["RateLimiter", "AnotherClass"]);
+  });
+
   it("caches the manifest on second call", async () => {
     const tmp = await createTempManifest(BASIC_MANIFEST_YAML);
     root = tmp.root;
@@ -727,7 +758,10 @@ packages:
     cleanup = tmp.cleanup;
 
     const manifest = await readManifest(root);
-    expect(((manifest.packages["test-pkg"] as Record<string, unknown>).obj as Record<string, unknown>).key1).toBe("val1");
+    expect(
+      ((manifest.packages["test-pkg"] as Record<string, unknown>).obj as Record<string, unknown>)
+        .key1,
+    ).toBe("val1");
   });
 
   it("handles list ending with a key at same indent", async () => {

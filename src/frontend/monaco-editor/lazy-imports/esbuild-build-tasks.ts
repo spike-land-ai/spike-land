@@ -7,7 +7,6 @@ import { tryCatch } from "./try-catch.ts"; // Added import
 export type Environment = "development" | "production";
 import path from "path";
 import { importMapReplace } from "../core-logic/lib/importmap-utils.ts";
-// import path from "path";
 
 const isProduction = environment === "production";
 
@@ -272,10 +271,6 @@ export async function buildMainBundle(wasmFile: string): Promise<void> {
     alias: {
       ...buildOptions.alias,
       "esbuild-wasm/esbuild.wasm": `./${wasmFile}`,
-      // ...(isProduction ? {} : {
-      // "react": "preact/compat",
-      // "react-dom": "preact/compat",
-      // }),
     },
     external: [
       "module",
@@ -392,11 +387,6 @@ export async function buildMainBundle(wasmFile: string): Promise<void> {
     alias: {
       ...buildOptions.alias,
       ...(await getExtraAliases()),
-      // ;,
-      // ...(isProduction ? {} : {
-      //   "react": "preact/compat",
-      //   "react-dom": "preact/compat",
-      // }),
     },
     external: [...Object.values(await getExtraAliases())],
   });

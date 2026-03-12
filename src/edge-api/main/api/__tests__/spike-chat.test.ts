@@ -143,11 +143,12 @@ describe("buildSpikeChatMessages", () => {
 });
 
 describe("spikeChat route", () => {
-  it("passes MCP tools into the execute stage and streams tool-call events", async () => {
+  it("uses a bounded MCP agent surface, executes tool calls, and resumes streaming", async () => {
     const app = new Hono<{ Bindings: Env; Variables: Variables }>();
     app.route("/", spikeChat);
 
     const fetchBodies: Array<Record<string, unknown>> = [];
+    let streamCallCount = 0;
     const fetchMock = vi.fn(async (_input: string | URL | Request, init?: RequestInit) => {
       const body = init?.body ? (JSON.parse(String(init.body)) as Record<string, unknown>) : {};
       fetchBodies.push(body);
@@ -160,7 +161,11 @@ describe("spikeChat route", () => {
               {
                 message: {
                   content:
-                    body["max_tokens"] === 200 ? '{"intent":"task"}' : "Use the pricing tool.",
+                    body["max_tokens"] === 200
+                      ? '{"intent":"task"}'
+                      : body["max_tokens"] === 256
+                        ? "null"
+                        : '{"plan":"Use MCP tool search/call if needed.","suggestedTools":["mcp_tool_call"],"confidence":0.8}',
                 },
               },
             ],
@@ -171,13 +176,19 @@ describe("spikeChat route", () => {
         );
       }
 
-      const sse = [
-        'data: {"choices":[{"delta":{"tool_calls":[{"function":{"name":"pricing_lookup"}}]}}]}\n',
-        'data: {"choices":[{"delta":{"tool_calls":[{"function":{"arguments":"{\\"page\\":\\"pricing\\"}"}}]}}]}\n',
-        'data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}\n',
-        'data: {"choices":[{"delta":{"content":"Done."}}]}\n',
-        "data: [DONE]\n",
-      ].join("\n");
+      streamCallCount += 1;
+      const sse =
+        streamCallCount === 1
+          ? [
+              'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"tool-1","function":{"name":"mcp_tool_call"}}]}}]}\n',
+              'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\\"name\\":\\"pricing_lookup\\",\\"arguments\\":{\\"page\\":\\"pricing\\"}}"}}]}}]}\n',
+              'data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}\n',
+              "data: [DONE]\n",
+            ].join("\n")
+          : [
+              'data: {"choices":[{"delta":{"content":"Pricing is $29 for Pro."}}]}\n',
+              "data: [DONE]\n",
+            ].join("\n");
 
       return new Response(sse, {
         headers: { "Content-Type": "text/event-stream" },
@@ -186,28 +197,53 @@ describe("spikeChat route", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
+    const mcpFetch = vi.fn(async (request: Request) => {
+      const url = new URL(request.url);
+      if (url.pathname === "/tools") {
+        return new Response(
+          JSON.stringify({
+            tools: [
+              {
+                name: "pricing_lookup",
+                description: "Look up pricing information",
+                inputSchema: {
+                  type: "object",
+                  properties: {
+                    page: { type: "string" },
+                  },
+                },
+              },
+            ],
+          }),
+          { headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      if (url.pathname === "/mcp") {
+        const rpcBody = (await request.json()) as {
+          params?: { name?: string; arguments?: Record<string, unknown> };
+        };
+
+        expect(rpcBody.params?.name).toBe("pricing_lookup");
+        expect(rpcBody.params?.arguments).toEqual({ page: "pricing" });
+
+        return new Response(
+          JSON.stringify({
+            result: {
+              content: [{ text: "Pro costs $29/month." }],
+            },
+          }),
+          { headers: { "Content-Type": "application/json" } },
+        );
+      }
+
+      return new Response("Not Found", { status: 404 });
+    });
+
     const env = {
       XAI_API_KEY: "test-key",
       MCP_SERVICE: {
-        fetch: vi.fn().mockResolvedValue(
-          new Response(
-            JSON.stringify({
-              tools: [
-                {
-                  name: "pricing_lookup",
-                  description: "Look up pricing information",
-                  inputSchema: {
-                    type: "object",
-                    properties: {
-                      page: { type: "string" },
-                    },
-                  },
-                },
-              ],
-            }),
-            { headers: { "Content-Type": "application/json" } },
-          ),
-        ),
+        fetch: mcpFetch,
       },
     } as unknown as Env;
 
@@ -227,26 +263,31 @@ describe("spikeChat route", () => {
     expect(res.status).toBe(200);
     const text = await res.text();
 
-    expect(fetchBodies).toHaveLength(4);
-    expect(fetchBodies[2]?.["tools"]).toEqual([
-      {
-        type: "function",
-        function: {
-          name: "pricing_lookup",
-          description: "Look up pricing information",
-          parameters: {
-            type: "object",
-            properties: {
-              page: { type: "string" },
-            },
-          },
-        },
-      },
+    expect(fetchBodies).toHaveLength(5);
+    const executeTools = fetchBodies[2]?.["tools"] as Array<{
+      type: string;
+      function: { name: string };
+    }>;
+    expect(executeTools.map((tool) => tool.function.name)).toEqual([
+      "browser_get_surface",
+      "browser_navigate",
+      "browser_click",
+      "browser_fill",
+      "browser_screenshot",
+      "browser_read_text",
+      "browser_scroll",
+      "browser_get_elements",
+      "mcp_tool_search",
+      "mcp_tool_call",
     ]);
+    expect(mcpFetch).toHaveBeenCalledTimes(2);
+    expect(text).toContain('"type":"context_sync"');
     expect(text).toContain('"type":"tool_call_start"');
-    expect(text).toContain('"name":"pricing_lookup"');
+    expect(text).toContain('"toolCallId":"tool-1"');
+    expect(text).toContain('"name":"mcp_tool_call"');
     expect(text).toContain('"type":"tool_call_end"');
-    expect(text).toContain('\\"page\\":\\"pricing\\"');
+    expect(text).toContain("Pro costs $29/month.");
+    expect(text).toContain("Pricing is $29 for Pro.");
   });
 });
 

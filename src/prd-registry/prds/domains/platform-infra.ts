@@ -1,0 +1,53 @@
+import type { PrdDefinition } from "../../core-logic/types.js";
+
+export const platformInfraDomain: PrdDefinition = {
+  id: "domain:platform-infra",
+  level: "domain",
+  name: "Platform Infrastructure",
+  summary: "Auth, billing, settings, MCP registry, observability, and admin tools",
+  purpose:
+    "Domain for platform operations. Covers authentication flows, billing/subscriptions, API key management, MCP server discovery, observability dashboards, and admin controls.",
+  constraints: [
+    "Auth tokens must be validated on every request",
+    "Billing mutations require Stripe webhook confirmation",
+    "Admin tools require super_admin role",
+    "Observability data retained for 30 days",
+  ],
+  acceptance: [
+    "Auth flow completes in <2s including token refresh",
+    "Billing state stays consistent with Stripe",
+  ],
+  toolCategories: [
+    "billing",
+    "settings",
+    "auth",
+    "credits",
+    "vault",
+    "permissions",
+    "audit",
+    "mcp-registry",
+    "mcp-observability",
+    "admin",
+    "workspaces",
+    "notifications",
+  ],
+  tools: [],
+  composesFrom: ["platform"],
+  routePatterns: [],
+  keywords: [
+    "auth",
+    "login",
+    "billing",
+    "subscription",
+    "admin",
+    "settings",
+    "api key",
+    "observability",
+    "metrics",
+    "quality",
+    "review",
+    "gates",
+  ],
+  tokenEstimate: 300,
+  version: "1.0.0",
+};

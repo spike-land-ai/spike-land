@@ -93,6 +93,14 @@ describe("createAuth", () => {
     expect(callArg.baseURL).toBe("https://auth-mcp.spike.land");
   });
 
+  it("trusts analytics.spike.land as a first-party origin", async () => {
+    const { betterAuth } = await import("better-auth");
+    const env = makeEnv();
+    createAuth(env);
+    const callArg = vi.mocked(betterAuth).mock.calls[0][0] as { trustedOrigins: string[] };
+    expect(callArg.trustedOrigins).toContain("https://analytics.spike.land");
+  });
+
   it("configures social providers with env values", async () => {
     const { betterAuth } = await import("better-auth");
     const env = makeEnv({

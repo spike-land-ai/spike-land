@@ -6,10 +6,12 @@ export interface AetherMessage {
   role: "user" | "assistant";
   content: string;
   toolCalls?: Array<{
+    toolCallId: string;
     name: string;
     args: Record<string, unknown>;
     result?: string;
     status: "pending" | "done" | "error";
+    transport: "mcp" | "browser";
   }>;
   timestamp: number;
 }
@@ -19,12 +21,17 @@ export type PipelineStage = "classify" | "plan" | "execute" | "extract" | "idle"
 interface UseAetherChatReturn {
   messages: AetherMessage[];
   sendMessage: (content: string) => Promise<void>;
+  submitBrowserResult: (toolCallId: string, result: unknown) => Promise<void>;
   isStreaming: boolean;
   currentStage: PipelineStage;
   error: string | null;
   clearError: () => void;
   clearMessages: () => void;
   noteCount: number;
+  totalNoteCount: number;
+  toolCatalogCount: number;
+  model: string | null;
+  lastLearnedLesson: string | null;
 }
 
 const STORAGE_KEY = "aether-chat-messages";
@@ -95,15 +102,24 @@ function makeId() {
  * @returns `error` — last error string, or `null`.
  * @returns `clearError` — resets the error state.
  * @returns `clearMessages` — clears history and localStorage.
- * @returns `noteCount` — reserved for future note-tracking feature.
+ * @returns `noteCount` — active memory notes currently injected into the prompt.
+ * @returns `totalNoteCount` — total learned notes available for this user.
+ * @returns `toolCatalogCount` — size of the MCP catalog visible to spike-chat.
+ * @returns `model` — active execution model name reported by the server.
+ * @returns `lastLearnedLesson` — latest extracted reusable lesson, if any.
  */
 export function useAetherChat(): UseAetherChatReturn {
   const [messages, setMessages] = useState<AetherMessage[]>(loadStoredMessages);
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentStage, setCurrentStage] = useState<PipelineStage>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [noteCount, _setNoteCount] = useState(0);
+  const [noteCount, setNoteCount] = useState(0);
+  const [totalNoteCount, setTotalNoteCount] = useState(0);
+  const [toolCatalogCount, setToolCatalogCount] = useState(0);
+  const [model, setModel] = useState<string | null>(null);
+  const [lastLearnedLesson, setLastLearnedLesson] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const sessionIdRef = useRef<string | null>(null);
 
   // Persist messages to localStorage (debounced)
   useEffect(() => {
@@ -185,7 +201,30 @@ export function useAetherChat(): UseAetherChatReturn {
 
               const eventType = typeof parsed["type"] === "string" ? parsed["type"] : "";
 
-              if (eventType === "stage_update") {
+              if (eventType === "context_sync") {
+                const activeNoteCount =
+                  typeof parsed["activeNoteCount"] === "number" ? parsed["activeNoteCount"] : 0;
+                const knownTotalNoteCount =
+                  typeof parsed["totalNoteCount"] === "number" ? parsed["totalNoteCount"] : 0;
+                const knownToolCatalogCount =
+                  typeof parsed["toolCatalogCount"] === "number" ? parsed["toolCatalogCount"] : 0;
+                setNoteCount(activeNoteCount);
+                setTotalNoteCount(knownTotalNoteCount);
+                setToolCatalogCount(knownToolCatalogCount);
+                setModel(typeof parsed["model"] === "string" ? parsed["model"] : null);
+                sessionIdRef.current =
+                  typeof parsed["sessionId"] === "string" ? parsed["sessionId"] : null;
+              } else if (eventType === "memory_update") {
+                if (typeof parsed["activeNoteCount"] === "number") {
+                  setNoteCount(parsed["activeNoteCount"]);
+                }
+                if (typeof parsed["totalNoteCount"] === "number") {
+                  setTotalNoteCount(parsed["totalNoteCount"]);
+                }
+                if (typeof parsed["lesson"] === "string") {
+                  setLastLearnedLesson(parsed["lesson"]);
+                }
+              } else if (eventType === "stage_update") {
                 const stage = typeof parsed["stage"] === "string" ? parsed["stage"] : undefined;
                 setCurrentStage(toPipelineStage(stage));
               } else if (eventType === "text_delta" && typeof parsed["text"] === "string") {
@@ -195,11 +234,21 @@ export function useAetherChat(): UseAetherChatReturn {
                     m.id === assistantMsg.id ? { ...m, content: m.content + deltaText } : m,
                   ),
                 );
-              } else if (eventType === "tool_call_start" && typeof parsed["name"] === "string") {
+              } else if (
+                eventType === "tool_call_start" &&
+                typeof parsed["name"] === "string" &&
+                typeof parsed["toolCallId"] === "string"
+              ) {
                 const toolName = parsed["name"];
+                const toolCallId = parsed["toolCallId"];
                 const toolArgs = isObject(parsed["args"])
                   ? (parsed["args"] as Record<string, unknown>)
                   : {};
+                const parsedTransport = parsed["transport"];
+                const transport: "mcp" | "browser" =
+                  parsedTransport === "browser" || parsedTransport === "mcp"
+                    ? parsedTransport
+                    : "mcp";
                 setMessages((prev) =>
                   prev.map((m) =>
                     m.id === assistantMsg.id
@@ -208,30 +257,44 @@ export function useAetherChat(): UseAetherChatReturn {
                           toolCalls: [
                             ...(m.toolCalls ?? []),
                             {
+                              toolCallId,
                               name: toolName,
                               args: toolArgs,
                               status: "pending" as const,
+                              transport,
                             },
                           ],
                         }
                       : m,
                   ),
                 );
-              } else if (eventType === "tool_call_end" && typeof parsed["name"] === "string") {
-                const endName = parsed["name"];
+              } else if (
+                eventType === "tool_call_end" &&
+                typeof parsed["toolCallId"] === "string"
+              ) {
+                const endToolCallId = parsed["toolCallId"];
                 const endResult =
                   typeof parsed["result"] === "string" ? parsed["result"] : undefined;
+                const parsedStatus = parsed["status"];
+                const endStatus: "pending" | "done" | "error" =
+                  parsedStatus === "error" || parsedStatus === "pending" ? parsedStatus : "done";
+                const parsedTransport = parsed["transport"];
+                const transport: "mcp" | "browser" =
+                  parsedTransport === "browser" || parsedTransport === "mcp"
+                    ? parsedTransport
+                    : "mcp";
                 setMessages((prev) =>
                   prev.map((m) =>
                     m.id === assistantMsg.id
                       ? {
                           ...m,
                           toolCalls: (m.toolCalls ?? []).map((tc) =>
-                            tc.name === endName && tc.status === "pending"
+                            tc.toolCallId === endToolCallId
                               ? {
                                   ...tc,
                                   ...(endResult !== undefined ? { result: endResult } : {}),
-                                  status: "done" as const,
+                                  status: endStatus,
+                                  transport,
                                 }
                               : tc,
                           ),
@@ -270,20 +333,90 @@ export function useAetherChat(): UseAetherChatReturn {
   );
 
   const clearError = useCallback(() => setError(null), []);
+  const submitBrowserResult = useCallback(async (toolCallId: string, result: unknown) => {
+    const sessionId = sessionIdRef.current;
+    if (!sessionId) {
+      return;
+    }
+
+    setMessages((prev) =>
+      prev.map((message) =>
+        message.role === "assistant"
+          ? {
+              ...message,
+              toolCalls: (message.toolCalls ?? []).map((toolCall) =>
+                toolCall.toolCallId === toolCallId && toolCall.transport === "browser"
+                  ? {
+                      ...toolCall,
+                      result: typeof result === "string" ? result : JSON.stringify(result, null, 2),
+                    }
+                  : toolCall,
+              ),
+            }
+          : message,
+      ),
+    );
+
+    try {
+      const res = await fetch(apiUrl("/spike-chat/browser-results"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          sessionId,
+          toolCallId,
+          result,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error((await res.text()) || `HTTP ${res.status}`);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to submit browser result";
+      setError(message);
+      setMessages((prev) =>
+        prev.map((item) =>
+          item.role === "assistant"
+            ? {
+                ...item,
+                toolCalls: (item.toolCalls ?? []).map((toolCall) =>
+                  toolCall.toolCallId === toolCallId
+                    ? {
+                        ...toolCall,
+                        status: "error",
+                        result: message,
+                      }
+                    : toolCall,
+                ),
+              }
+            : item,
+        ),
+      );
+    }
+  }, []);
+
   const clearMessages = useCallback(() => {
     setMessages([]);
     setError(null);
+    setLastLearnedLesson(null);
+    sessionIdRef.current = null;
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
   return {
     messages,
     sendMessage,
+    submitBrowserResult,
     isStreaming,
     currentStage,
     error,
     clearError,
     clearMessages,
     noteCount,
+    totalNoteCount,
+    toolCatalogCount,
+    model,
+    lastLearnedLesson,
   };
 }

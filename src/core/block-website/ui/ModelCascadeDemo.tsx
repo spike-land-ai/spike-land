@@ -366,7 +366,7 @@ export function ModelCascadeDemo() {
   return (
     <div ref={ref} className="my-8 flex flex-col gap-6 group">
       {/* Main visualization */}
-      <div className="rounded-xl overflow-hidden border border-border shadow-2xl shadow-violet-900/10 bg-card relative p-4">
+      <div className="rounded-[2rem] overflow-hidden border border-border/60 bg-card/80 shadow-[var(--panel-shadow)] backdrop-blur-sm relative p-4">
         <div className="absolute top-0 right-0 w-40 h-40 bg-violet-500/10 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-40 h-40 bg-sky-500/10 blur-3xl pointer-events-none" />
 
@@ -517,7 +517,7 @@ export function ModelCascadeDemo() {
           {/* Detail panel */}
           <div className="flex flex-col gap-4 w-full lg:w-64 flex-shrink-0">
             <div
-              className="rounded-lg border p-4 transition-all duration-500"
+              className="rounded-[1.6rem] border p-4 transition-all duration-500"
               style={{
                 borderColor: `${displayedConfig.color}40`,
                 backgroundColor: `${displayedConfig.color}08`,
@@ -525,16 +525,14 @@ export function ModelCascadeDemo() {
               }}
             >
               <p
-                className="text-xs font-bold font-mono uppercase tracking-widest mb-1"
+                className="text-xs font-bold uppercase tracking-[0.24em] mb-1"
                 style={{ color: displayedConfig.color }}
               >
                 {displayedConfig.label}
               </p>
-              <p className="text-[10px] text-muted-foreground font-mono mb-3">
-                {displayedConfig.tagline}
-              </p>
+              <p className="text-[10px] text-muted-foreground mb-3">{displayedConfig.tagline}</p>
 
-              <div className="flex flex-col gap-2 text-[10px] font-mono">
+              <div className="flex flex-col gap-2 text-[10px]">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground uppercase tracking-wider">Quality</span>
                   <MetricBars
@@ -565,8 +563,8 @@ export function ModelCascadeDemo() {
             </div>
 
             {/* Example tasks */}
-            <div className="rounded-lg border border-border bg-muted/60 p-3">
-              <p className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest mb-2">
+            <div className="rounded-[1.6rem] border border-border bg-muted/60 p-3">
+              <p className="text-[9px] text-muted-foreground uppercase tracking-[0.24em] mb-2">
                 Task examples
               </p>
               <div className="flex flex-col gap-1">
@@ -576,9 +574,7 @@ export function ModelCascadeDemo() {
                       className="w-1 h-1 rounded-full flex-shrink-0"
                       style={{ backgroundColor: displayedConfig.color }}
                     />
-                    <span className="text-[10px] font-mono text-muted-foreground opacity-80">
-                      {ex}
-                    </span>
+                    <span className="text-[10px] text-muted-foreground opacity-80">{ex}</span>
                   </div>
                 ))}
               </div>
@@ -588,13 +584,13 @@ export function ModelCascadeDemo() {
       </div>
 
       {/* Controls + description bar */}
-      <div className="flex flex-col gap-4 p-5 rounded-xl bg-card/80 backdrop-blur-xl border border-border">
+      <div className="flex flex-col gap-4 p-6 rounded-[2rem] border border-border/60 bg-card/80 shadow-[var(--panel-shadow)] backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <span
             className="w-2 h-2 bg-violet-500 rounded-full animate-pulse flex-shrink-0"
             style={{ boxShadow: "0 0 6px rgba(139,92,246,0.8)" }}
           />
-          <span className="text-xs font-bold text-violet-400 font-mono uppercase tracking-widest">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/18 bg-primary/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-primary">
             Context Funnel Cascade
           </span>
         </div>
@@ -609,7 +605,7 @@ export function ModelCascadeDemo() {
                 onMouseEnter={() => setActiveTier(tier)}
                 onMouseLeave={() => setActiveTier(null)}
                 onClick={() => setActiveTier(isActive ? null : tier)}
-                className="flex-1 flex flex-col gap-1 py-3 px-4 rounded-md border text-left transition-all duration-200"
+                className="flex-1 flex flex-col gap-1 py-3 px-4 rounded-2xl border text-left transition-all duration-200"
                 style={{
                   borderColor: isActive ? `${cfg.color}60` : "hsl(var(--border))",
                   backgroundColor: isActive ? `${cfg.color}10` : "hsl(var(--muted) / 0.6)",
@@ -617,14 +613,14 @@ export function ModelCascadeDemo() {
                 }}
               >
                 <span
-                  className="text-xs font-bold font-mono"
+                  className="text-xs font-bold"
                   style={{ color: isActive ? cfg.color : "hsl(var(--muted-foreground))" }}
                 >
                   {cfg.label}
                 </span>
                 <div className="flex items-center gap-2">
                   <span
-                    className="text-[10px] font-mono"
+                    className="text-[10px]"
                     style={{
                       color: isActive
                         ? "hsl(var(--muted-foreground))"
@@ -633,9 +629,9 @@ export function ModelCascadeDemo() {
                   >
                     {cfg.costLabel}
                   </span>
-                  <span className="text-[10px] text-muted-foreground opacity-30 font-mono">/</span>
+                  <span className="text-[10px] text-muted-foreground opacity-30">/</span>
                   <span
-                    className="text-[10px] font-mono"
+                    className="text-[10px]"
                     style={{
                       color: isActive
                         ? "hsl(var(--muted-foreground))"
@@ -650,7 +646,7 @@ export function ModelCascadeDemo() {
           })}
         </div>
 
-        <p className="text-xs text-muted-foreground font-mono leading-relaxed border-l-2 border-border pl-4">
+        <p className="text-xs text-muted-foreground leading-relaxed border-l-2 border-border pl-4">
           The router dispatches incoming tasks by complexity. Opus handles deep reasoning (100%
           cost, 1x speed), Sonnet writes code (50% cost, 4x speed), Haiku fixes syntax (5% cost, 20x
           speed). Hover a model to highlight its lane.

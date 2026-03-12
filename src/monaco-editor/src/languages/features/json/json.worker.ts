@@ -3,12 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as worker from "../../../internal/common/initialize";
-import { JSONWorker } from "./jsonWorker";
+import * as workerBootstrap from "../../../internal/common/initialize";
+import { JSONWorker, type ICreateData } from "./jsonWorker";
+import type { worker } from "../../../editor";
 
 self.onmessage = () => {
   // ignore the first message
-  worker.initialize((ctx, createData) => {
+  workerBootstrap.initialize((ctx: worker.IWorkerContext, createData: ICreateData) => {
     return new JSONWorker(ctx, createData);
   });
 };

@@ -159,13 +159,13 @@ export function CodeBlock({ children, className }: CodeBlockProps) {
   return (
     <div className="group relative">
       {lang && (
-        <div className="absolute top-3 left-5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 z-10 select-none">
+        <div className="absolute top-3 left-5 text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground/40 z-10 select-none">
           {lang}
         </div>
       )}
       <button
         onClick={handleCopy}
-        className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-foreground bg-background/80 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-border/50"
+        className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground/60 hover:text-foreground bg-background/80 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-border/50"
         type="button"
       >
         {copied ? "Copied!" : "Copy"}

@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   API_CONFIG,
+  AUTH_ALLOWED_ORIGINS,
+  AUTH_TRUSTED_ORIGINS,
   ENHANCEMENT_COSTS,
   IMAGE_CONSTRAINTS,
+  MAIN_SITE_HOSTS,
   MCP_GENERATION_COSTS,
+  PLATFORM_HOSTS,
   REFERRAL_CONFIG,
   REVENUECAT_PRODUCTS,
   SUBSCRIPTION_TIERS,
@@ -111,6 +115,19 @@ describe("constants", () => {
       expect(API_CONFIG.DEFAULT_TIMEOUT_MS).toBeGreaterThan(0);
       expect(API_CONFIG.JOB_POLL_INTERVAL_MS).toBeGreaterThan(0);
       expect(API_CONFIG.JOB_POLL_INTERVAL_MS).toBeLessThan(API_CONFIG.DEFAULT_TIMEOUT_MS);
+    });
+  });
+
+  describe("platform hosts", () => {
+    it("keeps analytics in the main-site host set", () => {
+      expect(MAIN_SITE_HOSTS).toContain(PLATFORM_HOSTS.analytics);
+    });
+
+    it("derives auth origins from the shared platform host list", () => {
+      expect(AUTH_ALLOWED_ORIGINS).toContain("https://analytics.spike.land");
+      expect(AUTH_ALLOWED_ORIGINS).toContain("https://auth-mcp.spike.land");
+      expect(AUTH_TRUSTED_ORIGINS).toContain("http://localhost:5173");
+      expect(AUTH_TRUSTED_ORIGINS).toContain("http://localhost:3000");
     });
   });
 
