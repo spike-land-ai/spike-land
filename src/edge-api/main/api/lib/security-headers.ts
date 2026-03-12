@@ -16,7 +16,7 @@ const CONTENT_SECURITY_POLICY = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://esm.spike.land https://unpkg.com",
   "img-src 'self' https://*.r2.dev https://*.r2.cloudflarestorage.com https://avatars.githubusercontent.com https://*.googleusercontent.com https://*.basemaps.cartocdn.com https://image-studio-mcp.spike.land https://www.googleadservices.com https://googleads.g.doubleclick.net https://www.google.com https://*.google.co.uk https://www.googletagmanager.com data: blob:",
   "font-src 'self' https://fonts.gstatic.com https://esm.spike.land data:",
-  "connect-src 'self' https://api.spike.land https://edge.spike.land https://auth-mcp.spike.land https://mcp.spike.land https://js.spike.land https://image-studio-mcp.spike.land https://chat.spike.land https://checkout.stripe.com wss://spike.land wss://chat.spike.land https://esm.sh https://esm.spike.land https://unpkg.com https://local.spike.land:5173 https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.google.co.uk https://googleads.g.doubleclick.net https://td.doubleclick.net blob: data:",
+  "connect-src 'self' https://spike.land https://api.spike.land https://edge.spike.land https://auth-mcp.spike.land https://mcp.spike.land https://js.spike.land https://image-studio-mcp.spike.land https://chat.spike.land https://checkout.stripe.com wss://spike.land wss://chat.spike.land https://esm.sh https://esm.spike.land https://unpkg.com https://local.spike.land:5173 https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.google.co.uk https://googleads.g.doubleclick.net https://td.doubleclick.net blob: data:",
   "worker-src 'self' blob: https://esm.sh https://esm.spike.land",
   "frame-src 'self' https://edge.spike.land https://chat.spike.land https://checkout.stripe.com https://js.stripe.com https://www.youtube.com https://www.youtube-nocookie.com",
   "object-src 'none'",
@@ -42,7 +42,10 @@ export function isAllowedBrowserOrigin(origin: string, configuredOrigins: string
 export function applySecurityHeaders(headers: Headers): void {
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("X-Frame-Options", "SAMEORIGIN");
-  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+  headers.set(
+    "Permissions-Policy",
+    'camera=(), microphone=(), geolocation=(), payment=(self "https://checkout.stripe.com")',
+  );
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
   headers.set("Content-Security-Policy", CONTENT_SECURITY_POLICY);

@@ -32,9 +32,12 @@ const resolvedOgImage = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={resolvedOgImage} />
-    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:url" content={resolvedCanonical} />
     <meta property="og:type" content="article" />
     <meta property="og:site_name" content="spike.land" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@spike_land" />
@@ -44,6 +47,7 @@ const resolvedOgImage = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
 
     <link rel="icon" href="/favicon.ico" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
     <!-- Google Fonts: Rubik -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -57,8 +61,9 @@ const resolvedOgImage = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
     <slot name="head" />
   </head>
   <body class="bg-amber-50 font-sans article-base">
-    <div class="container mx-auto max-w-screen-md px-4 my-12">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded">Skip to content</a>
+    <main id="main-content" class="container mx-auto max-w-screen-md px-4 my-12">
       <slot />
-    </div>
+    </main>
   </body>
 </html>

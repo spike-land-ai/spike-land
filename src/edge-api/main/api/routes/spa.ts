@@ -121,7 +121,7 @@ spa.get("/*", async (c) => {
       const title = `${appName} (${tab}) — spike.land`;
       const description = `Explore ${appName} on spike.land — the AI multi-agent operating system.`;
       const canonicalPath = escapeHtml(path);
-      const canonicalSearch = escapeHtml(url.search);
+      const canonicalSearch = "";
 
       // Replace title and inject meta tags
       html = html.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`);
@@ -136,7 +136,7 @@ spa.get("/*", async (c) => {
         <meta property="og:description" content="${description}" />
         <meta name="twitter:title" content="${title}" />
         <meta name="twitter:description" content="${description}" />
-        <meta name="twitter:site" content="@ai_spike_land" />
+        <meta name="twitter:site" content="@spike_land" />
         <link rel="canonical" href="https://spike.land${canonicalPath}${canonicalSearch}" />
       `;
       html = html.replace("</head>", `${metaTags}</head>`);
@@ -193,7 +193,7 @@ spa.get("/*", async (c) => {
         <meta name="twitter:title" content="${postTitle}" />
         <meta name="twitter:description" content="${postDesc}" />
         <meta name="twitter:image" content="${escapeHtml(postImage)}" />
-        <meta name="twitter:site" content="@ai_spike_land" />
+        <meta name="twitter:site" content="@spike_land" />
         <link rel="canonical" href="${postUrl}" />
         <script type="application/ld+json">${JSON.stringify({
           "@context": "https://schema.org",
@@ -345,7 +345,7 @@ spa.get("/*", async (c) => {
         <meta property="og:url" content="https://spike.land${path}" />
         <meta name="twitter:title" content="${escapeHtml(meta.title)}" />
         <meta name="twitter:description" content="${escapeHtml(meta.description)}" />
-        <meta name="twitter:site" content="@ai_spike_land" />`;
+        <meta name="twitter:site" content="@spike_land" />`;
         html = html.replace("</head>", `${ogTags}\n</head>`);
 
         if (meta.ssrContent) {
@@ -404,8 +404,19 @@ spa.get("/*", async (c) => {
     }
 
     // Inject noindex for utility pages that shouldn't appear in search results
-    const noindexPaths = ["/callback", "/settings", "/login"];
-    if (noindexPaths.includes(path)) {
+    const noindexPaths = [
+      "/callback",
+      "/settings",
+      "/login",
+      "/analytics",
+      "/cockpit",
+      "/dashboard",
+      "/messages",
+      "/mcp/authorize",
+    ];
+    // Set X-Robots-Tag header for noindex paths
+    const isNoindexPath = noindexPaths.includes(path);
+    if (isNoindexPath) {
       html = html.replace("</head>", `<meta name="robots" content="noindex, nofollow" />\n</head>`);
     }
 
@@ -416,6 +427,10 @@ spa.get("/*", async (c) => {
         "cache-control": getSpaResponseCacheControl(true),
       },
     });
+
+    if (isNoindexPath) {
+      response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    }
 
     const existingCookie = c.req.header("cookie") ?? "";
     // Only set tracking cookie if user has consented (GDPR compliance)

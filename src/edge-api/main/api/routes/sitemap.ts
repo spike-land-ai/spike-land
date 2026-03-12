@@ -12,8 +12,6 @@ interface SitemapRoute {
 
 const STATIC_ROUTES: SitemapRoute[] = [
   { path: "/", changefreq: "daily", priority: 1.0 },
-  { path: "/tools", changefreq: "weekly", priority: 0.9 },
-  { path: "/store", changefreq: "weekly", priority: 0.9 },
   { path: "/apps", changefreq: "weekly", priority: 0.9 },
   { path: "/mcp", changefreq: "weekly", priority: 0.9 },
   { path: "/pricing", changefreq: "monthly", priority: 0.8 },
@@ -25,18 +23,22 @@ const STATIC_ROUTES: SitemapRoute[] = [
   { path: "/security", changefreq: "monthly", priority: 0.4 },
   { path: "/what-we-do", changefreq: "monthly", priority: 0.7 },
   { path: "/vibe-code", changefreq: "weekly", priority: 0.8 },
-  { path: "/build", changefreq: "weekly", priority: 0.7 },
-  { path: "/analytics", changefreq: "weekly", priority: 0.5 },
   { path: "/version", changefreq: "monthly", priority: 0.3 },
   { path: "/privacy", changefreq: "monthly", priority: 0.3 },
   { path: "/terms", changefreq: "monthly", priority: 0.3 },
+  { path: "/migrate", changefreq: "monthly", priority: 0.7 },
+  { path: "/rubik", changefreq: "monthly", priority: 0.5 },
+  { path: "/learnit", changefreq: "weekly", priority: 0.6 },
 ];
+
+/** Static routes use the last-deployed date, not today's date, to avoid misleading crawlers. */
+const DEPLOY_DATE = "2026-03-12";
 
 function buildSitemapXml(
   staticRoutes: SitemapRoute[],
   blogPosts: Array<{ slug: string; date: string }>,
 ): string {
-  const now = new Date().toISOString().split("T")[0];
+  const now = DEPLOY_DATE;
 
   const staticEntries = staticRoutes.map(
     (route) =>
@@ -99,7 +101,10 @@ sitemap.get("/sitemap.xml", async (c) => {
   if (!response) {
     // Fallback if everything failed
     const xml = buildSitemapXml(STATIC_ROUTES, []);
-    return c.body(xml, 200, { "Content-Type": "application/xml; charset=utf-8" });
+    return c.body(xml, 200, {
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+    });
   }
 
   return response;
@@ -120,6 +125,8 @@ sitemap.get("/robots.txt", (c) => {
     "Disallow: /api/",
     "Disallow: /oauth/",
     "Disallow: /mcp/",
+    "Disallow: /analytics",
+    "Disallow: /learn/badge/",
     "Crawl-delay: 1",
     "",
     "Sitemap: https://spike.land/sitemap.xml",

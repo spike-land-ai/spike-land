@@ -51,7 +51,7 @@ const CONTROL_PLANE_ASSET_KEYS = new Set([
   "about.txt",
 ]);
 
-const HTML_RESPONSE_CACHE_CONTROL = "private, no-cache, no-store, must-revalidate";
+const HTML_RESPONSE_CACHE_CONTROL = "public, max-age=0, s-maxage=60, stale-while-revalidate=300";
 const DIRECT_ASSET_CACHE_CONTROL = "public, max-age=14400";
 const IMMUTABLE_ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable";
 const REVALIDATING_ASSET_CACHE_CONTROL = "public, max-age=14400, stale-while-revalidate=86400";

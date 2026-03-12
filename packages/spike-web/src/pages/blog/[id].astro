@@ -1,7 +1,5 @@
 ---
 import { getCollection, render } from 'astro:content';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import ArticleLayout from '../../layouts/ArticleLayout.astro';
 import Nav from '../../components/Nav.astro';
 import Footer from '../../components/Footer.astro';
@@ -13,7 +11,6 @@ import ScrollWeight from '../../components/typography/ScrollWeight.astro';
 import GlitchText from '../../components/typography/GlitchText.astro';
 
 // Auto-imported MDX Components
-import PersonaBlogViewer from '../../components/mdx/PersonaBlogViewer';
 import AgentCoordinationDemo from '../../components/mdx/AgentCoordinationDemo.astro';
 import AgentLoopDemo from '../../components/mdx/AgentLoopDemo.astro';
 import AttentionSpotlightDemo from '../../components/mdx/AttentionSpotlightDemo.astro';
@@ -118,38 +115,31 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
-
-// Fetch raw MDX text as the PRD
-let rawPrd = post.body || '';
-if (!rawPrd) {
-  try {
-    const filePath = path.resolve(process.cwd(), '../../content/blog', `${post.id}.mdx`);
-    const content = await fs.readFile(filePath, 'utf-8');
-    const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
-    const match = content.match(frontmatterRegex);
-    rawPrd = match ? match[2].trim() : content;
-  } catch(e) {
-    // fallback
-  }
-}
-
-// Fetch generated variants
-let variants = {};
-try {
-  const variantsFile = path.resolve(process.cwd(), '../../content/blog-variants', `${post.id}.json`);
-  const variantsData = await fs.readFile(variantsFile, 'utf-8');
-  variants = JSON.parse(variantsData);
-} catch (e) {
-  // Variants might not exist yet during local dev if script wasn't run
-}
 ---
 
 <ArticleLayout
   title={`${post.data.title} - spike.land`}
   description={post.data.description ?? 'Read this article on spike.land.'}
   ogImage={post.data.heroImage ?? '/android-chrome-512x512.png'}
+  noindex={post.data.unlisted}
 >
   <Analytics slot="head" />
+  {post.data.heroImage && <link slot="head" rel="preload" as="image" href={post.data.heroImage} fetchpriority="high" />}
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.data.title,
+    description: post.data.description ?? "",
+    image: post.data.heroImage ? new URL(post.data.heroImage, Astro.site ?? Astro.url.origin).href : undefined,
+    datePublished: post.data.date.toISOString(),
+    author: { "@type": "Person", name: post.data.author ?? "spike.land" },
+    publisher: { "@type": "Organization", name: "spike.land", url: "https://spike.land" },
+    url: Astro.url.href,
+    ...(post.data.tags ? { keywords: post.data.tags.join(", ") } : {}),
+  })} />
+  <meta slot="head" property="article:published_time" content={post.data.date.toISOString()} />
+  {post.data.author && <meta slot="head" property="article:author" content={post.data.author} />}
+  {post.data.tags?.map(tag => <meta slot="head" property="article:tag" content={tag} />)}
 
   <Nav activePath="/blog" />
 
@@ -180,7 +170,9 @@ try {
       <div class="rounded-xl overflow-hidden border border-border shadow-lg">
         <img
           src={post.data.heroImage}
-          alt={post.data.heroPrompt || post.data.title}
+          alt={post.data.title}
+          width="1200"
+          height="630"
           class="w-full h-auto block max-h-[28rem] object-cover"
           loading="eager"
         />
@@ -190,19 +182,10 @@ try {
 
   <!-- Article content -->
   <div class="space-y-4 my-8">
-    <PersonaBlogViewer
-      client:load
-      rawPrd={rawPrd}
-      variants={variants}
-      slug={post.id}
-    />
+    <article class="prose prose-p:font-sans prose-headings:font-display prose-headings:font-bold prose-p:leading-loose max-w-none">
+      <Content components={MDX_COMPONENTS} />
+    </article>
 
-    {/* Hidden SEO Content */}
-    <div class="hidden" aria-hidden="true">
-      <article class="prose prose-p:font-sans prose-headings:font-display prose-headings:font-bold prose-p:leading-loose max-w-none">
-        <Content components={MDX_COMPONENTS} />
-      </article>
-    </div>
   </div>
 
   <Footer />

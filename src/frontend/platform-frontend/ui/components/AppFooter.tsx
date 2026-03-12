@@ -233,7 +233,7 @@ export function AppFooter() {
             <div className="flex flex-wrap items-center gap-3">
               <a
                 href="/status"
-                role="status"
+                aria-label="System status"
                 className="inline-flex items-center gap-2 rounded-full border border-success/20 bg-success/70 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-success-foreground"
               >
                 <span className="relative flex h-2 w-2">
