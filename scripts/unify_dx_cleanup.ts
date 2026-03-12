@@ -1,8 +1,4 @@
-import {
-  Project,
-  SyntaxKind,
-  Node,
-} from "ts-morph";
+import { Project, SyntaxKind, Node } from "ts-morph";
 
 const project = new Project({
   // We don't use tsConfigFilePath because it excludes many files we want to fix

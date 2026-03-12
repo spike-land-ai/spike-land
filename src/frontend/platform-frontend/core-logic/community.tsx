@@ -84,7 +84,9 @@ export function CommunityPage() {
             className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/40"
           >
             <span className="font-semibold text-foreground">Platform Messages</span>
-            <span className="text-sm text-muted-foreground">Direct messaging within spike.land</span>
+            <span className="text-sm text-muted-foreground">
+              Direct messaging within spike.land
+            </span>
           </a>
           <a
             href="/docs"

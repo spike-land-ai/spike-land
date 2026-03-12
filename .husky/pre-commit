@@ -1,9 +1,11 @@
 #!/bin/sh
-# Secret detection — warn if gitleaks is missing, fail if it finds secrets
+# Secret detection — block if gitleaks is missing or finds secrets
 if command -v gitleaks >/dev/null 2>&1; then
   gitleaks git --pre-commit --staged --verbose
 else
-  echo "Warning: gitleaks not installed — skipping secret detection"
+  echo "ERROR: gitleaks not installed — install with: brew install gitleaks"
+  echo "Falling back to built-in secret scanner..."
+  bash scripts/scan-secrets.sh --staged
 fi
 
 # Format staged files with Biome

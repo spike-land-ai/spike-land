@@ -11,6 +11,7 @@ import {
   coerceNumberProp,
   parseStoryMappings,
   preprocessBlogMdx,
+  stripLegacyPersonalizedBlogFraming,
 } from "../core-logic/blog-mdx";
 import {
   buildPromptDrivenBlogImageSrc,
@@ -524,7 +525,7 @@ export function BlogPostView({
     /!\[[^\]]*\]\(https:\/\/placehold\.co\/[^)]+\)\n?/g,
     "",
   );
-  const processedContent = preprocessBlogMdx(cleanContent);
+  const processedContent = preprocessBlogMdx(stripLegacyPersonalizedBlogFraming(cleanContent));
   const safeHeroImage = sanitizeBlogImageSrc(resolvedPost.heroImage);
   const heroImageSrc = buildPromptDrivenBlogImageSrc(safeHeroImage, resolvedPost.heroPrompt);
 
@@ -739,20 +740,22 @@ export function BlogPostView({
           </header>
 
           <div
-            className="prose max-w-3xl mx-auto
-          prose-headings:font-black prose-headings:text-foreground prose-headings:tracking-tighter
-          prose-h1:text-4xl prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-8
-          prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-6
-          prose-p:text-lg prose-p:text-muted-foreground prose-p:leading-relaxed prose-p:font-medium
-          prose-a:text-primary prose-a:font-bold prose-a:no-underline hover:prose-a:underline
-          prose-strong:text-foreground prose-strong:font-black
-          prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:bg-primary/[0.02] prose-blockquote:py-6 prose-blockquote:px-8 prose-blockquote:rounded-r-3xl prose-blockquote:text-foreground prose-blockquote:font-bold prose-blockquote:italic
-          prose-code:text-primary prose-code:bg-primary/[0.05] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-lg prose-code:before:content-none prose-code:after:content-none prose-code:font-bold
-          [&_.shiki-container]:bg-muted/50 [&_.shiki-container]:border-2 [&_.shiki-container]:border-border/60 [&_.shiki-container]:rounded-[2rem] [&_.shiki-container]:px-4 [&_.shiki-container]:py-4 sm:[&_.shiki-container]:px-6 sm:[&_.shiki-container]:py-5 [&_.shiki-container]:overflow-x-auto [&_.shiki-container]:my-8 [&_.shiki-container]:pt-10 [&_.shiki-container_code]:bg-transparent [&_.shiki-container_code]:p-0 [&_.shiki-container_code]:text-sm [&_.shiki-container_code]:font-normal [&_.shiki-container_.shiki]:!bg-transparent
-          prose-pre:bg-muted/50 prose-pre:border-2 prose-pre:border-border/60 prose-pre:rounded-[2rem] prose-pre:px-4 prose-pre:py-4 sm:prose-pre:px-6 sm:prose-pre:py-5 prose-pre:overflow-x-auto
-          prose-li:text-muted-foreground prose-li:font-medium
+            className="prose max-w-3xl mx-auto font-sans
+          prose-headings:font-semibold prose-headings:text-foreground prose-headings:tracking-[-0.05em]
+          prose-h1:text-4xl prose-h1:sm:text-5xl prose-h1:mb-6
+          prose-h2:text-2xl prose-h2:sm:text-3xl prose-h2:mt-12 prose-h2:mb-4
+          prose-h3:text-xl prose-h3:sm:text-2xl prose-h3:mt-8 prose-h3:mb-3
+          prose-p:text-[0.97rem] prose-p:leading-8 prose-p:text-foreground/90
+          prose-a:text-primary prose-a:font-medium prose-a:no-underline hover:prose-a:underline
+          prose-strong:text-foreground prose-strong:font-semibold
+          prose-blockquote:my-5 prose-blockquote:border-l-2 prose-blockquote:border-primary prose-blockquote:bg-transparent prose-blockquote:py-0 prose-blockquote:px-4 prose-blockquote:rounded-none prose-blockquote:text-muted-foreground prose-blockquote:font-normal prose-blockquote:italic
+          prose-code:rounded-md prose-code:border prose-code:border-border prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:text-xs prose-code:font-mono prose-code:text-primary prose-code:before:content-none prose-code:after:content-none
+          [&_.shiki-container]:my-6 [&_.shiki-container]:overflow-x-auto [&_.shiki-container]:rounded-[calc(var(--radius-panel)-0.2rem)] [&_.shiki-container]:border [&_.shiki-container]:border-border [&_.shiki-container]:bg-muted/60 [&_.shiki-container]:p-4 [&_.shiki-container_code]:bg-transparent [&_.shiki-container_code]:p-0 [&_.shiki-container_code]:text-sm [&_.shiki-container_code]:font-normal [&_.shiki-container_.shiki]:!bg-transparent
+          prose-pre:my-6 prose-pre:overflow-x-auto prose-pre:rounded-[calc(var(--radius-panel)-0.2rem)] prose-pre:border prose-pre:border-border prose-pre:bg-muted/60 prose-pre:p-4
+          prose-li:text-foreground/90 prose-li:leading-8
           prose-ul:list-disc prose-ol:list-decimal
-          prose-img:rounded-[2.5rem] prose-img:shadow-[var(--panel-shadow)] prose-img:border prose-img:border-border/60
+          prose-img:rounded-[2rem] prose-img:border prose-img:border-border prose-img:shadow-[var(--panel-shadow)]
+          prose-hr:border-border/60
           selection:bg-primary selection:text-primary-foreground"
           >
             <Markdown

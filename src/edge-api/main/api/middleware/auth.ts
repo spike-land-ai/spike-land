@@ -55,7 +55,10 @@ export async function authMiddleware(
     return c.json({ error: "Invalid or expired session" }, 401);
   }
 
-  const session = await sessionRes.json<{ session?: unknown; user?: { id: string } }>();
+  const session = await sessionRes.json<{
+    session?: unknown;
+    user?: { id: string; email?: string };
+  }>();
 
   if (!session?.session || !session?.user) {
     return c.json({ error: "Invalid or expired session" }, 401);
@@ -63,6 +66,9 @@ export async function authMiddleware(
 
   // Store user info for downstream handlers
   c.set("userId", session.user.id);
+  if (session.user.email) {
+    c.set("userEmail", session.user.email);
+  }
 
   return next();
 }

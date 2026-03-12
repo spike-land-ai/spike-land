@@ -25,8 +25,8 @@ export function LearnitTopicPage() {
           AI-generated content about <strong>{displayName}</strong> is loading...
         </p>
         <p className="mt-4 text-sm text-muted-foreground">
-          This page will use the LearnIt MCP tool to generate comprehensive, structured content about
-          this topic on demand.
+          This page will use the LearnIt MCP tool to generate comprehensive, structured content
+          about this topic on demand.
         </p>
       </div>
 

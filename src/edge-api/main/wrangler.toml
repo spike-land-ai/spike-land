@@ -36,6 +36,7 @@ dataset = "spike_analytics"
 
 [vars]
 GA_MEASUREMENT_ID = "G-9WNEM9ZHE7"
+GA_PROPERTY_ID = "461757579"
 
 [[services]]
 binding = "AUTH_MCP"
@@ -55,4 +56,12 @@ zone_name = "spike.land"
 
 [[routes]]
 pattern = "www.spike.land/*"
+zone_name = "spike.land"
+
+[[routes]]
+pattern = "analytics.spike.land"
+custom_domain = true
+
+[[routes]]
+pattern = "*.spike.land/*"
 zone_name = "spike.land"

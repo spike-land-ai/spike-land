@@ -264,9 +264,12 @@ a{color:inherit;text-decoration:none}
     ).join('')+'</div>';
   }
 
+  // Always fetch from spike.land origin so auth cookies are sent
+  const API_ORIGIN = location.hostname === 'analytics.spike.land' ? 'https://spike.land' : '';
+
   async function fetchJson(path) {
     const sep = path.includes('?') ? '&' : '?';
-    const res = await fetch(path+sep+'range='+currentRange, {credentials:'include'});
+    const res = await fetch(API_ORIGIN+path+sep+'range='+currentRange, {credentials:'include'});
     if (res.status === 401 || res.status === 403) throw new Error('auth');
     if (!res.ok) throw new Error('HTTP '+res.status);
     return res.json();

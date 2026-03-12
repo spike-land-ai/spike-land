@@ -119,7 +119,10 @@ describe("useBrowserBridge", () => {
 
     expect(onResult).toHaveBeenCalledWith(
       "req-5",
-      expect.objectContaining({ success: false, error: expect.stringContaining("target not found") }),
+      expect.objectContaining({
+        success: false,
+        error: expect.stringContaining("target not found"),
+      }),
     );
   });
 

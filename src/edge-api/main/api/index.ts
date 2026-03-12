@@ -95,13 +95,29 @@ app.use("*", requestIdMiddleware);
 app.use("*", async (c, next) => {
   const host = getRequestHost(c.req.raw);
   if (host === PLATFORM_HOSTS.analytics) {
-    const pathname = new URL(c.req.url).pathname;
-    // Rewrite paths so analytics.spike.land/X → /analytics/X
-    if (pathname === "/" || pathname === "/index.html") {
-      return c.redirect("/analytics", 307);
+    const url = new URL(c.req.url);
+    const getExecutionContext = (): ExecutionContext | undefined => {
+      try {
+        return c.executionCtx;
+      } catch {
+        return undefined;
+      }
+    };
+    const forward = (pathname: string) => {
+      url.pathname = pathname;
+      const executionContext = getExecutionContext();
+      return executionContext
+        ? app.fetch(new Request(url.toString(), c.req.raw), c.env, executionContext)
+        : app.fetch(new Request(url.toString(), c.req.raw), c.env);
+    };
+    // Internally rewrite vanity-host requests so the browser stays on analytics.spike.land.
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      const res = await forward("/analytics");
+      return new Response(res.body, res);
     }
-    if (!pathname.startsWith("/analytics")) {
-      return c.redirect(`/analytics${pathname}`, 307);
+    if (!url.pathname.startsWith("/analytics")) {
+      const res = await forward(`/analytics${url.pathname}`);
+      return new Response(res.body, res);
     }
   }
   return next();
@@ -227,18 +243,20 @@ app.use("/api/spike-chat", creditMeterMiddleware);
 
 // Error handling middleware
 app.onError((err, c) => {
+  const requestId =
+    (c.get("requestId") as string | undefined) ?? c.req.header("x-request-id") ?? null;
   captureWorkerException("spike-edge", err, {
     request: c.req.raw,
-    extras: {
-      requestId: (c.get("requestId") as string | undefined) ?? c.req.header("x-request-id") ?? null,
-    },
+    extras: { requestId },
   });
   log.error(`${c.req.method} ${c.req.path}: ${err.message}`);
+
+  // Attempt to persist error to D1 — fail gracefully if table or DB is unavailable
   try {
     const metadata = JSON.stringify({
       method: c.req.method,
       path: c.req.path,
-      requestId: (c.get("requestId") as string | undefined) ?? c.req.header("x-request-id") ?? null,
+      requestId,
     });
     const clientId = c.req.header("cf-connecting-ip") ?? null;
     const logWork = c.env.DB.prepare(
@@ -254,14 +272,22 @@ app.onError((err, c) => {
         "error",
       )
       .run()
-      .catch((e) => log.error("error_logs write failed", { error: String(e) }));
+      .catch((e) => {
+        // Log to console so it's visible in wrangler tail even when D1 is down
+        console.error(
+          `[spike-edge] error_logs write failed: ${String(e)} | original error: ${err.message} | path: ${c.req.path}`,
+        );
+      });
     try {
       c.executionCtx.waitUntil(logWork);
     } catch {
       /* no ExecutionContext in tests */
     }
-  } catch {
-    /* DB unavailable — skip error logging to prevent double-error */
+  } catch (dbErr) {
+    // DB completely unavailable — log full context to console as last resort
+    console.error(
+      `[spike-edge] DB unavailable for error logging: ${String(dbErr)} | original error: ${err.message} | path: ${c.req.path}`,
+    );
   }
   return c.json({ error: "Internal Server Error" }, 500);
 });
@@ -625,8 +651,18 @@ app.all("/api/*", apiCatchAllHandler);
 app.route("/", spa);
 
 export { RateLimiter, app };
+
+/** Log a one-time warning per isolate if SENTRY_DSN is not configured. */
+let sentryDsnWarned = false;
+
 export default Sentry.withSentry((env: Env) => createWorkerSentryOptions("spike-edge", env), {
   async fetch(request: Request, env: Env, ctx?: ExecutionContext): Promise<Response> {
+    if (!sentryDsnWarned && !env.SENTRY_DSN) {
+      console.warn(
+        "[spike-edge] SENTRY_DSN is not set — errors will not be reported to Sentry. Set it with: npx wrangler secret put SENTRY_DSN",
+      );
+      sentryDsnWarned = true;
+    }
     const instrumentedEnv = instrumentD1Bindings(env, ["DB"]);
     const startedAt = Date.now();
     const metricService = shouldTrackServiceMetricRequest(request)

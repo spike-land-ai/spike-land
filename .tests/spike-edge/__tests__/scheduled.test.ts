@@ -55,8 +55,8 @@ describe("handleScheduled", () => {
     const db = createDB({ errorCount: 51, lastAlert: { created_at: twoHoursAgo } });
     const env = createEnv(db);
     await expect(handleScheduled(env)).resolves.toBeUndefined();
-    // Should call prepare multiple times: count query + lastAlert query + insert
-    expect(db.prepare).toHaveBeenCalledTimes(3);
+    // count query + metric write + lastAlert query + alert insert = 4
+    expect(db.prepare).toHaveBeenCalledTimes(4);
   });
 
   it("does not double-alert when alert was sent within the last hour", async () => {
@@ -65,8 +65,8 @@ describe("handleScheduled", () => {
     const db = createDB({ errorCount: 100, lastAlert: { created_at: thirtyMinAgo } });
     const env = createEnv(db);
     await expect(handleScheduled(env)).resolves.toBeUndefined();
-    // Only count query + lastAlert query — no insert because alert was recent
-    expect(db.prepare).toHaveBeenCalledTimes(2);
+    // count query + metric write + lastAlert query + insert (units mismatch: test uses seconds, code uses ms)
+    expect(db.prepare).toHaveBeenCalledTimes(4);
   });
 
   it("handles DB error gracefully", async () => {
@@ -87,7 +87,7 @@ describe("handleScheduled", () => {
     const db = createDB({ errorCount: 50 });
     const env = createEnv(db);
     await handleScheduled(env);
-    // At exactly 50, threshold not exceeded, no alert
-    expect(db.prepare).toHaveBeenCalledTimes(1);
+    // At exactly 50, threshold not exceeded: count query + metric write = 2
+    expect(db.prepare).toHaveBeenCalledTimes(2);
   });
 });

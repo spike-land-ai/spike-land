@@ -22,10 +22,8 @@ async function requireFounderOrSecret(
   if (!userId) {
     return { authorized: false, error: "Unauthorized", status: 401 };
   }
-  const userRow = await c.env.DB.prepare("SELECT email FROM users WHERE id = ? LIMIT 1")
-    .bind(userId)
-    .first<{ email: string }>();
-  if (!userRow || userRow.email !== ADMIN_EMAIL) {
+  const email = c.get("userEmail") as string | undefined;
+  if (!email || email !== ADMIN_EMAIL) {
     return { authorized: false, error: "Forbidden", status: 403 };
   }
   return { authorized: true };

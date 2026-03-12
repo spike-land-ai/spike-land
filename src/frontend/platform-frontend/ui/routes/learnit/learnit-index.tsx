@@ -33,7 +33,9 @@ export function LearnitIndexPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-12 py-8">
       <div className="space-y-4 text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Learn Anything. Instantly.</h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+          Learn Anything. Instantly.
+        </h1>
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
           AI-powered wiki that explains any topic at the depth you need. Search a topic or browse
           categories below.

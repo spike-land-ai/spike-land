@@ -89,9 +89,12 @@ export function PlatformTab({
   const recentEvents: PlatformEvent[] = (data?.recentEvents ?? []) as PlatformEvent[];
   const showFunnel = data?.funnel !== null && data?.funnel !== undefined;
   const isRealtime = isRealtimeRange(range);
-  const toolInvocations = summary?.eventsByType.find((e) => e.event_type === "tool_use")?.count ?? 0;
-  const signups = summary?.eventsByType.find((e) => e.event_type === "signup_completed")?.count ?? 0;
-  const conversionRate = summary && summary.uniqueUsers > 0 ? ((signups / summary.uniqueUsers) * 100).toFixed(1) : "0";
+  const toolInvocations =
+    summary?.eventsByType.find((e) => e.event_type === "tool_use")?.count ?? 0;
+  const signups =
+    summary?.eventsByType.find((e) => e.event_type === "signup_completed")?.count ?? 0;
+  const conversionRate =
+    summary && summary.uniqueUsers > 0 ? ((signups / summary.uniqueUsers) * 100).toFixed(1) : "0";
 
   return (
     <div className="space-y-6">
@@ -99,23 +102,35 @@ export function PlatformTab({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rubik-panel p-5">
           <p className="text-sm text-muted-foreground">Unique Visitors</p>
-          <p className="mt-1 text-2xl font-bold text-foreground">{loading ? "..." : String(summary?.uniqueUsers ?? 0)}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{isRealtime && data?.activeUsers != null ? `${data.activeUsers} active now` : range}</p>
+          <p className="mt-1 text-2xl font-bold text-foreground">
+            {loading ? "..." : String(summary?.uniqueUsers ?? 0)}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {isRealtime && data?.activeUsers != null ? `${data.activeUsers} active now` : range}
+          </p>
         </div>
         <div className="rubik-panel p-5">
           <p className="text-sm text-muted-foreground">Total Events</p>
-          <p className="mt-1 text-2xl font-bold text-foreground">{loading ? "..." : String(summary?.totalEvents ?? 0)}</p>
+          <p className="mt-1 text-2xl font-bold text-foreground">
+            {loading ? "..." : String(summary?.totalEvents ?? 0)}
+          </p>
           <p className="mt-1 text-xs text-muted-foreground">{range}</p>
         </div>
         <div className="rubik-panel p-5">
           <p className="text-sm text-muted-foreground">Tool Invocations</p>
-          <p className="mt-1 text-2xl font-bold text-foreground">{loading ? "..." : String(toolInvocations)}</p>
+          <p className="mt-1 text-2xl font-bold text-foreground">
+            {loading ? "..." : String(toolInvocations)}
+          </p>
           <p className="mt-1 text-xs text-muted-foreground">{range}</p>
         </div>
         <div className="rubik-panel p-5">
           <p className="text-sm text-muted-foreground">Conversion Rate</p>
-          <p className="mt-1 text-2xl font-bold text-foreground">{loading ? "..." : `${conversionRate}%`}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{showFunnel ? "signups / visitors" : `${range} (need 7d+)`}</p>
+          <p className="mt-1 text-2xl font-bold text-foreground">
+            {loading ? "..." : `${conversionRate}%`}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {showFunnel ? "signups / visitors" : `${range} (need 7d+)`}
+          </p>
         </div>
       </div>
 
@@ -127,17 +142,24 @@ export function PlatformTab({
           </h2>
           {!summary?.toolUsage.length ? (
             <div className="flex h-48 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border">
-              <p className="text-sm text-muted-foreground">{loading ? "Loading..." : "No tool usage data yet"}</p>
+              <p className="text-sm text-muted-foreground">
+                {loading ? "Loading..." : "No tool usage data yet"}
+              </p>
             </div>
           ) : (
             <div className="space-y-2">
               {summary.toolUsage.slice(0, 10).map((tool) => (
-                <div key={tool.tool_name} className="flex items-center justify-between rounded-2xl bg-muted px-3 py-2">
+                <div
+                  key={tool.tool_name}
+                  className="flex items-center justify-between rounded-2xl bg-muted px-3 py-2"
+                >
                   <span className="text-sm font-medium text-foreground">{tool.tool_name}</span>
                   <div className="flex items-center gap-2">
                     <div
                       className="h-2 rounded-full bg-primary"
-                      style={{ width: `${Math.max(12, (tool.count / (summary.toolUsage[0]?.count ?? 1)) * 120)}px` }}
+                      style={{
+                        width: `${Math.max(12, (tool.count / (summary.toolUsage[0]?.count ?? 1)) * 120)}px`,
+                      }}
                     />
                     <span className="text-xs text-muted-foreground">{tool.count}</span>
                   </div>
@@ -154,12 +176,17 @@ export function PlatformTab({
           </h2>
           {recentEvents.length === 0 ? (
             <div className="flex h-48 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border">
-              <p className="text-sm text-muted-foreground">{loading ? "Loading..." : "No recent events"}</p>
+              <p className="text-sm text-muted-foreground">
+                {loading ? "Loading..." : "No recent events"}
+              </p>
             </div>
           ) : (
             <div className="max-h-80 space-y-1 overflow-y-auto">
               {recentEvents.map((event) => (
-                <div key={event.id} className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-muted">
+                <div
+                  key={event.id}
+                  className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-muted"
+                >
                   <div className="flex items-center gap-2">
                     <span className="inline-block rounded bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
                       {event.event_type}
@@ -167,7 +194,9 @@ export function PlatformTab({
                     <span className="text-sm text-muted-foreground">{event.source}</span>
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
-                    {isRealtime ? relativeTime(event.created_at) : new Date(event.created_at).toLocaleTimeString()}
+                    {isRealtime
+                      ? relativeTime(event.created_at)
+                      : new Date(event.created_at).toLocaleTimeString()}
                   </span>
                 </div>
               ))}

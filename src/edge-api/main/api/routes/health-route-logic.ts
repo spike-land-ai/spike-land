@@ -7,10 +7,15 @@ export interface HealthPayload {
   timestamp: string;
   authMcp?: HealthStatus;
   mcpService?: HealthStatus;
+  tables?: Record<string, HealthStatus>;
 }
 
 export interface HealthFetchBinding {
   fetch(request: Request, init?: RequestInit): Promise<Response>;
+}
+
+export interface D1Database {
+  prepare(query: string): { first(): Promise<unknown> };
 }
 
 export interface HealthPayloadOptions {
@@ -18,6 +23,7 @@ export interface HealthPayloadOptions {
   d1: HealthStatus;
   authMcp?: HealthStatus | undefined;
   mcpService?: HealthStatus | undefined;
+  tables?: Record<string, HealthStatus> | undefined;
   timestamp?: string | undefined;
 }
 
@@ -59,6 +65,27 @@ export function getOverallHealthStatus(statuses: HealthStatus[]): HealthStatus {
   return statuses.every((status) => status === "ok") ? "ok" : "degraded";
 }
 
+/** Check that a D1 table exists and is queryable. */
+export async function checkTableHealth(db: D1Database, tableName: string): Promise<HealthStatus> {
+  try {
+    await db.prepare(`SELECT 1 FROM ${tableName} LIMIT 0`).first();
+    return "ok";
+  } catch {
+    return "degraded";
+  }
+}
+
+/** Check multiple critical tables and return per-table status. */
+export async function checkCriticalTables(
+  db: D1Database,
+  tableNames: string[],
+): Promise<Record<string, HealthStatus>> {
+  const results = await Promise.all(
+    tableNames.map(async (name) => [name, await checkTableHealth(db, name)] as const),
+  );
+  return Object.fromEntries(results);
+}
+
 export function buildHealthPayload(options: HealthPayloadOptions): HealthPayload {
   const statusFields: HealthStatus[] = [options.r2, options.d1];
 
@@ -70,6 +97,10 @@ export function buildHealthPayload(options: HealthPayloadOptions): HealthPayload
     statusFields.push(options.mcpService);
   }
 
+  if (options.tables) {
+    statusFields.push(...Object.values(options.tables));
+  }
+
   return {
     status: getOverallHealthStatus(statusFields),
     r2: options.r2,
@@ -77,6 +108,7 @@ export function buildHealthPayload(options: HealthPayloadOptions): HealthPayload
     timestamp: options.timestamp ?? new Date().toISOString(),
     ...(options.authMcp ? { authMcp: options.authMcp } : {}),
     ...(options.mcpService ? { mcpService: options.mcpService } : {}),
+    ...(options.tables ? { tables: options.tables } : {}),
   };
 }
 

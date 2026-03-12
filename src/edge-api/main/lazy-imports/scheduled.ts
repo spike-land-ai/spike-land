@@ -17,6 +17,21 @@ export async function handleScheduled(env: Env): Promise<void> {
     const errorCount = result?.count ?? 0;
     log.info("Error rate check", { errorCount, since: fifteenMinAgo });
 
+    // Write error rate metric so the analytics dashboard can display it
+    try {
+      const minuteBucket = Math.floor(nowMs / 60_000);
+      await env.DB.prepare(
+        `INSERT INTO status_service_minute_metrics (service_name, minute_bucket, request_count, error_count, p50_ms, p95_ms, p99_ms)
+         VALUES (?, ?, 0, ?, 0, 0, 0)
+         ON CONFLICT (service_name, minute_bucket) DO UPDATE SET error_count = error_count + excluded.error_count`,
+      )
+        .bind("spike-edge", minuteBucket, errorCount)
+        .run();
+    } catch (metricErr) {
+      // status_service_minute_metrics may not exist yet — don't fail the cron
+      log.warn("Failed to write error rate metric", { error: String(metricErr) });
+    }
+
     if (errorCount > 50) {
       // Check if we alerted recently (within last hour) to avoid spam
       const lastAlert = await env.DB.prepare(

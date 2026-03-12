@@ -57,6 +57,20 @@ export function preprocessBlogMdx(markdown: string): string {
     .join("");
 }
 
+export function stripLegacyPersonalizedBlogFraming(markdown: string): string {
+  return markdown
+    .replace(/^>\s+\*\*AI Personalized View for [^\n]+\*\*\s*\n+/i, "")
+    .replace(
+      /^Based on your profile as a \*\*[^*]+\*\*, here is the synthesized article:\s*\n+/i,
+      "",
+    )
+    .replace(
+      /\n+\*This is a dynamically generated personalized version of the raw PRD tailored specifically for the [^*]+ mindset\.\*\s*$/i,
+      "",
+    )
+    .trim();
+}
+
 export function coerceBooleanProp(value: unknown, fallback = false): boolean {
   if (typeof value === "boolean") return value;
   if (typeof value === "string") {

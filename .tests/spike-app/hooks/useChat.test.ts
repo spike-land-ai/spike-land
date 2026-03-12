@@ -163,9 +163,7 @@ describe("useChat", () => {
   });
 
   it("sets error on error event", async () => {
-    mockFetch([
-      makeSSEResponse([JSON.stringify({ type: "error", error: "Rate limited" })]),
-    ]);
+    mockFetch([makeSSEResponse([JSON.stringify({ type: "error", error: "Rate limited" })])]);
 
     const { result } = renderHook(() => useChat());
 
@@ -193,9 +191,7 @@ describe("useChat", () => {
   });
 
   it("newThread clears current items and selection", async () => {
-    mockFetch([
-      makeSSEResponse([JSON.stringify({ type: "text_delta", text: "Hi" })]),
-    ]);
+    mockFetch([makeSSEResponse([JSON.stringify({ type: "text_delta", text: "Hi" })])]);
 
     const { result } = renderHook(() => useChat());
 
@@ -214,9 +210,7 @@ describe("useChat", () => {
   });
 
   it("clearError clears the error state", async () => {
-    mockFetch([
-      makeSSEResponse([JSON.stringify({ type: "error", error: "Oops" })]),
-    ]);
+    mockFetch([makeSSEResponse([JSON.stringify({ type: "error", error: "Oops" })])]);
 
     const { result } = renderHook(() => useChat());
 

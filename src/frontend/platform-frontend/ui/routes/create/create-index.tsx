@@ -35,8 +35,8 @@ export function CreateIndexPage() {
       <div className="space-y-4 text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Create an AI App</h1>
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-          Describe what you want to build and let AI generate a fully functional React application in
-          seconds.
+          Describe what you want to build and let AI generate a fully functional React application
+          in seconds.
         </p>
       </div>
 

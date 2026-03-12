@@ -4,4 +4,33 @@ useDefault = true
 [allowlist]
 paths = [
   '''.env\.local\.save''',
+  '''\.test\.(ts|js)$''',
+  '''__tests__/''',
+  '''scripts/scan-secrets\.sh''',
 ]
+
+# Custom rules for spike-land-ai specific patterns
+
+[[rules]]
+id = "cloudflare-api-token"
+description = "Cloudflare API Token"
+regex = '''CLOUDFLARE_API_TOKEN\s*=\s*['"]?[A-Za-z0-9_-]{30,}['"]?'''
+keywords = ["CLOUDFLARE_API_TOKEN"]
+
+[[rules]]
+id = "spike-internal-secret"
+description = "Spike internal service secrets"
+regex = '''(INTERNAL_SERVICE_SECRET|MCP_INTERNAL_SECRET|QUIZ_BADGE_SECRET)\s*=\s*['"]?[^\s'"]{16,}['"]?'''
+keywords = ["INTERNAL_SERVICE_SECRET", "MCP_INTERNAL_SECRET", "QUIZ_BADGE_SECRET"]
+
+[[rules]]
+id = "sentry-auth-token"
+description = "Sentry Auth Token"
+regex = '''sntrys_[A-Za-z0-9]{20,}'''
+keywords = ["sntrys_"]
+
+[[rules]]
+id = "wrangler-oauth-token"
+description = "Wrangler OAuth refresh token"
+regex = '''oauth_token\s*=\s*['"]?[A-Za-z0-9_-]{30,}['"]?'''
+keywords = ["oauth_token"]

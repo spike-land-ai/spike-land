@@ -1,12 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import type {
-  EloChange,
-  Outcome,
-  PromptEloFile,
-  PromptRole,
-  PromptVariant,
-} from "./types.js";
+import type { EloChange, Outcome, PromptEloFile, PromptRole, PromptVariant } from "./types.js";
 
 import fixerV3 from "./prompts/fixer-v3.js";
 import reviewerV3 from "./prompts/reviewer-v3.js";
