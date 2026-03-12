@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.27.1",
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "express": "^5.2.1",
     "playwright": "^1.58.2",
     "zod": "4.3.6"
@@ -43,13 +43,13 @@
     "@changesets/cli": "2.30.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "@types/node": "25.3.5",
-    "@vitest/coverage-v8": "4.0.18",
+    "@types/node": "25.4.0",
+    "@vitest/coverage-v8": "4.1.0",
     "eslint": "10.0.3",
     "tsup": "8.5.1",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.56.1",
-    "vitest": "4.0.18"
+    "typescript-eslint": "8.57.0",
+    "vitest": "4.1.0"
   },
   "keywords": [
     "qa",

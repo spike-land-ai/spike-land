@@ -25,10 +25,10 @@
     "@tanstack/react-query": "^5.90.21",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "astro": "^5.4.1",
+    "astro": "^6.0.4",
     "better-auth": "^1.5.5",
     "class-variance-authority": "^0.7.1",
-    "framer-motion": "^12.35.2",
+    "framer-motion": "^12.36.0",
     "lucide-react": "^0.577.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -37,10 +37,10 @@
   "devDependencies": {
     "@sentry/vite-plugin": "^5.1.1",
     "@tailwindcss/typography": "^0.5.19",
-    "@tailwindcss/vite": "^4.0.0",
+    "@tailwindcss/vite": "^4.2.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "tailwindcss": "^4.0.0",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3"
   }
 }

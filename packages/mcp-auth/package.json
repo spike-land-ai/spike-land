@@ -17,20 +17,20 @@
     "lint": "eslint --quiet ."
   },
   "dependencies": {
-    "@better-auth/drizzle-adapter": "^1.5.4",
+    "@better-auth/drizzle-adapter": "^1.5.5",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@sentry/cloudflare": "^10.43.0",
-    "better-auth": "^1.5.4",
+    "better-auth": "^1.5.5",
     "drizzle-orm": "^0.45.1",
     "zod": "4.3.6"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "4.20260307.1",
-    "@vitest/coverage-v8": "^4.0.18",
+    "@cloudflare/workers-types": "4.20260312.1",
+    "@vitest/coverage-v8": "^4.1.0",
     "drizzle-kit": "^0.31.9",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18",
-    "wrangler": "^4.71.0"
+    "vitest": "^4.1.0",
+    "wrangler": "^4.72.0"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
