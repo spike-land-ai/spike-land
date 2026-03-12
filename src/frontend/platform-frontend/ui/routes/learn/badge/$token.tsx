@@ -16,7 +16,7 @@ export function BadgePage() {
     try {
       const parts = token.split(".");
       if (parts.length !== 2) return null;
-      const payloadStr = atob(parts[0]!);
+      const payloadStr = atob(parts[0] ?? "");
       return JSON.parse(payloadStr) as BadgePayload;
     } catch {
       return null;

@@ -134,8 +134,8 @@ export const NoteLifecycle: FC<NoteLifecycleProps> = ({
                     width: 60,
                     height: 2,
                     background: `linear-gradient(90deg, ${
-                      STAGES[i]!.color
-                    }60, ${STAGES[i + 1]!.color}60)`,
+                      STAGES[i]?.color ?? "#999"
+                    }60, ${STAGES[i + 1]?.color ?? "#999"}60)`,
                   }}
                 />
                 <div
@@ -144,7 +144,7 @@ export const NoteLifecycle: FC<NoteLifecycleProps> = ({
                     height: 0,
                     borderTop: "8px solid transparent",
                     borderBottom: "8px solid transparent",
-                    borderLeft: `12px solid ${STAGES[i + 1]!.color}60`,
+                    borderLeft: `12px solid ${STAGES[i + 1]?.color ?? "#999"}60`,
                   }}
                 />
               </div>

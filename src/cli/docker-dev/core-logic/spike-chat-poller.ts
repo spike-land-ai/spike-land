@@ -201,7 +201,7 @@ export function startPollingLoop(
     }
   }
 
-  tick();
+  void tick();
 
   return {
     stop() {

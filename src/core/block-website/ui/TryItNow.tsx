@@ -34,7 +34,7 @@ export function TryItNow() {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(getCommand());
+    void navigator.clipboard.writeText(getCommand());
     setCopied(true);
   };
 

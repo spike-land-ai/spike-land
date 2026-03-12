@@ -17,7 +17,7 @@ export default function McpDashboardPage() {
   const [data, setData] = useState<McpHealthData | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/mcp-health")
+    void fetch("/api/admin/mcp-health")
       .then((res) => res.json())
       .then((d: unknown) => setData(d as McpHealthData));
   }, []);

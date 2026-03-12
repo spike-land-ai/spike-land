@@ -160,7 +160,7 @@ describe("useSpikeChat", () => {
     const { result } = renderHook(() => useSpikeChat({ channelId: "ch-1" }));
 
     act(() => {
-      wsMockInstance!._triggerOpen();
+      wsMockInstance._triggerOpen();
     });
 
     expect(result.current.isConnected).toBe(true);
@@ -170,17 +170,17 @@ describe("useSpikeChat", () => {
     const { result } = renderHook(() => useSpikeChat({ channelId: "ch-1" }));
 
     act(() => {
-      wsMockInstance!._triggerOpen();
+      wsMockInstance._triggerOpen();
     });
     expect(result.current.isConnected).toBe(true);
 
     act(() => {
       // Prevent reconnect timer from firing
-      wsMockInstance!.close.mockImplementation(() => {
-        wsMockInstance!.readyState = WebSocket.CLOSED;
-        wsMockInstance!.onclose?.();
+      wsMockInstance.close.mockImplementation(() => {
+        wsMockInstance.readyState = WebSocket.CLOSED;
+        wsMockInstance.onclose?.();
       });
-      wsMockInstance!._triggerClose();
+      wsMockInstance._triggerClose();
     });
 
     expect(result.current.isConnected).toBe(false);
@@ -190,11 +190,11 @@ describe("useSpikeChat", () => {
     const { result } = renderHook(() => useSpikeChat({ channelId: "ch-1" }));
 
     act(() => {
-      wsMockInstance!._triggerOpen();
+      wsMockInstance._triggerOpen();
     });
 
     act(() => {
-      wsMockInstance!._triggerMessage({
+      wsMockInstance._triggerMessage({
         type: "message_new",
         message: sampleMessages[0],
       });
@@ -214,8 +214,8 @@ describe("useSpikeChat", () => {
     await waitFor(() => expect(result.current.messages).toHaveLength(1));
 
     act(() => {
-      wsMockInstance!._triggerOpen();
-      wsMockInstance!._triggerMessage({ type: "message_deleted", id: "msg-1" });
+      wsMockInstance._triggerOpen();
+      wsMockInstance._triggerMessage({ type: "message_deleted", id: "msg-1" });
     });
 
     expect(result.current.messages).toHaveLength(0);
@@ -225,8 +225,8 @@ describe("useSpikeChat", () => {
     const { result } = renderHook(() => useSpikeChat({ channelId: "ch-1" }));
 
     act(() => {
-      wsMockInstance!._triggerOpen();
-      wsMockInstance!._triggerMessage({ type: "typing", users: ["alice", "bob"] });
+      wsMockInstance._triggerOpen();
+      wsMockInstance._triggerMessage({ type: "typing", users: ["alice", "bob"] });
     });
 
     expect(result.current.typingUsers).toEqual(["alice", "bob"]);
@@ -244,8 +244,8 @@ describe("useSpikeChat", () => {
     };
 
     act(() => {
-      wsMockInstance!._triggerOpen();
-      wsMockInstance!._triggerMessage(event);
+      wsMockInstance._triggerOpen();
+      wsMockInstance._triggerMessage(event);
     });
 
     expect(onAppUpdated).toHaveBeenCalledWith(event);
@@ -255,8 +255,8 @@ describe("useSpikeChat", () => {
     const { result } = renderHook(() => useSpikeChat({ channelId: "ch-1" }));
 
     act(() => {
-      wsMockInstance!._triggerOpen();
-      wsMockInstance!.onmessage?.({ data: "not-valid-json{{" });
+      wsMockInstance._triggerOpen();
+      wsMockInstance.onmessage?.({ data: "not-valid-json{{" });
     });
 
     expect(result.current.messages).toEqual([]);
@@ -301,34 +301,34 @@ describe("useSpikeChat", () => {
     const { result } = renderHook(() => useSpikeChat({ channelId: "ch-1" }));
 
     act(() => {
-      wsMockInstance!._triggerOpen();
+      wsMockInstance._triggerOpen();
       result.current.startTyping();
     });
 
-    expect(wsMockInstance!.send).toHaveBeenCalledWith(JSON.stringify({ type: "typing_start" }));
+    expect(wsMockInstance.send).toHaveBeenCalledWith(JSON.stringify({ type: "typing_start" }));
   });
 
   it("stopTyping sends typing_stop message when WebSocket is open", () => {
     const { result } = renderHook(() => useSpikeChat({ channelId: "ch-1" }));
 
     act(() => {
-      wsMockInstance!._triggerOpen();
+      wsMockInstance._triggerOpen();
       result.current.stopTyping();
     });
 
-    expect(wsMockInstance!.send).toHaveBeenCalledWith(JSON.stringify({ type: "typing_stop" }));
+    expect(wsMockInstance.send).toHaveBeenCalledWith(JSON.stringify({ type: "typing_stop" }));
   });
 
   it("startTyping does not send when WebSocket is not open", () => {
     const { result } = renderHook(() => useSpikeChat({ channelId: "ch-1" }));
     // WebSocket is in CONNECTING state, not OPEN
     result.current.startTyping();
-    expect(wsMockInstance!.send).not.toHaveBeenCalled();
+    expect(wsMockInstance.send).not.toHaveBeenCalled();
   });
 
   it("closes WebSocket on unmount", () => {
     const { unmount } = renderHook(() => useSpikeChat({ channelId: "ch-1" }));
-    const ws = wsMockInstance!;
+    const ws = wsMockInstance;
     unmount();
     expect(ws.close).toHaveBeenCalled();
   });
@@ -346,7 +346,7 @@ describe("useSpikeChat", () => {
 
   it("schedules reconnect with exponential backoff on WebSocket close", async () => {
     renderHook(() => useSpikeChat({ channelId: "ch-1" }));
-    const firstWs = wsMockInstance!;
+    const firstWs = wsMockInstance;
 
     // Prevent the mock close from triggering onclose automatically so we can control it
     act(() => {

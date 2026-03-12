@@ -260,7 +260,7 @@ export function BlogListView({
       }
     }
 
-    load().finally(() => {
+    void load().finally(() => {
       if (!cancelled) setLoading(false);
     });
     return () => {

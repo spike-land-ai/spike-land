@@ -64,7 +64,7 @@ const toHtmlAndCss = async (
 
     const emotionGlobalStyles = emotionGlobalStylesData.map(
       (x) =>
-        Array.from(x.sheet!.cssRules)
+        Array.from(x.sheet?.cssRules ?? [])
           .map((rule: CSSRule) => rule.cssText)
           .join("\n"), // Added type CSSRule for inner x
     );
@@ -74,7 +74,7 @@ const toHtmlAndCss = async (
       ...emotionGlobalStyles,
       ...[...cssCache.sheet.tags]
         .map((tag: HTMLStyleElement) =>
-          Array.from(tag.sheet!.cssRules!).map((rule: CSSRule) => rule.cssText),
+          Array.from(tag.sheet?.cssRules ?? []).map((rule: CSSRule) => rule.cssText),
         )
         .flat(), // Changed to Array.from and added type CSSRule
     ]
@@ -348,7 +348,7 @@ async function _loadAppComponent(
         codeToUse = "export default ()=><div>Error: No code provided</div>";
       }
       const { data: appComponent, error: importError } = await tryCatch(
-        importFromString(codeToUse!),
+        importFromString(codeToUse as string),
       );
       AppToRender = importError || !appComponent ? FallbackErrorComponent : appComponent;
     }

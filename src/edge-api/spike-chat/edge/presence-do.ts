@@ -13,7 +13,7 @@ export class PresenceDurableObject extends DurableObject {
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
-    this.ctx.blockConcurrencyWhile(async () => {
+    void this.ctx.blockConcurrencyWhile(async () => {
       // Ensure the alarm is set when the DO wakes up
       const currentAlarm = await this.ctx.storage.getAlarm();
       if (!currentAlarm) {

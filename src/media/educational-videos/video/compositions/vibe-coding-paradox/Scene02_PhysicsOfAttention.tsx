@@ -30,16 +30,17 @@ export const Scene02_PhysicsOfAttention: FC = () => {
   const vibeSegments = Array.from({ length: 20 }, (_, i) => ({
     label: `tok-${i}`,
     value: 4 + Math.sin(i * 3.7) * 3,
-    color: [
-      VERITASIUM_COLORS.planning,
-      VERITASIUM_COLORS.generating,
-      VERITASIUM_COLORS.transpiling,
-      VERITASIUM_COLORS.fixing,
-      VERITASIUM_COLORS.learning,
-      COLORS.cyan,
-      COLORS.fuchsia,
-      COLORS.amber,
-    ][i % 8]!,
+    color:
+      [
+        VERITASIUM_COLORS.planning,
+        VERITASIUM_COLORS.generating,
+        VERITASIUM_COLORS.transpiling,
+        VERITASIUM_COLORS.fixing,
+        VERITASIUM_COLORS.learning,
+        COLORS.cyan,
+        COLORS.fuchsia,
+        COLORS.amber,
+      ][i % 8] ?? COLORS.cyan,
   }));
 
   // Subtle continuous camera zoom for visual momentum

@@ -10,7 +10,7 @@ export function TryItCta() {
   const browseCopy = useDevModeCopy("Or browse tools first", "Or inspect capabilities first");
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(command);
+    void navigator.clipboard.writeText(command);
     setCopied(true);
   };
 

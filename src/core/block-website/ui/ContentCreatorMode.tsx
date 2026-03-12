@@ -127,7 +127,9 @@ export function ContentCreatorMode({ slug, initialContent = "" }: ContentCreator
             variant="default"
             size="sm"
             className="rounded-xl font-black uppercase tracking-[0.24em] text-xs"
-            onClick={handleSubmitPR}
+            onClick={() => {
+              void handleSubmitPR();
+            }}
             disabled={submitting}
           >
             <GitPullRequest size={14} className="mr-1.5" />

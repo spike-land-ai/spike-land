@@ -29,7 +29,7 @@ export function triggerViewTransition(
     flushSync(callback);
   });
 
-  transition.ready.then(() => {
+  void transition.ready.then(() => {
     document.documentElement.animate(
       {
         clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${maxRadius}px at ${x}px ${y}px)`],

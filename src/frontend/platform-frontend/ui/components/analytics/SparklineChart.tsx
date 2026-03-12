@@ -92,7 +92,9 @@ export function SparklineChart({
               const min = Math.min(...data, 0);
               const range = max - min || 1;
               return (
-                height - padding - ((data[hoveredIndex]! - min) / range) * (height - padding * 2)
+                height -
+                padding -
+                (((data[hoveredIndex] ?? 0) - min) / range) * (height - padding * 2)
               );
             })()}
             r="3"

@@ -58,4 +58,4 @@ async function main() {
   process.stderr.write(`${SERVER_NAME} MCP Server v${SERVER_VERSION} running on stdio.\n`);
 }
 
-main();
+void main();

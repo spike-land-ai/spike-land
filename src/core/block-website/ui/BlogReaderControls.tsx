@@ -445,7 +445,7 @@ export function BlogReaderControls({
         ttsEngine.resume();
         return;
       }
-      ttsEngine.play(currentIndexRef.current);
+      void ttsEngine.play(currentIndexRef.current);
       return;
     }
 

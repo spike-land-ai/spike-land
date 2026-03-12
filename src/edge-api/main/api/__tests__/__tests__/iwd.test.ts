@@ -81,7 +81,7 @@ function createMockDB(state: { visitors?: VisitorRecord[]; messages?: MessageRec
             const counts = visitors
               .filter((visitor) => visitor.created_at >= dayStart && visitor.country)
               .reduce<Map<string, number>>((acc, visitor) => {
-                const key = visitor.country!;
+                const key = visitor.country as string;
                 acc.set(key, (acc.get(key) ?? 0) + 1);
                 return acc;
               }, new Map());

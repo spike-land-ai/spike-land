@@ -248,7 +248,10 @@ async function createEditorModel(
   const spikeEditorAPI: SpikeEditorAPI = {
     getValue: () => model.getValue(),
     setValue: (value: string) => editorModel.setValue(value),
-    getSelection: () => myEditor.getModel()?.getValueInRange(myEditor.getSelection()!) || "",
+    getSelection: () => {
+      const selection = myEditor.getSelection();
+      return selection ? myEditor.getModel()?.getValueInRange(selection) || "" : "";
+    },
     insertText: (text: string) => {
       const selection = myEditor.getSelection();
       if (selection) {

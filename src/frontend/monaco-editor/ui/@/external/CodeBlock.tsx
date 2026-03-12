@@ -22,7 +22,7 @@ export const CodeBlock: FC<CodeBlockProps> = memo(({ language, value, title }) =
     DocumentDuplicateIcon,
     ClipboardDocumentIcon,
   ];
-  const Icon = icons[iconIndex]!;
+  const Icon = icons[iconIndex] ?? ClipboardIcon;
   return (
     <div className="w-full font-mono text-sm rounded-lg overflow-hidden shadow-lg bg-gray-900 p-4">
       <div className="bg-gray-800 text-gray-200 py-3 px-4 text-sm rounded-t-lg flex justify-between items-center">

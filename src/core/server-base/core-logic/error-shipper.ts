@@ -58,7 +58,7 @@ export function createErrorShipper(options: ErrorShipperOptions = {}): ErrorShip
     buffer.push(entry);
 
     if (buffer.length >= batchSize) {
-      flush();
+      void flush();
     } else if (!timeoutId) {
       timeoutId = setTimeout(flush, flushIntervalMs);
     }
@@ -66,7 +66,7 @@ export function createErrorShipper(options: ErrorShipperOptions = {}): ErrorShip
 
   if (typeof process !== "undefined" && typeof process.on === "function") {
     process.on("beforeExit", () => {
-      flush();
+      void flush();
     });
   }
 

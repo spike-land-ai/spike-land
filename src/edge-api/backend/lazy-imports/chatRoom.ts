@@ -723,7 +723,7 @@ export class Code implements DurableObject {
         console.error("Failed to initialize session on wake:", error);
       }
     }
-    this.wsHandler.handleMessage(ws, message);
+    void this.wsHandler.handleMessage(ws, message);
   }
 
   async webSocketClose(ws: WebSocket, _code: number, _reason: string, _wasClean: boolean) {

@@ -226,7 +226,7 @@ export class ElevenLabsTtsEngine {
     const wasPlaying = this.status === "playing" || this.status === "loading";
     this.stop();
     if (wasPlaying) {
-      this.play(blockIndex);
+      void this.play(blockIndex);
     } else {
       this.onBlockChange(blockIndex);
       const entry = this.timeline[blockIndex];
@@ -332,7 +332,7 @@ export class ElevenLabsTtsEngine {
               this.setStatus("idle");
             }
           };
-          playNext();
+          void playNext();
         } else {
           this.setStatus("ended");
           const lastEntry = this.timeline.at(-1);

@@ -75,7 +75,7 @@ export function startHttpServer(server: McpServer, port: number, host: string) {
     if (sessionId) {
       const transport = transports.get(sessionId);
       if (transport) {
-        transport.close();
+        void transport.close();
         transports.delete(sessionId);
       }
     }

@@ -123,7 +123,7 @@ export function CodeBlock({ children, className }: CodeBlockProps) {
     if (!isBlock) return;
 
     let cancelled = false;
-    getHighlighter().then((h) => {
+    void getHighlighter().then((h) => {
       if (cancelled) return;
 
       const loadedLangs = h.getLoadedLanguages();
@@ -151,7 +151,7 @@ export function CodeBlock({ children, className }: CodeBlockProps) {
   }
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(code);
+    void navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

@@ -38,14 +38,14 @@ describe("useFocusTrap", () => {
     // Attach ref manually
     (result.current as React.MutableRefObject<HTMLDivElement>).current = container;
 
-    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']")!;
+    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']");
     expect(document.activeElement).not.toBe(btn0);
     cleanup(container);
   });
 
   it("focuses the first focusable element when activated", () => {
     const container = buildContainer(2);
-    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']")!;
+    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']");
 
     const { result, rerender } = renderHook(({ active }) => useFocusTrap(active), {
       initialProps: { active: false },
@@ -99,8 +99,8 @@ describe("useFocusTrap", () => {
 
   it("traps Tab forward: wraps focus from last to first element", () => {
     const container = buildContainer(2);
-    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']")!;
-    const btn1 = container.querySelector<HTMLButtonElement>("[data-testid='btn-1']")!;
+    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']");
+    const btn1 = container.querySelector<HTMLButtonElement>("[data-testid='btn-1']");
 
     const { result, rerender } = renderHook(({ active }) => useFocusTrap(active), {
       initialProps: { active: false },
@@ -131,8 +131,8 @@ describe("useFocusTrap", () => {
 
   it("traps Shift+Tab backward: wraps focus from first to last element", () => {
     const container = buildContainer(2);
-    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']")!;
-    const btn1 = container.querySelector<HTMLButtonElement>("[data-testid='btn-1']")!;
+    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']");
+    const btn1 = container.querySelector<HTMLButtonElement>("[data-testid='btn-1']");
 
     const { result, rerender } = renderHook(({ active }) => useFocusTrap(active), {
       initialProps: { active: false },
@@ -160,8 +160,8 @@ describe("useFocusTrap", () => {
 
   it("does not wrap Tab when focus is not on the last element", () => {
     const container = buildContainer(2);
-    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']")!;
-    const btn1 = container.querySelector<HTMLButtonElement>("[data-testid='btn-1']")!;
+    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']");
+    const btn1 = container.querySelector<HTMLButtonElement>("[data-testid='btn-1']");
 
     const { result, rerender } = renderHook(({ active }) => useFocusTrap(active), {
       initialProps: { active: false },
@@ -227,7 +227,7 @@ describe("useFocusTrap", () => {
     });
 
     // Focus moved into trap
-    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']")!;
+    const btn0 = container.querySelector<HTMLButtonElement>("[data-testid='btn-0']");
     expect(document.activeElement).toBe(btn0);
 
     // Deactivate: focus should return to trigger

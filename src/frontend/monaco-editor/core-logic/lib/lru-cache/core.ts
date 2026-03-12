@@ -842,8 +842,8 @@ export class LRUCache<K extends object | string | number, V extends object, FC =
     context: FC | undefined,
   ): BackgroundFetch<V> {
     const v = index === undefined ? undefined : (this.#valList[index] as V | undefined);
-    if (this.#isBackgroundFetch(this.#valList[index!])) {
-      return this.#valList[index!] as BackgroundFetch<V>;
+    if (index !== undefined && this.#isBackgroundFetch(this.#valList[index])) {
+      return this.#valList[index] as BackgroundFetch<V>;
     }
 
     const ac = new AC() as AbortController;
@@ -978,7 +978,7 @@ export class LRUCache<K extends object | string | number, V extends object, FC =
     if (index === undefined) {
       const setOptions: LRUCacheSetOptions<K, V, FC> = { ...fetchOpts.options };
       this.set(k, p, setOptions);
-      index = this.#keyMap.get(k)!;
+      index = this.#keyMap.get(k) as Index;
     } else {
       this.#valList[index] = p;
     }

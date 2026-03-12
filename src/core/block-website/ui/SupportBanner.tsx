@@ -181,7 +181,9 @@ function BlogBanner({
         {/* Left: fist bump */}
         <div className="flex items-center gap-4 min-w-0">
           <button
-            onClick={handleBump}
+            onClick={() => {
+              void handleBump();
+            }}
             disabled={bumped}
             aria-label={bumped ? "Already fist-bumped" : "Fist bump this post"}
             className={cn(
@@ -229,7 +231,9 @@ function BlogBanner({
           {DONATE_PRESETS.map((amount) => (
             <button
               key={amount}
-              onClick={() => handleDonate(amount)}
+              onClick={() => {
+                void handleDonate(amount);
+              }}
               disabled={donatingAmount !== null}
               aria-label={`Donate £${amount}`}
               className={cn(

@@ -451,7 +451,8 @@ export function registerCrdtTools(registry: ToolRegistry, userId: string, db: Dr
           mergeStates(merged, cloneState(allStates[i]));
         }
         for (const replicaId of set.replicaOrder) {
-          set.replicas.get(replicaId)?.state = cloneState(merged);
+          const replica = set.replicas.get(replicaId);
+          if (replica) replica.state = cloneState(merged);
         }
         const rows = set.replicaOrder
           .map((rid) => {

@@ -122,8 +122,8 @@ describe("useTranspiler", () => {
     });
 
     // Only the last value should have been transpiled
-    expect(fetchMock.mock.calls[0]![0]).toBe("https://js.spike.land");
-    expect(fetchMock.mock.calls[0]![1]).toMatchObject({
+    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://js.spike.land");
+    expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({
       method: "POST",
       body: "v4",
       headers: {

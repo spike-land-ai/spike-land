@@ -97,18 +97,18 @@ function buildQuestion(
     "This contradicts what the article states.",
   ];
   while (distractors.length < 3) {
-    distractors.push(fallbacks[distractors.length]!);
+    distractors.push(fallbacks[distractors.length] ?? "No additional information available.");
   }
 
   const correctIndex = Math.floor(Math.random() * 4);
   const opts: [string, string, string, string] = [
-    distractors[0]!,
-    distractors[1]!,
-    distractors[2]!,
+    distractors[0] ?? "",
+    distractors[1] ?? "",
+    distractors[2] ?? "",
     correctText,
   ];
   // Move correct answer to the chosen index
-  [opts[3], opts[correctIndex]] = [opts[correctIndex]!, opts[3]!];
+  [opts[3], opts[correctIndex]] = [opts[correctIndex] ?? "", opts[3] ?? ""];
 
   return {
     conceptIndex,
@@ -219,7 +219,7 @@ function evaluateMockAnswers(
   for (let i = 0; i < 3; i++) {
     const q = state.currentRound.questions[i];
     if (q && newProgress[q.conceptIndex]) {
-      const current = newProgress[q.conceptIndex]!;
+      const current = newProgress[q.conceptIndex];
       newProgress[q.conceptIndex] = {
         ...current,
         concept: current.concept,
