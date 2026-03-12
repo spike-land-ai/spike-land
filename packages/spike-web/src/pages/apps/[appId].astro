@@ -699,7 +699,7 @@ const appName = app.name;
     sendButton instanceof HTMLButtonElement &&
     messageList instanceof HTMLDivElement
   ) {
-    const selectedFiles = [];
+    const selectedFiles: File[] = [];
     const appName = chatForm.dataset.appName || 'your app';
 
     const autoresizeInput = () => {
@@ -735,7 +735,7 @@ const appName = app.name;
       });
     };
 
-    const appendMessage = (role, text, attachments = []) => {
+    const appendMessage = (role: 'assistant' | 'user', text: string, attachments: string[] = []) => {
       const message = document.createElement('div');
       message.className = `agent-message ${role === 'user' ? 'agent-message--user' : ''}`.trim();
 
@@ -752,7 +752,7 @@ const appName = app.name;
         const chips = document.createElement('div');
         chips.className = 'sidebar-attachment-list sidebar-attachment-list--message';
 
-        attachments.forEach((name) => {
+        attachments.forEach((name: string) => {
           const chip = document.createElement('span');
           chip.className = 'sidebar-attachment-chip';
           const label = document.createElement('span');
@@ -769,8 +769,8 @@ const appName = app.name;
       messageList.scrollTop = messageList.scrollHeight;
     };
 
-    const buildAssistantReply = (text, attachments) => {
-      const responseParts = [];
+    const buildAssistantReply = (text: string, attachments: string[]) => {
+      const responseParts: string[] = [];
 
       if (attachments.length > 0) {
         responseParts.push(
@@ -789,7 +789,7 @@ const appName = app.name;
       return responseParts.join(' ');
     };
 
-    attachmentList.addEventListener('click', (event) => {
+    attachmentList.addEventListener('click', (event: Event) => {
       const target = event.target;
       if (!(target instanceof HTMLButtonElement)) return;
 
@@ -804,9 +804,9 @@ const appName = app.name;
     attachmentInput.addEventListener('change', () => {
       const files = Array.from(attachmentInput.files || []);
 
-      files.forEach((file) => {
+      files.forEach((file: File) => {
         const alreadySelected = selectedFiles.some(
-          (entry) =>
+          (entry: File) =>
             entry.name === file.name &&
             entry.size === file.size &&
             entry.lastModified === file.lastModified,
@@ -827,21 +827,21 @@ const appName = app.name;
       syncComposerState();
     });
 
-    chatInput.addEventListener('keydown', (event) => {
+    chatInput.addEventListener('keydown', (event: KeyboardEvent) => {
       if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
         chatForm.requestSubmit();
       }
     });
 
-    chatForm.addEventListener('submit', (event) => {
+    chatForm.addEventListener('submit', (event: SubmitEvent) => {
       event.preventDefault();
 
       const text = chatInput.value.trim();
       const attachments = selectedFiles.map((file) => file.name);
       if (!text && attachments.length === 0) return;
 
-      appendMessage(role = 'user', text || 'Shared attachments for the current scaffold.', attachments);
+      appendMessage('user', text || 'Shared attachments for the current scaffold.', attachments);
 
       chatInput.value = '';
       selectedFiles.length = 0;

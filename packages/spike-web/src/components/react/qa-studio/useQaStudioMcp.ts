@@ -110,10 +110,11 @@ export function useQaStudioMcp() {
           try {
             const msg = JSON.parse(e.data);
             if (msg.id !== undefined && pendingRequestsRef.current.has(msg.id)) {
-              const { resolve, reject } = pendingRequestsRef.current.get(msg.id);
+              const pendingRequest = pendingRequestsRef.current.get(msg.id);
+              if (!pendingRequest) return;
               pendingRequestsRef.current.delete(msg.id);
-              if (msg.error) reject(msg.error);
-              else resolve(msg.result);
+              if (msg.error) pendingRequest.reject(msg.error);
+              else pendingRequest.resolve(msg.result);
             }
           } catch (err) {
             console.error("Error parsing message", err);

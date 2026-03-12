@@ -13316,6 +13316,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lucide-react@workspace:packages/spike-icons":
+  version: 0.0.0-use.local
+  resolution: "lucide-react@workspace:packages/spike-icons"
+  dependencies:
+    real-lucide-react: "npm:lucide-react@^0.300.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  languageName: unknown
+  linkType: soft
+
 "lz-string@npm:^1.5.0":
   version: 1.5.0
   resolution: "lz-string@npm:1.5.0"
@@ -16053,6 +16064,15 @@ __metadata:
   dependencies:
     picomatch: "npm:^2.2.1"
   checksum: 10c0/6fa848cf63d1b82ab4e985f4cf72bd55b7dcfd8e0a376905804e48c3634b7e749170940ba77b32804d5fe93b3cc521aa95a8d7e7d725f830da6d93f3669ce66b
+  languageName: node
+  linkType: hard
+
+"real-lucide-react@npm:lucide-react@^0.300.0":
+  version: 0.300.0
+  resolution: "lucide-react@npm:0.300.0"
+  peerDependencies:
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0
+  checksum: 10c0/cd532ee6eca64662abd3850d8b2f9135a5c8ca239a0f7ab0d01cf743271e953aa2b3b6af2027d3eaefc33564eb2c4c51d4664865920c4b6adc332f4c59cebc74
   languageName: node
   linkType: hard
 
