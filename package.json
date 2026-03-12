@@ -67,9 +67,9 @@
     "test:docker": "bash scripts/docker-test.sh",
     "test:docker:all": "bash scripts/docker-test.sh --all",
     "test:docker:ci": "bash scripts/docker-test.sh --base origin/main",
-    "dev:edge": "cd packages/spike-edge && npx wrangler dev --port 8787",
-    "dev:mcp": "cd packages/spike-land-mcp && npx wrangler dev --port 8790",
-    "dev:auth": "cd packages/mcp-auth && npx wrangler dev --port 8791"
+    "dev:edge": "cd packages/spike-edge && npx wrangler dev --port 8787 --inspector-port 9230",
+    "dev:mcp": "cd packages/spike-land-mcp && npx wrangler dev --port 8790 --inspector-port 9231",
+    "dev:auth": "cd packages/mcp-auth && npx wrangler dev --port 8791 --inspector-port 9232"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.27.1",

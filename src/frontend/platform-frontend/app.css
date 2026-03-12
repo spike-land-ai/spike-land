@@ -653,3 +653,63 @@
   font-weight: var(--shiki-dark-font-weight) !important;
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
+
+@layer components {
+  [data-reader-surface="true"] {
+    --reader-copy: var(--fg);
+    --reader-heading: var(--fg);
+    --reader-focus-bg: color-mix(in srgb, var(--card-bg) 82%, var(--primary-color) 18%);
+    --reader-focus-ring: color-mix(in srgb, var(--primary-color) 40%, transparent);
+  }
+
+  [data-reader-surface="true"] [data-reader-block="true"] {
+    color: var(--reader-copy);
+    border-radius: 1.4rem;
+    scroll-margin-top: 11rem;
+    transition:
+      background-color var(--duration-normal) var(--ease-default),
+      box-shadow var(--duration-normal) var(--ease-default),
+      color var(--duration-fast) var(--ease-default),
+      opacity var(--duration-fast) var(--ease-default),
+      transform var(--duration-fast) var(--ease-default);
+  }
+
+  [data-reader-surface="true"] [data-reader-kind="paragraph"],
+  [data-reader-surface="true"] [data-reader-kind="list-item"],
+  [data-reader-surface="true"] [data-reader-kind="blockquote"],
+  [data-reader-surface="true"] [data-reader-kind="summary"],
+  [data-reader-surface="true"] [data-reader-kind="callout"],
+  [data-reader-surface="true"] [data-reader-kind="primer"] {
+    line-height: var(--reader-line-height, 1.82);
+  }
+
+  [data-reader-surface="true"] [data-reader-kind="paragraph"],
+  [data-reader-surface="true"] [data-reader-kind="summary"],
+  [data-reader-surface="true"] [data-reader-kind="callout"],
+  [data-reader-surface="true"] [data-reader-kind="primer"] {
+    font-size: calc(1.125rem * var(--reader-font-scale, 1));
+  }
+
+  [data-reader-surface="true"] [data-reader-kind="list-item"],
+  [data-reader-surface="true"] [data-reader-kind="blockquote"] {
+    font-size: calc(1.05rem * var(--reader-font-scale, 1));
+  }
+
+  [data-reader-surface="true"] [data-reader-kind="title"],
+  [data-reader-surface="true"] [data-reader-kind^="heading-"] {
+    color: var(--reader-heading);
+  }
+
+  [data-reader-surface="true"][data-reader-state="playing"] [data-reader-block="true"],
+  [data-reader-surface="true"][data-reader-state="paused"] [data-reader-block="true"] {
+    opacity: 0.58;
+  }
+
+  [data-reader-surface="true"][data-reader-state="playing"] [data-reader-block="true"][data-reader-active="true"],
+  [data-reader-surface="true"][data-reader-state="paused"] [data-reader-block="true"][data-reader-active="true"] {
+    opacity: 1;
+    background: var(--reader-focus-bg);
+    box-shadow: inset 0 0 0 1px var(--reader-focus-ring);
+    transform: translateX(0.18rem);
+  }
+}

@@ -76,3 +76,6 @@ src/.mapping.json
 # Docker
 docker/caddy_data/
 docker/caddy_config/
+
+
+__astro

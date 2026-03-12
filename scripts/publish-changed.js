@@ -12,7 +12,7 @@
  *   NODE_AUTH_TOKEN — npm auth token for publishing
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { execSync } from "node:child_process";
 import YAML from "yaml";
@@ -92,6 +92,14 @@ function generatePackageJson(name, pkg, defaults) {
   return packageJson;
 }
 
+function getWorkspacePackageDir(name) {
+  return join(ROOT, "packages", name);
+}
+
+function hasWorkspacePublishMode(pkg) {
+  return pkg.publish?.mode === "workspace";
+}
+
 async function main() {
   const manifest = loadManifest();
   const { defaults, packages } = manifest;
@@ -136,6 +144,44 @@ async function main() {
     console.log(`  ${fullName}: ${remoteVersion ?? "(new)"} → ${pkg.version}`);
 
     if (dryRun) continue;
+
+    if (hasWorkspacePublishMode(pkg)) {
+      const workspaceDir = getWorkspacePackageDir(name);
+      const workspacePackageJson = join(workspaceDir, "package.json");
+
+      if (!existsSync(workspacePackageJson)) {
+        console.error(`  ✗ Failed to publish ${fullName}: missing ${workspacePackageJson}`);
+        failures.push(fullName);
+        continue;
+      }
+
+      const workspaceManifest = JSON.parse(readFileSync(workspacePackageJson, "utf-8"));
+      if (workspaceManifest.version !== pkg.version) {
+        console.error(
+          `  ✗ Failed to publish ${fullName}: workspace version ${workspaceManifest.version} does not match packages.yaml ${pkg.version}`,
+        );
+        failures.push(fullName);
+        continue;
+      }
+
+      try {
+        execSync(`npm run build`, {
+          cwd: workspaceDir,
+          stdio: "inherit",
+          timeout: 120_000,
+        });
+        execSync(`npm publish --access public --registry=${registryUrl}`, {
+          cwd: workspaceDir,
+          stdio: "inherit",
+          timeout: 120_000,
+        });
+        console.log(`  ✓ Published ${fullName}@${pkg.version}`);
+      } catch (err) {
+        console.error(`  ✗ Failed to publish ${fullName}: ${err.message}`);
+        failures.push(fullName);
+      }
+      continue;
+    }
 
     const pkgDist = join(DIST, name);
     mkdirSync(pkgDist, { recursive: true });

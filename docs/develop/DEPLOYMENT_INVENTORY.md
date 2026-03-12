@@ -152,7 +152,7 @@ All secrets are set via `wrangler secret put <NAME>` per worker.
 ### spike-app (Astro SPA)
 
 **Status**: Active — migrated from Vite + TanStack Router to Astro (March 2026).
-Old code archived to `packages/spike-app-old/`.
+Old code fully migrated and archived directory deleted.
 
 - **Built output**: `src/spike-app/dist/`
 - **Served via**: spike-edge (Cloudflare Workers)

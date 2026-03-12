@@ -242,7 +242,8 @@ packages:
     description: QA Studio browser automation (Playwright)
     entry: index.ts
     publish:
-      registries: [github]
+      mode: workspace
+      registries: [github, npm]
 
   state-machine:
     kind: library

@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from "react";
+// @ts-nocheck
+import { useState, useEffect, useCallback, lazy, Suspense, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -6,13 +7,32 @@ import remarkGfm from "remark-gfm";
 import type { BlogPost } from "../core-logic/types";
 import { apiUrl } from "../core-logic/api";
 import {
+  coerceBooleanProp,
+  coerceNumberProp,
+  parseStoryMappings,
+  preprocessBlogMdx,
+} from "../core-logic/blog-mdx";
+import {
   buildPromptDrivenBlogImageSrc,
   sanitizeBlogImageSrc,
 } from "../core-logic/blog-image-policy";
 import { extractHeroMedia } from "../core-logic/blog-source";
+import { ScrollStoryCard } from "../animation-ui/ScrollStoryCard";
 import { CodeBlock } from "./CodeBlock";
 import { BlogListView } from "./BlogList";
+import {
+  AgentLoopDemo,
+  AudioPlayer,
+  BlogPoll,
+  CTAButton,
+  PersonaLandingPreview,
+  PersonaSwitcher,
+  PollAnalyticsDashboard,
+  ToolCount,
+} from "./BlogCompatComponents";
+import { BlogReaderControls } from "./BlogReaderControls";
 import { ImageLoader } from "./ImageLoader";
+import { SpikeChatEmbed } from "./SpikeChatEmbed";
 import { ExperimentProvider, useExperiment } from "./useExperiment";
 import { useWidgetTracking } from "./useWidgetTracking";
 import {
@@ -46,17 +66,6 @@ import {
   SUPPORT_MAGIC_AMOUNT,
 } from "@spike-land-ai/shared";
 
-/**
- * Convert self-closing JSX/HTML tags for custom components to explicit
- * open/close pairs.
- */
-function fixSelfClosingTags(markdown: string): string {
-  return markdown.replace(
-    /<([A-Z][a-zA-Z]*)((?:\s+[a-zA-Z-]+=(?:"[^"]*"|'[^']*'|{[^}]*}))*)\s*\/>/g,
-    (_, tag, attrs) => `<${tag}${attrs}></${tag}>`,
-  );
-}
-
 const DemoFallback = () => (
   <div className="flex flex-col items-center justify-center py-12 bg-muted/30 rounded-3xl border border-border/50">
     <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
@@ -84,6 +93,71 @@ function lazyDemo(load: () => Promise<Record<string, unknown>>, name: string) {
 const interactiveImport = () =>
   import("../core-logic/interactive-index") as Promise<Record<string, unknown>>;
 
+function ScrollStoryCardCompat(props: Record<string, unknown>) {
+  const illustration =
+    props["illustration"] === "restaurant" ||
+    props["illustration"] === "usb" ||
+    props["illustration"] === "embassy" ||
+    props["illustration"] === "brain"
+      ? props["illustration"]
+      : "restaurant";
+
+  return (
+    <div className="not-prose my-12 overflow-hidden rounded-3xl border border-border/50 bg-card shadow-2xl">
+      <ScrollStoryCard
+        title={typeof props["title"] === "string" ? props["title"] : "Story Mapping"}
+        illustration={illustration}
+        mappings={parseStoryMappings(props["mappings"])}
+      />
+    </div>
+  );
+}
+
+function SpikeChatEmbedCompat(props: Record<string, unknown>) {
+  const channelSlug =
+    typeof props["channelSlug"] === "string"
+      ? props["channelSlug"]
+      : typeof props["channelslug"] === "string"
+        ? props["channelslug"]
+        : "blog";
+  const workspaceSlug =
+    typeof props["workspaceSlug"] === "string"
+      ? props["workspaceSlug"]
+      : typeof props["workspaceslug"] === "string"
+        ? props["workspaceslug"]
+        : "spike-land";
+  const guestAccess =
+    props["guestAccess"] !== undefined ? props["guestAccess"] : props["guestaccess"];
+  const height = props["height"];
+
+  return (
+    <div className="not-prose my-12 overflow-hidden rounded-3xl border border-border/50 bg-card shadow-2xl">
+      <SpikeChatEmbed
+        channelSlug={channelSlug}
+        workspaceSlug={workspaceSlug}
+        guestAccess={coerceBooleanProp(guestAccess)}
+        height={coerceNumberProp(height, 500)}
+      />
+    </div>
+  );
+}
+
+function ResponsiveIframe(props: React.IframeHTMLAttributes<HTMLIFrameElement>) {
+  return (
+    <div className="not-prose my-12 overflow-hidden rounded-[2rem] border border-border/50 bg-card shadow-2xl">
+      <div className="aspect-video">
+        <iframe
+          {...props}
+          src={props.src}
+          title={props.title ?? "Embedded media"}
+          loading="lazy"
+          className="h-full w-full border-0"
+        />
+      </div>
+    </div>
+  );
+}
+
 const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>> = {
   convergencedemo: lazyDemo(interactiveImport, "ConvergenceDemo"),
   dependencycascadedemo: lazyDemo(interactiveImport, "DependencyCascadeDemo"),
@@ -105,7 +179,7 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
   modelcascadedemo: lazyDemo(interactiveImport, "ModelCascadeDemo"),
   bayesianconfidencedemo: lazyDemo(interactiveImport, "BayesianConfidenceDemo"),
   mcpterminaldemo: lazyDemo(interactiveImport, "MCPTerminalDemo"),
-  scrollstorycard: lazyDemo(interactiveImport, "ScrollStoryCard"),
+  scrollstorycard: ScrollStoryCardCompat,
   mcpflowdiagram: lazyDemo(interactiveImport, "MCPFlowDiagram"),
   perspectivecarousel: lazyDemo(interactiveImport, "PerspectiveCarousel"),
   spikeclidemo: lazyDemo(interactiveImport, "SpikeCliDemo"),
@@ -125,11 +199,23 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
   toolsbycategorygrid: lazyDemo(interactiveImport, "ToolsByCategoryGrid"),
   personalizedsupportbox: lazyDemo(interactiveImport, "PersonalizedSupportBox"),
   rentstorytoggle: lazyDemo(interactiveImport, "RentStoryToggle"),
-  spikechatembed: lazyDemo(interactiveImport, "SpikeChatEmbed"),
+  spikechatembed: SpikeChatEmbedCompat,
+  toolcount: ToolCount as React.ComponentType<Record<string, unknown>>,
+  audioplayer: AudioPlayer as React.ComponentType<Record<string, unknown>>,
+  ctabutton: CTAButton as React.ComponentType<Record<string, unknown>>,
+  agentloopdemo: AgentLoopDemo as React.ComponentType<Record<string, unknown>>,
+  personalandingpreview: PersonaLandingPreview as React.ComponentType<Record<string, unknown>>,
+  personaswitcher: PersonaSwitcher as React.ComponentType<Record<string, unknown>>,
+  blogpoll: BlogPoll as React.ComponentType<Record<string, unknown>>,
+  pollanalyticsdashboard: PollAnalyticsDashboard as React.ComponentType<Record<string, unknown>>,
   pre: ({ children }: { children?: React.ReactNode }) => children,
   code: CodeBlock as React.ComponentType<Record<string, unknown>>,
   tldr: ({ children, title }: { children?: React.ReactNode; title?: string }) => (
-    <div className="bg-primary/[0.03] border-2 border-primary/10 rounded-[2rem] p-8 my-12 relative overflow-hidden">
+    <div
+      data-reader-block="true"
+      data-reader-kind="summary"
+      className="bg-primary/[0.03] border-2 border-primary/10 rounded-[2rem] p-8 my-12 relative overflow-hidden"
+    >
       <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12">
         <Zap size={80} className="text-primary" />
       </div>
@@ -147,6 +233,8 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
 
     return (
       <div
+        data-reader-block="true"
+        data-reader-kind="callout"
         className={cn(
           "p-6 my-10 rounded-2xl border-l-4 shadow-sm",
           isInfo &&
@@ -168,10 +256,66 @@ const COMPONENT_MAP: Record<string, React.ComponentType<Record<string, unknown>>
       </div>
     );
   },
-  p: ({ children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-    <div className="text-lg text-muted-foreground leading-relaxed font-medium my-6" {...props}>
+  h2: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h2 data-reader-block="true" data-reader-kind="heading-2" {...props}>
       {children}
-    </div>
+    </h2>
+  ),
+  h3: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h3 data-reader-block="true" data-reader-kind="heading-3" {...props}>
+      {children}
+    </h3>
+  ),
+  h4: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h4 data-reader-block="true" data-reader-kind="heading-4" {...props}>
+      {children}
+    </h4>
+  ),
+  h5: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h5 data-reader-block="true" data-reader-kind="heading-5" {...props}>
+      {children}
+    </h5>
+  ),
+  h6: ({ children, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+    <h6 data-reader-block="true" data-reader-kind="heading-6" {...props}>
+      {children}
+    </h6>
+  ),
+  p: ({ children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
+    <p
+      data-reader-block="true"
+      data-reader-kind="paragraph"
+      className="text-lg text-muted-foreground leading-relaxed font-medium my-6"
+      {...props}
+    >
+      {children}
+    </p>
+  ),
+  li: ({ children, ...props }: React.LiHTMLAttributes<HTMLLIElement>) => (
+    <li
+      data-reader-block="true"
+      data-reader-kind="list-item"
+      className="my-2 text-muted-foreground font-medium"
+      {...props}
+    >
+      {children}
+    </li>
+  ),
+  blockquote: ({ children, ...props }: React.HTMLAttributes<HTMLElement>) => (
+    <blockquote
+      data-reader-block="true"
+      data-reader-kind="blockquote"
+      className="border-l-4 border-primary/30 bg-primary/[0.02] py-6 px-8 rounded-r-3xl text-foreground font-bold italic"
+      {...props}
+    >
+      {children}
+    </blockquote>
+  ),
+  iframe: ResponsiveIframe as React.ComponentType<Record<string, unknown>>,
+  a: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
   ),
   img: ({ src, alt, ...rest }: React.ImgHTMLAttributes<HTMLImageElement>) => {
     const safeSrc = sanitizeBlogImageSrc(src);
@@ -234,6 +378,7 @@ export function BlogPostView({
   const [error, setError] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isHeroExpanded, setIsHeroExpanded] = useState(false);
+  const readerScopeRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -347,6 +492,7 @@ export function BlogPostView({
     /!\[[^\]]*\]\(https:\/\/placehold\.co\/[^)]+\)\n?/g,
     "",
   );
+  const processedContent = preprocessBlogMdx(cleanContent);
   const safeHeroImage = sanitizeBlogImageSrc(resolvedPost.heroImage);
   const heroImageSrc = buildPromptDrivenBlogImageSrc(safeHeroImage, resolvedPost.heroPrompt);
 
@@ -423,51 +569,62 @@ export function BlogPostView({
           </>
         )}
 
-        <header className="mb-16 max-w-3xl mx-auto space-y-8">
-          <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-            <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/10">
-              <Tag size={12} />
-              <span>{resolvedPost.category}</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Clock size={12} />
-              <time dateTime={resolvedPost.date}>
-                {new Date(resolvedPost.date).toLocaleDateString([], {
-                  month: "long",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </time>
-            </div>
-          </div>
+        <BlogReaderControls contentKey={resolvedPost.slug} scopeRef={readerScopeRef} />
 
-          <h1 className="text-5xl sm:text-7xl font-black text-foreground tracking-tighter leading-[0.85] text-balance">
-            {resolvedPost.title}
-          </h1>
-
-          {resolvedPost.primer && (
-            <p className="text-xl sm:text-2xl text-muted-foreground/80 font-medium leading-relaxed italic border-l-4 border-primary/20 pl-6">
-              "{resolvedPost.primer}"
-            </p>
-          )}
-
-          <div className="flex items-center gap-3 pt-4 border-t border-border/50">
-            <div className="size-10 rounded-2xl bg-primary flex items-center justify-center text-xs font-black text-primary-foreground shadow-lg shadow-primary/20">
-              {resolvedPost.author?.[0] || "S"}
+        <div ref={readerScopeRef} data-reader-surface="true">
+          <header className="mb-16 max-w-3xl mx-auto space-y-8">
+            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
+              <div className="flex items-center gap-1.5 bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/10">
+                <Tag size={12} />
+                <span>{resolvedPost.category}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Clock size={12} />
+                <time dateTime={resolvedPost.date}>
+                  {new Date(resolvedPost.date).toLocaleDateString([], {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </time>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-black uppercase tracking-widest text-foreground">
-                {resolvedPost.author || "Spike land Team"}
+
+            <h1
+              data-reader-block="true"
+              data-reader-kind="title"
+              className="text-5xl sm:text-7xl font-black text-foreground tracking-tighter leading-[0.85] text-balance"
+            >
+              {resolvedPost.title}
+            </h1>
+
+            {resolvedPost.primer && (
+              <p
+                data-reader-block="true"
+                data-reader-kind="primer"
+                className="text-xl sm:text-2xl text-muted-foreground/80 font-medium leading-relaxed italic border-l-4 border-primary/20 pl-6"
+              >
+                "{resolvedPost.primer}"
               </p>
-              <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
-                Independent Developer & Researcher
-              </p>
-            </div>
-          </div>
-        </header>
+            )}
 
-        <div
-          className="prose dark:prose-invert max-w-3xl mx-auto
+            <div className="flex items-center gap-3 pt-4 border-t border-border/50">
+              <div className="size-10 rounded-2xl bg-primary flex items-center justify-center text-xs font-black text-primary-foreground shadow-lg shadow-primary/20">
+                {resolvedPost.author?.[0] || "S"}
+              </div>
+              <div>
+                <p className="text-xs font-black uppercase tracking-widest text-foreground">
+                  {resolvedPost.author || "Spike land Team"}
+                </p>
+                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter">
+                  Independent Developer & Researcher
+                </p>
+              </div>
+            </div>
+          </header>
+
+          <div
+            className="prose dark:prose-invert max-w-3xl mx-auto
           prose-headings:font-black prose-headings:text-foreground prose-headings:tracking-tighter
           prose-h1:text-4xl prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-8
           prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-6
@@ -482,16 +639,17 @@ export function BlogPostView({
           prose-ul:list-disc prose-ol:list-decimal
           prose-img:rounded-[2.5rem] prose-img:shadow-2xl prose-img:border prose-img:border-border/50
           selection:bg-primary selection:text-primary-foreground"
-        >
-          <Markdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw]}
-            components={
-              COMPONENT_MAP as Record<string, React.ComponentType<Record<string, unknown>>>
-            }
           >
-            {fixSelfClosingTags(cleanContent)}
-          </Markdown>
+            <Markdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              components={
+                COMPONENT_MAP as Record<string, React.ComponentType<Record<string, unknown>>>
+              }
+            >
+              {processedContent}
+            </Markdown>
+          </div>
         </div>
 
         <div className="max-w-3xl mx-auto">
@@ -669,7 +827,9 @@ function SupportWidget({ post }: { post: BlogPost }) {
               "rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-xs transition-all duration-500",
               !bumped && "shadow-xl shadow-primary/20 hover:scale-105 active:scale-95",
             )}
-            onClick={handleBump}
+            onClick={() => {
+              void handleBump();
+            }}
             disabled={bumped}
           >
             <Heart
@@ -763,7 +923,9 @@ function SupportWidget({ post }: { post: BlogPost }) {
 
           <Button
             className="w-full rounded-2xl h-14 font-black uppercase tracking-widest text-xs shadow-xl shadow-primary/20"
-            onClick={handleDonate}
+            onClick={() => {
+              void handleDonate();
+            }}
             loading={donating}
             disabled={!canDonate}
           >

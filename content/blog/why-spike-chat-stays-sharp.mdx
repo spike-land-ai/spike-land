@@ -1,11 +1,11 @@
 ---
-title: "Why Spike Chat Stays Sharp While Transcript-First AI Chats Go Soft"
+title: "Context window management: why spike-chat stays sharp while transcript-first AI chats go soft"
 slug: "why-spike-chat-stays-sharp"
-description: "Most AI chats solve problems by throwing more transcript at the model. spike-chat does the opposite: split prompts, scored memory, staged execution, compressed working memory, bounded tool calling, and enough focus that a single gemini-3-flash agent rewrote our frontend to Astro from one PRD."
+description: "Most AI chats solve context-window management by throwing more transcript at the model. spike-chat does the opposite: split prompts, scored memory, staged execution, compressed working memory, bounded tool calling, and enough discipline that a single gemini-3-flash agent rewrote our frontend to Astro from one PRD."
 date: "2026-03-11"
 author: "Zoltan Erdos"
 category: "Developer Experience"
-tags: ["spike-chat", "context-engineering", "ai", "tool-calling", "memory", "llm-systems", "spike-land"]
+tags: ["spike-chat", "context-engineering", "context-window-management", "ai", "tool-calling", "memory", "llm-systems", "spike-land"]
 featured: false
 draft: false
 primer: "The smartest chat system is not the one with the most context. It is the one with the cleanest context."
@@ -17,13 +17,68 @@ heroPrompt: "A razor-sharp glowing chat interface cutting through a fog of clutt
 
 <Tldr>
 
-- Most chat products are transcript-first. They keep appending history until the model gets slower, blurrier, and less reliable.
-- spike-chat is built around compact artifacts, not endless replay.
-- We keep a stable prompt prefix, prune dynamic memory to fit an 800-token budget, and score notes by confidence and recency.
-- We split work into four stages: classify, plan, execute, extract. Each stage gets the artifact it needs, not the whole chat log.
-- We compress older turns and tool work into bounded stage memory instead of replaying raw transcripts, raw JSON, and full browser surfaces forever.
-- We also keep tool calling bounded: the execute stage receives a compact MCP tool catalog and now actually gets that catalog wired into the model call.
-- The proof point is real: we just migrated the whole site to Astro with a single `gemini-3-flash` agent, one PRD document, continuous context compression, and no errors.
+# spike-chat: Context Compression Architecture
+
+## Problem
+Transcript-first chat (append full history each turn) degrades reasoning as prompt grows. Signal/noise ratio drops before context window fills.
+
+## Proof
+Single gemini-3-flash agent + 1 PRD rewrote entire frontend to Astro. No errors. No swarm. Context discipline > model capability.
+
+## Architecture: 7 Mechanisms
+
+### 1. Split System Prompt
+- Stable prefix: identity, values, operating rules (fixed, cache-friendly)
+- Dynamic suffix: user-specific memory, max ~800 tokens, explicitly pruned
+
+### 2. Scored Memory Notes (not transcript)
+Each note carries: trigger, lesson, confidence score, help count, recency.
+- Below demotion threshold → dropped
+- Keeps helping → promoted
+- Selection: greedy under fixed budget, sorted by (confidence × recency)
+- Filter question: "What is still worth carrying forward?"
+
+### 3. Four-Stage Pipeline (context isolation)
+1. **Classify** → structured intent
+2. **Plan** → response strategy (receives classify artifact)
+3. **Execute** → uses plan artifact + bounded tool surface
+4. **Extract** → updates long-term memory (background)
+
+Each stage receives prior stage's artifact, NOT full raw process.
+
+### 4. History Compression Budgets
+- Historical memory: ≤8 prior rounds
+- Historical token budget: ~8% model window, cap 6,000 tokens
+- Stage working memory: ~5% model window, cap 4,000 tokens
+- Assistant text summaries: 320 chars
+- Tool args summaries: 180 chars
+- Tool result summaries: 360 chars
+
+Older turns → compact summaries. Budget exceeded → collapse older summaries.
+
+### 5. Tool Work Compression
+Raw tool traces → compact stage artifacts:
+- tool name
+- target-oriented argument summary
+- compact result summary
+- browser surface: page title + URL + few target labels + short text preview
+
+No replaying full payloads.
+
+### 6. Bounded Tool Calling
+Execute stage only:
+- Fetch MCP tool catalog → bound to compact set
+- Tool definitions wired into execute-stage model call (not just route-advertised)
+- Stream tool_call_start/tool_call_end events to UI
+
+### 7. Completion ≠ Truth
+- Tool calls anchored to assertion IDs
+- Tool outputs = evidence records
+- Assertion state tracked separately from task state
+- Rule: tool output is evidence → updates assertion state → conflicts stay unresolved
+
+## Core Principle
+Model needs smallest truthful artifact preserving: user intent, relevant durable memory, current plan, unfinished work, evidence from currently-relevant tools.
 
 </Tldr>
 
@@ -31,11 +86,7 @@ The classic AI chat failure mode is not that the model is stupid.
 
 It is that the system keeps feeding the model a bigger and bigger pile of old conversation, old tool output, stale context, and irrelevant schemas until attention gets diluted.
 
-That is what "too much context" really means.
-
-It does not just mean you spent more tokens.
-
-It means the model has to search through a messy working set where signal and noise are mixed together. When that happens, even a strong model starts acting weak.
+That is what "too much context" really means: the model searching through a messy working set where signal and noise are mixed together. When that happens, even a strong model starts acting weak.
 
 This is the problem we set out to solve in spike-chat.
 
@@ -45,19 +96,21 @@ This is not a theory post.
 
 We just migrated the whole site to Astro with a single agent.
 
-Not a swarm. Not a human manually chunking the work into fifty tickets. Not a stronger model with an absurdly large prompt.
+Not a swarm. Not a human manually chunking the work into fifty tickets. Not a stronger model with an oversized prompt.
 
 One agent.
 One PRD.
 `gemini-3-flash`.
-Continuous context compression.
+Continuous context compression through the stage-memory system from section 4.
 One full frontend rewrite.
 
-And it did not make errors.
+And in that run, it did not make the usual context-collapse mistakes.
 
 That is the point of this architecture.
 
 When the context stays sharp, a fast model can do work that transcript-first systems would bungle even with a more expensive model. If the representation is right, the model spends its attention on the actual product logic instead of re-reading a decaying wall of chat history.
+
+Astro migration is a useful proof point because drift shows up fast in a whole-site rewrite. The same working-set discipline matters even more in open-ended work, where drift is harder to notice.
 
 This is the commercial message as much as the technical one:
 
@@ -83,11 +136,13 @@ We do not think that is the right abstraction.
 
 The right abstraction is a compact working set: the minimum state that still preserves what matters.
 
-## What We Changed In Spike Chat
+One scope note before the implementation details: some of the mechanisms below live directly in spike-chat, and some currently live in the shared chat runtime and CLI layer that the broader spike.land chat stack uses. The architecture matters more than the packaging boundary.
+
+## What We Changed In spike-chat
 
 ### 1. We split the system prompt into a stable prefix and a dynamic suffix
 
-In spike-chat's Aether prompt layer, the system prompt is not rebuilt as one giant mutable blob.
+In spike-chat's Aether prompt layer (our split-prompt runtime for stable instructions plus bounded memory), the system prompt is not rebuilt as one giant mutable blob.
 
 It is split into:
 
@@ -103,7 +158,7 @@ The current target is simple and strict:
 
 That means user-specific memory is not allowed to grow forever just because the conversation did.
 
-## 2. We treat memory as scored notes, not immortal transcript
+### 2. We treat memory as scored notes, not immortal transcript
 
 spike-chat does not try to remember everything.
 
@@ -129,7 +184,7 @@ That is a much better filter.
 
 Most chats keep replaying everything. spike-chat packs only the notes that still earn their place in context.
 
-## 3. We split every request into stages instead of running one long monologue
+### 3. We split every request into stages instead of running one long monologue
 
 spike-chat uses a four-stage pipeline:
 
@@ -138,9 +193,7 @@ spike-chat uses a four-stage pipeline:
 3. Execute
 4. Extract
 
-This is more than orchestration theater.
-
-It is context isolation.
+The value here is context isolation, not orchestration theater.
 
 Each stage receives the artifact from the previous stage, not the entire raw process:
 
@@ -149,15 +202,27 @@ Each stage receives the artifact from the previous stage, not the entire raw pro
 - execute uses the plan artifact plus the current tool surface
 - extract runs afterward to update long-term memory in the background
 
+```text
+user request
+  -> classify -> intent artifact
+  -> plan     -> response strategy
+  -> execute  -> answer + tool evidence
+  -> extract  -> durable memory updates
+
+compressed history feeds each stage as bounded working memory,
+not as full transcript replay
+```
+
 This prevents a common failure in single-pass chat systems: the model has to do task classification, planning, tool selection, execution, response writing, and memory formation all inside one swollen prompt.
 
-That is too many jobs for one context window.
+One context window should not be doing all of those jobs at once.
 
 By separating the stages, spike-chat keeps each step narrow and relevant.
 
-## 4. We compress history instead of replaying it
+### 4. We compress history instead of replaying it
 
 This is the most important sharpness win.
+It is also the mechanism behind the "continuous context compression" claim from the Astro migration above.
 
 In the shared chat runtime, we added explicit stage-memory compression so older turns and completed stages become compact summaries, not dead weight.
 
@@ -181,7 +246,7 @@ It does the opposite:
 
 This is how you solve "too much context" in practice. Not by begging for a million-token model. By managing the working set like an engineer.
 
-## 5. We compress tool work, not just text
+### 5. We compress tool work, not just text
 
 Raw tool traces are one of the biggest hidden context leaks in AI products.
 
@@ -189,7 +254,7 @@ A transcript-first system will happily keep replaying:
 
 - raw JSON arguments
 - long browser results
-- huge DOM-ish payloads
+- huge DOM-like payloads
 - tool outputs that were only useful for one step
 
 spike-chat now converts tool work into compact stage artifacts.
@@ -211,9 +276,10 @@ We do not keep replaying giant surfaces just because we captured them once.
 
 That is the difference between a usable working memory and a junk drawer.
 
-## 6. We keep tool calling bounded
+### 6. We keep tool calling bounded
 
 Tool calling has its own version of the context problem.
+Section 5 is about what happens after a tool runs. This section is about what happens before the model chooses one.
 
 If you dump a huge tool catalog into every model call, you burn budget before the model even starts reasoning.
 
@@ -228,11 +294,9 @@ In spike-chat, the execute stage now does the practical version of the same idea
 
 We also fixed an implementation gap here: the fetched MCP tool definitions are now actually passed into the execute-stage model call, so the tool-calling surface is not just advertised by the route, it is wired into the request the model receives.
 
-That sounds minor. It is not.
+That closes a real gap in the request path. Tool calling is now part of the focused execution context instead of a disconnected side idea.
 
-It means tool calling is now part of the focused execution context instead of being a disconnected side idea.
-
-## 7. We are separating completion from truth
+### 7. We are separating completion from truth
 
 There is one more improvement worth calling out, even though it currently lives in the shared chat runtime and CLI layer:
 
@@ -240,17 +304,19 @@ There is one more improvement worth calling out, even though it currently lives 
 - tool outputs become evidence records
 - assertion state is tracked separately from task state
 
-That is an important philosophical shift.
+Philosophically, that changes the contract.
 
 Most chat systems implicitly act like:
 
 > Tool ran = task done = truth established
 
-That is wrong.
+That collapses evidence, task progress, and truth into one bucket.
 
 The better rule is:
 
 > Tool output is evidence. Evidence updates assertion state. Conflicts stay unresolved.
+
+For example, a successful browser step should update the evidence for "the page rendered correctly," not silently mark the whole task as complete.
 
 That same principle is how spike-chat avoids becoming just another smooth-talking transcript machine.
 
@@ -265,7 +331,7 @@ The frontend rewrite was not "magic." It was what happens when a model gets:
 
 That is what let one agent stay coherent across a whole-site migration.
 
-## Why Spike Chat Stays Sharp
+## Why spike-chat stays sharp
 
 Here is the simplest way to describe the difference.
 
@@ -288,13 +354,40 @@ Because it is more disciplined about what deserves to stay in memory.
 
 That discipline is what let a single `gemini-3-flash` agent take one PRD and rewrite the whole frontend into Astro without drifting off the rails.
 
+## Where spike-chat sits relative to vendors
+
+If every mechanism above is live end-to-end in production, then as of March 12, 2026, spike-chat belongs in the top tier of public tool-calling systems I know.
+
+I would still stop short of claiming "the single most advanced tool-calling suite" as an absolute statement. OpenAI, Anthropic, Google, Cursor, and GitHub all ship serious tool-calling and context-management primitives. The sharper claim is this:
+
+> spike-chat is one of the most advanced public tool-calling systems I know, and arguably the most disciplined about context representation.
+
+The public-docs comparison looks like this:
+
+| System | Tool calling | Context management | Durable memory | Read as of March 12, 2026 |
+|---|---|---|---|---|
+| spike-chat | Bounded MCP surface for execution, browser + MCP tool work, live `tool_call_start` / `tool_call_end` events | Stable prompt prefix, bounded dynamic suffix, four-stage pipeline, compressed historical context, compressed stage working memory, summarized tool artifacts | Scored notes plus assertion/evidence tracking in the broader runtime | The standout is not raw feature count. It is how aggressively the system turns messy transcript into compact artifacts. |
+| [OpenAI Responses API](https://platform.openai.com/docs/guides/responses-vs-chat-completions) | Built-in tools, custom functions, [remote MCP servers](https://platform.openai.com/docs/mcp/), [computer use](https://platform.openai.com/docs/guides/tools-computer-use), [background mode](https://platform.openai.com/docs/guides/background) | [Stateful conversations](https://platform.openai.com/docs/api-reference/conversations/create-item), `previous_response_id`, preserved reasoning/tool context, prompt caching | Strong server-side conversation state | Broadest first-party agent platform in the public market. Strong on breadth, less opinionated than spike-chat about staged artifact compaction by default. |
+| [Anthropic Messages / Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview) | Native tool use, [MCP connector](https://docs.anthropic.com/en/docs/agents-and-tools/mcp-connector), strong coding workflow integration | [Token-efficient tool use](https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/token-efficient-tool-use), prompt caching, solid tool loop ergonomics | [Claude Code memory](https://docs.anthropic.com/en/docs/claude-code/memory) and [memory tool](https://docs.claude.com/en/docs/agents-and-tools/tool-use/memory-tool) | Probably the closest philosophical neighbor. Stronger than most on developer ergonomics, but its public docs do not foreground the same bounded stage-artifact architecture. |
+| [Google Gemini](https://ai.google.dev/gemini-api/docs/function-calling) | Function calling with `AUTO` / `ANY` / `NONE`, `allowed_function_names`, and large function sets | Strong control over when and how tools are invoked | Public API docs emphasize function orchestration more than durable working-memory design | Strong tool-routing controls. Publicly, the system is easier to describe as powerful function calling than as a sharply staged context engine. |
+| [Cursor](https://docs.cursor.com/en/context/mcp) | MCP tools, approvals, toggles, remote/local MCP transports, [background agents](https://docs.cursor.com/en/background-agents) | Good operational context in product, including tool visibility and agent handoff | [Project-scoped memories](https://docs.cursor.com/context/memories) | One of the strongest coding products in practice. Its public differentiation is workflow speed and execution, not explicit context-compaction doctrine. |
+| [GitHub Copilot](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp/use-the-github-mcp-server) | GitHub MCP server, MCP in Copilot Chat, coding agent workflows | Strong repository-native context and PR/task integration | [Repository-scoped validated memory](https://docs.github.com/copilot/concepts/agents/copilot-memory) | Very strong inside the repo workflow. More repo-native than general-purpose, but serious on persistent context and tool-backed execution. |
+
+OpenAI looks strongest on first-party agent breadth. Anthropic looks strongest on MCP alignment and tool-use ergonomics. Cursor and Copilot look strongest on coding workflow integration.
+
+The reason spike-chat stands out is different:
+
+it treats context as an engineered working set instead of transcript exhaust.
+
 ## The Bigger Point
 
 The future of good AI chat is not "larger transcript windows."
 
 It is better representation.
 
-The strongest marketing claim we can make here is also the truest engineering claim:
+The strongest honest marketing claim we can make here is not that spike-chat has the most tools or the largest context window.
+
+It is that spike-chat is unusually strict about what gets to stay in working memory.
 
 spike-chat is not sharp because it hoards context.
 
@@ -316,5 +409,7 @@ Less noise.
 More signal.
 
 That is how you keep an AI system sharp.
+
+If you want to see this architecture in product form, open [spike-chat](/apps/spike-chat).
 
 If you want the tooling side of the same problem, read [Why Your Claude Agent Is Wasting 70% of Its Context Window on Tool Descriptions](/blog/why-your-claude-agent-wastes-context-on-tool-descriptions). If you want the broader context-engineering mindset behind this architecture, read [How Claude Code Engineers Context](/blog/how-claude-code-engineers-context).
