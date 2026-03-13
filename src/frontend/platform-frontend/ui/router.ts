@@ -417,6 +417,81 @@ const migrateRoute = createRoute({
   component: withSuspense(() => import("./routes/migrate"), "MigratePage"),
 });
 
+const chessRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/chess",
+  component: withSuspense(() => import("./routes/chess"), "ChessPage"),
+});
+
+const quizRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/quiz",
+  component: withSuspense(() => import("./routes/quiz"), "QuizPage"),
+});
+
+const thankYouRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/thank-you",
+  component: withSuspense(() => import("./routes/thank-you"), "ThankYouPage"),
+});
+
+// LearnIt routes
+const learnitRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/learnit",
+});
+
+const learnitIndexRoute = createRoute({
+  getParentRoute: () => learnitRoute,
+  path: "/",
+  component: withSuspense(
+    () => import("./routes/learnit/learnit-index"),
+    "LearnitIndexPage",
+  ),
+});
+
+const learnitTopicRoute = createRoute({
+  getParentRoute: () => learnitRoute,
+  path: "$topic",
+  component: withSuspense(() => import("./routes/learnit/$topic"), "LearnitTopicPage"),
+});
+
+// Create routes
+const createSectionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/create",
+});
+
+const createIndexRoute = createRoute({
+  getParentRoute: () => createSectionRoute,
+  path: "/",
+  component: withSuspense(
+    () => import("./routes/create/create-index"),
+    "CreateIndexPage",
+  ),
+});
+
+const createAppPathRoute = createRoute({
+  getParentRoute: () => createSectionRoute,
+  path: "$appPath",
+  component: withSuspense(() => import("./routes/create/$appPath"), "CreateAppPage"),
+});
+
+// Store category routes
+const storeCategoryParentRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/store/category",
+});
+
+const storeCategoryRoute = createRoute({
+  getParentRoute: () => storeCategoryParentRoute,
+  path: "$categorySlug",
+  component: withSuspense(
+    () => import("./routes/store/category/$categorySlug"),
+    "StoreCategoryPage",
+  ),
+});
+
 const buildRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/build",
@@ -457,6 +532,9 @@ const routeTree = rootRoute.addChildren([
   bazdmegRoute,
   whatWeDoRoute,
   migrateRoute,
+  chessRoute,
+  quizRoute,
+  thankYouRoute,
   vibeCodeRoute,
   buildRoute,
   toolSurfaceRoute,
@@ -492,8 +570,11 @@ const routeTree = rootRoute.addChildren([
   ]),
   dashboardRoute.addChildren([dashboardIndexRoute, bazdmegDashboardRoute]),
   learnRoute.addChildren([learnIndexRoute, learnSessionRoute, learnBadgeRoute]),
+  learnitRoute.addChildren([learnitIndexRoute, learnitTopicRoute]),
+  createSectionRoute.addChildren([createIndexRoute, createAppPathRoute]),
   messagesRoute.addChildren([messagesIndexRoute, messageThreadRoute]),
   appsRoute.addChildren([appsIndexRoute, appSessionRoute]),
+  storeCategoryParentRoute.addChildren([storeCategoryRoute]),
   mcpRoute.addChildren([mcpIndexRoute, mcpAuthorizeRoute]),
   agencyRoute.addChildren([agencyPortfolioRoute]),
 ]);
