@@ -9,7 +9,7 @@ import { describe, expect, it, vi } from "vitest";
 // Mock reviewPR
 const mockReviewPR = vi.fn();
 
-vi.mock("../../src/mcp-tools/code-review/tools/review-pr.js", () => ({
+vi.mock("../../src/mcp-tools/code-review/core-logic/review-pr.js", () => ({
   reviewPR: mockReviewPR,
 }));
 

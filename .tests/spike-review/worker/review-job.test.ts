@@ -5,8 +5,8 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { PRContext } from "../../../src/mcp-tools/code-review/worker/webhook-handler.js";
-import type { Env } from "../../../src/mcp-tools/code-review/worker/env.js";
+import type { PRContext } from "../../../src/mcp-tools/code-review/core-logic/webhook-handler.js";
+import type { Env } from "../../../src/mcp-tools/code-review/core-logic/env.js";
 
 // ── Mocks ───────────────────────────────────────────────────────────────────
 
@@ -28,7 +28,7 @@ const {
   mockFetch: vi.fn(),
 }));
 
-vi.mock("../../../src/mcp-tools/code-review/github/client.js", () => ({
+vi.mock("../../../src/mcp-tools/code-review/lazy-imports/client.js", () => ({
   GitHubClient: class MockGitHubClient {
     getPRDetails = mockGetPRDetails;
     getPRDiff = mockGetPRDiff;
@@ -42,7 +42,9 @@ vi.mock("../../../src/mcp-tools/code-review/github/client.js", () => ({
 vi.stubGlobal("fetch", mockFetch);
 
 // Import after mocks
-const { runReviewJob } = await import("../../../src/mcp-tools/code-review/worker/review-job.js");
+const { runReviewJob } = await import(
+  "../../../src/mcp-tools/code-review/core-logic/review-job.js"
+);
 
 // ── Test Data ───────────────────────────────────────────────────────────────
 

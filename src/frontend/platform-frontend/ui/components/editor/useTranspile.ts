@@ -284,8 +284,7 @@ async function remoteTranspile(source: string): Promise<string> {
   const cached = transpileCache.get(source);
   if (cached) return cached;
 
-  const origin =
-    typeof window !== "undefined" ? window.location.origin : "https://spike.land";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://spike.land";
 
   const response = await fetch(TRANSPILE_ENDPOINT, {
     method: "POST",
@@ -329,6 +328,8 @@ export function useTranspile(source: string, options: TranspileOptions = {}): Tr
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const lastTranspiledRef = useRef<string | null>(null);
+  const isDarkModeRef = useRef(isDarkMode);
+  isDarkModeRef.current = isDarkMode;
 
   // Re-render preview HTML when theme flips without re-transpiling
   useEffect(() => {
@@ -361,7 +362,7 @@ export function useTranspile(source: string, options: TranspileOptions = {}): Tr
           lastTranspiledRef.current = code;
           setState({
             transpiledCode: code,
-            html: buildPreviewHtml(code, isDarkMode),
+            html: buildPreviewHtml(code, isDarkModeRef.current),
             error: null,
             isTranspiling: false,
           });
@@ -381,7 +382,7 @@ export function useTranspile(source: string, options: TranspileOptions = {}): Tr
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [source, debounceMs]); // eslint-disable-line react-hooks/exhaustive-deps — isDarkMode handled separately
+  }, [source, debounceMs]);
 
   const clearError = useCallback(() => {
     setState((prev) => ({ ...prev, error: null }));

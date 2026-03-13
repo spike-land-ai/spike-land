@@ -29,8 +29,8 @@ describe("handleGPT4Request", () => {
       const response = await handleGPT4Request(request, mockEnv);
 
       expect(response.status).toBe(200);
-      // getAllowOrigin returns "https://spike.land" for unknown origins
-      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
+      // getAllowOrigin returns "*" when no Origin header is present
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
       // Should NOT call fetch for OPTIONS
       expect(mockFetch).not.toHaveBeenCalled();
     });
@@ -75,8 +75,8 @@ describe("handleGPT4Request", () => {
 
       const response = await handleGPT4Request(request, mockEnv);
 
-      // getAllowOrigin returns "https://spike.land" for unknown origins
-      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
+      // getAllowOrigin returns "*" when no Origin header is present
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
     });
 
     it("should remove Authorization and X-Api-Key headers from GET request", async () => {

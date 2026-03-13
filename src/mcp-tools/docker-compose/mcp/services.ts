@@ -55,7 +55,14 @@ function createZodTool<TSchema extends z.ZodRawShape>(
       return errorResult("INTERNAL_ERROR", message);
     }
   };
-  (server.tool as any)(options.name, options.description, options.schema, wrappedHandler);
+  (
+    server.tool as unknown as (
+      name: string,
+      description: string,
+      schema: TSchema,
+      handler: typeof wrappedHandler,
+    ) => void
+  )(options.name, options.description, options.schema, wrappedHandler);
 }
 
 export function registerServiceTools(server: McpServer): void {

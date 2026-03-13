@@ -106,9 +106,9 @@ function backoffDelay(attempt: number): number {
 function resolveWsUrl(roomId: string, userId: string): string {
   const base =
     typeof import.meta !== "undefined" && (import.meta as Record<string, unknown>).env
-      ? ((import.meta as Record<string, unknown>).env as Record<string, unknown>)["VITE_PRESENCE_WS_URL"] as
-          | string
-          | undefined
+      ? (((import.meta as Record<string, unknown>).env as Record<string, unknown>)[
+          "VITE_PRESENCE_WS_URL"
+        ] as string | undefined)
       : undefined;
 
   const origin = base ?? (typeof window !== "undefined" ? window.location.origin : "");
@@ -351,11 +351,12 @@ export function CollabProvider({
   useEffect(() => {
     isMounted.current = true;
     connect();
+    const timers = typingTimers.current;
     return () => {
       isMounted.current = false;
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
       if (heartbeatInterval.current) clearInterval(heartbeatInterval.current);
-      for (const t of typingTimers.current.values()) clearTimeout(t);
+      for (const t of timers.values()) clearTimeout(t);
       wsRef.current?.close();
     };
   }, [connect]);

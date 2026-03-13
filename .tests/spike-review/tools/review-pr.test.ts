@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { reviewPR } from "../../../src/mcp-tools/code-review/tools/review-pr.js";
+import { reviewPR } from "../../../src/mcp-tools/code-review/core-logic/review-pr.js";
 
 const mockPRDetails = {
   title: "feat: test PR",
@@ -53,7 +53,7 @@ const mockGetPRDetails = vi.hoisted(() => vi.fn());
 const mockGetPRDiff = vi.hoisted(() => vi.fn());
 const mockGetPRFiles = vi.hoisted(() => vi.fn());
 
-vi.mock("../../../src/mcp-tools/code-review/github/client.js", () => ({
+vi.mock("../../../src/mcp-tools/code-review/lazy-imports/client.js", () => ({
   GitHubClient: class MockGitHubClient {
     getPRDetails = mockGetPRDetails;
     getPRDiff = mockGetPRDiff;

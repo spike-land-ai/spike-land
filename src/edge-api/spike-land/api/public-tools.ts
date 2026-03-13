@@ -13,8 +13,6 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerAllTools } from "../core-logic/mcp/manifest";
 import { createDb } from "../db/db/db-index.ts";
 
-import { zodToJsonSchema } from "zod-to-json-schema";
-
 export const publicToolsRoute = new Hono<{ Bindings: Env; Variables: AuthVariables }>();
 
 publicToolsRoute.get("/", async (c) => {
@@ -53,10 +51,8 @@ publicToolsRoute.get("/", async (c) => {
   const tools = definitions.map((t) => {
     let inputSchema: Record<string, unknown> = { type: "object" };
     if (t.inputSchema) {
-      // Zod v4 object is not assignable to zodToJsonSchema's v3 param — bridge via unknown
-      const converted = zodToJsonSchema(
-        z.object(t.inputSchema) as unknown as Parameters<typeof zodToJsonSchema>[0],
-      ) as Record<string, unknown>;
+      // Use Zod v4's native toJSONSchema (zod-to-json-schema does not support Zod v4)
+      const converted = z.toJSONSchema(z.object(t.inputSchema)) as Record<string, unknown>;
       // Remove top-level $schema for cleaner output
       delete converted["$schema"];
       inputSchema = converted;

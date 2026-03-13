@@ -8,8 +8,7 @@ import { cn } from "../../../styling/cn";
 // Constants
 // ---------------------------------------------------------------------------
 
-const PAGE_SIZE_OPTIONS = [12, 24, 48] as const;
-type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
+type PageSize = 12 | 24 | 48;
 
 // ---------------------------------------------------------------------------
 // Skeleton
@@ -159,13 +158,10 @@ export function CategoryGrid({
   // Reset to page 1 when apps list changes (due to filter changes)
   const stableAppsKey = apps.map((a) => a.slug).join(",");
 
-  const handlePageChange = useCallback(
-    (page: number) => {
-      setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    },
-    [],
-  );
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   // Reset page when app list changes
   const prevKey = useState(stableAppsKey);

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   parseClaudeMd,
   rulesToPromptLines,
-} from "../../../src/mcp-tools/code-review/rules/claude-md-parser.js";
+} from "../../../src/mcp-tools/code-review/core-logic/claude-md-parser.js";
 
 describe("parseClaudeMd", () => {
   it("extracts blocking rules with NEVER/ALWAYS prefix", () => {

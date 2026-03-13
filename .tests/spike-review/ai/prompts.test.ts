@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildReviewPrompt,
   DEFAULT_REVIEW_PROMPT,
-} from "../../../src/mcp-tools/code-review/ai/prompts.js";
+} from "../../../src/mcp-tools/code-review/core-logic/prompts.js";
 import type { PRDetails } from "../../../src/mcp-tools/code-review/types.js";
 
 const mockPR: PRDetails = {

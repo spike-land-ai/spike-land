@@ -14,9 +14,9 @@ import {
 
 describe("Utils Functions", () => {
   describe("getAllowOrigin", () => {
-    it("returns spike.land when no origin header", () => {
+    it("returns * when no origin header", () => {
       const req = new Request("https://example.com", { headers: {} });
-      expect(getAllowOrigin(req)).toBe("https://spike.land");
+      expect(getAllowOrigin(req)).toBe("*");
     });
 
     it("returns origin when origin is exactly spike.land", () => {
@@ -40,11 +40,11 @@ describe("Utils Functions", () => {
       expect(getAllowOrigin(req)).toBe("http://localhost:3000");
     });
 
-    it("returns spike.land for unknown origins", () => {
+    it("returns any origin including unknown origins", () => {
       const req = new Request("https://example.com", {
         headers: { Origin: "https://evil.com" },
       });
-      expect(getAllowOrigin(req)).toBe("https://spike.land");
+      expect(getAllowOrigin(req)).toBe("https://evil.com");
     });
   });
 
@@ -119,21 +119,24 @@ describe("Utils Functions", () => {
 
   describe("handleCORS", () => {
     it("should handle CORS preflight request", () => {
+      // handleCORS checks Origin, Access-Control-Request-Method, Access-Control-Request-Headers
+      // then getAllowOrigin also calls get("Origin") — so mock by header name
       const mockRequest = {
         headers: {
-          get: vi
-            .fn()
-            .mockReturnValueOnce("http://example.com")
-            .mockReturnValueOnce("POST")
-            .mockReturnValueOnce("Content-Type"),
+          get: vi.fn((header: string) => {
+            if (header === "Origin") return "http://example.com";
+            if (header === "Access-Control-Request-Method") return "POST";
+            if (header === "Access-Control-Request-Headers") return "Content-Type";
+            return null;
+          }),
         },
       } as unknown as Request;
 
       const response = handleCORS(mockRequest);
 
       expect(response.status).toBe(200);
-      // getAllowOrigin returns "https://spike.land" for unknown origins
-      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("https://spike.land");
+      // getAllowOrigin returns the origin as-is for any provided origin
+      expect(response.headers.get("Access-Control-Allow-Origin")).toBe("http://example.com");
       expect(response.headers.get("Access-Control-Allow-Methods")).toBe("POST, OPTIONS");
     });
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ErrorOverlay } from "../ErrorOverlay";
 
@@ -7,9 +7,7 @@ describe("ErrorOverlay", () => {
   const errorWithLocation = { message: "Type error", line: 12, column: 4 };
 
   it("renders nothing when error is null", () => {
-    const { container } = render(
-      <ErrorOverlay error={null} onDismiss={vi.fn()} />,
-    );
+    const { container } = render(<ErrorOverlay error={null} onDismiss={vi.fn()} />);
     expect(container.firstChild).toBeNull();
   });
 
@@ -37,13 +35,7 @@ describe("ErrorOverlay", () => {
 
   it("calls onGoToLine with correct args when location button is clicked", () => {
     const onGoToLine = vi.fn();
-    render(
-      <ErrorOverlay
-        error={errorWithLocation}
-        onDismiss={vi.fn()}
-        onGoToLine={onGoToLine}
-      />,
-    );
+    render(<ErrorOverlay error={errorWithLocation} onDismiss={vi.fn()} onGoToLine={onGoToLine} />);
     fireEvent.click(screen.getByLabelText("Jump to Line 12:4 in editor"));
     expect(onGoToLine).toHaveBeenCalledWith(12, 4);
   });

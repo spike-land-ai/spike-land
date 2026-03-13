@@ -187,9 +187,11 @@ export function CursorOverlay() {
   }, [users]);
 
   useEffect(() => {
+    const faders = fadeTimers.current;
+    const removers = removeTimers.current;
     return () => {
-      for (const t of fadeTimers.current.values()) clearTimeout(t);
-      for (const t of removeTimers.current.values()) clearTimeout(t);
+      for (const t of faders.values()) clearTimeout(t);
+      for (const t of removers.values()) clearTimeout(t);
     };
   }, []);
 

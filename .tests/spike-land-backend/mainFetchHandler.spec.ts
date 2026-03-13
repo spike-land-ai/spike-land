@@ -7,6 +7,18 @@ import { handleErrors } from "../../src/edge-api/backend/lazy-imports/handleErro
 import { handleMainFetch } from "../../src/edge-api/backend/lazy-imports/mainFetchHandler.js";
 import { handleUnauthorizedRequest } from "../../src/edge-api/backend/core-logic/utils.js";
 
+vi.mock("../../src/edge-api/backend/lazy-imports/fetchHandler", () => ({
+  handleFetchApi: vi.fn(),
+}));
+
+vi.mock("../../src/edge-api/backend/lazy-imports/handleErrors", () => ({
+  handleErrors: vi.fn(),
+}));
+
+vi.mock("../../src/edge-api/backend/core-logic/utils", () => ({
+  handleUnauthorizedRequest: vi.fn(),
+}));
+
 describe("MainFetchHandler", () => {
   const mockEnv = {} as Env;
   let mockCtx: ExecutionContext;
@@ -22,19 +34,6 @@ describe("MainFetchHandler", () => {
       passThroughOnException: () => {},
       props: {},
     } as unknown as ExecutionContext;
-
-    // Mock imported functions
-    vi.mock("../../src/edge-api/backend/lazy-imports/fetchHandler", () => ({
-      handleFetchApi: vi.fn(),
-    }));
-
-    vi.mock("../../src/edge-api/backend/lazy-imports/handleErrors", () => ({
-      handleErrors: vi.fn(),
-    }));
-
-    vi.mock("../../src/edge-api/backend/core-logic/utils", () => ({
-      handleUnauthorizedRequest: vi.fn(),
-    }));
   });
 
   describe("Yandex Organization Blocking", () => {
@@ -55,7 +54,7 @@ describe("MainFetchHandler", () => {
       });
       (handleUnauthorizedRequest as Mock).mockReturnValue(mockUnauthorizedResponse);
 
-      const _response = await handleMainFetch(mockYandexRequest, mockEnv, mockCtx);
+      const response = await handleMainFetch(mockYandexRequest, mockEnv, mockCtx);
 
       expect(handleUnauthorizedRequest).toHaveBeenCalled();
       expect(response).toBe(mockUnauthorizedResponse);
@@ -77,7 +76,7 @@ describe("MainFetchHandler", () => {
       (handleErrors as Mock).mockImplementation(async (_, handler) => await handler());
       (handleFetchApi as Mock).mockResolvedValue(mockFetchApiResponse);
 
-      const _response = await handleMainFetch(mockRequest, mockEnv as Env, mockCtx);
+      const response = await handleMainFetch(mockRequest, mockEnv as Env, mockCtx);
 
       expect(handleErrors).toHaveBeenCalled();
       expect(handleFetchApi).toHaveBeenCalled();
@@ -100,7 +99,7 @@ describe("MainFetchHandler", () => {
       (handleErrors as Mock).mockImplementation(async (_, handler) => await handler());
       (handleFetchApi as Mock).mockResolvedValue(mockFetchApiResponse);
 
-      const _response = await handleMainFetch(mockRequest, mockEnv as Env, mockCtx);
+      const response = await handleMainFetch(mockRequest, mockEnv as Env, mockCtx);
 
       expect(handleFetchApi).toHaveBeenCalledWith(
         ["live", redirectTarget, "embed"],
@@ -124,7 +123,7 @@ describe("MainFetchHandler", () => {
       (handleErrors as Mock).mockImplementation(async (_, handler) => await handler());
       (handleFetchApi as Mock).mockResolvedValue(mockFetchApiResponse);
 
-      const _response = await handleMainFetch(mockRequest, mockEnv as Env, mockCtx);
+      const response = await handleMainFetch(mockRequest, mockEnv as Env, mockCtx);
 
       expect(handleFetchApi).toHaveBeenCalledWith(
         ["some", "test", "path"],
@@ -143,7 +142,7 @@ describe("MainFetchHandler", () => {
       (handleErrors as Mock).mockImplementation(async (_, handler) => await handler());
       (handleFetchApi as Mock).mockResolvedValue(mockFetchApiResponse);
 
-      const _response = await handleMainFetch(mockRequest, mockEnv as Env, mockCtx);
+      const response = await handleMainFetch(mockRequest, mockEnv as Env, mockCtx);
 
       expect(handleFetchApi).toHaveBeenCalledWith(
         ["live", "landing", "embed"],
@@ -167,7 +166,7 @@ describe("MainFetchHandler", () => {
       (handleErrors as Mock).mockImplementation(async (_, handler) => await handler());
       (handleFetchApi as Mock).mockResolvedValue(mockFetchApiResponse);
 
-      const _response = await handleMainFetch(mockRequest, mockEnv as Env, mockCtx);
+      const response = await handleMainFetch(mockRequest, mockEnv as Env, mockCtx);
 
       expect(handleErrors).toHaveBeenCalledWith(
         mockRequest,

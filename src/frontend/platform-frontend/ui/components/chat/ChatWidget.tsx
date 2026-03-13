@@ -29,8 +29,14 @@ interface ChatWidgetProps {
 }
 
 export function ChatWidget({ onOpenAppDrawer }: ChatWidgetProps) {
-  const { isPanelOpen, openPanel, closePanel, togglePanel, unreadCount, markAllRead } =
-    useChatContext();
+  const {
+    isPanelOpen,
+    openPanel: _openPanel,
+    closePanel,
+    togglePanel,
+    unreadCount,
+    markAllRead,
+  } = useChatContext();
 
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);

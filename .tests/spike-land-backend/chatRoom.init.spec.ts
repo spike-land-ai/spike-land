@@ -290,7 +290,7 @@ describe("Code Durable Object — initializeSession & fetch branches", () => {
       // Trigger through fetch which catches initializeSession errors
       const request = new Request("https://example.com/live/a-b-c/session?room=a-b-c");
       // fetch catches "Session initialization error" and continues with backup session
-      const _response = await codeInstance.fetch(request);
+      const response = await codeInstance.fetch(request);
 
       expect(consoleError).toHaveBeenCalledWith("Session initialization error:", expect.any(Error));
       // Should still return a response (from routeHandler)
@@ -403,7 +403,7 @@ describe("Code Durable Object — initializeSession & fetch branches", () => {
 
       const request = new Request("https://example.com/live/test-space/session?room=test-space");
       // Should not throw — error is caught
-      const _response = await codeInstance.fetch(request);
+      const response = await codeInstance.fetch(request);
 
       expect(response).toBeDefined();
       consoleError.mockRestore();
@@ -422,7 +422,7 @@ describe("Code Durable Object — initializeSession & fetch branches", () => {
         duplex: "half",
       });
 
-      const _response = await codeInstance.fetch(request);
+      const response = await codeInstance.fetch(request);
       expect(response).toBeDefined();
     });
 
@@ -440,7 +440,7 @@ describe("Code Durable Object — initializeSession & fetch branches", () => {
         duplex: "half",
       });
 
-      const _response = await codeInstance.fetch(request);
+      const response = await codeInstance.fetch(request);
       expect(response.status).toBe(400);
     });
 

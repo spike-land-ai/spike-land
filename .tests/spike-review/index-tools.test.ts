@@ -27,7 +27,7 @@ vi.mock("@octokit/rest", () => ({
   },
 }));
 
-vi.mock("../../src/mcp-tools/code-review/github/client.js", () => ({
+vi.mock("../../src/mcp-tools/code-review/lazy-imports/client.js", () => ({
   GitHubClient: class MockGitHubClient {
     getPRDetails = mockGitHubMethods.getPRDetails;
     getPRFiles = mockGitHubMethods.getPRFiles;
@@ -245,7 +245,7 @@ describe("review_pr tool handler", () => {
   it("calls reviewPR and formats the response", async () => {
     // Mock the reviewPR function to avoid GitHub API calls
     const { reviewPR: _reviewPR } = await import(
-      "../../src/mcp-tools/code-review/tools/review-pr.js"
+      "../../src/mcp-tools/code-review/core-logic/review-pr.js"
     );
 
     // The review_pr handler calls reviewPR internally

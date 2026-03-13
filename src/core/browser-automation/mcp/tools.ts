@@ -73,7 +73,7 @@ export function registerWebTools(server: McpServer): void {
         .optional()
         .describe("When to consider navigation complete (default: load)"),
     },
-    async handler(args: any) {
+    async handler(args) {
       const url = String(args.url);
       const tabIndex = args.tab as number | undefined;
       const waitUntil = (args.wait_until as string) ?? "load";
@@ -102,7 +102,7 @@ export function registerWebTools(server: McpServer): void {
           "compact (default, token-efficient) | full (verbose) | landmark (single section)",
         ),
     },
-    async handler(args: any) {
+    async handler(args) {
       const landmark = args.landmark as string | undefined;
       const detail = (args.detail as "compact" | "full" | "landmark" | undefined) ?? "compact";
       const text = await narrateCurrentPage(landmark, detail);
@@ -120,7 +120,7 @@ export function registerWebTools(server: McpServer): void {
       role: z.string().optional().describe("ARIA role (e.g. 'button', 'link')"),
       name: z.string().optional().describe("Accessible name to match"),
     },
-    async handler(args: any) {
+    async handler(args) {
       const ref = args.ref as number | undefined;
       const role = args.role as string | undefined;
       const name = args.name as string | undefined;
@@ -164,7 +164,7 @@ export function registerWebTools(server: McpServer): void {
       text: z.string().describe("Text to type"),
       clear: z.boolean().optional().describe("Clear the field before typing (default: true)"),
     },
-    async handler(args: any) {
+    async handler(args) {
       const ref = args.ref as number | undefined;
       const name = args.name as string | undefined;
       const text = String(args.text);
@@ -203,7 +203,7 @@ export function registerWebTools(server: McpServer): void {
       name: z.string().optional().describe("Accessible name of the select element"),
       option: z.string().describe("Option value or label to select"),
     },
-    async handler(args: any) {
+    async handler(args) {
       const ref = args.ref as number | undefined;
       const name = args.name as string | undefined;
       const option = String(args.option);
@@ -239,7 +239,7 @@ export function registerWebTools(server: McpServer): void {
         .string()
         .describe("Key or combo to press (e.g. 'Enter', 'Tab', 'Ctrl+a', 'ArrowDown')"),
     },
-    async handler(args: any) {
+    async handler(args) {
       const key = String(args.key);
       const tab = getActiveTab();
       if (!tab) return errorResult("NO_PAGE", "No active browser tab. Use web_navigate first.");
@@ -258,7 +258,7 @@ export function registerWebTools(server: McpServer): void {
       direction: z.enum(["up", "down"]).optional().describe("Scroll direction (default: down)"),
       amount: z.number().optional().describe("Number of viewport heights to scroll (default: 1)"),
     },
-    async handler(args: any) {
+    async handler(args) {
       const direction = (args.direction as string) ?? "down";
       const amount = (args.amount as number) ?? 1;
 
@@ -283,7 +283,7 @@ export function registerWebTools(server: McpServer): void {
       action: z.enum(["list", "switch", "close"]).describe("Action to perform"),
       tab: z.number().optional().describe("Tab index (required for switch/close)"),
     },
-    async handler(args: any) {
+    async handler(args) {
       const action = String(args.action);
       const tabIndex = args.tab as number | undefined;
 
@@ -322,7 +322,7 @@ export function registerWebTools(server: McpServer): void {
     schema: {
       full_page: z.boolean().optional().describe("Capture full scrollable page (default: false)"),
     },
-    async handler(args: any) {
+    async handler(args) {
       const fullPage = args.full_page as boolean | undefined;
       const tab = getActiveTab();
       if (!tab) return errorResult("NO_PAGE", "No active browser tab. Use web_navigate first.");

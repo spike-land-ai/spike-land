@@ -11,16 +11,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockHandleWebhook = vi.fn();
 const mockRunReviewJob = vi.fn();
 
-vi.mock("../../../src/mcp-tools/code-review/worker/webhook-handler.js", () => ({
+vi.mock("../../../src/mcp-tools/code-review/core-logic/webhook-handler.js", () => ({
   handleWebhook: mockHandleWebhook,
 }));
 
-vi.mock("../../../src/mcp-tools/code-review/worker/review-job.js", () => ({
+vi.mock("../../../src/mcp-tools/code-review/core-logic/review-job.js", () => ({
   runReviewJob: mockRunReviewJob,
 }));
 
 // Import the worker default export
-const workerModule = await import("../../../src/mcp-tools/code-review/worker/index.js");
+const workerModule = await import("../../../src/mcp-tools/code-review/core-logic/worker-index.js");
 const worker = workerModule.default;
 
 // Mock env

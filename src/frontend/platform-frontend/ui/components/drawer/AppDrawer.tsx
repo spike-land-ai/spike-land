@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Search, X, Plus, BookOpen, Store, ChevronRight } from "lucide-react";
 import { useDrawer } from "./DrawerProvider";
@@ -116,24 +116,31 @@ export function AppDrawer() {
   // Search filtering
   // ---------------------------------------------------------------------------
 
-  const normalizedQuery = query.trim().toLowerCase();
+  const normalizedQuery = useMemo(() => query.trim().toLowerCase(), [query]);
 
-  const filteredApps: McpAppSummary[] = normalizedQuery
-    ? allApps.filter(
-        (app) =>
-          app.name.toLowerCase().includes(normalizedQuery) ||
-          app.description.toLowerCase().includes(normalizedQuery) ||
-          app.slug.toLowerCase().includes(normalizedQuery) ||
-          app.category.toLowerCase().includes(normalizedQuery),
-      )
-    : [];
+  const filteredApps: McpAppSummary[] = useMemo(
+    () =>
+      normalizedQuery
+        ? allApps.filter(
+            (app) =>
+              app.name.toLowerCase().includes(normalizedQuery) ||
+              app.description.toLowerCase().includes(normalizedQuery) ||
+              app.slug.toLowerCase().includes(normalizedQuery) ||
+              app.category.toLowerCase().includes(normalizedQuery),
+          )
+        : [],
+    [allApps, normalizedQuery],
+  );
 
   // When there is an active search query we show search results. Otherwise we
   // show the Installed / Recent sections.
   const isSearching = normalizedQuery.length > 0;
 
   // Flat list of items navigable with arrow keys (only in search mode).
-  const navigableItems = isSearching ? filteredApps : [];
+  const navigableItems = useMemo(
+    () => (isSearching ? filteredApps : []),
+    [isSearching, filteredApps],
+  );
 
   // ---------------------------------------------------------------------------
   // Navigate to app
@@ -297,7 +304,11 @@ export function AppDrawer() {
               <section aria-label="Installed apps">
                 <SectionHeading>Installed</SectionHeading>
                 {installedLoading ? (
-                  <div className="grid grid-cols-4 gap-2 px-1 py-2" aria-busy="true" aria-label="Loading installed apps">
+                  <div
+                    className="grid grid-cols-4 gap-2 px-1 py-2"
+                    aria-busy="true"
+                    aria-label="Loading installed apps"
+                  >
                     {Array.from({ length: 8 }).map((_, i) => (
                       <div
                         key={i}
@@ -349,11 +360,7 @@ export function AppDrawer() {
                   <ul className="space-y-0.5">
                     {recentApps.map((app) => (
                       <li key={app.slug}>
-                        <AppItem
-                          app={app}
-                          isFocused={false}
-                          onClick={handleOpenApp}
-                        />
+                        <AppItem app={app} isFocused={false} onClick={handleOpenApp} />
                       </li>
                     ))}
                   </ul>

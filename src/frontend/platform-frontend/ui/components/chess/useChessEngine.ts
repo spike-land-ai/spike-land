@@ -116,14 +116,8 @@ export function deriveCapturedPieces(board: Board): CapturedPieces {
   capturedByWhite.sort(sortByValue);
   capturedByBlack.sort(sortByValue);
 
-  const whiteMaterialCaptured = capturedByWhite.reduce(
-    (sum, p) => sum + PIECE_VALUES[p.type],
-    0,
-  );
-  const blackMaterialCaptured = capturedByBlack.reduce(
-    (sum, p) => sum + PIECE_VALUES[p.type],
-    0,
-  );
+  const whiteMaterialCaptured = capturedByWhite.reduce((sum, p) => sum + PIECE_VALUES[p.type], 0);
+  const blackMaterialCaptured = capturedByBlack.reduce((sum, p) => sum + PIECE_VALUES[p.type], 0);
 
   return {
     white: capturedByWhite,
@@ -162,8 +156,8 @@ export interface UseChessEngineReturn {
 export function useChessEngine({
   fen,
   legalMoves,
-  lastMoveFrom,
-  lastMoveTo,
+  lastMoveFrom: _lastMoveFrom,
+  lastMoveTo: _lastMoveTo,
   flipped: initialFlipped = false,
   onMove,
 }: UseChessEngineOptions): UseChessEngineReturn {

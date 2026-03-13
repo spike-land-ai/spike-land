@@ -22,18 +22,34 @@ vi.mock("@spike-land-ai/mcp-server-base", () => ({
   })),
 }));
 
-// Mock Octokit
+// Mock Octokit — all methods must return { data: {...} } to avoid destructuring undefined
 vi.mock("@octokit/rest", () => ({
   Octokit: class MockOctokit {
     rest = {
       pulls: {
-        get: vi.fn(),
-        listFiles: vi.fn(),
-        createReview: vi.fn(),
+        get: vi.fn().mockResolvedValue({
+          data: {
+            title: "Mock PR",
+            body: null,
+            state: "open",
+            user: { login: "mockuser" },
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            mergeable: true,
+            merged: false,
+            additions: 0,
+            deletions: 0,
+            changed_files: 0,
+            head: { sha: "abc", ref: "feature" },
+            base: { sha: "def", ref: "main" },
+          },
+        }),
+        listFiles: vi.fn().mockResolvedValue({ data: [] }),
+        createReview: vi.fn().mockResolvedValue({ data: { id: 0 } }),
       },
       checks: {
-        create: vi.fn(),
-        update: vi.fn(),
+        create: vi.fn().mockResolvedValue({ data: { id: 0 } }),
+        update: vi.fn().mockResolvedValue({ data: {} }),
       },
     };
   },
@@ -174,7 +190,9 @@ describe("tool handlers", () => {
       });
 
       // Need to re-setup with a controllable GitHub client
-      const { GitHubClient } = await import("../../src/mcp-tools/code-review/github/client.js");
+      const { GitHubClient } = await import(
+        "../../src/mcp-tools/code-review/lazy-imports/client.js"
+      );
       const origGetPRDetails = GitHubClient.prototype.getPRDetails;
       GitHubClient.prototype.getPRDetails = mockGetPRDetails;
 
@@ -214,7 +232,9 @@ describe("tool handlers", () => {
         },
       ]);
 
-      const { GitHubClient } = await import("../../src/mcp-tools/code-review/github/client.js");
+      const { GitHubClient } = await import(
+        "../../src/mcp-tools/code-review/lazy-imports/client.js"
+      );
       const origGetPRFiles = GitHubClient.prototype.getPRFiles;
       GitHubClient.prototype.getPRFiles = mockGetPRFiles;
 
@@ -253,7 +273,7 @@ describe("startServer", () => {
     const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {
       throw new Error("process.exit called");
     });
-    const mockConsoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const mockStderrWrite = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     try {
       await startServer();
@@ -261,11 +281,11 @@ describe("startServer", () => {
       expect((e as Error).message).toBe("process.exit called");
     }
 
-    expect(mockConsoleError).toHaveBeenCalledWith(expect.stringContaining("GITHUB_TOKEN"));
+    expect(mockStderrWrite).toHaveBeenCalledWith(expect.stringContaining("GITHUB_TOKEN"));
     expect(mockExit).toHaveBeenCalledWith(1);
 
     mockExit.mockRestore();
-    mockConsoleError.mockRestore();
+    mockStderrWrite.mockRestore();
     if (originalToken) {
       process.env.GITHUB_TOKEN = originalToken;
     }

@@ -4,9 +4,9 @@ import {
   formatGateResults,
   getBuiltinRules,
   runGates,
-} from "../../../src/mcp-tools/code-review/rules/engine.js";
-import type { RuleContext } from "../../../src/mcp-tools/code-review/rules/engine.js";
-import type { GateResult } from "../../../src/mcp-tools/code-review/types.js";
+} from "../../../src/mcp-tools/code-review/core-logic/engine.js";
+import type { RuleContext } from "../../../src/mcp-tools/code-review/core-logic/engine.js";
+import type { GateResult } from "../../../src/mcp-tools/code-review/core-logic/types.js";
 
 function makeContext(overrides: Partial<RuleContext> = {}): RuleContext {
   return {
@@ -219,7 +219,7 @@ describe("Rule context edge cases", () => {
   it("detects various security and quality patterns", () => {
     const diff = [
       "+const apiKey = '123';",
-      "+const secret = 'test-dummy-value';",
+      "+const secret = 'aBcDeFgHiJkL12345';",
       "+element.innerHTML = '<div>';",
       "+// @ts-ignore",
       "+let x = y as any;",

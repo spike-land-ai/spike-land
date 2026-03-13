@@ -141,10 +141,11 @@ describe("status snapshot", () => {
       "MCP Registry",
       "Auth MCP",
       "Image Studio",
+      "Stripe Webhook",
     ]);
 
     const snapshot = createStatusSnapshot(results);
-    expect(snapshot.summary).toEqual({ up: 6, degraded: 0, down: 0, total: 6 });
+    expect(snapshot.summary).toEqual({ up: 7, degraded: 0, down: 0, total: 7 });
     expect(snapshot.overall).toBe("operational");
   });
 });
@@ -202,7 +203,7 @@ describe("/api/status", () => {
     expect(response.status).toBe(200);
     expect(body.overall).toBe("major_outage");
     expect(body.range).toEqual({ key: "60m", label: "Last 60 min", windowMinutes: 60 });
-    expect(body.summary).toEqual({ up: 5, degraded: 0, down: 1, total: 6 });
+    expect(body.summary).toEqual({ up: 6, degraded: 0, down: 1, total: 7 });
     expect(body.services.find((service) => service.label === "MCP Registry")).toMatchObject({
       status: "down",
       httpStatus: 503,

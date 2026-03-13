@@ -23,7 +23,8 @@ function StreakBadge({ streak }: { streak: number }) {
       }`}
       aria-label={`${isWin ? "Win" : "Loss"} streak of ${count}`}
     >
-      {isWin ? "+" : "-"}{count}
+      {isWin ? "+" : "-"}
+      {count}
     </span>
   );
 }
@@ -32,7 +33,7 @@ function StreakBadge({ streak }: { streak: number }) {
 
 function RankBadge({ rank }: { rank: number }) {
   const medals: Record<number, string> = { 1: "gold", 2: "silver", 3: "bronze" };
-  const medal = medals[rank];
+  const _medal = medals[rank];
 
   if (rank === 1) {
     return (

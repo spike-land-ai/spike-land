@@ -8,19 +8,9 @@
  */
 import { useState, useCallback } from "react";
 import type { TimeControl } from "./chess-types";
-import { TIME_CONTROL_LABELS, TIME_CONTROL_MS } from "./chess-types";
+import { TIME_CONTROL_LABELS } from "./chess-types";
 
 // ─── Time Control Options ────────────────────────────────────────────────────
-
-const TIME_CONTROL_OPTIONS: TimeControl[] = [
-  "BULLET_1",
-  "BULLET_2",
-  "BLITZ_3",
-  "BLITZ_5",
-  "RAPID_10",
-  "RAPID_15",
-  "UNLIMITED",
-];
 
 interface TimeControlCategory {
   label: string;

@@ -18,7 +18,7 @@ import type { UseChessEngineReturn } from "./useChessEngine";
 import {
   isLightSquare,
   getSquareForRowCol,
-  parseFen,
+  type parseFen,
   getTurnFromFen,
   findKingSquare,
 } from "./useChessEngine";
@@ -333,11 +333,7 @@ export function ChessBoard({
 
       {/* Promotion modal */}
       {promotionPending && (
-        <PromotionPicker
-          color={turn}
-          onChoose={resolvePromotion}
-          onCancel={cancelPromotion}
-        />
+        <PromotionPicker color={turn} onChoose={resolvePromotion} onCancel={cancelPromotion} />
       )}
     </div>
   );

@@ -60,12 +60,12 @@ describe("serve-with-cache cache headers", () => {
   it("serves unhashed JS with short TTL", async () => {
     const response = await serveAsset("app.js");
     const cc = response.headers.get("Cache-Control");
-    expect(cc).toBe("public, max-age=3600, stale-while-revalidate=86400");
+    expect(cc).toBe("public, max-age=14400, stale-while-revalidate=86400");
   });
 
   it("serves unhashed CSS with short TTL", async () => {
     const response = await serveAsset("style.css");
     const cc = response.headers.get("Cache-Control");
-    expect(cc).toBe("public, max-age=3600, stale-while-revalidate=86400");
+    expect(cc).toBe("public, max-age=14400, stale-while-revalidate=86400");
   });
 });

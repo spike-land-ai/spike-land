@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { GitHubClient, parseDiffHunks } from "../../../src/mcp-tools/code-review/github/client.js";
+import {
+  GitHubClient,
+  parseDiffHunks,
+} from "../../../src/mcp-tools/code-review/lazy-imports/client.js";
 
 // Mock Octokit — shared mock functions for all instances
 const mockPullsGet = vi.hoisted(() => vi.fn());

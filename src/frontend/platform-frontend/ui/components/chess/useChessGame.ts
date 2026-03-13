@@ -8,7 +8,7 @@
  * For now it uses polling with exponential backoff for simplicity.
  */
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { GameState, LegalMove, TimeControl } from "./chess-types";
+import type { GameState, LegalMove } from "./chess-types";
 import { getAllLegalMovesFromFen } from "./chess-logic";
 
 const POLL_INTERVAL_MS = 2_000;
@@ -56,7 +56,7 @@ export function useChessGame(gameId: string | null, myPlayerId: string | null): 
     try {
       const data = await apiFetch<GameState>(`/api/chess/games/${gameId}`);
       setGame(data);
-    } catch (err) {
+    } catch {
       // Silent failure during polling — don't overwrite existing state
     }
   }, [gameId]);

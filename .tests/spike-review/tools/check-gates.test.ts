@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkBazdmegGates } from "../../../src/mcp-tools/code-review/tools/check-gates.js";
+import { checkBazdmegGates } from "../../../src/mcp-tools/code-review/core-logic/check-gates.js";
 
 describe("checkBazdmegGates", () => {
   it("returns formatted gate results for clean diff", () => {

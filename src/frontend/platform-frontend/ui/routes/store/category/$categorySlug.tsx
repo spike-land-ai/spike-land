@@ -154,7 +154,9 @@ export function CategoryDetailPage() {
 
   const categoryName = useMemo(() => {
     if (!categorySlug) return null;
-    return decodeURIComponent(categorySlug).replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+    return decodeURIComponent(categorySlug)
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (l) => l.toUpperCase());
   }, [categorySlug]);
 
   const groupedApps = useMemo(() => groupAppsByCategory(apps ?? []), [apps]);
@@ -164,14 +166,12 @@ export function CategoryDetailPage() {
     // Exact match first, then case-insensitive
     return (
       groupedApps.find((g) => g.category === categoryName) ??
-      groupedApps.find(
-        (g) => g.category.toLowerCase() === categoryName.toLowerCase(),
-      ) ??
+      groupedApps.find((g) => g.category.toLowerCase() === categoryName.toLowerCase()) ??
       null
     );
   }, [groupedApps, categoryName]);
 
-  const allCategoryApps = categoryGroup?.apps ?? [];
+  const allCategoryApps = useMemo(() => categoryGroup?.apps ?? [], [categoryGroup]);
 
   const availableTags = useMemo(() => collectAvailableTags(allCategoryApps), [allCategoryApps]);
 
@@ -237,11 +237,11 @@ export function CategoryDetailPage() {
   return (
     <div className="rubik-container-wide rubik-page space-y-8">
       {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-muted-foreground">
-        <Link
-          to="/apps"
-          className="transition-colors hover:text-foreground"
-        >
+      <nav
+        aria-label="Breadcrumb"
+        className="flex items-center gap-1.5 text-sm text-muted-foreground"
+      >
+        <Link to="/apps" className="transition-colors hover:text-foreground">
           Store
         </Link>
         <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
