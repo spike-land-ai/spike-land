@@ -209,9 +209,14 @@ function TierCard({ tier }: { tier: MigrationTier }) {
       : "border-border bg-background text-foreground hover:border-primary/24 hover:text-primary"
   }`;
 
+  // Anchor ID map: SupportBanner links use #tier-blog, #tier-script, #tier-mcp
+  const anchorId =
+    tier.id === "blog-post" ? "tier-blog" : tier.id === "script" ? "tier-script" : "tier-mcp";
+
   return (
     <article
-      aria-labelledby={`tier-${tier.id}`}
+      id={anchorId}
+      aria-labelledby={`heading-${tier.id}`}
       className={`flex h-full flex-col p-6 ${panelClass}`}
     >
       {tier.badge && (
@@ -223,7 +228,7 @@ function TierCard({ tier }: { tier: MigrationTier }) {
       </p>
 
       <h2
-        id={`tier-${tier.id}`}
+        id={`heading-${tier.id}`}
         className="mt-1 text-xl font-semibold tracking-[-0.03em] text-foreground"
       >
         {tier.name}
@@ -323,6 +328,10 @@ function FaqItem({ item }: { item: FaqEntry }) {
 
 export function MigratePage() {
   const [scrollTracked, setScrollTracked] = useState(false);
+  const successTier =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("success")
+      : null;
 
   useEffect(() => {
     trackAnalyticsEvent("migration_page_view", { page: "/migrate" });
@@ -344,8 +353,28 @@ export function MigratePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrollTracked]);
 
+  const tierSuccessLabels: Record<string, string> = {
+    blog: "Blog Post Migration",
+    script: "CLI Script",
+    mcp: "MCP Server",
+  };
+
   return (
     <div className="rubik-container rubik-page rubik-stack">
+      {/* ------------------------------------------------------------------ */}
+      {/* SUCCESS BANNER                                                      */}
+      {/* ------------------------------------------------------------------ */}
+      {successTier && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="rounded-2xl border border-primary/20 bg-primary/8 p-4 text-center text-sm font-bold text-primary"
+        >
+          Thank you for commissioning{" "}
+          {tierSuccessLabels[successTier] ?? successTier}! We&apos;ll be in touch within 24h.
+        </div>
+      )}
+
       {/* ------------------------------------------------------------------ */}
       {/* HERO                                                                */}
       {/* ------------------------------------------------------------------ */}

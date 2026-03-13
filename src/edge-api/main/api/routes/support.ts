@@ -22,7 +22,30 @@ const log = createLogger("spike-edge");
 
 const support = new Hono<{ Bindings: Env }>();
 
-// ─── Fist Bump ──────────────────────────────────────────────────────────────
+// ─── GET Fist Bump Count ─────────────────────────────────────────────────────
+
+support.get("/api/support/fistbump/:slug", async (c) => {
+  const slug = c.req.param("slug");
+  if (!slug || slug.length > 200) {
+    return c.json({ error: "Invalid slug" }, 400);
+  }
+
+  const db = c.env.DB;
+  try {
+    const row = await db
+      .prepare("SELECT COUNT(*) as cnt FROM blog_engagement WHERE slug = ? AND type = 'fistbump'")
+      .bind(slug)
+      .first<{ cnt: number }>();
+
+    c.header("Cache-Control", "public, max-age=30, stale-while-revalidate=120");
+    return c.json({ slug, count: row?.cnt ?? 0 });
+  } catch (err) {
+    log.error("fistbump count error", { error: err instanceof Error ? err.message : String(err) });
+    return c.json({ slug, count: 0 });
+  }
+});
+
+// ─── POST Fist Bump ──────────────────────────────────────────────────────────
 
 support.post("/api/support/fistbump", async (c) => {
   let body: { slug?: string; clientId?: string };

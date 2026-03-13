@@ -424,6 +424,12 @@ const migrateRoute = createRoute({
   component: withSuspense(() => import("./routes/migrate"), "MigratePage"),
 });
 
+const thankYouRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/thank-you",
+  component: withSuspense(() => import("./routes/thank-you"), "ThankYouPage"),
+});
+
 const buildRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/build",
@@ -465,6 +471,7 @@ const routeTree = rootRoute.addChildren([
   chessRoute,
   whatWeDoRoute,
   migrateRoute,
+  thankYouRoute,
   vibeCodeRoute,
   buildRoute,
   toolSurfaceRoute,
