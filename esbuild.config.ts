@@ -293,8 +293,11 @@ async function buildBlock(opts: BuildOptions): Promise<esbuild.BuildResult> {
   console.log(`Building ${opts.packageName} (block — dual target)...`);
 
   // Worker target — fully bundled for CF Workers
+  const workerEntry = existsSync(join(srcDir, "worker.ts"))
+    ? join(srcDir, "worker.ts")
+    : join(srcDir, "lazy-imports", "worker.ts");
   const workerResult = await esbuild.build({
-    entryPoints: [join(srcDir, "worker.ts")],
+    entryPoints: [workerEntry],
     outdir: join(outDir, "worker"),
     platform: "browser",
     bundle: true,
@@ -308,8 +311,11 @@ async function buildBlock(opts: BuildOptions): Promise<esbuild.BuildResult> {
   });
 
   // Browser target — self-contained ESM with IDB adapter
+  const browserEntry = existsSync(join(srcDir, "browser.ts"))
+    ? join(srcDir, "browser.ts")
+    : join(srcDir, "lazy-imports", "browser.ts");
   const browserResult = await esbuild.build({
-    entryPoints: [join(srcDir, "browser.ts")],
+    entryPoints: [browserEntry],
     outdir: join(outDir, "browser"),
     platform: "browser",
     bundle: true,
