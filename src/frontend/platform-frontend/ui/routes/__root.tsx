@@ -13,8 +13,12 @@ import { AppFooter } from "../components/AppFooter";
 import { CookieConsent } from "../components/CookieConsent";
 import { ThemeSwitcher } from "../components/ThemeSwitcher";
 import { WelcomeModal } from "../components/WelcomeModal";
+
 import { QuizPersonaBanner } from "../components/quiz/QuizPersonaBanner";
 import { AppDrawer } from "../components/drawer/AppDrawer";
+
+import { ChatProvider, ChatWidget } from "../components/chat";
+
 import { apiUrl } from "../../core-logic/api";
 import { initGoogleAds } from "../../core-logic/google-ads";
 import { resolveSupportedLanguage } from "../i18n";
@@ -288,6 +292,7 @@ export function RootLayout() {
   }, [pathname, resolvedLanguage, searchStr, t]);
 
   return (
+    <ChatProvider>
     <div className="app-shell relative flex min-h-[100dvh] overflow-x-hidden bg-background text-foreground">
       {/* Skip to main content link for keyboard/screen reader users */}
       <a
@@ -436,7 +441,12 @@ export function RootLayout() {
         <CookieConsent />
         <WelcomeModal userName={null} />
       </div>
+
       <AppDrawer />
+
+      <ChatWidget />
+
     </div>
+    </ChatProvider>
   );
 }
