@@ -460,6 +460,12 @@ const buildRoute = createRoute({
   },
 });
 
+const workshopRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/workshop",
+  component: withSuspense(() => import("./routes/workshop"), "WorkshopPage"),
+});
+
 const vibeCodeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/vibe-code",
@@ -497,6 +503,7 @@ const routeTree = rootRoute.addChildren([
   thankYouRoute,
   vibeCodeRoute,
   buildRoute,
+  workshopRoute,
   toolSurfaceRoute,
   legacyToolDetailRedirectRoute,
   legacyToolsIndexRedirectRoute,

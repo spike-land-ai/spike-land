@@ -38,7 +38,7 @@ if [ -z "$FILES" ]; then
 fi
 
 # Exclude known safe patterns (test fixtures, examples, docs)
-EXCLUDE_PATTERN='(\.example$|\.md$|scan-secrets\.sh$|\.test\.(ts|js)$|__tests__/)'
+EXCLUDE_PATTERN='(\.example$|\.md$|scan-secrets\.sh$|\.test\.(ts|js)$|__tests__/|\.yarn/releases/)'
 
 for entry in "${PATTERNS[@]}"; do
   NAME="${entry%%:*}"

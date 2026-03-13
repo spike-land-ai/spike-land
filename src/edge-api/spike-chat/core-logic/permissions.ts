@@ -1,5 +1,5 @@
 import { eq, and } from "drizzle-orm";
-import { createDb } from "../db/db-index";
+import type { DrizzleDB } from "../db/db-index";
 import { channels, channelMembers } from "../db/schema";
 import type { Env } from "./env";
 
@@ -31,19 +31,33 @@ export async function checkWorkspaceMembership(
 }
 
 /**
+ * Minimal env shape required by checkChannelAccess.
+ * Accepts a pre-constructed DrizzleDB so callers control db creation,
+ * making the function unit-testable without module mocking.
+ */
+export interface ChannelAccessEnv {
+  DB: DrizzleDB;
+  MCP_SERVICE: Env["MCP_SERVICE"];
+}
+
+/**
  * Check if a user has access to a specific channel.
  * - For public channels: check workspace membership (visitors allowed)
  * - For private channels: check channel_members table
  * - For DMs: check channel_members table (visitor- prefix always denied)
  * - Channel not found: deny
+ *
+ * Pass env.DB as a DrizzleDB instance. Production callers should wrap the
+ * raw D1Database with createDb() before constructing the env object:
+ *   checkChannelAccess({ ...env, DB: createDb(env.DB) }, userId, channelId)
  */
 export async function checkChannelAccess(
-  env: Env,
+  env: ChannelAccessEnv,
   userId: string,
   channelId: string,
 ): Promise<boolean> {
   try {
-    const db = createDb(env.DB);
+    const db: DrizzleDB = env.DB;
 
     const [channel] = await db.select().from(channels).where(eq(channels.id, channelId)).limit(1);
 
@@ -56,7 +70,7 @@ export async function checkChannelAccess(
       if (userId.startsWith("visitor-")) {
         return true;
       }
-      return checkWorkspaceMembership(env, userId, channel.workspaceId);
+      return checkWorkspaceMembership(env as unknown as Env, userId, channel.workspaceId);
     }
 
     // private and dm: visitors are never allowed; check channel_members

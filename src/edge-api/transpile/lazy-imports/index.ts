@@ -87,6 +87,9 @@ async function hashCode(code: string): Promise<string> {
 export const handlePostRequest = async (request: Request, ctx?: ExecutionContext) => {
   try {
     const code = await request.text();
+    if (!code) {
+      return new Response("Empty code body", { status: 400 });
+    }
     const origin = request.headers.get("TR_ORIGIN") ?? "";
 
     // Content-addressed cache: same input always produces same output
@@ -96,13 +99,14 @@ export const handlePostRequest = async (request: Request, ctx?: ExecutionContext
 
     const cached = await cache.match(cacheKey);
     if (cached) {
+      const cloned = cached.clone();
       const corsHeaders = getCorsHeaders(request.headers.get("Origin"));
-      const headers = new Headers(cached.headers);
+      const headers = new Headers(cloned.headers);
       headers.set("Access-Control-Allow-Origin", corsHeaders["Access-Control-Allow-Origin"]);
       headers.set("Access-Control-Allow-Headers", corsHeaders["Access-Control-Allow-Headers"]);
-      return new Response(cached.body, {
-        status: cached.status,
-        statusText: cached.statusText,
+      return new Response(cloned.body, {
+        status: cloned.status,
+        statusText: cloned.statusText,
         headers,
       });
     }
