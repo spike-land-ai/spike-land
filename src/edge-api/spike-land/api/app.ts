@@ -13,6 +13,7 @@ import { publicAppsRoute } from "./public-apps";
 import { internalByokRoute } from "./internal-byok";
 import { internalAnalytics } from "./internal-analytics";
 import { internalAuthMiddleware } from "./internal-auth";
+import { landingRoute } from "./landing";
 
 export function createApp(): Hono<{ Bindings: Env; Variables: AuthVariables }> {
   const app = new Hono<{ Bindings: Env; Variables: AuthVariables }>();
@@ -50,6 +51,19 @@ export function createApp(): Hono<{ Bindings: Env; Variables: AuthVariables }> {
   app.route("/oauth", oauthRoute);
   app.route("/tools", publicToolsRoute);
   app.route("/apps", publicAppsRoute);
+
+  // Landing page route (serves HTML for browser GET /)
+  app.route("/", landingRoute);
+
+  // Browser visits to /mcp without auth → redirect to landing page
+  app.get("/mcp", (c, next) => {
+    const accept = c.req.header("Accept") ?? "";
+    const sessionId = c.req.header("Mcp-Session-Id");
+    if (accept.includes("text/html") && !sessionId && !c.req.header("Authorization")) {
+      return c.redirect("/");
+    }
+    return next();
+  });
 
   // Authenticated MCP route
   app.use("/mcp/*", authMiddleware);

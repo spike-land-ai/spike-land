@@ -13,12 +13,12 @@ import {
 } from "./chat-stage-memory.js";
 import { groupToolExecutionBatches } from "./chat-tool-batching.js";
 import { compressMessage, type PrdCompressionConfig } from "../../core-logic/prd-compression.js";
+import { fetchToolCatalog, type ToolCatalogItem } from "../../core-logic/mcp-tools.js";
+import { safeJsonParse, executeAgentTool } from "../../core-logic/chat-tool-execution.js";
 
 const chat = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 const MAX_TOOL_LOOPS = 10;
-const BROWSER_RESULT_TIMEOUT_MS = 15_000;
-const BROWSER_RESULT_POLL_MS = 250;
 const MAX_SEARCH_RESULTS = 8;
 
 type ChatContext = Context<{ Bindings: Env; Variables: Variables }>;
@@ -27,12 +27,6 @@ interface ChatRequestBody {
   message?: string;
   threadId?: string;
   persona?: string;
-}
-
-interface ToolCatalogItem {
-  name: string;
-  description: string;
-  inputSchema: unknown;
 }
 
 interface BrowserResultRequestBody {
@@ -64,12 +58,6 @@ interface ChatRoundRow {
   total_tokens: number | null;
   created_at: number;
   updated_at: number;
-}
-
-interface BrowserResultRow {
-  tool_call_id: string;
-  status: string;
-  result_json: string | null;
 }
 
 interface UsageSnapshot {
@@ -177,34 +165,6 @@ const MCP_AGENT_TOOLS: Array<{
   },
 ];
 
-function normalizeToolArgs(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return {};
-  }
-
-  return value as Record<string, unknown>;
-}
-
-function safeJsonParse<T>(value: string, fallback: T): T {
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-function serializeToolContent(value: unknown): string {
-  if (typeof value === "string") {
-    return value;
-  }
-
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-}
-
 function summarizeThreadTitle(message: string): string {
   const trimmed = message.trim().replace(/\s+/g, " ");
   if (trimmed.length <= 80) {
@@ -280,77 +240,6 @@ function serializeRoundInput(
   }
 
   return JSON.stringify(inputContent);
-}
-
-function scoreTool(query: string, tool: ToolCatalogItem): number {
-  const lowerQuery = query.toLowerCase();
-  const queryTokens = lowerQuery
-    .split(/[^a-z0-9_]+/i)
-    .map((token) => token.trim())
-    .filter(Boolean);
-
-  let score = 0;
-  if (tool.name.toLowerCase().includes(lowerQuery)) {
-    score += 12;
-  }
-  if (tool.description.toLowerCase().includes(lowerQuery)) {
-    score += 6;
-  }
-
-  for (const token of queryTokens) {
-    if (tool.name.toLowerCase().includes(token)) {
-      score += 4;
-    }
-    if (tool.description.toLowerCase().includes(token)) {
-      score += 2;
-    }
-  }
-
-  return score;
-}
-
-function searchToolCatalog(query: string, toolCatalog: ToolCatalogItem[]) {
-  return toolCatalog
-    .map((tool) => ({ tool, score: scoreTool(query, tool) }))
-    .filter((entry) => entry.score > 0)
-    .sort((a, b) => {
-      if (b.score !== a.score) {
-        return b.score - a.score;
-      }
-      return a.tool.name.localeCompare(b.tool.name);
-    })
-    .slice(0, MAX_SEARCH_RESULTS)
-    .map(({ tool }) => ({
-      name: tool.name,
-      description: tool.description,
-      inputSchema: tool.inputSchema,
-    }));
-}
-
-async function fetchToolCatalog(env: Env, requestId: string): Promise<ToolCatalogItem[]> {
-  try {
-    const toolsRes = await env.MCP_SERVICE.fetch(
-      new Request("https://mcp.spike.land/tools", {
-        headers: { "X-Request-Id": requestId },
-      }),
-    );
-
-    if (!toolsRes.ok) {
-      return [];
-    }
-
-    const data = await toolsRes.json<{
-      tools: Array<{ name: string; description: string; inputSchema?: unknown }>;
-    }>();
-
-    return (data.tools ?? []).map((tool) => ({
-      name: tool.name,
-      description: tool.description,
-      inputSchema: tool.inputSchema ?? { type: "object", properties: {} },
-    }));
-  } catch {
-    return [];
-  }
 }
 
 async function getThreadForUser(db: D1Database, threadId: string, userId: string) {
@@ -511,80 +400,6 @@ function createSseSender(writer: WritableStreamDefaultWriter<Uint8Array>) {
   };
 }
 
-async function waitForBrowserResult(
-  db: D1Database,
-  threadId: string,
-  toolCallId: string,
-  userId: string,
-) {
-  const deadline = Date.now() + BROWSER_RESULT_TIMEOUT_MS;
-
-  while (Date.now() < deadline) {
-    const row = await db
-      .prepare(
-        `SELECT tool_call_id, status, result_json
-         FROM chat_browser_results
-         WHERE tool_call_id = ? AND thread_id = ? AND user_id = ?
-         LIMIT 1`,
-      )
-      .bind(toolCallId, threadId, userId)
-      .first<BrowserResultRow>();
-
-    if (row?.status === "done" && row.result_json) {
-      return safeJsonParse<unknown>(row.result_json, row.result_json);
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, BROWSER_RESULT_POLL_MS));
-  }
-
-  return {
-    success: false,
-    error: "Timed out waiting for the browser result.",
-  };
-}
-
-async function callMcpTool(
-  env: Env,
-  requestId: string,
-  name: string,
-  args: Record<string, unknown>,
-) {
-  const rpcRes = await env.MCP_SERVICE.fetch(
-    new Request("https://mcp.spike.land/mcp", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Request-Id": requestId,
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: crypto.randomUUID(),
-        method: "tools/call",
-        params: { name, arguments: args },
-      }),
-    }),
-  );
-
-  if (!rpcRes.ok) {
-    throw new Error(`MCP tool call failed with status ${rpcRes.status}`);
-  }
-
-  const rpcData = await rpcRes.json<{
-    result?: { content?: Array<{ text?: string }> };
-    error?: { message: string };
-  }>();
-
-  if (rpcData.error) {
-    throw new Error(rpcData.error.message);
-  }
-
-  if (rpcData.result?.content?.length) {
-    return rpcData.result.content.map((item) => item.text ?? "").join("\n");
-  }
-
-  return "Tool completed successfully.";
-}
-
 async function executeTool(params: {
   c: ChatContext;
   threadId: string;
@@ -608,128 +423,28 @@ async function executeTool(params: {
     sendSseEvent,
   } = params;
 
-  if (toolName === "mcp_tool_search") {
-    const query = typeof toolArgs["query"] === "string" ? toolArgs["query"].trim() : "";
-    if (!query) {
-      return {
-        transport: "mcp" as const,
-        result: "Search query is required.",
-        status: "error" as const,
-      };
-    }
-
-    return {
-      transport: "mcp" as const,
-      result: JSON.stringify(
-        {
-          matches: searchToolCatalog(query, toolCatalog),
-        },
-        null,
-        2,
-      ),
-      status: "done" as const,
-    };
-  }
-
-  if (toolName === "mcp_tool_call") {
-    const targetName = typeof toolArgs["name"] === "string" ? toolArgs["name"].trim() : "";
-    if (!targetName) {
-      return {
-        transport: "mcp" as const,
-        result: "Tool name is required.",
-        status: "error" as const,
-      };
-    }
-
-    if (targetName === "mcp_tool_search" || targetName === "mcp_tool_call") {
-      return {
-        transport: "mcp" as const,
-        result: "Recursive agent tool calls are not allowed.",
-        status: "error" as const,
-      };
-    }
-
-    if (targetName.startsWith("browser_")) {
-      return {
-        transport: "mcp" as const,
-        result: "Browser tools must be called directly, not through mcp_tool_call.",
-        status: "error" as const,
-      };
-    }
-
-    try {
-      const result = await callMcpTool(
-        c.env,
-        requestId,
-        targetName,
-        normalizeToolArgs(toolArgs["arguments"]),
-      );
-
-      return {
-        transport: "mcp" as const,
-        result,
-        status: "done" as const,
-      };
-    } catch (error) {
-      return {
-        transport: "mcp" as const,
-        result: `Tool error: ${error instanceof Error ? error.message : "unknown"}`,
-        status: "error" as const,
-      };
-    }
-  }
-
-  if (toolName.startsWith("browser_")) {
-    const now = Date.now();
-
-    await c.env.DB.prepare(
-      `INSERT INTO chat_browser_results (
-        tool_call_id,
-        thread_id,
-        user_id,
-        tool_name,
-        args_json,
-        status,
-        result_json,
-        created_at,
-        updated_at
-      ) VALUES (?, ?, ?, ?, ?, 'pending', NULL, ?, ?)
-      ON CONFLICT(tool_call_id) DO UPDATE SET
-        args_json = excluded.args_json,
-        status = 'pending',
-        result_json = NULL,
-        updated_at = excluded.updated_at`,
-    )
-      .bind(toolCallId, threadId, userId, toolName, JSON.stringify(toolArgs), now, now)
-      .run();
-
-    await sendSseEvent("browser_command", {
-      threadId,
-      toolCallId,
-      tool: toolName,
-      args: toolArgs,
-    });
-
-    const browserResult = await waitForBrowserResult(c.env.DB, threadId, toolCallId, userId);
-
-    return {
-      transport: "browser" as const,
-      result: serializeToolContent(browserResult),
-      status:
-        typeof browserResult === "object" &&
-        browserResult !== null &&
-        "success" in browserResult &&
-        browserResult.success === false
-          ? ("error" as const)
-          : ("done" as const),
-    };
-  }
-
-  return {
-    transport: "mcp" as const,
-    result: `Unknown tool: ${toolName}`,
-    status: "error" as const,
-  };
+  return executeAgentTool({
+    mcpService: c.env.MCP_SERVICE,
+    db: c.env.DB,
+    requestId,
+    contextId: threadId,
+    userId,
+    toolCallId,
+    toolName,
+    toolArgs,
+    toolCatalog,
+    tableName: "chat_browser_results",
+    contextIdColumn: "thread_id",
+    maxSearchResults: MAX_SEARCH_RESULTS,
+    onBrowserInsert: async (tcId, tn, ta) => {
+      await sendSseEvent("browser_command", {
+        threadId,
+        toolCallId: tcId,
+        tool: tn,
+        args: ta,
+      });
+    },
+  });
 }
 
 chat.get("/api/chat/threads", async (c) => {
@@ -838,7 +553,7 @@ chat.post("/api/chat", async (c) => {
 
   const bgTask = (async () => {
     try {
-      const toolCatalog = await fetchToolCatalog(c.env, requestId);
+      const toolCatalog = await fetchToolCatalog(c.env.MCP_SERVICE, requestId);
       const priorRounds = await listRoundsForThread(c.env.DB, threadSummary.id);
       const configuredContextWindow = Number.parseInt(c.env.LLM_CONTEXT_WINDOW ?? "", 10);
       const stageBudget = createStageMemoryBudget(

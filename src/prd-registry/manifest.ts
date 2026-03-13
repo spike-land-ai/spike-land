@@ -11,6 +11,7 @@ import { contentDomain } from "./prds/domains/content.js";
 import { labsDomain } from "./prds/domains/labs.js";
 import { learningDomain } from "./prds/domains/learning.js";
 import { platformInfraDomain } from "./prds/domains/platform-infra.js";
+import { aetherDomain } from "./prds/domains/aether.js";
 
 // Routes
 import { appsRoute } from "./prds/routes/apps.js";
@@ -36,6 +37,7 @@ const ALL_PRDS: PrdDefinition[] = [
   learningDomain,
   platformInfraDomain,
   contentDomain,
+  aetherDomain,
   // Routes
   appsRoute,
   blogRoute,

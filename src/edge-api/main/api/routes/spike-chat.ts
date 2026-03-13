@@ -14,19 +14,25 @@ import {
   saveNote,
   parseExtractedNote,
 } from "../../core-logic/aether-memory.js";
+import { fetchToolCatalog } from "../../core-logic/mcp-tools.js";
+import { safeJsonParse, executeAgentTool } from "../../core-logic/chat-tool-execution.js";
+import {
+  resolveSynthesisTarget,
+  synthesizeCompletion,
+  streamCompletion,
+  type ProviderMessage,
+  type ResolvedSynthesisTarget,
+} from "../../core-logic/llm-provider.js";
+import { getRubik3SystemPrompt } from "../../core-logic/rubik-persona-prompt.js";
 
 const spikeChat = new Hono<{ Bindings: Env; Variables: Variables }>();
-const GROK_MODEL = "grok-4-1";
 const MAX_TOOL_LOOPS = 6;
-const MAX_SEARCH_RESULTS = 8;
 const MAX_HISTORY_MESSAGES = 16;
 const MAX_RECENT_HISTORY_MESSAGES = 6;
 const MAX_HISTORY_CHARS = 6_000;
 const RECENT_MESSAGE_CHAR_LIMIT = 1_200;
 const OLDER_ASSISTANT_CHAR_LIMIT = 320;
 const OLDER_USER_CHAR_LIMIT = 240;
-const BROWSER_RESULT_TIMEOUT_MS = 15_000;
-const BROWSER_RESULT_POLL_MS = 250;
 type SpikeChatRole = "system" | "user" | "assistant" | "tool";
 
 const SPIKE_BROWSER_TOOLS: Array<{
@@ -96,12 +102,6 @@ const SPIKE_AGENT_TOOLS: Array<{
   },
 ];
 
-interface ToolCatalogItem {
-  name: string;
-  description: string;
-  inputSchema: unknown;
-}
-
 interface ParsedToolCall {
   toolCallId: string;
   name: string;
@@ -113,12 +113,6 @@ interface BrowserResultRequestBody {
   sessionId?: string;
   toolCallId?: string;
   result?: unknown;
-}
-
-interface BrowserResultRow {
-  tool_call_id: string;
-  status: string;
-  result_json: string | null;
 }
 
 interface SpikeChatMessage {
@@ -133,34 +127,6 @@ interface SpikeChatMessage {
       arguments: string;
     };
   }>;
-}
-
-function normalizeToolArgs(value: unknown): Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return {};
-  }
-
-  return value as Record<string, unknown>;
-}
-
-function safeJsonParse<T>(value: string, fallback: T): T {
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return fallback;
-  }
-}
-
-function serializeToolContent(value: unknown): string {
-  if (typeof value === "string") {
-    return value;
-  }
-
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
 }
 
 function normalizeText(value: string, maxChars: number) {
@@ -215,326 +181,29 @@ function compressHistory(
   return compacted;
 }
 
-function scoreTool(query: string, tool: ToolCatalogItem): number {
-  const lowerQuery = query.toLowerCase();
-  const queryTokens = lowerQuery
-    .split(/[^a-z0-9_]+/i)
-    .map((token) => token.trim())
-    .filter(Boolean);
-
-  let score = 0;
-  if (tool.name.toLowerCase().includes(lowerQuery)) {
-    score += 12;
-  }
-  if (tool.description.toLowerCase().includes(lowerQuery)) {
-    score += 6;
-  }
-
-  for (const token of queryTokens) {
-    if (tool.name.toLowerCase().includes(token)) {
-      score += 4;
-    }
-    if (tool.description.toLowerCase().includes(token)) {
-      score += 2;
-    }
-  }
-
-  return score;
-}
-
-function searchToolCatalog(query: string, toolCatalog: ToolCatalogItem[]) {
-  return toolCatalog
-    .map((tool) => ({ tool, score: scoreTool(query, tool) }))
-    .filter((entry) => entry.score > 0)
-    .sort((a, b) => {
-      if (b.score !== a.score) {
-        return b.score - a.score;
-      }
-
-      return a.tool.name.localeCompare(b.tool.name);
-    })
-    .slice(0, MAX_SEARCH_RESULTS)
-    .map(({ tool }) => ({
-      name: tool.name,
-      description: tool.description,
-      inputSchema: tool.inputSchema,
-    }));
-}
-
-async function fetchToolCatalog(env: Env, requestId: string): Promise<ToolCatalogItem[]> {
-  try {
-    const toolsRes = await env.MCP_SERVICE.fetch(
-      new Request("https://mcp.spike.land/tools", {
-        headers: { "X-Request-Id": requestId },
-      }),
-    );
-
-    if (!toolsRes.ok) {
-      return [];
-    }
-
-    const data = await toolsRes.json<{
-      tools: Array<{ name: string; description: string; inputSchema?: unknown }>;
-    }>();
-
-    return (data.tools ?? []).map((tool) => ({
-      name: tool.name,
-      description: tool.description,
-      inputSchema: tool.inputSchema ?? { type: "object", properties: {} },
-    }));
-  } catch {
-    return [];
-  }
-}
-
-async function callMcpTool(
+/** Call LLM via user-bounded provider resolution. Non-streaming. */
+async function callLlm(
   env: Env,
-  requestId: string,
-  name: string,
-  args: Record<string, unknown>,
-) {
-  const rpcRes = await env.MCP_SERVICE.fetch(
-    new Request("https://mcp.spike.land/mcp", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Request-Id": requestId,
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        id: crypto.randomUUID(),
-        method: "tools/call",
-        params: { name, arguments: args },
-      }),
-    }),
-  );
-
-  if (!rpcRes.ok) {
-    throw new Error(`MCP tool call failed with status ${rpcRes.status}`);
-  }
-
-  const rpcData = await rpcRes.json<{
-    result?: { content?: Array<{ text?: string }> };
-    error?: { message: string };
-  }>();
-
-  if (rpcData.error) {
-    throw new Error(rpcData.error.message);
-  }
-
-  if (rpcData.result?.content?.length) {
-    return rpcData.result.content.map((item) => item.text ?? "").join("\n");
-  }
-
-  return "Tool completed successfully.";
-}
-
-async function waitForBrowserResult(
-  db: D1Database,
-  sessionId: string,
-  toolCallId: string,
-  userId: string,
-) {
-  const deadline = Date.now() + BROWSER_RESULT_TIMEOUT_MS;
-
-  while (Date.now() < deadline) {
-    const row = await db
-      .prepare(
-        `SELECT tool_call_id, status, result_json
-         FROM spike_chat_browser_results
-         WHERE tool_call_id = ? AND session_id = ? AND user_id = ?
-         LIMIT 1`,
-      )
-      .bind(toolCallId, sessionId, userId)
-      .first<BrowserResultRow>();
-
-    if (row?.status === "done" && row.result_json) {
-      return safeJsonParse<unknown>(row.result_json, row.result_json);
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, BROWSER_RESULT_POLL_MS));
-  }
-
-  return {
-    success: false,
-    error: "Timed out waiting for the browser result.",
-  };
-}
-
-async function executeAgentTool(
-  env: Env,
-  requestId: string,
-  sessionId: string,
   userId: string | undefined,
-  toolCallId: string,
-  toolName: string,
-  toolArgs: Record<string, unknown>,
-  toolCatalog: ToolCatalogItem[],
-) {
-  if (toolName.startsWith("browser_")) {
-    if (!userId) {
-      return {
-        transport: "browser" as const,
-        result: "Browser tools require a signed-in spike.land session.",
-        status: "error" as const,
-      };
-    }
-
-    const now = Date.now();
-    await env.DB.prepare(
-      `INSERT INTO spike_chat_browser_results (
-        tool_call_id,
-        session_id,
-        user_id,
-        tool_name,
-        args_json,
-        status,
-        result_json,
-        created_at,
-        updated_at
-      ) VALUES (?, ?, ?, ?, ?, 'pending', NULL, ?, ?)
-      ON CONFLICT(tool_call_id) DO UPDATE SET
-        args_json = excluded.args_json,
-        status = 'pending',
-        result_json = NULL,
-        updated_at = excluded.updated_at`,
-    )
-      .bind(toolCallId, sessionId, userId, toolName, JSON.stringify(toolArgs), now, now)
-      .run();
-
-    const browserResult = await waitForBrowserResult(env.DB, sessionId, toolCallId, userId);
-
-    return {
-      transport: "browser" as const,
-      result: serializeToolContent(browserResult),
-      status:
-        typeof browserResult === "object" &&
-        browserResult !== null &&
-        "success" in browserResult &&
-        browserResult.success === false
-          ? ("error" as const)
-          : ("done" as const),
-    };
-  }
-
-  if (toolName === "mcp_tool_search") {
-    const query = typeof toolArgs["query"] === "string" ? toolArgs["query"].trim() : "";
-    if (!query) {
-      return {
-        transport: "mcp" as const,
-        result: "Search query is required.",
-        status: "error" as const,
-      };
-    }
-
-    return {
-      transport: "mcp" as const,
-      result: JSON.stringify({ matches: searchToolCatalog(query, toolCatalog) }, null, 2),
-      status: "done" as const,
-    };
-  }
-
-  if (toolName === "mcp_tool_call") {
-    const targetName = typeof toolArgs["name"] === "string" ? toolArgs["name"].trim() : "";
-    if (!targetName) {
-      return {
-        transport: "mcp" as const,
-        result: "Tool name is required.",
-        status: "error" as const,
-      };
-    }
-
-    if (targetName === "mcp_tool_search" || targetName === "mcp_tool_call") {
-      return {
-        transport: "mcp" as const,
-        result: "Recursive agent tool calls are not allowed.",
-        status: "error" as const,
-      };
-    }
-
-    if (targetName.startsWith("browser_")) {
-      return {
-        transport: "mcp" as const,
-        result: "Browser tools are not available on the spike-chat surface.",
-        status: "error" as const,
-      };
-    }
-
-    if (!toolCatalog.some((tool) => tool.name === targetName)) {
-      return {
-        transport: "mcp" as const,
-        result: `Unknown MCP tool: ${targetName}`,
-        status: "error" as const,
-      };
-    }
-
-    try {
-      const result = await callMcpTool(
-        env,
-        requestId,
-        targetName,
-        normalizeToolArgs(toolArgs["arguments"]),
-      );
-
-      return {
-        transport: "mcp" as const,
-        result,
-        status: "done" as const,
-      };
-    } catch (error) {
-      return {
-        transport: "mcp" as const,
-        result: `Tool error: ${error instanceof Error ? error.message : "unknown"}`,
-        status: "error" as const,
-      };
-    }
-  }
-
-  return {
-    transport: "mcp" as const,
-    result: `Unknown tool: ${toolName}`,
-    status: "error" as const,
-  };
-}
-
-/** Call Grok (xAI) with OpenAI-compatible format. Non-streaming. */
-async function callGrok(
-  apiKey: string,
   systemPrompt: string,
   userMessage: string,
   opts: { temperature?: number; maxTokens?: number },
 ): Promise<string> {
-  const res = await fetch("https://api.x.ai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: GROK_MODEL,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userMessage },
-      ],
-      temperature: opts.temperature ?? 0.2,
-      max_tokens: opts.maxTokens ?? 256,
-      stream: false,
-    }),
+  const target = await resolveSynthesisTarget(env, userId, {
+    publicModel: "spike-agent-v1",
+    provider: "auto",
+    upstreamModel: undefined,
   });
+  if (!target) throw new Error("No LLM provider available");
 
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error(`Grok API error ${res.status}: ${errText}`);
-    throw new Error(`AI service error (${res.status})`);
-  }
+  const messages: ProviderMessage[] = [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userMessage },
+  ];
 
-  const data = await res.json<{
-    choices: Array<{ message: { content: string } }>;
-  }>();
-  return data.choices[0]?.message.content ?? "";
+  return (await synthesizeCompletion(target, messages, opts)).content;
 }
 
-/** Stream Grok response as SSE to the client. Returns the full collected text. */
 export function buildSpikeChatMessages(
   systemPrompt: string,
   history: Array<{ role: string; content: string }> | undefined,
@@ -550,8 +219,9 @@ export function buildSpikeChatMessages(
   return messages;
 }
 
-async function streamGrokResponse(
-  apiKey: string,
+/** Stream LLM response via provider resolution as SSE. Returns full text + parsed tool calls. */
+async function streamLlmResponse(
+  target: ResolvedSynthesisTarget,
   messages: SpikeChatMessage[],
   sendEvent: (data: unknown) => Promise<void>,
   opts: {
@@ -563,34 +233,19 @@ async function streamGrokResponse(
     }>;
   },
 ): Promise<{ fullText: string; toolCalls: ParsedToolCall[] }> {
-  const body: Record<string, unknown> = {
-    model: "grok-4-1",
-    messages,
-    temperature: opts.temperature ?? 0.2,
-    max_tokens: opts.maxTokens ?? 4096,
-    stream: true,
-  };
-  if (opts.tools && opts.tools.length > 0) {
-    body["tools"] = opts.tools;
-  }
+  const providerMessages: ProviderMessage[] = messages.map((m) => ({
+    role: m.role === "tool" ? ("user" as const) : m.role,
+    content: m.content ?? "",
+  }));
 
-  const res = await fetch("https://api.x.ai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(body),
+  const res = await streamCompletion(target, providerMessages, {
+    temperature: opts.temperature,
+    maxTokens: opts.maxTokens,
+    tools: opts.tools,
   });
 
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error(`Grok streaming API error ${res.status}: ${errText}`);
-    throw new Error(`AI service error (${res.status})`);
-  }
-
   const reader = res.body?.getReader();
-  if (!reader) throw new Error("No response body from Grok");
+  if (!reader) throw new Error("No response body from LLM provider");
 
   const decoder = new TextDecoder();
   let buffer = "";
@@ -627,13 +282,11 @@ async function streamGrokResponse(
         const delta = chunk.choices[0]?.delta;
         if (!delta) continue;
 
-        // Text content
         if (delta.content) {
           fullText += delta.content;
           await sendEvent({ type: "text_delta", text: delta.content });
         }
 
-        // Tool calls (OpenAI format) — track each by index
         if (delta.tool_calls) {
           for (const tc of delta.tool_calls) {
             const idx = tc.index ?? 0;
@@ -707,6 +360,7 @@ spikeChat.post("/api/spike-chat", async (c) => {
   const body = await c.req.json<{
     message?: string;
     history?: Array<{ role: string; content: string }>;
+    persona?: string;
   }>();
   if (!body.message || typeof body.message !== "string") {
     return c.json({ error: "message is required" }, 400);
@@ -716,15 +370,24 @@ spikeChat.post("/api/spike-chat", async (c) => {
     return c.json({ error: "message too long (max 8000 characters)" }, 400);
   }
 
-  const apiKey = c.env.XAI_API_KEY;
-  if (!apiKey) {
-    return c.json({ error: "XAI_API_KEY not configured" }, 503);
-  }
-
   const userId = c.get("userId") as string | undefined;
   const userMessage = body.message.trim();
   const requestId = (c.get("requestId") as string | undefined) ?? crypto.randomUUID();
   const sessionId = `spike-chat-${requestId}`;
+  const persona = typeof body.persona === "string" ? body.persona.trim() : undefined;
+
+  // Resolve LLM provider (BYOK → platform fallback)
+  const llmTarget = await resolveSynthesisTarget(c.env, userId, {
+    publicModel: "spike-agent-v1",
+    provider: "auto",
+    upstreamModel: undefined,
+  });
+  if (!llmTarget) {
+    return c.json(
+      { error: "No LLM provider available. Add a BYOK key or configure a platform provider." },
+      503,
+    );
+  }
 
   // Load user memory
   const userNotes: UserMemory["notes"] = userId
@@ -738,9 +401,14 @@ spikeChat.post("/api/spike-chat", async (c) => {
   };
 
   const { stablePrefix, dynamicSuffix } = buildAetherSystemPrompt(userMemory);
-  const fullSystemPrompt = dynamicSuffix ? `${stablePrefix}\n\n${dynamicSuffix}` : stablePrefix;
+  let fullSystemPrompt = dynamicSuffix ? `${stablePrefix}\n\n${dynamicSuffix}` : stablePrefix;
 
-  const toolCatalog = await fetchToolCatalog(c.env, requestId);
+  // Merge Rubik-3 persona prompt when requested
+  if (persona === "rubik-3") {
+    fullSystemPrompt = `${fullSystemPrompt}\n\n${getRubik3SystemPrompt()}`;
+  }
+
+  const toolCatalog = await fetchToolCatalog(c.env.MCP_SERVICE, requestId);
 
   // Set up SSE stream
   const { readable, writable } = new TransformStream();
@@ -772,14 +440,16 @@ spikeChat.post("/api/spike-chat", async (c) => {
         activeNoteCount: selectedNotes.length,
         totalNoteCount: userNotes.length,
         toolCatalogCount: toolCatalog.length,
-        model: GROK_MODEL,
+        provider: llmTarget.provider,
+        model: llmTarget.upstreamModel,
+        keySource: llmTarget.keySource,
       });
 
       // --- Stage 1: CLASSIFY ---
       await sendEvent({ type: "stage_update", stage: "classify" });
       let classifiedIntent = "{}";
       try {
-        classifiedIntent = await callGrok(apiKey, buildClassifyPrompt(), userMessage, {
+        classifiedIntent = await callLlm(c.env, userId, buildClassifyPrompt(), userMessage, {
           temperature: 0.1,
           maxTokens: 200,
         });
@@ -802,7 +472,7 @@ spikeChat.post("/api/spike-chat", async (c) => {
           `catalog_size_${toolCatalog.length}`,
         ];
         const planPrompt = buildPlanPrompt(classifiedIntent, toolNames);
-        const planResult = await callGrok(apiKey, planPrompt, userMessage, {
+        const planResult = await callLlm(c.env, userId, planPrompt, userMessage, {
           temperature: 0.4,
           maxTokens: 1024,
         });
@@ -821,7 +491,7 @@ spikeChat.post("/api/spike-chat", async (c) => {
       let assistantResponse = "";
 
       for (let loop = 0; loop < MAX_TOOL_LOOPS; loop++) {
-        const iteration = await streamGrokResponse(apiKey, executionMessages, sendEvent, {
+        const iteration = await streamLlmResponse(llmTarget, executionMessages, sendEvent, {
           temperature: 0.2,
           maxTokens: 4096,
           tools: SPIKE_AGENT_TOOLS,
@@ -855,16 +525,19 @@ spikeChat.post("/api/spike-chat", async (c) => {
             transport: "mcp",
           });
 
-          const toolResult = await executeAgentTool(
-            c.env,
+          const toolResult = await executeAgentTool({
+            mcpService: c.env.MCP_SERVICE,
+            db: c.env.DB,
             requestId,
-            sessionId,
+            contextId: sessionId,
             userId,
-            toolCall.toolCallId,
-            toolCall.name,
-            toolCall.args,
+            toolCallId: toolCall.toolCallId,
+            toolName: toolCall.name,
+            toolArgs: toolCall.args,
             toolCatalog,
-          );
+            tableName: "spike_chat_browser_results",
+            contextIdColumn: "session_id",
+          });
 
           await sendEvent({
             type: "tool_call_end",
@@ -894,8 +567,9 @@ spikeChat.post("/api/spike-chat", async (c) => {
       await sendEvent({ type: "stage_update", stage: "extract" });
       await (async () => {
         try {
-          const extractResult = await callGrok(
-            apiKey,
+          const extractResult = await callLlm(
+            c.env,
+            userId,
             buildExtractPrompt(),
             `User: ${userMessage}\n\nAssistant: ${assistantResponse.slice(0, 2000)}`,
             { temperature: 0.2, maxTokens: 256 },

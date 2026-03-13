@@ -2,28 +2,29 @@ import { Hono } from "hono";
 import type { Context, Next } from "hono";
 import type { Env, Variables } from "../../core-logic/env.js";
 import { DOCS_MANIFEST, type DocEntry } from "../../core-logic/docs-catalog.js";
-import { resolveByokKey, type ByokProvider } from "../../core-logic/byok.js";
 import { authMiddleware } from "../middleware/auth.js";
 import { compressMessage, type PrdCompressionConfig } from "../../core-logic/prd-compression.js";
+import {
+  fetchToolCatalog,
+  searchToolCatalog,
+  type ToolCatalogItem,
+} from "../../core-logic/mcp-tools.js";
+import {
+  PUBLIC_MODEL_ID,
+  DEFAULT_PROVIDER_MODELS,
+  parseModelSelection,
+  resolveSynthesisTarget,
+  synthesizeCompletion,
+  type ProviderMessage,
+  type UsageShape,
+} from "../../core-logic/llm-provider.js";
 
 const openAiCompatible = new Hono<{ Bindings: Env; Variables: Variables }>();
 
-const PUBLIC_MODEL_ID = "spike-agent-v1";
 const MODEL_CREATED_AT = 1_741_651_200;
 const MAX_SELECTED_DOCS = 3;
 const MAX_SELECTED_TOOLS = 6;
-const AUTO_BYOK_PRIORITY: ByokProvider[] = ["openai", "anthropic", "google"];
-const AUTO_PLATFORM_PRIORITY: ProviderId[] = ["xai", "anthropic", "google", "openai"];
 
-const DEFAULT_PROVIDER_MODELS: Record<ProviderId, string> = {
-  openai: "gpt-4.1",
-  anthropic: "claude-sonnet-4-20250514",
-  google: "gemini-2.5-flash",
-  xai: "grok-4-1",
-};
-
-type ProviderId = "openai" | "anthropic" | "google" | "xai";
-type ProviderSelection = ProviderId | "auto";
 type OpenAiErrorStatus = 400 | 401 | 402 | 403 | 404 | 409 | 422 | 429 | 500 | 502 | 503;
 
 interface OpenAiMessagePart {
@@ -45,63 +46,6 @@ interface OpenAiChatCompletionRequest {
   max_tokens?: number;
   user?: string;
   provider?: string;
-}
-
-interface ToolCatalogItem {
-  name: string;
-  description: string;
-  category: string | undefined;
-  inputSchema: unknown | undefined;
-}
-
-interface UsageShape {
-  prompt_tokens?: number;
-  completion_tokens?: number;
-  total_tokens?: number;
-}
-
-interface OpenAiCompatibleResponse {
-  choices?: Array<{ message?: { content?: string | OpenAiMessagePart[] | null } }>;
-  usage?: UsageShape;
-}
-
-interface AnthropicResponse {
-  content?: Array<{ type?: string; text?: string }>;
-  usage?: {
-    input_tokens?: number;
-    output_tokens?: number;
-  };
-}
-
-interface GoogleResponse {
-  candidates?: Array<{
-    content?: {
-      parts?: Array<{ text?: string }>;
-    };
-  }>;
-  usageMetadata?: {
-    promptTokenCount?: number;
-    candidatesTokenCount?: number;
-    totalTokenCount?: number;
-  };
-}
-
-interface ProviderMessage {
-  role: "system" | "user" | "assistant";
-  content: string;
-}
-
-interface ParsedModelSelection {
-  publicModel: string;
-  provider: ProviderSelection;
-  upstreamModel: string | undefined;
-}
-
-interface ResolvedSynthesisTarget {
-  provider: ProviderId;
-  upstreamModel: string;
-  apiKey: string;
-  keySource: "byok" | "platform";
 }
 
 function openAiError(
@@ -143,14 +87,6 @@ async function openAiCompatibleAuthMiddleware(
   }
 
   return authMiddleware(c, next);
-}
-
-function tokenize(value: string): string[] {
-  return value
-    .toLowerCase()
-    .split(/[^a-z0-9_]+/i)
-    .map((token) => token.trim())
-    .filter(Boolean);
 }
 
 function normalizeMessageContent(content: OpenAiChatMessage["content"]): string {
@@ -195,6 +131,14 @@ function lastUserMessage(messages: OpenAiChatMessage[]): string {
   }
 
   return "";
+}
+
+function tokenize(value: string): string[] {
+  return value
+    .toLowerCase()
+    .split(/[^a-z0-9_]+/i)
+    .map((token) => token.trim())
+    .filter(Boolean);
 }
 
 function inferIntent(query: string): string {
@@ -250,72 +194,6 @@ function selectRelevantDocs(query: string): DocEntry[] {
     })
     .slice(0, MAX_SELECTED_DOCS)
     .map((entry) => entry.doc);
-}
-
-function scoreTool(query: string, tool: ToolCatalogItem): number {
-  const lowerQuery = query.toLowerCase();
-  const queryTokens = tokenize(query);
-  const lowerName = tool.name.toLowerCase();
-  const lowerDescription = tool.description.toLowerCase();
-  const lowerCategory = (tool.category ?? "").toLowerCase();
-
-  let score = 0;
-  if (lowerName.includes(lowerQuery)) score += 12;
-  if (lowerDescription.includes(lowerQuery)) score += 8;
-
-  for (const token of queryTokens) {
-    if (lowerName.includes(token)) score += 4;
-    if (lowerDescription.includes(token)) score += 2;
-    if (lowerCategory.includes(token)) score += 2;
-  }
-
-  return score;
-}
-
-function searchToolCatalog(query: string, toolCatalog: ToolCatalogItem[]): ToolCatalogItem[] {
-  return toolCatalog
-    .map((tool) => ({ tool, score: scoreTool(query, tool) }))
-    .filter((entry) => entry.score > 0)
-    .sort((left, right) => {
-      if (right.score !== left.score) {
-        return right.score - left.score;
-      }
-      return left.tool.name.localeCompare(right.tool.name);
-    })
-    .slice(0, MAX_SELECTED_TOOLS)
-    .map((entry) => entry.tool);
-}
-
-async function fetchToolCatalog(env: Env, requestId: string): Promise<ToolCatalogItem[]> {
-  try {
-    const toolsRes = await env.MCP_SERVICE.fetch(
-      new Request("https://mcp.spike.land/tools", {
-        headers: { "X-Request-Id": requestId },
-      }),
-    );
-
-    if (!toolsRes.ok) {
-      return [];
-    }
-
-    const data = await toolsRes.json<{
-      tools?: Array<{
-        name: string;
-        description: string;
-        category?: string;
-        inputSchema?: unknown;
-      }>;
-    }>();
-
-    return (data.tools ?? []).map((tool) => ({
-      name: tool.name,
-      description: tool.description,
-      category: tool.category,
-      inputSchema: tool.inputSchema,
-    }));
-  } catch {
-    return [];
-  }
 }
 
 function buildKnowledgePrompt(query: string, docs: DocEntry[], tools: ToolCatalogItem[]): string {
@@ -421,469 +299,6 @@ function finalizeUsage(
     completion_tokens: completionTokens,
     total_tokens: totalTokens,
   };
-}
-
-function compactUsage(values: {
-  prompt_tokens: number | undefined;
-  completion_tokens: number | undefined;
-  total_tokens: number | undefined;
-}): UsageShape | undefined {
-  const usage: UsageShape = {};
-
-  if (values.prompt_tokens !== undefined) {
-    usage.prompt_tokens = values.prompt_tokens;
-  }
-  if (values.completion_tokens !== undefined) {
-    usage.completion_tokens = values.completion_tokens;
-  }
-  if (values.total_tokens !== undefined) {
-    usage.total_tokens = values.total_tokens;
-  }
-
-  return Object.keys(usage).length > 0 ? usage : undefined;
-}
-
-function normalizeProviderName(value: string): ProviderId | undefined {
-  const normalized = value.trim().toLowerCase();
-  if (normalized === "openai") return "openai";
-  if (normalized === "anthropic") return "anthropic";
-  if (normalized === "google" || normalized === "gemini") return "google";
-  if (normalized === "xai" || normalized === "grok") return "xai";
-  return undefined;
-}
-
-function inferProviderFromRawModel(model: string): ProviderId | undefined {
-  const normalized = model.trim().toLowerCase();
-  if (
-    /^(gpt|o1|o3|o4|o5|chatgpt|codex|computer-use|gpt-oss)/.test(normalized) ||
-    normalized.includes("openai")
-  ) {
-    return "openai";
-  }
-  if (normalized.startsWith("claude") || normalized.includes("anthropic")) {
-    return "anthropic";
-  }
-  if (normalized.startsWith("gemini") || normalized.includes("google")) {
-    return "google";
-  }
-  if (normalized.startsWith("grok") || normalized.includes("xai")) {
-    return "xai";
-  }
-  return undefined;
-}
-
-function parseModelSelection(
-  body: OpenAiChatCompletionRequest,
-):
-  | { ok: true; value: ParsedModelSelection }
-  | { ok: false; message: string; param?: string; code?: string } {
-  const publicModel = body.model?.trim() || PUBLIC_MODEL_ID;
-  const providerHint =
-    typeof body.provider === "string" && body.provider.trim()
-      ? normalizeProviderName(body.provider)
-      : undefined;
-
-  if (typeof body.provider === "string" && body.provider.trim() && !providerHint) {
-    return {
-      ok: false,
-      message: `Unsupported provider "${body.provider}".`,
-      param: "provider",
-      code: "provider_not_supported",
-    };
-  }
-
-  if (publicModel === PUBLIC_MODEL_ID) {
-    if (providerHint) {
-      return {
-        ok: true,
-        value: {
-          publicModel,
-          provider: providerHint,
-          upstreamModel: DEFAULT_PROVIDER_MODELS[providerHint],
-        },
-      };
-    }
-
-    return {
-      ok: true,
-      value: {
-        publicModel,
-        provider: "auto",
-        upstreamModel: undefined,
-      },
-    };
-  }
-
-  if (publicModel.includes("/")) {
-    const slashIndex = publicModel.indexOf("/");
-    const prefix = publicModel.slice(0, slashIndex);
-    const normalizedProvider = normalizeProviderName(prefix);
-    if (!normalizedProvider) {
-      return {
-        ok: false,
-        message: `Unsupported model "${publicModel}".`,
-        param: "model",
-        code: "model_not_found",
-      };
-    }
-
-    if (providerHint && providerHint !== normalizedProvider) {
-      return {
-        ok: false,
-        message: `provider "${body.provider}" does not match model "${publicModel}".`,
-        param: "provider",
-        code: "provider_model_mismatch",
-      };
-    }
-
-    const suffix = publicModel.slice(slashIndex + 1).trim();
-    return {
-      ok: true,
-      value: {
-        publicModel,
-        provider: normalizedProvider,
-        upstreamModel: suffix || DEFAULT_PROVIDER_MODELS[normalizedProvider],
-      },
-    };
-  }
-
-  if (providerHint) {
-    const inferred = inferProviderFromRawModel(publicModel);
-    if (inferred && inferred !== providerHint) {
-      return {
-        ok: false,
-        message: `provider "${body.provider}" does not match model "${publicModel}".`,
-        param: "provider",
-        code: "provider_model_mismatch",
-      };
-    }
-
-    return {
-      ok: true,
-      value: {
-        publicModel,
-        provider: providerHint,
-        upstreamModel: publicModel,
-      },
-    };
-  }
-
-  const inferred = inferProviderFromRawModel(publicModel);
-  if (!inferred) {
-    return {
-      ok: false,
-      message: `Unsupported model "${publicModel}". Use "${PUBLIC_MODEL_ID}" or a provider model like "openai/gpt-4.1".`,
-      param: "model",
-      code: "model_not_found",
-    };
-  }
-
-  return {
-    ok: true,
-    value: {
-      publicModel,
-      provider: inferred,
-      upstreamModel: publicModel,
-    },
-  };
-}
-
-function getPlatformKey(env: Env, provider: ProviderId): string | null {
-  if (provider === "openai") {
-    return env.OPENAI_API_KEY ?? null;
-  }
-  if (provider === "anthropic") {
-    return env.CLAUDE_OAUTH_TOKEN ?? null;
-  }
-  if (provider === "google") {
-    return env.GEMINI_API_KEY ?? null;
-  }
-  return env.XAI_API_KEY ?? null;
-}
-
-async function resolveExplicitSynthesisTarget(
-  env: Env,
-  userId: string | undefined,
-  provider: ProviderId,
-  upstreamModel: string,
-): Promise<ResolvedSynthesisTarget | null> {
-  if (provider !== "xai" && userId) {
-    const byokKey = await resolveByokKey(
-      env.MCP_SERVICE,
-      userId,
-      provider,
-      env.MCP_INTERNAL_SECRET,
-    );
-    if (byokKey) {
-      return {
-        provider,
-        upstreamModel,
-        apiKey: byokKey,
-        keySource: "byok",
-      };
-    }
-  }
-
-  const platformKey = getPlatformKey(env, provider);
-  if (!platformKey) {
-    return null;
-  }
-
-  return {
-    provider,
-    upstreamModel,
-    apiKey: platformKey,
-    keySource: "platform",
-  };
-}
-
-async function resolveAutoSynthesisTarget(
-  env: Env,
-  userId: string | undefined,
-): Promise<ResolvedSynthesisTarget | null> {
-  if (userId) {
-    const byokResults = await Promise.all(
-      AUTO_BYOK_PRIORITY.map(async (provider) => ({
-        provider,
-        key: await resolveByokKey(env.MCP_SERVICE, userId, provider, env.MCP_INTERNAL_SECRET),
-      })),
-    );
-
-    const match = byokResults.find((entry) => entry.key);
-    if (match?.key) {
-      return {
-        provider: match.provider,
-        upstreamModel: DEFAULT_PROVIDER_MODELS[match.provider],
-        apiKey: match.key,
-        keySource: "byok",
-      };
-    }
-  }
-
-  for (const provider of AUTO_PLATFORM_PRIORITY) {
-    const platformKey = getPlatformKey(env, provider);
-    if (platformKey) {
-      return {
-        provider,
-        upstreamModel: DEFAULT_PROVIDER_MODELS[provider],
-        apiKey: platformKey,
-        keySource: "platform",
-      };
-    }
-  }
-
-  return null;
-}
-
-async function resolveSynthesisTarget(
-  env: Env,
-  userId: string | undefined,
-  selection: ParsedModelSelection,
-): Promise<ResolvedSynthesisTarget | null> {
-  if (selection.provider === "auto") {
-    return resolveAutoSynthesisTarget(env, userId);
-  }
-
-  return resolveExplicitSynthesisTarget(
-    env,
-    userId,
-    selection.provider,
-    selection.upstreamModel ?? DEFAULT_PROVIDER_MODELS[selection.provider],
-  );
-}
-
-async function callOpenAiStyleProvider(
-  endpoint: string,
-  apiKey: string,
-  model: string,
-  messages: ProviderMessage[],
-  options: { temperature: number | undefined; maxTokens: number | undefined },
-): Promise<{ content: string; usage: UsageShape | undefined }> {
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature: options.temperature ?? 0.2,
-      max_tokens: options.maxTokens ?? 768,
-      stream: false,
-    }),
-  });
-
-  if (!res.ok) {
-    console.error("[openai-compatible] openai-style synthesis failed", {
-      endpoint,
-      status: res.status,
-    });
-    throw new Error(`Synthesis provider request failed with status ${res.status}.`);
-  }
-
-  const data = await res.json<OpenAiCompatibleResponse>();
-  return {
-    content: normalizeMessageContent(data.choices?.[0]?.message?.content ?? ""),
-    usage: data.usage,
-  };
-}
-
-async function callAnthropicProvider(
-  apiKey: string,
-  model: string,
-  messages: ProviderMessage[],
-  options: { temperature: number | undefined; maxTokens: number | undefined },
-): Promise<{ content: string; usage: UsageShape | undefined }> {
-  const system = messages
-    .filter((message) => message.role === "system")
-    .map((message) => message.content)
-    .join("\n\n")
-    .trim();
-  const nonSystemMessages = messages
-    .filter((message) => message.role !== "system")
-    .map((message) => ({
-      role: message.role,
-      content: message.content,
-    }));
-
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: options.maxTokens ?? 768,
-      temperature: options.temperature ?? 0.2,
-      ...(system ? { system } : {}),
-      messages: nonSystemMessages,
-    }),
-  });
-
-  if (!res.ok) {
-    console.error("[openai-compatible] anthropic synthesis failed", {
-      status: res.status,
-    });
-    throw new Error(`Anthropic synthesis request failed with status ${res.status}.`);
-  }
-
-  const data = await res.json<AnthropicResponse>();
-  const content = (data.content ?? [])
-    .map((entry) => (entry.type === "text" ? (entry.text ?? "") : ""))
-    .join("");
-
-  return {
-    content,
-    usage: data.usage
-      ? compactUsage({
-          prompt_tokens: data.usage.input_tokens,
-          completion_tokens: data.usage.output_tokens,
-          total_tokens:
-            data.usage.input_tokens !== undefined || data.usage.output_tokens !== undefined
-              ? (data.usage.input_tokens ?? 0) + (data.usage.output_tokens ?? 0)
-              : undefined,
-        })
-      : undefined,
-  };
-}
-
-async function callGoogleProvider(
-  apiKey: string,
-  model: string,
-  messages: ProviderMessage[],
-  options: { temperature: number | undefined; maxTokens: number | undefined },
-): Promise<{ content: string; usage: UsageShape | undefined }> {
-  const system = messages
-    .filter((message) => message.role === "system")
-    .map((message) => message.content)
-    .join("\n\n")
-    .trim();
-  const contents = messages
-    .filter((message) => message.role !== "system")
-    .map((message) => ({
-      role: message.role === "assistant" ? "model" : "user",
-      parts: [{ text: message.content }],
-    }));
-
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-      },
-      body: JSON.stringify({
-        ...(system ? { systemInstruction: { parts: [{ text: system }] } } : {}),
-        contents,
-        generationConfig: {
-          temperature: options.temperature ?? 0.2,
-          maxOutputTokens: options.maxTokens ?? 768,
-        },
-      }),
-    },
-  );
-
-  if (!res.ok) {
-    console.error("[openai-compatible] google synthesis failed", {
-      status: res.status,
-      model,
-    });
-    throw new Error(`Google synthesis request failed with status ${res.status}.`);
-  }
-
-  const data = await res.json<GoogleResponse>();
-  const content =
-    data.candidates?.[0]?.content?.parts
-      ?.map((part) => part.text ?? "")
-      .filter(Boolean)
-      .join("") ?? "";
-
-  return {
-    content,
-    usage: data.usageMetadata
-      ? compactUsage({
-          prompt_tokens: data.usageMetadata.promptTokenCount,
-          completion_tokens: data.usageMetadata.candidatesTokenCount,
-          total_tokens: data.usageMetadata.totalTokenCount,
-        })
-      : undefined,
-  };
-}
-
-async function synthesizeCompletion(
-  target: ResolvedSynthesisTarget,
-  messages: ProviderMessage[],
-  options: { temperature: number | undefined; maxTokens: number | undefined },
-) {
-  if (target.provider === "openai") {
-    return callOpenAiStyleProvider(
-      "https://api.openai.com/v1/chat/completions",
-      target.apiKey,
-      target.upstreamModel,
-      messages,
-      options,
-    );
-  }
-
-  if (target.provider === "anthropic") {
-    return callAnthropicProvider(target.apiKey, target.upstreamModel, messages, options);
-  }
-
-  if (target.provider === "google") {
-    return callGoogleProvider(target.apiKey, target.upstreamModel, messages, options);
-  }
-
-  return callOpenAiStyleProvider(
-    "https://api.x.ai/v1/chat/completions",
-    target.apiKey,
-    target.upstreamModel,
-    messages,
-    options,
-  );
 }
 
 function splitStreamingChunks(text: string): string[] {
@@ -1003,9 +418,9 @@ async function handleChatCompletion(c: Context<{ Bindings: Env; Variables: Varia
 
   const requestId = (c.get("requestId") as string | undefined) ?? crypto.randomUUID();
   const userId = c.get("userId") as string | undefined;
-  const toolCatalog = await fetchToolCatalog(c.env, requestId);
+  const toolCatalog = await fetchToolCatalog(c.env.MCP_SERVICE, requestId);
   const selectedDocs = selectRelevantDocs(effectivePrompt);
-  const selectedTools = searchToolCatalog(effectivePrompt, toolCatalog);
+  const selectedTools = searchToolCatalog(effectivePrompt, toolCatalog, MAX_SELECTED_TOOLS);
   const providerMessages = buildProviderMessages(
     body.messages,
     buildKnowledgePrompt(effectivePrompt, selectedDocs, selectedTools),
