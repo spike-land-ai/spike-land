@@ -12,6 +12,7 @@ export function computeMovePlans(
   nodes: FileNode[],
   packageCategories: Map<string, string>,
   MAX_BUCKET_SIZE: number = 20,
+  categoryDirs?: Set<string>,
 ): MovePlan[] {
   // Pass 1: Initial grouping to count bucket sizes
   const bucketCounts = new Map<string, number>();
@@ -38,8 +39,20 @@ export function computeMovePlans(
     let targetDir = path.join(category, appName, depGroupName);
 
     // Issue 3: Split oversized buckets
+    // For 2-level structure (category/package/subdir/...), skip 2 segments
+    // For flat structure (package/subdir/...), skip 1 segment
+    // Also skip leading segment if it matches the dep group (avoid stutter
+    // when source already has dep-group-based dirs)
     if ((bucketCounts.get(targetDir) || 0) > MAX_BUCKET_SIZE) {
-      const subDir = path.dirname(n.relPath).split(path.sep).slice(1).join(path.sep);
+      const parts = path.dirname(n.relPath).split(path.sep);
+      const firstSeg = parts[0] ?? "";
+      const skipCount = categoryDirs?.has(firstSeg) ? 2 : 1;
+      let subParts = parts.slice(skipCount);
+      // Strip leading segment if it duplicates the dep group name
+      if (subParts.length > 0 && subParts[0] === depGroupName) {
+        subParts = subParts.slice(1);
+      }
+      const subDir = subParts.join(path.sep);
       if (subDir) {
         targetDir = path.join(targetDir, subDir);
       }

@@ -87,6 +87,7 @@ describe("openAiCompatible route", () => {
       "openai/gpt-4.1",
       "anthropic/claude-sonnet-4-20250514",
       "google/gemini-2.5-flash",
+      "ollama/qwen3:8b",
     ]);
   });
 

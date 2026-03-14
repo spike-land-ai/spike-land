@@ -56,6 +56,11 @@ function buildRouteMeta(t: (key: string) => string): Record<string, RouteMeta> {
     "/login": { title: r("login"), description: d("login") },
     "/version": { title: r("version"), description: d("version") },
     "/what-we-do": { title: r("whatWeDo"), description: d("whatWeDo") },
+    "/api-products": {
+      title: "AI Products API — spike.land",
+      description:
+        "Six AI products from spike.land: Spike Ask, Spike Threads, Spike Tools, Spike Vision, Spike Local, and Token Pool. Flat pricing — you pay what the AI costs, nothing on top.",
+    },
     "/chat": {
       title: "Chat with Spike — spike.land",
       description:

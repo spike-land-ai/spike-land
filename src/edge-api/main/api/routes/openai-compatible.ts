@@ -441,6 +441,12 @@ function modelsResponse() {
         created: MODEL_CREATED_AT,
         owned_by: "spike.land",
       },
+      {
+        id: `ollama/${DEFAULT_PROVIDER_MODELS.ollama}`,
+        object: "model",
+        created: MODEL_CREATED_AT,
+        owned_by: "crystalline",
+      },
     ],
   };
 }

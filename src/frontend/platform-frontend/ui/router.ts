@@ -530,6 +530,12 @@ const govRoute = createRoute({
   component: withSuspense(() => import("./routes/gov"), "GovPage"),
 });
 
+const apiProductsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/api-products",
+  component: withSuspense(() => import("./routes/api"), "ApiPage"),
+});
+
 // Lumeva Barber sub-site
 const lumevabarberRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -596,6 +602,7 @@ const routeTree = rootRoute.addChildren([
   aboutRoute,
   securityRoute,
   govRoute,
+  apiProductsRoute,
   analyticsRoute,
   statusRoute,
   callbackRoute,

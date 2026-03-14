@@ -20,6 +20,7 @@ import { errors } from "./routes/errors.js";
 import { bugbook } from "./routes/bugbook.js";
 import { blogComments } from "./routes/blog-comments.js";
 import { whatsapp } from "./routes/whatsapp.js";
+import { telegram } from "./routes/telegram.js";
 import { stripeWebhook } from "./routes/stripe-webhook.js";
 import { checkout } from "./routes/checkout.js";
 import { userProfile } from "./routes/user-profile.js";
@@ -38,6 +39,7 @@ import { cachePurge } from "./routes/cache-purge.js";
 import { chat } from "./routes/chat.js";
 import { settings } from "./routes/settings.js";
 import { spikeChat } from "./routes/spike-chat.js";
+import { spikeApi } from "./routes/spike-api.js";
 import { spikeChatDebug } from "./routes/spike-chat-debug.js";
 import { spa } from "./routes/spa.js";
 import { wellKnown } from "./routes/well-known.js";
@@ -167,6 +169,7 @@ const KNOWN_VANITY_PREFIXES = [
   "bazdmeg",
   "vibe-code",
   "lumevabarber",
+  "ai",
 ] as const;
 
 /** Levenshtein distance between two strings (optimized single-row DP). */
@@ -342,6 +345,9 @@ app.delete("/r2/*", authMiddleware);
 // Auth middleware for WhatsApp linking API (not webhook — that uses HMAC)
 app.use("/whatsapp/link/*", authMiddleware);
 
+// Auth middleware for Telegram linking API (not webhook — that uses secret token)
+app.use("/telegram/link/*", authMiddleware);
+
 // Auth middleware for checkout (covers /api/checkout and /api/checkout/*)
 app.use("/api/checkout", authMiddleware);
 app.use("/api/checkout/*", authMiddleware);
@@ -378,6 +384,14 @@ app.post("/api/experiments/*/evaluate", authMiddleware);
 app.use("/api/chat", authMiddleware);
 app.use("/api/chat/*", authMiddleware);
 app.use("/api/chat", creditMeterMiddleware);
+
+// Auth and credit metering for Spike AI API v1
+app.use("/v1/ask", authMiddleware);
+app.use("/v1/ask", creditMeterMiddleware);
+app.use("/v1/thread", authMiddleware);
+app.use("/v1/thread", creditMeterMiddleware);
+app.use("/v1/tool", authMiddleware);
+app.use("/v1/donate-token", authMiddleware);
 
 // Auth and credit metering for Spike Chat (Grok-powered)
 app.use("/api/spike-chat", authMiddleware);
@@ -454,6 +468,7 @@ app.route("/", errors);
 app.route("/", bugbook);
 app.route("/", blogComments);
 app.route("/", whatsapp);
+app.route("/", telegram);
 app.route("/", stripeWebhook);
 app.route("/", checkout);
 app.route("/", userProfile);
@@ -466,6 +481,7 @@ app.route("/", experiments);
 app.route("/", fixer);
 app.route("/", settings);
 app.route("/", chat);
+app.route("/", spikeApi);
 app.route("/", spikeChat);
 app.route("/", spikeChatDebug);
 app.route("/", cachePurge);

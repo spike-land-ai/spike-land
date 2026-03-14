@@ -7,19 +7,122 @@ import { extractRootPackage } from "./utils.js";
 import { excludedDeps } from "../reorganize-config.js";
 
 /**
- * Build a per-package alias map for `@/*` paths.
- * Reads each package's tsconfig.json for `paths["@/*"]`, or falls back to
- * a heuristic based on directory structure.
+ * Detect which first-level directories in srcDir are "categories"
+ * (containing packages as subdirs) vs standalone packages.
+ *
+ * A directory is a category if:
+ * - It has no package.json
+ * - It has subdirectories that contain source files
+ * - Any root-level .ts files are only barrel re-exports
  */
-async function buildAliasMap(srcDir: string): Promise<AliasMap> {
-  const aliasMap: AliasMap = new Map();
+export async function detectCategoryDirs(srcDir: string): Promise<Set<string>> {
+  const categories = new Set<string>();
   const entries = await fs.readdir(srcDir, { withFileTypes: true });
 
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
-    const pkgName = entry.name;
-    const pkgDir = path.join(srcDir, pkgName);
+    const dirPath = path.join(srcDir, entry.name);
 
+    // Has package.json → standalone package, not a category
+    try {
+      await fs.access(path.join(dirPath, "package.json"));
+      continue;
+    } catch {
+      // no package.json — candidate for category
+    }
+
+    // Check children: does it have subdirs with source files?
+    const children = await fs.readdir(dirPath, { withFileTypes: true });
+    const subDirs = children.filter(
+      (c) =>
+        c.isDirectory() && !["node_modules", "__tests__", "dist", ".deploy-cache"].includes(c.name),
+    );
+
+    if (subDirs.length === 0) continue;
+
+    // Check if root-level .ts files are only barrels (export * from)
+    // Exclude .d.ts files and test files from the check
+    const tsFiles = children.filter(
+      (c) =>
+        c.isFile() &&
+        (c.name.endsWith(".ts") || c.name.endsWith(".tsx")) &&
+        !c.name.endsWith(".d.ts") &&
+        !c.name.endsWith(".test.ts") &&
+        !c.name.endsWith(".test.tsx") &&
+        !c.name.endsWith(".spec.ts"),
+    );
+
+    let allBarrels = true;
+    for (const tsFile of tsFiles) {
+      const content = await fs.readFile(path.join(dirPath, tsFile.name), "utf-8");
+      const lines = content
+        .split("\n")
+        .map((l) => l.trim())
+        .filter((l) => l && !l.startsWith("//"));
+      const isBarrel = lines.every(
+        (l) => l.startsWith("export *") || l.startsWith("export {") || l.startsWith("export type"),
+      );
+      if (!isBarrel) {
+        allBarrels = false;
+        break;
+      }
+    }
+
+    // If it has subdirs and only barrel TS files (or no TS files), it's a category
+    if (allBarrels) {
+      categories.add(entry.name);
+    }
+  }
+
+  return categories;
+}
+
+/**
+ * For a file's relPath (relative to srcDir), extract the package name.
+ * If the first segment is a category dir AND there are 3+ parts
+ * (category/package/file), use the second segment.
+ * Files at category root (category/file.ts) keep the category as package name.
+ * Otherwise use the first segment (flat layout).
+ */
+function extractPackageName(relPath: string, categoryDirs: Set<string>): string {
+  const parts = relPath.split(path.sep);
+  const firstSeg = parts[0] ?? "";
+  if (categoryDirs.has(firstSeg) && parts.length >= 3) {
+    return parts[1] ?? firstSeg;
+  }
+  return firstSeg;
+}
+
+/**
+ * Build a per-package alias map for `@/*` paths.
+ * Handles both flat (src/<pkg>) and nested (src/<category>/<pkg>) layouts.
+ */
+async function buildAliasMap(srcDir: string, categoryDirs: Set<string>): Promise<AliasMap> {
+  const aliasMap: AliasMap = new Map();
+
+  // Collect all package directories (accounting for category nesting)
+  const pkgDirs: Array<{ name: string; dir: string }> = [];
+  const entries = await fs.readdir(srcDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+
+    if (categoryDirs.has(entry.name)) {
+      // Nested: src/<category>/<pkg>/
+      const catDir = path.join(srcDir, entry.name);
+      const subEntries = await fs.readdir(catDir, { withFileTypes: true });
+      for (const sub of subEntries) {
+        if (!sub.isDirectory()) continue;
+        if (["node_modules", "__tests__", "dist"].includes(sub.name)) continue;
+        pkgDirs.push({ name: sub.name, dir: path.join(catDir, sub.name) });
+      }
+    } else {
+      // Flat: src/<pkg>/
+      pkgDirs.push({ name: entry.name, dir: path.join(srcDir, entry.name) });
+    }
+  }
+
+  for (const { name: pkgName, dir: pkgDir } of pkgDirs) {
     // Try reading tsconfig.json for paths
     const tsconfigPath = path.join(pkgDir, "tsconfig.json");
     try {
@@ -48,9 +151,7 @@ async function buildAliasMap(srcDir: string): Promise<AliasMap> {
       // no @ directory
     }
 
-    // Default: @/ maps to package root (same as `"@/*": ["./*"]`)
-    // Only set if the package actually uses @/ imports (we'll be conservative
-    // and set it — unused entries don't cause harm)
+    // Default: @/ maps to package root
     aliasMap.set(pkgName, { prefix: "@/", baseDir: pkgDir });
   }
 
@@ -78,10 +179,15 @@ function resolveAliasImport(
 export async function discoverFiles(
   project: Project,
   srcDir?: string,
-): Promise<{ nodes: FileNode[]; aliasMap: AliasMap }> {
+): Promise<{ nodes: FileNode[]; aliasMap: AliasMap; categoryDirs: Set<string> }> {
   const root = srcDir || path.resolve(process.cwd(), "src");
-  const aliasMap = await buildAliasMap(root);
+  const categoryDirs = await detectCategoryDirs(root);
+  const aliasMap = await buildAliasMap(root, categoryDirs);
   const nodes: FileNode[] = [];
+
+  if (categoryDirs.size > 0) {
+    console.log(`Detected category dirs: ${[...categoryDirs].sort().join(", ")}`);
+  }
 
   const rootWithSep = root.endsWith("/") ? root : root + "/";
 
@@ -90,7 +196,7 @@ export async function discoverFiles(
     if (!absPath.startsWith(rootWithSep)) continue;
 
     const relPath = path.relative(root, absPath);
-    const packageName = relPath.split(path.sep)[0];
+    const packageName = extractPackageName(relPath, categoryDirs);
 
     const externalDeps = new Set<string>();
     const relativeImports = new Set<string>();
@@ -148,5 +254,5 @@ export async function discoverFiles(
 
     nodes.push({ absPath, relPath, packageName: packageName ?? "", externalDeps, relativeImports });
   }
-  return { nodes, aliasMap };
+  return { nodes, aliasMap, categoryDirs };
 }

@@ -332,34 +332,11 @@ async function handleChat(message: string, ctx: CommandContext): Promise<string>
     return "Natural language chat requires a pro or business plan. Use /subscribe to upgrade, or try /help for available commands.";
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${ctx.env.GEMINI_API_KEY}`;
-
-  const resp = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      system_instruction: {
-        parts: [
-          {
-            text: "You are a helpful assistant for spike.land. Keep responses under 4000 chars, no markdown.",
-          },
-        ],
-      },
-      contents: [{ parts: [{ text: message }] }],
-      generationConfig: {
-        maxOutputTokens: 1024,
-        temperature: 0.7,
-      },
-    }),
+  const { routeToSpikeChat } = await import("./messaging-bridge.js");
+  return routeToSpikeChat(ctx.env, {
+    text: message,
+    source: "whatsapp",
+    userId: ctx.userId,
+    persona: "radix",
   });
-
-  if (!resp.ok) {
-    return "Chat service is temporarily unavailable. Try a / command instead.";
-  }
-
-  const result = await resp.json<{
-    candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-  }>();
-
-  return result?.candidates?.[0]?.content?.parts?.[0]?.text ?? "No response from chat service.";
 }

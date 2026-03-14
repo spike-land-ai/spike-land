@@ -9,7 +9,7 @@ import type { Env } from "./env.js";
 
 // ── Types ──────────────────────────────────────────────────────────────
 
-export type ProviderId = "openai" | "anthropic" | "google" | "xai";
+export type ProviderId = "openai" | "anthropic" | "google" | "xai" | "ollama";
 export type ProviderSelection = ProviderId | "auto";
 
 export interface ProviderMessage {
@@ -71,10 +71,11 @@ export const DEFAULT_PROVIDER_MODELS: Record<ProviderId, string> = {
   anthropic: "claude-sonnet-4-20250514",
   google: "gemini-2.5-flash",
   xai: "grok-4-1",
+  ollama: "qwen3:8b",
 };
 
 export const AUTO_BYOK_PRIORITY: ByokProvider[] = ["openai", "anthropic", "google"];
-export const AUTO_PLATFORM_PRIORITY: ProviderId[] = ["xai", "anthropic", "google", "openai"];
+export const AUTO_PLATFORM_PRIORITY: ProviderId[] = ["xai", "anthropic", "google", "openai"]; // ollama excluded from auto: local-only
 
 // ── Provider name / model inference ────────────────────────────────────
 
@@ -84,6 +85,7 @@ export function normalizeProviderName(value: string): ProviderId | undefined {
   if (normalized === "anthropic") return "anthropic";
   if (normalized === "google" || normalized === "gemini") return "google";
   if (normalized === "xai" || normalized === "grok") return "xai";
+  if (normalized === "ollama" || normalized === "crystalline") return "ollama";
   return undefined;
 }
 
@@ -98,6 +100,12 @@ export function inferProviderFromRawModel(model: string): ProviderId | undefined
   if (normalized.startsWith("claude") || normalized.includes("anthropic")) return "anthropic";
   if (normalized.startsWith("gemini") || normalized.includes("google")) return "google";
   if (normalized.startsWith("grok") || normalized.includes("xai")) return "xai";
+  if (
+    normalized.startsWith("ollama") ||
+    normalized.startsWith("crystalline") ||
+    normalized.startsWith("qwen")
+  )
+    return "ollama";
   return undefined;
 }
 
@@ -210,6 +218,7 @@ export function getPlatformKey(env: Env, provider: ProviderId): string | null {
   if (provider === "openai") return env.OPENAI_API_KEY ?? null;
   if (provider === "anthropic") return env.CLAUDE_OAUTH_TOKEN ?? null;
   if (provider === "google") return env.GEMINI_API_KEY ?? null;
+  if (provider === "ollama") return "ollama-local"; // No key needed for local Ollama
   return env.XAI_API_KEY ?? null;
 }
 
@@ -489,6 +498,18 @@ export async function synthesizeCompletion(
     return callGoogleProvider(target.apiKey, target.upstreamModel, messages, options);
   }
 
+  if (target.provider === "ollama") {
+    // Crystalline proxy at :11435 (context-enriched) or raw Ollama at :11434
+    const ollamaEndpoint = "http://localhost:11435/v1/chat/completions";
+    return callOpenAiStyleProvider(
+      ollamaEndpoint,
+      target.apiKey,
+      target.upstreamModel,
+      messages,
+      options,
+    );
+  }
+
   // xai (default) — OpenAI-compatible
   return callOpenAiStyleProvider(
     "https://api.x.ai/v1/chat/completions",
@@ -513,12 +534,14 @@ export async function streamCompletion(
     tools?: unknown[] | undefined;
   },
 ): Promise<Response> {
-  // OpenAI/xAI support native streaming
-  if (target.provider === "openai" || target.provider === "xai") {
+  // OpenAI/xAI/Ollama support native streaming
+  if (target.provider === "openai" || target.provider === "xai" || target.provider === "ollama") {
     const endpoint =
       target.provider === "openai"
         ? "https://api.openai.com/v1/chat/completions"
-        : "https://api.x.ai/v1/chat/completions";
+        : target.provider === "ollama"
+          ? "http://localhost:11435/v1/chat/completions"
+          : "https://api.x.ai/v1/chat/completions";
 
     const body: Record<string, unknown> = {
       model: target.upstreamModel,

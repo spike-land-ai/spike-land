@@ -1,0 +1,891 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Analytics from '../components/Analytics.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+
+const products = [
+  {
+    id: "prd-filter",
+    name: "PRD Filter",
+    tagline: "Context discipline for AI agents",
+    description: "Your AI doesn't need more tokens. It needs the right context. PRD Filter routes precisely scoped product requirements to every AI call — constraints, acceptance criteria, tool permissions. No hallucination. No drift. Just agents that know exactly what they're building.",
+    flagship: true,
+    badge: "FLAGSHIP",
+    code: `// AI that knows its constraints
+const prd = registry.resolve("/apps/chess-arena");
+// → platform constraints + domain rules
+//   + route requirements + app spec
+// = 2KB of pure context, not 200KB of noise`,
+    color: "#00ff88",
+    status: "live",
+    video: true,
+  },
+  {
+    id: "spike-ask",
+    name: "Spike Ask",
+    tagline: "Single-turn AI Q&A",
+    description: "One question. One answer. Flat JSON, no ceremony. Pick your model with an alias — fast, smart, vision, or local. BYOK or use platform credits.",
+    code: `curl -X POST https://api.spike.land/v1/ask \\
+  -H "Authorization: Bearer sk_..." \\
+  -d '{"q": "What is MCP?", "model": "fast"}'
+
+// → { "answer": "MCP is...", "provider": "google" }`,
+    color: "#00d4ff",
+    status: "live",
+  },
+  {
+    id: "spike-threads",
+    name: "Spike Threads",
+    tagline: "Multi-turn with server history",
+    description: "Conversations that remember. Server-managed history, no client-side state. Just send a thread_id and keep talking.",
+    code: `// First message creates a thread
+{ "q": "Explain React hooks" }
+// → { "thread_id": "abc-123", "turn": 1, ... }
+
+// Continue the conversation
+{ "thread_id": "abc-123", "q": "Now useEffect" }
+// → { "turn": 2, "answer": "useEffect is..." }`,
+    color: "#a855f7",
+    status: "live",
+  },
+  {
+    id: "spike-tools",
+    name: "Spike Tools",
+    tagline: "80+ MCP tools via API",
+    description: "Call any MCP tool directly. Search the web, generate images, submit bug reports, query databases — all through one endpoint.",
+    code: `POST /v1/tool
+{ "name": "search_tools", "args": {"query": "image"} }
+
+// → { "tool": "search_tools",
+//     "output": [{"text": "Found 5 tools..."}] }`,
+    color: "#f59e0b",
+    status: "live",
+  },
+  {
+    id: "spike-vision",
+    name: "Spike Vision",
+    tagline: "See what AI sees",
+    description: "Image understanding powered by GPT-4.1 and Gemini. Upload screenshots, diagrams, photos — get structured analysis back.",
+    code: `{ "q": "What's in this architecture diagram?",
+  "model": "vision",
+  "context": "<base64 image>" }`,
+    color: "#ec4899",
+    status: "coming-soon",
+  },
+  {
+    id: "spike-local",
+    name: "Spike Local",
+    tagline: "AI on your machine",
+    description: "Run models locally via Ollama integration. Zero data leaves your laptop. Same API, same tools, fully offline.",
+    code: `{ "q": "Review this code",
+  "model": "local" }
+// → Routes to Ollama (qwen3:8b)
+// → Zero network calls`,
+    color: "#22d3ee",
+    status: "beta",
+  },
+  {
+    id: "token-pool",
+    name: "Token Pool",
+    tagline: "Community-powered AI",
+    description: "Donate an API key. Earn credits. Help everyone. Spike runs on donated keys from the community — every key serves the entire platform. Solo dev, empty bank account, full-power AI.",
+    code: `POST /v1/donate-token
+{ "provider": "openai",
+  "api_key": "sk-..." }
+
+// → { "credits_earned": 10,
+//     "message": "Thank you! 🎉" }`,
+    color: "#10b981",
+    status: "live",
+  },
+];
+---
+
+<Layout
+  title="AI Products - spike.land"
+  description="Developer-optimized AI APIs. PRD Filter, Spike Ask, Threads, 80+ MCP tools. Pay what the AI costs — we add nothing on top."
+>
+  <Analytics slot="head" />
+
+  <div class="page-shell">
+    <Nav activePath="/ai" />
+
+    <main>
+      <!-- Hero: PRD Filter -->
+      <section class="hero">
+        <div class="rubik-container hero-inner">
+          <div class="hero-badge">NEW — AI Product Suite</div>
+          <h1 class="hero-title">
+            <span class="hero-gradient">AI that knows</span>
+            <br />what it's building.
+          </h1>
+          <p class="hero-sub">
+            Not another wrapper. A context engine. PRD Filter injects the right constraints
+            into every AI call. Plus 6 developer APIs that do exactly what you'd expect.
+          </p>
+          <p class="hero-pricing">Pay what the AI costs. We add nothing on top.</p>
+          <div class="hero-actions">
+            <a href="#products" class="btn-primary">See all products</a>
+            <a href="#donate" class="btn-ghost">Donate a token</a>
+          </div>
+          <div class="hero-stats" id="hero-stats">
+            <div class="stat">
+              <span class="stat-value" id="stat-tokens">0</span>
+              <span class="stat-label">tokens donated</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">80+</span>
+              <span class="stat-label">MCP tools</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">5</span>
+              <span class="stat-label">AI providers</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">$0</span>
+              <span class="stat-label">markup</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Products grid -->
+      <section class="products" id="products">
+        <div class="rubik-container">
+          {products.map((p) => (
+            <div
+              class={`product-card ${p.flagship ? 'product-card--flagship' : ''}`}
+              data-product={p.id}
+              style={`--accent: ${p.color}`}
+            >
+              {p.badge && <div class="product-badge">{p.badge}</div>}
+              <div class="product-header">
+                <div class="product-status-row">
+                  <h2 class="product-name">{p.name}</h2>
+                  <span class={`status-pill status-pill--${p.status}`}>
+                    {p.status === 'live' ? 'LIVE' : p.status === 'beta' ? 'BETA' : 'SOON'}
+                  </span>
+                </div>
+                <p class="product-tagline">{p.tagline}</p>
+                <p class="product-desc">{p.description}</p>
+              </div>
+              <pre class="product-code"><code>{p.code}</code></pre>
+              <div class="product-actions">
+                {p.status === 'live' ? (
+                  <a href="/login?redirect=/dashboard" class="btn-accent">Get API Key</a>
+                ) : p.status === 'beta' ? (
+                  <button class="btn-accent" data-waitlist={p.id} type="button">Join Beta</button>
+                ) : (
+                  <button class="btn-accent" data-waitlist={p.id} type="button">Join Waitlist</button>
+                )}
+                {p.video && (
+                  <a href="#video" class="btn-ghost-sm">Watch demo</a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <!-- Donate section -->
+      <section class="donate-section" id="donate">
+        <div class="rubik-container donate-inner">
+          <h2 class="donate-title">Donate a Token</h2>
+          <p class="donate-sub">
+            spike.land runs on community-donated API keys. Every key you donate serves
+            the entire platform. You earn 10 credits per key — enough for 10 AI calls.
+          </p>
+          <div class="donate-card glass-card">
+            <form id="donate-form" class="donate-form">
+              <div class="form-row">
+                <label for="donate-provider" class="form-label">Provider</label>
+                <select id="donate-provider" class="form-select" required>
+                  <option value="">Select provider...</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="anthropic">Anthropic</option>
+                  <option value="google">Google (Gemini)</option>
+                  <option value="xai">xAI (Grok)</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="donate-key" class="form-label">API Key</label>
+                <input
+                  id="donate-key"
+                  type="password"
+                  class="form-input"
+                  placeholder="sk-..."
+                  required
+                  autocomplete="off"
+                />
+              </div>
+              <button type="submit" class="btn-primary donate-submit">
+                Donate & Earn 10 Credits
+              </button>
+              <p id="donate-feedback" class="donate-feedback" hidden></p>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Feedback section -->
+      <section class="feedback-section" id="feedback">
+        <div class="rubik-container feedback-inner">
+          <h2 class="feedback-title">What should we build next?</h2>
+          <p class="feedback-sub">
+            Solo dev. Empty bank account. Full-power AI. Tell us what matters.
+          </p>
+          <form id="feedback-form" class="feedback-form">
+            <textarea
+              id="feedback-text"
+              class="form-textarea"
+              rows="4"
+              placeholder="I want Spike to..."
+              required
+            ></textarea>
+            <div class="feedback-row">
+              <input
+                id="feedback-email"
+                type="email"
+                class="form-input"
+                placeholder="Email (optional, for replies)"
+              />
+              <button type="submit" class="btn-primary">Send Feedback</button>
+            </div>
+            <p id="feedback-feedback" class="donate-feedback" hidden></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <Footer />
+    <CookieConsent />
+  </div>
+</Layout>
+
+<style>
+  .page-shell {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  /* ── Hero ────────────────────────────────────────────────────── */
+  .hero {
+    padding-block: clamp(4rem, 8vw, 7rem) clamp(3rem, 6vw, 5rem);
+    border-bottom: 1px solid var(--border-color);
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(0, 255, 136, 0.06), transparent),
+      radial-gradient(ellipse 40% 30% at 80% 20%, rgba(0, 212, 255, 0.04), transparent);
+    overflow: hidden;
+  }
+
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.25rem;
+  }
+
+  .hero-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #00ff88;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    padding: 0.3rem 1rem;
+    border-radius: 999px;
+    background: rgba(0, 255, 136, 0.06);
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin: 0;
+  }
+
+  .hero-gradient {
+    background: linear-gradient(135deg, #00ff88, #00d4ff, #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    color: var(--muted-fg);
+    max-width: 42ch;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .hero-pricing {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #00ff88;
+    margin: 0;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--muted-fg);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Buttons ─────────────────────────────────────────────────── */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--fg);
+    color: var(--bg);
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .btn-ghost:hover { border-color: var(--fg); }
+
+  .btn-ghost-sm {
+    font-size: 0.8125rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: var(--muted-fg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+
+  .btn-ghost-sm:hover { color: var(--fg); }
+
+  .btn-accent {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: var(--accent, var(--primary-color));
+    color: #000;
+    border-radius: var(--radius-lg);
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+
+  .btn-accent:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* ── Product cards ───────────────────────────────────────────── */
+  .products {
+    padding-block: clamp(3rem, 6vw, 5rem);
+  }
+
+  .products .rubik-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .product-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    display: grid;
+    gap: 1.25rem;
+    position: relative;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s;
+  }
+
+  .product-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .product-card:hover {
+    box-shadow: 0 0 32px color-mix(in srgb, var(--accent) 12%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--border-color));
+  }
+
+  .product-card--flagship {
+    border-color: rgba(0, 255, 136, 0.3);
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 4%, var(--card-bg)),
+      var(--card-bg)
+    );
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+  }
+
+  .product-card--flagship .product-header { grid-column: 1; }
+  .product-card--flagship .product-code { grid-column: 2; grid-row: 1 / 3; }
+  .product-card--flagship .product-actions { grid-column: 1; }
+
+  @media (max-width: 48rem) {
+    .product-card--flagship {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+    .product-card--flagship .product-code { grid-column: 1; grid-row: auto; }
+    .product-card--flagship .product-actions { grid-column: 1; }
+  }
+
+  .product-badge {
+    position: absolute;
+    top: -0.625rem;
+    left: 1.5rem;
+    background: #00ff88;
+    color: #000;
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.75rem;
+    border-radius: 999px;
+  }
+
+  .product-header { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .product-status-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .product-name {
+    font-size: 1.375rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--accent);
+  }
+
+  .status-pill {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+
+  .status-pill--live {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .status-pill--beta {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  .status-pill--coming-soon {
+    background: rgba(168, 85, 247, 0.15);
+    color: #a855f7;
+    border: 1px solid rgba(168, 85, 247, 0.3);
+  }
+
+  .product-tagline {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--fg);
+  }
+
+  .product-desc {
+    font-size: 0.875rem;
+    color: var(--muted-fg);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .product-code {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    overflow-x: auto;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    margin: 0;
+    color: #e2e8f0;
+    font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+  }
+
+  .product-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  /* ── Donate ──────────────────────────────────────────────────── */
+  .donate-section {
+    padding-block: clamp(3rem, 6vw, 5rem);
+    border-top: 1px solid var(--border-color);
+    background: radial-gradient(ellipse 50% 40% at 50% 100%, rgba(16, 185, 129, 0.05), transparent);
+  }
+
+  .donate-inner {
+    max-width: 36rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  .donate-title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .donate-sub {
+    color: var(--muted-fg);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .donate-card {
+    width: 100%;
+    padding: clamp(1.5rem, 3vw, 2rem);
+    text-align: left;
+  }
+
+  .donate-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .form-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--muted-fg);
+  }
+
+  .form-select,
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    background: var(--bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--fg);
+    font-size: 0.875rem;
+    font-family: var(--font-sans);
+    transition: border-color 0.15s;
+  }
+
+  .form-select:focus,
+  .form-input:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  .form-textarea { resize: vertical; }
+
+  .donate-submit { width: 100%; justify-content: center; }
+
+  .donate-feedback {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    border-radius: var(--radius-lg);
+    margin: 0;
+    text-align: center;
+  }
+
+  .donate-feedback.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .donate-feedback.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  /* ── Feedback ────────────────────────────────────────────────── */
+  .feedback-section {
+    padding-block: clamp(3rem, 6vw, 5rem);
+    border-top: 1px solid var(--border-color);
+  }
+
+  .feedback-inner {
+    max-width: 36rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  .feedback-title {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .feedback-sub {
+    color: var(--muted-fg);
+    font-size: 0.9375rem;
+    margin: 0;
+  }
+
+  .feedback-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: left;
+  }
+
+  .feedback-row {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .feedback-row .form-input { flex: 1; }
+
+  @media (max-width: 36rem) {
+    .feedback-row { flex-direction: column; }
+  }
+</style>
+
+<script>
+  // ── Intersection Observer for scroll animations ──────────────
+  const cards = document.querySelectorAll('.product-card');
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          const el = entry.target as HTMLElement;
+          setTimeout(() => el.classList.add('visible'), i * 80);
+          observer.unobserve(el);
+        }
+      });
+    },
+    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+  );
+  cards.forEach(card => observer.observe(card));
+
+  // ── Animated counter ────────────────────────────────────────
+  const statEl = document.getElementById('stat-tokens');
+  if (statEl) {
+    // Fetch real stats
+    fetch('/v1/donate-token/stats')
+      .then(r => r.json())
+      .then((data: { total_donors?: number }) => {
+        const target = data.total_donors ?? 0;
+        animateCounter(statEl, target);
+      })
+      .catch(() => {
+        statEl.textContent = '0';
+      });
+  }
+
+  function animateCounter(el: HTMLElement, target: number): void {
+    if (target === 0) { el.textContent = '0'; return; }
+    const duration = 1200;
+    const start = performance.now();
+    function tick(now: number): void {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      el.textContent = String(Math.round(eased * target));
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // ── Donate form ─────────────────────────────────────────────
+  const donateForm = document.getElementById('donate-form') as HTMLFormElement | null;
+  const donateFeedback = document.getElementById('donate-feedback');
+
+  donateForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const provider = (document.getElementById('donate-provider') as HTMLSelectElement).value;
+    const apiKey = (document.getElementById('donate-key') as HTMLInputElement).value;
+
+    if (!provider || !apiKey) return;
+
+    const btn = donateForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+    btn.disabled = true;
+    btn.textContent = 'Donating...';
+
+    try {
+      const res = await fetch('/v1/donate-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ provider, api_key: apiKey }),
+      });
+
+      if (res.status === 401) {
+        showFeedback(donateFeedback, 'Please log in first.', 'error');
+        return;
+      }
+
+      const data = await res.json() as { donated?: boolean; credits_earned?: number; error?: string; message?: string };
+      if (data.donated) {
+        showFeedback(donateFeedback, data.message ?? 'Thank you! You earned credits.', 'success');
+        (document.getElementById('donate-key') as HTMLInputElement).value = '';
+        // Increment counter
+        if (statEl) {
+          const current = parseInt(statEl.textContent ?? '0', 10);
+          animateCounter(statEl, current + 1);
+        }
+      } else {
+        showFeedback(donateFeedback, data.error ?? 'Something went wrong.', 'error');
+      }
+    } catch {
+      showFeedback(donateFeedback, 'Network error. Please try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Donate & Earn 10 Credits';
+    }
+  });
+
+  // ── Waitlist buttons ────────────────────────────────────────
+  document.querySelectorAll('[data-waitlist]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const product = (btn as HTMLElement).dataset.waitlist;
+      const email = prompt(`Enter your email to join the ${product} waitlist:`);
+      if (!email) return;
+
+      // Track waitlist signup
+      fetch('/analytics/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'waitlist_signup',
+          properties: { product, email },
+        }),
+      }).catch(() => {});
+
+      (btn as HTMLButtonElement).textContent = 'Joined!';
+      (btn as HTMLButtonElement).disabled = true;
+    });
+  });
+
+  // ── Feedback form ───────────────────────────────────────────
+  const feedbackForm = document.getElementById('feedback-form') as HTMLFormElement | null;
+  const feedbackFeedback = document.getElementById('feedback-feedback');
+
+  feedbackForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = (document.getElementById('feedback-text') as HTMLTextAreaElement).value;
+    const email = (document.getElementById('feedback-email') as HTMLInputElement).value;
+
+    if (!text.trim()) return;
+
+    const btn = feedbackForm.querySelector('button[type="submit"]') as HTMLButtonElement;
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      // Track feedback as analytics event
+      await fetch('/analytics/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'product_feedback',
+          properties: { text, email: email || undefined, source: 'ai-page' },
+        }),
+      });
+
+      showFeedback(feedbackFeedback, 'Feedback received. Thank you!', 'success');
+      (document.getElementById('feedback-text') as HTMLTextAreaElement).value = '';
+    } catch {
+      showFeedback(feedbackFeedback, 'Failed to send. Try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Send Feedback';
+    }
+  });
+
+  function showFeedback(el: HTMLElement | null, msg: string, type: 'success' | 'error'): void {
+    if (!el) return;
+    el.hidden = false;
+    el.textContent = msg;
+    el.className = `donate-feedback ${type}`;
+    setTimeout(() => { el.hidden = true; }, 5000);
+  }
+</script>

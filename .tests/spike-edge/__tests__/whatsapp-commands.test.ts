@@ -380,22 +380,23 @@ describe("dispatchCommand — chat", () => {
     expect(result).toBe("Hello from Gemini");
   });
 
-  it("returns error when Gemini is unavailable", async () => {
+  it("returns error when LLM provider is unavailable", async () => {
     globalThis.fetch = vi.fn().mockResolvedValueOnce(new Response("{}", { status: 500 }));
 
     const ctx = buildCtx("business");
     const cmd: ParsedCommand = { name: "chat", args: "Hello", raw: "Hello" };
     const result = await dispatchCommand(cmd, ctx);
-    expect(result).toContain("temporarily unavailable");
+    // messaging-bridge catches the error and returns a user-friendly message
+    expect(result).toContain("error");
   });
 
-  it("returns fallback when Gemini response has no candidates", async () => {
+  it("returns fallback when LLM response has no content", async () => {
     const geminiResponse = new Response(JSON.stringify({ candidates: [] }), { status: 200 });
     globalThis.fetch = vi.fn().mockResolvedValueOnce(geminiResponse);
 
     const ctx = buildCtx("pro");
     const cmd: ParsedCommand = { name: "chat", args: "Empty response", raw: "Empty response" };
     const result = await dispatchCommand(cmd, ctx);
-    expect(result).toBe("No response from chat service.");
+    expect(result).toBe("No response.");
   });
 });

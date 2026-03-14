@@ -58,13 +58,13 @@ async function runReorganization(values: unknown) {
   const _files = filesToProcess.length > 0 ? filesToProcess : allFiles;
   project.addSourceFilesAtPaths(allFiles);
 
-  const { nodes, aliasMap } = await discoverFiles(project, srcDir);
+  const { nodes, aliasMap, categoryDirs } = await discoverFiles(project, srcDir);
   propagateDeps(nodes);
 
   // Package-level category assignment
   const packageCategories = computePackageCategories(nodes, packagesYaml);
 
-  const plans = computeMovePlans(nodes, packageCategories, MAX_BUCKET_SIZE);
+  const plans = computeMovePlans(nodes, packageCategories, MAX_BUCKET_SIZE, categoryDirs);
 
   // Lint mode: check for category violations
   if (values.lint) {

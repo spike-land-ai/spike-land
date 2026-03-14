@@ -39,6 +39,9 @@ export interface Env {
   GOOGLE_CLIENT_SECRET: string;
   GOOGLE_REFRESH_TOKEN: string;
   GA_PROPERTY_ID: string;
+  OLLAMA_ENDPOINT?: string;
+  TELEGRAM_BOT_TOKEN?: string;
+  TELEGRAM_WEBHOOK_SECRET?: string;
   SENTRY_DSN?: string;
   SENTRY_TRACES_SAMPLE_RATE?: string;
   PRD_COMPRESSION_MODE?: string;
