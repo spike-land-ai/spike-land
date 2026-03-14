@@ -57,6 +57,9 @@ const resolvedOgImage = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
       rel="stylesheet"
     />
 
+    <!-- KaTeX for LaTeX math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj3dQfAA6Gx41xUH8UkMoot6/29kGqiu6/aRRsxjJMBZ7+2E32yMOSbGD2" crossorigin="anonymous" />
+
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <slot name="head" />
   </head>

@@ -5,6 +5,8 @@ import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import react from "@astrojs/react";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
 const sentryOrg = process.env.SENTRY_ORG;
 const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
@@ -40,6 +42,11 @@ export default defineConfig({
           ]
         : []),
     ],
+  },
+
+  markdown: {
+    remarkPlugins: [remarkMath],
+    rehypePlugins: [rehypeKatex],
   },
 
   integrations: [

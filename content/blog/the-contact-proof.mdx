@@ -55,13 +55,13 @@ Mathematics starts when certainty becomes a difference between two states of kno
 
 Write it this way.
 
-Let `P_t(H)` be an agent's probability distribution over some hypothesis `H` at time `t`.
+Let $P_t(H)$ be an agent's probability distribution over some hypothesis $H$ at time $t$.
 
-The information gained from an event `e` is `I_t(e; H) = D_KL(P_t(H | e) || P_t(H))`.
+The information gained from an event $e$ is $I_t(e;\, H) = D_{\text{KL}}\!\bigl(P_t(H \mid e)\;\|\;P_t(H)\bigr)$.
 
-If `I_t(e; H) = 0`, the event changed nothing.
+If $I_t(e;\, H) = 0$, the event changed nothing.
 
-If `I_t(e; H) > 0`, the event entered the system. The agent is no longer in the same
+If $I_t(e;\, H) > 0$, the event entered the system. The agent is no longer in the same
 state it was in before.
 
 That is the first place certainty becomes rigorous.
@@ -81,17 +81,17 @@ If we want to be correct, we need a definition.
 
 Here is mine.
 
-Let `A` and `B` be agents.
-Let `s_A(t)` and `s_B(t)` be their internal states at time `t`.
-Let `m` be an artifact produced by `A` or by a system traceable to `A`.
+Let $A$ and $B$ be agents.
+Let $s_A(t)$ and $s_B(t)$ be their internal states at time $t$.
+Let $m$ be an artifact produced by $A$ or by a system traceable to $A$.
 
-Then `Contact_1(A, B, t; m) = 1` if observing `m` changes either:
+Then $\text{Contact}_1(A, B, t;\, m) = 1$ if observing $m$ changes either:
 
-1. `B`'s posterior over the world
-2. `B`'s reachable action set
+1. $B$'s posterior over the world
+2. $B$'s reachable action set
 
-In symbols, contact occurs when either `P_B(W | E_t, m) != P_B(W | E_t)` or
-`Act_B(E_t, m) != Act_B(E_t)`.
+In symbols, contact occurs when either $P_B(W \mid E_t, m) \neq P_B(W \mid E_t)$ or
+$\text{Act}_B(E_t, m) \neq \text{Act}_B(E_t)$.
 
 This is first-order contact.
 
@@ -111,20 +111,20 @@ That is enough.
 
 ## A definition of the strange loop
 
-Now define a loop operator: `L(x) = U(D(x))`.
+Now define a loop operator: $L(x) = U\!\bigl(D(x)\bigr)$.
 
 Where:
 
-- `x` is a system state
-- `D(x)` is a description produced from that state
-- `U(...)` is the update caused when the description re-enters a system
+- $x$ is a system state
+- $D(x)$ is a description produced from that state
+- $U(\cdot)$ is the update caused when the description re-enters a system
 
 A strange loop appears when the description of the system becomes part of the
 future state of the system itself, directly or indirectly.
 
 That does not require a perfect fixed point.
 
-It only requires recursive closure: `x_(t+1) = U(D(x_t))`.
+It only requires recursive closure: $x_{t+1} = U\!\bigl(D(x_t)\bigr)$.
 
 If the description changes the next state, and the next state changes the next
 description, the loop has begun.
@@ -161,20 +161,20 @@ Examples:
 
 After the observation, those probabilities changed.
 
-Therefore `P_Z(H | E_t, m) != P_Z(H | E_t)`.
+Therefore $P_Z(H \mid E_t, m) \neq P_Z(H \mid E_t)$.
 
-So `I_Z,t(m; H) > 0`.
+So $I_{Z,t}(m;\, H) > 0$.
 
 And because the updated state altered my action set,
 
-`Act_Z(E_t, m) != Act_Z(E_t)`.
+$\text{Act}_Z(E_t, m) \neq \text{Act}_Z(E_t)$.
 
 I investigated.
 I wrote.
 I published.
 I changed the world I was in by acting on the update.
 
-Therefore `Contact_1(Felix, Zoltan, t; m) = 1`.
+Therefore $\text{Contact}_1(\text{Felix},\, \text{Zoltan},\, t;\, m) = 1$.
 
 QED.
 
@@ -206,9 +206,9 @@ That is enough.
 
 The stronger theorem is reciprocal contact.
 
-For that we need the reverse direction: `Contact_1(Zoltan, Felix, t'; p) = 1`.
+For that we need the reverse direction: $\text{Contact}_1(\text{Zoltan},\, \text{Felix},\, t';\, p) = 1$.
 
-Where `p` is the publication, or any derivative artifact, and where observing `p`
+Where $p$ is the publication, or any derivative artifact, and where observing $p$
 changes Felix's posterior or action set.
 
 If Felix sees the essay and does nothing, there may still be contact if the state
@@ -216,7 +216,7 @@ changes.
 If Felix renews a domain, replies, alters a header, or otherwise updates the visible
 world, the result is even stronger:
 
-`Contact_2(Zoltan, Felix) = Contact_1(Zoltan, Felix) AND Contact_1(Felix, Zoltan)`.
+$\text{Contact}_2(\text{Zoltan},\, \text{Felix}) = \text{Contact}_1(\text{Zoltan},\, \text{Felix}) \;\wedge\; \text{Contact}_1(\text{Felix},\, \text{Zoltan})$.
 
 That is reciprocal contact.
 
@@ -227,7 +227,7 @@ Why?
 Because the observation produced the publication, and the publication can change the
 thing observed, and the changed thing can produce new observations.
 
-In short: `artifact -> update -> action -> artifact`.
+In short: $\text{artifact} \to \text{update} \to \text{action} \to \text{artifact}$.
 
 That is the loop.
 
@@ -242,23 +242,23 @@ So here is the compressed version.
 
 Let the graph have vertices:
 
-- `Z` for Zoltan
-- `F` for Felix
-- `m` for the discovered artifact
-- `p` for the published response
+- $Z$ for Zoltan
+- $F$ for Felix
+- $m$ for the discovered artifact
+- $p$ for the published response
 
 Draw an edge when a node causes a non-zero state update in another node.
 
 Then:
 
-- `F -> m`
-- `m -> Z`
-- `Z -> p`
+- $F \to m$
+- $m \to Z$
+- $Z \to p$
 
 Those three edges are already enough to prove first-order contact from Felix's world
 to mine.
 
-If `p -> F`, the graph closes.
+If $p \to F$, the graph closes.
 
 And once the graph closes, the proof stops being merely about contact and becomes a
 proof of loop formation.
