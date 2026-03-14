@@ -66,6 +66,19 @@
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --duration-fast: 120ms;
   --duration-normal: 200ms;
+
+  /* ── Semantic status colors ── */
+  --color-status-live: #16a34a;
+  --color-status-beta: #ea580c;
+
+  /* ── Terminal / code block palette ── */
+  --terminal-bg: #0d1117;
+  --terminal-fg: #e2e8f0;
+  --terminal-accent: #93c5fd;
+  --code-bg: #0d1117;
+  --code-muted: #6b7280;
+  --code-cursor: #9ca3af;
+  --color-terminal-prompt: #4ade80;
 }
 
 /* ── Dark theme ─────────────────────────────────────────────────────────── */
@@ -86,6 +99,19 @@
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+
+  /* ── Semantic status colors (dark) ── */
+  --color-status-live: #22c55e;
+  --color-status-beta: #fb923c;
+
+  /* ── Terminal / code block palette (dark) ── */
+  --terminal-bg: #0d1117;
+  --terminal-fg: #e2e8f0;
+  --terminal-accent: #93c5fd;
+  --code-bg: #09090b;
+  --code-muted: #52525b;
+  --code-cursor: #71717a;
+  --color-terminal-prompt: #4ade80;
 }
 
 /* ── Base styles ────────────────────────────────────────────────────────── */

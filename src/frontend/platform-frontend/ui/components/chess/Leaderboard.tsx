@@ -32,26 +32,23 @@ function StreakBadge({ streak }: { streak: number }) {
 // ─── Rank Badge ──────────────────────────────────────────────────────────────
 
 function RankBadge({ rank }: { rank: number }) {
-  const medals: Record<number, string> = { 1: "gold", 2: "silver", 3: "bronze" };
-  const _medal = medals[rank];
-
   if (rank === 1) {
     return (
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-yellow-400/20 text-xs font-bold text-yellow-600 dark:text-yellow-400">
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-warning/20 text-xs font-bold text-warning-foreground">
         1
       </span>
     );
   }
   if (rank === 2) {
     return (
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-300/30 text-xs font-bold text-slate-500 dark:text-slate-400">
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-xs font-bold text-secondary-foreground">
         2
       </span>
     );
   }
   if (rank === 3) {
     return (
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-orange-400/20 text-xs font-bold text-orange-600 dark:text-orange-400">
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground">
         3
       </span>
     );
@@ -113,7 +110,7 @@ function PlayerRow({ player, rank, isMe, onChallenge, onViewProfile }: PlayerRow
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <span
-                className={`inline-block h-1.5 w-1.5 rounded-full ${player.isOnline ? "bg-green-500" : "bg-muted-foreground/40"}`}
+                className={`inline-block h-1.5 w-1.5 rounded-full ${player.isOnline ? "bg-success-foreground" : "bg-muted-foreground/40"}`}
                 aria-label={player.isOnline ? "Online" : "Offline"}
               />
               <span>{player.isOnline ? "Online" : "Offline"}</span>

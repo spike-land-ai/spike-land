@@ -26,7 +26,14 @@ interface PlayerBarProps {
   side: "top" | "bottom";
 }
 
-function PlayerBar({ player, timeMs, isActive, captured, materialAdvantage, side }: PlayerBarProps) {
+function PlayerBar({
+  player,
+  timeMs,
+  isActive,
+  captured,
+  materialAdvantage,
+  side,
+}: PlayerBarProps) {
   const formattedTime = formatTime(timeMs);
   const isLow = timeMs > 0 && timeMs < 30_000;
   const isVeryLow = timeMs > 0 && timeMs < 10_000;
@@ -50,9 +57,7 @@ function PlayerBar({ player, timeMs, isActive, captured, materialAdvantage, side
           <span className="truncate text-sm font-semibold text-foreground">
             {player ? player.name : "Waiting..."}
           </span>
-          {player && (
-            <span className="shrink-0 text-xs text-muted-foreground">{player.elo}</span>
-          )}
+          {player && <span className="shrink-0 text-xs text-muted-foreground">{player.elo}</span>}
           {materialAdvantage > 0 && (
             <span className="shrink-0 text-xs font-medium text-success-foreground">
               +{materialAdvantage}
@@ -77,8 +82,8 @@ function PlayerBar({ player, timeMs, isActive, captured, materialAdvantage, side
             ? isVeryLow
               ? "animate-pulse bg-destructive text-destructive-foreground"
               : isLow
-              ? "bg-warning/20 text-warning-foreground"
-              : "bg-primary/10 text-primary"
+                ? "bg-warning/20 text-warning-foreground"
+                : "bg-primary/10 text-primary"
             : "bg-muted text-muted-foreground"
         }`}
         aria-label={`Time remaining: ${formattedTime}`}
@@ -123,12 +128,19 @@ function MoveHistory({ moves }: MoveHistoryProps) {
           Moves
         </h3>
       </div>
-      <div className="flex-1 overflow-y-auto px-1 py-1 text-sm" role="log" aria-label="Move history">
+      <div
+        className="flex-1 overflow-y-auto px-1 py-1 text-sm"
+        role="log"
+        aria-label="Move history"
+      >
         {pairs.length === 0 ? (
           <p className="px-2 py-3 text-xs text-muted-foreground">No moves yet</p>
         ) : (
           pairs.map((pair) => (
-            <div key={pair.number} className="flex items-baseline gap-1 rounded px-2 py-0.5 hover:bg-muted/50">
+            <div
+              key={pair.number}
+              className="flex items-baseline gap-1 rounded px-2 py-0.5 hover:bg-muted/50"
+            >
               <span className="w-6 shrink-0 text-xs text-muted-foreground tabular-nums">
                 {Math.ceil(pair.number / 2)}.
               </span>
@@ -174,8 +186,7 @@ function GameResultModal({
   onClose,
   onRematch,
 }: GameResultModalProps) {
-  const myColor =
-    myPlayerId === whitePlayerId ? "w" : myPlayerId === blackPlayerId ? "b" : null;
+  const myColor = myPlayerId === whitePlayerId ? "w" : myPlayerId === blackPlayerId ? "b" : null;
   const wonOrLost =
     myColor === null
       ? null
@@ -201,16 +212,11 @@ function GameResultModal({
     "50move": "50-move rule",
   };
 
-  const resultLabel =
-    result === "draw"
-      ? "Draw"
-      : result === "white"
-        ? "White wins"
-        : "Black wins";
+  const resultLabel = result === "draw" ? "Draw" : result === "white" ? "White wins" : "Black wins";
 
   return (
     <div
-      className="absolute inset-0 z-30 flex items-center justify-center bg-black/50"
+      className="absolute inset-0 z-30 flex items-center justify-center bg-foreground/40"
       role="dialog"
       aria-modal="true"
       aria-label="Game over"
@@ -221,8 +227,8 @@ function GameResultModal({
             wonOrLost === "win"
               ? "text-success-foreground"
               : wonOrLost === "loss"
-              ? "text-destructive"
-              : "text-foreground"
+                ? "text-destructive"
+                : "text-foreground"
           }`}
         >
           {wonOrLost ? headlineMap[wonOrLost] : resultLabel}
@@ -345,11 +351,7 @@ export function GamePanel({
   const isActive = game.status === "ACTIVE" || game.status === "CHECK";
   const whiteTurn = game.turn === "w";
   const myColor =
-    myPlayerId === game.whitePlayerId
-      ? "w"
-      : myPlayerId === game.blackPlayerId
-      ? "b"
-      : null;
+    myPlayerId === game.whitePlayerId ? "w" : myPlayerId === game.blackPlayerId ? "b" : null;
   const canInteract = isActive && myColor !== null;
   const drawOffered = game.status === "DRAW_OFFERED";
   const isGameOver = ["CHECKMATE", "STALEMATE", "DRAW", "RESIGNED"].includes(game.status);
@@ -357,10 +359,10 @@ export function GamePanel({
   // Determine which player bar is on top vs bottom.
   // Bottom = the current user's side; top = opponent.
   const flipped = boardProps.engine.flipped;
-  const bottomIsWhite = flipped ? false : (myColor === "w" || myColor === null);
+  const bottomIsWhite = flipped ? false : myColor === "w" || myColor === null;
 
-  const topPlayer = bottomIsWhite ? game.blackPlayer ?? null : game.whitePlayer ?? null;
-  const bottomPlayer = bottomIsWhite ? game.whitePlayer ?? null : game.blackPlayer ?? null;
+  const topPlayer = bottomIsWhite ? (game.blackPlayer ?? null) : (game.whitePlayer ?? null);
+  const bottomPlayer = bottomIsWhite ? (game.whitePlayer ?? null) : (game.blackPlayer ?? null);
   const topTimeMs = bottomIsWhite ? game.blackTimeMs : game.whiteTimeMs;
   const bottomTimeMs = bottomIsWhite ? game.whiteTimeMs : game.blackTimeMs;
   const topIsActive = isActive && (bottomIsWhite ? !whiteTurn : whiteTurn);
@@ -374,15 +376,15 @@ export function GamePanel({
       ? -capturedPieces.advantage
       : 0
     : capturedPieces.advantage > 0
-    ? capturedPieces.advantage
-    : 0;
+      ? capturedPieces.advantage
+      : 0;
   const bottomAdvantage = bottomIsWhite
     ? capturedPieces.advantage > 0
       ? capturedPieces.advantage
       : 0
     : capturedPieces.advantage < 0
-    ? -capturedPieces.advantage
-    : 0;
+      ? -capturedPieces.advantage
+      : 0;
 
   const reasonForResult = useCallback((): GameResultModalProps["reason"] => {
     if (resultModalProps?.reason) return resultModalProps.reason;

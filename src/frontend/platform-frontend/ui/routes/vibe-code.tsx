@@ -4,29 +4,23 @@
  * Renders the full-screen LivePreview component as the primary UI.
  * Auto-saves work to localStorage under the "spike-vibe-editor" key.
  *
- * Route: /vibe-code
+ * Route: /vibe-code  (registered in router.ts via withSuspense)
  */
 
-import { createFileRoute } from "@tanstack/react-router";
 import { LivePreview } from "../components/editor/LivePreview";
 import type { EditorFile } from "../components/editor/LivePreview";
-
-// ---------------------------------------------------------------------------
-// Route definition
-// ---------------------------------------------------------------------------
-
-export const Route = createFileRoute("/vibe-code")({
-  component: VibeCodePage,
-});
 
 // ---------------------------------------------------------------------------
 // Page component
 // ---------------------------------------------------------------------------
 
-function VibeCodePage() {
+export function VibeCodePage() {
   const handleDeploy = (files: EditorFile[]) => {
     // TODO: wire to the spike-edge deploy endpoint
-    console.info("[Vibe Code] Deploy requested", files.map((f) => f.name));
+    console.info(
+      "[Vibe Code] Deploy requested",
+      files.map((f) => f.name),
+    );
   };
 
   return (

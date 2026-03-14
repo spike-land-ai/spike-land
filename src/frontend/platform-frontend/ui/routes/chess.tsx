@@ -50,7 +50,9 @@ function GameStatusBadge({ status }: { status: GameState["status"] }) {
     DRAW_OFFERED: "Draw offered",
   };
   return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${map[status] ?? "bg-muted text-muted-foreground"}`}>
+    <span
+      className={`rounded-full px-2 py-0.5 text-xs font-semibold ${map[status] ?? "bg-muted text-muted-foreground"}`}
+    >
       {labels[status] ?? status}
     </span>
   );
@@ -94,7 +96,8 @@ function MyGamesTab({ playerId, onOpenGame }: MyGamesTabProps) {
   return (
     <div className="space-y-2">
       {games.map((game) => {
-        const isActive = game.status === "ACTIVE" || game.status === "CHECK" || game.status === "WAITING";
+        const isActive =
+          game.status === "ACTIVE" || game.status === "CHECK" || game.status === "WAITING";
         return (
           <button
             key={game.id}
@@ -184,10 +187,7 @@ function ChallengesTab({ playerId, onGameStarted }: ChallengesTabProps) {
   return (
     <div className="space-y-2">
       {challenges.map((challenge) => (
-        <div
-          key={challenge.id}
-          className="rounded-xl border border-border bg-card p-4"
-        >
+        <div key={challenge.id} className="rounded-xl border border-border bg-card p-4">
           <div className="mb-3 flex items-start justify-between gap-2">
             <div>
               <p className="text-sm font-semibold text-foreground">
@@ -238,8 +238,17 @@ interface ActiveGameViewProps {
 }
 
 function ActiveGameView({ gameId, myPlayerId, onClose, onRematch }: ActiveGameViewProps) {
-  const { game, legalMoves, error, makeMove, resign, offerDraw, acceptDraw, declineDraw, clearError } =
-    useChessGame(gameId, myPlayerId);
+  const {
+    game,
+    legalMoves,
+    error,
+    makeMove,
+    resign,
+    offerDraw,
+    acceptDraw,
+    declineDraw,
+    clearError,
+  } = useChessGame(gameId, myPlayerId);
 
   const myColor = useMemo(() => {
     if (!game || !myPlayerId) return null;
@@ -269,14 +278,16 @@ function ActiveGameView({ gameId, myPlayerId, onClose, onRematch }: ActiveGameVi
 
   const isCheck = game.status === "CHECK";
   const isGameOver = ["CHECKMATE", "STALEMATE", "DRAW", "RESIGNED"].includes(game.status);
-  const isInteractive = (game.status === "ACTIVE" || game.status === "CHECK") && game.turn === myColor;
+  const isInteractive =
+    (game.status === "ACTIVE" || game.status === "CHECK") && game.turn === myColor;
 
-  const reasonMap: Record<string, "checkmate" | "stalemate" | "resignation" | "draw" | "timeout"> = {
-    CHECKMATE: "checkmate",
-    STALEMATE: "stalemate",
-    RESIGNED: "resignation",
-    DRAW: "draw",
-  };
+  const reasonMap: Record<string, "checkmate" | "stalemate" | "resignation" | "draw" | "timeout"> =
+    {
+      CHECKMATE: "checkmate",
+      STALEMATE: "stalemate",
+      RESIGNED: "resignation",
+      DRAW: "draw",
+    };
 
   const lastMove = game.moves[game.moves.length - 1];
 
@@ -289,7 +300,13 @@ function ActiveGameView({ gameId, myPlayerId, onClose, onRematch }: ActiveGameVi
           onClick={onClose}
           className="flex items-center gap-1.5 rounded-xl border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
         >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg
+            className="h-3.5 w-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
           Back to Arena
@@ -297,7 +314,9 @@ function ActiveGameView({ gameId, myPlayerId, onClose, onRematch }: ActiveGameVi
         {error && (
           <div className="flex flex-1 items-center justify-between rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-1.5 text-xs text-destructive">
             <span>{error}</span>
-            <button type="button" onClick={clearError} className="hover:underline">Dismiss</button>
+            <button type="button" onClick={clearError} className="hover:underline">
+              Dismiss
+            </button>
           </div>
         )}
       </div>
@@ -341,31 +360,35 @@ export function ChessPage() {
   const [searchingTimeControl, setSearchingTimeControl] = useState<TimeControl>("BLITZ_5");
 
   // TODO: Replace with actual player profile lookup via /api/chess/players/me
-  const myPlayerId: string | null = (user as { chessPlayerId?: string } | null)?.chessPlayerId ?? null;
+  const myPlayerId: string | null =
+    (user as { chessPlayerId?: string } | null)?.chessPlayerId ?? null;
 
   const leaderboard = useLeaderboard();
 
   // ─── Matchmaking handlers ──────────────────────────────────────────────────
 
-  const handleQuickPlay = useCallback(async (tc: TimeControl) => {
-    setSearchingTimeControl(tc);
-    setIsSearching(true);
-    try {
-      // POST to matchmaking endpoint — creates a game or joins waiting one
-      const res = await fetch("/api/chess/matchmake", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ timeControl: tc, playerId: myPlayerId }),
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const data = (await res.json()) as { gameId: string };
-      setIsSearching(false);
-      setActiveGameId(data.gameId);
-    } catch {
-      setIsSearching(false);
-    }
-  }, [myPlayerId]);
+  const handleQuickPlay = useCallback(
+    async (tc: TimeControl) => {
+      setSearchingTimeControl(tc);
+      setIsSearching(true);
+      try {
+        // POST to matchmaking endpoint — creates a game or joins waiting one
+        const res = await fetch("/api/chess/matchmake", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ timeControl: tc, playerId: myPlayerId }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = (await res.json()) as { gameId: string };
+        setIsSearching(false);
+        setActiveGameId(data.gameId);
+      } catch {
+        setIsSearching(false);
+      }
+    },
+    [myPlayerId],
+  );
 
   const handleChallengeFriend = useCallback(
     async (username: string, tc: TimeControl) => {
@@ -453,14 +476,16 @@ export function ChessPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">Chess Arena</h1>
-          <p className="text-sm text-muted-foreground">Play, challenge, and climb the leaderboard</p>
+          <p className="text-sm text-muted-foreground">
+            Play, challenge, and climb the leaderboard
+          </p>
         </div>
         {/* Board preview — decorative */}
         <div className="hidden items-center gap-1 sm:flex" aria-hidden="true">
           {["\u265A", "\u2655", "\u265B", "\u2654"].map((symbol, i) => (
             <span
               key={i}
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-xl dark:bg-amber-900/30"
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-xl"
             >
               {symbol}
             </span>
@@ -560,11 +585,7 @@ function DemoBoard() {
 
   return (
     <div className="flex justify-center">
-      <ChessBoard
-        engine={engine}
-        fen={INITIAL_FEN}
-        interactive={false}
-      />
+      <ChessBoard engine={engine} fen={INITIAL_FEN} interactive={false} />
     </div>
   );
 }

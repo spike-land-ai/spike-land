@@ -488,19 +488,19 @@ const vibeCodeRoute = createRoute({
 });
 
 // Create routes
-const createRoute = createRoute({
+const createPageRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/create",
 });
 
 const createIndexRoute = createRoute({
-  getParentRoute: () => createRoute,
+  getParentRoute: () => createPageRoute,
   path: "/",
   component: withSuspense(() => import("./routes/create/create-index.tsx"), "CreateIndexPage"),
 });
 
 const createAppRoute = createRoute({
-  getParentRoute: () => createRoute,
+  getParentRoute: () => createPageRoute,
   path: "$appPath",
   component: withSuspense(() => import("./routes/create/$appPath"), "CreateAppPage"),
 });
@@ -598,7 +598,7 @@ const routeTree = rootRoute.addChildren([
   ]),
   mcpRoute.addChildren([mcpIndexRoute, mcpAuthorizeRoute]),
   agencyRoute.addChildren([agencyPortfolioRoute]),
-  createRoute.addChildren([createIndexRoute, createAppRoute]),
+  createPageRoute.addChildren([createIndexRoute, createAppRoute]),
   learnitRoute.addChildren([learnitIndexRoute, learnitTopicRoute]),
 ]);
 

@@ -672,7 +672,7 @@ export function ChessArenaApp() {
                               key={square}
                               type="button"
                               onClick={() => handleSquarePress(square)}
-                              className={`relative aspect-square rounded-[18px] border p-1.5 text-left transition-colors ${squareTone} ${interactiveTone} ${isSelected ? "ring-2 ring-primary/65" : ""} ${isHintFrom ? "ring-2 ring-amber-500/65" : ""} ${isHintTo ? "ring-2 ring-emerald-500/65" : ""}`}
+                              className={`relative aspect-square rounded-[18px] border p-1.5 text-left transition-colors ${squareTone} ${interactiveTone} ${isSelected ? "ring-2 ring-primary/65" : ""} ${isHintFrom ? "ring-2 ring-warning/65" : ""} ${isHintTo ? "ring-2 ring-success-foreground/65" : ""}`}
                               aria-label={`Square ${square}, ${describePiece(piece)}${isLegalTarget ? ", legal target" : ""}${isSelected ? ", selected" : ""}`}
                             >
                               {isLegalTarget && (

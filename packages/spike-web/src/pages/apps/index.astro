@@ -198,15 +198,17 @@ import { appCatalog as apps } from '../../data/apps';
   }
 
   .status-live {
-    background: rgba(22,163,74,0.12);
-    color: #16a34a;
-    border: 1px solid rgba(22,163,74,0.2);
+    --_status-color: var(--status-live-color, oklch(52% 0.17 145));
+    background: color-mix(in srgb, var(--_status-color) 12%, transparent);
+    color: var(--_status-color);
+    border: 1px solid color-mix(in srgb, var(--_status-color) 20%, transparent);
   }
 
   .status-beta {
-    background: rgba(234,88,12,0.12);
-    color: #ea580c;
-    border: 1px solid rgba(234,88,12,0.2);
+    --_status-color: var(--status-beta-color, oklch(60% 0.19 41));
+    background: color-mix(in srgb, var(--_status-color) 12%, transparent);
+    color: var(--_status-color);
+    border: 1px solid color-mix(in srgb, var(--_status-color) 20%, transparent);
   }
 
   .category-badge {

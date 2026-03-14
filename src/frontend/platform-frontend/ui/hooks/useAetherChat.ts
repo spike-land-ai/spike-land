@@ -125,22 +125,27 @@ export function useAetherChat(): UseAetherChatReturn {
   const [model, setModel] = useState<string | null>(null);
   const [lastLearnedLesson, setLastLearnedLesson] = useState<string | null>(null);
   const [sessionReady, setSessionReady] = useState(false);
-  const abortRef = useRef<AbortController | null>(null);
-  const sessionIdRef = useRef<string | null>(() => {
+  const [sessionId, setSessionId] = useState<string | null>(() => {
     try {
       return localStorage.getItem(SESSION_ID_KEY);
     } catch {
       return null;
     }
   });
-  const lastEventIdRef = useRef<number>(() => {
-    try {
-      const stored = localStorage.getItem(LAST_EVENT_ID_KEY);
-      return stored ? Number(stored) : 0;
-    } catch {
-      return 0;
-    }
-  });
+  const abortRef = useRef<AbortController | null>(null);
+  // sessionIdRef mirrors the sessionId state so it is always current inside
+  // async callbacks without requiring the callback to close over stale state.
+  const sessionIdRef = useRef<string | null>(sessionId);
+  const lastEventIdRef = useRef<number>(
+    (() => {
+      try {
+        const stored = localStorage.getItem(LAST_EVENT_ID_KEY);
+        return stored ? Number(stored) : 0;
+      } catch {
+        return 0;
+      }
+    })(),
+  );
 
   // Persist messages to localStorage (debounced)
   useEffect(() => {
@@ -167,6 +172,7 @@ export function useAetherChat(): UseAetherChatReturn {
 
         if (serverSessionId) {
           sessionIdRef.current = serverSessionId;
+          setSessionId(serverSessionId);
           localStorage.setItem(SESSION_ID_KEY, serverSessionId);
         }
 
@@ -301,6 +307,7 @@ export function useAetherChat(): UseAetherChatReturn {
                 const syncedSessionId =
                   typeof parsed["sessionId"] === "string" ? parsed["sessionId"] : null;
                 sessionIdRef.current = syncedSessionId;
+                setSessionId(syncedSessionId);
                 if (syncedSessionId) {
                   try {
                     localStorage.setItem(SESSION_ID_KEY, syncedSessionId);
@@ -495,6 +502,7 @@ export function useAetherChat(): UseAetherChatReturn {
     setError(null);
     setLastLearnedLesson(null);
     sessionIdRef.current = null;
+    setSessionId(null);
     lastEventIdRef.current = 0;
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(SESSION_ID_KEY);
@@ -515,7 +523,7 @@ export function useAetherChat(): UseAetherChatReturn {
     toolCatalogCount,
     model,
     lastLearnedLesson,
-    sessionId: sessionIdRef.current,
+    sessionId,
     sessionReady,
   };
 }

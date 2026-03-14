@@ -254,15 +254,15 @@ const appName = app.name;
   }
 
   .status-live {
-    background: rgba(22,163,74,0.12);
-    color: #16a34a;
-    border: 1px solid rgba(22,163,74,0.2);
+    background: color-mix(in srgb, var(--color-status-live) 12%, transparent);
+    color: var(--color-status-live);
+    border: 1px solid color-mix(in srgb, var(--color-status-live) 20%, transparent);
   }
 
   .status-beta {
-    background: rgba(234,88,12,0.12);
-    color: #ea580c;
-    border: 1px solid rgba(234,88,12,0.2);
+    background: color-mix(in srgb, var(--color-status-beta) 12%, transparent);
+    color: var(--color-status-beta);
+    border: 1px solid color-mix(in srgb, var(--color-status-beta) 20%, transparent);
   }
 
   .status-dot {
@@ -389,7 +389,7 @@ const appName = app.name;
 
   /* Editor */
   .editor-panel {
-    background: #0d1117;
+    background: var(--code-bg);
   }
 
   .editor-placeholder {
@@ -397,14 +397,14 @@ const appName = app.name;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #555;
+    color: var(--code-muted);
     font-family: var(--font-mono);
     font-size: 0.875rem;
   }
 
   /* Terminal */
   .terminal-panel {
-    background: #0a0a0a;
+    background: var(--terminal-bg);
     padding: 1.25rem;
     font-family: var(--font-mono);
     font-size: 0.875rem;
@@ -414,9 +414,9 @@ const appName = app.name;
   }
 
   .terminal-line { line-height: 1.6; }
-  .terminal-prompt { color: #4ade80; }
-  .terminal-muted { color: #555; }
-  .terminal-cursor { color: #888; animation: blink 1s step-end infinite; }
+  .terminal-prompt { color: var(--color-terminal-prompt); }
+  .terminal-muted { color: var(--code-muted); }
+  .terminal-cursor { color: var(--code-cursor); animation: blink 1s step-end infinite; }
 
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
@@ -444,7 +444,7 @@ const appName = app.name;
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
-    background: #16a34a;
+    background: var(--color-status-live);
   }
 
   .sidebar-messages {

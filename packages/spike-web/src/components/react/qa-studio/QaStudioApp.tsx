@@ -133,11 +133,11 @@ export default function QaStudioPage() {
       </div>
 
       {errorMessage && (
-        <div className="mx-4 mt-2 px-4 py-3 rounded-lg border border-red-500/30 bg-red-500/10 text-sm text-red-500 flex items-center justify-between">
+        <div className="mx-4 mt-2 px-4 py-3 rounded-lg border border-destructive/30 bg-destructive/10 text-sm text-destructive flex items-center justify-between">
           <span>{errorMessage}</span>
           <button
             onClick={() => setErrorMessage(null)}
-            className="ml-4 text-red-400 hover:text-red-300"
+            className="ml-4 text-destructive/80 hover:text-destructive"
           >
             &times;
           </button>

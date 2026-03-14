@@ -37,7 +37,7 @@ function PromotionPicker({
   const pieces: PieceType[] = ["q", "r", "b", "n"];
   return (
     <div
-      className="absolute inset-0 z-20 flex items-center justify-center bg-black/60"
+      className="absolute inset-0 z-20 flex items-center justify-center bg-foreground/50"
       role="dialog"
       aria-modal="true"
       aria-label="Choose promotion piece"
@@ -108,18 +108,20 @@ function Square({
 
   const light = isLightSquare(row, col);
 
-  // Base square color
-  let bgClass = light ? "bg-amber-100" : "bg-amber-800";
+  // Base square color — uses CSS vars so both themes are covered
+  let bgClass = light
+    ? "bg-[color-mix(in_srgb,var(--card-bg)_70%,var(--muted-bg)_30%)]"
+    : "bg-[color-mix(in_srgb,var(--muted-bg)_60%,var(--border-color)_40%)]";
 
   // Overlays (order matters — later wins)
   if (isLastMoveSquare) {
-    bgClass = light ? "bg-yellow-200" : "bg-yellow-600";
+    bgClass = light ? "bg-warning/20" : "bg-warning/40";
   }
   if (isSelected) {
-    bgClass = "bg-green-400";
+    bgClass = "bg-primary/30";
   }
   if (isKingInCheck) {
-    bgClass = "bg-red-400";
+    bgClass = "bg-destructive/40";
   }
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -161,9 +163,7 @@ function Square({
       {/* Rank label (left edge, first column) */}
       {showRankLabel && (
         <span
-          className={`absolute left-0.5 top-0.5 text-[0.6rem] font-bold leading-none ${
-            light ? "text-amber-800" : "text-amber-100"
-          }`}
+          className="absolute left-0.5 top-0.5 text-[0.6rem] font-bold leading-none text-muted-foreground"
           aria-hidden="true"
         >
           {rankLabel(row, flipped)}
@@ -173,9 +173,7 @@ function Square({
       {/* File label (bottom edge, last row) */}
       {showFileLabel && (
         <span
-          className={`absolute bottom-0.5 right-0.5 text-[0.6rem] font-bold leading-none ${
-            light ? "text-amber-800" : "text-amber-100"
-          }`}
+          className="absolute bottom-0.5 right-0.5 text-[0.6rem] font-bold leading-none text-muted-foreground"
           aria-hidden="true"
         >
           {fileLabel(col, flipped)}
@@ -184,7 +182,7 @@ function Square({
 
       {/* Legal move indicator — dot for empty, ring for occupied */}
       {isLegalTarget && !piece && (
-        <div className="pointer-events-none h-[28%] w-[28%] rounded-full bg-black/20" />
+        <div className="pointer-events-none h-[28%] w-[28%] rounded-full bg-foreground/20" />
       )}
       {isLegalTarget && piece && (
         <div className="pointer-events-none absolute inset-0 rounded-sm ring-4 ring-inset ring-black/25" />
@@ -300,7 +298,7 @@ export function ChessBoard({
 
       {/* Board grid */}
       <div
-        className="grid grid-cols-8 overflow-hidden rounded-xl border-2 border-amber-900/60 shadow-2xl"
+        className="grid grid-cols-8 overflow-hidden rounded-xl border-2 border-border shadow-2xl"
         role="grid"
         aria-label="Chess board"
         style={{ width: "min(90vw, 520px)", height: "min(90vw, 520px)" }}

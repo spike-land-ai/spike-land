@@ -1,15 +1,81 @@
 ---
 ---
-<div id="cookie-banner" class="fixed bottom-0 left-0 right-0 z-50 p-4 bg-zinc-900 border-t border-zinc-700 flex flex-col sm:flex-row items-center gap-4 justify-between" style="display:none">
-  <p class="text-sm text-zinc-300">
+<div id="cookie-banner" class="cookie-banner" style="display:none">
+  <p class="cookie-text">
     We use cookies to improve your experience and track usage analytics.
-    <a href="/privacy" class="underline text-blue-400">Learn more</a>
+    <a href="/privacy" class="cookie-link">Learn more</a>
   </p>
-  <div class="flex gap-3 shrink-0">
-    <button id="cookie-decline" class="px-4 py-2 text-sm rounded bg-zinc-700 hover:bg-zinc-600 text-white transition-colors">Decline</button>
-    <button id="cookie-accept" class="px-4 py-2 text-sm rounded bg-blue-600 hover:bg-blue-500 text-white transition-colors">Accept</button>
+  <div class="cookie-actions">
+    <button id="cookie-decline" class="cookie-btn cookie-btn--decline">Decline</button>
+    <button id="cookie-accept" class="cookie-btn cookie-btn--accept">Accept</button>
   </div>
 </div>
+
+<style>
+  .cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    padding: 1rem;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    justify-content: space-between;
+  }
+
+  @media (min-width: 640px) {
+    .cookie-banner {
+      flex-direction: row;
+    }
+  }
+
+  .cookie-text {
+    font-size: 0.875rem;
+    color: var(--muted-fg);
+    margin: 0;
+  }
+
+  .cookie-link {
+    color: var(--primary-color);
+    text-decoration: underline;
+  }
+
+  .cookie-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .cookie-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity var(--duration-fast) var(--ease);
+  }
+
+  .cookie-btn:hover {
+    opacity: 0.85;
+  }
+
+  .cookie-btn--decline {
+    background: var(--muted-bg);
+    color: var(--fg);
+    border: 1px solid var(--border-color);
+  }
+
+  .cookie-btn--accept {
+    background: var(--primary-color);
+    color: var(--primary-fg);
+  }
+</style>
 
 <script is:inline>
   (function() {

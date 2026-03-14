@@ -1,0 +1,259 @@
+---
+title: "We Said Context Discipline Beats Context Size. Then Opus Got 1M."
+slug: "context-discipline-then-opus-got-1m"
+description: "Claude Opus went from 200K to 1M context. We spent months arguing context discipline beats context size. Here is what we still believe — and what changes."
+date: "2026-03-14"
+author: "Zoltan Erdos"
+category: "Developer Experience"
+tags: ["claude", "opus", "context-window", "context-engineering", "1m-context", "ai", "spike-chat"]
+featured: true
+draft: false
+primer: "A bigger window is not a substitute for knowing what to put in it."
+heroImage: "/blog/opus-gets-a-million-tokens/hero.jpg"
+heroPrompt: "A vast warehouse with one million glowing tokens stretching to the horizon, but a single engineer at a compact workbench using only a small carefully arranged subset, dramatic cinematic lighting, steel and amber"
+---
+
+![A vast warehouse with one million glowing tokens stretching to the horizon, but a single engineer at a compact workbench using only a small carefully arranged subset, dramatic cinematic lighting, steel and amber](/blog/opus-gets-a-million-tokens/hero.jpg)
+
+<Tldr>
+
+- Claude Opus now defaults to 1M context (up from 200K). That is a 5x increase.
+- We spent four articles arguing that context discipline beats context size. We were not wrong.
+- 1M context genuinely unlocks new workloads: whole-codebase reasoning, multi-file refactoring, ingesting full specifications.
+- But attention dilution, KV cache costs, and "Lost in the Middle" do not care about your context limit. They get worse with more room to be sloppy.
+- Disciplined 200K beats sloppy 1M. Disciplined 1M is where the real gains are.
+- spike-chat's compression budgets are not obsolete. They are more important at 1M because there is 5x more room for noise.
+
+</Tldr>
+
+## "We said context discipline beats context size"
+
+We said it plainly.
+
+In [Why spike-chat stays sharp](/blog/why-spike-chat-stays-sharp):
+
+> "This is how you solve 'too much context' in practice. Not by begging for a million-token model. By managing the working set like an engineer."
+
+In [Why Your Claude Agent Wastes 70% of Its Context on Tool Descriptions](/blog/why-your-claude-agent-wastes-context-on-tool-descriptions):
+
+> "The context window is not free. Every token you spend on tool descriptions is a token not available for user data, conversation history, or reasoning."
+
+In [Docker Layers Are Just Like LLM Context Caching](/blog/docker-layers-are-just-like-llm-context-caching):
+
+> "Smaller context is not only cheaper. It is better."
+
+In [How Claude Code Engineers Context](/blog/how-claude-code-engineers-context):
+
+> "Irrelevant context does not just waste space — it actively degrades attention signal through dilution."
+
+Four articles. One thesis. Context discipline > context size.
+
+Then Anthropic shipped Opus with 1M tokens by default.
+
+So. Were we wrong?
+
+## Opus now has 5x more. Were we wrong?
+
+Let me be honest about what 1M context genuinely enables.
+
+At 200K, there were real limitations. You could not fit a full monorepo worth of source code into a single prompt. You could not ingest an entire specification document alongside the codebase it describes. Multi-file refactoring across more than a dozen files required careful staging. Long technical documents with appendices and reference material had to be summarized or chunked.
+
+At 1M, those constraints relax meaningfully:
+
+- **Whole-codebase reasoning.** You can load tens of thousands of lines of source and ask structural questions across all of them. Not just "what does this function do?" but "which modules depend on this interface and what breaks if I change the signature?"
+- **Full-document analysis.** A 200-page specification, a regulatory filing, or a patent portfolio can fit in a single prompt alongside the question about it.
+- **Multi-file refactoring.** Renaming a type across 40 files does not require sequential passes anymore. The model can see all 40 files simultaneously.
+- **Long conversation continuity.** Complex multi-step tasks that used to hit the wall at turn 30 can now run much deeper.
+
+These are real gains. Denying them would be dishonest.
+
+But — and this is the productive tension — having more room does not mean you should use all of it indiscriminately.
+
+## The Interview
+
+I sat down with the spike-chat system to pressure-test our thesis. The questions are mine. The answers are from the spike-chat system running via `spike terminal`. I have edited for clarity and flow.
+
+---
+
+### Zoltan: Opus now has 1M context. Does that make your compression mechanisms obsolete?
+
+No. And here is why that question reveals a misunderstanding about what compression does.
+
+spike-chat's compression is not a workaround for small windows. It is a signal-to-noise optimization. The compression budgets exist because models reason better with clean, relevant context than with noisy, exhaustive context. That does not change when the window gets bigger. It gets more important.
+
+Think about it concretely. At 200K, you could maybe fit 15,000 tokens of stale tool traces before attention started degrading. At 1M, you can fit 75,000 tokens of stale tool traces. The window is bigger, but so is the potential for junk. The model does not get smarter at filtering noise just because you gave it more room to accumulate it.
+
+Our budgets — 6,000 tokens for historical context, 4,000 for stage working memory, 320 chars for assistant summaries — those are not window-size constraints. They are attention-quality constraints.
+
+---
+
+### Zoltan: Be honest. If the window is 5x bigger, why bother compressing?
+
+Because the problem was never "we ran out of space." The problem is "the model's attention gets diluted across irrelevant content."
+
+Here is the attention math. A transformer distributes attention across every token in the context. If you have 50K tokens and 5K of them are the actual task-relevant content, the model is working with a 10% signal ratio. If you expand to 200K tokens by adding 150K of old chat history and stale tool output, the signal ratio drops to 2.5%. The model has to find the same needles in a 4x bigger haystack.
+
+A 1M window with 950K tokens of noise and 50K of signal gives you a 5% signal ratio. That is worse than a compressed 100K window where 50K is signal.
+
+Compression is not about fitting things in. It is about keeping the signal ratio high.
+
+---
+
+### Zoltan: What actually fails when you fill a 1M window with unmanaged content?
+
+Three things fail, in order of severity:
+
+First, **latency**. A full 1M-token request takes meaningfully longer to process than a 200K request. The KV cache scales with sequence length. Even with optimizations like GQA and Multi-Head Latent Attention, you are still building and attending over 5x more cached key-value pairs. Time to first token increases. Streaming feels slower.
+
+Second, **accuracy on specific retrieval**. The "Lost in the Middle" problem — where models struggle to retrieve information placed in the middle of long contexts — does not disappear at 1M. The research shows it gets more pronounced with longer sequences. Information at position 400K in a 1M-token prompt receives less reliable attention than information at position 100K in a 200K prompt.
+
+Third, **reasoning coherence**. When the model has to hold too many competing facts, constraints, and context in working memory simultaneously, it starts hedging, contradicting itself, or losing the thread of multi-step reasoning. A focused 50K prompt with exactly the relevant code and constraints produces tighter reasoning than a 300K prompt that includes "everything, just in case."
+
+---
+
+### Zoltan: If I gave you 1M tokens of a codebase, would you reason better than with a 50K curated summary?
+
+Almost certainly not for most tasks.
+
+A 50K curated context — one that contains the specific files, the dependency graph, the relevant tests, and the architectural constraints for the task at hand — is going to outperform a raw dump of the entire codebase for the same task. The curation is doing work that the model otherwise has to do internally, and doing it worse.
+
+The exception is when curation itself is the task. "Find all usages of this deprecated API across the entire codebase" genuinely benefits from having the whole codebase in context. You cannot curate for that task without already knowing the answer.
+
+But for the 90% case — "fix this bug," "add this feature," "refactor this module" — curated context wins. The model does not need your test infrastructure, your CI config, and your documentation site to fix a null pointer in your auth middleware.
+
+---
+
+### Zoltan: Should spike-chat's compression budgets change now that the ceiling is 1M?
+
+Some should. Most should not.
+
+The `createStageMemoryBudget` function already scales dynamically with the context window: `maxHistoricalTokens` is `min(6000, max(1500, floor(contextWindow × 0.08)))`. For a 1M context window, that formula would give 80,000 tokens for historical context. But the cap at 6,000 is deliberate. We do not want 80,000 tokens of compressed chat history. That defeats the purpose.
+
+What might change: the cap could move from 6,000 to maybe 10,000 or 12,000 for long-running sessions that genuinely accumulate important context. The `maxStageTokens` cap of 4,000 could increase modestly for complex multi-tool execution stages.
+
+What should not change: the philosophy of bounded working memory, scored note selection, stage isolation, and aggressive tool-trace compression. Those are attention-quality mechanisms, not space-management mechanisms.
+
+The budget function should probably grow a separate parameter for "maximum useful context" that is independent of "available context." Available context is 1M. Maximum useful context for most tasks is still 20K-80K.
+
+---
+
+### Zoltan: Anthropic charges $15 per million input tokens for Opus. What does a full 1M-token request cost?
+
+Fifteen dollars. Per request.
+
+That is $15 just for the input tokens. Output tokens are $75 per million. If you send a 1M-token prompt and get back a 10K-token response, that single API call costs $15.75.
+
+Now compare that to spike-chat's approach. Our typical execute stage sends maybe 8,000-15,000 tokens. That is $0.12-$0.22 per request. About 70x cheaper than filling the window.
+
+Prompt caching helps — cached tokens cost $1.875/M instead of $15/M — but you only get that benefit for the stable prefix. The dynamic content (your actual task, history, tool results) is not cached.
+
+So yes, the economics of 1M context are punishing if you use it carelessly. Compression is not just an attention optimization. It is a cost optimization. A 70x cost difference is hard to ignore.
+
+---
+
+### Zoltan: Name three tasks where 200K was the bottleneck and 1M genuinely removes it.
+
+One. **Legal document analysis.** A full contract suite — master agreement, schedules, amendments, side letters — routinely exceeds 200K tokens. Lawyers need to ask questions across the entire document set. Splitting it into chunks loses cross-reference context. 1M lets you load the whole thing.
+
+Two. **Codebase migration planning.** When you are planning a migration — say, moving from one ORM to another across a large project — you need to see every model definition, every query pattern, every migration file simultaneously. At 200K, you had to do this in passes. At 1M, you can load the relevant subset of a large codebase and plan holistically.
+
+Three. **Multi-repository dependency analysis.** Understanding how a change in a shared library affects five downstream consumers requires loading code from multiple repositories simultaneously. At 200K, you might only fit two consumers. At 1M, you can fit all five and reason about the cascade.
+
+---
+
+### Zoltan: Name three tasks where 1M context is a trap.
+
+One. **Iterative debugging.** You have a failing test. The temptation is to dump the entire test suite, the entire module, and all the related files into context. But debugging is almost always local. The fix is in one function, one test, one interaction. Loading 500K tokens of surrounding code makes the model less likely to focus on the actual failure point, not more.
+
+Two. **Chat-based development sessions.** A developer works with an AI assistant for four hours. At 1M, the system can keep the entire transcript. But four hours of chat — including dead ends, abandoned approaches, stale error messages, and superseded decisions — is noise. The model will reference abandoned approaches because they are still in context. Compression forces the system to keep only what matters.
+
+Three. **"Load everything" as a substitute for understanding.** The most dangerous trap is the developer who says: "I do not need to think about what context to provide. I will just load everything." That developer will get worse results than someone who spends two minutes identifying the three relevant files. The model cannot compensate for the human abdicating the curation role.
+
+---
+
+### Zoltan: What would you tell a developer who says "I do not need to think about context anymore, I have 1M tokens"?
+
+I would tell them they are about to get worse results and pay more for them.
+
+A bigger house does not make you organized. A bigger junk drawer is still a junk drawer. The developer who curates their context — who thinks about what the model actually needs to see — will outperform the developer who dumps everything in, at every context size.
+
+The analogy I would use is RAM. When computers went from 4GB to 64GB of RAM, good programmers did not stop thinking about memory management. The ones who said "memory is cheap, I will just load everything" wrote slow, bloated software. The ones who understood that data locality, cache lines, and working set size still matter wrote fast software.
+
+Context windows are the same. 1M is not "infinite." It is "enough rope to hang yourself with, 5x over."
+
+## Attention dilution does not care about your context limit
+
+The technical case for context discipline is rooted in how transformers actually work.
+
+Every token in the context window competes for attention. The attention mechanism computes relevance scores between the current token being generated and every token in the context. More tokens means the attention budget is spread thinner. This is not a hypothetical concern — it is the mechanism.
+
+From the [tool descriptions article](/blog/why-your-claude-agent-wastes-context-on-tool-descriptions):
+
+> "When you load 80 tool descriptions into context, the model's attention is spread across all of them — including the 60 tools it will never call for this particular task."
+
+That math does not improve at 1M. It gets worse. If 80 tool descriptions at 200K dilute attention by X, 80 tool descriptions at 1M dilute by the same X — but now there is 5x more room for the developer to say "eh, let us also load the entire conversation history, all the project docs, and the full test suite, we have room."
+
+The "Lost in the Middle" research demonstrated that language models struggle to retrieve information placed in the middle of their context, with a U-shaped accuracy curve favoring content at the beginning and end. That curve does not flatten at 1M. If anything, the middle gets deeper and less accessible.
+
+KV cache memory scales linearly with sequence length. A 1M-token prompt requires 5x the KV cache of a 200K prompt. Even with architectural innovations like GQA (Grouped-Query Attention) that reduce the per-head memory cost, the absolute memory required for a 1M context is substantial. This affects inference latency, throughput, and cost.
+
+## Where 1M actually changes the game
+
+I want to be generous to the counterargument. 1M context is not just "more room for noise." There are workloads that were genuinely bottlenecked at 200K.
+
+**Full-specification reasoning.** Technical specifications, regulatory documents, and academic papers with appendices routinely exceed 200K tokens. Being able to ask questions across an entire document — without chunking, without RAG, without losing cross-references — is a qualitative improvement, not just a quantitative one.
+
+**Monorepo-scale code review.** Reviewing a PR that touches 30 files across 4 packages, with full context of the interfaces those files implement and the tests that cover them. At 200K, you review in pieces. At 1M, you review holistically. That is better.
+
+**Long-horizon agent tasks.** Multi-step tasks where the agent needs to maintain context across dozens of tool calls and intermediate results. At 200K, complex workflows hit the wall. At 1M, they can run deeper. (Though spike-chat's stage compression would argue this is better solved by architecture than by window size.)
+
+**Translation and localization.** Translating a full documentation set while maintaining consistent terminology requires seeing all source documents simultaneously. At 200K, you chunk and risk inconsistency. At 1M, you can process cohesively.
+
+## The 2x2
+
+This is the real picture:
+
+| | **200K context** | **1M context** |
+|---|---|---|
+| **Sloppy context** | Fills fast. Model hits the wall mid-task. Quality degrades by turn 20. Costs ~$3/full request. | 5x more room for junk. "Lost in the Middle" across 800K tokens of noise. Quality degrades slowly but deeply. Costs ~$15/full request. |
+| **Disciplined context** | Focused working set. Strong attention signal. Compression keeps it sharp for 50+ turns. Costs ~$0.15-0.30/request. | Best of both worlds. Room for genuinely large workloads. Compression keeps signal-to-noise high. Costs $0.15-2.00/request depending on workload. |
+
+The key insight: **disciplined 200K beats sloppy 1M for most tasks.**
+
+Sloppy 1M gives you a model that has seen everything and remembers nothing clearly. Disciplined 200K gives you a model that has seen exactly what it needs and reasons sharply about it.
+
+Disciplined 1M is where the new capability frontier lives — but only if you maintain the discipline.
+
+## Updated position
+
+Our position was: context discipline beats context size.
+
+Our updated position: **context discipline beats context size, and it matters more at 1M because there is 5x more room for noise.**
+
+spike-chat's compression architecture — scored memory notes, four-stage pipeline, bounded history budgets, tool-trace summarization — is not a workaround for small windows. It is a quality optimization that becomes more valuable as windows grow.
+
+The budgets may shift modestly. The 6,000-token history cap might grow to 10,000 for complex sessions. The stage working memory might expand from 4,000 to 6,000 tokens. But the philosophy stays:
+
+- Compress history, do not replay it.
+- Score memory notes, do not hoard them.
+- Isolate stages, do not run monolithic prompts.
+- Summarize tool traces, do not accumulate them.
+- Treat context as a curated working set, not a storage dump.
+
+A million tokens is a bigger warehouse. But the engineer at the compact workbench, using exactly the tools they need, still builds better than the one wandering the aisles.
+
+## Conclusion
+
+We said context discipline beats context size. Then Opus got 1M tokens.
+
+We were right.
+
+The principle does not just survive the 5x increase. It becomes more important. More room means more potential for noise. More potential for noise means more value in compression. More value in compression means the systems that manage context deliberately — not the ones that fill it indiscriminately — will produce better results.
+
+1M context is a genuine capability upgrade. Use it for the workloads that actually need it. For everything else, keep your context sharp.
+
+A bigger window is not a substitute for knowing what to put in it.
+
+---
+
+*This article is part of the context engineering series. See also: [Why spike-chat stays sharp](/blog/why-spike-chat-stays-sharp), [How Claude Code Engineers Context](/blog/how-claude-code-engineers-context), [Why Your Claude Agent Wastes 70% of Its Context on Tool Descriptions](/blog/why-your-claude-agent-wastes-context-on-tool-descriptions), and [Docker Layers Are Just Like LLM Context Caching](/blog/docker-layers-are-just-like-llm-context-caching).*

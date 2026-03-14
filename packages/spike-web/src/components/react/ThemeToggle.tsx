@@ -37,8 +37,13 @@ const RAYS = [0, 45, 90, 135, 180, 225, 270, 315];
 
 function Sun({ rs }: { rs: number }) {
   return (
-    <svg width="20" height="20" viewBox="-11 -11 22 22" style={{ overflow: "visible" }}>
-      <circle r="5" fill="#f0a500" />
+    <svg
+      width="20"
+      height="20"
+      viewBox="-11 -11 22 22"
+      style={{ overflow: "visible", color: "var(--accent)" }}
+    >
+      <circle r="5" fill="currentColor" />
       {RAYS.map((deg) => {
         const r = (deg * Math.PI) / 180;
         const c = Math.cos(r),
@@ -51,7 +56,7 @@ function Sun({ rs }: { rs: number }) {
             y1={ss * 7}
             x2={c * (7 + len)}
             y2={ss * (7 + len)}
-            stroke="#f0a500"
+            stroke="currentColor"
             strokeWidth="2.1"
             strokeLinecap="round"
             opacity={Math.max(0, rs)}
@@ -69,10 +74,22 @@ function Moon({ sa }: { sa: number }) {
     { x: 3.5, y: 4, r: 0.85 },
   ];
   return (
-    <svg width="20" height="20" viewBox="-11 -11 22 22" style={{ overflow: "visible" }}>
-      <path d="M0,-8 A8,8 0 1,0 8,0 A5.5,5.5 0 1,1 0,-8 Z" fill="#c8cfee" />
+    <svg
+      width="20"
+      height="20"
+      viewBox="-11 -11 22 22"
+      style={{ overflow: "visible", color: "var(--thumb)" }}
+    >
+      <path d="M0,-8 A8,8 0 1,0 8,0 A5.5,5.5 0 1,1 0,-8 Z" fill="currentColor" opacity="0.9" />
       {pts.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r={p.r} fill="#a8b0d8" opacity={Math.max(0, sa)} />
+        <circle
+          key={i}
+          cx={p.x}
+          cy={p.y}
+          r={p.r}
+          fill="currentColor"
+          opacity={Math.max(0, sa) * 0.6}
+        />
       ))}
     </svg>
   );

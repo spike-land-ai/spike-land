@@ -66,7 +66,7 @@ const quickActions = [
     </aside>
 
     <!-- Main content -->
-    <div class="dash-main">
+    <div id="main-content" class="dash-main">
       <!-- Top bar -->
       <header class="dash-topbar">
         <h1 class="dash-page-title">Overview</h1>
@@ -80,7 +80,7 @@ const quickActions = [
         <!-- Metric cards -->
         <div class="metrics-grid">
           <div class="metric-card rubik-panel">
-            <div class="metric-icon" style="background: rgba(37,99,235,0.1); color: #2563eb;">
+            <div class="metric-icon metric-icon--blue">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
             </div>
             <div>
@@ -89,7 +89,7 @@ const quickActions = [
             </div>
           </div>
           <div class="metric-card rubik-panel">
-            <div class="metric-icon" style="background: rgba(22,163,74,0.1); color: #16a34a;">
+            <div class="metric-icon metric-icon--green">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
             </div>
             <div>
@@ -98,7 +98,7 @@ const quickActions = [
             </div>
           </div>
           <div class="metric-card rubik-panel">
-            <div class="metric-icon" style="background: rgba(147,51,234,0.1); color: #9333ea;">
+            <div class="metric-icon metric-icon--purple">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
             <div>
@@ -427,7 +427,14 @@ const quickActions = [
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    --_icon-color: var(--primary-color);
+    background: color-mix(in srgb, var(--_icon-color) 10%, transparent);
+    color: var(--_icon-color);
   }
+
+  .metric-icon--blue  { --_icon-color: var(--primary-color); }
+  .metric-icon--green { --_icon-color: oklch(52% 0.17 145); }
+  .metric-icon--purple { --_icon-color: oklch(55% 0.22 300); }
 
   .metric-label {
     font-size: 0.8125rem;
@@ -552,15 +559,17 @@ const quickActions = [
   }
 
   .status-running {
-    background: rgba(22,163,74,0.12);
-    color: #16a34a;
-    border: 1px solid rgba(22,163,74,0.2);
+    --_status-color: oklch(52% 0.17 145);
+    background: color-mix(in srgb, var(--_status-color) 12%, transparent);
+    color: var(--_status-color);
+    border: 1px solid color-mix(in srgb, var(--_status-color) 20%, transparent);
   }
 
   .status-idle {
-    background: rgba(234,179,8,0.12);
-    color: #ca8a04;
-    border: 1px solid rgba(234,179,8,0.2);
+    --_status-color: oklch(62% 0.16 85);
+    background: color-mix(in srgb, var(--_status-color) 12%, transparent);
+    color: var(--_status-color);
+    border: 1px solid color-mix(in srgb, var(--_status-color) 20%, transparent);
   }
 
   .status-dot {
