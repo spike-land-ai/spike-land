@@ -22,7 +22,7 @@ export { convertMiddleware } from "./middleware-converter.ts";
 
 import type { RepoFile, MigrationReport, TransformResult } from "./types.ts";
 import { rewriteImports } from "./import-rewriter.ts";
-import { buildRouteTree } from "./route-converter.ts";
+import { buildRouteTree, convertApiRoute } from "./route-converter.ts";
 import { convertDataLoaders } from "./data-loader-converter.ts";
 import { convertConfig, rewriteEnvVars, convertRewritesAndRedirects } from "./config-converter.ts";
 import { convertMiddleware } from "./middleware-converter.ts";
@@ -67,7 +67,22 @@ export function migrateNextjsProject(
     allWarnings.push(...result.warnings);
   }
 
-  // 3. Convert source files (imports + data loaders + env vars)
+  // 4. Convert API routes
+  const apiFiles = files.filter(
+    (f) => f.path.match(/pages\/api\//) || f.path.match(/app\/api\/.*\/route\.(ts|js)$/),
+  );
+  for (const f of apiFiles) {
+    const apiResult = convertApiRoute(f.path, f.content);
+    results.push({
+      filename: f.path.replace(/pages\/api\//, "api/").replace(/app\/api\//, "api/"),
+      original: f.content,
+      transformed: apiResult.code,
+      warnings: apiResult.warnings,
+    });
+    allWarnings.push(...apiResult.warnings);
+  }
+
+  // 5. Convert source files (imports + data loaders + env vars)
   const sourceFiles = files.filter(
     (f) =>
       f.path.match(/\.(tsx?|jsx?)$/) &&
@@ -99,7 +114,7 @@ export function migrateNextjsProject(
     allWarnings.push(...result.warnings);
   }
 
-  // 4. Generate route tree
+  // 6. Generate route tree
   const routeFiles = files.filter((f) => {
     if (routerType === "pages" || routerType === "mixed") {
       return f.path.startsWith("pages/") && !f.path.startsWith("pages/api/");
