@@ -1,0 +1,14 @@
+{
+  "name": "@spike-land-ai/spike-chat",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "hono": "^4.12.7"
+  }
+}

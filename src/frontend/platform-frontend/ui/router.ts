@@ -453,7 +453,18 @@ const quizRoute = createRoute({
 const migrateRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/migrate",
+});
+
+const migrateIndexRoute = createRoute({
+  getParentRoute: () => migrateRoute,
+  path: "/",
   component: withSuspense(() => import("./routes/migrate"), "MigratePage"),
+});
+
+const migrateLiveRoute = createRoute({
+  getParentRoute: () => migrateRoute,
+  path: "live",
+  component: withSuspense(() => import("./routes/migrate/live"), "MigrateLivePage"),
 });
 
 const supportRoute = createRoute({
@@ -589,7 +600,7 @@ const routeTree = rootRoute.addChildren([
   chessRoute,
   whatWeDoRoute,
   quizRoute,
-  migrateRoute,
+  migrateRoute.addChildren([migrateIndexRoute, migrateLiveRoute]),
   supportRoute,
   thankYouRoute,
   vibeCodeRoute,

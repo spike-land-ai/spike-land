@@ -1,0 +1,32 @@
+name = "spike-chat"
+main = "index.ts"
+compatibility_date = "2026-03-01"
+compatibility_flags = ["nodejs_compat"]
+
+[durable_objects]
+bindings = [
+  { name = "CHANNEL_DO", class_name = "ChannelDurableObject" },
+  { name = "PRESENCE_DO", class_name = "PresenceDurableObject" }
+]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["ChannelDurableObject", "PresenceDurableObject"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "spike-chat"
+database_id = "TO_BE_CREATED"
+migrations_dir = "db/migrations"
+
+[[services]]
+binding = "AUTH_MCP"
+service = "mcp-auth"
+
+[[services]]
+binding = "MCP_SERVICE"
+service = "spike-land-mcp"
+
+[[routes]]
+pattern = "chat.spike.land/*"
+zone_name = "spike.land"

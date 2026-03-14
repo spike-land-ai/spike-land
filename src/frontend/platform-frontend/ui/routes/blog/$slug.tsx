@@ -1,5 +1,5 @@
 import { useParams, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { BlogPostView } from "@spike-land-ai/block-website/ui";
 import type { BlogPost } from "@spike-land-ai/block-website/core";
 import { extractHeroMedia } from "../../../../../core/block-website/core-logic/blog-source.js";
@@ -124,6 +124,59 @@ function useSiblingPosts(currentSlug: string): SiblingPosts {
   }, [currentSlug]);
 
   return siblings;
+}
+
+const COUNTDOWN_TARGET = new Date("2026-03-27T00:00:00Z").getTime();
+const COUNTDOWN_SLUGS = new Set([
+  "sixteen-mathematicians-walked-into-a-loop",
+  "the-strange-loop-valued-at-ten-trillion",
+  "the-contact-proof",
+  "the-predictor-already-moved",
+  "the-two-boxes",
+]);
+
+function useCountdown(targetMs: number) {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  return useMemo(() => {
+    const diff = Math.max(0, targetMs - now);
+    const d = Math.floor(diff / 86_400_000);
+    const h = Math.floor((diff % 86_400_000) / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    const s = Math.floor((diff % 60_000) / 1000);
+    return { d, h, m, s, expired: diff <= 0 };
+  }, [targetMs, now]);
+}
+
+function CountdownBanner() {
+  const { d, h, m, s, expired } = useCountdown(COUNTDOWN_TARGET);
+
+  if (expired) return null;
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  return (
+    <div className="rubik-container py-4">
+      <div
+        className="mx-auto max-w-3xl rounded-2xl border border-[var(--border-color)] bg-[var(--card-bg)] px-6 py-4 text-center"
+        role="timer"
+        aria-live="polite"
+        aria-label="Countdown to March 27"
+      >
+        <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-[var(--muted-fg)] mb-2">
+          March 27, 2026
+        </p>
+        <p className="font-mono text-3xl font-black tracking-wider text-[var(--fg)] tabular-nums sm:text-4xl">
+          {pad(d)}D {pad(h)}H {pad(m)}M {pad(s)}S
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function PostBreadcrumb({ postTitle }: { postTitle: string | null }) {
@@ -302,9 +355,12 @@ export function BlogPostPage() {
     );
   }, [normalizedSlug, postTitle]);
 
+  const showCountdown = COUNTDOWN_SLUGS.has(normalizedSlug);
+
   return (
     <div className="min-h-screen font-sans antialiased">
       <PostBreadcrumb postTitle={postTitle} />
+      {showCountdown && <CountdownBanner />}
       <main>
         <BlogPostView
           slug={normalizedSlug}

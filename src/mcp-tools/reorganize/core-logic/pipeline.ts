@@ -39,7 +39,18 @@ export async function runPipeline(srcDir?: string, _incremental = false): Promis
     skipAddingFilesFromTsConfig: true,
   });
 
-  // TODO: implement incremental file filtering using git diff
+  // Incremental mode: only changed files
+  let filesToProcess: string[] = [];
+  if (_incremental) {
+    try {
+      const { execSync } = await import("node:child_process");
+      const stdout = execSync("git diff --name-only HEAD", { encoding: "utf-8" });
+      filesToProcess = stdout
+        .split("\n")
+        .filter((f) => f.startsWith("src/") && (f.endsWith(".ts") || f.endsWith(".tsx")))
+        .map((f) => path.resolve(process.cwd(), f));
+    } catch (_e) {}
+  }
 
   const allFiles = await glob("**/*.{ts,tsx}", {
     cwd: resolvedSrcDir,
@@ -49,7 +60,14 @@ export async function runPipeline(srcDir?: string, _incremental = false): Promis
 
   project.addSourceFilesAtPaths(allFiles);
 
-  const { nodes, aliasMap } = await discoverFiles(project, resolvedSrcDir);
+  const { nodes: allNodes, aliasMap } = await discoverFiles(project, resolvedSrcDir);
+
+  // Incremental mode: only keep nodes for files we wanted to process
+  const nodes =
+    filesToProcess.length > 0
+      ? allNodes.filter((node) => filesToProcess.includes(node.absPath))
+      : allNodes;
+
   propagateDeps(nodes);
 
   const packageCategories = computePackageCategories(nodes, packagesYaml);

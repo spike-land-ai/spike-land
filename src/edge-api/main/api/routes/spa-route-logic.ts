@@ -16,6 +16,7 @@ const EXACT_SPA_ROUTES = new Set([
   "/mcp",
   "/mcp/authorize",
   "/migrate",
+  "/migrate/live",
   "/packages",
   "/packages/new",
   "/packages/qa-studio/ui",
@@ -51,6 +52,7 @@ const PREFIXED_SPA_ROUTES = [
   "/docs",
   "/learn",
   "/messages",
+  "/migrate",
   "/packages",
 ];
 const API_PREFIXES = ["/oauth/", "/api/"];
