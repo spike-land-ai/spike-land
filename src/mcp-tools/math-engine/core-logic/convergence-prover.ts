@@ -6,6 +6,7 @@
  */
 
 import type { Finding, LLMProvider, Problem, SessionState } from "./types.js";
+import { FALLBACK_TRUNCATION, parseFindingsFromResponse } from "./parse-utils.js";
 
 const CONVERGENCE_STRATEGIES = [
   {
@@ -47,23 +48,24 @@ export async function analyzeConvergence(
   llm: LLMProvider,
 ): Promise<Finding[]> {
   const findings: Finding[] = [];
+  const priorContext = session.findings
+    .filter((f) => f.category === "proof_step" || f.category === "counterexample")
+    .slice(-20)
+    .map((f) => `[${f.agentRole}] ${f.content.slice(0, FALLBACK_TRUNCATION)}`)
+    .join("\n");
 
   for (const strategy of CONVERGENCE_STRATEGIES) {
-    const priorFindings = session.findings
-      .filter((f) => f.category === "proof_step" || f.category === "counterexample")
-      .map((f) => `[${f.agentRole}] ${f.content}`)
-      .join("\n");
-
-    const response = await llm.complete({
-      temperature: 0.1,
-      maxTokens: 2000,
-      systemPrompt: strategy.systemPrompt,
-      userPrompt: `Problem: ${problem.description}
+    try {
+      const response = await llm.complete({
+        temperature: 0.1,
+        maxTokens: 2000,
+        systemPrompt: strategy.systemPrompt,
+        userPrompt: `Problem: ${problem.description}
 
 Strategy: ${strategy.name} — ${strategy.description}
 
 Prior findings:
-${priorFindings || "None yet."}
+${priorContext || "None yet."}
 
 Analyze whether this convergence strategy can work. Provide:
 1. The precise mathematical setup
@@ -75,60 +77,21 @@ Format findings as JSON:
 \`\`\`json
 [{"category": "proof_step|counterexample|gap|insight", "content": "...", "confidence": 0.0-1.0}]
 \`\`\``,
-    });
+      });
 
-    const parsed = parseFindings(response, "constructor", session.iteration);
-    findings.push(...parsed);
+      const parsed = parseFindingsFromResponse(response, "analyst", session.iteration);
+      findings.push(...parsed);
+    } catch (error) {
+      findings.push({
+        agentRole: "analyst",
+        iteration: session.iteration,
+        category: "gap",
+        content: `Strategy "${strategy.name}" failed: ${error instanceof Error ? error.message : String(error)}`,
+        confidence: 0.3,
+        timestamp: Date.now(),
+      });
+    }
   }
 
   return findings;
-}
-
-function parseFindings(
-  response: string,
-  role: "analyst" | "constructor" | "adversary",
-  iteration: number,
-): Finding[] {
-  const jsonMatch = response.match(/```json\s*([\s\S]*?)```/);
-  if (!jsonMatch) {
-    return [
-      {
-        agentRole: role,
-        iteration,
-        category: "insight",
-        content: response.slice(0, 500),
-        confidence: 0.3,
-        timestamp: Date.now(),
-      },
-    ];
-  }
-
-  try {
-    const jsonStr = jsonMatch[1];
-    if (!jsonStr) throw new Error("empty");
-    const parsed = JSON.parse(jsonStr) as Array<{
-      category?: string;
-      content?: string;
-      confidence?: number;
-    }>;
-    return parsed.map((f) => ({
-      agentRole: role,
-      iteration,
-      category: (f.category ?? "insight") as Finding["category"],
-      content: String(f.content ?? ""),
-      confidence: Number(f.confidence ?? 0.5),
-      timestamp: Date.now(),
-    }));
-  } catch {
-    return [
-      {
-        agentRole: role,
-        iteration,
-        category: "insight",
-        content: response.slice(0, 500),
-        confidence: 0.3,
-        timestamp: Date.now(),
-      },
-    ];
-  }
 }

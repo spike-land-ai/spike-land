@@ -6,6 +6,13 @@
  */
 
 import type { Finding, LLMProvider, ProofAttempt, SessionState } from "./types.js";
+import {
+  FALLBACK_TRUNCATION,
+  extractJsonBlock,
+  parseFindingsFromResponse,
+  validateNumberArray,
+  validateSeverity,
+} from "./parse-utils.js";
 
 interface CurryDetectionResult {
   hasCurryPattern: boolean;
@@ -36,7 +43,6 @@ Your job: detect these patterns and propose grounding constraints.`;
 
 export async function detectCurryPatterns(
   proofAttempt: ProofAttempt,
-  _session: SessionState,
   llm: LLMProvider,
 ): Promise<CurryDetectionResult> {
   const response = await llm.complete({
@@ -71,18 +77,14 @@ Format as JSON:
 }
 
 function parseCurryResult(response: string): CurryDetectionResult {
-  const jsonMatch = response.match(/```json\s*([\s\S]*?)```/);
-  if (jsonMatch) {
+  const jsonStr = extractJsonBlock(response);
+  if (jsonStr) {
     try {
-      const jsonStr = jsonMatch[1];
-      if (!jsonStr) throw new Error("empty");
-      const parsed = JSON.parse(jsonStr) as CurryDetectionResult;
+      const parsed = JSON.parse(jsonStr) as Record<string, unknown>;
       return {
         hasCurryPattern: Boolean(parsed.hasCurryPattern),
-        selfReferentialSteps: Array.isArray(parsed.selfReferentialSteps)
-          ? parsed.selfReferentialSteps
-          : [],
-        severity: parsed.severity ?? "none",
+        selfReferentialSteps: validateNumberArray(parsed.selfReferentialSteps),
+        severity: validateSeverity(parsed.severity),
         explanation: String(parsed.explanation ?? ""),
         groundingFix: parsed.groundingFix ? String(parsed.groundingFix) : undefined,
       };
@@ -104,32 +106,48 @@ export async function resolveGap(session: SessionState, llm: LLMProvider): Promi
 
   // Check all proof attempts for Curry patterns
   for (const attempt of session.proofAttempts) {
-    const result = await detectCurryPatterns(attempt, session, llm);
+    try {
+      const result = await detectCurryPatterns(attempt, llm);
 
-    if (result.hasCurryPattern) {
-      findings.push({
-        agentRole: "adversary",
-        iteration: session.iteration,
-        category: "counterexample",
-        content: `Curry pattern detected in proof "${attempt.method}" (severity: ${result.severity}). Steps ${result.selfReferentialSteps.join(", ")} are self-referential. ${result.explanation}`,
-        confidence: result.severity === "critical" ? 0.95 : 0.7,
-        timestamp: Date.now(),
-      });
-
-      if (result.groundingFix) {
+      if (result.hasCurryPattern) {
         findings.push({
           agentRole: "adversary",
           iteration: session.iteration,
-          category: "insight",
-          content: `Grounding fix for Curry pattern: ${result.groundingFix}`,
-          confidence: 0.6,
+          category: "counterexample",
+          content: `Curry pattern detected in proof "${attempt.method}" (severity: ${result.severity}). Steps ${result.selfReferentialSteps.join(", ")} are self-referential. ${result.explanation}`,
+          confidence: result.severity === "critical" ? 0.95 : 0.7,
           timestamp: Date.now(),
         });
+
+        if (result.groundingFix) {
+          findings.push({
+            agentRole: "adversary",
+            iteration: session.iteration,
+            category: "insight",
+            content: `Grounding fix for Curry pattern: ${result.groundingFix}`,
+            confidence: 0.6,
+            timestamp: Date.now(),
+          });
+        }
       }
+    } catch (error) {
+      findings.push({
+        agentRole: "adversary",
+        iteration: session.iteration,
+        category: "gap",
+        content: `Curry check failed for "${attempt.method}": ${error instanceof Error ? error.message : String(error)}`,
+        confidence: 0.3,
+        timestamp: Date.now(),
+      });
     }
   }
 
-  // General grounding analysis
+  // General grounding analysis with bounded context
+  const contextFindings = session.findings
+    .slice(-20)
+    .map((f) => `[${f.agentRole}|${f.category}] ${f.content.slice(0, FALLBACK_TRUNCATION)}`)
+    .join("\n");
+
   const groundingResponse = await llm.complete({
     temperature: 0.2,
     maxTokens: 1500,
@@ -137,7 +155,7 @@ export async function resolveGap(session: SessionState, llm: LLMProvider): Promi
     userPrompt: `For the self-referential system under analysis, propose grounding constraints that prevent Curry's paradox:
 
 Current findings:
-${session.findings.map((f) => `[${f.agentRole}|${f.category}] ${f.content}`).join("\n")}
+${contextFindings}
 
 Propose:
 1. External observable constraints (things that must be checked against reality, not self-assertion)
@@ -150,55 +168,10 @@ Format findings as JSON array:
 \`\`\``,
   });
 
-  const parsed = parseGroundingFindings(groundingResponse, session.iteration);
+  const parsed = parseFindingsFromResponse(groundingResponse, "adversary", session.iteration);
   findings.push(...parsed);
 
   return findings;
-}
-
-function parseGroundingFindings(response: string, iteration: number): Finding[] {
-  const jsonMatch = response.match(/```json\s*([\s\S]*?)```/);
-  if (!jsonMatch) {
-    return [
-      {
-        agentRole: "adversary",
-        iteration,
-        category: "insight",
-        content: response.slice(0, 500),
-        confidence: 0.3,
-        timestamp: Date.now(),
-      },
-    ];
-  }
-
-  try {
-    const jsonStr = jsonMatch[1];
-    if (!jsonStr) throw new Error("empty");
-    const parsed = JSON.parse(jsonStr) as Array<{
-      category?: string;
-      content?: string;
-      confidence?: number;
-    }>;
-    return parsed.map((f) => ({
-      agentRole: "adversary" as const,
-      iteration,
-      category: (f.category ?? "insight") as Finding["category"],
-      content: String(f.content ?? ""),
-      confidence: Number(f.confidence ?? 0.5),
-      timestamp: Date.now(),
-    }));
-  } catch {
-    return [
-      {
-        agentRole: "adversary",
-        iteration,
-        category: "insight",
-        content: response.slice(0, 500),
-        confidence: 0.3,
-        timestamp: Date.now(),
-      },
-    ];
-  }
 }
 
 export { type CurryDetectionResult };

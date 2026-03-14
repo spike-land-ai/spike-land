@@ -6,14 +6,17 @@
  */
 
 import type { Finding, LLMProvider, Problem, SessionState } from "./types.js";
+import { FALLBACK_TRUNCATION, extractJsonBlock } from "./parse-utils.js";
 
 interface ComputabilityClassification {
   property: string;
   classification: "syntactic" | "semantic" | "unknown";
   decidable: boolean;
   justification: string;
-  approximation?: string;
+  approximation?: string | undefined;
 }
+
+const VALID_CLASSIFICATIONS = new Set(["syntactic", "semantic", "unknown"]);
 
 const RICE_THEOREM_PROMPT = `You are analyzing computability properties using Rice's theorem.
 
@@ -68,26 +71,36 @@ Format as JSON:
 
 function parseComputabilityFindings(response: string, iteration: number): Finding[] {
   const findings: Finding[] = [];
-  const jsonMatch = response.match(/```json\s*([\s\S]*?)```/);
+  const jsonStr = extractJsonBlock(response);
 
-  if (jsonMatch) {
+  if (jsonStr) {
     try {
-      const jsonStr = jsonMatch[1];
-      if (!jsonStr) throw new Error("empty");
       const parsed = JSON.parse(jsonStr) as {
-        classifications?: ComputabilityClassification[];
+        classifications?: Array<Record<string, unknown>>;
         computability_ceiling?: string;
         honest_assessment?: string;
       };
 
-      if (parsed.classifications) {
+      if (Array.isArray(parsed.classifications)) {
         for (const c of parsed.classifications) {
+          const classification = VALID_CLASSIFICATIONS.has(String(c.classification))
+            ? (String(c.classification) as ComputabilityClassification["classification"])
+            : "unknown";
+          const decidable = Boolean(c.decidable);
+          // Semantic undecidable properties get lower confidence than syntactic decidable ones
+          const confidence =
+            classification === "unknown"
+              ? 0.3
+              : classification === "semantic" && !decidable
+                ? 0.6
+                : 0.8;
+
           findings.push({
             agentRole: "analyst",
             iteration,
-            category: c.decidable ? "structure" : "gap",
-            content: `[${c.classification}] ${c.property}: ${c.justification}${c.approximation ? ` Approximation: ${c.approximation}` : ""}`,
-            confidence: c.classification === "unknown" ? 0.3 : 0.8,
+            category: decidable ? "structure" : "gap",
+            content: `[${classification}] ${String(c.property ?? "")}: ${String(c.justification ?? "")}${c.approximation ? ` Approximation: ${String(c.approximation)}` : ""}`,
+            confidence,
             timestamp: Date.now(),
           });
         }
@@ -119,7 +132,7 @@ function parseComputabilityFindings(response: string, iteration: number): Findin
         agentRole: "analyst",
         iteration,
         category: "insight",
-        content: response.slice(0, 500),
+        content: response.slice(0, FALLBACK_TRUNCATION),
         confidence: 0.3,
         timestamp: Date.now(),
       });
@@ -129,7 +142,7 @@ function parseComputabilityFindings(response: string, iteration: number): Findin
       agentRole: "analyst",
       iteration,
       category: "insight",
-      content: response.slice(0, 500),
+      content: response.slice(0, FALLBACK_TRUNCATION),
       confidence: 0.3,
       timestamp: Date.now(),
     });

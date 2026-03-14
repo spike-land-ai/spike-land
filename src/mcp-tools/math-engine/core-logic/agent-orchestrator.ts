@@ -16,6 +16,7 @@ import { createSessionState } from "./types.js";
 import { getProblemById } from "./problem-registry.js";
 import { getSystemPrompt, getUserPrompt } from "./prompt-templates.js";
 import { verifyProof, verificationToFindings } from "./proof-verifier.js";
+import { extractJsonBlock, parseFindingsFromResponse } from "./parse-utils.js";
 
 // Active sessions
 const sessions = new Map<string, SessionState>();
@@ -150,84 +151,19 @@ async function runAgent(
     userPrompt,
   });
 
-  const findings = parseFindings(response, role, session.iteration);
+  const findings = parseFindingsFromResponse(response, role, session.iteration);
   const proofAttempts = role === "constructor" ? parseProofAttempts(response, session) : [];
 
   return { rawOutput: response, findings, proofAttempts };
 }
 
-function parseFindings(response: string, role: AgentRole, iteration: number): Finding[] {
-  const findingsMatch = response.match(/```json\s*([\s\S]*?)```/);
-  if (!findingsMatch) {
-    return [
-      {
-        agentRole: role,
-        iteration,
-        category: "insight",
-        content: response.slice(0, 500),
-        confidence: 0.3,
-        timestamp: Date.now(),
-      },
-    ];
-  }
-
-  try {
-    const jsonStr = findingsMatch[1];
-    if (!jsonStr)
-      return [
-        {
-          agentRole: role,
-          iteration,
-          category: "insight",
-          content: response.slice(0, 500),
-          confidence: 0.3,
-          timestamp: Date.now(),
-        },
-      ];
-    const parsed: unknown = JSON.parse(jsonStr);
-    if (!Array.isArray(parsed)) {
-      return [
-        {
-          agentRole: role,
-          iteration,
-          category: "insight",
-          content: response.slice(0, 500),
-          confidence: 0.3,
-          timestamp: Date.now(),
-        },
-      ];
-    }
-    return parsed.map((f: Record<string, unknown>) => ({
-      agentRole: role,
-      iteration,
-      category: String(f.category ?? "insight") as Finding["category"],
-      content: String(f.content ?? ""),
-      confidence: Number(f.confidence ?? 0.5),
-      timestamp: Date.now(),
-    }));
-  } catch {
-    return [
-      {
-        agentRole: role,
-        iteration,
-        category: "insight",
-        content: response.slice(0, 500),
-        confidence: 0.3,
-        timestamp: Date.now(),
-      },
-    ];
-  }
-}
-
 function parseProofAttempts(response: string, session: SessionState): ProofAttempt[] {
-  // Look for the second JSON block (first is findings, second is proof attempts)
-  const jsonBlocks = [...response.matchAll(/```json\s*([\s\S]*?)```/g)];
-  if (jsonBlocks.length < 2) return [];
+  // Second JSON block = proof attempts (first is findings)
+  const jsonStr = extractJsonBlock(response, 1);
+  if (!jsonStr) return [];
 
   try {
-    const block = jsonBlocks[1];
-    if (!block?.[1]) return [];
-    const parsed: unknown = JSON.parse(block[1]);
+    const parsed: unknown = JSON.parse(jsonStr);
     if (!Array.isArray(parsed)) return [];
     return parsed.map((p: Record<string, unknown>, i: number) => ({
       id: `proof-${session.sessionId}-${session.iteration}-${i}`,

@@ -51,6 +51,6 @@ describe("conjecture-explorer", () => {
     const findings = await exploreConjecture(problem, session, llm);
 
     expect(findings.length).toBeGreaterThan(0);
-    expect(findings.every((f) => f.confidence === 0.4)).toBe(true);
+    expect(findings.every((f) => f.confidence === 0.3)).toBe(true);
   });
 });

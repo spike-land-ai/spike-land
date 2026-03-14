@@ -5,6 +5,7 @@
  */
 
 import type { Finding, LLMProvider, Problem, SessionState } from "./types.js";
+import { FALLBACK_TRUNCATION, parseFindingsFromResponse } from "./parse-utils.js";
 
 interface ExplorationStrategy {
   name: string;
@@ -51,15 +52,20 @@ export async function exploreConjecture(
 ): Promise<Finding[]> {
   const strategies = getApplicableStrategies(problem.id);
   const findings: Finding[] = [];
+  const priorContext = session.findings
+    .slice(-20)
+    .map((f) => `[${f.agentRole}|${f.category}] ${f.content.slice(0, FALLBACK_TRUNCATION)}`)
+    .join("\n");
 
   for (const strategy of strategies) {
-    const response = await llm.complete({
-      temperature: 0.7,
-      maxTokens: 2000,
-      systemPrompt: `You are a research mathematician exploring open conjectures.
+    try {
+      const response = await llm.complete({
+        temperature: 0.7,
+        maxTokens: 2000,
+        systemPrompt: `You are a research mathematician exploring open conjectures.
 Use the ${strategy.name} approach to make progress on the given conjecture.
 Be creative but mathematically rigorous. Identify partial results, patterns, and new angles of attack.`,
-      userPrompt: `## Conjecture: ${problem.title}
+        userPrompt: `## Conjecture: ${problem.title}
 
 ${problem.description}
 
@@ -67,7 +73,7 @@ ${problem.description}
 ${strategy.description}
 
 ## Prior findings from this session:
-${session.findings.map((f) => `[${f.agentRole}|${f.category}] ${f.content}`).join("\n") || "None yet."}
+${priorContext || "None yet."}
 
 Apply this strategy to the conjecture. Report:
 1. Setup: How does this strategy apply?
@@ -82,60 +88,25 @@ Format key findings as JSON:
   {"category": "structure|proof_step|gap|insight", "content": "...", "confidence": 0.0-1.0}
 ]
 \`\`\``,
-    });
+      });
 
-    const parsed = parseExplorationFindings(response, session.iteration, strategy.name);
-    findings.push(...parsed);
+      // Prefix each finding with the strategy name for traceability
+      const parsed = parseFindingsFromResponse(response, "constructor", session.iteration);
+      for (const f of parsed) {
+        f.content = `[${strategy.name}] ${f.content}`;
+      }
+      findings.push(...parsed);
+    } catch (error) {
+      findings.push({
+        agentRole: "constructor",
+        iteration: session.iteration,
+        category: "gap",
+        content: `[${strategy.name}] Failed: ${error instanceof Error ? error.message : String(error)}`,
+        confidence: 0.3,
+        timestamp: Date.now(),
+      });
+    }
   }
 
   return findings;
-}
-
-function parseExplorationFindings(
-  response: string,
-  iteration: number,
-  strategyName: string,
-): Finding[] {
-  const jsonMatch = response.match(/```json\s*([\s\S]*?)```/);
-  if (!jsonMatch) {
-    return [
-      {
-        agentRole: "constructor",
-        iteration,
-        category: "insight",
-        content: `[${strategyName}] ${response.slice(0, 500)}`,
-        confidence: 0.4,
-        timestamp: Date.now(),
-      },
-    ];
-  }
-
-  try {
-    const jsonStr = jsonMatch[1];
-    if (!jsonStr) throw new Error("empty");
-    const parsed = JSON.parse(jsonStr) as Array<{
-      category?: string;
-      content?: string;
-      confidence?: number;
-    }>;
-    return parsed.map((f) => ({
-      agentRole: "constructor" as const,
-      iteration,
-      category: (f.category ?? "insight") as Finding["category"],
-      content: `[${strategyName}] ${String(f.content ?? "")}`,
-      confidence: Number(f.confidence ?? 0.5),
-      timestamp: Date.now(),
-    }));
-  } catch {
-    return [
-      {
-        agentRole: "constructor",
-        iteration,
-        category: "insight",
-        content: `[${strategyName}] ${response.slice(0, 500)}`,
-        confidence: 0.4,
-        timestamp: Date.now(),
-      },
-    ];
-  }
 }
