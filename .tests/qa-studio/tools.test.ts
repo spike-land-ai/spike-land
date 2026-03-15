@@ -9,7 +9,7 @@ const mockGetPageSnapshot = vi.fn();
 const mockListTabs = vi.fn();
 const mockCloseTab = vi.fn();
 
-vi.mock("../../src/core/browser-automation/browser-session.js", () => ({
+vi.mock("../../src/core/browser-automation/core-logic/browser-session.js", () => ({
   getOrCreateTab: (...args: unknown[]) => mockGetOrCreateTab(...args),
   getActiveTab: (...args: unknown[]) => mockGetActiveTab(...args),
   getPageSnapshot: (...args: unknown[]) => mockGetPageSnapshot(...args),
@@ -300,7 +300,6 @@ describe("web tools", () => {
       const result = await server.call("web_screenshot", {});
       expect(mockScreenshot).toHaveBeenCalledWith({
         fullPage: false,
-        encoding: "base64",
         type: "png",
       });
       expect(result.content[0]).toMatchObject({

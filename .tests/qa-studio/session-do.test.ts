@@ -6,7 +6,7 @@ const mockNewPage = vi.fn();
 const mockIsConnected = vi.fn().mockReturnValue(true);
 const mockAdapterClose = vi.fn().mockResolvedValue(undefined);
 
-vi.mock("../../src/core/browser-automation/adapter-puppeteer.js", () => {
+vi.mock("../../src/core/browser-automation/edge/adapter-puppeteer.js", () => {
   return {
     PuppeteerAdapter: class MockPuppeteerAdapter {
       launch() {

@@ -174,8 +174,9 @@ describe("PuppeteerAdapter", () => {
 
     const adapter = new PuppeteerAdapter(mockBinding);
     const page = await adapter.newPage();
-    const tree = await page.getAccessibilityTree();
-    expect(tree).toBeNull();
+    await expect(page.getAccessibilityTree()).rejects.toThrow(
+      "Failed to get accessibility tree via CDP: CDP failed",
+    );
   });
 
   it("adapter.close closes browser", async () => {
