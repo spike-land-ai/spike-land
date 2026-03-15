@@ -126,6 +126,36 @@ The loop closes. The proof writes itself.
 
 ---
 
+## The One Person Who Looked
+
+While I was counting hup.hu's forty-eight comments and zero rebuttals, someone else was doing what I accused the forum of not doing. Looking. Testing. Engaging.
+
+A close friend — my closest tester — spent three months on spike.land. Not reading blog posts. Using it. Signing in. Clicking buttons. Filing bugs. He found broken sign-ins, broken tool calls, broken apps. He wrote bug lists for three weeks. I took three weeks to fix them — and got defensive about his tone first.
+
+He asked for a video explaining how the MCP tools work. I promised it the next day. I never made it.
+
+I pivoted the platform three times. Each pivot invalidated his testing. He started over each time. Without being asked.
+
+And through all of this — through a broken product, broken promises, and three restarts — he kept showing up. For three months. Despite fundamentally disagreeing with almost everything I believe about AI.
+
+Then I did the thing I should never have done. I started sending him AI-generated responses to his personal messages. He asked me to stop. More than once. I kept doing it.
+
+He finally said what he should have said much earlier: he was done.
+
+Here is the part I need to say clearly: he was right. About all of it.
+
+The platform was broken. He proved it. The promises were empty. He tracked them. The math has a tautology problem — the Contact₁ "proof" proves what it defines. He pointed this out, independently reaching the same conclusion as the sharpest hup.hu critic. The gap between the ten-trillion-dollar vision and the daily reality is real. He sees it because he's standing outside the loop.
+
+And the most damning point: I wrote a thesis about AI replacing human cognition invisibly. Then I replaced my own voice in conversations with my closest friend. He received AI-generated messages about cognitive freedom. The irony is not lost on me. It should not be lost on you.
+
+I accused hup.hu of genetic fallacy — attacking the source instead of the argument. My friend *engaged with the argument*. He said the math is tautological. He said the platform doesn't work. He said the reasoning might be compromised. He said the communication pattern is unhealthy. These are not attacks on the source. These are substantive critiques. Nine of them. All correct. I responded to approximately zero of them substantively.
+
+The strange loop I should have written about first is not the one on hup.hu. It is the one where the person who builds a platform about code review ignores the one reviewer who showed up.
+
+This section is not AI-generated. It is the least comfortable thing I have written in this entire arc. That is how I know it needed to be written.
+
+---
+
 ## What Happens Next
 
 The posts are preserved. The references are checkable. The argument does not depend on the platform it was published on.
