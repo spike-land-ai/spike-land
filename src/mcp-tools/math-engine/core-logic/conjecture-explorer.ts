@@ -22,7 +22,7 @@ const STRATEGIES: ExplorationStrategy[] = [
   {
     name: "Modular Arithmetic",
     description: "Analyze the problem modulo small primes and residue classes",
-    applicableTo: ["erdos-straus", "covering-systems"],
+    applicableTo: ["erdos-straus", "covering-systems", "collatz"],
   },
   {
     name: "Algebraic Geometry",
@@ -37,7 +37,28 @@ const STRATEGIES: ExplorationStrategy[] = [
   {
     name: "Computational Verification",
     description: "Verify conjecture for specific cases and look for patterns",
-    applicableTo: ["erdos-straus", "erdos-ginzburg-ziv", "covering-systems", "unit-distance"],
+    applicableTo: [
+      "erdos-straus",
+      "erdos-ginzburg-ziv",
+      "covering-systems",
+      "unit-distance",
+      "collatz",
+    ],
+  },
+  {
+    name: "Dynamical Systems Analysis",
+    description: "Analyze orbit structure, attractors, stopping times, and Lyapunov exponents",
+    applicableTo: ["collatz"],
+  },
+  {
+    name: "Probabilistic Heuristics",
+    description: "Apply random walk models and stochastic convergence bounds",
+    applicableTo: ["collatz"],
+  },
+  {
+    name: "p-adic Analysis",
+    description: "Extend to p-adic integers and study convergence in p-adic topology",
+    applicableTo: ["collatz"],
   },
 ];
 

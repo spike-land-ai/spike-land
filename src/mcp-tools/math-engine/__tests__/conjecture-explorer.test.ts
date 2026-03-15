@@ -18,6 +18,17 @@ describe("conjecture-explorer", () => {
     expect(strategies.map((s) => s.name)).toContain("Algebraic Geometry");
   });
 
+  it("should return 5 applicable strategies for collatz", () => {
+    const strategies = getApplicableStrategies("collatz");
+    const names = strategies.map((s) => s.name);
+    expect(strategies).toHaveLength(5);
+    expect(names).toContain("Modular Arithmetic");
+    expect(names).toContain("Computational Verification");
+    expect(names).toContain("Dynamical Systems Analysis");
+    expect(names).toContain("Probabilistic Heuristics");
+    expect(names).toContain("p-adic Analysis");
+  });
+
   it("should produce findings from exploration", async () => {
     const llm: LLMProvider = {
       complete: vi.fn().mockResolvedValue(`Exploration result:

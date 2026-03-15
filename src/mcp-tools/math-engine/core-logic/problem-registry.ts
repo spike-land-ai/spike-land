@@ -44,6 +44,21 @@ distinguish natural fixed points (from dynamics) vs injected (arbitrary).`,
     references: ["sixteen-mathematicians-walked-into-a-loop", "quantum analogy (surviving)"],
   },
 
+  // ─── Collatz Conjecture ───
+  {
+    id: "collatz",
+    title: "Collatz Conjecture (3n+1)",
+    category: "open_problem",
+    description: `For any positive integer n, repeatedly apply:
+    - If n is even: n -> n/2
+    - If n is odd: n -> 3n+1
+The conjecture: every positive integer eventually reaches 1.
+Verified computationally for n up to 2.7 x 10^18 but no proof exists.
+Explore: dynamical systems, probabilistic heuristics, p-adic analysis, modular obstructions.`,
+    status: "open",
+    references: ["collatz-1937", "lagarias-1985", "tao-2022-almost-all"],
+  },
+
   // ─── Erdos Conjectures ───
   {
     id: "erdos-straus",
