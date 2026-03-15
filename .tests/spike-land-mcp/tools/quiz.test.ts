@@ -181,8 +181,11 @@ describe("Quiz Engine", () => {
     it("prioritizes unmastered concepts", () => {
       const session = createTestSession();
       // Master concept A
-      session.conceptStates[0]!.mastered = true;
-      session.conceptStates[0]!.correctCount = 2;
+      const conceptA = session.conceptStates[0];
+      if (conceptA) {
+        conceptA.mastered = true;
+        conceptA.correctCount = 2;
+      }
 
       const round = generateNextRound(session);
       // Should include concepts B and C (unmastered)
@@ -262,7 +265,7 @@ describe("Quiz Engine", () => {
       const conceptAIdx = round1.questions.findIndex((q) => q.conceptIndex === 0);
       if (conceptAIdx >= 0) {
         const answers: [number, number, number] = [0, 0, 0];
-        answers[conceptAIdx] = round1.questions[conceptAIdx]?.correctIndex;
+        answers[conceptAIdx] = round1.questions[conceptAIdx]?.correctIndex ?? 0;
         evaluateAnswers(session, answers);
 
         // Next round: answer concept A variant incorrectly
@@ -286,7 +289,8 @@ describe("Quiz Engine", () => {
     it("resets mastery on conflict", () => {
       const session = createTestSession();
       // Pre-set concept A as having 1 correct answer
-      session.conceptStates[0]!.correctCount = 1;
+      const conceptAState = session.conceptStates[0];
+      if (conceptAState) conceptAState.correctCount = 1;
       session.conceptStates[0]?.answerHistory.set(0, 0); // variant 0, answered correctly (idx 0)
 
       // Now create a round where concept A variant 1 is tested

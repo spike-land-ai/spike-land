@@ -74,7 +74,8 @@ const CommenterRow: FC<{ commenterIndex: number; rowDelay: number }> = ({
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const commenter = ARENA_COMMENTERS[commenterIndex]!;
+  const commenter = ARENA_COMMENTERS[commenterIndex];
+  if (!commenter) return null;
   const responses = RESPONSES[commenter.name] ?? ["", "", ""];
 
   const labelOpacity = fadeIn(frame, fps, 0.4, rowDelay);

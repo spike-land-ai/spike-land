@@ -173,7 +173,8 @@ export class PuppeteerAdapter implements BrowserAdapter {
 
   async newPage(): Promise<BrowserPage> {
     if (!this._browser) await this.launch();
-    const rawPage = await this._browser!.newPage();
+    if (!this._browser) throw new Error("Browser failed to launch");
+    const rawPage = await this._browser.newPage();
     return new PuppeteerPageWrapper(rawPage);
   }
 

@@ -78,7 +78,7 @@ export function convertMiddleware(filename: string, source: string): TransformRe
     /export\s+const\s+config\s*=\s*\{[\s\S]*?matcher\s*:\s*(\[[\s\S]*?\]|['"][^'"]+['"])/,
   );
   if (matcherMatch) {
-    const matcherValue = matcherMatch[1]!;
+    const matcherValue = matcherMatch[1] ?? "";
     warnings.push(`Matcher config detected: ${matcherValue} — apply as app.use() paths`);
   }
 

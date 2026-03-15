@@ -122,7 +122,7 @@ export interface Challenge {
 /** Maps algebraic square name (e.g. "e4") to [file, rank] indices [0-7]. */
 export function squareToCoords(square: string): [number, number] {
   const file = square.charCodeAt(0) - 97; // 'a' = 0
-  const rank = parseInt(square[1]!, 10) - 1; // '1' = 0
+  const rank = parseInt(square[1] ?? "0", 10) - 1; // '1' = 0
   return [file, rank];
 }
 

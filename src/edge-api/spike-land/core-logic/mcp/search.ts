@@ -108,7 +108,8 @@ export class ToolSearch {
         return true;
       })
       .map((r) => {
-        const tracked = tools.get(r.name)!;
+        const tracked = tools.get(r.name);
+        if (!tracked) return null;
         const stability = tracked.definition.stability ?? "stable";
 
         return {
@@ -125,6 +126,7 @@ export class ToolSearch {
           version: tracked.definition.version ?? "1.0.0",
           stability,
         };
-      });
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null);
   }
 }

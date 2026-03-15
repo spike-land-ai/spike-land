@@ -9,7 +9,9 @@ import { migrateNextjsProject } from "../index.ts";
 
 /** Convert DemoRepo files to RepoFile array for migrateNextjsProject. */
 function repoFiles(name: string): RepoFile[] {
-  return DEMO_REPOS[name]!.files.map((f) => ({ path: f.path, content: f.content }));
+  const repo = DEMO_REPOS[name];
+  if (!repo) throw new Error(`Demo repo "${name}" not found`);
+  return repo.files.map((f) => ({ path: f.path, content: f.content }));
 }
 
 /** Find a result by filename (or partial match). */
@@ -27,11 +29,9 @@ function allTransformed(report: MigrationReport): string {
 // ---------------------------------------------------------------------------
 
 describe("hello-world demo (pages router)", () => {
-  let report: MigrationReport;
-
   // Eagerly compute once so individual tests do not re-run the pipeline.
   // Vitest runs describe blocks synchronously, so assigning here is safe.
-  report = migrateNextjsProject(repoFiles("hello-world"), "pages");
+  const report: MigrationReport = migrateNextjsProject(repoFiles("hello-world"), "pages");
 
   it("produces a non-empty files array", () => {
     expect(report.files.length).toBeGreaterThan(0);
@@ -105,7 +105,7 @@ describe("hello-world demo (pages router)", () => {
     const indexResult = findFile(report, "pages/index");
     expect(indexResult).toBeDefined();
     // The file is transformed (imports rewritten, Image/Head removed)
-    expect(indexResult!.transformed).not.toContain('from "next/link"');
+    expect(indexResult?.transformed ?? "").not.toContain('from "next/link"');
   });
 
   it("getStaticProps warning is emitted when function-declaration form is present", () => {
@@ -123,29 +123,29 @@ describe("hello-world demo (pages router)", () => {
     // Confirm the file is still processed (link/router imports rewritten).
     const postResult = findFile(report, "posts");
     expect(postResult).toBeDefined();
-    expect(postResult!.transformed).not.toContain('from "next/router"');
-    expect(postResult!.transformed).not.toContain('from "next/head"');
+    expect(postResult?.transformed ?? "").not.toContain('from "next/router"');
+    expect(postResult?.transformed ?? "").not.toContain('from "next/head"');
   });
 
   it("API route pages/api/hello.ts is converted to a Hono handler stub", () => {
     const apiResult = findFile(report, "api/hello");
     expect(apiResult).toBeDefined();
-    expect(apiResult!.transformed).toContain('import { Hono } from "hono"');
-    expect(apiResult!.transformed).toContain("const app = new Hono()");
-    expect(apiResult!.transformed).toContain("export default app");
+    expect(apiResult?.transformed ?? "").toContain('import { Hono } from "hono"');
+    expect(apiResult?.transformed ?? "").toContain("const app = new Hono()");
+    expect(apiResult?.transformed ?? "").toContain("export default app");
   });
 
   it("hello.ts API route detects GET method and generates app.get() handler", () => {
     const apiResult = findFile(report, "api/hello");
     expect(apiResult).toBeDefined();
-    expect(apiResult!.transformed).toContain("app.get(");
+    expect(apiResult?.transformed ?? "").toContain("app.get(");
   });
 
   it("API route result filename is remapped from pages/api/ to api/", () => {
     const apiResult = report.files.find((r) => r.filename.includes("api/hello"));
     expect(apiResult).toBeDefined();
-    expect(apiResult!.filename).not.toContain("pages/api/");
-    expect(apiResult!.filename).toMatch(/^api\/hello/);
+    expect(apiResult?.filename ?? "").not.toContain("pages/api/");
+    expect(apiResult?.filename ?? "").toMatch(/^api\/hello/);
   });
 
   it("rewrites config warning is emitted even when rewrite rules cannot be parsed", () => {
@@ -164,27 +164,27 @@ describe("hello-world demo (pages router)", () => {
   it("next.config.js is converted to vite.config.ts", () => {
     const viteResult = findFile(report, "vite.config");
     expect(viteResult).toBeDefined();
-    expect(viteResult!.filename).toBe("vite.config.ts");
+    expect(viteResult?.filename ?? "").toBe("vite.config.ts");
   });
 
   it("vite.config.ts output contains server proxy config for /api", () => {
     const viteResult = findFile(report, "vite.config");
     expect(viteResult).toBeDefined();
-    expect(viteResult!.transformed).toContain("/api");
-    expect(viteResult!.transformed).toContain("proxy");
+    expect(viteResult?.transformed ?? "").toContain("/api");
+    expect(viteResult?.transformed ?? "").toContain("proxy");
   });
 
   it("NEXT_PUBLIC_APP_NAME env var is noted in vite.config.ts output", () => {
     const viteResult = findFile(report, "vite.config");
     expect(viteResult).toBeDefined();
-    expect(viteResult!.transformed).toContain("APP_NAME");
+    expect(viteResult?.transformed ?? "").toContain("APP_NAME");
   });
 
   it("useRouter from next/router is transformed to @tanstack/react-router in posts page", () => {
     const postResult = findFile(report, "posts");
     expect(postResult).toBeDefined();
-    expect(postResult!.transformed).not.toContain('from "next/router"');
-    expect(postResult!.transformed).toContain("@tanstack/react-router");
+    expect(postResult?.transformed ?? "").not.toContain('from "next/router"');
+    expect(postResult?.transformed ?? "").toContain("@tanstack/react-router");
   });
 
   it("package.json is not included in transformed results (non-ts/tsx file skipped)", () => {
@@ -198,8 +198,7 @@ describe("hello-world demo (pages router)", () => {
 // ---------------------------------------------------------------------------
 
 describe("dashboard demo (app router)", () => {
-  let report: MigrationReport;
-  report = migrateNextjsProject(repoFiles("dashboard"), "app");
+  const report: MigrationReport = migrateNextjsProject(repoFiles("dashboard"), "app");
 
   it("produces a non-empty files array", () => {
     expect(report.files.length).toBeGreaterThan(0);
@@ -221,20 +220,20 @@ describe("dashboard demo (app router)", () => {
   it("middleware result contains authMiddleware function export", () => {
     const middlewareResult = report.files.find((r) => r.filename.includes("middleware/auth"));
     expect(middlewareResult).toBeDefined();
-    expect(middlewareResult!.transformed).toContain("authMiddleware");
+    expect(middlewareResult?.transformed ?? "").toContain("authMiddleware");
   });
 
   it("NextResponse.next() in middleware is replaced with await next()", () => {
     const middlewareResult = report.files.find((r) => r.filename.includes("middleware/auth"));
     expect(middlewareResult).toBeDefined();
-    expect(middlewareResult!.transformed).toContain("await next()");
-    expect(middlewareResult!.transformed).not.toContain("NextResponse.next()");
+    expect(middlewareResult?.transformed ?? "").toContain("await next()");
+    expect(middlewareResult?.transformed ?? "").not.toContain("NextResponse.next()");
   });
 
   it("NextRequest type annotation is replaced with Hono Context in middleware", () => {
     const middlewareResult = report.files.find((r) => r.filename.includes("middleware/auth"));
     expect(middlewareResult).toBeDefined();
-    expect(middlewareResult!.transformed).not.toContain(": NextRequest");
+    expect(middlewareResult?.transformed ?? "").not.toContain(": NextRequest");
   });
 
   it("middleware warns about matcher config", () => {
@@ -271,22 +270,22 @@ describe("dashboard demo (app router)", () => {
   it("app/api/data/route.ts is converted to a Hono handler stub", () => {
     const apiResult = report.files.find((r) => r.filename.includes("api/data"));
     expect(apiResult).toBeDefined();
-    expect(apiResult!.transformed).toContain('import { Hono } from "hono"');
-    expect(apiResult!.transformed).toContain("export default app");
+    expect(apiResult?.transformed ?? "").toContain('import { Hono } from "hono"');
+    expect(apiResult?.transformed ?? "").toContain("export default app");
   });
 
   it("app/api/data/route.ts detects GET and POST named exports", () => {
     const apiResult = report.files.find((r) => r.filename.includes("api/data"));
     expect(apiResult).toBeDefined();
-    expect(apiResult!.transformed).toContain("app.get(");
-    expect(apiResult!.transformed).toContain("app.post(");
+    expect(apiResult?.transformed ?? "").toContain("app.get(");
+    expect(apiResult?.transformed ?? "").toContain("app.post(");
   });
 
   it("app/api route result filename is remapped from app/api/ to api/", () => {
     const apiResult = report.files.find((r) => r.filename.includes("api/data"));
     expect(apiResult).toBeDefined();
-    expect(apiResult!.filename).not.toContain("app/api/");
-    expect(apiResult!.filename).toMatch(/^api\/data/);
+    expect(apiResult?.filename ?? "").not.toContain("app/api/");
+    expect(apiResult?.filename ?? "").toMatch(/^api\/data/);
   });
 
   it("next/link imports in app pages are replaced with @tanstack/react-router", () => {
@@ -303,7 +302,7 @@ describe("dashboard demo (app router)", () => {
     // dashboard config has NEXT_PUBLIC_API_URL — the config converter records it
     const viteResult = findFile(report, "vite.config");
     expect(viteResult).toBeDefined();
-    expect(viteResult!.transformed).toContain("API_URL");
+    expect(viteResult?.transformed ?? "").toContain("API_URL");
   });
 
   it("warnings array is non-empty for dashboard", () => {
@@ -321,8 +320,7 @@ describe("dashboard demo (app router)", () => {
 // ---------------------------------------------------------------------------
 
 describe("ecommerce demo (mixed router)", () => {
-  let report: MigrationReport;
-  report = migrateNextjsProject(repoFiles("ecommerce"), "mixed");
+  const report: MigrationReport = migrateNextjsProject(repoFiles("ecommerce"), "mixed");
 
   it("produces a non-empty files array", () => {
     expect(report.files.length).toBeGreaterThan(0);
@@ -356,8 +354,8 @@ describe("ecommerce demo (mixed router)", () => {
   it("pages/api/checkout.ts is converted to Hono handler stub", () => {
     const checkoutResult = report.files.find((r) => r.filename.includes("api/checkout"));
     expect(checkoutResult).toBeDefined();
-    expect(checkoutResult!.transformed).toContain('import { Hono } from "hono"');
-    expect(checkoutResult!.transformed).toContain("export default app");
+    expect(checkoutResult?.transformed ?? "").toContain('import { Hono } from "hono"');
+    expect(checkoutResult?.transformed ?? "").toContain("export default app");
   });
 
   it("checkout API route falls back to GET when method check uses !==", () => {
@@ -366,19 +364,19 @@ describe("ecommerce demo (mixed router)", () => {
     const checkoutResult = report.files.find((r) => r.filename.includes("api/checkout"));
     expect(checkoutResult).toBeDefined();
     // Hono stub is always generated — at least one handler present
-    expect(checkoutResult!.transformed).toMatch(/app\.\w+\(/);
+    expect(checkoutResult?.transformed ?? "").toMatch(/app\.\w+\(/);
   });
 
   it("middleware.ts (geo middleware) is converted", () => {
     const middlewareResult = report.files.find((r) => r.filename.includes("middleware/auth"));
     expect(middlewareResult).toBeDefined();
-    expect(middlewareResult!.transformed).toContain("authMiddleware");
+    expect(middlewareResult?.transformed ?? "").toContain("authMiddleware");
   });
 
   it("geo middleware conversion replaces NextResponse.next() with await next()", () => {
     const middlewareResult = report.files.find((r) => r.filename.includes("middleware/auth"));
     expect(middlewareResult).toBeDefined();
-    expect(middlewareResult!.transformed).toContain("await next()");
+    expect(middlewareResult?.transformed ?? "").toContain("await next()");
   });
 
   it("i18n config in next.config.js emits a warning", () => {
@@ -403,13 +401,13 @@ describe("ecommerce demo (mixed router)", () => {
   it("NEXT_PUBLIC_STORE_NAME env var is noted in vite.config.ts output", () => {
     const viteResult = findFile(report, "vite.config");
     expect(viteResult).toBeDefined();
-    expect(viteResult!.transformed).toContain("STORE_NAME");
+    expect(viteResult?.transformed ?? "").toContain("STORE_NAME");
   });
 
   it("NEXT_PUBLIC_CURRENCY env var is noted in vite.config.ts output", () => {
     const viteResult = findFile(report, "vite.config");
     expect(viteResult).toBeDefined();
-    expect(viteResult!.transformed).toContain("CURRENCY");
+    expect(viteResult?.transformed ?? "").toContain("CURRENCY");
   });
 
   it("warnings array is non-empty", () => {
@@ -422,8 +420,8 @@ describe("ecommerce demo (mixed router)", () => {
     // transformed because of next/head, next/link, and next/image imports.
     const indexResult = findFile(report, "pages/index");
     expect(indexResult).toBeDefined();
-    expect(indexResult!.transformed).not.toContain('from "next/link"');
-    expect(indexResult!.transformed).not.toContain('from "next/image"');
+    expect(indexResult?.transformed ?? "").not.toContain('from "next/link"');
+    expect(indexResult?.transformed ?? "").not.toContain('from "next/image"');
   });
 });
 
@@ -510,7 +508,7 @@ describe("files that do not change are excluded from results", () => {
     const report = migrateNextjsProject(files, "pages");
     const aboutResult = report.files.find((r) => r.filename.includes("about"));
     expect(aboutResult).toBeDefined();
-    expect(aboutResult!.transformed).not.toContain('from "next/link"');
+    expect(aboutResult?.transformed ?? "").not.toContain('from "next/link"');
   });
 });
 
@@ -545,7 +543,9 @@ describe("MigrationReport shape guarantees across all demos", () => {
 
     it(`${name}: TransformResult.original is never mutated (matches demo fixture content)`, () => {
       const report = migrateNextjsProject(repoFiles(name), routerType);
-      const originals = new Map(DEMO_REPOS[name]!.files.map((f) => [f.path, f.content]));
+      const repo = DEMO_REPOS[name];
+      if (!repo) throw new Error(`Demo repo "${name}" not found`);
+      const originals = new Map(repo.files.map((f) => [f.path, f.content]));
       for (const r of report.files) {
         if (originals.has(r.filename)) {
           // Config files are stored as vite.config.ts (renamed), so original comes from next.config

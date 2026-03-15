@@ -150,25 +150,31 @@ function stringSimilarity(str1: string, str2: string): number {
   }
 
   for (let i = 0; i <= len1; i++) {
-    matrix[i]![0] = i;
+    const row = matrix[i];
+    if (row) row[0] = i;
   }
 
   for (let j = 0; j <= len2; j++) {
-    matrix[0]![j] = j;
+    const row = matrix[0];
+    if (row) row[j] = j;
   }
 
   for (let i = 1; i <= len1; i++) {
     for (let j = 1; j <= len2; j++) {
       const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
-      matrix[i]![j] = Math.min(
-        matrix[i - 1]![j]! + 1, // deletion
-        matrix[i]![j - 1]! + 1, // insertion
-        matrix[i - 1]![j - 1]! + cost, // substitution
-      );
+      const currentRow = matrix[i];
+      const prevRow = matrix[i - 1];
+      if (currentRow && prevRow) {
+        currentRow[j] = Math.min(
+          (prevRow[j] ?? 0) + 1, // deletion
+          (currentRow[j - 1] ?? 0) + 1, // insertion
+          (prevRow[j - 1] ?? 0) + cost, // substitution
+        );
+      }
     }
   }
 
-  const distance = matrix[len1]?.[len2];
+  const distance = matrix[len1]?.[len2] ?? 0;
   return 1 - distance / maxDist;
 }
 

@@ -589,10 +589,10 @@ async function resolveHeroPrompt(
     }
   }
 
-  let prompt = inferPromptFromRow(row, row!.hero_image ?? requestedPath);
+  let prompt = inferPromptFromRow(row, row?.hero_image ?? requestedPath);
 
   if (!prompt) {
-    const sourceRow = await fetchBlogPostSource(row!.slug);
+    const sourceRow = await fetchBlogPostSource(row?.slug ?? slug);
     if (sourceRow) {
       prompt = inferPromptFromRow(sourceRow, sourceRow.hero_image ?? requestedPath);
     }

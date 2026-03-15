@@ -62,9 +62,12 @@ export class BrowserSessionDO extends DurableObject<Env> {
   private async ensureTab(index?: number): Promise<TabState> {
     const adapter = this.getAdapter();
 
-    if (index !== undefined && this.tabs.has(index)) {
-      this.activeTabIndex = index;
-      return this.tabs.get(index)!;
+    if (index !== undefined) {
+      const existing = this.tabs.get(index);
+      if (existing) {
+        this.activeTabIndex = index;
+        return existing;
+      }
     }
 
     await adapter.launch();
@@ -229,7 +232,7 @@ export class BrowserSessionDO extends DurableObject<Env> {
     this.tabs.delete(index);
     if (this.activeTabIndex === index) {
       const remaining = [...this.tabs.keys()];
-      this.activeTabIndex = remaining.length > 0 ? remaining[0]! : 0;
+      this.activeTabIndex = remaining[0] ?? 0;
     }
     return true;
   }

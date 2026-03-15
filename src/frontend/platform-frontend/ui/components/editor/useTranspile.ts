@@ -338,7 +338,7 @@ export function useTranspile(source: string, options: TranspileOptions = {}): Tr
       if (prev.error) return prev;
       return {
         ...prev,
-        html: buildPreviewHtml(lastTranspiledRef.current!, isDarkMode),
+        html: buildPreviewHtml(lastTranspiledRef.current ?? "", isDarkMode),
       };
     });
   }, [isDarkMode]);

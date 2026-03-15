@@ -94,7 +94,7 @@ function userColor(userId: string): string {
   for (let i = 0; i < userId.length; i++) {
     hash = (hash * 31 + userId.charCodeAt(i)) >>> 0;
   }
-  return COLLAB_COLORS[hash % COLLAB_COLORS.length] ?? COLLAB_COLORS[0]!;
+  return COLLAB_COLORS[hash % COLLAB_COLORS.length] ?? COLLAB_COLORS[0] ?? "#3b82f6";
 }
 
 const MAX_BACKOFF_MS = 30_000;

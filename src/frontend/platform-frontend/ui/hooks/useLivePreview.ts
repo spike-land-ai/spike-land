@@ -639,7 +639,6 @@ export function useLivePreview(options: LivePreviewOptions): LivePreviewResult {
     };
     // filesKey and refreshToken drive rebuilds; debounceMs changes are applied
     // on the next build cycle without cancelling an in-flight request.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filesKey, refreshToken, debounceMs]);
 
   // Listen for runtime errors posted from the iframe.

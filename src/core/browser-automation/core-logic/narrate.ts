@@ -339,7 +339,8 @@ function narrateCompactNode(
     lines.push(`${indent}[${label}]`);
     const children = node.children ?? [];
     for (let i = 0; i < children.length; i++) {
-      narrateCompactNode(children[i]!, state, depth + 1, lines, children, i);
+      const child = children[i];
+      if (child) narrateCompactNode(child, state, depth + 1, lines, children, i);
     }
     return;
   }
@@ -407,7 +408,8 @@ function narrateCompactNode(
 
   const children = node.children ?? [];
   for (let i = 0; i < children.length; i++) {
-    narrateCompactNode(children[i]!, state, depth, lines, children, i);
+    const child = children[i];
+    if (child) narrateCompactNode(child, state, depth, lines, children, i);
   }
 }
 
@@ -431,7 +433,8 @@ export function narrateCompact(
 
   const children = tree.children ?? [];
   for (let i = 0; i < children.length; i++) {
-    narrateCompactNode(children[i]!, state, 0, lines, children, i);
+    const child = children[i];
+    if (child) narrateCompactNode(child, state, 0, lines, children, i);
   }
 
   return {
@@ -478,7 +481,8 @@ export function narrateCompactSection(
 
   const children = landmark.children ?? [];
   for (let i = 0; i < children.length; i++) {
-    narrateCompactNode(children[i]!, state, 1, lines, children, i);
+    const child = children[i];
+    if (child) narrateCompactNode(child, state, 1, lines, children, i);
   }
 
   return {

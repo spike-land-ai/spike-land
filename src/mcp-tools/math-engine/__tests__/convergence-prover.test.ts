@@ -21,7 +21,9 @@ describe("convergence-prover", () => {
 \`\`\``),
     };
 
-    const problem = getProblemById("convergence")!;
+    const problem = getProblemById("convergence");
+    expect(problem).toBeDefined();
+    if (!problem) return;
     const session = createSessionState("test-session", "convergence", 5);
 
     const findings = await analyzeConvergence(problem, session, llm);
@@ -35,7 +37,9 @@ describe("convergence-prover", () => {
       complete: vi.fn().mockResolvedValue("No JSON output here, just text analysis."),
     };
 
-    const problem = getProblemById("convergence")!;
+    const problem = getProblemById("convergence");
+    expect(problem).toBeDefined();
+    if (!problem) return;
     const session = createSessionState("test-session", "convergence", 5);
 
     const findings = await analyzeConvergence(problem, session, llm);

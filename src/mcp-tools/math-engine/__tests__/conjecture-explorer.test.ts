@@ -40,7 +40,9 @@ describe("conjecture-explorer", () => {
 \`\`\``),
     };
 
-    const problem = getProblemById("erdos-straus")!;
+    const problem = getProblemById("erdos-straus");
+    expect(problem).toBeDefined();
+    if (!problem) return;
     const session = createSessionState("test-explore", "erdos-straus", 3);
 
     const findings = await exploreConjecture(problem, session, llm);
@@ -56,7 +58,9 @@ describe("conjecture-explorer", () => {
       complete: vi.fn().mockResolvedValue("Interesting conjecture, but no structured output."),
     };
 
-    const problem = getProblemById("erdos-straus")!;
+    const problem = getProblemById("erdos-straus");
+    expect(problem).toBeDefined();
+    if (!problem) return;
     const session = createSessionState("test-explore", "erdos-straus", 3);
 
     const findings = await exploreConjecture(problem, session, llm);
