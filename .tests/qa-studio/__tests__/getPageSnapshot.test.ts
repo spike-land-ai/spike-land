@@ -53,7 +53,7 @@ import {
   cleanup,
   getOrCreateTab,
   getPageSnapshot,
-} from "../../../src/core/browser-automation/browser-session.js";
+} from "../../../src/core/browser-automation/core-logic/browser-session.js";
 
 async function resetAll() {
   await cleanup();
@@ -255,13 +255,11 @@ describe("getPageSnapshot", () => {
     expect(result?.tree).toBeNull();
   });
 
-  it("handles CDP error gracefully and returns null tree", async () => {
+  it("propagates CDP error when accessibility tree fetch fails", async () => {
     await getOrCreateTab();
     mockCdpSend.mockRejectedValue(new Error("CDP session failed"));
 
-    const result = await getPageSnapshot();
-    expect(result).not.toBeNull();
-    expect(result?.tree).toBeNull();
+    await expect(getPageSnapshot()).rejects.toThrow("CDP session failed");
   });
 
   it("skips unknown childIds during tree linking", async () => {

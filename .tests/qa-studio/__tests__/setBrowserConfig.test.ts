@@ -44,7 +44,7 @@ import {
   setBrowserConfig,
   getOrCreateTab,
   cleanup,
-} from "../../../src/core/browser-automation/browser-session.js";
+} from "../../../src/core/browser-automation/core-logic/browser-session.js";
 
 beforeEach(() => {
   vi.clearAllMocks();
