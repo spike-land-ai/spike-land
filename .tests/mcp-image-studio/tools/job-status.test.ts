@@ -4,9 +4,9 @@ import {
   mockGenerationJobRow,
   mockJobRow,
 } from "../__test-utils__/mock-deps.js";
-import { jobStatus } from "../../../src/mcp-tools/image-studio/tools/job-status.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
-import { asImageId, asJobId } from "../../../src/mcp-tools/image-studio/types.js";
+import { jobStatus } from "../../../src/mcp-tools/image-studio/core-logic/tools/job-status.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
+import { asImageId, asJobId } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 describe("jobStatus", () => {
   const userId = "u1";

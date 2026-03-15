@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockImageStudioDeps, mockImageRow } from "../__test-utils__/mock-deps.js";
-import { screenshot } from "../../../src/mcp-tools/image-studio/tools/screenshot.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
-import { asImageId } from "../../../src/mcp-tools/image-studio/types.js";
+import { screenshot } from "../../../src/mcp-tools/image-studio/core-logic/tools/screenshot.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
+import { asImageId } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { standardScenarios } from "../__test-utils__/standard-scenarios.js";
 
 describe("screenshot", () => {

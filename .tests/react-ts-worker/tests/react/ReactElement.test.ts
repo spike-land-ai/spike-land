@@ -3,8 +3,8 @@ import {
   cloneElement,
   createElement,
   isValidElement,
-} from "../../../../src/core/react-engine/react/ReactElement.js";
-import { REACT_ELEMENT_TYPE } from "../../../../src/core/react-engine/react/ReactSymbols.js";
+} from "../../../../src/core/react-engine/core-logic/react/ReactElement.js";
+import { REACT_ELEMENT_TYPE } from "../../../../src/core/react-engine/core-logic/react/ReactSymbols.js";
 
 describe("createElement", () => {
   it("creates element with string type", () => {

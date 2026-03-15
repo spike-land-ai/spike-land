@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import * as ReactAPI from "../../../../src/core/react-engine/react/index.js";
+import * as ReactAPI from "../../../../src/core/react-engine/core-logic/react/index.js";
 
 describe("react/index exports", () => {
   it("exports createElement", () => {

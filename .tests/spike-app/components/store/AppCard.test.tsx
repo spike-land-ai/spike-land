@@ -99,7 +99,7 @@ describe("AppCard (store)", () => {
 
     expect(screen.getByText("QA Studio")).toBeInTheDocument();
     expect(screen.getByText("🎭")).toBeInTheDocument();
-    expect(screen.getByText(/Browser automation/i)).toBeInTheDocument();
+    expect(screen.getByText("Browser automation and screenshot tools.")).toBeInTheDocument();
   });
 
   it("displays the category badge in grid layout", () => {

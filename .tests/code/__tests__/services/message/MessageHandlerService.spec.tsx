@@ -1,4 +1,4 @@
-import { MessageHandlerService } from "@/../services/message/MessageHandlerService";
+import { MessageHandlerService } from "@/services/message/MessageHandlerService";
 import type { ImageUrlPart, Message, MessagePart } from "@/lib/interfaces";
 import { MessageType } from "@/lib/interfaces";
 import { beforeEach, describe, expect, it, vi } from "vitest";

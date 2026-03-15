@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { autoTag } from "../../../src/mcp-tools/image-studio/tools/auto-tag.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
-import { asImageId } from "../../../src/mcp-tools/image-studio/types.js";
+import { autoTag } from "../../../src/mcp-tools/image-studio/core-logic/tools/auto-tag.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
+import { asImageId } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { createMockImageStudioDeps, mockImageRow } from "../__test-utils__/index.js";
 
 describe("auto-tag tool", () => {

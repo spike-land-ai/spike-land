@@ -1,4 +1,4 @@
-import { ScreenshotService } from "@/../services/screenshot/ScreenshotService";
+import { ScreenshotService } from "@/services/screenshot/ScreenshotService";
 import type { ImageData } from "@/lib/interfaces";
 import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
 

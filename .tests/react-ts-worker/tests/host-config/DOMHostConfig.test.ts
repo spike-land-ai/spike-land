@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { DOMHostConfig } from "../../../../src/core/react-engine/host-config/DOMHostConfig.js";
+import { DOMHostConfig } from "../../../../src/core/react-engine/core-logic/host-config/DOMHostConfig.js";
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const MATH_NAMESPACE = "http://www.w3.org/1998/Math/MathML";

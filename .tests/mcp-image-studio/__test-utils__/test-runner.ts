@@ -1,5 +1,5 @@
 import { createMockImageStudioDeps } from "./mock-deps.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 /**
  * A test utility that wraps a tool handler, automatically providing

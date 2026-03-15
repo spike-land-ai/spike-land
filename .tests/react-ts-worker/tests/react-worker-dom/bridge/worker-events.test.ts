@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   setupWorkerEventReceiver,
   WorkerEventRegistry,
-} from "../../../../../src/core/react-engine/react-worker-dom/bridge/worker-events.js";
-import { WorkerNodeImpl } from "../../../../../src/core/react-engine/react-worker-dom/bridge/worker-document.js";
+} from "../../../../../src/core/react-engine/core-logic/react-worker-dom/bridge/worker-events.js";
+import { WorkerNodeImpl } from "../../../../../src/core/react-engine/core-logic/react-worker-dom/bridge/worker-document.js";
 
 describe("WorkerEventRegistry", () => {
   describe("setHandler", () => {

@@ -7,10 +7,10 @@ import {
   mountClassInstance,
   processClassUpdateQueue,
   updateClassInstance,
-} from "../../../../src/core/react-engine/reconciler/ReactFiberClassComponent.js";
-import type { Fiber } from "../../../../src/core/react-engine/reconciler/ReactFiberTypes.js";
-import { SyncLane } from "../../../../src/core/react-engine/reconciler/ReactFiberLane.js";
-import { ClassComponent } from "../../../../src/core/react-engine/reconciler/ReactWorkTags.js";
+} from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberClassComponent.js";
+import type { Fiber } from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberTypes.js";
+import { SyncLane } from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberLane.js";
+import { ClassComponent } from "../../../../src/core/react-engine/core-logic/reconciler/ReactWorkTags.js";
 
 function makeFiber(overrides: Partial<Fiber> = {}): Fiber {
   return {

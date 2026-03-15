@@ -1,12 +1,12 @@
-import { asAlbumHandle, asImageId } from "../../../src/mcp-tools/image-studio/types.js";
+import { asAlbumHandle, asImageId } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createMockImageStudioDeps,
   mockAlbumRow,
   mockImageRow,
 } from "../__test-utils__/mock-deps.js";
-import { upload } from "../../../src/mcp-tools/image-studio/tools/upload.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import { upload } from "../../../src/mcp-tools/image-studio/core-logic/tools/upload.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 describe("upload", () => {
   const userId = "u1";

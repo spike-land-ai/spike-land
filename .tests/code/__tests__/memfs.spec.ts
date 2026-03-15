@@ -1,7 +1,7 @@
 // This file serves as an entry point for all memfs tests
 // The actual tests are in the memfs/ directory
 
-import FS from "@/lib/memfs/index";
+import * as memfs from "@/lib/memfs/index";
 import { describe, expect, it } from "vitest";
 
 describe("memfs", () => {
@@ -12,8 +12,9 @@ describe("memfs", () => {
   });
 
   it("should export a complete FS module", () => {
-    expect(FS).toBeDefined();
-    expect(typeof FS).toBe("object");
-    expect(Object.keys(FS).length).toBeGreaterThan(0);
+    // The memfs index uses `export *` (named exports), not a default export
+    expect(memfs).toBeDefined();
+    expect(typeof memfs).toBe("object");
+    expect(Object.keys(memfs).length).toBeGreaterThan(0);
   });
 });

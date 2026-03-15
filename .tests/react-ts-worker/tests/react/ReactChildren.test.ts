@@ -5,11 +5,11 @@ import {
   mapChildren,
   onlyChild,
   toArray,
-} from "../../../../src/core/react-engine/react/ReactChildren.js";
+} from "../../../../src/core/react-engine/core-logic/react/ReactChildren.js";
 import {
   createElement,
   isValidElement,
-} from "../../../../src/core/react-engine/react/ReactElement.js";
+} from "../../../../src/core/react-engine/core-logic/react/ReactElement.js";
 
 describe("mapChildren", () => {
   it("returns null for null children", () => {

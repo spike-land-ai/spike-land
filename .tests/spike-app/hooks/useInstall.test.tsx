@@ -143,14 +143,20 @@ describe("useInstall", () => {
   });
 
   it("optimistically updates install state and reconciles with server response", async () => {
-    // Initial status fetch
-    mockApiFetch.mockResolvedValueOnce(
-      mockResponse({ installed: false, count: 10 }),
-    );
-    // Install POST
-    mockApiFetch.mockResolvedValueOnce(
-      mockResponse({ appName: "QA Studio", count: 11 }),
-    );
+    let callIndex = 0;
+    mockApiFetch.mockImplementation(() => {
+      callIndex++;
+      if (callIndex === 1) {
+        // Initial status fetch
+        return Promise.resolve(mockResponse({ installed: false, count: 10 }));
+      }
+      if (callIndex === 2) {
+        // Install POST
+        return Promise.resolve(mockResponse({ appName: "QA Studio", count: 11 }));
+      }
+      // Any subsequent call (list re-fetch, etc.)
+      return Promise.resolve(mockResponse({ installed: true, count: 11 }));
+    });
 
     const { result } = renderHook(() => useInstall("qa-studio"), {
       wrapper: createWrapper(),
@@ -163,8 +169,10 @@ describe("useInstall", () => {
       await result.current.install();
     });
 
-    expect(result.current.isInstalled).toBe(true);
-    expect(result.current.installCount).toBe(11);
+    await waitFor(() => {
+      expect(result.current.isInstalled).toBe(true);
+      expect(result.current.installCount).toBe(11);
+    });
   });
 
   it("optimistically updates uninstall state", async () => {

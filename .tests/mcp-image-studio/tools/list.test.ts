@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMockImageStudioDeps, mockImageRow } from "../__test-utils__/mock-deps.js";
-import { list } from "../../../src/mcp-tools/image-studio/tools/list.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import { list } from "../../../src/mcp-tools/image-studio/core-logic/tools/list.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 describe("list", () => {
   const userId = "u1";

@@ -1,7 +1,7 @@
 import type { ICode } from "@/lib/interfaces";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ChatInterface } from "../../../src/frontend/monaco-editor/ChatInterface";
+import { ChatInterface } from "../../../src/frontend/monaco-editor/ui/ChatInterface";
 
 // Mock ICode interface
 const mockCodeSession: ICode = {

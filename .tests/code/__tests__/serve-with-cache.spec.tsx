@@ -104,7 +104,7 @@ describe("serveWithCache", () => {
 
     expect(await result.clone().text()).toBe("fetched content");
     expect(result.headers.get("Content-Type")).toBe("application/javascript");
-    expect(result.headers.get("Cache-Control")).toBe("public, max-age=604800, immutable");
+    expect(result.headers.get("Cache-Control")).toBe("public, max-age=14400, stale-while-revalidate=86400");
     expect(cache.put).toHaveBeenCalledWith(expect.any(Request), expect.any(Response));
     expect(assetFetcher).toHaveBeenCalledWith(expect.any(Request), expect.any(Function));
   });
@@ -197,7 +197,7 @@ describe("serveWithCache", () => {
     );
 
     expect(result.headers.get("Content-Type")).toBe("application/javascript");
-    expect(result.headers.get("Cache-Control")).toBe("public, max-age=604800, immutable");
+    expect(result.headers.get("Cache-Control")).toBe("public, max-age=14400, stale-while-revalidate=86400");
     expect(result.headers.get("Cross-Origin-Embedder-Policy")).toBe("require-corp");
   });
 
@@ -488,7 +488,7 @@ describe("serveWithCache", () => {
     expect(result.headers.get("Cross-Origin-Embedder-Policy")).toBe("require-corp");
   });
 
-  it("should not set 'Access-Control-Allow-Origin' header", async () => {
+  it("should set 'Access-Control-Allow-Origin' header to '*'", async () => {
     const { serve } = serveWithCache(files, cacheToUse);
     vi.mocked(cache.match).mockResolvedValue(undefined);
     const fetchedResponse = new Response("content", {
@@ -497,12 +497,13 @@ describe("serveWithCache", () => {
     vi.mocked(assetFetcher).mockResolvedValue(fetchedResponse);
 
     const result = await serve(
-      new Request("https://example.com/abc123/somefile.js"),
+      new Request("https://example.com/abc123/main.js"),
       assetFetcher,
       waitUntil,
     );
 
-    expect(result.headers.has("Access-Control-Allow-Origin")).toBe(false);
+    expect(result.headers.has("Access-Control-Allow-Origin")).toBe(true);
+    expect(result.headers.get("Access-Control-Allow-Origin")).toBe("*");
   });
 
   it("should call 'waitUntil' with cache put promise", async () => {
@@ -582,7 +583,7 @@ describe("serveWithCache", () => {
     expect(resultText).toContain("<!DOCTYPE html>");
     expect(resultText).toContain('<div id="root"></div>');
     expect(result.headers.get("Content-Type")).toBe("text/html");
-    expect(result.headers.get("Cache-Control")).toBe("public, max-age=604800, immutable");
+    expect(result.headers.get("Cache-Control")).toBe("public, no-cache, must-revalidate");
   });
 
   it("should handle requests with hash fragments", async () => {

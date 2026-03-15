@@ -10,7 +10,7 @@ class MockWorker {
 vi.stubGlobal("Worker", MockWorker);
 
 const { mount, unmount, MainThreadApplier } = await import(
-  "../../../../src/core/react-engine/react-worker-dom/main-entry.js"
+  "../../../../src/core/react-engine/core-logic/react-worker-dom/main-entry.js"
 );
 
 describe("main-entry", () => {

@@ -25,7 +25,7 @@ import {
   cleanFileContent,
   cleanFilePath,
   extractImportSpecifiers,
-} from "../../../../../src/frontend/monaco-editor/@/workers/ata.worker";
+} from "../../../../../src/frontend/monaco-editor/lazy-imports/ata.worker";
 
 describe("ata.worker", () => {
   beforeEach(() => {
@@ -45,11 +45,13 @@ describe("ata.worker", () => {
       expect(cleanFilePath(`${origin}/react/index.d.ts`, origin)).toBe("/react/index.d.ts");
     });
 
-    it("strips spike.land and esm.sh origins", () => {
+    it("strips spike.land and esm.spike.land origins", () => {
       expect(cleanFilePath("https://spike.land/react/index.d.ts", origin)).toBe(
         "/react/index.d.ts",
       );
-      expect(cleanFilePath("https://esm.sh/react/index.d.ts", origin)).toBe("/react/index.d.ts");
+      expect(cleanFilePath("https://esm.spike.land/react/index.d.ts", origin)).toBe(
+        "/react/index.d.ts",
+      );
     });
 
     it("removes node_modules, @types, dist, types, src, declarations segments", () => {

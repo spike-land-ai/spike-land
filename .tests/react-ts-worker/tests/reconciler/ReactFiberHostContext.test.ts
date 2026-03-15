@@ -6,13 +6,13 @@ import {
   popHostContainer,
   pushHostContext,
   popHostContext,
-} from "../../../../src/core/react-engine/reconciler/ReactFiberHostContext.js";
+} from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberHostContext.js";
 import type {
   Fiber,
   FiberRoot,
-} from "../../../../src/core/react-engine/reconciler/ReactFiberTypes.js";
-import { DOMHostConfig } from "../../../../src/core/react-engine/host-config/DOMHostConfig.js";
-import { HostRoot } from "../../../../src/core/react-engine/reconciler/ReactWorkTags.js";
+} from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberTypes.js";
+import { DOMHostConfig } from "../../../../src/core/react-engine/core-logic/host-config/DOMHostConfig.js";
+import { HostRoot } from "../../../../src/core/react-engine/core-logic/reconciler/ReactWorkTags.js";
 
 function makeHostRootFiber(container: HTMLElement): Fiber {
   const fiberRoot: Partial<FiberRoot> = {

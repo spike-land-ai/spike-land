@@ -10,7 +10,7 @@ const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
 beforeEach(() => {
-  vi.useFakeTimers();
+  vi.useFakeTimers({ shouldAdvanceTime: true });
   mockFetch.mockReset();
 });
 
@@ -73,7 +73,9 @@ describe("useTranspile", () => {
     mockFetch.mockResolvedValue({ ok: true, text: () => Promise.resolve("const x=1;") });
     const { result } = renderHook(() => useTranspile("const a=1;", { debounceMs: 100 }));
 
-    act(() => { vi.advanceTimersByTime(150); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(150);
+    });
 
     await waitFor(() => {
       expect(result.current.html).not.toBeNull();
@@ -87,7 +89,9 @@ describe("useTranspile", () => {
     mockFetch.mockResolvedValue({ ok: false, text: () => Promise.resolve("SyntaxError: unexpected token") });
     const { result } = renderHook(() => useTranspile("const;", { debounceMs: 100 }));
 
-    act(() => { vi.advanceTimersByTime(150); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(150);
+    });
 
     await waitFor(() => {
       expect(result.current.error).not.toBeNull();
@@ -100,7 +104,9 @@ describe("useTranspile", () => {
     mockFetch.mockResolvedValue({ ok: false, text: () => Promise.resolve("bad code") });
     const { result } = renderHook(() => useTranspile("x;", { debounceMs: 100 }));
 
-    act(() => { vi.advanceTimersByTime(150); });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(150);
+    });
     await waitFor(() => expect(result.current.error).not.toBeNull());
 
     act(() => { result.current.clearError(); });

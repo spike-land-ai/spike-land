@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { asImageId } from "../../../src/mcp-tools/image-studio/types.js";
+import { asImageId } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { createMockImageStudioDeps, mockImageRow } from "../__test-utils__/mock-deps.js";
-import type { NanoDeps, ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
+import type { NanoDeps } from "../../../src/mcp-tools/image-studio/core-logic/index.js";
 import {
   consumeCreditsOrError,
   resolveImageOrError,
   resolveImagesOrError,
-} from "../../../src/mcp-tools/image-studio/define-tool.js";
+} from "../../../src/mcp-tools/image-studio/core-logic/define-tool.js";
 
 describe("resolveImageOrError", () => {
   let deps: NanoDeps;

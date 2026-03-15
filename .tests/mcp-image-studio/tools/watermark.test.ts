@@ -1,8 +1,8 @@
-import { asImageId } from "../../../src/mcp-tools/image-studio/types.js";
+import { asImageId } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMockImageStudioDeps, mockImageRow } from "../__test-utils__/mock-deps.js";
-import { watermark } from "../../../src/mcp-tools/image-studio/tools/watermark.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import { watermark } from "../../../src/mcp-tools/image-studio/core-logic/tools/watermark.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { standardScenarios } from "../__test-utils__/standard-scenarios.js";
 
 describe("watermark", () => {

@@ -7,7 +7,7 @@ import type {
   CallToolResult,
   ImageStudioToolRegistry,
   ToolDefinition,
-} from "../../../src/mcp-tools/image-studio/types.js";
+} from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 export type MockRegistry = ImageStudioToolRegistry & {
   handlers: Map<

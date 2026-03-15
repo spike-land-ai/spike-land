@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   type EditorState as _EditorState,
   useEditorState,
-} from "../../../src/frontend/monaco-editor/hooks/use-editor-state";
+} from "../../../src/frontend/monaco-editor/ui/hooks/use-editor-state";
 
 describe("useEditorState", () => {
   beforeEach(() => {

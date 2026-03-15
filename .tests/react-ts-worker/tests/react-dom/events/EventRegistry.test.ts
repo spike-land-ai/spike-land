@@ -6,7 +6,7 @@ import {
   getReactNamesForNativeEvent,
   isDiscreteEvent,
   isNonBubblingEvent,
-} from "../../../../../src/core/react-engine/react-dom/events/EventRegistry.js";
+} from "../../../../../src/core/react-engine/core-logic/react-dom/events/EventRegistry.js";
 
 describe("EventRegistry", () => {
   describe("getReactNamesForNativeEvent", () => {

@@ -15,7 +15,11 @@ const capturedActions = vi.hoisted(
 );
 
 // Mocked modules - must be before any imports
-vi.mock("cross-spawn", () => ({ default: vi.fn() }));
+const mockSpawn = vi.hoisted(() => vi.fn());
+vi.mock("node:child_process", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:child_process")>();
+  return { ...actual, spawn: mockSpawn };
+});
 vi.mock("fs/promises", () => ({
   readFile: vi.fn(),
   writeFile: vi.fn(),
@@ -70,7 +74,7 @@ vi.mock("commander", async (importOriginal) => {
 });
 
 // Import mocked modules so we can set expectations on them
-import spawn from "cross-spawn";
+const spawn = mockSpawn;
 import { mkdir, readFile, writeFile } from "fs/promises";
 import * as agentModule from "../../../src/cli/docker-dev/node-sys/agent.js";
 import * as redisModule from "../../../src/cli/docker-dev/core-logic/redis.js";

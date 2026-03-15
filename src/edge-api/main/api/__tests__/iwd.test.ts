@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
 import { Hono } from "hono";
-import { iwd, resolveGreeting } from "../../routes/iwd.js";
-import type { Env } from "../../../core-logic/env.js";
+import { iwd, resolveGreeting } from "../routes/iwd.js";
+import type { Env } from "../../core-logic/env.js";
 
 interface VisitorRecord {
   id: string;
