@@ -104,7 +104,9 @@ describe("serveWithCache", () => {
 
     expect(await result.clone().text()).toBe("fetched content");
     expect(result.headers.get("Content-Type")).toBe("application/javascript");
-    expect(result.headers.get("Cache-Control")).toBe("public, max-age=14400, stale-while-revalidate=86400");
+    expect(result.headers.get("Cache-Control")).toBe(
+      "public, max-age=14400, stale-while-revalidate=86400",
+    );
     expect(cache.put).toHaveBeenCalledWith(expect.any(Request), expect.any(Response));
     expect(assetFetcher).toHaveBeenCalledWith(expect.any(Request), expect.any(Function));
   });
@@ -197,7 +199,9 @@ describe("serveWithCache", () => {
     );
 
     expect(result.headers.get("Content-Type")).toBe("application/javascript");
-    expect(result.headers.get("Cache-Control")).toBe("public, max-age=14400, stale-while-revalidate=86400");
+    expect(result.headers.get("Cache-Control")).toBe(
+      "public, max-age=14400, stale-while-revalidate=86400",
+    );
     expect(result.headers.get("Cross-Origin-Embedder-Policy")).toBe("require-corp");
   });
 

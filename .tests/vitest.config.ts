@@ -202,16 +202,22 @@ const packages: Record<string, PkgConfig> = {
       "@/services/ServiceWorkerManager": src("frontend/monaco-editor/edge/ServiceWorkerManager.ts"),
       "@/hooks/use-dark-mode": src("frontend/monaco-editor/ui/@/hooks/use-dark-mode.ts"),
       "@/hooks/use-dictation": src("frontend/monaco-editor/ui/@/hooks/use-dictation.ts"),
-      "@/components/ui/start-with-prompt": src("frontend/monaco-editor/animation-ui/start-with-prompt.tsx"),
+      "@/components/ui/start-with-prompt": src(
+        "frontend/monaco-editor/animation-ui/start-with-prompt.tsx",
+      ),
       "@/components/ui/card": src("frontend/monaco-editor/ui/@/components/ui/card.tsx"),
       "@/components/ui/theme-toggle": src("frontend/monaco-editor/ui/@/components/ui/toggle.tsx"),
       "@/external/html2canvas": src("frontend/monaco-editor/rendering/html2canvas.ts"),
       "@/workers/ata.worker": src("frontend/monaco-editor/lazy-imports/ata.worker.ts"),
-      "@/workers/monaco-editor.worker": src("frontend/monaco-editor/editor/monaco-editor.worker.ts"),
+      "@/workers/monaco-editor.worker": src(
+        "frontend/monaco-editor/editor/monaco-editor.worker.ts",
+      ),
       "@/lib/try-catch": src("frontend/monaco-editor/lazy-imports/try-catch.ts"),
       "@/lib/queued-fetch": src("frontend/monaco-editor/http-client/queued-fetch.ts"),
       "@/components/app/wrapper": src("frontend/monaco-editor/ui/@/components/app/wrapper.tsx"),
-      "@/components/errors/error-boundary": src("frontend/monaco-editor/ui/@/components/app/error-boundary.tsx"),
+      "@/components/errors/error-boundary": src(
+        "frontend/monaco-editor/ui/@/components/app/error-boundary.tsx",
+      ),
       "@/lib/webgl-support": src("frontend/monaco-editor/core-logic/lib/webgl-support.ts"),
       // Fallback: most @/ files live in core-logic
       "@": src("frontend/monaco-editor/core-logic"),

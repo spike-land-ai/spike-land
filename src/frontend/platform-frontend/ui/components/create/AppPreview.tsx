@@ -44,9 +44,7 @@ function GenerationProgress({ steps }: { steps: GenerationStep[] }) {
             <span
               className={cn(
                 "flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px]",
-                step.done
-                  ? "bg-primary text-primary-foreground"
-                  : "border border-border bg-muted",
+                step.done ? "bg-primary text-primary-foreground" : "border border-border bg-muted",
               )}
               aria-hidden="true"
             >
@@ -197,7 +195,12 @@ export function AppPreview({
                 asChild
                 title="Open in new tab"
               >
-                <a href={src} target="_blank" rel="noopener noreferrer" aria-label="Open in new tab">
+                <a
+                  href={src}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open in new tab"
+                >
                   <ExternalLink className="size-3.5" />
                 </a>
               </Button>
@@ -217,12 +220,7 @@ export function AppPreview({
       </div>
 
       {/* Preview area */}
-      <div
-        className={cn(
-          "relative bg-background",
-          isFullscreen ? "flex-1" : "h-[520px]",
-        )}
-      >
+      <div className={cn("relative bg-background", isFullscreen ? "flex-1" : "h-[520px]")}>
         {/* Generation progress overlay */}
         {isGenerating && <GenerationProgress steps={generationSteps} />}
 

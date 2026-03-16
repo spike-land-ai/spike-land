@@ -20,7 +20,10 @@ function StarRating({ rating, count }: StarRatingProps) {
   const hasHalf = clamped - full >= 0.5;
 
   return (
-    <span className="inline-flex items-center gap-1" aria-label={`Rating: ${clamped.toFixed(1)} out of 5`}>
+    <span
+      className="inline-flex items-center gap-1"
+      aria-label={`Rating: ${clamped.toFixed(1)} out of 5`}
+    >
       <span className="flex items-center" aria-hidden="true">
         {Array.from({ length: 5 }).map((_, i) => {
           const filled = i < full;
@@ -257,12 +260,7 @@ export function AppCard({
   }
 
   return (
-    <AppCardGrid
-      app={app}
-      categoryName={categoryName}
-      rating={rating}
-      ratingCount={ratingCount}
-    />
+    <AppCardGrid app={app} categoryName={categoryName} rating={rating} ratingCount={ratingCount} />
   );
 }
 

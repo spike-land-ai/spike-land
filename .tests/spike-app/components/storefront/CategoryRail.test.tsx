@@ -30,9 +30,7 @@ vi.mock("@tanstack/react-router", () => ({
     },
     ref: React.Ref<HTMLAnchorElement>,
   ) {
-    const href = params
-      ? `${to}/${Object.values(params).join("/")}`
-      : to;
+    const href = params ? `${to}/${Object.values(params).join("/")}` : to;
     return (
       <a
         ref={ref}

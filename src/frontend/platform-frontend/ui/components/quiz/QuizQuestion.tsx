@@ -42,7 +42,9 @@ export function QuizQuestion({
         aria-label={`Question ${step} of ${totalSteps}`}
       >
         <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          <span>Question {step} of {totalSteps}</span>
+          <span>
+            Question {step} of {totalSteps}
+          </span>
           <span>{Math.round(((step - 1) / totalSteps) * 100)}% done</span>
         </div>
         <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
@@ -71,9 +73,7 @@ export function QuizQuestion({
 
       {/* Question text */}
       <div className="space-y-2 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-          beUniq Quiz
-        </p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">beUniq Quiz</p>
         <h2
           id={questionId}
           className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-tight"
@@ -83,11 +83,7 @@ export function QuizQuestion({
       </div>
 
       {/* Option buttons */}
-      <div
-        className="grid gap-4 sm:grid-cols-2"
-        role="group"
-        aria-label="Choose your answer"
-      >
+      <div className="grid gap-4 sm:grid-cols-2" role="group" aria-label="Choose your answer">
         <OptionButton
           label={yesLabel}
           sublabel="Yes"
@@ -148,9 +144,7 @@ function OptionButton({ label, sublabel, onClick, disabled, variant }: OptionBut
       <span
         className={cn(
           "mt-1 text-lg font-bold leading-snug tracking-tight transition-colors",
-          variant === "yes"
-            ? "text-foreground group-hover:text-primary"
-            : "text-foreground",
+          variant === "yes" ? "text-foreground group-hover:text-primary" : "text-foreground",
         )}
       >
         {label}
@@ -161,7 +155,12 @@ function OptionButton({ label, sublabel, onClick, disabled, variant }: OptionBut
         className="absolute right-5 top-1/2 -translate-y-1/2 opacity-0 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-1"
         aria-hidden="true"
       >
-        <svg className="h-5 w-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg
+          className="h-5 w-5 text-muted-foreground"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </span>

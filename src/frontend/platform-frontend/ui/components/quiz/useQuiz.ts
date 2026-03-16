@@ -118,10 +118,7 @@ export function useQuiz() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data = (await res.json()) as StartSessionResponse;
-      localStorage.setItem(
-        SESSION_STORAGE_KEY,
-        JSON.stringify({ sessionId: data.session_id }),
-      );
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ sessionId: data.session_id }));
 
       setState({
         phase: "question",

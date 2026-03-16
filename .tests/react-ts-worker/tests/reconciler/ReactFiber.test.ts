@@ -23,7 +23,10 @@ import {
   SuspenseComponent,
 } from "../../../../src/core/react-engine/core-logic/reconciler/ReactWorkTags.js";
 import { NoFlags } from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberFlags.js";
-import { NoLanes, SyncLane } from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberLane.js";
+import {
+  NoLanes,
+  SyncLane,
+} from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberLane.js";
 import {
   REACT_CONSUMER_TYPE,
   REACT_CONTEXT_TYPE,

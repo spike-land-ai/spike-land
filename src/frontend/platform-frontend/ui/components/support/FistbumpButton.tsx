@@ -59,7 +59,9 @@ export function FistbumpButton({ slug, className }: FistbumpButtonProps) {
 
     fetch(apiUrl(`/support/engagement/${encodeURIComponent(slug)}`), { credentials: "include" })
       .then((r) => (r.ok ? (r.json() as Promise<EngagementResponse>) : null))
-      .then((data) => { if (data) setCount(data.fistBumps); })
+      .then((data) => {
+        if (data) setCount(data.fistBumps);
+      })
       .catch(() => {});
   }, [slug]);
 
@@ -110,7 +112,9 @@ export function FistbumpButton({ slug, className }: FistbumpButtonProps) {
     <div className={className}>
       <button
         type="button"
-        onClick={() => { void handleBump(); }}
+        onClick={() => {
+          void handleBump();
+        }}
         disabled={bumped}
         aria-label={bumped ? "Already fist-bumped — thank you!" : "Fist bump this post"}
         aria-pressed={bumped}

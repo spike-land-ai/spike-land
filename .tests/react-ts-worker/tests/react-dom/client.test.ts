@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, _vi } from "vitest";
 import { createElement } from "../../../../src/core/react-engine/core-logic/react/index.js";
-import { createRoot, hydrateRoot } from "../../../../src/core/react-engine/core-logic/react-dom/client.js";
+import {
+  createRoot,
+  hydrateRoot,
+} from "../../../../src/core/react-engine/core-logic/react-dom/client.js";
 
 describe("createRoot", () => {
   let container: HTMLElement;

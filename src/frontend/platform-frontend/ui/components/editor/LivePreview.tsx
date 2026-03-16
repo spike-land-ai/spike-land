@@ -26,13 +26,7 @@
  *   />
  */
 
-import {
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-  useMemo,
-} from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import {
   Download,
   RefreshCw,
@@ -113,7 +107,13 @@ interface PreviewPaneProps {
   onRefresh: () => void;
 }
 
-function PreviewPane({ html: _html, isTranspiling, iframeRef, srcDoc, onRefresh }: PreviewPaneProps) {
+function PreviewPane({
+  html: _html,
+  isTranspiling,
+  iframeRef,
+  srcDoc,
+  onRefresh,
+}: PreviewPaneProps) {
   const [iframeLoading, setIframeLoading] = useState(false);
 
   useEffect(() => {
@@ -316,10 +316,7 @@ export function LivePreview({
   }, [files, storageKey]);
 
   // Normalise files to array
-  const fileList: EditorFile[] = useMemo(
-    () => (Array.isArray(files) ? files : [files]),
-    [files],
-  );
+  const fileList: EditorFile[] = useMemo(() => (Array.isArray(files) ? files : [files]), [files]);
 
   const activeFile = fileList[activeIndex] ?? fileList[0];
 
@@ -339,13 +336,16 @@ export function LivePreview({
   const dragStartX = useRef(0);
   const dragStartSplit = useRef(50);
 
-  const handleDividerPointerDown = useCallback((e: React.PointerEvent) => {
-    e.preventDefault();
-    isDragging.current = true;
-    dragStartX.current = e.clientX;
-    dragStartSplit.current = splitPercent;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  }, [splitPercent]);
+  const handleDividerPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      e.preventDefault();
+      isDragging.current = true;
+      dragStartX.current = e.clientX;
+      dragStartSplit.current = splitPercent;
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    },
+    [splitPercent],
+  );
 
   useEffect(() => {
     const onPointerMove = (e: PointerEvent) => {
@@ -355,9 +355,7 @@ export function LivePreview({
       const deltaPct = (dx / containerWidth) * 100;
       const minPct = (MIN_PANE_PX / containerWidth) * 100;
       const maxPct = 100 - minPct;
-      setSplitPercent(
-        Math.max(minPct, Math.min(maxPct, dragStartSplit.current + deltaPct)),
-      );
+      setSplitPercent(Math.max(minPct, Math.min(maxPct, dragStartSplit.current + deltaPct)));
     };
     const onPointerUp = () => {
       isDragging.current = false;
@@ -421,7 +419,13 @@ export function LivePreview({
     const name = newFileName(fileList.map((f) => f.name));
     setFiles((prev) => {
       const list = Array.isArray(prev) ? prev : [prev];
-      return [...list, { name, content: `export default function ${name.replace(".tsx", "")}() {\n  return <div>Hello from ${name}</div>;\n}\n` }] as unknown as EditorFile;
+      return [
+        ...list,
+        {
+          name,
+          content: `export default function ${name.replace(".tsx", "")}() {\n  return <div>Hello from ${name}</div>;\n}\n`,
+        },
+      ] as unknown as EditorFile;
     });
     setActiveIndex(fileList.length);
   }, [fileList]);
@@ -431,7 +435,9 @@ export function LivePreview({
       setFiles((prev) => {
         const list = Array.isArray(prev) ? prev : [prev];
         const next = list.filter((_, i) => i !== index);
-        return (next.length === 0 ? [{ name: "App.tsx", content: DEFAULT_CODE }] : next) as unknown as EditorFile;
+        return (next.length === 0
+          ? [{ name: "App.tsx", content: DEFAULT_CODE }]
+          : next) as unknown as EditorFile;
       });
       setActiveIndex((prev) => Math.min(prev, Math.max(0, fileList.length - 2)));
     },
@@ -595,9 +601,11 @@ export function LivePreview({
             title={isFullscreen ? "Exit fullscreen (Esc)" : "Enter fullscreen"}
             className="h-8 px-2 text-muted-foreground hover:text-foreground"
           >
-            {isFullscreen
-              ? <Minimize className="h-3.5 w-3.5" aria-hidden="true" />
-              : <Maximize className="h-3.5 w-3.5" aria-hidden="true" />}
+            {isFullscreen ? (
+              <Minimize className="h-3.5 w-3.5" aria-hidden="true" />
+            ) : (
+              <Maximize className="h-3.5 w-3.5" aria-hidden="true" />
+            )}
           </Button>
         </div>
       </div>
@@ -631,10 +639,7 @@ export function LivePreview({
         {layout === "split" && <Divider onDragStart={handleDividerPointerDown} />}
 
         {/* Preview pane */}
-        <div
-          style={previewStyle}
-          className="relative min-h-0 overflow-hidden transition-none"
-        >
+        <div style={previewStyle} className="relative min-h-0 overflow-hidden transition-none">
           {layout !== "editor" && (
             <>
               <PreviewPane
@@ -645,11 +650,7 @@ export function LivePreview({
                 srcDoc={srcDoc}
                 onRefresh={handleRefresh}
               />
-              <ErrorOverlay
-                error={error}
-                onDismiss={clearError}
-                onGoToLine={handleGoToLine}
-              />
+              <ErrorOverlay error={error} onDismiss={clearError} onGoToLine={handleGoToLine} />
             </>
           )}
         </div>

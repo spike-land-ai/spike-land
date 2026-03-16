@@ -36,9 +36,7 @@ interface CategorySearchParams {
   sort?: SortOption;
 }
 
-export function parseFiltersFromSearch(
-  search: Partial<CategorySearchParams>,
-): StoreFilterState {
+export function parseFiltersFromSearch(search: Partial<CategorySearchParams>): StoreFilterState {
   return {
     tags: search.tags ? search.tags.split(",").filter(Boolean) : [],
     pricing: (search.pricing as PricingFilter) ?? "all",
@@ -47,9 +45,7 @@ export function parseFiltersFromSearch(
   };
 }
 
-export function serializeFiltersToSearch(
-  filters: StoreFilterState,
-): CategorySearchParams {
+export function serializeFiltersToSearch(filters: StoreFilterState): CategorySearchParams {
   return {
     tags: filters.tags.length > 0 ? filters.tags.join(",") : undefined,
     pricing: filters.pricing !== "all" ? filters.pricing : undefined,
@@ -135,7 +131,9 @@ function SortDropdown({ value, onChange }: SortDropdownProps) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Sort By</p>
+      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        Sort By
+      </p>
       <div ref={ref} className="relative" onKeyDown={handleKeyDown}>
         <button
           type="button"
@@ -146,7 +144,10 @@ function SortDropdown({ value, onChange }: SortDropdownProps) {
         >
           <span>{currentLabel}</span>
           <ChevronDown
-            className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")}
+            className={cn(
+              "h-4 w-4 text-muted-foreground transition-transform",
+              open && "rotate-180",
+            )}
           />
         </button>
 
@@ -166,9 +167,7 @@ function SortDropdown({ value, onChange }: SortDropdownProps) {
                   }}
                   className={cn(
                     "w-full px-3 py-2 text-left text-sm transition-colors hover:bg-muted/50",
-                    value === option.value
-                      ? "font-semibold text-primary"
-                      : "text-muted-foreground",
+                    value === option.value ? "font-semibold text-primary" : "text-muted-foreground",
                   )}
                 >
                   {option.label}
@@ -200,7 +199,9 @@ interface PricingToggleProps {
 function PricingToggle({ value, onChange }: PricingToggleProps) {
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Pricing</p>
+      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        Pricing
+      </p>
       <div
         role="group"
         aria-label="Filter by pricing"
@@ -245,7 +246,9 @@ interface RatingFilterProps {
 function RatingFilterControl({ value, onChange }: RatingFilterProps) {
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Rating</p>
+      <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+        Rating
+      </p>
       <div className="flex flex-col gap-1">
         {RATING_OPTIONS.map((option) => (
           <label key={option.value} className="flex cursor-pointer items-center gap-2">

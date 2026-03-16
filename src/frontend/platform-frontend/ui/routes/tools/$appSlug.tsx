@@ -4,14 +4,7 @@ import { useApp, useApps, groupAppsByCategory } from "../../hooks/useApps";
 import { trackAnalyticsEvent } from "../../hooks/useAnalytics";
 import { MdxSurface } from "../../components/MdxSurface";
 import { StoreAppCard } from "../../components/storefront/StoreAppCard";
-import {
-  ArrowLeft,
-  Download,
-  ExternalLink,
-  Tag,
-  Loader2,
-  PackageOpen,
-} from "lucide-react";
+import { ArrowLeft, Download, ExternalLink, Tag, Loader2, PackageOpen } from "lucide-react";
 
 // ── App Detail Page ──────────────────────────────────────────────────────────
 
@@ -76,9 +69,9 @@ export function AppDetailPage() {
 
   // Related apps: same category, excluding this app, max 6
   const relatedApps = allApps
-    ? groupAppsByCategory(allApps.filter((a) => a.slug !== slug))
+    ? (groupAppsByCategory(allApps.filter((a) => a.slug !== slug))
         .find((g) => g.category === app.category)
-        ?.apps.slice(0, 6) ?? []
+        ?.apps.slice(0, 6) ?? [])
     : [];
 
   return (
@@ -104,11 +97,7 @@ export function AppDetailPage() {
           aria-label="Related apps"
           className="w-full lg:w-72 xl:w-80 shrink-0 border-t lg:border-t-0 lg:border-l border-border bg-muted/10"
         >
-          <RelatedAppsSidebar
-            apps={relatedApps}
-            category={app.category}
-            currentSlug={slug}
-          />
+          <RelatedAppsSidebar apps={relatedApps} category={app.category} currentSlug={slug} />
         </aside>
       )}
     </div>
@@ -194,7 +183,9 @@ function AppHeader({ app }: AppHeaderProps) {
               </span>
             )}
             {app.tool_count != null && app.tool_count > 0 && (
-              <span>{app.tool_count} tool{app.tool_count === 1 ? "" : "s"}</span>
+              <span>
+                {app.tool_count} tool{app.tool_count === 1 ? "" : "s"}
+              </span>
             )}
             {app.pricing && app.pricing !== "free" && (
               <span className="capitalize">{app.pricing}</span>
@@ -285,11 +276,7 @@ function RelatedAppsSidebar({ apps, category }: RelatedAppsSidebarProps) {
 
       <div className="space-y-2">
         {apps.map((relatedApp) => (
-          <StoreAppCard
-            key={relatedApp.slug}
-            app={relatedApp}
-            layout="list"
-          />
+          <StoreAppCard key={relatedApp.slug} app={relatedApp} layout="list" />
         ))}
       </div>
     </div>

@@ -120,9 +120,7 @@ export function FunnelView({ data, range, loading }: FunnelViewProps) {
       <div className="space-y-1">
         {stepValues.map((sv, i) => {
           const prev = i > 0 ? stepValues[i - 1] : null;
-          const convRate = prev && prev.uniqueUsers > 0
-            ? sv.uniqueUsers / prev.uniqueUsers
-            : null;
+          const convRate = prev && prev.uniqueUsers > 0 ? sv.uniqueUsers / prev.uniqueUsers : null;
           const barWidth = dropOffWidth(sv.uniqueUsers, topCount);
 
           return (
@@ -138,9 +136,7 @@ export function FunnelView({ data, range, loading }: FunnelViewProps) {
                       convRate !== null ? conversionColor(convRate) : "text-muted-foreground"
                     }`}
                   >
-                    {convRate !== null
-                      ? `${(convRate * 100).toFixed(1)}% converted`
-                      : "—"}
+                    {convRate !== null ? `${(convRate * 100).toFixed(1)}% converted` : "—"}
                   </span>
                   {convRate !== null && convRate < 1 && (
                     <span className="text-xs text-muted-foreground">
@@ -176,9 +172,7 @@ export function FunnelView({ data, range, loading }: FunnelViewProps) {
                   {/* Text */}
                   <div className="relative z-10 min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                      <span className="text-sm font-semibold text-foreground">
-                        {sv.step.label}
-                      </span>
+                      <span className="text-sm font-semibold text-foreground">{sv.step.label}</span>
                       <span className="text-xs text-muted-foreground">{sv.step.description}</span>
                     </div>
                     {/* Progress bar */}
@@ -224,16 +218,17 @@ export function FunnelView({ data, range, loading }: FunnelViewProps) {
           <tbody>
             {stepValues.map((sv, i) => {
               const prev = i > 0 ? stepValues[i - 1] : null;
-              const convRate = prev && prev.uniqueUsers > 0
-                ? sv.uniqueUsers / prev.uniqueUsers
-                : null;
+              const convRate =
+                prev && prev.uniqueUsers > 0 ? sv.uniqueUsers / prev.uniqueUsers : null;
               const topRate = topCount > 0 ? sv.uniqueUsers / topCount : 0;
 
               return (
                 <tr key={sv.step.key} className="border-b border-border last:border-0">
                   <td className="py-2">
                     <span className="font-medium text-foreground">{sv.step.label}</span>
-                    <span className="ml-2 text-xs text-muted-foreground">{sv.step.description}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">
+                      {sv.step.description}
+                    </span>
                   </td>
                   <td className="py-2 text-right font-semibold tabular-nums text-foreground">
                     {sv.uniqueUsers.toLocaleString()}
@@ -241,9 +236,11 @@ export function FunnelView({ data, range, loading }: FunnelViewProps) {
                   <td className="py-2 text-right tabular-nums text-muted-foreground">
                     {sv.count.toLocaleString()}
                   </td>
-                  <td className={`py-2 text-right font-medium tabular-nums ${
-                    convRate !== null ? conversionColor(convRate) : "text-muted-foreground"
-                  }`}>
+                  <td
+                    className={`py-2 text-right font-medium tabular-nums ${
+                      convRate !== null ? conversionColor(convRate) : "text-muted-foreground"
+                    }`}
+                  >
                     {convRate !== null ? `${(convRate * 100).toFixed(1)}%` : "—"}
                   </td>
                   <td className="py-2 text-right tabular-nums text-muted-foreground">

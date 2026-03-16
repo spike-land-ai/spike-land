@@ -86,7 +86,10 @@ describe("useTranspile", () => {
   });
 
   it("sets error when fetch fails", async () => {
-    mockFetch.mockResolvedValue({ ok: false, text: () => Promise.resolve("SyntaxError: unexpected token") });
+    mockFetch.mockResolvedValue({
+      ok: false,
+      text: () => Promise.resolve("SyntaxError: unexpected token"),
+    });
     const { result } = renderHook(() => useTranspile("const;", { debounceMs: 100 }));
 
     await act(async () => {
@@ -109,7 +112,9 @@ describe("useTranspile", () => {
     });
     await waitFor(() => expect(result.current.error).not.toBeNull());
 
-    act(() => { result.current.clearError(); });
+    act(() => {
+      result.current.clearError();
+    });
     expect(result.current.error).toBeNull();
   });
 

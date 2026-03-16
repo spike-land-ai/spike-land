@@ -53,10 +53,7 @@ const SEGMENT_LABELS: Record<string, string> = {
 
 function formatSegment(segment: string): string {
   return (
-    SEGMENT_LABELS[segment] ??
-    segment
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (l) => l.toUpperCase())
+    SEGMENT_LABELS[segment] ?? segment.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
   );
 }
 

@@ -93,7 +93,11 @@ export function OverviewTab({ range }: { range: TimeRange }) {
               type="button"
               onClick={() =>
                 downloadCsv(
-                  overview.timeSeries.map((d) => ({ date: d.date, sessions: d.sessions, users: d.users })),
+                  overview.timeSeries.map((d) => ({
+                    date: d.date,
+                    sessions: d.sessions,
+                    users: d.users,
+                  })),
                   csvFilename("overview-traffic", range),
                 )
               }

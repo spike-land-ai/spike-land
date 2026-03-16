@@ -204,8 +204,19 @@ export function DonationCheckout({ slug, initialAmount, onClose }: DonationCheck
             aria-label="Close donation dialog"
             className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted-foreground hover:border-primary/30 hover:text-foreground transition-colors"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -234,11 +245,7 @@ export function DonationCheckout({ slug, initialAmount, onClose }: DonationCheck
         </div>
 
         {/* Amount presets */}
-        <div
-          role="group"
-          aria-label="Preset amounts"
-          className="mb-3 grid grid-cols-3 gap-2"
-        >
+        <div role="group" aria-label="Preset amounts" className="mb-3 grid grid-cols-3 gap-2">
           {PRESETS.map((amount) => (
             <button
               key={amount}
@@ -306,7 +313,10 @@ export function DonationCheckout({ slug, initialAmount, onClose }: DonationCheck
 
         {/* Error */}
         {error && (
-          <p role="alert" className="mb-3 rounded-xl bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive">
+          <p
+            role="alert"
+            className="mb-3 rounded-xl bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive"
+          >
             {error}
           </p>
         )}
@@ -314,7 +324,9 @@ export function DonationCheckout({ slug, initialAmount, onClose }: DonationCheck
         {/* Submit */}
         <button
           type="button"
-          onClick={() => { void handleSubmit(); }}
+          onClick={() => {
+            void handleSubmit();
+          }}
           disabled={loading || effectiveAmount() === null}
           className="w-full rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:bg-primary/90 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >

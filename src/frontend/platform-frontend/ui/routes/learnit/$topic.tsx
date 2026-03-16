@@ -112,19 +112,42 @@ function displayName(slug: string): string {
 function renderMarkdown(md: string): string {
   // Very lightweight markdown → HTML — good enough for the generated content
   return md
-    .replace(/^#### (.+)$/gm, `<h4 id="${"$1".toLowerCase().replace(/\s+/g, "-")}" class="text-base font-semibold mt-6 mb-2 text-foreground">$1</h4>`)
-    .replace(/^### (.+)$/gm, (_, t: string) => `<h3 id="${slugify(t)}" class="text-lg font-semibold mt-8 mb-3 text-foreground">${t}</h3>`)
-    .replace(/^## (.+)$/gm, (_, t: string) => `<h2 id="${slugify(t)}" class="text-xl font-bold mt-10 mb-4 text-foreground border-b border-border pb-2">${t}</h2>`)
-    .replace(/^# (.+)$/gm, (_, t: string) => `<h1 id="${slugify(t)}" class="text-2xl font-bold mt-2 mb-4 text-foreground">${t}</h1>`)
+    .replace(
+      /^#### (.+)$/gm,
+      `<h4 id="${"$1".toLowerCase().replace(/\s+/g, "-")}" class="text-base font-semibold mt-6 mb-2 text-foreground">$1</h4>`,
+    )
+    .replace(
+      /^### (.+)$/gm,
+      (_, t: string) =>
+        `<h3 id="${slugify(t)}" class="text-lg font-semibold mt-8 mb-3 text-foreground">${t}</h3>`,
+    )
+    .replace(
+      /^## (.+)$/gm,
+      (_, t: string) =>
+        `<h2 id="${slugify(t)}" class="text-xl font-bold mt-10 mb-4 text-foreground border-b border-border pb-2">${t}</h2>`,
+    )
+    .replace(
+      /^# (.+)$/gm,
+      (_, t: string) =>
+        `<h1 id="${slugify(t)}" class="text-2xl font-bold mt-2 mb-4 text-foreground">${t}</h1>`,
+    )
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/`([^`]+)`/g, '<code class="rounded bg-muted px-1 py-0.5 text-sm font-mono text-foreground">$1</code>')
-    .replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang: string | undefined, code: string) =>
-      `<pre class="learnit-code-block" data-lang="${lang ?? ""}"><code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`,
+    .replace(
+      /`([^`]+)`/g,
+      '<code class="rounded bg-muted px-1 py-0.5 text-sm font-mono text-foreground">$1</code>',
     )
-    .replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-primary/40 pl-4 italic text-muted-foreground my-4">$1</blockquote>')
-    .replace(/^- (.+)$/gm, "<li class=\"ml-4 list-disc text-foreground\">$1</li>")
-    .replace(/^(\d+)\. (.+)$/gm, "<li class=\"ml-4 list-decimal text-foreground\">$2</li>")
+    .replace(
+      /```(\w+)?\n([\s\S]*?)```/g,
+      (_, lang: string | undefined, code: string) =>
+        `<pre class="learnit-code-block" data-lang="${lang ?? ""}"><code>${code.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`,
+    )
+    .replace(
+      /^> (.+)$/gm,
+      '<blockquote class="border-l-4 border-primary/40 pl-4 italic text-muted-foreground my-4">$1</blockquote>',
+    )
+    .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc text-foreground">$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal text-foreground">$2</li>')
     .replace(/\n\n/g, '</p><p class="my-3 text-foreground leading-relaxed">')
     .replace(/^(?!<[hplbco])(.+)$/gm, (line) =>
       line.trim() ? `<p class="my-3 text-foreground leading-relaxed">${line}</p>` : "",
@@ -293,9 +316,8 @@ export function LearnitTopicPage() {
   // Navigation
   const topicIndex = TOPIC_ORDER.indexOf(topic);
   const prevTopic = topicIndex > 0 ? TOPIC_ORDER[topicIndex - 1] : null;
-  const nextTopic = topicIndex >= 0 && topicIndex < TOPIC_ORDER.length - 1
-    ? TOPIC_ORDER[topicIndex + 1]
-    : null;
+  const nextTopic =
+    topicIndex >= 0 && topicIndex < TOPIC_ORDER.length - 1 ? TOPIC_ORDER[topicIndex + 1] : null;
 
   // Save to recently viewed
   useEffect(() => {
@@ -322,13 +344,13 @@ export function LearnitTopicPage() {
               body: JSON.stringify({ slug: topic }),
             });
             if (!genRes.ok) throw new Error("Failed to generate content");
-            const generated = await genRes.json() as TopicData;
+            const generated = (await genRes.json()) as TopicData;
             if (!cancelled) setTopicData(generated);
           } else {
             throw new Error(`HTTP ${res.status}`);
           }
         } else {
-          const data = await res.json() as TopicData;
+          const data = (await res.json()) as TopicData;
           if (!cancelled) setTopicData(data);
         }
       } catch (err) {
@@ -353,14 +375,13 @@ export function LearnitTopicPage() {
     }
 
     fetchTopic();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [topic, name]);
 
   // Intersection observer for active heading
-  const toc = useMemo(
-    () => (topicData ? extractToc(topicData.content) : []),
-    [topicData],
-  );
+  const toc = useMemo(() => (topicData ? extractToc(topicData.content) : []), [topicData]);
 
   useEffect(() => {
     if (toc.length === 0) return;
@@ -479,9 +500,7 @@ export function LearnitTopicPage() {
           ) : null}
 
           {/* Interactive code blocks (rendered separately after main content) */}
-          {!loading && topicData && (
-            <InteractiveCodeBlocks content={topicData.content} />
-          )}
+          {!loading && topicData && <InteractiveCodeBlocks content={topicData.content} />}
 
           {/* Quiz */}
           {!loading && topicData?.quiz && topicData.quiz.length > 0 && !quizCompleted && (
@@ -567,10 +586,7 @@ export function LearnitTopicPage() {
 
         {/* TOC Sidebar */}
         {!loading && toc.length > 1 && (
-          <aside
-            className="hidden w-56 shrink-0 xl:block"
-            aria-label="Table of contents"
-          >
+          <aside className="hidden w-56 shrink-0 xl:block" aria-label="Table of contents">
             <TableOfContents entries={toc} activeId={activeHeading} />
           </aside>
         )}

@@ -36,8 +36,24 @@ function slugToTitle(slug: string): string {
 }
 
 function inferDifficulty(slug: string): "Beginner" | "Intermediate" | "Advanced" | "Expert" {
-  const expertTopics = ["kubernetes", "webassembly", "compiler", "rust", "llms", "transformers", "distributed-systems"];
-  const advancedTopics = ["graphql", "docker", "oauth-2", "mcp-protocol", "edge-computing", "rag", "fine-tuning"];
+  const expertTopics = [
+    "kubernetes",
+    "webassembly",
+    "compiler",
+    "rust",
+    "llms",
+    "transformers",
+    "distributed-systems",
+  ];
+  const advancedTopics = [
+    "graphql",
+    "docker",
+    "oauth-2",
+    "mcp-protocol",
+    "edge-computing",
+    "rag",
+    "fine-tuning",
+  ];
   const beginnerTopics = ["html", "css", "javascript-basics", "git-basics", "sql-basics"];
 
   if (expertTopics.some((t) => slug.includes(t))) return "Expert";
@@ -276,7 +292,7 @@ learnitRoute.get("/api/learnit", async (c) => {
 learnitRoute.post("/api/learnit/generate", async (c) => {
   let body: { slug?: unknown };
   try {
-    body = await c.req.json() as { slug?: unknown };
+    body = (await c.req.json()) as { slug?: unknown };
   } catch {
     return c.json({ error: "Invalid JSON body" }, 400);
   }

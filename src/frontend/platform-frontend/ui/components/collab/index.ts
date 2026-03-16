@@ -1,5 +1,11 @@
 export { CollabProvider, useCollab } from "./CollabProvider";
-export type { CollabUser, ConnectionStatus, EditOperation, SelectionRange, UserStatus } from "./CollabProvider";
+export type {
+  CollabUser,
+  ConnectionStatus,
+  EditOperation,
+  SelectionRange,
+  UserStatus,
+} from "./CollabProvider";
 
 export { CursorOverlay } from "./CursorOverlay";
 export { PresenceBar } from "./PresenceBar";

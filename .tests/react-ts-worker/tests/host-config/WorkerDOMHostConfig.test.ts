@@ -397,7 +397,9 @@ describe("createWorkerDOMHostConfig - worker root", () => {
     const { createRoot } = await import(
       "../../../../src/core/react-engine/core-logic/react-worker-dom/index.js"
     );
-    const { createElement } = await import("../../../../src/core/react-engine/core-logic/react/index.js");
+    const { createElement } = await import(
+      "../../../../src/core/react-engine/core-logic/react/index.js"
+    );
 
     const container = makeWorkerElement("div");
     const root = createRoot(mockDoc, container);

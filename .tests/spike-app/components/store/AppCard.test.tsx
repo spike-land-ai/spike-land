@@ -11,7 +11,14 @@ import type { McpAppSummary } from "@/ui/hooks/useApps";
 // ---------------------------------------------------------------------------
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ children, to, params, className, "aria-label": ariaLabel, tabIndex }: {
+  Link: ({
+    children,
+    to,
+    params,
+    className,
+    "aria-label": ariaLabel,
+    tabIndex,
+  }: {
     children: ReactNode;
     to: string;
     params?: { appSlug?: string };
@@ -119,9 +126,7 @@ describe("AppCard (store)", () => {
     render(<AppCard app={mockApp} layout="grid" rating={4.5} ratingCount={12} />, {
       wrapper: createWrapper(),
     });
-    expect(
-      screen.getByLabelText(/rating: 4\.5 out of 5/i),
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/rating: 4\.5 out of 5/i)).toBeInTheDocument();
     expect(screen.getByText("(12)")).toBeInTheDocument();
   });
 
@@ -147,8 +152,6 @@ describe("AppCard (store)", () => {
 
   it("renders install button for the app", () => {
     render(<AppCard app={mockApp} layout="grid" />, { wrapper: createWrapper() });
-    expect(
-      screen.getByRole("button", { name: /install qa studio/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /install qa studio/i })).toBeInTheDocument();
   });
 });

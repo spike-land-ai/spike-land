@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockImageStudioDeps, mockImageRow } from "../__test-utils__/mock-deps.js";
-import { createDeleteTool, deleteImage } from "../../../src/mcp-tools/image-studio/core-logic/tools/delete.js";
-import type { ImageStudioDeps, ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
+import {
+  createDeleteTool,
+  deleteImage,
+} from "../../../src/mcp-tools/image-studio/core-logic/tools/delete.js";
+import type {
+  ImageStudioDeps,
+  ToolContext,
+} from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 describe("deleteImage", () => {
   const userId = "u1";

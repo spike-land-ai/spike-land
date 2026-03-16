@@ -87,8 +87,8 @@ function QuizLanding({ onStart }: { onStart: () => void }) {
           Who are you?
         </h1>
         <p className="mx-auto max-w-sm text-base text-muted-foreground leading-relaxed">
-          Answer 4 quick questions and we'll match you to a persona — then recommend
-          the apps that fit you best.
+          Answer 4 quick questions and we'll match you to a persona — then recommend the apps that
+          fit you best.
         </p>
       </div>
 
@@ -113,7 +113,13 @@ function QuizLanding({ onStart }: { onStart: () => void }) {
         className="mx-auto flex items-center gap-2 rounded-2xl bg-foreground px-10 py-4 text-base font-bold text-background shadow-[0_16px_40px_color-mix(in_srgb,var(--fg)_14%,transparent)] transition-all duration-200 hover:bg-foreground/90 hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         Start the quiz
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <svg
+          className="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>
@@ -134,7 +140,10 @@ function QuizLoading() {
       role="status"
       aria-label="Loading question"
     >
-      <div className="h-10 w-10 animate-spin rounded-full border-4 border-border border-t-primary" aria-hidden="true" />
+      <div
+        className="h-10 w-10 animate-spin rounded-full border-4 border-border border-t-primary"
+        aria-hidden="true"
+      />
       <p className="text-sm font-medium text-muted-foreground">Just a moment…</p>
     </div>
   );

@@ -164,9 +164,7 @@ export function useInstall(slug: string): UseInstallReturn {
     mutationFn: () => postInstall(slug),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: installKeys.status(slug) });
-      const previous = queryClient.getQueryData<InstallStatusResponse>(
-        installKeys.status(slug),
-      );
+      const previous = queryClient.getQueryData<InstallStatusResponse>(installKeys.status(slug));
       // Optimistic update
       queryClient.setQueryData<InstallStatusResponse>(installKeys.status(slug), (old) => ({
         installed: true,
@@ -182,7 +180,7 @@ export function useInstall(slug: string): UseInstallReturn {
     onSuccess: (data) => {
       queryClient.setQueryData<InstallStatusResponse>(installKeys.status(slug), (old) => ({
         installed: true,
-        count: data.count ?? (old?.count ?? 0),
+        count: data.count ?? old?.count ?? 0,
       }));
       void queryClient.invalidateQueries({ queryKey: installKeys.list() });
     },
@@ -192,9 +190,7 @@ export function useInstall(slug: string): UseInstallReturn {
     mutationFn: () => deleteInstall(slug),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: installKeys.status(slug) });
-      const previous = queryClient.getQueryData<InstallStatusResponse>(
-        installKeys.status(slug),
-      );
+      const previous = queryClient.getQueryData<InstallStatusResponse>(installKeys.status(slug));
       queryClient.setQueryData<InstallStatusResponse>(installKeys.status(slug), (old) => ({
         installed: false,
         count: Math.max(0, (old?.count ?? 1) - 1),

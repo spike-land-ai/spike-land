@@ -70,7 +70,10 @@ function ProfileTab() {
   return (
     <fieldset className="space-y-5">
       <div>
-        <label htmlFor="displayName" className="mb-1.5 block text-[13px] font-medium text-foreground">
+        <label
+          htmlFor="displayName"
+          className="mb-1.5 block text-[13px] font-medium text-foreground"
+        >
           {t("profile.displayName")}
         </label>
         <input
@@ -642,11 +645,17 @@ function AccessTab() {
         <div className="space-y-2">
           {[
             { label: t("access.freeTier"), range: "0 - 999", active: eloScore < 1000 },
-            { label: t("access.proTier"), range: "1000 - 1499", active: eloScore >= 1000 && eloScore < 1500 },
+            {
+              label: t("access.proTier"),
+              range: "1000 - 1499",
+              active: eloScore >= 1000 && eloScore < 1500,
+            },
             { label: t("access.eliteTier"), range: "1500+", active: eloScore >= 1500 },
           ].map((tier) => (
             <div key={tier.label} className="flex items-center justify-between text-[13px]">
-              <span className={tier.active ? "font-medium text-foreground" : "text-muted-foreground"}>
+              <span
+                className={tier.active ? "font-medium text-foreground" : "text-muted-foreground"}
+              >
                 {tier.label}
               </span>
               <span className="font-mono text-xs text-muted-foreground">{tier.range}</span>
