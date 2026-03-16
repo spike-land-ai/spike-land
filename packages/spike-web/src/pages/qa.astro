@@ -1,0 +1,324 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="QA Arena — spike.land"
+  description="Site health dashboard for spike.land"
+  noindex={true}
+>
+
+  <div class="qa-shell">
+    <main class="qa-main" id="main-content">
+
+      <header class="qa-header">
+        <h1 class="qa-title">QA Arena</h1>
+        <p class="qa-sub">spike.land site health dashboard</p>
+      </header>
+
+      <div class="qa-controls">
+        <button id="run-btn" class="qa-btn">Run All Tests</button>
+        <span id="summary" class="qa-summary"></span>
+      </div>
+
+      <div class="qa-table-wrap">
+        <table class="qa-table">
+          <thead>
+            <tr>
+              <th class="col-status">Status</th>
+              <th class="col-page">Page</th>
+              <th class="col-code">HTTP</th>
+              <th class="col-time">Time</th>
+            </tr>
+          </thead>
+          <tbody id="results"></tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+</Layout>
+
+<script is:inline>
+(function () {
+  var PAGES = [
+    '/',
+    '/ai',
+    '/apps',
+    '/arnold',
+    '/blog',
+    '/daftpunk',
+    '/erdos',
+    '/hu2026',
+    '/login',
+    '/peti',
+    '/pricing',
+    '/privacy',
+    '/radix',
+    '/raju',
+    '/spike',
+    '/zoltan',
+    '/tools',
+    '/callback',
+    '/apps/app-creator',
+    '/apps/codespace',
+    '/apps/ops-dash',
+    '/apps/qa-studio',
+    '/apps/spike-chat',
+    // Blog posts
+    '/blog/a-chemist-walked-into-a-codebase',
+    '/blog/ai-ab-testing-bug-detection',
+    '/blog/automate-dev-team-ai-agents',
+    '/blog/az-alkotas-szuroje',
+    '/blog/bugbook-elo-system',
+    '/blog/context-discipline-then-opus-got-1m',
+    '/blog/context-engineering-your-zero-shot-prompt',
+    '/blog/docker-layers-are-just-like-llm-context-caching',
+    '/blog/getting-started-spike-land',
+    '/blog/godspeed-development-100-app-ideas',
+    '/blog/hogyan-tervezi-a-claude-code-a-kontextust',
+    '/blog/how-claude-code-engineers-context',
+    '/blog/it-feels-like-cheating',
+    '/blog/living-with-adhd-the-rotating-pairs',
+    '/blog/mcp-apps-from-any-origin',
+    '/blog/mcp-explained-universal-adapter-for-ai-tools',
+    '/blog/nextjs-migration-service',
+    '/blog/nextjs-vs-tanstack-start',
+    '/blog/nextjs-vs-tanstack-start-appendix',
+    '/blog/one-site-many-faces',
+    '/blog/openai-compatible-endpoint-local-playground',
+    '/blog/sixteen-mathematicians-walked-into-a-loop',
+    '/blog/spike-land-app-store',
+    '/blog/spike-land-launch',
+    '/blog/strange-loops-statistical-selves-and-the-coming-identity-crisis',
+    '/blog/the-architecture-of-scale-building-tools',
+    '/blog/the-contact-proof',
+    '/blog/the-database-for-agents',
+    '/blog/the-grandmother-neuron-fallacy',
+    '/blog/the-prd-filter-old-chats-are-already-prds',
+    '/blog/the-predictor-already-moved',
+    '/blog/the-strange-loop-valued-at-ten-trillion',
+    '/blog/the-testing-pyramid-is-upside-down',
+    '/blog/the-two-boxes',
+    '/blog/the-universal-interface-wasnt-graphql',
+    '/blog/the-vibe-coding-paradox',
+    '/blog/think-slowly-ship-fast',
+    '/blog/what-i-learned-from-my-worst-pull-request',
+    '/blog/what-i-would-ship-in-claude-code',
+    '/blog/where-does-your-code-belong',
+    '/blog/why-spike-chat-stays-sharp',
+    '/blog/why-your-claude-agent-wastes-context-on-tool-descriptions',
+    '/blog/you-cannot-automate-chaos',
+  ];
+
+  var tbody = document.getElementById('results');
+  var runBtn = document.getElementById('run-btn');
+  var summary = document.getElementById('summary');
+  var BASE = 'https://spike.land';
+
+  function resetTable() {
+    tbody.innerHTML = '';
+    PAGES.forEach(function (p) {
+      var tr = document.createElement('tr');
+      tr.id = 'row-' + encodeURIComponent(p);
+      tr.innerHTML =
+        '<td class="col-status"><span class="dot dot-pending"></span></td>' +
+        '<td class="col-page"><a href="' + BASE + p + '" target="_blank" rel="noopener">' + p + '</a></td>' +
+        '<td class="col-code">-</td>' +
+        '<td class="col-time">-</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateRow(path, status, code, time) {
+    var tr = document.getElementById('row-' + encodeURIComponent(path));
+    if (!tr) return;
+    var cells = tr.children;
+    var dot = cells[0].querySelector('.dot');
+    dot.className = 'dot dot-' + status;
+    cells[2].textContent = code;
+    cells[3].textContent = time;
+    if (status === 'fail') tr.classList.add('row-fail');
+    else if (status === 'slow') tr.classList.add('row-slow');
+  }
+
+  async function checkPage(path) {
+    var t0 = performance.now();
+    try {
+      var res = await fetch(BASE + path, { method: 'HEAD', mode: 'cors', cache: 'no-store' });
+      var ms = Math.round(performance.now() - t0);
+      var timeStr = ms + 'ms';
+      if (!res.ok) {
+        updateRow(path, 'fail', res.status, timeStr);
+        return { ok: false, slow: false };
+      }
+      var slow = ms > 2000;
+      updateRow(path, slow ? 'slow' : 'pass', res.status, timeStr);
+      return { ok: true, slow: slow };
+    } catch (e) {
+      var ms2 = Math.round(performance.now() - t0);
+      updateRow(path, 'fail', 'ERR', ms2 + 'ms');
+      return { ok: false, slow: false };
+    }
+  }
+
+  async function runAll() {
+    runBtn.disabled = true;
+    runBtn.textContent = 'Running...';
+    summary.textContent = '';
+    resetTable();
+
+    var pass = 0, fail = 0, slow = 0;
+    // Run in batches of 6 for speed without overwhelming
+    for (var i = 0; i < PAGES.length; i += 6) {
+      var batch = PAGES.slice(i, i + 6);
+      var results = await Promise.all(batch.map(checkPage));
+      results.forEach(function (r) {
+        if (!r.ok) fail++;
+        else if (r.slow) slow++;
+        else pass++;
+      });
+      summary.textContent = pass + ' pass / ' + fail + ' fail / ' + slow + ' slow (' + (pass + fail + slow) + '/' + PAGES.length + ')';
+    }
+
+    runBtn.disabled = false;
+    runBtn.textContent = 'Run All Tests';
+    summary.className = 'qa-summary ' + (fail > 0 ? 'summary-fail' : 'summary-pass');
+  }
+
+  resetTable();
+  runBtn.addEventListener('click', runAll);
+})();
+</script>
+
+<style>
+  .qa-shell {
+    min-height: 100svh;
+    background: #0a0a0a;
+    color: #e5e5e5;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+  }
+
+  .qa-main {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 3rem) 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .qa-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .qa-title {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 800;
+    color: #fafafa;
+    margin: 0;
+    letter-spacing: -0.03em;
+  }
+
+  .qa-sub {
+    font-size: 0.8125rem;
+    color: #525252;
+    margin: 0;
+  }
+
+  .qa-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .qa-btn {
+    background: #22c55e;
+    color: #0a0a0a;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .qa-btn:hover { opacity: 0.85; }
+  .qa-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .qa-summary {
+    font-size: 0.8125rem;
+    color: #a3a3a3;
+  }
+
+  .summary-pass { color: #22c55e; }
+  .summary-fail { color: #ef4444; }
+
+  .qa-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .qa-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+  }
+
+  .qa-table th {
+    text-align: left;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #525252;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #1f1f1f;
+    white-space: nowrap;
+  }
+
+  .qa-table td {
+    padding: 0.375rem 0.75rem;
+    border-bottom: 1px solid #141414;
+    white-space: nowrap;
+  }
+
+  .col-status { width: 3rem; text-align: center; }
+  .col-code { width: 4rem; }
+  .col-time { width: 5rem; }
+
+  .qa-table a {
+    color: #a3a3a3;
+    text-decoration: none;
+  }
+  .qa-table a:hover {
+    color: #fafafa;
+    text-decoration: underline;
+  }
+
+  .row-fail td { background: rgba(239, 68, 68, 0.06); }
+  .row-slow td { background: rgba(251, 191, 36, 0.06); }
+
+  .dot {
+    display: inline-block;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 50%;
+  }
+
+  .dot-pending { background: #333; }
+  .dot-pass { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.4); }
+  .dot-fail { background: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); }
+  .dot-slow { background: #fbbf24; box-shadow: 0 0 6px rgba(251, 191, 36, 0.4); }
+
+  @media (max-width: 480px) {
+    .qa-table { font-size: 0.75rem; }
+    .qa-table td, .qa-table th { padding: 0.3rem 0.5rem; }
+  }
+</style>
