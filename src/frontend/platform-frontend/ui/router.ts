@@ -359,12 +359,10 @@ const toolSurfaceRoute = createRoute({
   component: withSuspense(() => import("./routes/tool/$toolName"), "ToolSurfacePage"),
 });
 
-const legacyToolsIndexRedirectRoute = createRoute({
+const toolsIndexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/tools",
-  beforeLoad: ({ search }) => {
-    throw redirect({ to: "/apps", search });
-  },
+  component: withSuspense(() => import("./routes/tools/tools-index.tsx"), "ToolsIndexPage"),
 });
 
 const legacyToolDetailRedirectRoute = createRoute({
@@ -607,8 +605,8 @@ const routeTree = rootRoute.addChildren([
   buildRoute,
   workshopRoute,
   toolSurfaceRoute,
+  toolsIndexRoute,
   legacyToolDetailRedirectRoute,
-  legacyToolsIndexRedirectRoute,
   startChecklistRoute,
   aboutRoute,
   securityRoute,

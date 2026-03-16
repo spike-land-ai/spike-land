@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, XCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { CheckCircle2, XCircle, ChevronDown, ChevronRight, Star } from "lucide-react";
 
 interface ResultRendererProps {
   result?: unknown;
@@ -92,6 +92,8 @@ export function ResultRenderer({ result, error }: ResultRendererProps) {
           </pre>
         </div>
       )}
+
+      {!isErrorResult && <StarCta />}
     </div>
   );
 }
@@ -106,6 +108,42 @@ function tryParseJsonArray(text: string): Record<string, unknown>[] | null {
     // not JSON
   }
   return null;
+}
+
+function StarCta() {
+  const [dismissed, setDismissed] = useState(
+    () => typeof localStorage !== "undefined" && localStorage.getItem("star-cta-dismissed") === "1",
+  );
+
+  if (dismissed) return null;
+
+  return (
+    <div className="mt-3 flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+      <Star className="w-4 h-4 text-primary shrink-0" />
+      <span className="text-xs text-foreground">
+        Enjoyed this? Star us on GitHub — it helps others discover spike.land.
+      </span>
+      <a
+        href="https://github.com/spike-land-ai/spike.land"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="ml-auto shrink-0 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+      >
+        <Star className="w-3 h-3" />
+        Star
+      </a>
+      <button
+        onClick={() => {
+          setDismissed(true);
+          localStorage.setItem("star-cta-dismissed", "1");
+        }}
+        className="shrink-0 text-muted-foreground hover:text-foreground text-xs"
+        aria-label="Dismiss"
+      >
+        &times;
+      </button>
+    </div>
+  );
 }
 
 function ResultTable({ data }: { data: Record<string, unknown>[] }) {

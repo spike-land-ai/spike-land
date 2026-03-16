@@ -55,14 +55,14 @@ export function HeroShelf({ featuredApps, isLoading = false }: HeroShelfProps) {
       <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
 
       <div className="relative flex flex-col items-center gap-8 p-8 md:flex-row md:p-12">
-        <div className="flex-1 space-y-6">
+        <div className="min-w-0 flex-1 space-y-6">
           <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">
             <Sparkles className="h-3.5 w-3.5" />
             {t("featuredApp")}
           </div>
 
           <div>
-            <h2 className="text-3xl font-black tracking-tight text-foreground md:text-5xl">
+            <h2 className="text-3xl font-black tracking-tight text-foreground break-words md:text-5xl">
               {heroApp.name}
             </h2>
             <p className="mt-4 max-w-lg text-lg leading-relaxed text-muted-foreground">

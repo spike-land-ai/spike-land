@@ -62,6 +62,32 @@ const PERSONAS: Record<string, PersonaConfig> = {
       "Mondd el mit látsz kívülről",
     ],
   },
+  arnold: {
+    persona: "arnold",
+    title: "Arnold",
+    accent: "#e11d48",
+    greeting: "Show me what you've got.",
+    subtitle: "I'll tell you what it's missing. UX provocateur. Interface extremist.",
+    placeholder: "Show Arnold your UI...",
+    suggestions: [
+      "Roast my landing page",
+      "Make this loading state unforgettable",
+      "What's wrong with my above-the-fold?",
+    ],
+  },
+  daftpunk: {
+    persona: "daftpunk",
+    title: "Daft Punk",
+    accent: "#fbbf24",
+    greeting: "One more time.",
+    subtitle: "Music is technology. Technology is music. Human After All.",
+    placeholder: "Describe your sound...",
+    suggestions: [
+      "Make me a beat in 8 bars",
+      "How do I make that classic French house filter?",
+      "Design a synth patch that sounds like the future",
+    ],
+  },
 };
 
 interface Props {

@@ -10,14 +10,33 @@ const plans = [
       id: "free",
       name: "Free",
       price: "$0",
-      period: "/month",
-      description: "Perfect for individuals getting started with AI agents.",
+      period: "/forever",
+      description: "Everything. No limits. No credit card. No catch.",
       features: [
-        "Access to CodeSpace",
-        "Community Support",
-        "Basic Agent Orchestration"
+        "All 80+ MCP tools",
+        "Spike Chat with all personas",
+        "CodeSpace editor",
+        "QA Studio",
+        "Community support",
+        "Unlimited agent runs"
       ],
-      cta: "Start Free",
+      cta: "Start Building",
+      highlighted: true,
+    },
+    {
+      id: "supporter",
+      name: "Supporter",
+      price: "$5",
+      period: "/month",
+      description: "Love what we're building? Help us grow. 99% goes to marketing.",
+      features: [
+        "Everything in Free (same features)",
+        "Supporter badge on profile",
+        "Early access to experiments",
+        "Vote on roadmap priorities",
+        "Our eternal gratitude"
+      ],
+      cta: "Support spike.land",
       highlighted: false,
     },
     {
@@ -25,29 +44,15 @@ const plans = [
       name: "Pro",
       price: "$29",
       period: "/month",
-      description: "For professional developers building production apps.",
+      description: "For power users who want priority and scale.",
       features: [
         "Everything in Free",
-        "QA Studio Access",
-        "Priority Support",
-        "Unlimited Agent Runs"
+        "Priority AI queue",
+        "Extended context windows",
+        "Priority support (Slack)",
+        "Custom MCP server hosting"
       ],
-      cta: "Upgrade to Pro",
-      highlighted: true,
-    },
-    {
-      id: "business",
-      name: "Business",
-      price: "$99",
-      period: "/month",
-      description: "For teams collaborating on AI systems.",
-      features: [
-        "Everything in Pro",
-        "Ops Dashboard",
-        "Team Collaboration",
-        "Custom Domains"
-      ],
-      cta: "Upgrade to Business",
+      cta: "Go Pro",
       highlighted: false,
     },
     {
@@ -57,10 +62,11 @@ const plans = [
       period: "",
       description: "For organizations with custom requirements.",
       features: [
-        "Everything in Business",
-        "Dedicated Success Manager",
-        "Custom Integrations",
-        "SLA"
+        "Everything in Pro",
+        "Dedicated success manager",
+        "Custom integrations",
+        "SLA & uptime guarantees",
+        "On-premise deployment"
       ],
       cta: "Contact Sales",
       highlighted: false,
@@ -69,20 +75,20 @@ const plans = [
 
 const faqs = [
   {
-    q: "Can I switch plans anytime?",
-    a: "Yes. Upgrades take effect immediately; downgrades take effect at the end of your billing cycle.",
+    q: "Wait — is it really free? What's the catch?",
+    a: "No catch. Every feature is free. We believe open access creates better AI tools. If you love what we're building, you can support us — 99% of supporter revenue goes directly to marketing so more people discover spike.land.",
+  },
+  {
+    q: "Why would I pay if it's free?",
+    a: "Because you want to help us grow. Supporter and Pro tiers are voluntary — like buying a coffee for someone building something you use every day. 99% of your money goes to marketing.",
   },
   {
     q: "What payment methods do you accept?",
-    a: "We accept all major credit cards, debit cards, and bank transfers for annual plans.",
+    a: "All major credit cards and debit cards via Stripe. Secure, PCI-compliant. We never see your card number.",
   },
   {
-    q: "Is there a free trial on paid plans?",
-    a: "Pro and Business plans come with a 14-day free trial — no credit card required.",
-  },
-  {
-    q: "What counts as an 'agent run'?",
-    a: "An agent run is a single end-to-end execution of an MCP agent task. Free plans include 100 runs/month.",
+    q: "Can I cancel anytime?",
+    a: "Yes. One click. No retention dark patterns. No 'are you sure?' modals. We're engineers, not used-car salespeople.",
   },
 ];
 ---
@@ -101,8 +107,8 @@ const faqs = [
       <section class="pricing-header">
         <div class="rubik-container pricing-header-inner">
           <p class="rubik-eyebrow">Pricing</p>
-          <h1 class="pricing-title">Simple, transparent pricing.</h1>
-          <p class="rubik-lede">Start for free, upgrade when you need more power. No hidden fees.</p>
+          <h1 class="pricing-title">Everything is free. Seriously.</h1>
+          <p class="rubik-lede">No gates. No trials. No "contact sales" wall. Pay only if you want to help us grow.</p>
         </div>
       </section>
 
@@ -137,24 +143,24 @@ const faqs = [
 
                 <div class="plan-cta-wrap">
                   {plan.id === 'free' && (
-                    <a href="/login" class={`plan-cta ${plan.highlighted ? 'plan-cta--primary' : 'plan-cta--secondary'}`}>
+                    <a href="/chat" class={`plan-cta ${plan.highlighted ? 'plan-cta--primary' : 'plan-cta--secondary'}`}>
                       {plan.cta}
                     </a>
                   )}
-                  {plan.id === 'pro' && (
+                  {plan.id === 'supporter' && (
                     <button
-                      class="plan-cta plan-cta--primary"
+                      class="plan-cta plan-cta--secondary"
                       type="button"
-                      data-checkout-tier="pro"
+                      data-checkout-service="support_coffee"
                     >
                       {plan.cta}
                     </button>
                   )}
-                  {plan.id === 'business' && (
+                  {plan.id === 'pro' && (
                     <button
                       class="plan-cta plan-cta--secondary"
                       type="button"
-                      data-checkout-tier="business"
+                      data-checkout-tier="pro"
                     >
                       {plan.cta}
                     </button>
@@ -181,56 +187,56 @@ const faqs = [
                 <tr class="comp-head-row">
                   <th class="comp-feature-col">Feature</th>
                   <th>Free</th>
+                  <th>Supporter</th>
                   <th>Pro</th>
-                  <th>Business</th>
                   <th>Enterprise</th>
                 </tr>
               </thead>
               <tbody>
                 <tr class="comp-row">
-                  <td class="comp-feature">CodeSpace</td>
+                  <td class="comp-feature">All 80+ MCP Tools</td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                 </tr>
                 <tr class="comp-row">
-                  <td class="comp-feature">QA Studio</td>
-                  <td><span class="comp-dash">—</span></td>
+                  <td class="comp-feature">Spike Chat + Personas</td>
+                  <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                 </tr>
                 <tr class="comp-row">
-                  <td class="comp-feature">Ops Dashboard</td>
-                  <td><span class="comp-dash">—</span></td>
-                  <td><span class="comp-dash">—</span></td>
+                  <td class="comp-feature">CodeSpace + QA Studio</td>
+                  <td><span class="comp-check">✓</span></td>
+                  <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                 </tr>
                 <tr class="comp-row">
                   <td class="comp-feature">Agent Runs/mo</td>
-                  <td>100</td>
                   <td>Unlimited</td>
                   <td>Unlimited</td>
                   <td>Unlimited</td>
-                </tr>
-                <tr class="comp-row">
-                  <td class="comp-feature">Team Members</td>
-                  <td>1</td>
-                  <td>3</td>
-                  <td>25</td>
                   <td>Unlimited</td>
                 </tr>
                 <tr class="comp-row">
-                  <td class="comp-feature">Custom Domains</td>
+                  <td class="comp-feature">Supporter Badge</td>
+                  <td><span class="comp-dash">—</span></td>
+                  <td><span class="comp-check">✓</span></td>
+                  <td><span class="comp-check">✓</span></td>
+                  <td><span class="comp-check">✓</span></td>
+                </tr>
+                <tr class="comp-row">
+                  <td class="comp-feature">Priority AI Queue</td>
                   <td><span class="comp-dash">—</span></td>
                   <td><span class="comp-dash">—</span></td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                 </tr>
                 <tr class="comp-row comp-row-last">
-                  <td class="comp-feature">SLA</td>
+                  <td class="comp-feature">SLA & Dedicated Support</td>
                   <td><span class="comp-dash">—</span></td>
                   <td><span class="comp-dash">—</span></td>
                   <td><span class="comp-dash">—</span></td>
@@ -689,4 +695,53 @@ const faqs = [
       void startCheckout(button);
     });
   });
+
+  // Service checkout (supporter tier)
+  const serviceButtons = Array.from(document.querySelectorAll('[data-checkout-service]'));
+  serviceButtons.forEach((button) => {
+    if (!(button instanceof HTMLButtonElement)) return;
+    button.addEventListener('click', () => {
+      void startServiceCheckout(button);
+    });
+  });
+
+  async function startServiceCheckout(button: HTMLButtonElement) {
+    const service = button.dataset.checkoutService;
+    if (!service) return;
+
+    const originalLabel = button.textContent?.trim() || 'Continue';
+    setFeedback(null);
+    button.disabled = true;
+    button.textContent = 'Redirecting…';
+
+    try {
+      const res = await fetch('/api/checkout/service', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ service })
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(
+          typeof data?.error === 'string' ? data.error : `Unable to start checkout (${res.status})`,
+        );
+      }
+
+      if (typeof data?.url !== 'string' || data.url.length === 0) {
+        throw new Error('No checkout URL returned.');
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      console.error('Service checkout error:', err);
+      setFeedback(
+        err instanceof Error ? err.message : 'Unable to start checkout right now. Please try again.',
+      );
+    } finally {
+      button.disabled = false;
+      button.textContent = originalLabel;
+    }
+  }
 </script>
