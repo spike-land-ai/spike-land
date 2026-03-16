@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
-import { experiments } from "../../routes/experiments.js";
-import type { Env } from "../../../core-logic/env.js";
+import { experiments } from "../routes/experiments.js";
+import type { Env } from "../../core-logic/env.js";
 
 // ─── Mock DB ────────────────────────────────────────────────────────────────
 

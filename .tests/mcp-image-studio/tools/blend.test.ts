@@ -4,9 +4,9 @@ import {
   mockImageRow,
   mockJobRow,
 } from "../__test-utils__/mock-deps.js";
-import { blend } from "../../../src/mcp-tools/image-studio/tools/blend.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
-import { asImageId } from "../../../src/mcp-tools/image-studio/types.js";
+import { blend } from "../../../src/mcp-tools/image-studio/core-logic/tools/blend.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
+import { asImageId } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { standardScenarios } from "../__test-utils__/standard-scenarios.js";
 
 describe("blend", () => {

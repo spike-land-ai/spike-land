@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CodeHistoryCarousel } from "../../../../src/frontend/monaco-editor/components/AutoSaveHistory";
+import { CodeHistoryCarousel } from "../../../../src/frontend/monaco-editor/ui/components/AutoSaveHistory";
 import { cSessMock } from "../config/cSessMock";
 
 // Mock the Wrapper component to avoid complex renderApp setup

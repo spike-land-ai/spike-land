@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockImageStudioDeps, mockImageRow } from "../__test-utils__/mock-deps.js";
-import { bulkDelete } from "../../../src/mcp-tools/image-studio/tools/bulk-delete.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
-import { asImageId, MAX_BATCH_SIZE } from "../../../src/mcp-tools/image-studio/types.js";
+import { bulkDelete } from "../../../src/mcp-tools/image-studio/core-logic/tools/bulk-delete.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
+import { asImageId, MAX_BATCH_SIZE } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 describe("bulkDelete", () => {
   const userId = "test-user-123";

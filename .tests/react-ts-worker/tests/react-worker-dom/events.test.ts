@@ -3,8 +3,8 @@ import {
   CAPTURED_EVENTS,
   createEventFromTransfer,
   setupEventForwarding,
-} from "../../../../src/core/react-engine/react-worker-dom/events.js";
-import type { TransferrableEventData } from "../../../../src/core/react-engine/react-worker-dom/events.js";
+} from "../../../../src/core/react-engine/core-logic/react-worker-dom/events.js";
+import type { TransferrableEventData } from "../../../../src/core/react-engine/core-logic/react-worker-dom/events.js";
 
 describe("react-worker-dom events", () => {
   describe("createEventFromTransfer", () => {

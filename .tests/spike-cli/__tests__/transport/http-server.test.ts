@@ -68,43 +68,51 @@ describe("http-server", () => {
 
 describe("HTTP server port-in-use", () => {
   let mockManager: ServerManager;
-  let blockingServer: http.Server;
-  let blockingPort: number;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     mockManager = {
       getAllTools: vi.fn().mockReturnValue([]),
       callTool: vi.fn().mockResolvedValue({
         content: [{ type: "text", text: "ok" }],
       }),
     } as unknown as ServerManager;
+  });
 
-    // Start a blocking server on a random port
-    blockingServer = http.createServer((_req, res) => {
+  /** Helper: occupy a port on a specific host, run a callback, then release. */
+  async function withBlockingServer(
+    host: string,
+    fn: (port: number) => Promise<void>,
+  ) {
+    const srv = http.createServer((_req, res) => {
       res.writeHead(200);
       res.end();
     });
-    await new Promise<void>((resolve) => {
-      blockingServer.listen(0, () => resolve());
-    });
-    const addr = blockingServer.address();
-    blockingPort = typeof addr === "object" && addr !== null ? addr.port : 0;
-  });
-
-  afterEach(async () => {
-    await new Promise<void>((resolve) => blockingServer.close(() => resolve()));
-  });
+    await new Promise<void>((resolve) => srv.listen(0, host, () => resolve()));
+    const addr = srv.address();
+    const port = typeof addr === "object" && addr !== null ? addr.port : 0;
+    try {
+      await fn(port);
+    } finally {
+      await new Promise<void>((resolve) => srv.close(() => resolve()));
+    }
+  }
 
   it("rejects with error when HTTP port is in use", async () => {
-    const { startHttpServer } = await import(
-      "../../../../src/cli/spike-cli/node-sys/http-server.js"
-    );
-    await expect(startHttpServer(mockManager, { port: blockingPort })).rejects.toThrow();
+    // startHttpServer binds to 127.0.0.1 — block the same interface
+    await withBlockingServer("127.0.0.1", async (port) => {
+      const { startHttpServer } = await import(
+        "../../../../src/cli/spike-cli/node-sys/http-server.js"
+      );
+      await expect(startHttpServer(mockManager, { port })).rejects.toThrow();
+    });
   });
 
   it("rejects with error when SSE port is in use", async () => {
-    const { startSseServer } = await import("../../../../src/cli/spike-cli/node-sys/sse-server.js");
-    await expect(startSseServer(mockManager, { port: blockingPort })).rejects.toThrow();
+    // startSseServer binds to :: (default) — block the same wildcard interface
+    await withBlockingServer("::", async (port) => {
+      const { startSseServer } = await import("../../../../src/cli/spike-cli/node-sys/sse-server.js");
+      await expect(startSseServer(mockManager, { port })).rejects.toThrow();
+    });
   });
 });
 

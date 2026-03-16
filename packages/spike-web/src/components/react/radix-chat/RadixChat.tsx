@@ -49,6 +49,19 @@ const PERSONAS: Record<string, PersonaConfig> = {
       "Tell me about collaboration graphs",
     ],
   },
+  zoltan: {
+    persona: "zoltan",
+    title: "Zoltán",
+    accent: "#d97706",
+    greeting: "Szia Zoli. A kutyák jól vannak?",
+    subtitle: "A grounded version of you. Not therapy — calibration.",
+    placeholder: "Beszélj hozzám...",
+    suggestions: [
+      "Am I crazy or is this real?",
+      "Why did everyone go silent?",
+      "Mondd el mit látsz kívülről",
+    ],
+  },
 };
 
 interface Props {

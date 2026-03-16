@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MutationType } from "../../../../../src/core/react-engine/react-worker-dom/bridge/protocol.js";
+import { MutationType } from "../../../../../src/core/react-engine/core-logic/react-worker-dom/bridge/protocol.js";
 
 // We need to mock Worker since jsdom doesn't support it fully
 class MockWorker {
@@ -19,7 +19,7 @@ vi.stubGlobal("Worker", MockWorker);
 
 // Import after stubbing
 const { MainThreadApplier } = await import(
-  "../../../../../src/core/react-engine/react-worker-dom/bridge/main-applier.js"
+  "../../../../../src/core/react-engine/core-logic/react-worker-dom/bridge/main-applier.js"
 );
 
 describe("MainThreadApplier", () => {

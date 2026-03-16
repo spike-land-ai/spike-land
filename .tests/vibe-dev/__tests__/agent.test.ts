@@ -4,13 +4,17 @@ import { existsSync, mkdirSync } from "fs";
 import { mkdir, readFile, rm, writeFile } from "fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const mockSpawn = vi.hoisted(() => vi.fn());
 vi.mock("fs");
 vi.mock("fs/promises");
 vi.mock("../../../src/cli/docker-dev/core-logic/api.js");
 vi.mock("../../../src/cli/docker-dev/core-logic/redis.js");
-vi.mock("cross-spawn", () => ({ default: vi.fn() }));
+vi.mock("node:child_process", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:child_process")>();
+  return { ...actual, spawn: mockSpawn };
+});
 
-import spawn from "cross-spawn";
+const spawn = mockSpawn;
 import * as api from "../../../src/cli/docker-dev/core-logic/api.js";
 import * as redis from "../../../src/cli/docker-dev/core-logic/redis.js";
 import * as agent from "../../../src/cli/docker-dev/node-sys/agent.js";

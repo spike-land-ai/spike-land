@@ -6,7 +6,7 @@ import {
   SyntheticInputEvent,
   SyntheticKeyboardEvent,
   SyntheticMouseEvent,
-} from "../../../../../src/core/react-engine/react-dom/events/SyntheticEvent.js";
+} from "../../../../../src/core/react-engine/core-logic/react-dom/events/SyntheticEvent.js";
 
 function makeNativeEvent(type: string, opts?: EventInit): Event {
   return new Event(type, { bubbles: true, cancelable: true, ...opts });

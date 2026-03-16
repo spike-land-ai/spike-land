@@ -1,25 +1,20 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import * as Tabs from "@radix-ui/react-tabs";
 import { useAuth } from "../hooks/useAuth";
 import { trackAnalyticsEvent } from "../hooks/useAnalytics";
 import { useToast } from "../components/Toast";
 import { usePricing } from "../hooks/usePricing";
 import { AuthGuard } from "../components/AuthGuard";
 import { CreditWidget } from "../components/CreditWidget";
-import { apiUrl } from "../../core-logic/api";
+import { apiFetch } from "../../core-logic/api";
 import { trackPurchaseConversion, getStoredGclid } from "../../core-logic/google-ads";
 import { UI_ANIMATIONS } from "@spike-land-ai/shared/constants";
 
 type SettingsTab = "profile" | "whatsapp" | "keys" | "billing" | "access";
 
-const TABS: { id: SettingsTab }[] = [
-  { id: "profile" },
-  { id: "whatsapp" },
-  { id: "keys" },
-  { id: "billing" },
-  { id: "access" },
-];
+const TAB_IDS: SettingsTab[] = ["profile", "whatsapp", "keys", "billing", "access"];
 
 type Provider = "openai" | "anthropic" | "google" | "mistral";
 
@@ -57,7 +52,7 @@ function ProfileTab() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(apiUrl("/user/profile"), {
+      const res = await apiFetch("/user/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email }),
@@ -73,9 +68,9 @@ function ProfileTab() {
   }
 
   return (
-    <div className="space-y-4">
+    <fieldset className="space-y-5">
       <div>
-        <label htmlFor="displayName" className="mb-1 block text-sm font-medium text-foreground">
+        <label htmlFor="displayName" className="mb-1.5 block text-[13px] font-medium text-foreground">
           {t("profile.displayName")}
         </label>
         <input
@@ -83,12 +78,12 @@ function ProfileTab() {
           id="displayName"
           type="text"
           defaultValue={isAuthenticated ? (user?.name ?? "") : ""}
-          className="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background"
           placeholder={t("profile.namePlaceholder")}
         />
       </div>
       <div>
-        <label htmlFor="email" className="mb-1 block text-sm font-medium text-foreground">
+        <label htmlFor="email" className="mb-1.5 block text-[13px] font-medium text-foreground">
           {t("profile.email")}
         </label>
         <input
@@ -96,24 +91,24 @@ function ProfileTab() {
           id="email"
           type="email"
           defaultValue={isAuthenticated ? (user?.email ?? "") : ""}
-          className="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className="h-9 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background"
           placeholder={t("profile.emailPlaceholder")}
         />
       </div>
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      <div className="flex items-center gap-3">
+      {error && <p className="text-[13px] text-destructive">{error}</p>}
+      <div className="flex items-center gap-3 pt-1">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="rounded-lg bg-primary px-6 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+          className="h-9 rounded-md bg-foreground px-4 text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
         >
           {saving ? t("profile.saving") : t("profile.saveChanges")}
         </button>
         {saved && (
-          <span className="text-sm text-muted-foreground">{t("profile.savedSuccess")}</span>
+          <span className="text-[13px] text-muted-foreground">{t("profile.savedSuccess")}</span>
         )}
       </div>
-    </div>
+    </fieldset>
   );
 }
 
@@ -150,7 +145,7 @@ function WhatsAppTab() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(apiUrl("/whatsapp/link/initiate"), { method: "POST" });
+      const res = await apiFetch("/whatsapp/link/initiate", { method: "POST" });
       if (!res.ok) throw new Error(`Request failed: ${res.status}`);
       const data = (await res.json()) as { otp: string };
       setOtp(data.otp);
@@ -165,7 +160,7 @@ function WhatsAppTab() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(apiUrl("/whatsapp/link"), { method: "DELETE" });
+      const res = await apiFetch("/whatsapp/link", { method: "DELETE" });
       if (!res.ok) throw new Error(`Request failed: ${res.status}`);
       setLinked(false);
       setOtp(null);
@@ -179,17 +174,17 @@ function WhatsAppTab() {
   const otpTime = `${Math.floor(otpSecondsLeft / 60)}:${String(otpSecondsLeft % 60).padStart(2, "0")}`;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3">
+    <div className="space-y-5">
+      <div className="flex items-center justify-between rounded-md border border-border px-4 py-3">
         <div>
-          <p className="text-sm font-medium text-foreground">
+          <p className="text-[13px] font-medium text-foreground">
             {t("whatsapp.statusLabel")}:{" "}
             {linked ? t("whatsapp.statusLinked") : t("whatsapp.statusNotLinked")}
           </p>
           {linked && <p className="text-xs text-muted-foreground">{phone}</p>}
         </div>
         <span
-          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+          className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
             linked ? "bg-success/15 text-success-foreground" : "bg-muted text-muted-foreground"
           }`}
         >
@@ -198,26 +193,26 @@ function WhatsAppTab() {
       </div>
 
       {otp && (
-        <div className="rounded-lg border border-border bg-muted p-4">
+        <div className="rounded-md border border-border bg-muted/50 p-4">
           <div className="mb-1 flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">{t("whatsapp.otpTitle")}</p>
+            <p className="text-[13px] font-medium text-foreground">{t("whatsapp.otpTitle")}</p>
             <span className="text-xs text-muted-foreground">
               {t("whatsapp.otpExpires", { time: otpTime })}
             </span>
           </div>
-          <p className="font-mono text-2xl tracking-widest text-primary">{otp}</p>
+          <p className="font-mono text-2xl tracking-widest text-foreground">{otp}</p>
           <p className="mt-2 text-xs text-muted-foreground">{t("whatsapp.otpInstructions")}</p>
         </div>
       )}
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="text-[13px] text-destructive">{error}</p>}
 
       <div className="flex gap-3">
         {!linked && (
           <button
             onClick={handleLink}
             disabled={loading}
-            className="rounded-lg bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            className="h-9 rounded-md bg-foreground px-4 text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
           >
             {loading ? t("whatsapp.linking") : t("whatsapp.linkButton")}
           </button>
@@ -226,7 +221,7 @@ function WhatsAppTab() {
           <button
             onClick={handleUnlink}
             disabled={loading}
-            className="rounded-lg border border-destructive/30 px-5 py-2 text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50"
+            className="h-9 rounded-md border border-destructive/30 px-4 text-[13px] font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
           >
             {loading ? t("whatsapp.unlinking") : t("whatsapp.unlinkButton")}
           </button>
@@ -252,7 +247,7 @@ function ApiKeysTab() {
   useEffect(() => {
     async function fetchKeys() {
       try {
-        const res = await fetch(apiUrl("/keys"));
+        const res = await apiFetch("/keys");
         if (!res.ok) return;
         const data = (await res.json()) as { keys: ApiKey[] };
         setKeys(data.keys.map((k) => ({ ...k, key: "****" })));
@@ -270,7 +265,7 @@ function ApiKeysTab() {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(apiUrl("/keys"), {
+      const res = await apiFetch("/keys", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider: selectedProvider, apiKey: newKeyValue }),
@@ -292,7 +287,7 @@ function ApiKeysTab() {
   async function handleTest(key: ApiKey) {
     setTestingId(key.id);
     try {
-      const res = await fetch(apiUrl(`/keys/${key.id}/test`), { method: "POST" });
+      const res = await apiFetch(`/keys/${key.id}/test`, { method: "POST" });
       const data = (await res.json()) as { valid: boolean; status?: number };
       setTestResults((prev) => ({
         ...prev,
@@ -309,7 +304,7 @@ function ApiKeysTab() {
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(apiUrl(`/keys/${id}`), { method: "DELETE" });
+      const res = await apiFetch(`/keys/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error(`Failed to delete: ${res.status}`);
       setKeys((prev) => prev.filter((k) => k.id !== id));
       setTestResults((prev) => {
@@ -323,30 +318,26 @@ function ApiKeysTab() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Existing keys */}
+    <div className="space-y-5">
       {loadingKeys ? (
-        <p className="text-sm text-muted-foreground">{t("apiKeys.loadingKeys")}</p>
+        <p className="text-[13px] text-muted-foreground">{t("apiKeys.loadingKeys")}</p>
       ) : keys.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("apiKeys.noKeysYet")}</p>
+        <p className="text-[13px] text-muted-foreground">{t("apiKeys.noKeysYet")}</p>
       ) : (
-        <div className="space-y-2">
+        <div className="divide-y divide-border rounded-md border border-border">
           {keys.map((key) => (
-            <div
-              key={key.id}
-              className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-3"
-            >
-              <div>
-                <p className="text-sm font-medium capitalize text-foreground">{key.provider}</p>
+            <div key={key.id} className="flex items-center justify-between px-4 py-3">
+              <div className="min-w-0">
+                <p className="text-[13px] font-medium capitalize text-foreground">{key.provider}</p>
                 <p className="font-mono text-xs text-muted-foreground">{key.key}</p>
                 {key.createdAt && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground">
                     {t("apiKeys.addedOn", { date: new Date(key.createdAt).toLocaleDateString() })}
                   </p>
                 )}
                 {testResults[key.id] && (
                   <p
-                    className={`text-xs ${
+                    className={`text-[11px] ${
                       testResults[key.id] === t("apiKeys.statusOk")
                         ? "text-success-foreground"
                         : "text-destructive"
@@ -360,13 +351,13 @@ function ApiKeysTab() {
                 <button
                   onClick={() => handleTest(key)}
                   disabled={testingId === key.id}
-                  className="rounded-lg border border-border px-3 py-1 text-xs text-muted-foreground hover:bg-muted disabled:opacity-50"
+                  className="h-7 rounded-md border border-border px-2.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted disabled:opacity-50"
                 >
                   {testingId === key.id ? t("apiKeys.testing") : t("apiKeys.test")}
                 </button>
                 <button
                   onClick={() => handleDelete(key.id)}
-                  className="rounded-lg border border-destructive/30 px-3 py-1 text-xs text-destructive hover:bg-destructive/10"
+                  className="h-7 rounded-md border border-destructive/30 px-2.5 text-[11px] font-medium text-destructive transition-colors hover:bg-destructive/10"
                 >
                   {t("apiKeys.delete")}
                 </button>
@@ -376,9 +367,8 @@ function ApiKeysTab() {
         </div>
       )}
 
-      {/* Add key form */}
-      <div className="rounded-lg border border-border bg-background p-4 space-y-3">
-        <p className="text-sm font-medium text-foreground">{t("apiKeys.addKey")}</p>
+      <div className="space-y-3 rounded-md border border-border p-4">
+        <p className="text-[13px] font-medium text-foreground">{t("apiKeys.addKey")}</p>
         <div className="flex gap-2">
           <label htmlFor="apiKeyProvider" className="sr-only">
             {t("apiKeys.provider")}
@@ -387,7 +377,7 @@ function ApiKeysTab() {
             id="apiKeyProvider"
             value={selectedProvider}
             onChange={(e) => setSelectedProvider(e.target.value as Provider)}
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="h-9 rounded-md border border-border bg-background px-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background"
           >
             {PROVIDERS.map((p) => (
               <option key={p} value={p} className="capitalize">
@@ -404,17 +394,17 @@ function ApiKeysTab() {
             value={newKeyValue}
             onChange={(e) => setNewKeyValue(e.target.value)}
             placeholder={t("apiKeys.pastePlaceholder")}
-            className="flex-1 rounded-lg border border-border bg-background px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="h-9 flex-1 rounded-md border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1 focus:ring-offset-background"
           />
           <button
             onClick={handleSaveKey}
             disabled={saving || !newKeyValue.trim()}
-            className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            className="h-9 rounded-md bg-foreground px-4 text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
           >
             {saving ? t("apiKeys.saving") : t("apiKeys.save")}
           </button>
         </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className="text-[13px] text-destructive">{error}</p>}
       </div>
     </div>
   );
@@ -432,12 +422,6 @@ interface BillingStatus {
   usage: number;
 }
 
-const planColors: Record<Plan, string> = {
-  free: "bg-muted text-muted-foreground",
-  pro: "bg-info/15 text-info-foreground",
-  business: "bg-primary/15 text-primary",
-};
-
 function BillingTab() {
   const { t } = useTranslation("settings");
   const { showToast } = useToast();
@@ -453,7 +437,7 @@ function BillingTab() {
   useEffect(() => {
     async function fetchBilling() {
       try {
-        const res = await fetch(apiUrl("/billing/status"));
+        const res = await apiFetch("/billing/status");
         if (!res.ok) return;
         const data = (await res.json()) as BillingStatus;
         setBilling(data);
@@ -483,7 +467,7 @@ function BillingTab() {
     setUpgrading(true);
     try {
       const gclid = getStoredGclid();
-      const res = await fetch(apiUrl("/checkout"), {
+      const res = await apiFetch("/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tier, ...(gclid && { gclid }) }),
@@ -503,7 +487,7 @@ function BillingTab() {
   async function handleManageSubscription() {
     setManagingPortal(true);
     try {
-      const res = await fetch(apiUrl("/billing/portal"), { method: "POST" });
+      const res = await apiFetch("/billing/portal", { method: "POST" });
       if (!res.ok) {
         const err = (await res.json()) as { error?: string };
         showToast(err.error ?? t("errors.openPortalFailed"), "error");
@@ -517,7 +501,7 @@ function BillingTab() {
   }
 
   if (loadingBilling) {
-    return <p className="text-sm text-muted-foreground">{t("billing.loadingInfo")}</p>;
+    return <p className="text-[13px] text-muted-foreground">{t("billing.loadingInfo")}</p>;
   }
 
   const plan = billing?.plan ?? "free";
@@ -540,68 +524,57 @@ function BillingTab() {
         : t("billing.statusPastDue");
 
   return (
-    <div className="space-y-6">
-      {/* Past due warning */}
+    <div className="space-y-5">
       {status === "past_due" && (
-        <div className="rounded-lg border border-warning/40 bg-warning/8 px-4 py-3">
-          <p className="text-sm font-medium text-warning-foreground">
+        <div className="rounded-md border border-warning/40 bg-warning/8 px-4 py-3">
+          <p className="text-[13px] font-medium text-warning-foreground">
             {t("billing.pastDueWarning")}
           </p>
         </div>
       )}
 
-      {/* Canceled notice */}
       {status === "canceled" && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3">
-          <p className="text-sm font-medium text-destructive">{t("billing.canceledWarning")}</p>
+        <div className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3">
+          <p className="text-[13px] font-medium text-destructive">{t("billing.canceledWarning")}</p>
         </div>
       )}
 
-      {/* Current plan */}
-      <div className="flex items-center justify-between rounded-lg border border-border bg-background px-4 py-4">
+      <div className="flex items-center justify-between rounded-md border border-border px-4 py-4">
         <div>
-          <p className="text-sm text-muted-foreground">{t("billing.currentPlan")}</p>
-          <p className="mt-1 text-lg font-semibold text-foreground">{planLabel}</p>
+          <p className="text-[13px] text-muted-foreground">{t("billing.currentPlan")}</p>
+          <p className="mt-0.5 text-base font-semibold text-foreground">{planLabel}</p>
           {periodEnd && (
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-[11px] text-muted-foreground mt-0.5">
               {status === "canceled" ? t("billing.accessUntil") : t("billing.renews")} {periodEnd}
             </p>
           )}
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${planColors[plan]}`}>
-            {planLabel}
-          </span>
-          <span
-            className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
-              status === "active"
-                ? "bg-success/15 text-success-foreground"
-                : status === "past_due"
-                  ? "bg-warning/20 text-warning-foreground"
-                  : "bg-muted text-muted-foreground"
-            }`}
-          >
-            {statusLabel}
-          </span>
-        </div>
+        <span
+          className={`rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${
+            status === "active"
+              ? "bg-success/15 text-success-foreground"
+              : status === "past_due"
+                ? "bg-warning/20 text-warning-foreground"
+                : "bg-muted text-muted-foreground"
+          }`}
+        >
+          {statusLabel}
+        </span>
       </div>
 
-      {/* Credit balance */}
       <CreditWidget />
 
-      {/* Manage subscription (paid plans) */}
       {plan !== "free" && (
         <button
           type="button"
           onClick={handleManageSubscription}
           disabled={managingPortal}
-          className="w-full rounded-lg border border-border px-6 py-2.5 text-center text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+          className="h-9 w-full rounded-md border border-border text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
         >
           {managingPortal ? t("billing.openingPortal") : t("billing.manageSubscription")}
         </button>
       )}
 
-      {/* Upgrade buttons */}
       {(plan === "free" || status === "canceled") && (
         <div className="flex flex-col gap-3 sm:flex-row">
           {plan !== "pro" && (
@@ -609,7 +582,7 @@ function BillingTab() {
               type="button"
               onClick={() => handleUpgrade("pro")}
               disabled={upgrading}
-              className="flex-1 rounded-lg bg-blue-600 px-6 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="h-9 flex-1 rounded-md bg-foreground text-[13px] font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
             >
               {upgrading ? t("billing.redirecting") : t("billing.upgradeToPro", { price: 29 })}
             </button>
@@ -619,7 +592,7 @@ function BillingTab() {
               type="button"
               onClick={() => handleUpgrade("business")}
               disabled={upgrading}
-              className="flex-1 rounded-lg bg-purple-600 px-6 py-2.5 text-center text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+              className="h-9 flex-1 rounded-md border border-border text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
             >
               {upgrading ? t("billing.redirecting") : t("billing.upgradeToBusiness", { price: 99 })}
             </button>
@@ -639,19 +612,12 @@ interface EloEvent {
   createdAt: string;
 }
 
-function getTierColor(score: number): string {
-  if (score >= 1500) return "bg-primary/15 text-primary";
-  if (score >= 1000) return "bg-info/15 text-info-foreground";
-  return "bg-muted text-muted-foreground";
-}
-
 function AccessTab() {
   const { t } = useTranslation("settings");
   const eloScore = 850;
   const eloHistory: EloEvent[] = [];
   const bugBountyEligible = eloScore >= 1000;
 
-  const tierColor = getTierColor(eloScore);
   const tierLabel =
     eloScore >= 1500
       ? t("access.eliteTier")
@@ -660,40 +626,39 @@ function AccessTab() {
         : t("access.freeTier");
 
   return (
-    <div className="space-y-6">
-      {/* ELO score */}
-      <div className="flex items-center gap-4 rounded-lg border border-border bg-background px-5 py-4">
+    <div className="space-y-5">
+      <div className="flex items-center justify-between rounded-md border border-border px-4 py-4">
         <div>
-          <p className="text-sm text-muted-foreground">{t("access.eloScore")}</p>
-          <p className="mt-1 text-3xl font-bold text-foreground">{eloScore}</p>
+          <p className="text-[13px] text-muted-foreground">{t("access.eloScore")}</p>
+          <p className="mt-0.5 text-2xl font-bold tabular-nums text-foreground">{eloScore}</p>
         </div>
-        <span className={`ml-auto rounded-full px-3 py-1 text-sm font-semibold ${tierColor}`}>
+        <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
           {tierLabel}
         </span>
       </div>
 
-      {/* Tier thresholds */}
-      <div className="rounded-lg border border-border bg-background p-4 space-y-3">
-        <p className="text-sm font-medium text-foreground">{t("access.tierThresholds")}</p>
+      <div className="rounded-md border border-border p-4 space-y-3">
+        <p className="text-[13px] font-medium text-foreground">{t("access.tierThresholds")}</p>
         <div className="space-y-2">
           {[
-            { label: t("access.freeTier"), color: "bg-muted" },
-            { label: t("access.proTier"), color: "bg-blue-500" },
-            { label: t("access.eliteTier"), color: "bg-purple-500" },
+            { label: t("access.freeTier"), range: "0 - 999", active: eloScore < 1000 },
+            { label: t("access.proTier"), range: "1000 - 1499", active: eloScore >= 1000 && eloScore < 1500 },
+            { label: t("access.eliteTier"), range: "1500+", active: eloScore >= 1500 },
           ].map((tier) => (
-            <div key={tier.label} className="flex items-center gap-3">
-              <span className={`h-2.5 w-2.5 rounded-full ${tier.color}`} />
-              <span className="text-sm font-medium text-foreground">{tier.label}</span>
+            <div key={tier.label} className="flex items-center justify-between text-[13px]">
+              <span className={tier.active ? "font-medium text-foreground" : "text-muted-foreground"}>
+                {tier.label}
+              </span>
+              <span className="font-mono text-xs text-muted-foreground">{tier.range}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Bug bounty */}
-      <div className="rounded-lg border border-border bg-background px-4 py-3 flex items-center justify-between">
-        <span className="text-sm text-foreground">{t("access.bugBountyEligibility")}</span>
+      <div className="flex items-center justify-between rounded-md border border-border px-4 py-3">
+        <span className="text-[13px] text-foreground">{t("access.bugBountyEligibility")}</span>
         <span
-          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+          className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
             bugBountyEligible
               ? "bg-success/15 text-success-foreground"
               : "bg-muted text-muted-foreground"
@@ -703,29 +668,25 @@ function AccessTab() {
         </span>
       </div>
 
-      {/* ELO history */}
       <div className="space-y-2">
-        <p className="text-sm font-medium text-foreground">{t("access.recentEvents")}</p>
+        <p className="text-[13px] font-medium text-foreground">{t("access.recentEvents")}</p>
         {eloHistory.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("access.noRecentEvents")}</p>
+          <p className="text-[13px] text-muted-foreground">{t("access.noRecentEvents")}</p>
         ) : (
-          <div className="space-y-1">
+          <div className="divide-y divide-border rounded-md border border-border">
             {eloHistory.map((event) => (
-              <div
-                key={event.id}
-                className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-muted"
-              >
-                <span className="text-sm text-foreground">{event.reason}</span>
+              <div key={event.id} className="flex items-center justify-between px-4 py-2.5">
+                <span className="text-[13px] text-foreground">{event.reason}</span>
                 <div className="flex items-center gap-3">
                   <span
-                    className={`text-sm font-semibold ${
-                      event.delta >= 0 ? "text-green-600" : "text-destructive"
+                    className={`text-[13px] font-semibold tabular-nums ${
+                      event.delta >= 0 ? "text-success-foreground" : "text-destructive"
                     }`}
                   >
                     {event.delta >= 0 ? "+" : ""}
                     {event.delta}
                   </span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-[11px] text-muted-foreground">
                     {new Date(event.createdAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -745,14 +706,13 @@ export function SettingsPage() {
   const search = useSearch({ strict: false }) as { tab?: string };
   const navigate = useNavigate();
 
-  const validTabs = TABS.map((tab) => tab.id);
-  const activeTab: SettingsTab = validTabs.includes(search.tab as SettingsTab)
+  const activeTab: SettingsTab = TAB_IDS.includes(search.tab as SettingsTab)
     ? (search.tab as SettingsTab)
     : "profile";
 
-  const setTab = useCallback(
-    (tab: SettingsTab) => {
-      navigate({ to: "/settings", search: (prev) => ({ ...prev, tab }) });
+  const handleTabChange = useCallback(
+    (value: string) => {
+      navigate({ to: "/settings", search: (prev) => ({ ...prev, tab: value }) });
     },
     [navigate],
   );
@@ -767,46 +727,44 @@ export function SettingsPage() {
 
   return (
     <AuthGuard>
-      <div className="mx-auto max-w-3xl space-y-6">
-        <h1 className="text-2xl font-bold text-foreground">{t("title")}</h1>
+      <div className="rubik-container py-8">
+        <div className="mx-auto max-w-2xl">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">{t("title")}</h1>
 
-        {/* Tab bar */}
-        <div
-          role="tablist"
-          aria-label={t("sectionsLabel")}
-          className="flex gap-1 border-b border-border overflow-x-auto"
-        >
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              aria-controls={`settings-panel-${tab.id}`}
-              id={`settings-tab-${tab.id}`}
-              onClick={() => setTab(tab.id)}
-              className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition ${
-                activeTab === tab.id
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
+          <Tabs.Root value={activeTab} onValueChange={handleTabChange} className="mt-6">
+            <Tabs.List
+              aria-label={t("sectionsLabel")}
+              className="flex gap-1 border-b border-border"
             >
-              {tabLabels[tab.id]}
-            </button>
-          ))}
-        </div>
+              {TAB_IDS.map((id) => (
+                <Tabs.Trigger
+                  key={id}
+                  value={id}
+                  className="relative whitespace-nowrap px-3 pb-2.5 pt-1 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground data-[state=active]:text-foreground after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:bg-transparent data-[state=active]:after:bg-foreground"
+                >
+                  {tabLabels[id]}
+                </Tabs.Trigger>
+              ))}
+            </Tabs.List>
 
-        {/* Tab content */}
-        <div
-          role="tabpanel"
-          id={`settings-panel-${activeTab}`}
-          aria-labelledby={`settings-tab-${activeTab}`}
-          className="rubik-panel p-6"
-        >
-          {activeTab === "profile" && <ProfileTab />}
-          {activeTab === "whatsapp" && <WhatsAppTab />}
-          {activeTab === "keys" && <ApiKeysTab />}
-          {activeTab === "billing" && <BillingTab />}
-          {activeTab === "access" && <AccessTab />}
+            <div className="mt-6">
+              <Tabs.Content value="profile" className="outline-none">
+                <ProfileTab />
+              </Tabs.Content>
+              <Tabs.Content value="whatsapp" className="outline-none">
+                <WhatsAppTab />
+              </Tabs.Content>
+              <Tabs.Content value="keys" className="outline-none">
+                <ApiKeysTab />
+              </Tabs.Content>
+              <Tabs.Content value="billing" className="outline-none">
+                <BillingTab />
+              </Tabs.Content>
+              <Tabs.Content value="access" className="outline-none">
+                <AccessTab />
+              </Tabs.Content>
+            </div>
+          </Tabs.Root>
         </div>
       </div>
     </AuthGuard>

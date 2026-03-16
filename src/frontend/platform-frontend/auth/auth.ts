@@ -3,6 +3,9 @@ import { API_BASE } from "../core-logic/api";
 
 export const authClient = createAuthClient({
   baseURL: API_BASE,
+  fetchOptions: {
+    credentials: "include" as const,
+  },
 });
 
 export const authProviders = [

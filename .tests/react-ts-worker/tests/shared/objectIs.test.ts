@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import objectIs from "../../../../src/core/react-engine/shared/objectIs.js";
+import objectIs from "../../../../src/core/react-engine/core-logic/shared/objectIs.js";
 
 describe("objectIs", () => {
   it("returns true for same primitive values", () => {

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockImageStudioDeps } from "../__test-utils__/mock-deps.js";
-import { banner } from "../../../src/mcp-tools/image-studio/tools/banner.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import { banner } from "../../../src/mcp-tools/image-studio/core-logic/tools/banner.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 describe("banner", () => {
   const userId = "u1";

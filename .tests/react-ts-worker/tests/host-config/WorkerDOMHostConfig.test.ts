@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { createWorkerDOMHostConfig } from "../../../../src/core/react-engine/host-config/WorkerDOMHostConfig.js";
+import { createWorkerDOMHostConfig } from "../../../../src/core/react-engine/core-logic/host-config/WorkerDOMHostConfig.js";
 import type {
   WorkerDocument,
   WorkerElement,
   WorkerText,
-} from "../../../../src/core/react-engine/host-config/WorkerDOMHostConfig.js";
+} from "../../../../src/core/react-engine/core-logic/host-config/WorkerDOMHostConfig.js";
 
 function makeWorkerText(text: string): WorkerText {
   return {
@@ -395,9 +395,9 @@ describe("createWorkerDOMHostConfig - worker root", () => {
     };
 
     const { createRoot } = await import(
-      "../../../../src/core/react-engine/react-worker-dom/index.js"
+      "../../../../src/core/react-engine/core-logic/react-worker-dom/index.js"
     );
-    const { createElement } = await import("../../../../src/core/react-engine/react/index.js");
+    const { createElement } = await import("../../../../src/core/react-engine/core-logic/react/index.js");
 
     const container = makeWorkerElement("div");
     const root = createRoot(mockDoc, container);

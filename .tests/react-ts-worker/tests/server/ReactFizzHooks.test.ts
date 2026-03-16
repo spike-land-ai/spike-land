@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import {
   resetIdCounter,
   ServerDispatcher,
-} from "../../../../src/core/react-engine/server/ReactFizzHooks.js";
-import { createContext } from "../../../../src/core/react-engine/react/ReactContext.js";
+} from "../../../../src/core/react-engine/core-logic/server/ReactFizzHooks.js";
+import { createContext } from "../../../../src/core/react-engine/core-logic/react/ReactContext.js";
 
 describe("ReactFizzHooks - ServerDispatcher", () => {
   beforeEach(() => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { memo } from "../../../../src/core/react-engine/react/ReactMemo.js";
-import { REACT_MEMO_TYPE } from "../../../../src/core/react-engine/react/ReactSymbols.js";
+import { memo } from "../../../../src/core/react-engine/core-logic/react/ReactMemo.js";
+import { REACT_MEMO_TYPE } from "../../../../src/core/react-engine/core-logic/react/ReactSymbols.js";
 
 describe("memo", () => {
   it("creates memo component with correct $$typeof", () => {

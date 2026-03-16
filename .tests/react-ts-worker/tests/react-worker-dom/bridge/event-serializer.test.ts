@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { serializeEvent } from "../../../../../src/core/react-engine/react-worker-dom/bridge/event-serializer.js";
+import { serializeEvent } from "../../../../../src/core/react-engine/core-logic/react-worker-dom/bridge/event-serializer.js";
 
 describe("serializeEvent", () => {
   it("serializes basic event properties", () => {

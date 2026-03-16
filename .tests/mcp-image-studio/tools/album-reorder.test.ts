@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { createMockImageStudioDeps, mockAlbumRow } from "../__test-utils__/index.js";
-import { albumReorderTool } from "../../../src/mcp-tools/image-studio/tools/album-reorder.js";
-import type { CallToolResult, ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
-import { asAlbumHandle, asImageId } from "../../../src/mcp-tools/image-studio/types.js";
+import { albumReorderTool } from "../../../src/mcp-tools/image-studio/core-logic/tools/album-reorder.js";
+import type { CallToolResult, ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
+import { asAlbumHandle, asImageId } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { standardScenarios } from "../__test-utils__/standard-scenarios.js";
 
 describe("albumReorder", () => {

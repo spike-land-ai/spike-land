@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { peek, pop, push } from "../../../../src/core/react-engine/scheduler/SchedulerMinHeap.js";
-import type { HeapNode } from "../../../../src/core/react-engine/scheduler/SchedulerMinHeap.js";
+import { peek, pop, push } from "../../../../src/core/react-engine/core-logic/scheduler/SchedulerMinHeap.js";
+import type { HeapNode } from "../../../../src/core/react-engine/core-logic/scheduler/SchedulerMinHeap.js";
 
 describe("SchedulerMinHeap", () => {
   function makeNode(id: number, sortIndex: number): HeapNode {

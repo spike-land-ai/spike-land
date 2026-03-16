@@ -7,8 +7,8 @@ import {
   WorkerElementImpl,
   WorkerNodeImpl,
   WorkerTextImpl,
-} from "../../../../../src/core/react-engine/react-worker-dom/bridge/worker-document.js";
-import { MutationType } from "../../../../../src/core/react-engine/react-worker-dom/bridge/protocol.js";
+} from "../../../../../src/core/react-engine/core-logic/react-worker-dom/bridge/worker-document.js";
+import { MutationType } from "../../../../../src/core/react-engine/core-logic/react-worker-dom/bridge/protocol.js";
 
 describe("WorkerDocument", () => {
   beforeEach(() => {

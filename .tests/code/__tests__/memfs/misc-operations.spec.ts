@@ -1,4 +1,5 @@
-import FS, { cwd, readFileSync } from "@/lib/memfs/index";
+import { cwd, readFileSync } from "@/lib/memfs/index";
+import * as FS from "@/lib/memfs/index";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mockNavigator, setupTest } from "./setup.js";
 

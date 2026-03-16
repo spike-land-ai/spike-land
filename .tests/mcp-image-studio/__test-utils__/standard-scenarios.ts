@@ -3,7 +3,7 @@ import type {
   CallToolResult,
   ImageStudioDeps,
   ToolContext,
-} from "../../../src/mcp-tools/image-studio/types.js";
+} from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 export function standardScenarios(config: {
   handler: (input: unknown, ctx: ToolContext) => Promise<CallToolResult> | CallToolResult;

@@ -1,12 +1,12 @@
-import { asImageId, asJobId } from "../../../src/mcp-tools/image-studio/types.js";
+import { asImageId, asJobId } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   createMockImageStudioDeps,
   mockImageRow,
   mockJobRow,
 } from "../__test-utils__/mock-deps.js";
-import { enhance } from "../../../src/mcp-tools/image-studio/tools/enhance.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import { enhance } from "../../../src/mcp-tools/image-studio/core-logic/tools/enhance.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 describe("enhance", () => {
   const userId = "u1";

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { edit } from "../../../src/mcp-tools/image-studio/tools/edit.js";
+import { edit } from "../../../src/mcp-tools/image-studio/core-logic/tools/edit.js";
 import { createMockImageStudioDeps, mockImageRow } from "../__test-utils__/index.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;

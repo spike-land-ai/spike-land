@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMockImageStudioDeps } from "../__test-utils__/mock-deps.js";
-import { credits } from "../../../src/mcp-tools/image-studio/tools/credits.js";
-import type { EnhancementTier, ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import { credits } from "../../../src/mcp-tools/image-studio/core-logic/tools/credits.js";
+import type { EnhancementTier, ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 describe("credits", () => {
   const userId = "u1";

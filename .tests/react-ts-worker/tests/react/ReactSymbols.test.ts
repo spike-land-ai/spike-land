@@ -12,7 +12,7 @@ import {
   REACT_PROFILER_TYPE,
   REACT_STRICT_MODE_TYPE,
   REACT_SUSPENSE_TYPE,
-} from "../../../../src/core/react-engine/react/ReactSymbols.js";
+} from "../../../../src/core/react-engine/core-logic/react/ReactSymbols.js";
 
 describe("React Symbols", () => {
   it("REACT_ELEMENT_TYPE is a well-known symbol", () => {

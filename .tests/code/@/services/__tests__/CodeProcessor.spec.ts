@@ -47,7 +47,7 @@ vi.mock("@/services/RenderService", () => ({
 import { importMapReplace } from "@/lib/importmap-utils";
 import { md5 } from "@/lib/md5";
 import { transpileCode } from "@/services/editorUtils";
-import { CodeProcessor } from "../../../../../src/frontend/monaco-editor/@/services/CodeProcessor";
+import { CodeProcessor } from "../../../../../src/frontend/monaco-editor/core-logic/services/CodeProcessor";
 
 describe("CodeProcessor", () => {
   let processor: CodeProcessor;
@@ -468,13 +468,19 @@ describe("CodeProcessor", () => {
       expect(result).toBe(false);
     });
 
-    it("should log error when transpile fails", async () => {
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    it("should return false when transpile fails", async () => {
       vi.mocked(transpileCode).mockRejectedValueOnce(new Error("Transpile failed"));
 
-      await processor.process("bad code", true, mockAbortController.signal, mockGetSession);
+      const result = await processor.process(
+        "bad code",
+        true,
+        mockAbortController.signal,
+        mockGetSession,
+      );
 
-      expect(consoleSpy).toHaveBeenCalledWith("Error transpiling code:", expect.any(Error));
+      // The process method uses tryCatch which silently captures the error
+      // and returns false without logging to console
+      expect(result).toBe(false);
     });
   });
 

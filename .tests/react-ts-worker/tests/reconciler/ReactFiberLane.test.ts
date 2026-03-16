@@ -32,7 +32,7 @@ import {
   SyncLane,
   SyncUpdateLanes,
   TotalLanes,
-} from "../../../../src/core/react-engine/reconciler/ReactFiberLane.js";
+} from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberLane.js";
 
 describe("ReactFiberLane", () => {
   describe("constants", () => {

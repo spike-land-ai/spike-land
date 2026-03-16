@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { Fragment, jsx, jsxs } from "../../../../src/core/react-engine/react/jsx-runtime.js";
+import { Fragment, jsx, jsxs } from "../../../../src/core/react-engine/core-logic/react/jsx-runtime.js";
 import {
   REACT_ELEMENT_TYPE,
   REACT_FRAGMENT_TYPE,
-} from "../../../../src/core/react-engine/react/ReactSymbols.js";
+} from "../../../../src/core/react-engine/core-logic/react/ReactSymbols.js";
 
 describe("jsx runtime", () => {
   describe("jsx", () => {

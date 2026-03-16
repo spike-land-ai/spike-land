@@ -4,8 +4,8 @@ import {
   mockImageRow,
   mockJobRow,
 } from "../__test-utils__/mock-deps.js";
-import { resize } from "../../../src/mcp-tools/image-studio/tools/resize.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import { resize } from "../../../src/mcp-tools/image-studio/core-logic/tools/resize.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { standardScenarios } from "../__test-utils__/standard-scenarios.js";
 
 describe("resize", () => {
@@ -118,7 +118,7 @@ describe("resize", () => {
 
   it("should validate width and height are positive integers using schema", async () => {
     const { ResizeInputSchema } = await import(
-      "../../../src/mcp-tools/image-studio/tools/resize.js"
+      "../../../src/mcp-tools/image-studio/core-logic/tools/resize.js"
     );
 
     const resultWidth = ResizeInputSchema.safeParse({

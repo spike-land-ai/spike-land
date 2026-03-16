@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createContext } from "../../../../src/core/react-engine/react/ReactContext.js";
+import { createContext } from "../../../../src/core/react-engine/core-logic/react/ReactContext.js";
 import {
   REACT_CONSUMER_TYPE,
   REACT_CONTEXT_TYPE,
-} from "../../../../src/core/react-engine/react/ReactSymbols.js";
+} from "../../../../src/core/react-engine/core-logic/react/ReactSymbols.js";
 
 describe("createContext", () => {
   it("creates context with correct $$typeof", () => {

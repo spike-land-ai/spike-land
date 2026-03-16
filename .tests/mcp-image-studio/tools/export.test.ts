@@ -1,8 +1,8 @@
-import { asImageId } from "../../../src/mcp-tools/image-studio/types.js";
+import { asImageId } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMockImageStudioDeps, mockImageRow } from "../__test-utils__/mock-deps.js";
-import { exportImage } from "../../../src/mcp-tools/image-studio/tools/export.js";
-import type { ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import { exportImage } from "../../../src/mcp-tools/image-studio/core-logic/tools/export.js";
+import type { ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { standardScenarios } from "../__test-utils__/standard-scenarios.js";
 
 describe("exportImage", () => {

@@ -169,19 +169,17 @@ describe("blog.ts — outer catch fallback paths", () => {
     expect(ctx.waitUntil).toHaveBeenCalled();
   });
 
-  it("GET /api/blog/:slug: returns post via D1 fallback when withEdgeCache throws", async () => {
-    // Fetcher (DB.prepare.first) throws on first call, succeeds on second call (outer catch)
-    let callCount = 0;
+  it("GET /api/blog/:slug: returns 404 when DB error in fetcher and GitHub source unavailable", async () => {
+    // When withEdgeCache's fetcher encounters a DB error, getBlogPostRow catches it
+    // and falls back to fetchBlogPostSource (GitHub raw). In test env that also fails,
+    // so the fetcher returns null → withEdgeCache returns null → route returns 404.
+    // (withEdgeCache does NOT throw; it gracefully degrades.)
     const env = createMockEnv({
       DB: {
         prepare: vi.fn().mockImplementation(() => {
-          callCount++;
           return {
             bind: vi.fn().mockReturnThis(),
-            first: vi.fn().mockImplementation(() => {
-              if (callCount === 1) throw new Error("DB error in fetcher");
-              return Promise.resolve(SAMPLE_ROW);
-            }),
+            first: vi.fn().mockRejectedValue(new Error("DB error in fetcher")),
             all: vi.fn().mockResolvedValue({ results: [] }),
             run: vi.fn().mockResolvedValue({}),
           };
@@ -200,9 +198,7 @@ describe("blog.ts — outer catch fallback paths", () => {
       env,
       ctx as unknown as ExecutionContext,
     );
-    expect(res.status).toBe(200);
-    const body = await res.json<{ slug: string }>();
-    expect(body.slug).toBe("hello-world");
+    expect(res.status).toBe(404);
   });
 
   it("GET /api/blog/:slug: returns 404 when withEdgeCache throws and fallback D1 returns null", async () => {

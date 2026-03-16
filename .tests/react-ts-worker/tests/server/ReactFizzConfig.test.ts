@@ -5,7 +5,7 @@ import {
   pushEndInstance,
   pushStartInstance,
   pushTextInstance,
-} from "../../../../src/core/react-engine/server/ReactFizzConfig.js";
+} from "../../../../src/core/react-engine/core-logic/server/ReactFizzConfig.js";
 
 describe("ReactFizzConfig", () => {
   describe("escapeHtml", () => {

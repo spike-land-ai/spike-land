@@ -25,17 +25,17 @@ import {
   useInsertionEffect,
   useImperativeHandle,
   useDebugValue,
-} from "../../../../src/core/react-engine/react/index.js";
-import { memo } from "../../../../src/core/react-engine/react/ReactMemo.js";
-import { forwardRef } from "../../../../src/core/react-engine/react/ReactForwardRef.js";
-import { createRoot } from "../../../../src/core/react-engine/react-dom/client.js";
+} from "../../../../src/core/react-engine/core-logic/react/index.js";
+import { memo } from "../../../../src/core/react-engine/core-logic/react/ReactMemo.js";
+import { forwardRef } from "../../../../src/core/react-engine/core-logic/react/ReactForwardRef.js";
+import { createRoot } from "../../../../src/core/react-engine/core-logic/react-dom/client.js";
 import {
   createContainer,
   updateContainer,
   getPublicRootInstance,
-} from "../../../../src/core/react-engine/reconciler/ReactFiberReconciler.js";
-import { DOMHostConfig } from "../../../../src/core/react-engine/host-config/DOMHostConfig.js";
-import { flushSync } from "../../../../src/core/react-engine/reconciler/ReactFiberWorkLoop.js";
+} from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberReconciler.js";
+import { DOMHostConfig } from "../../../../src/core/react-engine/core-logic/host-config/DOMHostConfig.js";
+import { flushSync } from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberWorkLoop.js";
 
 // Wait for microtasks to flush (sync queue processing)
 function flushMicrotasks(): Promise<void> {

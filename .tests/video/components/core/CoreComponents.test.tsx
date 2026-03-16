@@ -1,20 +1,20 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { AttentionSpotlightCore } from "../../../../src/media/educational-videos/components/core/AttentionSpotlightCore";
-import { FiveLayerStackCore } from "../../../../src/media/educational-videos/components/core/FiveLayerStackCore";
-import { DarwinianTreeCore } from "../../../../src/media/educational-videos/components/core/DarwinianTreeCore";
-import { RecursiveZoomCore } from "../../../../src/media/educational-videos/components/core/RecursiveZoomCore";
-import { AgentLoopCore } from "../../../../src/media/educational-videos/components/core/AgentLoopCore";
-import { BayesianConfidenceCore } from "../../../../src/media/educational-videos/components/core/BayesianConfidenceCore";
-import { ModelCascadeCore } from "../../../../src/media/educational-videos/components/core/ModelCascadeCore";
-import { SplitScreenCore } from "../../../../src/media/educational-videos/components/core/SplitScreenCore";
+import { AttentionSpotlightCore } from "../../../../src/media/educational-videos/ui/AttentionSpotlightCore";
+import { FiveLayerStackCore } from "../../../../src/media/educational-videos/ui/FiveLayerStackCore";
+import { DarwinianTreeCore } from "../../../../src/media/educational-videos/ui/DarwinianTreeCore";
+import { RecursiveZoomCore } from "../../../../src/media/educational-videos/ui/RecursiveZoomCore";
+import { AgentLoopCore } from "../../../../src/media/educational-videos/ui/AgentLoopCore";
+import { BayesianConfidenceCore } from "../../../../src/media/educational-videos/ui/BayesianConfidenceCore";
+import { ModelCascadeCore } from "../../../../src/media/educational-videos/ui/ModelCascadeCore";
+import { SplitScreenCore } from "../../../../src/media/educational-videos/ui/SplitScreenCore";
 
-import { GlassmorphismCardCore } from "../../../../src/media/educational-videos/components/core/ui/GlassmorphismCardCore";
+import { GlassmorphismCardCore } from "../../../../src/media/educational-videos/ui/GlassmorphismCardCore";
 import {
   clamp,
   interpolate,
   seededRandom,
-} from "../../../../src/media/educational-videos/lib/animation-utils";
+} from "../../../../src/media/educational-videos/core-logic/animation-utils";
 
 describe("Animation Utils", () => {
   it("interpolates values correctly", () => {

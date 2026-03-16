@@ -1,8 +1,8 @@
-import { asJobId } from "../../../src/mcp-tools/image-studio/types.js";
+import { asJobId } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockImageStudioDeps, mockJobRow } from "../__test-utils__/mock-deps.js";
-import { history } from "../../../src/mcp-tools/image-studio/tools/history.js";
-import type { ToolCallRow, ToolContext } from "../../../src/mcp-tools/image-studio/types.js";
+import { history } from "../../../src/mcp-tools/image-studio/core-logic/tools/history.js";
+import type { ToolCallRow, ToolContext } from "../../../src/mcp-tools/image-studio/mcp/types.js";
 
 function mockToolCallRow(overrides: Partial<ToolCallRow> = {}): ToolCallRow {
   return {
