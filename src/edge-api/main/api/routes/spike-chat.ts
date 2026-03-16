@@ -29,7 +29,7 @@ import { getZoltanPersonaPrompt } from "../../core-logic/zoltan-persona-prompt.j
 import { getArnoldPersonaPrompt } from "../../core-logic/arnold-persona-prompt.js";
 import { getDaftPunkPersonaPrompt } from "../../core-logic/daftpunk-persona-prompt.js";
 import { getSpikePersonaPrompt } from "../../core-logic/spike-persona-prompt.js";
-import { getRajuPersonaPrompt } from "../../core-logic/raju-persona-prompt.js";
+import { getPetiPersonaPrompt } from "../../core-logic/peti-persona-prompt.js";
 const spikeChat = new Hono<{ Bindings: Env; Variables: Variables }>();
 const MAX_TOOL_LOOPS = 3;
 const MAX_HISTORY_MESSAGES = 16;
@@ -598,9 +598,9 @@ spikeChat.post("/api/spike-chat", async (c) => {
     fullSystemPrompt = `${fullSystemPrompt}\n\n${getGovPersonaPrompt()}`;
   }
 
-  // Merge Zoltán grounded-mirror persona when requested
-  if (persona === "zoltan") {
-    fullSystemPrompt = `${fullSystemPrompt}\n\n${getZoltanPersonaPrompt()}`;
+  // Merge Zoltán persona (grounded mirror + Daft Punk music technologist — merged)
+  if (persona === "zoltan" || persona === "daftpunk") {
+    fullSystemPrompt = `${fullSystemPrompt}\n\n${getZoltanPersonaPrompt()}\n\n${getDaftPunkPersonaPrompt()}`;
   }
 
   // Merge Arnold UX provocateur persona when requested
@@ -608,19 +608,14 @@ spikeChat.post("/api/spike-chat", async (c) => {
     fullSystemPrompt = `${fullSystemPrompt}\n\n${getArnoldPersonaPrompt()}`;
   }
 
-  // Merge Daft Punk music technologist persona when requested
-  if (persona === "daftpunk") {
-    fullSystemPrompt = `${fullSystemPrompt}\n\n${getDaftPunkPersonaPrompt()}`;
-  }
-
   // Merge Spike platform guide persona when requested
   if (persona === "spike") {
     fullSystemPrompt = `${fullSystemPrompt}\n\n${getSpikePersonaPrompt()}`;
   }
 
-  // Merge Raju QA engineer persona when requested
-  if (persona === "raju") {
-    fullSystemPrompt = `${fullSystemPrompt}\n\n${getRajuPersonaPrompt()}`;
+  // Merge Peti QA engineer persona when requested
+  if (persona === "peti") {
+    fullSystemPrompt = `${fullSystemPrompt}\n\n${getPetiPersonaPrompt()}`;
   }
 
   const intentSummary = classifyIntent(userMessage, body.pageContext);

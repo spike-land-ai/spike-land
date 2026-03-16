@@ -23,23 +23,7 @@ const plans = [
       cta: "Start Building",
       highlighted: true,
     },
-    {
-      id: "supporter",
-      name: "Supporter",
-      price: "$5",
-      period: "/month",
-      description: "Love what we're building? Help us grow. 99% goes to marketing.",
-      features: [
-        "Everything in Free (same features)",
-        "Supporter badge on profile",
-        "Early access to experiments",
-        "Vote on roadmap priorities",
-        "Our eternal gratitude"
-      ],
-      cta: "Support spike.land",
-      highlighted: false,
-    },
-    {
+{
       id: "pro",
       name: "Pro",
       price: "$29",
@@ -80,7 +64,7 @@ const faqs = [
   },
   {
     q: "Why would I pay if it's free?",
-    a: "Because you want to help us grow. Supporter and Pro tiers are voluntary — like buying a coffee for someone building something you use every day. 99% of your money goes to marketing.",
+    a: "Pro is for power users who need priority and scale. Enterprise is for organizations with custom requirements. The free tier has everything you need to build.",
   },
   {
     q: "What payment methods do you accept?",
@@ -147,16 +131,7 @@ const faqs = [
                       {plan.cta}
                     </a>
                   )}
-                  {plan.id === 'supporter' && (
-                    <button
-                      class="plan-cta plan-cta--secondary"
-                      type="button"
-                      data-checkout-service="support_coffee"
-                    >
-                      {plan.cta}
-                    </button>
-                  )}
-                  {plan.id === 'pro' && (
+{plan.id === 'pro' && (
                     <button
                       class="plan-cta plan-cta--secondary"
                       type="button"
@@ -187,7 +162,6 @@ const faqs = [
                 <tr class="comp-head-row">
                   <th class="comp-feature-col">Feature</th>
                   <th>Free</th>
-                  <th>Supporter</th>
                   <th>Pro</th>
                   <th>Enterprise</th>
                 </tr>
@@ -198,11 +172,9 @@ const faqs = [
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
-                  <td><span class="comp-check">✓</span></td>
                 </tr>
                 <tr class="comp-row">
                   <td class="comp-feature">Spike Chat + Personas</td>
-                  <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
@@ -212,32 +184,21 @@ const faqs = [
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
-                  <td><span class="comp-check">✓</span></td>
                 </tr>
                 <tr class="comp-row">
                   <td class="comp-feature">Agent Runs/mo</td>
                   <td>Unlimited</td>
                   <td>Unlimited</td>
                   <td>Unlimited</td>
-                  <td>Unlimited</td>
-                </tr>
-                <tr class="comp-row">
-                  <td class="comp-feature">Supporter Badge</td>
-                  <td><span class="comp-dash">—</span></td>
-                  <td><span class="comp-check">✓</span></td>
-                  <td><span class="comp-check">✓</span></td>
-                  <td><span class="comp-check">✓</span></td>
                 </tr>
                 <tr class="comp-row">
                   <td class="comp-feature">Priority AI Queue</td>
-                  <td><span class="comp-dash">—</span></td>
                   <td><span class="comp-dash">—</span></td>
                   <td><span class="comp-check">✓</span></td>
                   <td><span class="comp-check">✓</span></td>
                 </tr>
                 <tr class="comp-row comp-row-last">
                   <td class="comp-feature">SLA & Dedicated Support</td>
-                  <td><span class="comp-dash">—</span></td>
                   <td><span class="comp-dash">—</span></td>
                   <td><span class="comp-dash">—</span></td>
                   <td><span class="comp-check">✓</span></td>
@@ -696,52 +657,4 @@ const faqs = [
     });
   });
 
-  // Service checkout (supporter tier)
-  const serviceButtons = Array.from(document.querySelectorAll('[data-checkout-service]'));
-  serviceButtons.forEach((button) => {
-    if (!(button instanceof HTMLButtonElement)) return;
-    button.addEventListener('click', () => {
-      void startServiceCheckout(button);
-    });
-  });
-
-  async function startServiceCheckout(button: HTMLButtonElement) {
-    const service = button.dataset.checkoutService;
-    if (!service) return;
-
-    const originalLabel = button.textContent?.trim() || 'Continue';
-    setFeedback(null);
-    button.disabled = true;
-    button.textContent = 'Redirecting…';
-
-    try {
-      const res = await fetch('/api/checkout/service', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ service })
-      });
-
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        throw new Error(
-          typeof data?.error === 'string' ? data.error : `Unable to start checkout (${res.status})`,
-        );
-      }
-
-      if (typeof data?.url !== 'string' || data.url.length === 0) {
-        throw new Error('No checkout URL returned.');
-      }
-
-      window.location.href = data.url;
-    } catch (err) {
-      console.error('Service checkout error:', err);
-      setFeedback(
-        err instanceof Error ? err.message : 'Unable to start checkout right now. Please try again.',
-      );
-    } finally {
-      button.disabled = false;
-      button.textContent = originalLabel;
-    }
-  }
 </script>

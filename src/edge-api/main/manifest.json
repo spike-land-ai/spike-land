@@ -34,7 +34,6 @@
     "api/routes/spa.ts",
     "api/routes/stripe-webhook.ts",
     "api/routes/support.ts",
-    "api/routes/user-profile.ts",
     "api/routes/version.ts",
     "api/routes/well-known.ts",
     "api/routes/whatsapp.ts",

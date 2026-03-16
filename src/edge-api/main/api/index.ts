@@ -23,7 +23,6 @@ import { whatsapp } from "./routes/whatsapp.js";
 import { telegram } from "./routes/telegram.js";
 import { stripeWebhook } from "./routes/stripe-webhook.js";
 import { checkout } from "./routes/checkout.js";
-import { userProfile } from "./routes/user-profile.js";
 import { billing } from "./routes/billing.js";
 import { apiKeys } from "./routes/api-keys.js";
 import { cockpit } from "./routes/cockpit.js";
@@ -143,14 +142,11 @@ const KNOWN_VANITY_PREFIXES = [
   "analytics",
   "gov",
   "dash",
-  "dashboard",
   "blog",
   "docs",
   "apps",
   "pricing",
   "cockpit",
-  "settings",
-  "support",
   "store",
   "chess",
   "workshop",
@@ -374,7 +370,6 @@ app.use("/api/checkout/*", authMiddleware);
 app.use("/api/credits/*", authMiddleware);
 
 // Auth middleware for new user/billing/keys/cockpit routes
-app.use("/api/user/*", authMiddleware);
 app.use("/api/billing/*", authMiddleware);
 app.use("/api/keys", authMiddleware);
 app.use("/api/keys/*", authMiddleware);
@@ -485,7 +480,6 @@ app.route("/", whatsapp);
 app.route("/", telegram);
 app.route("/", stripeWebhook);
 app.route("/", checkout);
-app.route("/", userProfile);
 app.route("/", billing);
 app.route("/", apiKeys);
 app.route("/", cockpit);

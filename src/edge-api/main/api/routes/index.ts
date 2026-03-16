@@ -24,7 +24,6 @@ export * from "./sitemap";
 export * from "./spa";
 export * from "./stripe-webhook";
 export * from "./support";
-export * from "./user-profile";
 export * from "./version";
 export * from "./well-known";
 export * from "./whatsapp";
