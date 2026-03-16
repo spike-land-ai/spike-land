@@ -70,7 +70,7 @@ export const DEFAULT_PROVIDER_MODELS: Record<ProviderId, string> = {
   openai: "gpt-4.1",
   anthropic: "claude-sonnet-4-20250514",
   google: "gemini-2.5-flash",
-  xai: "grok-4-1",
+  xai: "grok-3-latest",
   ollama: "qwen3:8b",
 };
 
@@ -566,7 +566,7 @@ export async function streamCompletion(
     if (!res.ok) {
       const errText = await res.text();
       console.error(`[llm-provider] streaming failed ${res.status}: ${errText}`);
-      throw new Error(`AI service error (${res.status})`);
+      throw new Error(`AI service error (${res.status}): ${errText.slice(0, 200)}`);
     }
 
     return res;
