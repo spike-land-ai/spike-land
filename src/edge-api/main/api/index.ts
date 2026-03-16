@@ -411,11 +411,7 @@ app.use("/v1/thread", creditMeterMiddleware);
 app.use("/v1/tool", authMiddleware);
 app.use("/v1/donate-token", authMiddleware);
 
-// Auth and credit metering for Spike Chat (Grok-powered)
-app.use("/api/spike-chat", authMiddleware);
-app.use("/api/spike-chat", creditMeterMiddleware);
-app.use("/api/spike-chat/history", authMiddleware);
-app.use("/api/spike-chat/stream/*", authMiddleware);
+// Spike Chat — open to all (guest = free = pro = team = enterprise)
 app.use("/api/spike-chat/debug/*", authMiddleware);
 
 // Error handling middleware
