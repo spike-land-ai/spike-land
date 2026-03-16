@@ -1,14 +1,26 @@
 ---
-// Zoltan merged into Daft Punk mega-persona — redirect
+import RadixChat from '../components/react/radix-chat/RadixChat.tsx';
+import TrackPageView from '../components/TrackPageView.astro';
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0;url=/daftpunk" />
-    <title>Redirecting to Daft Punk...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Zolt&aacute;n — spike.land</title>
+    <meta name="description" content="Music. Math. Code. Platform. Human After All." />
+    <meta name="theme-color" content="#d97706" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; overflow: hidden; -webkit-text-size-adjust: 100%; }
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    </style>
+    <TrackPageView />
   </head>
   <body>
-    <p>Redirecting to <a href="/daftpunk">Daft Punk</a>...</p>
+    <RadixChat client:only="react" persona="zoltan" />
   </body>
 </html>

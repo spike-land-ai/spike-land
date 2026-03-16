@@ -23,17 +23,17 @@ interface PersonaConfig {
 }
 
 const PERSONAS: Record<string, PersonaConfig> = {
-  daftpunk: {
-    persona: "daftpunk",
-    title: "Daft Punk",
-    accent: "#fbbf24",
-    greeting: "One more time. My brain is open.",
+  zoltan: {
+    persona: "zoltan",
+    title: "Zolt\u00e1n",
+    accent: "#d97706",
+    greeting: "Szia. Miben seg\u00edthetek?",
     subtitle: "Music. Math. Code. Platform. Human After All.",
-    placeholder: "Talk to Daft Punk...",
+    placeholder: "Talk to Zolt\u00e1n...",
     suggestions: [
-      "Make me a beat in 8 bars",
       "Am I crazy or is this real?",
       "What MCP tools should I use?",
+      "Help me finish this project",
     ],
   },
   arnold: {
@@ -68,8 +68,8 @@ interface Props {
   persona?: string;
 }
 
-export default function RadixChat({ persona = "daftpunk" }: Props) {
-  const config = PERSONAS[persona] ?? PERSONAS["daftpunk"];
+export default function RadixChat({ persona = "zoltan" }: Props) {
+  const config = PERSONAS[persona] ?? PERSONAS["zoltan"];
   const { messages, sendMessage, isStreaming, currentStage, error, clearError, clearMessages } =
     useRadixChat(config.persona);
   const messagesEndRef = useRef<HTMLDivElement>(null);

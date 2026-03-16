@@ -16,14 +16,16 @@ import { fetchToolCatalog } from "../../core-logic/mcp-tools.js";
 import { safeJsonParse, executeAgentTool } from "../../core-logic/chat-tool-execution.js";
 import {
   resolveSynthesisTarget,
+  resolveAllPlatformTargets,
   streamCompletion,
+  streamCompletionWithFallback,
   synthesizeCompletion,
   type ProviderMessage,
   type ResolvedSynthesisTarget,
 } from "../../core-logic/llm-provider.js";
 import { getRubik3SystemPrompt } from "../../core-logic/rubik-persona-prompt.js";
 import { getArnoldPersonaPrompt } from "../../core-logic/arnold-persona-prompt.js";
-import { getDaftPunkPersonaPrompt } from "../../core-logic/daftpunk-persona-prompt.js";
+import { getZoltanMegaPersonaPrompt } from "../../core-logic/zoltan-persona-prompt.js";
 import { getPetiPersonaPrompt } from "../../core-logic/peti-persona-prompt.js";
 const spikeChat = new Hono<{ Bindings: Env; Variables: Variables }>();
 const MAX_TOOL_LOOPS = 3;
@@ -344,6 +346,8 @@ async function streamLlmResponse(
       type: "function";
       function: { name: string; description: string; parameters: unknown };
     }>;
+    fallbackTargets?: ResolvedSynthesisTarget[];
+    db?: D1Database;
   },
 ): Promise<{ fullText: string; toolCalls: ParsedToolCall[] }> {
   const providerMessages: ProviderMessage[] = messages.map((m) => ({
@@ -351,11 +355,20 @@ async function streamLlmResponse(
     content: m.content ?? "",
   }));
 
-  const res = await streamCompletion(target, providerMessages, {
+  const streamOpts = {
     temperature: opts.temperature,
     maxTokens: opts.maxTokens,
     tools: opts.tools,
-  });
+  };
+
+  let res: Response;
+  if (opts.fallbackTargets && opts.fallbackTargets.length > 0) {
+    const allTargets = [target, ...opts.fallbackTargets.filter((t) => t.provider !== target.provider)];
+    const result = await streamCompletionWithFallback(allTargets, providerMessages, streamOpts, opts.db);
+    res = result.response;
+  } else {
+    res = await streamCompletion(target, providerMessages, streamOpts);
+  }
 
   const reader = res.body?.getReader();
   if (!reader) throw new Error("No response body from LLM provider");
@@ -546,6 +559,10 @@ spikeChat.post("/api/spike-chat", async (c) => {
     );
   }
 
+  // Resolve all available targets for fallback on provider failure
+  const allTargets = await resolveAllPlatformTargets(c.env, userId);
+  const fallbackTargets = allTargets.filter((t) => t.provider !== llmTarget.provider);
+
   // Load user memory
   const userNotes: UserMemory["notes"] = await fetchUserNotes(c.env.DB, userId).catch(
     (): UserMemory["notes"] => [],
@@ -578,9 +595,9 @@ spikeChat.post("/api/spike-chat", async (c) => {
     fullSystemPrompt = `${fullSystemPrompt}\n\n${getRubik3SystemPrompt()}`;
   }
 
-  // Merge Daft Punk mega-persona (also serves: zoltan, erdos, radix, spike, gov)
-  if (["daftpunk", "zoltan", "erdos", "radix", "spike", "gov"].includes(persona ?? "")) {
-    fullSystemPrompt = `${fullSystemPrompt}\n\n${getDaftPunkPersonaPrompt()}`;
+  // Zoltan mega-persona (also serves legacy slugs: erdos, radix, spike, gov, zoli)
+  if (["zoltan", "zoli", "daftpunk", "erdos", "radix", "spike", "gov"].includes(persona ?? "")) {
+    fullSystemPrompt = `${fullSystemPrompt}\n\n${getZoltanMegaPersonaPrompt()}`;
   }
 
   // Merge Arnold UX provocateur persona when requested
@@ -691,6 +708,8 @@ spikeChat.post("/api/spike-chat", async (c) => {
           temperature: 0.2,
           maxTokens: 4096,
           ...(intentSummary.needsTools ? { tools: SPIKE_AGENT_TOOLS } : {}),
+          fallbackTargets,
+          db: c.env.DB,
         });
 
         assistantResponse += iteration.fullText;
