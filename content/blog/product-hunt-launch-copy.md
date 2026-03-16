@@ -1,5 +1,4 @@
 ---
-heroImage: "/images/blog/product-hunt-launch-copy-hero.png"
 heroPrompt: "A futuristic command center dashboard showing 18 glowing AI agent nodes connected to a central server, with a neon blue and dark theme."
 ---
 # Product Hunt Launch Copy — spike.land
