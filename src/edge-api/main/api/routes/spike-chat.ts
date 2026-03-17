@@ -32,6 +32,7 @@ import { getGPPersonaPrompt } from "../../core-logic/gp-persona-prompt.js";
 import { getRajuPersonaPrompt } from "../../core-logic/raju-persona-prompt.js";
 import { getSwitchboardPersonaPrompt } from "../../core-logic/switchboard-persona-prompt.js";
 import { getErdosPersonaPrompt } from "../../core-logic/erdos-persona-prompt.js";
+import { getEinsteinPersonaPrompt } from "../../core-logic/einstein-persona-prompt.js";
 const spikeChat = new Hono<{ Bindings: Env; Variables: Variables }>();
 const MAX_TOOL_LOOPS = 3;
 const MAX_HISTORY_MESSAGES = 16;
@@ -647,6 +648,11 @@ spikeChat.post("/api/spike-chat", async (c) => {
   // Erdős mathematical collaboration persona
   if (persona === "erdos") {
     fullSystemPrompt = `${fullSystemPrompt}\n\n${getErdosPersonaPrompt()}`;
+  }
+
+  // Einstein physics + thought experiments persona
+  if (persona === "einstein") {
+    fullSystemPrompt = `${fullSystemPrompt}\n\n${getEinsteinPersonaPrompt()}`;
   }
 
   const intentSummary = classifyIntent(userMessage, body.pageContext);
