@@ -33,6 +33,8 @@ import { getRajuPersonaPrompt } from "../../core-logic/raju-persona-prompt.js";
 import { getSwitchboardPersonaPrompt } from "../../core-logic/switchboard-persona-prompt.js";
 import { getErdosPersonaPrompt } from "../../core-logic/erdos-persona-prompt.js";
 import { getEinsteinPersonaPrompt } from "../../core-logic/einstein-persona-prompt.js";
+import { getZoltanQualityGate } from "../../core-logic/zoltan-quality-gate.js";
+import { getHungarianConcepts } from "../../core-logic/hungarian-concepts.js";
 const spikeChat = new Hono<{ Bindings: Env; Variables: Variables }>();
 const MAX_TOOL_LOOPS = 3;
 const MAX_HISTORY_MESSAGES = 16;
@@ -604,6 +606,12 @@ spikeChat.post("/api/spike-chat", async (c) => {
     parts.push("\nUse this context to answer questions about what the user is reading.");
     fullSystemPrompt = `${fullSystemPrompt}\n\n${parts.join("\n")}`;
   }
+
+  // Zoltán's quality gate — every prompt passes through his values
+  fullSystemPrompt = `${fullSystemPrompt}\n\n${getZoltanQualityGate()}`;
+
+  // Hungarian concepts — new language = new concepts
+  fullSystemPrompt = `${fullSystemPrompt}\n\n${getHungarianConcepts()}`;
 
   // Merge Rubik-3 persona prompt when requested
   if (persona === "rubik-3") {

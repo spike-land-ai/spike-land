@@ -1,245 +1,246 @@
 # Spike Land Roadmap
 
-> **Last updated**: 12 March 2026
-> **Current phase**: Wedge validation
+> **Last updated**: 17 March 2026
+> **Current phase**: Product stabilization + personal brand alignment
 > **Company**: SPIKE LAND LTD
 
 ---
 
 ## 1. Roadmap Thesis
 
-The product is broad. The business cannot be.
+The product is broader than planned. That turned out to be the point.
 
-For the next 12 months, the roadmap is built around one commercial wedge:
+What started as a QA wedge for agencies evolved into something more honest: an
+AI platform where personas teach, learn, and build — powered by MCP tools, PRDs,
+and a shared token pool. The personas are not gimmicks. They are the product.
 
-- QA-heavy software agencies
-- AI consultancies
-- adjacent small AI product teams with an existing Playwright or Cypress burden
+The job for the next 90 days is:
 
-The job is not to prove that spike.land can theoretically serve every developer
-workflow. The job is to prove that one repeatable customer will pay for a tool-
-first verification model and that the company can support that customer without
-remaining structurally founder-only.
+1. **Make the product work.** Peti tested it. It's broken. Fix it.
+2. **Make the founder credible.** Clean up online presence. Sound like a real
+   person, not a startup pitch deck.
+3. **Let the content compound.** 18 blog posts, 9 personas, a learning platform.
+   The content is good. Distribution is the bottleneck.
 
 ---
 
 ## 2. What Is Already Built
 
-These assets are real and should be used as leverage, not as excuses to stay
-unfocused:
+### Infrastructure (stable)
+- Hosted MCP runtime and registry (80+ tools)
+- `spike-cli` with multiplexer, lazy toolset loading
+- `spike-chat` with aether memory, persona routing, streaming
+- OpenAI-compatible API endpoint
+- Astro frontend on Cloudflare Workers
+- Stripe checkout plumbing
+- CI/CD with parallel builds, real rollback
 
-- hosted MCP runtime and registry
-- `spike-cli` (security-hardened, with enhanced chat pipeline and type safety)
-- `spike-chat` with aether memory for persistent conversational context
-- 80+ natively hosted tools
-- OpenAI-compatible API endpoint (agents can call spike.land tools via chat
-  completions format)
-- QA Studio and browser automation surfaces
-- Astro SPA frontend (migrated from Vite + TanStack Router, March 2026)
-- analytics MCP servers (stripe-analytics-mcp, google-analytics-mcp)
-- strict TypeScript (ES2024 target, type-aware ESLint, enum-to-const migration)
-- web dashboard and public beta infrastructure
-- Stripe checkout and core commercial plumbing nearing completion
-- COMPASS as a proof point for regulated, multilingual, offline-capable flows
+### Personas (shipped, need testing)
+- **Zoltán** — founder persona, ADHD, math, dogs
+- **Arnold** — UX provocateur
+- **Peti** — QA engineer
+- **Erdős** — mathematics, collaboration, The Book
+- **Einstein** — physics, thought experiments, Arena-upskilled
+- **Daft Punk** — music production, synthesis
+- **GP** — chemist from Brighton, non-dev builder
+- **Raju** — backend architect, infrastructure sage
+- **Switchboard** — UK consumer advocacy
+
+### Content (published)
+- 18+ blog posts in PRD format with personaPrompts
+- Dogs essay, Einstein Arena post, QA Arena, THE_BOOK
+- Twitter hooks PRD with 80+ ready-to-post tweets
+- Full content growth strategy
+
+### New (committed, not deployed)
+- Token Bank — AES-256-GCM encryption, provider detection, proxy-only
+- Learn pages — /learn topic explorer, /learn/[slug] PRD runner
+- QA health check API + /qa page
 
 ---
 
-## 3. What We Are Not Doing
+## 3. What Is Broken
 
-The roadmap explicitly does **not** optimize for:
+Per Peti's testing (March 2026, multiple browsers, multiple weeks):
 
-- serving four GTM segments at once
-- launching a broad marketplace before a paid wedge exists
-- pitching COMPASS revenue as the reason to fund the company
-- asking teams to rip out all browser testing immediately
+- Code editor: broken
+- App filter: broken
+- Demo buttons: broken
+- Terminal: broken
+- Interactive features: none of them work
+
+**This is the #1 priority.** Nothing else matters if the product doesn't load.
 
 ---
 
 ## 4. Next 90 Days
 
-### Weeks 1-2: sharpen the offer — **in progress** (started ~11 March 2026)
+### Phase 1: Fix the product (Weeks 1-3)
+
+Ship a working product. Not a feature-complete product — a working one.
 
 Goals:
-
-- unify the business case, deck, website, and outreach around the QA wedge
-- finish instrumentation for activation and design-partner metrics
-- finalize the design-partner offer, success criteria, and onboarding materials
+- Every persona chat page loads and streams responses
+- QA health check works on production URLs
+- /learn pages render and link to blog content
+- Code editor, demo buttons, and terminal either work or are removed
+- Mobile-responsive, < 3s load time
 
 Outputs:
+- Peti re-tests and confirms basic flows work
+- Zero broken interactive elements on shipped pages
 
-- refreshed business materials
-- live analytics for `signup_completed`, `mcp_server_connected`,
-  `first_tool_call`, and design-partner milestones
-- one proof asset showing tool-first verification against a browser-heavy flow
+### Phase 2: Clean up the founder (Weeks 2-4)
 
-### Weeks 3-4: build the target-account list and start founder-led outreach
+Zoltán needs to look like who he actually is: a Hungarian mathematician who
+builds things, lives with two dogs, and thinks differently. Not a startup bro.
 
 Goals:
-
-- prioritize 30-40 reachable accounts, starting with Brighton and London
-  agencies/consultancies
-- secure 6-8 discovery calls
+- Rewrite LinkedIn bio (human, not corporate)
+- Clean up Twitter/X presence (remove AI-slop tweets if any)
+- GitHub profile reflects actual work, not aspirational marketing
+- Blog posts are the portfolio — make sure they're discoverable
+- Remove or archive marketing docs that don't match the voice
 
 Outputs:
+- One-paragraph bio that works everywhere (LinkedIn, Twitter, GitHub, HN)
+- 5 initial tweets from the hooks PRD, posted in Zoltán's real voice
+- advisor-outreach.md rewritten in human language
 
-- target-account list with pain hypotheses
-- outreach scripts and follow-up cadence
-- first batch of discovery calls booked
+### Phase 3: Let content work (Weeks 4-8)
 
-### Weeks 5-6: run discovery and qualify design partners
+Don't create more content. Distribute what exists.
 
 Goals:
-
-- validate which flows are painful enough to buy around
-- find accounts willing to commit time, data, and a real workflow
-
-Outputs:
-
-- 5+ completed discovery calls
-- 3 shortlisted design partners
-- baseline metrics captured for candidate workflows
-
-### Weeks 7-8: onboard the first design partners
-
-Goals:
-
-- implement one or two high-friction flows per partner
-- keep Playwright/Cypress in place as smoke coverage
-- instrument before/after results
+- Post the 5 highest-impact blog posts to HN, Reddit, Twitter
+- Persona pages indexed by Google
+- /learn pages live and linked from blog posts
+- Hero images generated for all blog posts with personaPrompts
 
 Outputs:
+- Organic traffic from content (target: 100 sessions/week)
+- At least 1 HN front-page attempt
+- All blog hero images generated
 
-- partner environments connected
-- success criteria signed off
-- weekly operating cadence live
+### Phase 4: Revenue path (Weeks 8-12)
 
-### Weeks 9-10: prove measurable value
+Based on what gets traction, pick ONE:
 
-Goals:
+**Option A: Consulting** (fastest to revenue)
+- "I'll build your MCP tools / fix your AI pipeline"
+- Hourly rate, Brighton-local + remote
+- The platform is the portfolio
 
-- reduce CI time
-- reduce flaky browser dependence
-- show that the same contract can power CI, CLI, and agent invocation
+**Option B: Hosted personas** (scalable)
+- White-label persona chat for businesses (training, onboarding, support)
+- Monthly subscription per persona
+- Token pool subsidizes early users
 
-Outputs:
+**Option C: Learning platform** (ambitious)
+- /learn as free Duolingo/Brilliant for AI/math/physics
+- Freemium: free personas, premium content/tokens
+- Community token donations sustain it
 
-- partner-specific benchmark results
-- objections log
-- pricing feedback
-
-### Weeks 11-12: convert proof into sales assets
-
-Goals:
-
-- convert at least one partner into a paying reference account or paid pilot
-- turn results into reusable case-study material
-- decide whether the wedge is strong enough to double down on
-
-Outputs:
-
-- 1 paid or committed-to-paid account
-- case-study draft
-- updated pipeline assumptions
-- hire brief for Founding Head of Growth/DevRel
+Decision criteria: which one gets the first paying user fastest?
 
 ---
 
-## 5. Twelve-Month Roadmap
+## 5. Twelve-Month View
 
-### Q2 2026
-
-- complete commercial onboarding and metering
-- close first design partners
-- instrument activation and outcome metrics
-- publish benchmark and case-study material
+### Q2 2026 (now)
+- Fix broken product
+- Clean up personal brand
+- Distribute existing content
+- First revenue (consulting or hosted personas)
 
 ### Q3 2026
-
-- convert first partners into paid reference customers
-- hire founding Head of Growth/DevRel
-- systematize founder-led outbound into a repeatable account pipeline
-- tighten docs, runbooks, and package-level onboarding
+- Double down on whatever revenue path works
+- Learning platform public beta if /learn gets traction
+- First 10 paying users (any path)
+- Hire decision: do we need help, or does the solo model work?
 
 ### Q4 2026
-
-- hire senior engineer
-- reduce bus-factor risk
-- improve auditability, auth, and governance features needed by agency and
-  regulated buyers
-- expand from first wedge into adjacent small AI product teams only if the
-  original wedge is proving repeatable
+- If consulting: systematize into productized service
+- If personas: white-label offering with Stripe billing
+- If learning: curriculum expansion, community contributors
+- Brighton privacy play: local-first AI models (GDPR differentiator)
 
 ### Q1-Q2 2027
-
-- reach 10-15 paying teams if wedge validation is holding
-- decide whether marketplace and broader registry monetization deserve focused
-  investment
-- decide whether COMPASS should remain a proof point, become a pilot program, or
-  be ring-fenced from the core fundraising narrative
+- 50+ paying users/clients
+- The platform runs without Zoltán being awake
+- Decide: raise money or stay profitable and small?
 
 ---
 
 ## 6. Metrics That Matter
 
-### Commercial metrics
+### Product health (Peti is the judge)
+- Pages that load without errors
+- Persona chat response time
+- /learn page completion rate
+- Zero broken interactive elements
 
-- target accounts contacted
-- discovery calls completed
-- design partners onboarded
-- paid reference customers
-- conversion from design partner to paid
+### Content traction
+- Blog post views per week
+- HN/Reddit/Twitter engagement
+- Organic search sessions
+- Persona chat sessions (people actually talking to personas)
 
-### Product metrics
+### Revenue
+- First paying user (date)
+- Monthly revenue
+- Revenue per channel (consulting / hosted / learning)
 
-- time to first tool call
-- time to onboard a design partner
-- CI time reduction
-- flaky-build reduction
-- number of high-friction flows moved below the browser
-
-### Company health metrics
-
-- percentage of production-critical areas with written runbooks
-- time for a second engineer to ship a bounded feature
-- number of non-founder people able to support customer workflows
-
----
-
-## 7. Hiring Roadmap
-
-### Hire 1: Founding Head of Growth/DevRel
-
-When:
-
-- as soon as the company has enough evidence to support a repeatable design-
-  partner motion
-
-Why:
-
-- founder-only sales does not scale
-- the company needs someone who can both sell and earn trust with technical
-  teams
-
-### Hire 2: Senior Engineer
-
-When:
-
-- immediately after the first commercial hire or in parallel if capital allows
-
-Why:
-
-- the codebase cannot remain bus-factor-one
-- customer onboarding, documentation, and runtime hardening need a second owner
+### Personal brand
+- LinkedIn profile views
+- Twitter follower growth
+- Inbound inquiries (people reaching out, not us chasing)
 
 ---
 
-## 8. September 2027 Kill Criteria
+## 7. What We Are Not Doing
 
-By **30 September 2027**, the thesis is broken if all three are not true:
+- Raising money before the product works
+- Writing more marketing docs before distributing existing content
+- Adding more personas before existing ones are tested
+- Building a marketplace before anyone pays for anything
+- Pretending to be a 10-person company
 
-1. at least 3 paid reference customers exist in the QA/agency wedge
-2. commercial motion is no longer fully founder-carried
-3. customers are adopting the product, not simply buying founder effort
+---
 
-These criteria are part of the roadmap on purpose. They define what success
-looks like and when to stop pretending.
+## 8. Kill Criteria
+
+By **31 December 2026**, the thesis is broken if:
+
+1. No paying users exist (consulting, hosted, or learning)
+2. The product still has broken interactive elements
+3. Zero organic inbound (nobody finds spike.land without being told)
+
+These criteria exist so we know when to stop and do something else.
+
+---
+
+## 9. The Voice
+
+Everything public should sound like this:
+
+> I'm a Hungarian mathematician who moved to Brighton and built an AI platform.
+> I live with two dogs who are smarter than most people I've met. I have ADHD
+> and I used math to fix my brain. Now I'm using the same math to build
+> something that makes other people smarter too. It's free. Try it.
+
+Not like this:
+
+> spike.land is a managed runtime for typed AI-callable tools, offering a
+> multiplexer CLI with lazy toolset loading across 533+ natively hosted tools
+> in a Cloudflare Workers-powered registry.
+
+Both are true. Only one is human.
+
+The deeper thesis (the E Pluribus resolution):
+
+> E pluribus unum — out of many, one. The paradox: by becoming one, you lose
+> the many. spike.land resolves this. You don't lose who you are. You become
+> smarter by engaging with different minds. Einstein, Erdős, Daft Punk — each
+> one changes how you think, but you stay you. Curiosity is additive, not
+> substitutive. There is no paradox. Just use the site and stay curious.
