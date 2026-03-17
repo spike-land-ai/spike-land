@@ -35,6 +35,7 @@ export interface Env {
   CF_CACHE_PURGE_TOKEN: string;
   XAI_API_KEY: string;
   ELEVENLABS_API_KEY: string;
+  RESEND_API_KEY?: string;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
   GOOGLE_REFRESH_TOKEN: string;

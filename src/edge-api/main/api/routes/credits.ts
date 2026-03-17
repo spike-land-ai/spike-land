@@ -34,7 +34,7 @@ credits.get("/api/credits/balance", async (c) => {
     getUsedToday(c.env.DB, userId),
   ]);
 
-  return c.json({ balance, dailyLimit, tier, usedToday });
+  return c.json({ balance, dailyLimit, tier, usedToday, lowBalance: balance < 5 });
 });
 
 credits.post("/api/credits/purchase", async (c) => {

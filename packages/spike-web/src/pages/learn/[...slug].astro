@@ -3,31 +3,31 @@ import { getCollection } from 'astro:content';
 import RadixChat from '../../components/react/radix-chat/RadixChat.tsx';
 import TrackPageView from '../../components/TrackPageView.astro';
 
-const KNOWN_TOPICS = [
-  { slug: 'physics',              persona: 'einstein',  title: 'Physics' },
-  { slug: 'mathematics',          persona: 'erdos',     title: 'Mathematics' },
-  { slug: 'music-production',     persona: 'daftpunk',  title: 'Music Production' },
-  { slug: 'building-apps',        persona: 'gp',        title: 'Building Apps' },
-  { slug: 'backend-architecture', persona: 'raju',      title: 'Backend Architecture' },
-  { slug: 'ux-design',            persona: 'arnold',    title: 'UX Design' },
-  { slug: 'testing',              persona: 'peti',      title: 'Testing' },
-  { slug: 'strange-loops',        persona: 'zoltan',    title: 'Strange Loops' },
-] as const;
-
-function personaFromTags(tags: string[], author: string): string {
-  const t = tags.map((s) => s.toLowerCase());
-  const a = author.toLowerCase();
-  if (t.includes('physics') || a.includes('einstein')) return 'einstein';
-  if (t.includes('mathematics') || t.includes('math')) return 'erdos';
-  if (t.includes('music')) return 'daftpunk';
-  if (t.includes('building') || a.includes('gp')) return 'gp';
-  if (t.includes('backend') || t.includes('infrastructure')) return 'raju';
-  if (t.includes('ux') || t.includes('design')) return 'arnold';
-  if (t.includes('testing') || t.includes('qa')) return 'peti';
-  return 'zoltan';
-}
-
 export async function getStaticPaths() {
+  const KNOWN_TOPICS = [
+    { slug: 'physics',              persona: 'einstein',  title: 'Physics' },
+    { slug: 'mathematics',          persona: 'erdos',     title: 'Mathematics' },
+    { slug: 'music-production',     persona: 'daftpunk',  title: 'Music Production' },
+    { slug: 'building-apps',        persona: 'gp',        title: 'Building Apps' },
+    { slug: 'backend-architecture', persona: 'raju',      title: 'Backend Architecture' },
+    { slug: 'ux-design',            persona: 'arnold',    title: 'UX Design' },
+    { slug: 'testing',              persona: 'peti',      title: 'Testing' },
+    { slug: 'strange-loops',        persona: 'zoltan',    title: 'Strange Loops' },
+  ] as const;
+
+  function personaFromTags(tags: string[], author: string): string {
+    const t = tags.map((s) => s.toLowerCase());
+    const a = author.toLowerCase();
+    if (t.includes('physics') || a.includes('einstein')) return 'einstein';
+    if (t.includes('mathematics') || t.includes('math')) return 'erdos';
+    if (t.includes('music')) return 'daftpunk';
+    if (t.includes('building') || a.includes('gp')) return 'gp';
+    if (t.includes('backend') || t.includes('infrastructure')) return 'raju';
+    if (t.includes('ux') || t.includes('design')) return 'arnold';
+    if (t.includes('testing') || t.includes('qa')) return 'peti';
+    return 'zoltan';
+  }
+
   const topicSlugs = new Set(KNOWN_TOPICS.map((t) => t.slug));
 
   const topicPaths = KNOWN_TOPICS.map((t) => ({
