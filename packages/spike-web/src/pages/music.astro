@@ -5,7 +5,7 @@ import Analytics from '../components/Analytics.astro';
 
 <Layout
   title="Music Creator — spike.land"
-  description="Browser-based beat studio. Drum sequencer, bass, synth — make a beat in 8 bars."
+  description="Browser-based beat studio. 8-bar sequencer with drums, bass, lead and pad."
 >
   <Analytics slot="head" />
 
@@ -16,8 +16,8 @@ import Analytics from '../components/Analytics.astro';
       <div class="ov-card">
         <div class="ov-icon">&#9835;</div>
         <h1 class="ov-title">Music Creator</h1>
-        <p class="ov-sub">Tap a beat. Hear it. Share it.<br>No installs. No samples. Just your browser.</p>
-        <button id="start-btn" class="ov-btn">Start a Beat</button>
+        <p class="ov-sub">8-bar loop sequencer. Drums, bass, lead, pad.<br>No installs. Just your browser.</p>
+        <button id="start-btn" class="ov-btn">Start</button>
         <p class="ov-hint">Press Space to play · Click grid to edit</p>
       </div>
     </div>
@@ -31,26 +31,27 @@ import Analytics from '../components/Analytics.astro';
         </button>
         <div class="t-field">
           <label class="t-label" for="bpm">BPM</label>
-          <input id="bpm" type="number" min="60" max="200" value="90" class="t-num" />
+          <input id="bpm" type="number" min="60" max="200" value="130" class="t-num" />
         </div>
         <div class="t-field">
-          <label class="t-label" for="swing">Swing <span id="swing-v">15%</span></label>
-          <input id="swing" type="range" min="0" max="100" value="15" class="t-range" />
+          <label class="t-label" for="swing">Swing <span id="swing-v">0%</span></label>
+          <input id="swing" type="range" min="0" max="100" value="0" class="t-range" />
         </div>
         <div class="t-spacer"></div>
         <button id="demo-btn" class="t-btn t-demo" title="Load demo beat">Demo</button>
         <button id="clear-btn" class="t-btn" title="Clear all patterns">Clear</button>
       </header>
 
+      <!-- Bar selector -->
+      <div class="bar-selector">
+        <span class="bar-label">BAR</span>
+        <div class="bar-btns" id="bar-btns"></div>
+      </div>
+
       <!-- Drums -->
       <section class="sec">
         <div class="sec-head">
           <h2 class="sec-title c-drums">Drums</h2>
-          <div class="pills" id="kit-pills">
-            <button class="pill active" data-v="808">808</button>
-            <button class="pill" data-v="acoustic">Acoustic</button>
-            <button class="pill" data-v="electronic">Electronic</button>
-          </div>
           <div class="mix">
             <input id="drums-vol" type="range" min="0" max="100" value="80" class="vol" data-t="drums" />
             <button class="mbtn" data-t="drums" title="Mute">M</button>
@@ -68,9 +69,9 @@ import Analytics from '../components/Analytics.astro';
       <section class="sec">
         <div class="sec-head">
           <h2 class="sec-title c-bass">Bass</h2>
-          <span class="sec-hint">C minor</span>
+          <span class="sec-hint">mono — 1 note per step</span>
           <div class="mix">
-            <input id="bass-vol" type="range" min="0" max="100" value="70" class="vol" data-t="bass" />
+            <input id="bass-vol" type="range" min="0" max="100" value="75" class="vol" data-t="bass" />
             <button class="mbtn" data-t="bass" title="Mute">M</button>
           </div>
         </div>
@@ -82,24 +83,38 @@ import Analytics from '../components/Analytics.astro';
         </div>
       </section>
 
-      <!-- Synth -->
+      <!-- Lead -->
       <section class="sec">
         <div class="sec-head">
-          <h2 class="sec-title c-synth">Synth</h2>
-          <div class="pills" id="preset-pills">
-            <button class="pill active" data-v="pad">Pad</button>
-            <button class="pill" data-v="lead">Lead</button>
-            <button class="pill" data-v="keys">Keys</button>
-          </div>
+          <h2 class="sec-title c-lead">Lead</h2>
+          <span class="sec-hint">detuned saw</span>
           <div class="mix">
-            <input id="synth-vol" type="range" min="0" max="100" value="60" class="vol" data-t="synth" />
-            <button class="mbtn" data-t="synth" title="Mute">M</button>
+            <input id="lead-vol" type="range" min="0" max="100" value="55" class="vol" data-t="lead" />
+            <button class="mbtn" data-t="lead" title="Mute">M</button>
           </div>
         </div>
         <div class="grid-wrap">
-          <div class="grid-labels" id="synth-labels"></div>
+          <div class="grid-labels" id="lead-labels"></div>
           <div class="grid-scroll">
-            <div class="grid" id="synth-grid"></div>
+            <div class="grid" id="lead-grid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pad -->
+      <section class="sec">
+        <div class="sec-head">
+          <h2 class="sec-title c-pad">Pad</h2>
+          <span class="sec-hint">dark, filtered — poly</span>
+          <div class="mix">
+            <input id="pad-vol" type="range" min="0" max="100" value="45" class="vol" data-t="pad" />
+            <button class="mbtn" data-t="pad" title="Mute">M</button>
+          </div>
+        </div>
+        <div class="grid-wrap">
+          <div class="grid-labels" id="pad-labels"></div>
+          <div class="grid-scroll">
+            <div class="grid" id="pad-grid"></div>
           </div>
         </div>
       </section>
@@ -112,43 +127,97 @@ import Analytics from '../components/Analytics.astro';
 (function () {
   'use strict';
 
-  var S = 16; // steps
+  var S = 16;       // steps per bar
+  var BARS = 8;     // total bars
   var DRUM_NAMES = ['Kick', 'Snare', 'HiHat', 'Clap'];
   var DRUM_KEYS  = ['kick', 'snare', 'hihat', 'clap'];
-  var BASS_NOTES = ['C3','Bb2','Ab2','G2','F2','Eb2','D2','C2']; // top to bottom
-  var SYNTH_NOTES = ['C4','Bb3','Ab3','G3','F3','Eb3','D3','C3'];
-  var KEY = 'mc_v3';
+  var BASS_NOTES = ['C2','A#1','A1','G1','F1','E1','D#1','C1'];
+  var LEAD_NOTES = ['F5','D#5','D5','C5','A#4','G#4','G4','F4'];
+  var PAD_NOTES  = ['F4','D4','C4','A#3','G#3','G3','D#3','C3'];
+  var KEY = 'mc_v4';
 
-  // Default boom-bap pattern
+  // ── Default: user's 130 BPM 8-bar composition ──────────────────────────────
+  function makeEmpty() {
+    var b = [];
+    for (var i = 0; i < BARS; i++) {
+      b.push({
+        drums: {
+          kick:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+          snare: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+          hihat: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+          clap:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+        },
+        bass: {},
+        lead: {},
+        pad:  {},
+      });
+    }
+    return b;
+  }
+
+  function makeDefault() {
+    var b = makeEmpty();
+
+    for (var i = 0; i < BARS; i++) {
+      // Kick: four-on-the-floor
+      b[i].drums.kick  = [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0];
+      // Snare: 2 & 4
+      b[i].drums.snare = [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0];
+      // Hi-hat: off-beat 8ths
+      b[i].drums.hihat = [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0];
+    }
+
+    // Bass: pulsing quarter notes, root changes every 2 bars
+    var bassRoots = ['C1','C1','G1','G1','A#1','A#1','F1','F1'];
+    for (var i = 0; i < BARS; i++) {
+      var root = bassRoots[i];
+      b[i].bass[root + ':0']  = 1;
+      b[i].bass[root + ':4']  = 1;
+      b[i].bass[root + ':8']  = 1;
+      b[i].bass[root + ':12'] = 1;
+    }
+
+    // Lead: SOS siren motif on odd bars (0, 2, 4, 6), rest on even (1, 3, 5, 7)
+    // C5(1/8) D#5(1/8) C5(1/8) G4(1/8) C5(1/4) rest
+    var leadBars = [0, 2, 4, 6];
+    for (var li = 0; li < leadBars.length; li++) {
+      var bi = leadBars[li];
+      b[bi].lead['C5:0']   = 1; b[bi].lead['C5:1']   = 1;  // C5 1/8
+      b[bi].lead['D#5:2']  = 1; b[bi].lead['D#5:3']  = 1;  // D#5 1/8
+      b[bi].lead['C5:4']   = 1; b[bi].lead['C5:5']   = 1;  // C5 1/8
+      b[bi].lead['G4:6']   = 1; b[bi].lead['G4:7']   = 1;  // G4 1/8
+      b[bi].lead['C5:8']   = 1; b[bi].lead['C5:9']   = 1;  // C5 1/4
+      b[bi].lead['C5:10']  = 1; b[bi].lead['C5:11']  = 1;
+    }
+
+    // Pad: sustained chords, trigger on beat 1 (step 0) and sustain (steps 0-3 for visual)
+    // Bars 0-1: Cm (C3, D#3, G3)
+    b[0].pad['C3:0'] = 1; b[0].pad['D#3:0'] = 1; b[0].pad['G3:0'] = 1;
+    b[1].pad['C3:0'] = 1; b[1].pad['D#3:0'] = 1; b[1].pad['G3:0'] = 1;
+    // Bars 2-3: Gm (G3, A#3, D4)
+    b[2].pad['G3:0'] = 1; b[2].pad['A#3:0'] = 1; b[2].pad['D4:0'] = 1;
+    b[3].pad['G3:0'] = 1; b[3].pad['A#3:0'] = 1; b[3].pad['D4:0'] = 1;
+    // Bars 4-5: A#maj (A#3, D4, F4)
+    b[4].pad['A#3:0'] = 1; b[4].pad['D4:0'] = 1; b[4].pad['F4:0'] = 1;
+    b[5].pad['A#3:0'] = 1; b[5].pad['D4:0'] = 1; b[5].pad['F4:0'] = 1;
+    // Bars 6-7: Fm (F3 not in grid — use closest: C3 + G#3 + C4 would be... hmm)
+    // Actually Fm = F3, G#3, C4 — F3 isn't in PAD_NOTES. Let me use the available notes.
+    // PAD_NOTES: F4, D4, C4, A#3, G#3, G3, D#3, C3
+    // Fm = use G#3 + C4 (F is missing, use C3 as bass substitute)
+    b[6].pad['C3:0'] = 1; b[6].pad['G#3:0'] = 1; b[6].pad['C4:0'] = 1;
+    b[7].pad['C3:0'] = 1; b[7].pad['G#3:0'] = 1; b[7].pad['C4:0'] = 1;
+
+    return b;
+  }
+
   var DEFAULT = {
-    bpm: 90, swing: 0.15, kit: '808', preset: 'pad',
-    drums: {
-      kick:  [1,0,0,0, 0,0,1,0, 0,0,1,0, 0,0,0,0],
-      snare: [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0],
-      hihat: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,1],
-      clap:  [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,1],
-    },
-    bass: (function () {
-      var g = {}; // key: "note:step"
-      g['C2:0'] = 1; g['C2:1'] = 1;
-      g['G2:4'] = 1; g['G2:5'] = 1;
-      g['Eb2:8'] = 1; g['Eb2:9'] = 1;
-      g['F2:10'] = 1; g['F2:11'] = 1;
-      return g;
-    })(),
-    synth: (function () {
-      var g = {};
-      g['Eb3:0'] = 1; g['G3:0'] = 1; g['Bb3:0'] = 1;  // Cm (Eb-G-Bb)
-      g['Ab3:4'] = 1; g['C4:4'] = 1; g['Eb3:4'] = 1;   // Ab (Ab-C-Eb)
-      g['Eb3:8'] = 1; g['G3:8'] = 1; g['Bb3:8'] = 1;   // Eb (Eb-G-Bb)
-      g['Bb3:12'] = 1; g['D3:12'] = 1; g['F3:12'] = 1;  // Bb (Bb-D-F)
-      return g;
-    })(),
-    vol: { drums: 0.8, bass: 0.7, synth: 0.6 },
-    mute: { drums: false, bass: false, synth: false },
+    bpm: 130, swing: 0, viewBar: 0,
+    bars: makeDefault(),
+    vol: { drums: 0.8, bass: 0.75, lead: 0.55, pad: 0.45 },
+    mute: { drums: false, bass: false, lead: false, pad: false },
   };
 
-  // ── State ──────────────────────────────────────────────────────────────────────
+  // ── State ──────────────────────────────────────────────────────────────────
   var st = JSON.parse(JSON.stringify(DEFAULT));
 
   function load() {
@@ -156,19 +225,15 @@ import Analytics from '../components/Analytics.astro';
       var raw = localStorage.getItem(KEY);
       if (raw) {
         var s = JSON.parse(raw);
-        // Only load if it has the v3 shape
-        if (s.drums && s.bass && typeof s.bass === 'object' && !Array.isArray(s.bass)) {
-          st = s;
-        }
+        if (s.bars && s.bars.length === BARS) st = s;
       }
     } catch (e) { /* ignore */ }
   }
-
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) { /* */ }
   }
 
-  // ── DOM refs ───────────────────────────────────────────────────────────────────
+  // ── DOM refs ───────────────────────────────────────────────────────────────
   var overlay  = document.getElementById('overlay');
   var startBtn = document.getElementById('start-btn');
   var appEl    = document.getElementById('app');
@@ -179,15 +244,17 @@ import Analytics from '../components/Analytics.astro';
   var swingV   = document.getElementById('swing-v');
   var clearBtn = document.getElementById('clear-btn');
   var demoBtn  = document.getElementById('demo-btn');
+  var barBtns  = document.getElementById('bar-btns');
 
-  // ── Audio ──────────────────────────────────────────────────────────────────────
-  var T = null; // Tone namespace
+  // ── Audio ──────────────────────────────────────────────────────────────────
+  var T = null;
   var inited = false;
   var playing = false;
+  var curBar = 0;
   var curStep = -1;
   var syn = {};
   var fxv = {};
-  var seq = null;
+  var loopSeq = null;
 
   function initAudio() {
     return new Promise(function (ok, fail) {
@@ -206,24 +273,23 @@ import Analytics from '../components/Analytics.astro';
 
   function dB(v) { return v <= 0 ? -Infinity : 20 * Math.log10(v); }
 
-  // Safe Transport access — works across Tone.js 14.x builds
-  function transport() { return T.getTransport ? transport() : T.Transport; }
+  // Safe Transport access — T.getTransport() in Tone 14, fallback T.Transport
+  function tp() {
+    return T.getTransport ? T.getTransport() : T.Transport;
+  }
 
   function buildAudio() {
     fxv.drums = new T.Volume(dB(st.vol.drums)).toDestination();
     fxv.bass  = new T.Volume(dB(st.vol.bass)).toDestination();
-    fxv.synth = new T.Volume(dB(st.vol.synth)).toDestination();
+    fxv.lead  = new T.Volume(dB(st.vol.lead)).toDestination();
+    fxv.pad   = new T.Volume(dB(st.vol.pad)).toDestination();
 
-    var synthRev = new T.Reverb({ decay: 2.5, wet: 0.3 }).connect(fxv.synth);
-    var synthDel = new T.FeedbackDelay('8n.', 0.2).connect(fxv.synth);
-
-    // Kick — deep 808
+    // -- Drums --
     syn.kick = new T.MembraneSynth({
       pitchDecay: 0.08, octaves: 8,
       envelope: { attack: 0.001, decay: 0.5, sustain: 0, release: 0.1 },
     }).connect(fxv.drums);
 
-    // Snare — noise + body
     syn.snare = new T.NoiseSynth({
       noise: { type: 'white' },
       envelope: { attack: 0.001, decay: 0.2, sustain: 0, release: 0.05 },
@@ -233,81 +299,73 @@ import Analytics from '../components/Analytics.astro';
       envelope: { attack: 0.001, decay: 0.12, sustain: 0, release: 0.05 },
     }).connect(fxv.drums);
 
-    // Hi-hat — short metallic
     syn.hihat = new T.MetalSynth({
       frequency: 400, envelope: { attack: 0.001, decay: 0.08, release: 0.01 },
       harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5,
     }).connect(fxv.drums);
     syn.hihat.volume.value = -6;
 
-    // Clap — filtered noise burst (NOT MetalSynth)
     syn.clap = new T.NoiseSynth({
       noise: { type: 'white' },
       envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.08 },
     }).connect(fxv.drums);
 
-    // Bass — sawtooth + filter
+    // -- Bass: resonant square, slight distortion --
+    var bassDist = new T.Distortion(0.15).connect(fxv.bass);
     syn.bass = new T.MonoSynth({
-      oscillator: { type: 'sawtooth' },
-      envelope: { attack: 0.01, decay: 0.2, sustain: 0.4, release: 0.3 },
+      oscillator: { type: 'square' },
+      envelope: { attack: 0.01, decay: 0.2, sustain: 0.6, release: 0.3 },
       filterEnvelope: {
         attack: 0.01, decay: 0.15, sustain: 0.5, release: 0.4,
-        baseFrequency: 150, octaves: 3,
+        baseFrequency: 80, octaves: 3,
       },
-    }).connect(fxv.bass);
+    }).connect(bassDist);
 
-    // Synth — FM PolySynth (Tone 14: options go directly, not in voice0)
-    syn.synthI = new T.PolySynth(T.FMSynth, {
+    // -- Lead: detuned saw, slightly distorted --
+    var leadDel = new T.FeedbackDelay('16n', 0.15).connect(fxv.lead);
+    syn.lead = new T.PolySynth(T.Synth, {
+      maxPolyphony: 4,
+      oscillator: { type: 'sawtooth' },
+      envelope: { attack: 0.005, decay: 0.15, sustain: 0.3, release: 0.2 },
+    }).connect(fxv.lead);
+    syn.lead.connect(leadDel);
+    // Detune for thickness
+    syn.lead.set({ detune: 12 });
+
+    // -- Pad: dark, evolving, filtered low --
+    var padFilter = new T.Filter({ type: 'lowpass', frequency: 800, rolloff: -24 }).connect(fxv.pad);
+    var padRev = new T.Reverb({ decay: 4, wet: 0.5 }).connect(padFilter);
+    syn.pad = new T.PolySynth(T.FMSynth, {
       maxPolyphony: 6,
-      harmonicity: 2, modulationIndex: 5,
-      envelope: { attack: 0.3, decay: 0.5, sustain: 0.8, release: 1.5 },
-      modulationEnvelope: { attack: 0.1, decay: 0.2, sustain: 0.3, release: 0.5 },
-    }).connect(synthRev);
-    syn.synthI.connect(synthDel);
-
-    applyKit();
-    applyPreset();
+      harmonicity: 1.5, modulationIndex: 3,
+      envelope: { attack: 0.8, decay: 1.0, sustain: 0.9, release: 2.5 },
+      modulationEnvelope: { attack: 0.5, decay: 0.3, sustain: 0.5, release: 1.0 },
+    }).connect(padRev);
+    // Store filter ref for potential sweep
+    syn.padFilter = padFilter;
   }
 
-  function applyKit() {
-    if (!syn.kick) return;
-    var k = st.kit;
-    if (k === '808') {
-      syn.kick.set({ pitchDecay: 0.1, octaves: 9, envelope: { decay: 0.5 } });
-      syn.snare.set({ noise: { type: 'white' }, envelope: { decay: 0.22 } });
-      syn.hihat.set({ envelope: { decay: 0.08 } });
-    } else if (k === 'acoustic') {
-      syn.kick.set({ pitchDecay: 0.06, octaves: 6, envelope: { decay: 0.3 } });
-      syn.snare.set({ noise: { type: 'brown' }, envelope: { decay: 0.15 } });
-      syn.hihat.set({ envelope: { decay: 0.05 } });
-    } else {
-      syn.kick.set({ pitchDecay: 0.12, octaves: 10, envelope: { decay: 0.35 } });
-      syn.snare.set({ noise: { type: 'pink' }, envelope: { decay: 0.14 } });
-      syn.hihat.set({ envelope: { decay: 0.04 } });
-    }
-  }
-
-  function applyPreset() {
-    if (!syn.synthI) return;
-    var p = {
-      pad:  { harmonicity: 2, modulationIndex: 5,  envelope: { attack: 0.3, decay: 0.5, sustain: 0.8, release: 1.5 } },
-      lead: { harmonicity: 3, modulationIndex: 15, envelope: { attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.3 } },
-      keys: { harmonicity: 1, modulationIndex: 8,  envelope: { attack: 0.02, decay: 0.4, sustain: 0.6, release: 0.6 } },
-    };
-    syn.synthI.set(p[st.preset] || p.pad);
-  }
-
-  // ── Sequencer ──────────────────────────────────────────────────────────────────
+  // ── Sequencer ──────────────────────────────────────────────────────────────
   function startSeq() {
-    if (seq) { seq.dispose(); seq = null; }
+    if (loopSeq) { loopSeq.dispose(); loopSeq = null; }
+
+    var totalSteps = BARS * S;
     var steps = [];
-    for (var i = 0; i < S; i++) steps.push(i);
-    seq = new T.Sequence(function (time, step) { tick(time, step); }, steps, '16n');
-    seq.start(0);
-    transport().bpm.value = st.bpm;
-    transport().swing = st.swing;
-    transport().swingSubdivision = '16n';
-    transport().start();
+    for (var i = 0; i < totalSteps; i++) steps.push(i);
+
+    loopSeq = new T.Sequence(function (time, gStep) {
+      var bar = Math.floor(gStep / S);
+      var step = gStep % S;
+      curBar = bar;
+      curStep = step;
+      tick(bar, step, time);
+    }, steps, '16n');
+    loopSeq.start(0);
+
+    tp().bpm.value = st.bpm;
+    tp().swing = st.swing;
+    tp().swingSubdivision = '16n';
+    tp().start();
     playing = true;
     playIco.innerHTML = '&#9646;&#9646;';
     playBtn.classList.add('on');
@@ -315,79 +373,89 @@ import Analytics from '../components/Analytics.astro';
 
   function stopSeq() {
     if (!inited) return;
-    transport().stop();
-    if (seq) { seq.dispose(); seq = null; }
+    tp().stop();
+    if (loopSeq) { loopSeq.dispose(); loopSeq = null; }
     playing = false;
+    curBar = 0;
     curStep = -1;
     playIco.innerHTML = '&#9654;';
     playBtn.classList.remove('on');
     clearStepHighlights();
+    syncBarBtns();
   }
 
-  function tick(time, step) {
-    curStep = step;
+  function tick(bar, step, time) {
     var draw = T.Draw || (T.getDraw && T.getDraw());
-    if (draw) draw.schedule(function () { highlightStep(step); }, time);
+    if (draw) draw.schedule(function () {
+      highlightStep(step, bar);
+    }, time);
 
-    var dm = !st.mute.drums;
-    var bm = !st.mute.bass;
-    var sm = !st.mute.synth;
+    var b = st.bars[bar];
+    if (!b) return;
 
-    if (dm) {
-      if (st.drums.kick[step])  syn.kick.triggerAttackRelease('C1', '8n', time);
-      if (st.drums.snare[step]) {
+    // Drums
+    if (!st.mute.drums) {
+      if (b.drums.kick[step])  syn.kick.triggerAttackRelease('C1', '8n', time);
+      if (b.drums.snare[step]) {
         syn.snare.triggerAttackRelease('8n', time);
         syn.snareBody.triggerAttackRelease('D2', '16n', time);
       }
-      if (st.drums.hihat[step]) syn.hihat.triggerAttack(time);
-      if (st.drums.clap[step])  syn.clap.triggerAttackRelease('16n', time);
+      if (b.drums.hihat[step]) syn.hihat.triggerAttack(time);
+      if (b.drums.clap[step])  syn.clap.triggerAttackRelease('16n', time);
     }
 
-    // Bass — find which note is active at this step
-    if (bm) {
+    // Bass (mono)
+    if (!st.mute.bass) {
       BASS_NOTES.forEach(function (note) {
-        if (st.bass[note + ':' + step]) {
+        if (b.bass[note + ':' + step]) {
           syn.bass.triggerAttackRelease(note, '16n', time);
         }
       });
     }
 
-    // Synth — collect all active notes at this step (chords!)
-    if (sm) {
-      var chord = [];
-      SYNTH_NOTES.forEach(function (note) {
-        if (st.synth[note + ':' + step]) chord.push(note);
+    // Lead (poly)
+    if (!st.mute.lead) {
+      var leadNotes = [];
+      LEAD_NOTES.forEach(function (note) {
+        if (b.lead[note + ':' + step]) leadNotes.push(note);
       });
-      if (chord.length > 0) {
-        var dur = st.preset === 'pad' ? '4n' : st.preset === 'lead' ? '16n' : '8n';
-        syn.synthI.triggerAttackRelease(chord, dur, time);
+      if (leadNotes.length > 0) {
+        syn.lead.triggerAttackRelease(leadNotes, '16n', time);
+      }
+    }
+
+    // Pad (poly, long sustain)
+    if (!st.mute.pad) {
+      var padNotes = [];
+      PAD_NOTES.forEach(function (note) {
+        if (b.pad[note + ':' + step]) padNotes.push(note);
+      });
+      if (padNotes.length > 0) {
+        syn.pad.triggerAttackRelease(padNotes, '2n', time);
       }
     }
   }
 
-  // ── Grid building ──────────────────────────────────────────────────────────────
+  // ── Grid building ──────────────────────────────────────────────────────────
   function buildDrumGrid() {
     var grid = document.getElementById('drum-grid');
     var labels = document.getElementById('drum-labels');
-    grid.innerHTML = '';
-    labels.innerHTML = '';
+    grid.innerHTML = ''; labels.innerHTML = '';
+    var b = st.bars[st.viewBar];
 
     DRUM_KEYS.forEach(function (key, ri) {
       var lbl = document.createElement('div');
-      lbl.className = 'g-label';
-      lbl.textContent = DRUM_NAMES[ri];
+      lbl.className = 'g-label'; lbl.textContent = DRUM_NAMES[ri];
       labels.appendChild(lbl);
 
       var row = document.createElement('div');
       row.className = 'g-row';
-
       for (var si = 0; si < S; si++) {
         var cell = document.createElement('button');
         cell.className = 'g-cell c-drums';
         if (si % 4 === 0) cell.classList.add('bar');
-        cell.dataset.t = key;
-        cell.dataset.s = String(si);
-        if (st.drums[key][si]) cell.classList.add('on');
+        cell.dataset.t = key; cell.dataset.s = String(si);
+        if (b.drums[key][si]) cell.classList.add('on');
         cell.addEventListener('click', onDrumClick);
         row.appendChild(cell);
       }
@@ -398,27 +466,22 @@ import Analytics from '../components/Analytics.astro';
   function buildNoteGrid(gridId, labelsId, notes, stateKey, colorClass) {
     var grid = document.getElementById(gridId);
     var labels = document.getElementById(labelsId);
-    grid.innerHTML = '';
-    labels.innerHTML = '';
+    grid.innerHTML = ''; labels.innerHTML = '';
+    var b = st.bars[st.viewBar];
 
     notes.forEach(function (note) {
       var lbl = document.createElement('div');
-      lbl.className = 'g-label';
-      lbl.textContent = note;
+      lbl.className = 'g-label'; lbl.textContent = note;
       labels.appendChild(lbl);
 
       var row = document.createElement('div');
       row.className = 'g-row';
-
       for (var si = 0; si < S; si++) {
         var cell = document.createElement('button');
         cell.className = 'g-cell ' + colorClass;
         if (si % 4 === 0) cell.classList.add('bar');
-        cell.dataset.n = note;
-        cell.dataset.s = String(si);
-        cell.dataset.sk = stateKey;
-        var k = note + ':' + si;
-        if (st[stateKey][k]) cell.classList.add('on');
+        cell.dataset.n = note; cell.dataset.s = String(si); cell.dataset.sk = stateKey;
+        if (b[stateKey][note + ':' + si]) cell.classList.add('on');
         cell.addEventListener('click', onNoteClick);
         row.appendChild(cell);
       }
@@ -426,47 +489,43 @@ import Analytics from '../components/Analytics.astro';
     });
   }
 
-  // ── Events ─────────────────────────────────────────────────────────────────────
+  // ── Events ─────────────────────────────────────────────────────────────────
   function onDrumClick(e) {
     var c = e.currentTarget;
-    var t = c.dataset.t;
-    var s = parseInt(c.dataset.s, 10);
-    st.drums[t][s] = st.drums[t][s] ? 0 : 1;
-    c.classList.toggle('on', !!st.drums[t][s]);
+    var t = c.dataset.t, s = parseInt(c.dataset.s, 10);
+    var b = st.bars[st.viewBar];
+    b.drums[t][s] = b.drums[t][s] ? 0 : 1;
+    c.classList.toggle('on', !!b.drums[t][s]);
     save();
   }
 
   function onNoteClick(e) {
     var c = e.currentTarget;
-    var note = c.dataset.n;
-    var step = c.dataset.s;
+    var note = c.dataset.n, step = c.dataset.s, sk = c.dataset.sk;
     var k = note + ':' + step;
-    var sk = c.dataset.sk;
+    var b = st.bars[st.viewBar];
 
-    if (st[sk][k]) {
-      // Toggle off
-      delete st[sk][k];
-      c.classList.remove('on');
+    if (b[sk][k]) {
+      delete b[sk][k]; c.classList.remove('on');
     } else {
-      // For bass (monophonic) — clear other notes on the same step
+      // Bass is mono — clear other notes on same step
       if (sk === 'bass') {
         BASS_NOTES.forEach(function (n) {
-          var otherKey = n + ':' + step;
-          if (st[sk][otherKey]) {
-            delete st[sk][otherKey];
-            var otherCell = document.querySelector('#bass-grid .g-cell[data-n="' + n + '"][data-s="' + step + '"]');
-            if (otherCell) otherCell.classList.remove('on');
+          var ok = n + ':' + step;
+          if (b[sk][ok]) {
+            delete b[sk][ok];
+            var oc = document.querySelector('#bass-grid .g-cell[data-n="' + n + '"][data-s="' + step + '"]');
+            if (oc) oc.classList.remove('on');
           }
         });
       }
-      st[sk][k] = 1;
-      c.classList.add('on');
+      b[sk][k] = 1; c.classList.add('on');
     }
     save();
   }
 
-  // ── Step highlight (cached columns — no querySelectorAll per tick) ────────────
-  var stepCols = []; // stepCols[i] = cells at step i
+  // ── Step highlight ─────────────────────────────────────────────────────────
+  var stepCols = [];
   var prevStep = -1;
 
   function cacheStepColumns() {
@@ -476,14 +535,17 @@ import Analytics from '../components/Analytics.astro';
     }
   }
 
-  function highlightStep(step) {
+  function highlightStep(step, bar) {
+    // Update bar indicator
+    syncBarBtns();
+    // If viewing a different bar than playing, still show playhead only if same bar
     if (prevStep >= 0 && stepCols[prevStep]) {
       stepCols[prevStep].forEach(function (c) { c.classList.remove('step-now'); });
     }
-    if (stepCols[step]) {
+    if (bar === st.viewBar && stepCols[step]) {
       stepCols[step].forEach(function (c) { c.classList.add('step-now'); });
     }
-    prevStep = step;
+    prevStep = (bar === st.viewBar) ? step : -1;
   }
 
   function clearStepHighlights() {
@@ -493,24 +555,49 @@ import Analytics from '../components/Analytics.astro';
     prevStep = -1;
   }
 
-  // ── Sync DOM ───────────────────────────────────────────────────────────────────
+  // ── Bar selector ───────────────────────────────────────────────────────────
+  function buildBarBtns() {
+    barBtns.innerHTML = '';
+    for (var i = 0; i < BARS; i++) {
+      var btn = document.createElement('button');
+      btn.className = 'bar-btn';
+      btn.textContent = String(i + 1);
+      btn.dataset.bar = String(i);
+      if (i === st.viewBar) btn.classList.add('active');
+      btn.addEventListener('click', function (e) {
+        st.viewBar = parseInt(e.currentTarget.dataset.bar, 10);
+        rebuildGrids();
+        syncBarBtns();
+        save();
+      });
+      barBtns.appendChild(btn);
+    }
+  }
+
+  function syncBarBtns() {
+    var btns = barBtns.querySelectorAll('.bar-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('active', i === st.viewBar);
+      btns[i].classList.toggle('playing', playing && i === curBar);
+    }
+  }
+
+  // ── Sync DOM ───────────────────────────────────────────────────────────────
+  function rebuildGrids() {
+    buildDrumGrid();
+    buildNoteGrid('bass-grid', 'bass-labels', BASS_NOTES, 'bass', 'c-bass');
+    buildNoteGrid('lead-grid', 'lead-labels', LEAD_NOTES, 'lead', 'c-lead');
+    buildNoteGrid('pad-grid', 'pad-labels', PAD_NOTES, 'pad', 'c-pad');
+    cacheStepColumns();
+  }
+
   function syncUI() {
     bpmEl.value = st.bpm;
     swingEl.value = Math.round(st.swing * 100);
     swingV.textContent = Math.round(st.swing * 100) + '%';
 
-    // Kit pills
-    document.querySelectorAll('#kit-pills .pill').forEach(function (b) {
-      b.classList.toggle('active', b.dataset.v === st.kit);
-    });
-
-    // Preset pills
-    document.querySelectorAll('#preset-pills .pill').forEach(function (b) {
-      b.classList.toggle('active', b.dataset.v === st.preset);
-    });
-
     // Volumes
-    ['drums', 'bass', 'synth'].forEach(function (t) {
+    ['drums', 'bass', 'lead', 'pad'].forEach(function (t) {
       var el = document.getElementById(t + '-vol');
       if (el) el.value = Math.round(st.vol[t] * 100);
     });
@@ -520,14 +607,11 @@ import Analytics from '../components/Analytics.astro';
       b.classList.toggle('on', !!st.mute[b.dataset.t]);
     });
 
-    // Rebuild grids
-    buildDrumGrid();
-    buildNoteGrid('bass-grid', 'bass-labels', BASS_NOTES, 'bass', 'c-bass');
-    buildNoteGrid('synth-grid', 'synth-labels', SYNTH_NOTES, 'synth', 'c-synth');
-    cacheStepColumns();
+    buildBarBtns();
+    rebuildGrids();
   }
 
-  // ── Wire controls ──────────────────────────────────────────────────────────────
+  // ── Wire controls ──────────────────────────────────────────────────────────
   playBtn.addEventListener('click', function () {
     if (!inited) return;
     if (playing) stopSeq(); else startSeq();
@@ -537,7 +621,7 @@ import Analytics from '../components/Analytics.astro';
     var v = parseInt(bpmEl.value, 10);
     if (isNaN(v) || v < 60 || v > 200) return;
     st.bpm = v;
-    if (inited) transport().bpm.value = v;
+    if (inited) tp().bpm.value = v;
     save();
   });
 
@@ -545,55 +629,20 @@ import Analytics from '../components/Analytics.astro';
     var v = parseInt(swingEl.value, 10);
     st.swing = v / 100;
     swingV.textContent = v + '%';
-    if (inited) transport().swing = st.swing;
+    if (inited) tp().swing = st.swing;
     save();
   });
 
   clearBtn.addEventListener('click', function () {
-    st.drums = { kick: Array(S).fill(0), snare: Array(S).fill(0), hihat: Array(S).fill(0), clap: Array(S).fill(0) };
-    st.bass = {};
-    st.synth = {};
-    save();
-    syncUI();
+    st.bars = makeEmpty();
+    save(); syncUI();
   });
 
   demoBtn.addEventListener('click', function () {
-    var d = JSON.parse(JSON.stringify(DEFAULT));
-    st.drums = d.drums;
-    st.bass = d.bass;
-    st.synth = d.synth;
-    st.bpm = d.bpm;
-    st.swing = d.swing;
-    if (inited) {
-      transport().bpm.value = st.bpm;
-      transport().swing = st.swing;
-    }
-    save();
-    syncUI();
-  });
-
-  // Kit pills
-  document.querySelectorAll('#kit-pills .pill').forEach(function (b) {
-    b.addEventListener('click', function () {
-      st.kit = b.dataset.v;
-      document.querySelectorAll('#kit-pills .pill').forEach(function (x) {
-        x.classList.toggle('active', x.dataset.v === st.kit);
-      });
-      applyKit();
-      save();
-    });
-  });
-
-  // Preset pills
-  document.querySelectorAll('#preset-pills .pill').forEach(function (b) {
-    b.addEventListener('click', function () {
-      st.preset = b.dataset.v;
-      document.querySelectorAll('#preset-pills .pill').forEach(function (x) {
-        x.classList.toggle('active', x.dataset.v === st.preset);
-      });
-      applyPreset();
-      save();
-    });
+    st.bars = makeDefault();
+    st.bpm = 130; st.swing = 0;
+    if (inited) { tp().bpm.value = 130; tp().swing = 0; }
+    save(); syncUI();
   });
 
   // Volume
@@ -626,7 +675,7 @@ import Analytics from '../components/Analytics.astro';
     }
   });
 
-  // ── Start ──────────────────────────────────────────────────────────────────────
+  // ── Start ──────────────────────────────────────────────────────────────────
   startBtn.addEventListener('click', function () {
     startBtn.disabled = true;
     startBtn.textContent = 'Loading...';
@@ -635,8 +684,7 @@ import Analytics from '../components/Analytics.astro';
     }).then(function () {
       overlay.classList.add('gone');
       appEl.classList.remove('hidden');
-      // Auto-play the default beat so you hear music immediately
-      startSeq();
+      startSeq(); // auto-play
     }).catch(function (err) {
       console.error(err);
       startBtn.disabled = false;
@@ -644,7 +692,7 @@ import Analytics from '../components/Analytics.astro';
     });
   });
 
-  // ── Boot ───────────────────────────────────────────────────────────────────────
+  // ── Boot ───────────────────────────────────────────────────────────────────
   load();
   syncUI();
 
@@ -652,10 +700,10 @@ import Analytics from '../components/Analytics.astro';
 </script>
 
 <style>
-  /* ─── Shell ───────────────────────────────────────────────────────────────────── */
+  /* ─── Shell ─────────────────────────────────────────────────────────── */
   .mc { min-height: 100svh; background: #0a0a0a; color: #e5e5e5; font-family: system-ui, -apple-system, sans-serif; }
 
-  /* ─── Overlay ──────────────────────────────────────────────────────────────────── */
+  /* ─── Overlay ───────────────────────────────────────────────────────── */
   .overlay {
     position: fixed; inset: 0; z-index: 100;
     background: rgba(10,10,10,0.97);
@@ -682,11 +730,11 @@ import Analytics from '../components/Analytics.astro';
   .ov-btn:disabled { opacity: 0.5; cursor: wait; }
   .ov-hint { font-size: 0.75rem; color: #333; margin: 0; }
 
-  /* ─── App ───────────────────────────────────────────────────────────────────── */
-  .app { max-width: 72rem; margin: 0 auto; padding: 0.75rem 0.75rem 4rem; display: flex; flex-direction: column; gap: 1rem; }
+  /* ─── App ───────────────────────────────────────────────────────────── */
+  .app { max-width: 72rem; margin: 0 auto; padding: 0.75rem 0.75rem 4rem; display: flex; flex-direction: column; gap: 0.75rem; }
   .app.hidden { display: none; }
 
-  /* ─── Transport ──────────────────────────────────────────────────────────────── */
+  /* ─── Transport ─────────────────────────────────────────────────────── */
   .transport {
     display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
     padding: 0.625rem 0.875rem;
@@ -730,10 +778,31 @@ import Analytics from '../components/Analytics.astro';
   .t-btn:hover { border-color: #ef4444; color: #f87171; }
   .t-demo:hover { border-color: #3b82f6; color: #93c5fd; }
 
-  /* ─── Section ────────────────────────────────────────────────────────────────── */
+  /* ─── Bar selector ──────────────────────────────────────────────────── */
+  .bar-selector {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.375rem 0.875rem;
+    background: #111; border: 1px solid #1e1e1e; border-radius: 0.75rem;
+  }
+  .bar-label {
+    font-size: 0.6875rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.12em; color: #404040;
+  }
+  .bar-btns { display: flex; gap: 0.25rem; flex: 1; }
+  .bar-btn {
+    flex: 1; min-height: 36px; border-radius: 0.375rem;
+    background: #1a1a1a; border: 1px solid #2a2a2a;
+    color: #555; font-size: 0.875rem; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 0.12s;
+  }
+  .bar-btn.active { background: #1e2d4a; border-color: #3b82f6; color: #93c5fd; }
+  .bar-btn.playing { box-shadow: 0 0 8px rgba(59,130,246,0.4); border-color: #60a5fa; }
+  .bar-btn.playing:not(.active) { background: #162030; border-color: #2563eb; color: #60a5fa; }
+
+  /* ─── Section ───────────────────────────────────────────────────────── */
   .sec {
     background: #111; border: 1px solid #1e1e1e; border-radius: 0.75rem;
-    padding: 0.75rem; display: flex; flex-direction: column; gap: 0.625rem;
+    padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem;
   }
   .sec-head { display: flex; align-items: center; gap: 0.625rem; flex-wrap: wrap; }
   .sec-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; margin: 0; }
@@ -741,20 +810,10 @@ import Analytics from '../components/Analytics.astro';
 
   .c-drums { color: #3b82f6; }
   .c-bass  { color: #f59e0b; }
-  .c-synth { color: #a855f7; }
+  .c-lead  { color: #10b981; }
+  .c-pad   { color: #a855f7; }
 
-  /* ─── Pills ──────────────────────────────────────────────────────────────────── */
-  .pills { display: flex; gap: 0.25rem; }
-  .pill {
-    background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 0.375rem;
-    color: #666; font-size: 0.75rem; font-weight: 600; font-family: inherit;
-    padding: 0.3rem 0.625rem; min-height: 30px; cursor: pointer; transition: all 0.12s;
-    white-space: nowrap;
-  }
-  #kit-pills .pill.active { background: #1e2d4a; border-color: #3b82f6; color: #93c5fd; }
-  #preset-pills .pill.active { background: #2a1a42; border-color: #a855f7; color: #d8b4fe; }
-
-  /* ─── Mix ─────────────────────────────────────────────────────────────────────── */
+  /* ─── Mix ───────────────────────────────────────────────────────────── */
   .mix { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; }
   .vol {
     width: 5rem; height: 6px; appearance: none; background: #2a2a2a;
@@ -773,15 +832,14 @@ import Analytics from '../components/Analytics.astro';
   }
   .mbtn.on { background: #2e1a1a; border-color: #ef4444; color: #f87171; }
 
-  /* ─── Grid ────────────────────────────────────────────────────────────────────── */
+  /* ─── Grid ──────────────────────────────────────────────────────────── */
   .grid-wrap { display: flex; gap: 0.5rem; }
 
   .grid-labels {
     display: flex; flex-direction: column; gap: 2px; flex-shrink: 0;
-    padding-top: 0;
   }
   .g-label {
-    height: 44px; display: flex; align-items: center; justify-content: flex-end;
+    height: 40px; display: flex; align-items: center; justify-content: flex-end;
     font-size: 0.625rem; font-weight: 600; color: #444; text-transform: uppercase;
     letter-spacing: 0.06em; width: 3rem; padding-right: 0.375rem;
     user-select: none;
@@ -793,47 +851,42 @@ import Analytics from '../components/Analytics.astro';
   .grid-scroll::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
 
   .grid { display: flex; flex-direction: column; gap: 2px; }
-
   .g-row { display: flex; gap: 2px; }
 
   .g-cell {
-    width: 44px; height: 44px; min-width: 44px;
-    border-radius: 6px; border: 1.5px solid #1e1e1e;
+    width: 40px; height: 40px; min-width: 40px;
+    border-radius: 5px; border: 1.5px solid #1e1e1e;
     background: #151515; cursor: pointer;
     transition: background 0.06s, border-color 0.06s, box-shadow 0.06s;
     position: relative; padding: 0;
   }
-
-  /* Beat markers — every 4th step gets a left accent */
   .g-cell.bar { border-left: 2.5px solid #252525; }
-
-  /* Hover */
   .g-cell:hover { background: #1c1c1c; }
 
-  /* ── Active (on) — track-colored ── */
+  /* Active */
   .g-cell.c-drums.on { background: #1d3461; border-color: #3b82f6; }
   .g-cell.c-bass.on  { background: #3b2e0a; border-color: #f59e0b; }
-  .g-cell.c-synth.on { background: #2a1545; border-color: #a855f7; }
+  .g-cell.c-lead.on  { background: #0a3024; border-color: #10b981; }
+  .g-cell.c-pad.on   { background: #2a1545; border-color: #a855f7; }
 
-  /* ── Playing step column highlight ── */
+  /* Playing step */
   .g-cell.step-now { background: #1a1a1a; }
   .g-cell.step-now.c-drums.on { background: #2563eb; border-color: #60a5fa; box-shadow: 0 0 10px rgba(59,130,246,0.5); }
   .g-cell.step-now.c-bass.on  { background: #d97706; border-color: #fbbf24; box-shadow: 0 0 10px rgba(245,158,11,0.5); }
-  .g-cell.step-now.c-synth.on { background: #7c3aed; border-color: #c084fc; box-shadow: 0 0 10px rgba(168,85,247,0.5); }
+  .g-cell.step-now.c-lead.on  { background: #059669; border-color: #34d399; box-shadow: 0 0 10px rgba(16,185,129,0.5); }
+  .g-cell.step-now.c-pad.on   { background: #7c3aed; border-color: #c084fc; box-shadow: 0 0 10px rgba(168,85,247,0.5); }
 
-  /* ─── Responsive ──────────────────────────────────────────────────────────────── */
+  /* ─── Responsive ────────────────────────────────────────────────────── */
   @media (max-width: 600px) {
-    .app { padding: 0.5rem 0.375rem 3rem; gap: 0.75rem; }
+    .app { padding: 0.5rem 0.375rem 3rem; gap: 0.5rem; }
     .sec { padding: 0.5rem; }
     .transport { padding: 0.5rem 0.625rem; gap: 0.5rem; }
     .g-label { width: 2.5rem; font-size: 0.5625rem; }
+    .g-cell { width: 36px; height: 36px; min-width: 36px; }
     .t-range { width: 5rem; }
     .vol { width: 3.5rem; }
-    .pills { gap: 0.15rem; }
-    .pill { padding: 0.25rem 0.5rem; font-size: 0.6875rem; }
   }
 
-  /* Landscape phone: un-sticky transport */
   @media (max-height: 500px) and (orientation: landscape) {
     .transport { position: static; }
   }
