@@ -46,6 +46,7 @@ import { wellKnown } from "./routes/well-known.js";
 import { sitemap } from "./routes/sitemap.js";
 import { githubStars } from "./routes/github-stars.js";
 import { docsApi } from "./routes/docs-api.js";
+import { qa } from "./routes/qa.js";
 import { handleScheduled } from "../lazy-imports/scheduled.js";
 import { applySecurityHeaders, isAllowedBrowserOrigin } from "./lib/security-headers.js";
 import {
@@ -872,6 +873,7 @@ app.route("/", wellKnown);
 app.route("/", sitemap);
 app.route("/", githubStars);
 app.route("/", docsApi);
+app.route("/", qa);
 
 // Catch-all for unmatched API routes — return JSON 404 instead of SPA HTML
 export const apiCatchAllHandler = (
