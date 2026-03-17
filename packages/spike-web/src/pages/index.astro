@@ -3,16 +3,11 @@ import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import Whisper from '../components/typography/Whisper.astro';
 import Analytics from '../components/Analytics.astro';
 import CookieConsent from '../components/CookieConsent.astro';
-import { appCatalog } from '../data/apps';
-
-const features = appCatalog;
-
 const metrics = [
   { value: '26', label: 'Personas' },
-  { value: '80+', label: 'MCP Tools' },
+  { value: '7/7', label: 'Services Up' },
   { value: '100%', label: 'Open Source' },
   { value: '$0', label: 'To Start' },
 ];
@@ -100,63 +95,15 @@ const morePosts = latestPosts.slice(1, 4);
         </div>
       </section>
 
-      <!-- ── One-command connect ──────────────────────────────────────── -->
-      <section class="connect-section">
-        <div class="rubik-container connect-inner">
-          <p class="rubik-eyebrow">Zero config</p>
-          <h2 class="connect-title">Connect in one command</h2>
-          <div class="connect-terminal rubik-panel">
-            <div class="terminal-dots">
-              <span></span><span></span><span></span>
-            </div>
-            <code class="terminal-cmd">
-              <span class="terminal-prompt">$</span>
-              claude mcp add spike-land --transport http https://spike.land/mcp
-            </code>
-          </div>
-          <p class="connect-sub">Works with Claude Code, Cursor, VS Code, and any MCP client.</p>
-        </div>
-      </section>
-
-      <!-- ── Free tokens hook ─────────────────────────────────────────── -->
-      <section class="hook-section hook-tokens">
-        <div class="rubik-container hook-inner">
-          <div class="hook-badge">Free forever</div>
-          <h2 class="hook-title">You get 1,000 free tokens. Every day.</h2>
-          <p class="hook-sub">
-            No credit card. No trial expiry. No "contact sales" wall.
-            Just open Spike Chat and start building. We pay what the AI costs.
-          </p>
-          <div class="hook-stats">
-            <div class="hook-stat">
-              <span class="hook-stat-value">$0</span>
-              <span class="hook-stat-label">markup on AI calls</span>
-            </div>
-            <div class="hook-stat">
-              <span class="hook-stat-value">5</span>
-              <span class="hook-stat-label">AI providers</span>
-            </div>
-            <div class="hook-stat">
-              <span class="hook-stat-value">0</span>
-              <span class="hook-stat-label">features behind paywall</span>
-            </div>
-          </div>
-          <a href="/chat" class="cta-primary">
-            Start chatting — it's free
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-      </section>
-
-      <!-- ── Meet the personas ───────────────────────────────────────── -->
+      <!-- ── Meet the personas (first thing after hero) ──────────────── -->
       <section class="hook-section hook-personas">
         <div class="rubik-container">
           <div class="section-header">
             <p class="rubik-eyebrow">The Arena</p>
-            <h2 class="section-title">Talk to minds, not chatbots</h2>
+            <h2 class="section-title">Pick a mind. Start talking.</h2>
           </div>
           <p class="hook-sub" style="text-align:center; margin-bottom: 2rem;">
-            Mathematicians, philosophers, engineers, provocateurs. Each with their own worldview. Stay curious.
+            Mathematicians, philosophers, engineers. Each with their own worldview. Stay curious.
           </p>
           <div class="persona-grid">
             {personas.map(p => (
@@ -177,61 +124,12 @@ const morePosts = latestPosts.slice(1, 4);
         </div>
       </section>
 
-      <!-- ── Apps grid ───────────────────────────────────────────────── -->
-      <section class="apps-section" id="apps">
-        <div class="rubik-container">
-          <div class="section-header">
-            <p class="rubik-eyebrow">Platform Apps</p>
-            <h2 class="section-title">Everything you need to ship AI</h2>
-          </div>
-
-          <div class="apps-grid">
-            {features.map(app => (
-              <a href={`/apps/${app.id}`} class="app-card rubik-panel" style={`--app-accent: ${app.accent}; --app-accent-bg: ${app.accentBg};`}>
-                <div class="app-icon-wrap">
-                  <svg class="app-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={app.iconPath}></path>
-                  </svg>
-                </div>
-                <h3 class="app-name">{app.name}</h3>
-                <p class="app-desc">{app.description}</p>
-                <span class="app-link">
-                  Open app
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <!-- ── Open source trust hook ───────────────────────────────────── -->
-      <section class="hook-section hook-opensource">
-        <div class="rubik-container hook-inner">
-          <div class="hook-badge">100% open source</div>
-          <h2 class="hook-title">Read every line. Fork the whole thing.</h2>
-          <p class="hook-sub">
-            28 packages. MIT license. No vendor lock-in. The code you see is the code that runs.
-            Not "open core" with the good parts hidden — genuinely, fully open.
-          </p>
-          <div class="hero-ctas" style="justify-content: center;">
-            <a href="https://github.com/spike-land-ai/spike.land" class="cta-secondary" target="_blank" rel="noopener">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 4.238 9.617 9.634 10.828.576.106.788-.25.788-.556 0-.273-.01-1.185-.015-2.171-4.037.876-4.889-1.731-4.889-1.731-.66-1.676-1.61-2.122-1.61-2.122-1.318-.9.1-.882.1-.882 1.457.102 2.224 1.496 2.224 1.496 1.296 2.218 3.39 1.577 4.216 1.206.13-.938.533-1.577.976-1.94-3.221-.366-6.608-1.61-6.608-7.17 0-1.583.565-2.877 1.492-3.892-.15-.366-.647-1.84.142-3.838 0 0 1.217-.422 3.992 1.486 1.157-.322 2.397-.483 3.633-.488 1.235.005 2.476.166 3.635.488 2.772-1.908 3.987-1.486 3.987-1.486.791 1.998.294 3.472.144 3.838.929 1.015 1.49 2.309 1.49 3.892 0 5.574-3.393 6.801-6.624 7.16.524.452.991 1.344.991 2.709 0 1.957-.014 3.532-.014 4.012 0 .31.209.669.799.554 5.393-1.213 9.629-5.526 9.629-10.828 0-6.627-5.373-12-12-12z"/></svg>
-              View on GitHub
-            </a>
-            <a href="/pricing" class="cta-secondary">
-              See pricing (spoiler: it's free)
-            </a>
-          </div>
-        </div>
-      </section>
-
-      <!-- ── Blog: Latest Intelligence ────────────────────────────────── -->
+      <!-- ── Blog ────────────────────────────────────────────────────── -->
       <section class="blog-section">
         <div class="rubik-container">
           <div class="section-header">
-            <p class="rubik-eyebrow">Latest Intelligence</p>
-            <h2 class="section-title">From the engineering log</h2>
+            <p class="rubik-eyebrow">Writing</p>
+            <h2 class="section-title">From the Arena</h2>
           </div>
 
           {featuredPost && (
@@ -287,6 +185,36 @@ const morePosts = latestPosts.slice(1, 4);
         </div>
       </section>
 
+      <!-- ── For developers ──────────────────────────────────────────── -->
+      <section class="hook-section hook-opensource">
+        <div class="rubik-container hook-inner">
+          <div class="hook-badge">For developers</div>
+          <h2 class="hook-title">Open source. 30 packages. MIT license.</h2>
+          <p class="hook-sub">
+            Read every line. Fork the whole thing. The code you see is the code that runs.
+          </p>
+          <div class="connect-terminal rubik-panel" style="max-width: 44rem; width: 100%;">
+            <div class="terminal-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <code class="terminal-cmd">
+              <span class="terminal-prompt">$</span>
+              claude mcp add spike-land --transport http https://spike.land/mcp
+            </code>
+          </div>
+          <div class="hero-ctas" style="justify-content: center;">
+            <a href="https://github.com/spike-land-ai/spike.land" class="cta-secondary" target="_blank" rel="noopener">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 4.238 9.617 9.634 10.828.576.106.788-.25.788-.556 0-.273-.01-1.185-.015-2.171-4.037.876-4.889-1.731-4.889-1.731-.66-1.676-1.61-2.122-1.61-2.122-1.318-.9.1-.882.1-.882 1.457.102 2.224 1.496 2.224 1.496 1.296 2.218 3.39 1.577 4.216 1.206.13-.938.533-1.577.976-1.94-3.221-.366-6.608-1.61-6.608-7.17 0-1.583.565-2.877 1.492-3.892-.15-.366-.647-1.84.142-3.838 0 0 1.217-.422 3.992 1.486 1.157-.322 2.397-.483 3.633-.488 1.235.005 2.476.166 3.635.488 2.772-1.908 3.987-1.486 3.987-1.486.791 1.998.294 3.472.144 3.838.929 1.015 1.49 2.309 1.49 3.892 0 5.574-3.393 6.801-6.624 7.16.524.452.991 1.344.991 2.709 0 1.957-.014 3.532-.014 4.012 0 .31.209.669.799.554 5.393-1.213 9.629-5.526 9.629-10.828 0-6.627-5.373-12-12-12z"/></svg>
+              View on GitHub
+            </a>
+            <a href="https://status.spike.land" class="cta-secondary" target="_blank" rel="noopener">
+              <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#22c55e"/></svg>
+              7/7 services up
+            </a>
+          </div>
+        </div>
+      </section>
+
       <!-- ── CTA band ────────────────────────────────────────────────── -->
       <section class="cta-band">
         <div class="rubik-container cta-band-inner">
@@ -300,10 +228,6 @@ const morePosts = latestPosts.slice(1, 4);
             <a href="/zoltan" class="cta-primary">
               Start a conversation
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-            <a href="https://github.com/spike-land-ai/spike.land" class="cta-secondary" target="_blank" rel="noopener">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 4.238 9.617 9.634 10.828.576.106.788-.25.788-.556 0-.273-.01-1.185-.015-2.171-4.037.876-4.889-1.731-4.889-1.731-.66-1.676-1.61-2.122-1.61-2.122-1.318-.9.1-.882.1-.882 1.457.102 2.224 1.496 2.224 1.496 1.296 2.218 3.39 1.577 4.216 1.206.13-.938.533-1.577.976-1.94-3.221-.366-6.608-1.61-6.608-7.17 0-1.583.565-2.877 1.492-3.892-.15-.366-.647-1.84.142-3.838 0 0 1.217-.422 3.992 1.486 1.157-.322 2.397-.483 3.633-.488 1.235.005 2.476.166 3.635.488 2.772-1.908 3.987-1.486 3.987-1.486.791 1.998.294 3.472.144 3.838.929 1.015 1.49 2.309 1.49 3.892 0 5.574-3.393 6.801-6.624 7.16.524.452.991 1.344.991 2.709 0 1.957-.014 3.532-.014 4.012 0 .31.209.669.799.554 5.393-1.213 9.629-5.526 9.629-10.828 0-6.627-5.373-12-12-12z"/></svg>
-              Star on GitHub
             </a>
           </div>
         </div>
@@ -548,42 +472,11 @@ const morePosts = latestPosts.slice(1, 4);
   .terminal-cmd { color: var(--fg); word-break: break-all; }
   .connect-sub { font-size: 0.875rem; color: var(--muted-fg); }
 
-  /* ── Apps section ──────────────────────────────────────────────────── */
-  .apps-section { padding-block: clamp(4rem, 8vw, 6rem); }
   .section-header {
     text-align: center; margin-bottom: 3rem;
     display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
   }
   .section-title { max-width: 24ch; }
-  .apps-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 1.25rem;
-  }
-  .app-card {
-    display: flex; flex-direction: column; gap: 0.875rem;
-    text-decoration: none; color: inherit;
-    transition: box-shadow var(--duration-normal) var(--ease),
-                border-color var(--duration-normal) var(--ease),
-                transform var(--duration-fast) var(--ease);
-  }
-  .app-card:hover {
-    transform: translateY(-2px); box-shadow: var(--shadow-lg);
-    border-color: color-mix(in srgb, var(--app-accent) 40%, transparent);
-  }
-  .app-icon-wrap {
-    width: 3rem; height: 3rem; border-radius: var(--radius-md);
-    background: var(--app-accent-bg);
-    display: flex; align-items: center; justify-content: center;
-    color: var(--app-accent); flex-shrink: 0;
-  }
-  .app-icon { width: 1.375rem; height: 1.375rem; }
-  .app-name { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--fg); margin: 0; }
-  .app-desc { font-size: 0.9375rem; line-height: 1.6; color: var(--muted-fg); flex: 1; margin: 0; }
-  .app-link {
-    display: inline-flex; align-items: center; gap: 0.375rem;
-    font-size: 0.875rem; font-weight: 600; color: var(--app-accent);
-    margin-top: 0.25rem; transition: gap var(--duration-fast) var(--ease);
-  }
-  .app-card:hover .app-link { gap: 0.625rem; }
 
   /* ── Blog section ──────────────────────────────────────────────────── */
   .blog-section {
@@ -749,12 +642,7 @@ const morePosts = latestPosts.slice(1, 4);
     font-size: 0.8125rem; color: var(--muted-fg); font-weight: 500;
   }
 
-  /* Tokens hook accent */
-  .hook-tokens {
-    background: color-mix(in srgb, var(--primary-color) 3%, var(--bg));
-  }
-
-  /* Open source hook accent */
+  /* Open source / developer hook accent */
   .hook-opensource {
     background: color-mix(in srgb, var(--primary-color) 2%, var(--bg));
   }
