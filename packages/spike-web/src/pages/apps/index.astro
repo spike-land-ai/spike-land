@@ -250,3 +250,20 @@ import { appCatalog as apps } from '../../data/apps';
 
   .app-card:hover .app-link { gap: 0.625rem; }
 </style>
+
+<script>
+  const searchInput = document.querySelector('.search-input');
+  const appCards = document.querySelectorAll('.app-card');
+
+  if (searchInput instanceof HTMLInputElement) {
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.toLowerCase().trim();
+      appCards.forEach(card => {
+        if (card instanceof HTMLElement) {
+          const text = card.textContent?.toLowerCase() || '';
+          card.style.display = query === '' || text.includes(query) ? '' : 'none';
+        }
+      });
+    });
+  }
+</script>

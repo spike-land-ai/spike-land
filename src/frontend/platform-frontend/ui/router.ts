@@ -49,7 +49,6 @@ export const ROUTE_PRD_MAP: Record<string, string> = {
   "/apps": "route:/apps",
   "/chess": "route:/chess",
   "/blog": "route:/blog",
-  "/dashboard": "route:/dashboard",
   "/cockpit": "route:/dashboard",
   "/vibe-code": "route:/vibe-code",
 };
@@ -120,12 +119,6 @@ const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/terms",
   component: withSuspense(() => import("../core-logic/terms"), "TermsPage"),
-});
-
-const settingsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/settings",
-  component: withSuspense(() => import("./routes/settings"), "SettingsPage"),
 });
 
 const pricingRoute = createRoute({
@@ -250,26 +243,6 @@ const bugbookMyReportsRoute = createRoute({
   getParentRoute: () => bugbookRoute,
   path: "my-reports",
   component: withSuspense(() => import("./routes/bugbook/my-reports"), "MyReportsPage"),
-});
-
-// Dashboard routes
-const dashboardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/dashboard",
-  component: Outlet,
-  notFoundComponent: NotFoundPage,
-});
-
-const dashboardIndexRoute = createRoute({
-  getParentRoute: () => dashboardRoute,
-  path: "/",
-  component: withSuspense(() => import("../core-logic/dashboard-index.tsx"), "DashboardPage"),
-});
-
-const bazdmegDashboardRoute = createRoute({
-  getParentRoute: () => dashboardRoute,
-  path: "bazdmeg",
-  component: withSuspense(() => import("./routes/dashboard/bazdmeg"), "BazdmegDashboardPage"),
 });
 
 // Learn routes
@@ -465,12 +438,6 @@ const migrateLiveRoute = createRoute({
   component: withSuspense(() => import("./routes/migrate/live"), "MigrateLivePage"),
 });
 
-const supportRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/support",
-  component: withSuspense(() => import("./routes/support"), "SupportPage"),
-});
-
 const thankYouRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/thank-you",
@@ -599,7 +566,6 @@ const routeTree = rootRoute.addChildren([
   whatWeDoRoute,
   quizRoute,
   migrateRoute.addChildren([migrateIndexRoute, migrateLiveRoute]),
-  supportRoute,
   thankYouRoute,
   vibeCodeRoute,
   buildRoute,
@@ -618,7 +584,6 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   privacyRoute,
   termsRoute,
-  settingsRoute,
   pricingRoute,
   storeRoute,
   versionRoute,
@@ -637,7 +602,6 @@ const routeTree = rootRoute.addChildren([
     bugbookLeaderboardRoute,
     bugbookMyReportsRoute,
   ]),
-  dashboardRoute.addChildren([dashboardIndexRoute, bazdmegDashboardRoute]),
   learnRoute.addChildren([learnIndexRoute, learnSessionRoute, learnBadgeRoute]),
   messagesRoute.addChildren([messagesIndexRoute, messageThreadRoute]),
   appsRoute.addChildren([

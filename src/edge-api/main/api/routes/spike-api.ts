@@ -29,6 +29,8 @@ import {
 } from "../../core-logic/llm-provider.js";
 import { getBalance, deductCredit } from "../../core-logic/credit-service.js";
 import { resolveEffectiveTier } from "../../core-logic/tier-service.js";
+import { encryptApiKey } from "../../core-logic/token-encryption.js";
+import { validateDonatedKey, isDonatedProvider } from "../../core-logic/token-validation.js";
 
 const log = createLogger("spike-api");
 
@@ -361,10 +363,27 @@ spikeApi.post("/v1/tool", async (c) => {
 });
 
 // ── POST /v1/donate-token — community API key donation ──────────────
+//
+// Security hardening (Phase 1):
+//   1. Key is validated against the upstream provider before acceptance
+//      — prevents credit farming with garbage keys (OWASP A04:2021)
+//   2. Key is AES-256-GCM encrypted before writing to D1
+//      — a DB dump cannot expose plaintext keys (OWASP A02:2021)
+//   3. TOKEN_ENCRYPTION_KEY is required; missing secret = hard failure
+//   4. The raw key is NEVER logged at any point in this handler
 
 spikeApi.post("/v1/donate-token", async (c) => {
   const userId = c.get("userId") as string | undefined;
   if (!userId) return c.json({ error: "auth_required" }, 401);
+
+  // Encryption key must be provisioned before this endpoint can accept keys
+  const encryptionSecret = (c.env as unknown as Record<string, string | undefined>)[
+    "TOKEN_ENCRYPTION_KEY"
+  ];
+  if (!encryptionSecret) {
+    log.error("TOKEN_ENCRYPTION_KEY is not configured — donate-token disabled");
+    return c.json({ error: "service_unavailable" }, 503);
+  }
 
   let body: { provider?: string; api_key?: string };
   try {
@@ -380,26 +399,67 @@ spikeApi.post("/v1/donate-token", async (c) => {
     return c.json({ error: "provider and api_key are required" }, 400);
   }
 
-  const validProviders = ["openai", "anthropic", "google", "xai"];
-  if (!validProviders.includes(provider)) {
-    return c.json({ error: `provider must be one of: ${validProviders.join(", ")}` }, 400);
+  if (!isDonatedProvider(provider)) {
+    return c.json({ error: `provider must be one of: openai, anthropic, google, xai` }, 400);
   }
 
+  // ── Step 1: Validate the key against the upstream provider ──────────
+  // This is intentionally done BEFORE any DB write or credit grant.
+  // network_error is treated as "unknown" — we do not reject keys when our
+  // own outbound network is having problems, but we also do not credit the
+  // donor until the key is confirmed on the next successful call.
+
+  const validation = await validateDonatedKey(provider, apiKey);
+
+  if (!validation.valid) {
+    if (validation.error === "network_error") {
+      // Cannot confirm — fail safe: do not store an unverified key
+      return c.json(
+        {
+          error: "validation_unavailable",
+          message: "Could not reach the provider to validate your key. Please try again shortly.",
+        },
+        503,
+      );
+    }
+    // The provider rejected the key — do not reveal which exact check failed
+    // to avoid giving an attacker an oracle for key-format guessing
+    return c.json(
+      {
+        error: "invalid_key",
+        message: "The API key was rejected by the provider. Please check the key and try again.",
+      },
+      422,
+    );
+  }
+
+  // ── Step 2: Encrypt the key before writing to D1 ────────────────────
+  let encryptedKey: string;
+  try {
+    encryptedKey = await encryptApiKey(apiKey, encryptionSecret);
+  } catch (err) {
+    log.error("Failed to encrypt donated key", { provider, error: String(err) });
+    return c.json({ error: "internal_error" }, 500);
+  }
+
+  // ── Step 3: Persist the encrypted key ───────────────────────────────
   const id = crypto.randomUUID();
   const now = Date.now();
 
   try {
     await c.env.DB.prepare(
-      `INSERT INTO donated_tokens (id, donor_user_id, provider, encrypted_key, donated_at, active, total_calls)
+      `INSERT INTO donated_tokens
+         (id, donor_user_id, provider, encrypted_key, donated_at, active, total_calls)
        VALUES (?, ?, ?, ?, ?, 1, 0)`,
     )
-      .bind(id, userId, provider, apiKey, now)
+      .bind(id, userId, provider, encryptedKey, now)
       .run();
   } catch {
     return c.json({ error: "Failed to store token. Table may not be set up yet." }, 500);
   }
 
-  // Reward donor with credits (10 credits per donated key)
+  // ── Step 4: Reward donor with credits ───────────────────────────────
+  // Non-fatal: credit grant failure must not roll back a successful donation
   try {
     await c.env.DB.prepare(
       `INSERT INTO user_credits (id, user_id, amount, reason, created_at)
@@ -408,7 +468,7 @@ spikeApi.post("/v1/donate-token", async (c) => {
       .bind(crypto.randomUUID(), userId)
       .run();
   } catch {
-    // Non-fatal
+    // Intentionally non-fatal
   }
 
   return c.json({

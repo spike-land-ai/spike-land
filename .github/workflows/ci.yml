@@ -23,40 +23,104 @@ jobs:
       - name: Scan for secrets
         run: bash scripts/scan-secrets.sh --all
 
+  # Shared install: runs yarn install once, saves node_modules to GHA cache.
+  # All downstream jobs (typecheck, lint, test, build) restore from this cache
+  # rather than each running their own install. This shaves ~60-90 s per job
+  # on a cold run, and ~30-45 s on cache-hit runs where yarn validate-deps
+  # skips the network entirely.
+  install:
+    runs-on: ubuntu-latest
+    outputs:
+      # Surface the exact cache key so downstream jobs can use restore-keys
+      # with the identical primary key and avoid a redundant yarn install.
+      cache-key: ${{ steps.cache-key.outputs.key }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          # The built-in yarn cache from setup-node caches the Yarn global
+          # cache (~/.yarn/berry/cache). We add a separate node_modules cache
+          # below so downstream jobs can skip yarn install entirely.
+          cache: yarn
+
+      - id: cache-key
+        run: echo "key=node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}" >> $GITHUB_OUTPUT
+
+      - name: Restore node_modules cache
+        id: nm-cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ steps.cache-key.outputs.key }}
+          restore-keys: node-modules-${{ runner.os }}-
+
+      # Only run install when node_modules cache missed. On a hit, the
+      # node_modules directory is already fully populated.
+      - name: Install dependencies
+        if: steps.nm-cache.outputs.cache-hit != 'true'
+        run: yarn install --immutable
+
+      # Explicitly save even if the primary key was restored (in case
+      # restore-keys matched a stale key and yarn install updated modules).
+      - name: Save node_modules cache
+        if: steps.nm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: node_modules
+          key: ${{ steps.cache-key.outputs.key }}
+
+  # typecheck, lint, test, and build all fan out from install in parallel.
+  # None of them need to wait for each other — only for deps to be installed.
+
   typecheck:
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
 
+      # Restore the shared node_modules written by the install job.
+      - uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ needs.install.outputs.cache-key }}
+          restore-keys: node-modules-${{ runner.os }}-
+
+      # .tsbuildinfo is per-job because the TypeScript incremental build
+      # state is not safe to share across concurrent writers.
       - uses: actions/cache@v4
         with:
           path: .tsbuildinfo
           key: tsbuildinfo-${{ runner.os }}-${{ hashFiles('tsconfig.json', 'src/**/*.ts', 'src/**/*.tsx') }}
           restore-keys: tsbuildinfo-${{ runner.os }}-
 
-      - uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-          restore-keys: node-modules-${{ runner.os }}-
-
-      - run: yarn install
+      - run: yarn install --immutable
       - run: yarn typecheck
 
   lint:
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn
+
+      - uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ needs.install.outputs.cache-key }}
+          restore-keys: node-modules-${{ runner.os }}-
 
       - uses: actions/cache@v4
         with:
@@ -64,13 +128,7 @@ jobs:
           key: eslintcache-${{ runner.os }}-${{ hashFiles('eslint.config.mjs') }}
           restore-keys: eslintcache-${{ runner.os }}-
 
-      - uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
-          restore-keys: node-modules-${{ runner.os }}-
-
-      - run: yarn install
+      - run: yarn install --immutable
       - run: yarn lint:check
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
@@ -83,11 +141,13 @@ jobs:
           fi
 
   test:
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -96,10 +156,10 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          key: ${{ needs.install.outputs.cache-key }}
           restore-keys: node-modules-${{ runner.os }}-
 
-      - run: yarn install
+      - run: yarn install --immutable
       - name: Run changed tests
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -108,11 +168,16 @@ jobs:
             bash scripts/test-changed.sh --base HEAD~1 --head HEAD
           fi
 
+  # Build starts as soon as install finishes — in parallel with the three check
+  # jobs. This means build wall-clock time is hidden behind check wall-clock
+  # time. If a check fails, the gate job blocks deploy from running. The build
+  # artifact is still uploaded; it is simply never consumed by deploy-workers.
   build:
-    needs: [typecheck, lint, test]
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -121,10 +186,10 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
+          key: ${{ needs.install.outputs.cache-key }}
           restore-keys: node-modules-${{ runner.os }}-
 
-      - run: yarn install
+      - run: yarn install --immutable
       - run: yarn build:src
 
       # esbuild.config.ts outputs to dist/<packageName>/.
@@ -137,15 +202,27 @@ jobs:
           path: dist/
           retention-days: 1
 
+  # Gate: all three quality checks AND the build must pass before any deploy
+  # job runs. This replaces the old pattern of build needing [typecheck, lint,
+  # test]. Using a separate gate job means we can clearly express: "we need
+  # clean code AND a successful build before deploying."
+  gate:
+    needs: [typecheck, lint, test, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All checks passed
+        run: echo "typecheck, lint, test, and build all succeeded — gate open"
+
   publish:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build
+    needs: gate
     runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -158,7 +235,7 @@ jobs:
           key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
           restore-keys: node-modules-${{ runner.os }}-
 
-      - run: yarn install
+      - run: yarn install --immutable
 
       # publish-changed.js reads from dist/<packageName>/ (line: const DIST = join(ROOT, "dist"))
       - name: Download build artifacts
@@ -179,12 +256,13 @@ jobs:
 
   deploy-workers:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: build
+    needs: gate
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -196,7 +274,7 @@ jobs:
           key: node-modules-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
           restore-keys: node-modules-${{ runner.os }}-
 
-      - run: yarn install
+      - run: yarn install --immutable
 
       # No artifact download needed — wrangler compiles TypeScript directly
       # from src/ via the main field in each packages/*/wrangler.toml.
@@ -316,13 +394,13 @@ jobs:
                 if echo "$RES" | jq -e '.status == "ok" or .ok == true' > /dev/null; then
                   SVC=$(echo "$RES" | jq -r '.service // "unknown"')
                   TS=$(echo "$RES" | jq -r '.timestamp // "none"')
-                  echo "  ✓ $label (service: $SVC, timestamp: $TS)"
+                  echo "  OK $label (service: $SVC, timestamp: $TS)"
                   return 0
                 fi
               fi
               [ "$i" -lt 3 ] && sleep 10
             done
-            echo "  ✗ $label FAILED after 3 attempts"
+            echo "  FAIL $label FAILED after 3 attempts"
             return 1
           }
 
@@ -342,14 +420,14 @@ jobs:
           for i in 1 2 3; do
             SPA_CODE=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "https://spike.land/" 2>/dev/null)
             if [ "$SPA_CODE" = "200" ] || [ "$SPA_CODE" = "403" ]; then
-              echo "  ✓ SPA serving (HTTP $SPA_CODE)"
+              echo "  OK SPA serving (HTTP $SPA_CODE)"
               SPA_OK=true
               break
             fi
             [ "$i" -lt 3 ] && sleep 10
           done
           if [ "$SPA_OK" = "false" ]; then
-            echo "  ✗ SPA serving FAILED after 3 attempts"
+            echo "  FAIL SPA serving FAILED after 3 attempts"
             ((FAIL_COUNT++))
           fi
 
@@ -375,4 +453,3 @@ jobs:
         run: bash .github/scripts/rollback-workers.sh all
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-

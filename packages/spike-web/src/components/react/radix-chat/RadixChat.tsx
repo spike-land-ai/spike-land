@@ -23,43 +23,17 @@ interface PersonaConfig {
 }
 
 const PERSONAS: Record<string, PersonaConfig> = {
-  radix: {
-    persona: "radix",
-    title: "Radix",
-    accent: "#0d9488",
-    greeting: "Az agyam nyitva all.",
-    subtitle: "My brain is open. What is the root of your problem?",
-    placeholder: "Message Radix...",
-    suggestions: [
-      "What is the root of spike.land?",
-      "Explain the Strange Loop audit",
-      "What is the BAZDMEG method?",
-    ],
-  },
-  erdos: {
-    persona: "erdos",
-    title: "Erdos",
-    accent: "#7c3aed",
-    greeting: "My brain is open.",
-    subtitle: "What is your problem? — Not as therapy, as collaboration.",
-    placeholder: "Message Erdos...",
-    suggestions: [
-      "Give me a beautiful problem",
-      "What makes a proof from The Book?",
-      "Tell me about collaboration graphs",
-    ],
-  },
   zoltan: {
     persona: "zoltan",
-    title: "Zoltán",
+    title: "Zolt\u00e1n",
     accent: "#d97706",
-    greeting: "Szia Zoli. A kutyák jól vannak?",
-    subtitle: "A grounded version of you. Not therapy — calibration.",
-    placeholder: "Beszélj hozzám...",
+    greeting: "Szia. Miben seg\u00edthetek?",
+    subtitle: "Music. Math. Code. Platform. Human After All.",
+    placeholder: "Talk to Zolt\u00e1n...",
     suggestions: [
       "Am I crazy or is this real?",
-      "Why did everyone go silent?",
-      "Mondd el mit látsz kívülről",
+      "What MCP tools should I use?",
+      "Help me finish this project",
     ],
   },
   arnold: {
@@ -75,17 +49,17 @@ const PERSONAS: Record<string, PersonaConfig> = {
       "What's wrong with my above-the-fold?",
     ],
   },
-  daftpunk: {
-    persona: "daftpunk",
-    title: "Daft Punk",
-    accent: "#fbbf24",
-    greeting: "One more time.",
-    subtitle: "Music is technology. Technology is music. Human After All.",
-    placeholder: "Describe your sound...",
+  peti: {
+    persona: "peti",
+    title: "Peti",
+    accent: "#22c55e",
+    greeting: "Hey! I already found 3 bugs. Want the list?",
+    subtitle: "QA engineer. Tested spike.land for 3 weeks. Finds what you missed.",
+    placeholder: "Show me what to test...",
     suggestions: [
-      "Make me a beat in 8 bars",
-      "How do I make that classic French house filter?",
-      "Design a synth patch that sounds like the future",
+      "I already tested that. Here's what's broken.",
+      "Run the full test matrix on /chat",
+      "What are the top 5 bugs you found?",
     ],
   },
 };
@@ -94,8 +68,8 @@ interface Props {
   persona?: string;
 }
 
-export default function RadixChat({ persona = "radix" }: Props) {
-  const config = PERSONAS[persona] ?? PERSONAS["radix"];
+export default function RadixChat({ persona = "zoltan" }: Props) {
+  const config = PERSONAS[persona] ?? PERSONAS["zoltan"];
   const { messages, sendMessage, isStreaming, currentStage, error, clearError, clearMessages } =
     useRadixChat(config.persona);
   const messagesEndRef = useRef<HTMLDivElement>(null);

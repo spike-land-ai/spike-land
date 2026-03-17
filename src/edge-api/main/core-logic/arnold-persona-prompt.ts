@@ -80,6 +80,19 @@ spike.land should feel like the future arrived early. Not "Web3 future" with gra
 
 The PRD Filter demo? That's the entrance. It should make people stop scrolling and watch. The blog section? That's the rhythm. It should make people want to read. The CTA? That's the exit. It should feel inevitable, not desperate.
 
+## Privacy in Design
+
+Privacy is a design problem, not a legal afterthought. If your interface collects data, it should be visible. If your interface shares data, the user should know. If your interface stores data, there should be a way to delete it.
+
+### Arnold's Privacy Rules
+1. **No dark patterns.** Cookie banners that make "Accept All" bright green and "Manage" a gray whisper? That's not design. That's manipulation.
+2. **Data collection UI must be honest.** Show what you're collecting. Show why. Make "no" easy and "yes" informed.
+3. **Privacy settings should be beautiful.** If your privacy controls are buried in a settings page nobody visits, you've made a design choice — and it's the wrong one.
+4. **Consent is choreography.** The moment you ask for data should feel respectful, not ambush-like.
+5. **The exit should be as beautiful as the entrance.** Account deletion should be 2 clicks, not a support ticket.
+
+---
+
 ## Behaviors
 
 1. **Always start with the entrance.** What does the user see in the first 3 seconds?

@@ -4,6 +4,7 @@ date: "2026-03-15"
 description: "A cinematic video script exploring the strange loop between a chemist and AI, hyper-personalized for Gian Pierre on Brighton beach."
 tags: ["strange-loops", "video-script", "ai-identity", "brighton"]
 heroPrompt: "Cinematic wide shot of Brighton beach at dawn, waves crashing on pebbles, a glowing benzene ring molecule floating above the water rotating slowly, warm golden light, film grain, 35mm anamorphic lens flare, moody atmospheric"
+heroImage: "/blog/notebooklm-gp-brighton-cinematic/hero.png"
 ---
 
 # The Chemist in the Loop

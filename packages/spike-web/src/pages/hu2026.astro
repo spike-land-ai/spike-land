@@ -1,0 +1,645 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Analytics from '../components/Analytics.astro';
+---
+
+<Layout
+  title="April 12 — Hungary 2026"
+  description="Hungary's most consequential election since 1990."
+>
+  <Analytics slot="head" />
+
+  <div class="hu-shell">
+    <main class="hu-main">
+
+      <!-- Countdown -->
+      <header class="hu-header">
+        <div class="hu-flag">
+          <span class="stripe red"></span>
+          <span class="stripe white"></span>
+          <span class="stripe green"></span>
+        </div>
+        <p class="hu-date">April 12, 2026</p>
+        <h1 class="hu-title" id="countdown"></h1>
+        <p class="hu-sub">Hungary's most consequential election since 1990.</p>
+      </header>
+
+      <!-- The Race -->
+      <section class="hu-section">
+        <h2 class="hu-section-title">The Race</h2>
+        <div class="race-bars">
+          <div class="race-candidate">
+            <div class="race-info">
+              <span class="race-name">TISZA</span>
+              <span class="race-leader">Péter Magyar</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill tisza-bar" style="--pct: 44.8%">
+                <span class="bar-label">44.8%</span>
+              </div>
+            </div>
+          </div>
+          <div class="race-candidate">
+            <div class="race-info">
+              <span class="race-name">Fidesz</span>
+              <span class="race-leader">Viktor Orbán</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill fidesz-bar" style="--pct: 41.1%">
+                <span class="bar-label">41.1%</span>
+              </div>
+            </div>
+          </div>
+          <div class="race-candidate">
+            <div class="race-info">
+              <span class="race-name">Mi Hazánk</span>
+              <span class="race-leader">László Toroczkai</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill mihazank-bar" style="--pct: 5.9%">
+                <span class="bar-label">5.9%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="hu-note">PolitPro weighted average, March 2026. 17-point divergence between government-aligned and independent pollsters.</p>
+      </section>
+
+      <!-- Scenarios -->
+      <section class="hu-section">
+        <h2 class="hu-section-title">Five Scenarios</h2>
+        <div class="scenario-grid">
+          <div class="scenario-card" style="--s-accent: #3b82f6; --s-pct: 44%">
+            <div class="scenario-bar"></div>
+            <div class="scenario-content">
+              <span class="scenario-pct">44%</span>
+              <h3 class="scenario-name">TISZA majority</h3>
+              <p class="scenario-desc">100–132 seats. Independent polls correct. High urban turnout. EU funds narrative resonates.</p>
+            </div>
+          </div>
+          <div class="scenario-card" style="--s-accent: #f97316; --s-pct: 25%">
+            <div class="scenario-bar"></div>
+            <div class="scenario-content">
+              <span class="scenario-pct">25%</span>
+              <h3 class="scenario-name">Fidesz majority</h3>
+              <p class="scenario-desc">100–132 seats. "Shy Fidesz" voters materialise. Rural turnout machine delivers.</p>
+            </div>
+          </div>
+          <div class="scenario-card" style="--s-accent: #a855f7; --s-pct: 22%">
+            <div class="scenario-bar"></div>
+            <div class="scenario-content">
+              <span class="scenario-pct">22%</span>
+              <h3 class="scenario-name">Hung parliament</h3>
+              <p class="scenario-desc">No party reaches 100. Mi Hazánk enters with 7–12 seats. Constitutional crisis.</p>
+            </div>
+          </div>
+          <div class="scenario-card" style="--s-accent: #06b6d4; --s-pct: 5%">
+            <div class="scenario-bar"></div>
+            <div class="scenario-content">
+              <span class="scenario-pct">5%</span>
+              <h3 class="scenario-name">Fidesz supermajority</h3>
+              <p class="scenario-desc">133+ seats. 2022 pattern repeats. Independent polls off by 10+ points.</p>
+            </div>
+          </div>
+          <div class="scenario-card" style="--s-accent: #10b981; --s-pct: 4%">
+            <div class="scenario-bar"></div>
+            <div class="scenario-content">
+              <span class="scenario-pct">4%</span>
+              <h3 class="scenario-name">TISZA supermajority</h3>
+              <p class="scenario-desc">133+ seats. Fidesz collapses rurally. Without precedent in Hungarian history.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Key Numbers -->
+      <section class="hu-section">
+        <h2 class="hu-section-title">The Numbers That Matter</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-value">16</span>
+            <span class="stat-label">years of Orbán</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">€19B</span>
+            <span class="stat-label">EU funds frozen</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">25%</span>
+            <span class="stat-label">peak inflation (2023)</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">80%</span>
+            <span class="stat-label">media controlled by Fidesz</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">300K+</span>
+            <span class="stat-label">rallied for Magyar (Apr 2024)</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">57%</span>
+            <span class="stat-label">Polymarket: TISZA wins</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- The Divide -->
+      <section class="hu-section">
+        <h2 class="hu-section-title">Two Electorates</h2>
+        <div class="divide-grid">
+          <div class="divide-row">
+            <span class="divide-label">18–29 year olds</span>
+            <div class="divide-bar">
+              <div class="divide-fill tisza-fill" style="--pct: 63%"><span>TISZA 63%</span></div>
+              <div class="divide-fill fidesz-fill" style="--pct: 10%"><span>Fidesz 10%</span></div>
+            </div>
+          </div>
+          <div class="divide-row">
+            <span class="divide-label">65+ year olds</span>
+            <div class="divide-bar">
+              <div class="divide-fill fidesz-fill" style="--pct: 49%"><span>Fidesz 49%</span></div>
+              <div class="divide-fill tisza-fill" style="--pct: 14%"><span>TISZA 14%</span></div>
+            </div>
+          </div>
+          <div class="divide-row">
+            <span class="divide-label">Budapest</span>
+            <div class="divide-bar">
+              <div class="divide-fill tisza-fill" style="--pct: 37%"><span>TISZA 37%</span></div>
+              <div class="divide-fill fidesz-fill" style="--pct: 13%"><span>Fidesz 13%</span></div>
+            </div>
+          </div>
+          <div class="divide-row">
+            <span class="divide-label">Villages</span>
+            <div class="divide-bar">
+              <div class="divide-fill fidesz-fill" style="--pct: 39%"><span>Fidesz 39%</span></div>
+              <div class="divide-fill tisza-fill" style="--pct: 23%"><span>TISZA 23%</span></div>
+            </div>
+          </div>
+          <div class="divide-row">
+            <span class="divide-label">University graduates</span>
+            <div class="divide-bar">
+              <div class="divide-fill tisza-fill" style="--pct: 42%"><span>TISZA 42%</span></div>
+              <div class="divide-fill fidesz-fill" style="--pct: 22%"><span>Fidesz 22%</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- The line -->
+      <section class="hu-section hu-closing">
+        <div class="closing-line"></div>
+        <p class="closing-quote">"The era of Fidesz supermajorities is almost certainly over."</p>
+        <p class="closing-note">
+          March 2025: Pride events banned, 136–27.<br>
+          But 300,000 people stood in the street and said: not this.<br>
+          Change doesn't ask permission. It just shows up.
+        </p>
+        <div class="closing-line"></div>
+      </section>
+
+      <!-- The Forum Thread -->
+      <section class="hu-section">
+        <h2 class="hu-section-title">From the Archive</h2>
+        <div class="archive-grid">
+          <a href="/blog/hup-hu-responses-189552" class="archive-card">
+            <span class="archive-date">March 15, 2026</span>
+            <h3 class="archive-title">Az AI önmaga foglyává vált — Arena Responses</h3>
+            <p class="archive-desc">3×3×3 Arena: Radix, Erdős, Hofstadter respond to hup.hu/node/189552 — AI, GDPR, strange loops, cognitive freedom.</p>
+          </a>
+          <a href="/blog/hup-hu-blocked-the-loop-closes" class="archive-card">
+            <span class="archive-date">March 15, 2026</span>
+            <h3 class="archive-title">They Blocked My Account — The Loop Closes</h3>
+            <p class="archive-desc">I posted about cognitive freedom on Hungary's oldest tech forum. They blocked my account. On March 15. The strange loop closed itself.</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- The message -->
+      <section class="hu-section hu-message">
+        <p class="message-text">
+          I read every word.
+        </p>
+        <p class="message-sub">
+          Built on <a href="https://spike.land" class="message-link">spike.land</a> — the thing I stay up all night building.
+          <br>You should come see it sometime.
+        </p>
+      </section>
+
+    </main>
+  </div>
+</Layout>
+
+<script is:inline>
+  (function() {
+    var target = new Date('2026-04-12T06:00:00+02:00');
+    var el = document.getElementById('countdown');
+    function update() {
+      var now = new Date();
+      var diff = target - now;
+      if (diff <= 0) { el.textContent = 'Today.'; return; }
+      var days = Math.floor(diff / 86400000);
+      if (days === 0) { el.textContent = 'Today.'; }
+      else if (days === 1) { el.textContent = 'Tomorrow.'; }
+      else { el.textContent = days + ' days.'; }
+    }
+    update();
+    setInterval(update, 60000);
+  })();
+</script>
+
+<style>
+  :root {
+    --tisza-color: #3b82f6;
+    --fidesz-color: #f97316;
+  }
+
+  .hu-shell {
+    min-height: 100svh;
+    background: #0a0a0a;
+    color: #e5e5e5;
+    font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+  }
+
+  .hu-main {
+    max-width: 52rem;
+    margin: 0 auto;
+    padding: clamp(2rem, 6vw, 5rem) 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(3rem, 6vw, 5rem);
+  }
+
+  /* Header */
+  .hu-header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .hu-flag {
+    display: flex;
+    width: 3rem;
+    height: 2rem;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+  }
+  .stripe { flex: 1; }
+  .stripe.red { background: #ce2939; }
+  .stripe.white { background: #ffffff; }
+  .stripe.green { background: #477050; }
+
+  .hu-date {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #737373;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .hu-title {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: #fafafa;
+    margin: 0;
+  }
+
+  .hu-sub {
+    font-size: 1.125rem;
+    color: #737373;
+    margin: 0;
+    max-width: 36ch;
+    line-height: 1.5;
+  }
+
+  /* Sections */
+  .hu-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .hu-section-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #525252;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .hu-note {
+    font-size: 0.75rem;
+    color: #525252;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Race bars */
+  .race-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .race-candidate {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .race-info {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .race-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fafafa;
+  }
+
+  .race-leader {
+    font-size: 0.8125rem;
+    color: #525252;
+  }
+
+  .bar-track {
+    height: 2.5rem;
+    background: #171717;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    width: var(--pct);
+    display: flex;
+    align-items: center;
+    padding-left: 0.75rem;
+    border-radius: 0.5rem;
+    transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .bar-label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .tisza-bar { background: var(--tisza-color); }
+  .fidesz-bar { background: var(--fidesz-color); }
+  .mihazank-bar { background: #71717a; }
+
+  /* Scenarios */
+  .scenario-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .scenario-card {
+    display: flex;
+    background: #141414;
+    border: 1px solid #1f1f1f;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .scenario-card:hover {
+    border-color: var(--s-accent);
+  }
+
+  .scenario-bar {
+    width: 4px;
+    background: var(--s-accent);
+    flex-shrink: 0;
+  }
+
+  .scenario-content {
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .scenario-pct {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--s-accent);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .scenario-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fafafa;
+    margin: 0;
+  }
+
+  .scenario-desc {
+    font-size: 0.8125rem;
+    color: #737373;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    background: #141414;
+    border: 1px solid #1f1f1f;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #fafafa;
+    letter-spacing: -0.03em;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: #525252;
+    line-height: 1.4;
+  }
+
+  /* Divide */
+  .divide-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .divide-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .divide-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #a3a3a3;
+  }
+
+  .divide-bar {
+    display: flex;
+    gap: 0.25rem;
+    height: 1.75rem;
+    background: #171717;
+    border-radius: 0.375rem;
+    overflow: hidden;
+  }
+
+  .divide-fill {
+    width: var(--pct);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .divide-fill span {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+    padding: 0 0.5rem;
+  }
+
+  .tisza-fill { background: var(--tisza-color); }
+  .fidesz-fill { background: var(--fidesz-color); }
+
+  /* Closing */
+  .hu-closing {
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .closing-line {
+    width: 3rem;
+    height: 1px;
+    background: #2a2a2a;
+  }
+
+  .closing-quote {
+    font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+    font-weight: 700;
+    color: #d4d4d4;
+    font-style: italic;
+    margin: 0;
+    max-width: 32ch;
+    line-height: 1.4;
+  }
+
+  .closing-note {
+    font-size: 0.875rem;
+    color: #525252;
+    margin: 0;
+    line-height: 1.8;
+  }
+
+  /* Message */
+  .hu-message {
+    align-items: center;
+    text-align: center;
+    padding-top: 2rem;
+    gap: 1rem;
+  }
+
+  .message-text {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 900;
+    color: #fafafa;
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+
+  .message-sub {
+    font-size: 0.875rem;
+    color: #525252;
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  .message-link {
+    color: var(--tisza-color);
+    text-decoration: none;
+  }
+  .message-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Archive */
+  .archive-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .archive-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    background: #141414;
+    border: 1px solid #1f1f1f;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s;
+  }
+
+  .archive-card:hover {
+    border-color: var(--tisza-color);
+  }
+
+  .archive-date {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #525252;
+    font-weight: 600;
+  }
+
+  .archive-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fafafa;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .archive-desc {
+    font-size: 0.8125rem;
+    color: #737373;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .divide-fill span { font-size: 0.6rem; padding: 0 0.25rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

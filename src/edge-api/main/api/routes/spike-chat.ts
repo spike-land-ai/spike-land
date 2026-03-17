@@ -16,18 +16,17 @@ import { fetchToolCatalog } from "../../core-logic/mcp-tools.js";
 import { safeJsonParse, executeAgentTool } from "../../core-logic/chat-tool-execution.js";
 import {
   resolveSynthesisTarget,
+  resolveAllPlatformTargets,
   streamCompletion,
+  streamCompletionWithFallback,
   synthesizeCompletion,
   type ProviderMessage,
   type ResolvedSynthesisTarget,
 } from "../../core-logic/llm-provider.js";
 import { getRubik3SystemPrompt } from "../../core-logic/rubik-persona-prompt.js";
-import { getErdosPersonaPrompt } from "../../core-logic/erdos-persona-prompt.js";
-import { getRadixPersonaPrompt } from "../../core-logic/radix-persona-prompt.js";
-import { getGovPersonaPrompt } from "../../core-logic/gov-persona-prompt.js";
-import { getZoltanPersonaPrompt } from "../../core-logic/zoltan-persona-prompt.js";
 import { getArnoldPersonaPrompt } from "../../core-logic/arnold-persona-prompt.js";
-import { getDaftPunkPersonaPrompt } from "../../core-logic/daftpunk-persona-prompt.js";
+import { getZoltanMegaPersonaPrompt } from "../../core-logic/zoltan-persona-prompt.js";
+import { getPetiPersonaPrompt } from "../../core-logic/peti-persona-prompt.js";
 const spikeChat = new Hono<{ Bindings: Env; Variables: Variables }>();
 const MAX_TOOL_LOOPS = 3;
 const MAX_HISTORY_MESSAGES = 16;
@@ -347,6 +346,8 @@ async function streamLlmResponse(
       type: "function";
       function: { name: string; description: string; parameters: unknown };
     }>;
+    fallbackTargets?: ResolvedSynthesisTarget[];
+    db?: D1Database;
   },
 ): Promise<{ fullText: string; toolCalls: ParsedToolCall[] }> {
   const providerMessages: ProviderMessage[] = messages.map((m) => ({
@@ -354,11 +355,20 @@ async function streamLlmResponse(
     content: m.content ?? "",
   }));
 
-  const res = await streamCompletion(target, providerMessages, {
+  const streamOpts = {
     temperature: opts.temperature,
     maxTokens: opts.maxTokens,
     tools: opts.tools,
-  });
+  };
+
+  let res: Response;
+  if (opts.fallbackTargets && opts.fallbackTargets.length > 0) {
+    const allTargets = [target, ...opts.fallbackTargets.filter((t) => t.provider !== target.provider)];
+    const result = await streamCompletionWithFallback(allTargets, providerMessages, streamOpts, opts.db);
+    res = result.response;
+  } else {
+    res = await streamCompletion(target, providerMessages, streamOpts);
+  }
 
   const reader = res.body?.getReader();
   if (!reader) throw new Error("No response body from LLM provider");
@@ -549,6 +559,10 @@ spikeChat.post("/api/spike-chat", async (c) => {
     );
   }
 
+  // Resolve all available targets for fallback on provider failure
+  const allTargets = await resolveAllPlatformTargets(c.env, userId);
+  const fallbackTargets = allTargets.filter((t) => t.provider !== llmTarget.provider);
+
   // Load user memory
   const userNotes: UserMemory["notes"] = await fetchUserNotes(c.env.DB, userId).catch(
     (): UserMemory["notes"] => [],
@@ -581,24 +595,9 @@ spikeChat.post("/api/spike-chat", async (c) => {
     fullSystemPrompt = `${fullSystemPrompt}\n\n${getRubik3SystemPrompt()}`;
   }
 
-  // Merge Erdős persona prompt when requested
-  if (persona === "erdos") {
-    fullSystemPrompt = `${fullSystemPrompt}\n\n${getErdosPersonaPrompt()}`;
-  }
-
-  // Merge Radix persona prompt when requested
-  if (persona === "radix") {
-    fullSystemPrompt = `${fullSystemPrompt}\n\n${getRadixPersonaPrompt()}`;
-  }
-
-  // Merge Gov persona prompt when requested
-  if (persona === "gov") {
-    fullSystemPrompt = `${fullSystemPrompt}\n\n${getGovPersonaPrompt()}`;
-  }
-
-  // Merge Zoltán grounded-mirror persona when requested
-  if (persona === "zoltan") {
-    fullSystemPrompt = `${fullSystemPrompt}\n\n${getZoltanPersonaPrompt()}`;
+  // Zoltan mega-persona (also serves legacy slugs: erdos, radix, spike, gov, zoli)
+  if (["zoltan", "zoli", "daftpunk", "erdos", "radix", "spike", "gov"].includes(persona ?? "")) {
+    fullSystemPrompt = `${fullSystemPrompt}\n\n${getZoltanMegaPersonaPrompt()}`;
   }
 
   // Merge Arnold UX provocateur persona when requested
@@ -606,9 +605,9 @@ spikeChat.post("/api/spike-chat", async (c) => {
     fullSystemPrompt = `${fullSystemPrompt}\n\n${getArnoldPersonaPrompt()}`;
   }
 
-  // Merge Daft Punk music technologist persona when requested
-  if (persona === "daftpunk") {
-    fullSystemPrompt = `${fullSystemPrompt}\n\n${getDaftPunkPersonaPrompt()}`;
+  // Merge Peti QA engineer persona when requested
+  if (persona === "peti") {
+    fullSystemPrompt = `${fullSystemPrompt}\n\n${getPetiPersonaPrompt()}`;
   }
 
   const intentSummary = classifyIntent(userMessage, body.pageContext);
@@ -709,6 +708,8 @@ spikeChat.post("/api/spike-chat", async (c) => {
           temperature: 0.2,
           maxTokens: 4096,
           ...(intentSummary.needsTools ? { tools: SPIKE_AGENT_TOOLS } : {}),
+          fallbackTargets,
+          db: c.env.DB,
         });
 
         assistantResponse += iteration.fullText;

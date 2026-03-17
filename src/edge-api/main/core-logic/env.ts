@@ -46,6 +46,13 @@ export interface Env {
   SENTRY_TRACES_SAMPLE_RATE?: string;
   PRD_COMPRESSION_MODE?: string;
   PRD_COMPRESSION_EXPOSE?: string;
+  /**
+   * 32-byte (256-bit) random secret used to derive the AES-256-GCM key for
+   * encrypting donated API keys at rest in D1.
+   * Required for POST /v1/donate-token to function.
+   * Generate with: openssl rand -base64 32
+   */
+  TOKEN_ENCRYPTION_KEY?: string;
   ANALYTICS: AnalyticsEngineDataset;
   /** Set to "development" or "local" in dev wrangler config to enable draft posts */
   ENVIRONMENT?: string;

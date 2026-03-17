@@ -4,6 +4,7 @@ date: "2026-03-15"
 description: "A case study in AI-augmented identity — how a chemist with no coding background shipped three working apps and became the controlled reaction that proves the strange loop thesis."
 tags: ["strange-loops", "case-study", "ai-identity", "spike-land"]
 heroPrompt: "A chemist standing on Brighton beach at golden hour, pebbles and waves in the foreground, holding a glowing molecule diagram in one hand and a laptop showing code in the other, feedback loop spirals connecting them, cinematic warm lighting, photorealistic"
+heroImage: "/blog/notebooklm-gp-brighton/hero.png"
 ---
 
 # The Chemist in the Loop: How Gian Pierre Broke the Strange Loop Pattern

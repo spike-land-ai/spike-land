@@ -4,6 +4,7 @@ date: "2026-03-15"
 description: "3×3 Arena válaszok a hup.hu/node/189552 szálra: Radix, Erdős és Hofstadter három personája reagál nyolc hozzászólóra — AI, GDPR, strange loops, kognitív szabadság."
 tags: ["strange-loops", "hup-hu", "ai-identity", "gdpr", "hungarian"]
 heroPrompt: "Three chess players at an abstract arena table debating intensely, one synthesizing ideas (warm amber glow), one rigorous mathematician (cool blue light), one drawing analogies (purple spiral light), Hungarian flag colors in the background, dramatic chiaroscuro lighting, digital art"
+heroImage: "/blog/hup-hu-responses-189552/hero.png"
 ---
 
 # Responses to hup.hu/node/189552 — "Az AI önmaga foglyává vált"

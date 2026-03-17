@@ -52,9 +52,4 @@ export const SERVICE_PRODUCTS: Record<
     successPath: "/migrate?success=mcp",
     label: "Next.js Migration MCP Server",
   },
-  support_coffee: {
-    lookupKey: "support_coffee_500",
-    successPath: "/support?success=1",
-    label: "Support spike.land",
-  },
 };
