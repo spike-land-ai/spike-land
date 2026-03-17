@@ -1,39 +1,84 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import TrackPageView from '../components/TrackPageView.astro';
 ---
 
 <Layout
   title="QA Arena — spike.land"
-  description="Site health dashboard for spike.land"
+  description="Enter any URL. Get an instant health report — status, title, viewport, links, images, headings."
   noindex={true}
 >
+  <TrackPageView slot="head" />
 
   <div class="qa-shell">
     <main class="qa-main" id="main-content">
 
       <header class="qa-header">
         <h1 class="qa-title">QA Arena</h1>
-        <p class="qa-sub">spike.land site health dashboard</p>
+        <p class="qa-sub">Enter any URL. Get a health report.</p>
       </header>
 
-      <div class="qa-controls">
-        <button id="run-btn" class="qa-btn">Run All Tests</button>
-        <span id="summary" class="qa-summary"></span>
+      <form class="qa-form" id="qa-form" aria-label="URL health check">
+        <label for="url-input" class="sr-only">URL to check</label>
+        <input
+          id="url-input"
+          type="url"
+          class="qa-input"
+          placeholder="https://spike.land/pricing"
+          autocomplete="url"
+          spellcheck="false"
+          aria-required="true"
+        />
+        <button type="submit" id="check-btn" class="qa-btn" aria-label="Check URL">
+          Check
+        </button>
+      </form>
+
+      <div id="results-panel" class="qa-results" hidden aria-live="polite" aria-atomic="true">
+
+        <!-- Status row -->
+        <section class="result-card" id="card-status" aria-labelledby="lbl-status">
+          <div class="card-label" id="lbl-status">Status</div>
+          <div class="card-body" id="body-status"></div>
+        </section>
+
+        <!-- Title -->
+        <section class="result-card" id="card-title" aria-labelledby="lbl-title">
+          <div class="card-label" id="lbl-title">Title</div>
+          <div class="card-body" id="body-title"></div>
+        </section>
+
+        <!-- Viewport -->
+        <section class="result-card" id="card-viewport" aria-labelledby="lbl-viewport">
+          <div class="card-label" id="lbl-viewport">Viewport</div>
+          <div class="card-body" id="body-viewport"></div>
+        </section>
+
+        <!-- Links -->
+        <section class="result-card" id="card-links" aria-labelledby="lbl-links">
+          <div class="card-label" id="lbl-links">Links</div>
+          <div class="card-body" id="body-links"></div>
+          <details class="broken-list" id="broken-links-details" hidden>
+            <summary class="broken-summary">Show broken links</summary>
+            <ul class="broken-ul" id="broken-links-list" aria-label="Broken links"></ul>
+          </details>
+        </section>
+
+        <!-- Images -->
+        <section class="result-card" id="card-images" aria-labelledby="lbl-images">
+          <div class="card-label" id="lbl-images">Images</div>
+          <div class="card-body" id="body-images"></div>
+        </section>
+
+        <!-- Headings -->
+        <section class="result-card" id="card-headings" aria-labelledby="lbl-headings">
+          <div class="card-label" id="lbl-headings">Headings</div>
+          <div class="card-body" id="body-headings"></div>
+        </section>
+
       </div>
 
-      <div class="qa-table-wrap">
-        <table class="qa-table">
-          <thead>
-            <tr>
-              <th class="col-status">Status</th>
-              <th class="col-page">Page</th>
-              <th class="col-code">HTTP</th>
-              <th class="col-time">Time</th>
-            </tr>
-          </thead>
-          <tbody id="results"></tbody>
-        </table>
-      </div>
+      <div id="error-panel" class="qa-error" hidden role="alert"></div>
 
     </main>
   </div>
@@ -42,281 +87,590 @@ import Layout from '../layouts/Layout.astro';
 
 <script is:inline>
 (function () {
-  var PAGES = [
-    '/',
-    '/ai',
-    '/apps',
-    '/arnold',
-    '/blog',
-    '/erdos',
-    '/hu2026',
-    '/login',
-    '/peti',
-    '/pricing',
-    '/privacy',
-    '/radix',
-    '/spike',
-    '/zoltan',
-    '/tools',
-    '/callback',
-    '/apps/app-creator',
-    '/apps/codespace',
-    '/apps/ops-dash',
-    '/apps/qa-studio',
-    '/apps/spike-chat',
-    // Blog posts
-    '/blog/a-chemist-walked-into-a-codebase',
-    '/blog/ai-ab-testing-bug-detection',
-    '/blog/automate-dev-team-ai-agents',
-    '/blog/az-alkotas-szuroje',
-    '/blog/bugbook-elo-system',
-    '/blog/context-discipline-then-opus-got-1m',
-    '/blog/context-engineering-your-zero-shot-prompt',
-    '/blog/docker-layers-are-just-like-llm-context-caching',
-    '/blog/getting-started-spike-land',
-    '/blog/godspeed-development-100-app-ideas',
-    '/blog/hogyan-tervezi-a-claude-code-a-kontextust',
-    '/blog/how-claude-code-engineers-context',
-    '/blog/it-feels-like-cheating',
-    '/blog/living-with-adhd-the-rotating-pairs',
-    '/blog/mcp-apps-from-any-origin',
-    '/blog/mcp-explained-universal-adapter-for-ai-tools',
-    '/blog/nextjs-migration-service',
-    '/blog/nextjs-vs-tanstack-start',
-    '/blog/nextjs-vs-tanstack-start-appendix',
-    '/blog/one-site-many-faces',
-    '/blog/openai-compatible-endpoint-local-playground',
-    '/blog/sixteen-mathematicians-walked-into-a-loop',
-    '/blog/spike-land-app-store',
-    '/blog/spike-land-launch',
-    '/blog/strange-loops-statistical-selves-and-the-coming-identity-crisis',
-    '/blog/the-architecture-of-scale-building-tools',
-    '/blog/the-contact-proof',
-    '/blog/the-database-for-agents',
-    '/blog/the-grandmother-neuron-fallacy',
-    '/blog/the-prd-filter-old-chats-are-already-prds',
-    '/blog/the-predictor-already-moved',
-    '/blog/the-strange-loop-valued-at-ten-trillion',
-    '/blog/the-testing-pyramid-is-upside-down',
-    '/blog/the-two-boxes',
-    '/blog/the-universal-interface-wasnt-graphql',
-    '/blog/the-vibe-coding-paradox',
-    '/blog/think-slowly-ship-fast',
-    '/blog/what-i-learned-from-my-worst-pull-request',
-    '/blog/what-i-would-ship-in-claude-code',
-    '/blog/where-does-your-code-belong',
-    '/blog/why-spike-chat-stays-sharp',
-    '/blog/why-your-claude-agent-wastes-context-on-tool-descriptions',
-    '/blog/you-cannot-automate-chaos',
-  ];
+  'use strict';
 
-  var tbody = document.getElementById('results');
-  var runBtn = document.getElementById('run-btn');
-  var summary = document.getElementById('summary');
-  var BASE = 'https://spike.land';
+  var form      = document.getElementById('qa-form');
+  var input     = document.getElementById('url-input');
+  var btn       = document.getElementById('check-btn');
+  var results   = document.getElementById('results-panel');
+  var errPanel  = document.getElementById('error-panel');
 
-  function resetTable() {
-    tbody.innerHTML = '';
-    PAGES.forEach(function (p) {
-      var tr = document.createElement('tr');
-      tr.id = 'row-' + encodeURIComponent(p);
-      tr.innerHTML =
-        '<td class="col-status"><span class="dot dot-pending"></span></td>' +
-        '<td class="col-page"><a href="' + BASE + p + '" target="_blank" rel="noopener">' + p + '</a></td>' +
-        '<td class="col-code">-</td>' +
-        '<td class="col-time">-</td>';
-      tbody.appendChild(tr);
+  // ── helpers ────────────────────────────────────────────────────────────────
+
+  function pass(icon) { return '<span class="icon-pass" aria-label="pass">' + icon + '</span>'; }
+  function fail(icon) { return '<span class="icon-fail" aria-label="fail">' + icon + '</span>'; }
+  function checkmark() { return pass('&#10003;'); }
+  function cross()     { return fail('&#10007;'); }
+
+  function setText(id, html) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+
+  function showCard(id, visible) {
+    var el = document.getElementById(id);
+    if (el) el.hidden = !visible;
+  }
+
+  function showError(msg) {
+    errPanel.textContent = msg;
+    errPanel.hidden = false;
+    results.hidden = true;
+  }
+
+  function clearError() {
+    errPanel.hidden = true;
+    errPanel.textContent = '';
+  }
+
+  function setLoading(on) {
+    btn.disabled = on;
+    btn.textContent = on ? 'Checking...' : 'Check';
+  }
+
+  // ── normalise URL ──────────────────────────────────────────────────────────
+
+  function normaliseUrl(raw) {
+    var s = raw.trim();
+    if (!s) return null;
+    if (!/^https?:\/\//i.test(s)) s = 'https://' + s;
+    try { return new URL(s).href; }
+    catch (e) { return null; }
+  }
+
+  // ── render results ─────────────────────────────────────────────────────────
+
+  function renderResults(data) {
+    // -- Status --
+    var statusOk = data.status >= 200 && data.status < 400;
+    var statusIcon = statusOk ? checkmark() : cross();
+    var statusColor = statusOk ? 'val-pass' : 'val-fail';
+    setText('body-status',
+      statusIcon +
+      ' <span class="' + statusColor + '">' + data.status + '</span>' +
+      ' <span class="val-dim">' + data.statusText + '</span>' +
+      ' <span class="val-dim">&mdash; ' + data.responseTime + 'ms</span>'
+    );
+
+    // -- Title --
+    if (data.title) {
+      setText('body-title', checkmark() + ' <span class="val-text">' + escHtml(data.title) + '</span>');
+    } else {
+      setText('body-title', cross() + ' <span class="val-fail">Missing</span>');
+    }
+
+    // -- Viewport --
+    if (data.viewport) {
+      setText('body-viewport', checkmark() + ' <code class="val-code">' + escHtml(data.viewport) + '</code>');
+    } else {
+      setText('body-viewport', cross() + ' <span class="val-fail">Missing &lt;meta name="viewport"&gt;</span>');
+    }
+
+    // -- Links --
+    var brokenCount = data.brokenLinks ? data.brokenLinks.length : 0;
+    var linksIcon = brokenCount === 0 ? checkmark() : cross();
+    var linksColor = brokenCount === 0 ? 'val-pass' : 'val-fail';
+    setText('body-links',
+      linksIcon +
+      ' <span class="val-text">' + (data.totalLinks || 0) + ' total</span>' +
+      ' &mdash; <span class="' + linksColor + '">' + brokenCount + ' broken</span>'
+    );
+
+    var details = document.getElementById('broken-links-details');
+    var list    = document.getElementById('broken-links-list');
+    if (brokenCount > 0 && details && list) {
+      list.innerHTML = '';
+      data.brokenLinks.forEach(function (item) {
+        var li = document.createElement('li');
+        li.innerHTML =
+          '<span class="broken-code">' + item.status + '</span>' +
+          ' <a href="' + escAttr(item.href) + '" target="_blank" rel="noopener noreferrer" class="broken-href">' +
+          escHtml(item.href) + '</a>';
+        list.appendChild(li);
+      });
+      details.hidden = false;
+    } else if (details) {
+      details.hidden = true;
+    }
+
+    // -- Images --
+    var totalImgs = data.totalImages || 0;
+    var altCount  = data.imagesWithAlt || 0;
+    var pct       = totalImgs > 0 ? Math.round((altCount / totalImgs) * 100) : 100;
+    var imgIcon   = (totalImgs === 0 || pct === 100) ? checkmark() : (pct >= 80 ? pass('&#9888;') : cross());
+    setText('body-images',
+      imgIcon +
+      ' <span class="val-text">' + totalImgs + ' total</span>' +
+      ' &mdash; <span class="val-text">' + altCount + ' with alt</span>' +
+      ' <span class="val-dim">(' + pct + '%)</span>'
+    );
+
+    // -- Headings --
+    var headingsHtml = '';
+    if (data.headings && data.headings.length > 0) {
+      headingsHtml = data.headings.map(function (h) {
+        return '<span class="h-tag">' + escHtml(h.tag) + '</span>' +
+               '<span class="h-text">' + escHtml(h.text) + '</span>';
+      }).join('<br>');
+    } else {
+      headingsHtml = cross() + ' <span class="val-fail">No headings found</span>';
+    }
+    setText('body-headings', headingsHtml);
+
+    results.hidden = false;
+  }
+
+  // ── escape helpers ─────────────────────────────────────────────────────────
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function escAttr(s) {
+    return String(s).replace(/"/g, '&quot;');
+  }
+
+  // ── fetch + parse ──────────────────────────────────────────────────────────
+
+  function parseHtml(html, url) {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(html, 'text/html');
+
+    // Title
+    var titleEl = doc.querySelector('title');
+    var title = titleEl ? titleEl.textContent.trim() : '';
+
+    // Viewport
+    var vpEl = doc.querySelector('meta[name="viewport"]');
+    var viewport = vpEl ? vpEl.getAttribute('content') : null;
+
+    // Links — collect unique hrefs
+    var anchors = doc.querySelectorAll('a[href]');
+    var origin;
+    try { origin = new URL(url).origin; } catch (e) { origin = ''; }
+
+    var seen = {};
+    var allLinks = [];
+    for (var i = 0; i < anchors.length; i++) {
+      var raw = anchors[i].getAttribute('href');
+      if (!raw || raw.charAt(0) === '#' || raw.indexOf('mailto:') === 0 || raw.indexOf('tel:') === 0) continue;
+      var abs;
+      try { abs = new URL(raw, url).href; } catch (e) { continue; }
+      if (!seen[abs]) { seen[abs] = true; allLinks.push(abs); }
+    }
+
+    // Images
+    var imgs = doc.querySelectorAll('img');
+    var totalImages = imgs.length;
+    var imagesWithAlt = 0;
+    for (var j = 0; j < imgs.length; j++) {
+      if (imgs[j].hasAttribute('alt')) imagesWithAlt++;
+    }
+
+    // Headings (first 10)
+    var headingEls = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    var headings = [];
+    var maxH = Math.min(headingEls.length, 10);
+    for (var k = 0; k < maxH; k++) {
+      headings.push({
+        tag: headingEls[k].tagName.toLowerCase(),
+        text: headingEls[k].textContent.trim().slice(0, 80),
+      });
+    }
+
+    return { title: title, viewport: viewport, allLinks: allLinks, totalImages: totalImages, imagesWithAlt: imagesWithAlt, headings: headings };
+  }
+
+  async function checkLinks(links, pageOrigin) {
+    // Only check same-origin links to avoid CORS issues (max 20)
+    var candidates = links.filter(function (l) {
+      try { return new URL(l).origin === pageOrigin; } catch (e) { return false; }
+    }).slice(0, 20);
+
+    if (candidates.length === 0) return { total: links.length, broken: [] };
+
+    var broken = [];
+    var batchSize = 5;
+    for (var i = 0; i < candidates.length; i += batchSize) {
+      var batch = candidates.slice(i, i + batchSize);
+      var checks = batch.map(async function (href) {
+        try {
+          var r = await fetch(href, { method: 'HEAD', mode: 'cors', cache: 'no-store', redirect: 'follow' });
+          if (!r.ok) return { href: href, status: r.status };
+        } catch (e) {
+          return { href: href, status: 'ERR' };
+        }
+        return null;
+      });
+      var res = await Promise.all(checks);
+      res.forEach(function (r) { if (r) broken.push(r); });
+    }
+
+    return { total: links.length, broken: broken };
+  }
+
+  async function runCheck(rawUrl) {
+    var url = normaliseUrl(rawUrl);
+    if (!url) { showError('Please enter a valid URL.'); return; }
+
+    clearError();
+    setLoading(true);
+    results.hidden = true;
+
+    var t0 = performance.now();
+    var proxyUrl = '/qa/check?url=' + encodeURIComponent(url);
+
+    var htmlBody = null;
+    var status = 0;
+    var statusText = '';
+    var responseTime = 0;
+
+    try {
+      // Try proxy first; fall back to direct fetch (works for same-origin or permissive CORS)
+      var res;
+      try {
+        res = await fetch(proxyUrl, { cache: 'no-store' });
+        status = res.status;
+        statusText = res.statusText;
+        responseTime = Math.round(performance.now() - t0);
+        if (res.ok) {
+          var ct = res.headers.get('content-type') || '';
+          if (ct.indexOf('html') !== -1) htmlBody = await res.text();
+        }
+      } catch (_proxyErr) {
+        // Proxy not available — try direct
+        var direct = await fetch(url, { cache: 'no-store', mode: 'cors' });
+        status = direct.status;
+        statusText = direct.statusText;
+        responseTime = Math.round(performance.now() - t0);
+        if (direct.ok) {
+          var dct = direct.headers.get('content-type') || '';
+          if (dct.indexOf('html') !== -1) htmlBody = await direct.text();
+        }
+      }
+    } catch (fetchErr) {
+      setLoading(false);
+      showError('Could not reach that URL. Check the address and try again. (' + fetchErr.message + ')');
+      return;
+    }
+
+    var parsed = { title: '', viewport: null, allLinks: [], totalImages: 0, imagesWithAlt: 0, headings: [] };
+    if (htmlBody) {
+      try { parsed = parseHtml(htmlBody, url); } catch (_) { /* best effort */ }
+    }
+
+    // Check links
+    var origin;
+    try { origin = new URL(url).origin; } catch (e) { origin = ''; }
+    var linksResult = { total: parsed.allLinks.length, broken: [] };
+    if (htmlBody && parsed.allLinks.length > 0) {
+      try { linksResult = await checkLinks(parsed.allLinks, origin); } catch (_) { /* best effort */ }
+    }
+
+    setLoading(false);
+
+    renderResults({
+      status: status,
+      statusText: statusText,
+      responseTime: responseTime,
+      title: parsed.title,
+      viewport: parsed.viewport,
+      totalLinks: linksResult.total,
+      brokenLinks: linksResult.broken,
+      totalImages: parsed.totalImages,
+      imagesWithAlt: parsed.imagesWithAlt,
+      headings: parsed.headings,
     });
   }
 
-  function updateRow(path, status, code, time) {
-    var tr = document.getElementById('row-' + encodeURIComponent(path));
-    if (!tr) return;
-    var cells = tr.children;
-    var dot = cells[0].querySelector('.dot');
-    dot.className = 'dot dot-' + status;
-    cells[2].textContent = code;
-    cells[3].textContent = time;
-    if (status === 'fail') tr.classList.add('row-fail');
-    else if (status === 'slow') tr.classList.add('row-slow');
-  }
+  // ── submit ─────────────────────────────────────────────────────────────────
 
-  async function checkPage(path) {
-    var t0 = performance.now();
-    try {
-      var res = await fetch(BASE + path, { method: 'HEAD', mode: 'cors', cache: 'no-store' });
-      var ms = Math.round(performance.now() - t0);
-      var timeStr = ms + 'ms';
-      if (!res.ok) {
-        updateRow(path, 'fail', res.status, timeStr);
-        return { ok: false, slow: false };
-      }
-      var slow = ms > 2000;
-      updateRow(path, slow ? 'slow' : 'pass', res.status, timeStr);
-      return { ok: true, slow: slow };
-    } catch (e) {
-      var ms2 = Math.round(performance.now() - t0);
-      updateRow(path, 'fail', 'ERR', ms2 + 'ms');
-      return { ok: false, slow: false };
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var val = input.value.trim();
+    if (!val) { input.focus(); return; }
+    runCheck(val);
+  });
+
+  // Allow Enter on input
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      form.dispatchEvent(new Event('submit'));
     }
-  }
+  });
 
-  async function runAll() {
-    runBtn.disabled = true;
-    runBtn.textContent = 'Running...';
-    summary.textContent = '';
-    resetTable();
+  // Pre-fill from ?url= query param
+  try {
+    var qp = new URLSearchParams(location.search).get('url');
+    if (qp) { input.value = qp; runCheck(qp); }
+  } catch (_) {}
 
-    var pass = 0, fail = 0, slow = 0;
-    // Run in batches of 6 for speed without overwhelming
-    for (var i = 0; i < PAGES.length; i += 6) {
-      var batch = PAGES.slice(i, i + 6);
-      var results = await Promise.all(batch.map(checkPage));
-      results.forEach(function (r) {
-        if (!r.ok) fail++;
-        else if (r.slow) slow++;
-        else pass++;
-      });
-      summary.textContent = pass + ' pass / ' + fail + ' fail / ' + slow + ' slow (' + (pass + fail + slow) + '/' + PAGES.length + ')';
-    }
-
-    runBtn.disabled = false;
-    runBtn.textContent = 'Run All Tests';
-    summary.className = 'qa-summary ' + (fail > 0 ? 'summary-fail' : 'summary-pass');
-  }
-
-  resetTable();
-  runBtn.addEventListener('click', runAll);
 })();
 </script>
 
 <style>
+  /* ─── Reset & Shell ──────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
   .qa-shell {
     min-height: 100svh;
     background: #0a0a0a;
     color: #e5e5e5;
-    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Menlo, monospace;
+    font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', Menlo, Consolas, monospace;
   }
 
+  /* ─── Layout ─────────────────────────────────────────────────────────── */
   .qa-main {
-    max-width: 64rem;
+    max-width: 44rem;
     margin: 0 auto;
-    padding: clamp(1.5rem, 4vw, 3rem) 1rem;
+    padding: clamp(2rem, 5vw, 4rem) 1rem clamp(3rem, 6vw, 5rem);
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
   }
 
-  .qa-header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
+  /* ─── Header ─────────────────────────────────────────────────────────── */
+  .qa-header { display: flex; flex-direction: column; gap: 0.35rem; }
 
   .qa-title {
-    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
     font-weight: 800;
     color: #fafafa;
     margin: 0;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
   }
 
   .qa-sub {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     color: #525252;
     margin: 0;
   }
 
-  .qa-controls {
+  /* ─── Form ───────────────────────────────────────────────────────────── */
+  .qa-form {
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
   }
 
+  .qa-input {
+    flex: 1 1 14rem;
+    min-width: 0;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 0.5rem;
+    color: #fafafa;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    padding: 0.625rem 0.875rem;
+    min-height: 48px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .qa-input::placeholder { color: #404040; }
+  .qa-input:focus { border-color: #10b981; }
+
   .qa-btn {
-    background: #22c55e;
+    background: #10b981;
     color: #0a0a0a;
     border: none;
-    padding: 0.5rem 1.25rem;
-    border-radius: 0.375rem;
-    font-size: 0.875rem;
-    font-weight: 700;
+    border-radius: 0.5rem;
+    padding: 0.625rem 1.5rem;
+    min-height: 48px;
     font-family: inherit;
+    font-size: 0.9375rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: opacity 0.15s;
+    transition: background 0.15s, opacity 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .qa-btn:hover:not(:disabled) { background: #059669; }
+  .qa-btn:disabled { opacity: 0.5; cursor: wait; }
+
+  /* ─── Error ──────────────────────────────────────────────────────────── */
+  .qa-error {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 0.5rem;
+    color: #f87171;
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
   }
 
-  .qa-btn:hover { opacity: 0.85; }
-  .qa-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .qa-summary {
-    font-size: 0.8125rem;
-    color: #a3a3a3;
+  /* ─── Result cards ───────────────────────────────────────────────────── */
+  .qa-results {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
-  .summary-pass { color: #22c55e; }
-  .summary-fail { color: #ef4444; }
-
-  .qa-table-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+  .result-card {
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 0.625rem;
+    padding: 0.75rem 1rem;
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: 0.25rem 0.75rem;
+    align-items: start;
   }
 
-  .qa-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.8125rem;
-  }
-
-  .qa-table th {
-    text-align: left;
+  .card-label {
     font-size: 0.6875rem;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: #525252;
-    font-weight: 600;
-    padding: 0.5rem 0.75rem;
-    border-bottom: 1px solid #1f1f1f;
+    padding-top: 0.125rem;
     white-space: nowrap;
   }
 
-  .qa-table td {
-    padding: 0.375rem 0.75rem;
-    border-bottom: 1px solid #141414;
-    white-space: nowrap;
+  .card-body {
+    font-size: 0.875rem;
+    color: #d4d4d4;
+    line-height: 1.6;
+    word-break: break-word;
+    min-width: 0;
   }
 
-  .col-status { width: 3rem; text-align: center; }
-  .col-code { width: 4rem; }
-  .col-time { width: 5rem; }
-
-  .qa-table a {
-    color: #a3a3a3;
-    text-decoration: none;
-  }
-  .qa-table a:hover {
-    color: #fafafa;
-    text-decoration: underline;
-  }
-
-  .row-fail td { background: rgba(239, 68, 68, 0.06); }
-  .row-slow td { background: rgba(251, 191, 36, 0.06); }
-
-  .dot {
-    display: inline-block;
-    width: 0.625rem;
-    height: 0.625rem;
+  /* ─── Icons ──────────────────────────────────────────────────────────── */
+  .icon-pass {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    background: #10b981;
+    color: #0a0a0a;
     border-radius: 50%;
+    font-size: 0.625rem;
+    font-weight: 900;
+    vertical-align: middle;
+    margin-right: 0.25rem;
+    flex-shrink: 0;
   }
 
-  .dot-pending { background: #333; }
-  .dot-pass { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, 0.4); }
-  .dot-fail { background: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); }
-  .dot-slow { background: #fbbf24; box-shadow: 0 0 6px rgba(251, 191, 36, 0.4); }
+  .icon-fail {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    background: #ef4444;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 0.625rem;
+    font-weight: 900;
+    vertical-align: middle;
+    margin-right: 0.25rem;
+    flex-shrink: 0;
+  }
 
+  /* ─── Value types ────────────────────────────────────────────────────── */
+  .val-pass  { color: #10b981; font-weight: 600; }
+  .val-fail  { color: #ef4444; font-weight: 600; }
+  .val-dim   { color: #525252; }
+  .val-text  { color: #d4d4d4; }
+
+  .val-code {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 0.25rem;
+    padding: 0.1em 0.4em;
+    font-size: 0.8125rem;
+    font-family: inherit;
+    word-break: break-all;
+  }
+
+  /* ─── Headings tree ──────────────────────────────────────────────────── */
+  .h-tag {
+    display: inline-block;
+    width: 2rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #10b981;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .h-text {
+    color: #a3a3a3;
+    font-size: 0.8125rem;
+  }
+
+  /* ─── Broken links list ──────────────────────────────────────────────── */
+  .broken-list {
+    grid-column: 1 / -1;
+    margin-top: 0.5rem;
+  }
+
+  .broken-summary {
+    font-size: 0.75rem;
+    color: #737373;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+  .broken-summary::-webkit-details-marker { display: none; }
+  .broken-summary::before { content: '+ '; color: #ef4444; }
+  details[open] .broken-summary::before { content: '- '; }
+
+  .broken-ul {
+    list-style: none;
+    padding: 0.5rem 0 0 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-height: 14rem;
+    overflow-y: auto;
+  }
+
+  .broken-ul li {
+    font-size: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+  }
+
+  .broken-code {
+    color: #ef4444;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .broken-href {
+    color: #737373;
+    text-decoration: none;
+    word-break: break-all;
+  }
+  .broken-href:hover { color: #fafafa; text-decoration: underline; }
+
+  /* ─── Responsive ─────────────────────────────────────────────────────── */
   @media (max-width: 480px) {
-    .qa-table { font-size: 0.75rem; }
-    .qa-table td, .qa-table th { padding: 0.3rem 0.5rem; }
+    .result-card {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+    .broken-list { margin-top: 0.375rem; }
+    .qa-form { flex-direction: column; }
+    .qa-btn { width: 100%; }
+  }
+
+  @media (max-width: 320px) {
+    .qa-main { padding: 1.25rem 0.75rem 3rem; }
+    .qa-title { font-size: 1.5rem; }
   }
 </style>
