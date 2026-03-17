@@ -1,6 +1,17 @@
 /**
  * AES-256-GCM encryption for donated API keys.
  *
+ * Two usage patterns are provided:
+ *
+ * Pattern A — base64 master key (TOKEN_BANK_KEY, 32-byte random secret):
+ *   importMasterKey(base64Key) -> CryptoKey
+ *   encryptToken(plaintext, masterKey) -> base64(iv + ciphertext)
+ *   decryptToken(stored, masterKey) -> plaintext
+ *
+ * Pattern B — PBKDF2 derivation from arbitrary secret string (TOKEN_ENCRYPTION_KEY):
+ *   encryptApiKey(plaintext, secret) -> base64(iv + ciphertext)
+ *   decryptApiKey(encrypted, secret) -> plaintext
+ *
  * Security properties:
  * - AES-256-GCM provides authenticated encryption (confidentiality + integrity)
  * - Each encrypt() call generates a unique random 12-byte IV (never reused)
@@ -142,4 +153,68 @@ export async function decryptApiKey(encrypted: string, secret: string): Promise<
 export function isEncryptedBlob(value: string): boolean {
   if (value.length < 28) return false;
   return /^[A-Za-z0-9+/]+=*$/.test(value);
+}
+
+// ── Pattern A: base64 master key (TOKEN_BANK_KEY) ────────────────────
+
+/**
+ * Import a 32-byte base64-encoded master key as an AES-256-GCM CryptoKey.
+ * Use with TOKEN_BANK_KEY: a 256-bit random secret stored as a Worker secret.
+ * Generate with: openssl rand -base64 32
+ */
+export async function importMasterKey(base64Key: string): Promise<CryptoKey> {
+  const raw = Uint8Array.from(atob(base64Key), (c) => c.charCodeAt(0));
+  return crypto.subtle.importKey("raw", raw, { name: "AES-GCM", length: 256 }, false, [
+    "encrypt",
+    "decrypt",
+  ]);
+}
+
+/**
+ * Encrypt a plaintext string with the given AES-256-GCM CryptoKey.
+ * Generates a fresh 12-byte random IV per call.
+ *
+ * @returns base64(iv || ciphertext+tag)
+ */
+export async function encryptToken(plaintext: string, masterKey: CryptoKey): Promise<string> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(plaintext);
+  const cipherBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, masterKey, encoded);
+
+  const combined = new Uint8Array(12 + cipherBuffer.byteLength);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(cipherBuffer), 12);
+
+  return btoa(String.fromCharCode(...combined));
+}
+
+/**
+ * Decrypt a blob produced by encryptToken().
+ *
+ * @param stored  base64(iv || ciphertext+tag)
+ * @throws        If the ciphertext is tampered or the wrong key is used.
+ */
+export async function decryptToken(stored: string, masterKey: CryptoKey): Promise<string> {
+  let combined: Uint8Array;
+  try {
+    combined = Uint8Array.from(atob(stored), (c) => c.charCodeAt(0));
+  } catch {
+    throw new Error("token_decryption_failed: invalid base64");
+  }
+
+  if (combined.byteLength < 12 + 16) {
+    throw new Error("token_decryption_failed: ciphertext too short");
+  }
+
+  const iv = combined.slice(0, 12);
+  const ciphertext = combined.slice(12);
+
+  let plainBuffer: ArrayBuffer;
+  try {
+    plainBuffer = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, masterKey, ciphertext);
+  } catch {
+    throw new Error("token_decryption_failed: authentication failed");
+  }
+
+  return new TextDecoder().decode(plainBuffer);
 }

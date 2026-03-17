@@ -1,0 +1,138 @@
+---
+import { getCollection } from 'astro:content';
+import RadixChat from '../../components/react/radix-chat/RadixChat.tsx';
+import TrackPageView from '../../components/TrackPageView.astro';
+
+const KNOWN_TOPICS = [
+  { slug: 'physics',              persona: 'einstein',  title: 'Physics' },
+  { slug: 'mathematics',          persona: 'erdos',     title: 'Mathematics' },
+  { slug: 'music-production',     persona: 'daftpunk',  title: 'Music Production' },
+  { slug: 'building-apps',        persona: 'gp',        title: 'Building Apps' },
+  { slug: 'backend-architecture', persona: 'raju',      title: 'Backend Architecture' },
+  { slug: 'ux-design',            persona: 'arnold',    title: 'UX Design' },
+  { slug: 'testing',              persona: 'peti',      title: 'Testing' },
+  { slug: 'strange-loops',        persona: 'zoltan',    title: 'Strange Loops' },
+] as const;
+
+function personaFromTags(tags: string[], author: string): string {
+  const t = tags.map((s) => s.toLowerCase());
+  const a = author.toLowerCase();
+  if (t.includes('physics') || a.includes('einstein')) return 'einstein';
+  if (t.includes('mathematics') || t.includes('math')) return 'erdos';
+  if (t.includes('music')) return 'daftpunk';
+  if (t.includes('building') || a.includes('gp')) return 'gp';
+  if (t.includes('backend') || t.includes('infrastructure')) return 'raju';
+  if (t.includes('ux') || t.includes('design')) return 'arnold';
+  if (t.includes('testing') || t.includes('qa')) return 'peti';
+  return 'zoltan';
+}
+
+export async function getStaticPaths() {
+  const topicSlugs = new Set(KNOWN_TOPICS.map((t) => t.slug));
+
+  const topicPaths = KNOWN_TOPICS.map((t) => ({
+    params: { slug: t.slug },
+    props: { title: t.title, persona: t.persona },
+  }));
+
+  const allPosts = await getCollection('blog');
+  const blogPaths = allPosts
+    .filter((post) => !topicSlugs.has(post.id))
+    .map((post) => {
+      const tags = post.data.tags ?? [];
+      const author = post.data.author ?? '';
+      return {
+        params: { slug: post.id },
+        props: {
+          title: post.data.title,
+          persona: personaFromTags(tags, author),
+        },
+      };
+    });
+
+  return [...topicPaths, ...blogPaths];
+}
+
+interface Props {
+  title: string;
+  persona: string;
+}
+
+const { title, persona } = Astro.props;
+
+const PERSONA_ACCENTS: Record<string, string> = {
+  einstein:  '#78716c',
+  erdos:     '#4f46e5',
+  daftpunk:  '#7c3aed',
+  gp:        '#ea580c',
+  raju:      '#0891b2',
+  arnold:    '#e11d48',
+  peti:      '#22c55e',
+  zoltan:    '#d97706',
+};
+
+const accent = PERSONA_ACCENTS[persona] ?? '#d97706';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} — Learning Arena — spike.land</title>
+    <meta name="description" content={`Learn about ${title} in a live conversation.`} />
+    <meta name="theme-color" content={accent} />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; overflow: hidden; -webkit-text-size-adjust: 100%; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        display: flex;
+        flex-direction: column;
+      }
+      .topic-bar {
+        flex-shrink: 0;
+        background: #0a0a0a;
+        border-bottom: 1px solid #1e1e1e;
+        padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+      }
+      .topic-back {
+        color: #525252;
+        text-decoration: none;
+        font-family: 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 0.75rem;
+        transition: color 0.15s;
+        flex-shrink: 0;
+      }
+      .topic-back:hover { color: #e5e5e5; }
+      .topic-sep { color: #2a2a2a; font-size: 0.75rem; flex-shrink: 0; }
+      .topic-label {
+        font-family: 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--accent);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+      }
+      .chat-wrap { flex: 1; overflow: hidden; min-height: 0; }
+    </style>
+    <TrackPageView />
+  </head>
+  <body style={`--accent: ${accent}`}>
+    <nav class="topic-bar" aria-label="Breadcrumb">
+      <a class="topic-back" href="/learn">&#8592; Learn</a>
+      <span class="topic-sep" aria-hidden="true">/</span>
+      <span class="topic-label">{title}</span>
+    </nav>
+    <div class="chat-wrap">
+      <RadixChat client:only="react" persona={persona} />
+    </div>
+  </body>
+</html>

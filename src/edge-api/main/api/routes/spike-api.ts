@@ -29,8 +29,14 @@ import {
 } from "../../core-logic/llm-provider.js";
 import { getBalance, deductCredit } from "../../core-logic/credit-service.js";
 import { resolveEffectiveTier } from "../../core-logic/tier-service.js";
-import { encryptApiKey } from "../../core-logic/token-encryption.js";
-import { validateDonatedKey, isDonatedProvider } from "../../core-logic/token-validation.js";
+import { encryptApiKey, importMasterKey, encryptToken } from "../../core-logic/token-encryption.js";
+import {
+  validateDonatedKey,
+  isDonatedProvider,
+  detectProvider,
+  validateToken,
+  type TokenProvider,
+} from "../../core-logic/token-validation.js";
 
 const log = createLogger("spike-api");
 
@@ -376,12 +382,13 @@ spikeApi.post("/v1/donate-token", async (c) => {
   const userId = c.get("userId") as string | undefined;
   if (!userId) return c.json({ error: "auth_required" }, 401);
 
-  // Encryption key must be provisioned before this endpoint can accept keys
-  const encryptionSecret = (c.env as unknown as Record<string, string | undefined>)[
-    "TOKEN_ENCRYPTION_KEY"
-  ];
+  // Prefer TOKEN_BANK_KEY (base64 master key); fall back to TOKEN_ENCRYPTION_KEY
+  // for backwards compatibility with existing encrypted rows.
+  const env = c.env as unknown as Record<string, string | undefined>;
+  const tokenBankKey = env["TOKEN_BANK_KEY"];
+  const encryptionSecret = tokenBankKey ?? env["TOKEN_ENCRYPTION_KEY"];
   if (!encryptionSecret) {
-    log.error("TOKEN_ENCRYPTION_KEY is not configured — donate-token disabled");
+    log.error("TOKEN_BANK_KEY is not configured — donate-token disabled");
     return c.json({ error: "service_unavailable" }, 503);
   }
 
@@ -392,28 +399,76 @@ spikeApi.post("/v1/donate-token", async (c) => {
     return c.json({ error: "invalid_json" }, 400);
   }
 
-  const provider = body.provider?.trim().toLowerCase();
   const apiKey = body.api_key?.trim();
-
-  if (!provider || !apiKey) {
-    return c.json({ error: "provider and api_key are required" }, 400);
+  if (!apiKey) {
+    return c.json({ error: "api_key is required" }, 400);
   }
 
-  if (!isDonatedProvider(provider)) {
-    return c.json({ error: `provider must be one of: openai, anthropic, google, xai` }, 400);
+  // Auto-detect provider from key prefix if not supplied
+  let provider: string | null = body.provider?.trim().toLowerCase() ?? null;
+  if (!provider) {
+    provider = detectProvider(apiKey) as TokenProvider | null;
   }
 
-  // ── Step 1: Validate the key against the upstream provider ──────────
-  // This is intentionally done BEFORE any DB write or credit grant.
-  // network_error is treated as "unknown" — we do not reject keys when our
-  // own outbound network is having problems, but we also do not credit the
-  // donor until the key is confirmed on the next successful call.
+  if (!provider) {
+    return c.json(
+      {
+        error: "unknown_provider",
+        message:
+          "Could not detect provider from key prefix. Pass provider explicitly: openai, anthropic, google, xai, deepseek, or mistral.",
+      },
+      400,
+    );
+  }
 
-  const validation = await validateDonatedKey(provider, apiKey);
+  const validProviders: readonly string[] = [
+    "openai",
+    "anthropic",
+    "google",
+    "xai",
+    "deepseek",
+    "mistral",
+  ];
+  if (!validProviders.includes(provider)) {
+    return c.json({ error: `provider must be one of: ${validProviders.join(", ")}` }, 400);
+  }
 
-  if (!validation.valid) {
-    if (validation.error === "network_error") {
-      // Cannot confirm — fail safe: do not store an unverified key
+  // ── Step 1: SHA-256 hash for duplicate detection ─────────────────────
+  // We never store the plaintext key or query by it. Instead we store a
+  // SHA-256 hash (hex) of the key so we can detect if the same key is
+  // donated twice, without ever revealing the key itself.
+  const keyHashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(apiKey));
+  const keyHash = Array.from(new Uint8Array(keyHashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  // Check for duplicate before hitting the provider
+  try {
+    const existing = await c.env.DB.prepare(
+      "SELECT id FROM donated_tokens WHERE provider = ? AND key_hash = ? LIMIT 1",
+    )
+      .bind(provider, keyHash)
+      .first<{ id: string }>();
+
+    if (existing) {
+      return c.json({ error: "duplicate_key", message: "This key is already in the pool." }, 409);
+    }
+  } catch {
+    // key_hash column may not exist yet (pre-migration) — proceed without check
+  }
+
+  // ── Step 2: Validate the key against the upstream provider ──────────
+  const validation = isDonatedProvider(provider)
+    ? await validateDonatedKey(provider, apiKey)
+    : await validateToken(apiKey, provider as TokenProvider);
+
+  const validationValid = isDonatedProvider(provider)
+    ? (validation as { valid: boolean }).valid
+    : (validation as { valid: boolean }).valid;
+  const validationError = (validation as { error?: string }).error;
+
+  if (!validationValid) {
+    if (validationError === "network_error") {
       return c.json(
         {
           error: "validation_unavailable",
@@ -422,8 +477,6 @@ spikeApi.post("/v1/donate-token", async (c) => {
         503,
       );
     }
-    // The provider rejected the key — do not reveal which exact check failed
-    // to avoid giving an attacker an oracle for key-format guessing
     return c.json(
       {
         error: "invalid_key",
@@ -433,33 +486,48 @@ spikeApi.post("/v1/donate-token", async (c) => {
     );
   }
 
-  // ── Step 2: Encrypt the key before writing to D1 ────────────────────
+  // ── Step 3: Encrypt the key before writing to D1 ────────────────────
   let encryptedKey: string;
   try {
-    encryptedKey = await encryptApiKey(apiKey, encryptionSecret);
+    if (tokenBankKey) {
+      const masterKey = await importMasterKey(tokenBankKey);
+      encryptedKey = await encryptToken(apiKey, masterKey);
+    } else {
+      encryptedKey = await encryptApiKey(apiKey, encryptionSecret);
+    }
   } catch (err) {
     log.error("Failed to encrypt donated key", { provider, error: String(err) });
     return c.json({ error: "internal_error" }, 500);
   }
 
-  // ── Step 3: Persist the encrypted key ───────────────────────────────
+  // ── Step 4: Persist the encrypted key ───────────────────────────────
   const id = crypto.randomUUID();
   const now = Date.now();
 
   try {
     await c.env.DB.prepare(
       `INSERT INTO donated_tokens
-         (id, donor_user_id, provider, encrypted_key, donated_at, active, total_calls)
-       VALUES (?, ?, ?, ?, ?, 1, 0)`,
+         (id, donor_user_id, provider, encrypted_key, key_hash, donated_at, active, total_calls)
+       VALUES (?, ?, ?, ?, ?, ?, 1, 0)`,
     )
-      .bind(id, userId, provider, encryptedKey, now)
+      .bind(id, userId, provider, encryptedKey, keyHash, now)
       .run();
   } catch {
-    return c.json({ error: "Failed to store token. Table may not be set up yet." }, 500);
+    // Fall back to insert without key_hash if the column doesn't exist yet
+    try {
+      await c.env.DB.prepare(
+        `INSERT INTO donated_tokens
+           (id, donor_user_id, provider, encrypted_key, donated_at, active, total_calls)
+         VALUES (?, ?, ?, ?, ?, 1, 0)`,
+      )
+        .bind(id, userId, provider, encryptedKey, now)
+        .run();
+    } catch {
+      return c.json({ error: "Failed to store token. Table may not be set up yet." }, 500);
+    }
   }
 
-  // ── Step 4: Reward donor with credits ───────────────────────────────
-  // Non-fatal: credit grant failure must not roll back a successful donation
+  // ── Step 5: Reward donor with credits ───────────────────────────────
   try {
     await c.env.DB.prepare(
       `INSERT INTO user_credits (id, user_id, amount, reason, created_at)

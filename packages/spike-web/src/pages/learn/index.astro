@@ -1,0 +1,196 @@
+---
+import TrackPageView from '../../components/TrackPageView.astro';
+
+const topics = [
+  {
+    persona: 'Einstein',
+    slug: 'physics',
+    accent: '#78716c',
+    title: 'Physics',
+    description: 'Thought experiments, relativity, and quantum mechanics.',
+  },
+  {
+    persona: 'Erdős',
+    slug: 'mathematics',
+    accent: '#4f46e5',
+    title: 'Mathematics',
+    description: 'Graph theory, probabilistic method, combinatorics.',
+  },
+  {
+    persona: 'Daft Punk',
+    slug: 'music-production',
+    accent: '#7c3aed',
+    title: 'Music Production',
+    description: 'Synthesis, sidechain compression, the 8-bar test.',
+  },
+  {
+    persona: 'GP',
+    slug: 'building-apps',
+    accent: '#ea580c',
+    title: 'Building Apps',
+    description: 'Writing PRDs, MCP tools, shipping without coding.',
+  },
+  {
+    persona: 'Raju',
+    slug: 'backend-architecture',
+    accent: '#0891b2',
+    title: 'Backend Architecture',
+    description: 'Failure modes, database design, edge compute.',
+  },
+  {
+    persona: 'Arnold',
+    slug: 'ux-design',
+    accent: '#e11d48',
+    title: 'UX Design',
+    description: 'Roasting UIs, the grandmother test, above-the-fold.',
+  },
+  {
+    persona: 'Peti',
+    slug: 'testing',
+    accent: '#22c55e',
+    title: 'Testing',
+    description: 'Finding bugs, test matrices, QA methodology.',
+  },
+  {
+    persona: 'Zoltán',
+    slug: 'strange-loops',
+    accent: '#d97706',
+    title: 'Strange Loops',
+    description: 'Fixed-point theorems, self-reference, ADHD as algorithm.',
+  },
+];
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Learning Arena — spike.land</title>
+    <meta name="description" content="Learn anything from the personas who live it. Pick a topic, start a conversation." />
+    <meta name="theme-color" content="#0a0a0a" />
+    <TrackPageView />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html { background: #0a0a0a; }
+      body {
+        background: #0a0a0a;
+        color: #e5e5e5;
+        font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', Menlo, Consolas, monospace;
+        min-height: 100svh;
+      }
+      .shell {
+        max-width: 52rem;
+        margin: 0 auto;
+        padding: clamp(2rem, 5vw, 4rem) 1rem clamp(3rem, 6vw, 5rem);
+      }
+      .header { margin-bottom: 2.5rem; }
+      .title {
+        font-size: clamp(1.75rem, 5vw, 2.75rem);
+        font-weight: 800;
+        color: #fafafa;
+        letter-spacing: -0.04em;
+        margin-bottom: 0.5rem;
+      }
+      .subtitle {
+        font-size: 0.875rem;
+        color: #525252;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+        gap: 1rem;
+      }
+      .card {
+        background: #111;
+        border-radius: 0.75rem;
+        padding: 1.25rem 1.5rem;
+        text-decoration: none;
+        display: block;
+        border: 1px solid #1e1e1e;
+        transition: border-color 0.15s, background 0.15s;
+        position: relative;
+        overflow: hidden;
+      }
+      .card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        border: 1px solid var(--accent);
+        opacity: 0;
+        transition: opacity 0.15s;
+        pointer-events: none;
+      }
+      .card:hover { background: #161616; }
+      .card:hover::before { opacity: 1; }
+      .card:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .card-persona {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--accent);
+        margin-bottom: 0.5rem;
+      }
+      .card-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #fafafa;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.375rem;
+      }
+      .card-desc {
+        font-size: 0.8125rem;
+        color: #737373;
+        line-height: 1.5;
+      }
+      .card-arrow {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.25rem;
+        color: #404040;
+        font-size: 0.875rem;
+        transition: color 0.15s, transform 0.15s;
+      }
+      .card:hover .card-arrow {
+        color: var(--accent);
+        transform: translateX(2px);
+      }
+      @media (max-width: 320px) {
+        .shell { padding: 1.25rem 0.75rem 3rem; }
+        .title { font-size: 1.5rem; }
+        .card { padding: 1rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="header">
+        <h1 class="title">Learning Arena</h1>
+        <p class="subtitle">Pick a topic. A persona teaches it.</p>
+      </header>
+      <main>
+        <ul class="grid" role="list" aria-label="Learning topics">
+          {topics.map((t) => (
+            <li>
+              <a
+                class="card"
+                href={`/learn/${t.slug}`}
+                style={`--accent: ${t.accent}`}
+                aria-label={`${t.title} — taught by ${t.persona}`}
+              >
+                <div class="card-persona">{t.persona}</div>
+                <div class="card-title">{t.title}</div>
+                <p class="card-desc">{t.description}</p>
+                <span class="card-arrow" aria-hidden="true">&#8594;</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </main>
+    </div>
+  </body>
+</html>

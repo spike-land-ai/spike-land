@@ -53,6 +53,12 @@ export interface Env {
    * Generate with: openssl rand -base64 32
    */
   TOKEN_ENCRYPTION_KEY?: string;
+  /**
+   * 32-byte (256-bit) base64-encoded AES-256-GCM master key for the token bank.
+   * Preferred over TOKEN_ENCRYPTION_KEY for new deployments.
+   * Generate with: openssl rand -base64 32
+   */
+  TOKEN_BANK_KEY?: string;
   ANALYTICS: AnalyticsEngineDataset;
   /** Set to "development" or "local" in dev wrangler config to enable draft posts */
   ENVIRONMENT?: string;

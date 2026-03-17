@@ -26,6 +26,9 @@
 
 export type DonatedProvider = "openai" | "anthropic" | "google" | "xai";
 
+/** Extended set of providers supported by the token bank. */
+export type TokenProvider = "anthropic" | "openai" | "google" | "xai" | "deepseek" | "mistral";
+
 export interface ValidationResult {
   /** Whether the key was accepted as valid by the upstream provider. */
   valid: boolean;
@@ -232,4 +235,99 @@ export async function validateDonatedKey(
  */
 export function isDonatedProvider(value: string): value is DonatedProvider {
   return ["openai", "anthropic", "google", "xai"].includes(value);
+}
+
+// ── Extended providers: deepseek + mistral ───────────────────────────
+
+async function validateDeepseek(apiKey: string): Promise<{ valid: boolean; error?: string }> {
+  const res = await fetchWithTimeout(
+    "https://api.deepseek.com/v1/models",
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "User-Agent": "spike-land-validator/1.0",
+      },
+    },
+    VALIDATION_TIMEOUT_MS,
+  );
+
+  if (!res) return { valid: false, error: "network_error" };
+  if (res.status === 200 || res.status === 429) return { valid: true };
+  if (res.status === 401 || res.status === 403) return { valid: false, error: "invalid_key" };
+  return { valid: false, error: `unexpected_status_${res.status}` };
+}
+
+async function validateMistral(apiKey: string): Promise<{ valid: boolean; error?: string }> {
+  const res = await fetchWithTimeout(
+    "https://api.mistral.ai/v1/models",
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "User-Agent": "spike-land-validator/1.0",
+      },
+    },
+    VALIDATION_TIMEOUT_MS,
+  );
+
+  if (!res) return { valid: false, error: "network_error" };
+  if (res.status === 200 || res.status === 429) return { valid: true };
+  if (res.status === 401 || res.status === 403) return { valid: false, error: "invalid_key" };
+  return { valid: false, error: `unexpected_status_${res.status}` };
+}
+
+/**
+ * Auto-detect TokenProvider from API key prefix.
+ * Returns null if the prefix is not recognised.
+ *
+ * Prefix map:
+ *   sk-ant-*  -> anthropic
+ *   sk-proj-* -> openai
+ *   sk-*      -> openai (or deepseek — caller must provide provider hint if ambiguous)
+ *   AIza*     -> google
+ *   xai-*     -> xai
+ */
+export function detectProvider(key: string): TokenProvider | null {
+  if (key.startsWith("sk-ant-")) return "anthropic";
+  if (key.startsWith("xai-")) return "xai";
+  if (key.startsWith("AIza")) return "google";
+  // sk-proj- and generic sk- are treated as openai by default;
+  // deepseek also uses sk- prefix but requires explicit provider selection
+  if (key.startsWith("sk-")) return "openai";
+  return null;
+}
+
+/**
+ * Validate a key against a TokenProvider endpoint.
+ * Supports all six providers in the token bank.
+ */
+export async function validateToken(
+  key: string,
+  provider: TokenProvider,
+): Promise<{ valid: boolean; error?: string }> {
+  if (!key || key.length < 10) return { valid: false, error: "key_too_short" };
+
+  function fromValidationResult(r: ValidationResult): { valid: boolean; error?: string } {
+    return r.error !== undefined ? { valid: r.valid, error: r.error } : { valid: r.valid };
+  }
+
+  switch (provider) {
+    case "openai":
+      return fromValidationResult(await validateOpenAI(key));
+    case "anthropic":
+      return fromValidationResult(await validateAnthropic(key));
+    case "google":
+      return fromValidationResult(await validateGoogle(key));
+    case "xai":
+      return fromValidationResult(await validateXai(key));
+    case "deepseek":
+      return validateDeepseek(key);
+    case "mistral":
+      return validateMistral(key);
+    default: {
+      const _exhaustive: never = provider;
+      return { valid: false, error: `unsupported_provider_${String(_exhaustive)}` };
+    }
+  }
 }
