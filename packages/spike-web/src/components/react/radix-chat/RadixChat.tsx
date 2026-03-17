@@ -114,6 +114,19 @@ const PERSONAS: Record<string, PersonaConfig> = {
       "What would the probabilistic method say?",
     ],
   },
+  einstein: {
+    persona: "einstein",
+    title: "Einstein",
+    accent: "#78716c",
+    greeting: "I have no special talents. I am only passionately curious.",
+    subtitle: "Physics. Thought experiments. What the Arena taught him.",
+    placeholder: "Be curious with Einstein...",
+    suggestions: [
+      "Explain this as a thought experiment",
+      "What's the invariant in this system?",
+      "What did Erdős teach you?",
+    ],
+  },
   switchboard: {
     persona: "switchboard",
     title: "Switchboard",
