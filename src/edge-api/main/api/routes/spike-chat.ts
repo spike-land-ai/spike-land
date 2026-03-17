@@ -27,6 +27,10 @@ import { getRubik3SystemPrompt } from "../../core-logic/rubik-persona-prompt.js"
 import { getArnoldPersonaPrompt } from "../../core-logic/arnold-persona-prompt.js";
 import { getZoltanMegaPersonaPrompt } from "../../core-logic/zoltan-persona-prompt.js";
 import { getPetiPersonaPrompt } from "../../core-logic/peti-persona-prompt.js";
+import { getDaftPunkPersonaPrompt } from "../../core-logic/daftpunk-persona-prompt.js";
+import { getGPPersonaPrompt } from "../../core-logic/gp-persona-prompt.js";
+import { getRajuPersonaPrompt } from "../../core-logic/raju-persona-prompt.js";
+import { getSwitchboardPersonaPrompt } from "../../core-logic/switchboard-persona-prompt.js";
 const spikeChat = new Hono<{ Bindings: Env; Variables: Variables }>();
 const MAX_TOOL_LOOPS = 3;
 const MAX_HISTORY_MESSAGES = 16;
@@ -38,12 +42,12 @@ const OLDER_USER_CHAR_LIMIT = 240;
 const TOOL_HINT_LIMIT = 12;
 // Technologic — buy it, use it, break it, fix it, trash it, change it, mail, upgrade it
 const TOOL_INTENT_PATTERNS = [
-  /\b(search|find|look up|lookup|browse|inspect|scan|check)\b/i,     // buy it, use it
-  /\b(open|navigate|click|fill|screenshot|scroll|read|write)\b/i,    // break it, fix it
-  /\b(price|pricing|docs?|documentation|api|endpoint|status)\b/i,    // trash it, change it
-  /\b(compare|verify|debug|deploy|build|upgrade|update|format)\b/i,  // mail, upgrade it
+  /\b(search|find|look up|lookup|browse|inspect|scan|check)\b/i, // buy it, use it
+  /\b(open|navigate|click|fill|screenshot|scroll|read|write)\b/i, // break it, fix it
+  /\b(price|pricing|docs?|documentation|api|endpoint|status)\b/i, // trash it, change it
+  /\b(compare|verify|debug|deploy|build|upgrade|update|format)\b/i, // mail, upgrade it
   /\b(this page|current page|article|here|latest|current|today)\b/i, // technologic
-  /\b(error|logs?|tool|mcp|test|benchmark|profile|optimize)\b/i,     // technologic
+  /\b(error|logs?|tool|mcp|test|benchmark|profile|optimize)\b/i, // technologic
 ] as const;
 type SpikeChatRole = "system" | "user" | "assistant" | "tool";
 
@@ -363,8 +367,16 @@ async function streamLlmResponse(
 
   let res: Response;
   if (opts.fallbackTargets && opts.fallbackTargets.length > 0) {
-    const allTargets = [target, ...opts.fallbackTargets.filter((t) => t.provider !== target.provider)];
-    const result = await streamCompletionWithFallback(allTargets, providerMessages, streamOpts, opts.db);
+    const allTargets = [
+      target,
+      ...opts.fallbackTargets.filter((t) => t.provider !== target.provider),
+    ];
+    const result = await streamCompletionWithFallback(
+      allTargets,
+      providerMessages,
+      streamOpts,
+      opts.db,
+    );
     res = result.response;
   } else {
     res = await streamCompletion(target, providerMessages, streamOpts);
@@ -518,7 +530,8 @@ spikeChat.post("/api/spike-chat", async (c) => {
     return c.json({ error: "message too long (max 8000 characters)" }, 400);
   }
 
-  const userId = (c.get("userId") as string | undefined) ?? `guest-${crypto.randomUUID().slice(0, 8)}`;
+  const userId =
+    (c.get("userId") as string | undefined) ?? `guest-${crypto.randomUUID().slice(0, 8)}`;
 
   const userMessage = body.message.trim();
   const requestId = (c.get("requestId") as string | undefined) ?? crypto.randomUUID();
@@ -596,7 +609,7 @@ spikeChat.post("/api/spike-chat", async (c) => {
   }
 
   // Zoltan mega-persona (also serves legacy slugs: erdos, radix, spike, gov, zoli)
-  if (["zoltan", "zoli", "daftpunk", "erdos", "radix", "spike", "gov"].includes(persona ?? "")) {
+  if (["zoltan", "zoli", "erdos", "radix", "spike", "gov"].includes(persona ?? "")) {
     fullSystemPrompt = `${fullSystemPrompt}\n\n${getZoltanMegaPersonaPrompt()}`;
   }
 
@@ -608,6 +621,26 @@ spikeChat.post("/api/spike-chat", async (c) => {
   // Merge Peti QA engineer persona when requested
   if (persona === "peti") {
     fullSystemPrompt = `${fullSystemPrompt}\n\n${getPetiPersonaPrompt()}`;
+  }
+
+  // Daft Punk music production persona
+  if (persona === "daftpunk") {
+    fullSystemPrompt = `${fullSystemPrompt}\n\n${getDaftPunkPersonaPrompt()}`;
+  }
+
+  // Gian Pierre chemist/citizen-developer persona
+  if (persona === "gp") {
+    fullSystemPrompt = `${fullSystemPrompt}\n\n${getGPPersonaPrompt()}`;
+  }
+
+  // Raju backend architect persona
+  if (persona === "raju") {
+    fullSystemPrompt = `${fullSystemPrompt}\n\n${getRajuPersonaPrompt()}`;
+  }
+
+  // Switchboard UK consumer advocacy persona
+  if (persona === "switchboard") {
+    fullSystemPrompt = `${fullSystemPrompt}\n\n${getSwitchboardPersonaPrompt()}`;
   }
 
   const intentSummary = classifyIntent(userMessage, body.pageContext);
