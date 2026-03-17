@@ -71,6 +71,16 @@ const morePosts = latestPosts.slice(1, 4);
             Each with their own voice, values, and expertise. No login. Free.
           </p>
 
+          <!-- GP's voice from Brighton -->
+          <div class="gp-audio-wrap">
+            <button id="gp-play" class="gp-play-btn" aria-label="Listen to Gian Pierre from Brighton">
+              <svg class="gp-icon-play" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+              <svg class="gp-icon-pause" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              <span class="gp-label">Gian Pierre from Brighton</span>
+            </button>
+            <audio id="gp-audio" src="/gp-brighton.opus" preload="auto"></audio>
+          </div>
+
           <div class="hero-ctas">
             <a href="/zoltan" class="cta-primary">
               Meet the Arena
@@ -255,6 +265,37 @@ const morePosts = latestPosts.slice(1, 4);
     </div>
   </div>
 </Layout>
+
+<!-- GP audio player -->
+<script is:inline>
+(function() {
+  var btn = document.getElementById('gp-play');
+  var audio = document.getElementById('gp-audio');
+  var iconPlay = btn && btn.querySelector('.gp-icon-play');
+  var iconPause = btn && btn.querySelector('.gp-icon-pause');
+  if (!btn || !audio) return;
+
+  btn.addEventListener('click', function() {
+    if (audio.paused) {
+      audio.play();
+      btn.classList.add('is-playing');
+      iconPlay.style.display = 'none';
+      iconPause.style.display = 'block';
+    } else {
+      audio.pause();
+      btn.classList.remove('is-playing');
+      iconPlay.style.display = 'block';
+      iconPause.style.display = 'none';
+    }
+  });
+
+  audio.addEventListener('ended', function() {
+    btn.classList.remove('is-playing');
+    iconPlay.style.display = 'block';
+    iconPause.style.display = 'none';
+  });
+})();
+</script>
 
 <!-- PWA Install + A/B tracking script -->
 <script is:inline>
@@ -641,6 +682,29 @@ const morePosts = latestPosts.slice(1, 4);
   .hook-stat-label {
     font-size: 0.8125rem; color: var(--muted-fg); font-weight: 500;
   }
+
+  /* ── GP audio player ─────────────────────────────────────────────── */
+  .gp-audio-wrap {
+    display: flex; justify-content: center;
+  }
+  .gp-play-btn {
+    display: inline-flex; align-items: center; gap: 0.625rem;
+    padding: 0.625rem 1.25rem;
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--card-bg));
+    border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
+    border-radius: 999px; cursor: pointer;
+    color: var(--fg); font-size: 0.875rem; font-weight: 500;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  }
+  .gp-play-btn:hover {
+    background: color-mix(in srgb, var(--primary-color) 14%, var(--card-bg));
+    border-color: color-mix(in srgb, var(--primary-color) 40%, transparent);
+    transform: translateY(-1px);
+  }
+  .gp-play-btn svg { color: var(--primary-color); flex-shrink: 0; }
+  .gp-label { color: var(--muted-fg); }
+  .gp-play-btn.is-playing { border-color: var(--primary-color); }
+  .gp-play-btn.is-playing .gp-label { color: var(--fg); }
 
   /* Open source / developer hook accent */
   .hook-opensource {
