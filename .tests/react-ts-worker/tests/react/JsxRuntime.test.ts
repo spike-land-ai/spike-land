@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { Fragment, jsx, jsxs } from "../../../../src/core/react-engine/core-logic/react/jsx-runtime.js";
+import {
+  Fragment,
+  jsx,
+  jsxs,
+} from "../../../../src/core/react-engine/core-logic/react/jsx-runtime.js";
 import {
   REACT_ELEMENT_TYPE,
   REACT_FRAGMENT_TYPE,

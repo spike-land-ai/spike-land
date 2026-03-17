@@ -79,10 +79,7 @@ describe("HTTP server port-in-use", () => {
   });
 
   /** Helper: occupy a port on a specific host, run a callback, then release. */
-  async function withBlockingServer(
-    host: string,
-    fn: (port: number) => Promise<void>,
-  ) {
+  async function withBlockingServer(host: string, fn: (port: number) => Promise<void>) {
     const srv = http.createServer((_req, res) => {
       res.writeHead(200);
       res.end();
@@ -110,7 +107,9 @@ describe("HTTP server port-in-use", () => {
   it("rejects with error when SSE port is in use", async () => {
     // startSseServer binds to :: (default) — block the same wildcard interface
     await withBlockingServer("::", async (port) => {
-      const { startSseServer } = await import("../../../../src/cli/spike-cli/node-sys/sse-server.js");
+      const { startSseServer } = await import(
+        "../../../../src/cli/spike-cli/node-sys/sse-server.js"
+      );
       await expect(startSseServer(mockManager, { port })).rejects.toThrow();
     });
   });

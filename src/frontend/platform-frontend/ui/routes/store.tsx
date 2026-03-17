@@ -465,16 +465,16 @@ export function StorePage() {
       <main className="min-w-0 flex-1 space-y-8">
         {/* Page header + search */}
         <section className="rubik-panel-strong flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl space-y-4">
+          <div className="min-w-0 max-w-3xl space-y-4">
             <span className="rubik-eyebrow">
               <Sparkles className="h-3.5 w-3.5" />
               {t("appStore")}
             </span>
             <div className="space-y-3">
-              <h2 className="font-display text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+              <h2 className="font-display text-4xl font-extrabold tracking-tight text-foreground break-words sm:text-5xl">
                 {t("heroTitle")}
               </h2>
-              <p className="rubik-lede">{t("heroSubtitle")}</p>
+              <p className="rubik-lede break-words">{t("heroSubtitle")}</p>
             </div>
           </div>
 

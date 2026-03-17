@@ -77,6 +77,34 @@
     "whatWeDo": {
       "title": "What We Do - spike.land | Tool-First QA and Managed MCP Runtime",
       "description": "See how spike.land helps teams move critical verification below the browser while running 80+ hosted tools across a broader edge-native runtime."
+    },
+    "cockpit": {
+      "title": "Cockpit - spike.land",
+      "description": "Unified cockpit view for monitoring your spike.land MCP tools, deployments, and real-time system health."
+    },
+    "workshop": {
+      "title": "Workshop - spike.land",
+      "description": "Hands-on workshop environment for building and testing MCP tools interactively on spike.land."
+    },
+    "dashboard": {
+      "title": "Dashboard - spike.land",
+      "description": "Your personal spike.land dashboard — tool usage, recent activity, and quality gate status at a glance."
+    },
+    "mcp": {
+      "title": "MCP Runtime - spike.land",
+      "description": "Explore the spike.land MCP runtime — 80+ hosted tools, OAuth authorization, and edge-native execution."
+    },
+    "support": {
+      "title": "Support - spike.land",
+      "description": "Get help with spike.land — documentation, community support, and direct contact for Pro and Business plans."
+    },
+    "startChecklist": {
+      "title": "Start Checklist - spike.land",
+      "description": "Step-by-step checklist to get started with spike.land — account setup, first tool, and deployment in minutes."
+    },
+    "tools": {
+      "title": "Tools - spike.land",
+      "description": "Browse all 80+ MCP tools available on spike.land — search, filter, and install tools for your AI workflows."
     }
   }
 }

@@ -51,9 +51,7 @@ describe("useInstallStatus", () => {
   });
 
   it("returns installed status from the API", async () => {
-    mockApiFetch.mockResolvedValueOnce(
-      mockResponse({ installed: true, count: 42 }),
-    );
+    mockApiFetch.mockResolvedValueOnce(mockResponse({ installed: true, count: 42 }));
 
     const { result } = renderHook(() => useInstallStatus("qa-studio"), {
       wrapper: createWrapper(),
@@ -127,9 +125,7 @@ describe("useInstall", () => {
   });
 
   it("exposes isInstalled and installCount from status query", async () => {
-    mockApiFetch.mockResolvedValueOnce(
-      mockResponse({ installed: false, count: 7 }),
-    );
+    mockApiFetch.mockResolvedValueOnce(mockResponse({ installed: false, count: 7 }));
 
     const { result } = renderHook(() => useInstall("qa-studio"), {
       wrapper: createWrapper(),
@@ -143,13 +139,9 @@ describe("useInstall", () => {
 
   it("optimistically updates install state and reconciles with server response", async () => {
     // Initial status fetch
-    mockApiFetch.mockResolvedValueOnce(
-      mockResponse({ installed: false, count: 10 }),
-    );
+    mockApiFetch.mockResolvedValueOnce(mockResponse({ installed: false, count: 10 }));
     // Install POST
-    mockApiFetch.mockResolvedValueOnce(
-      mockResponse({ appName: "QA Studio", count: 11 }),
-    );
+    mockApiFetch.mockResolvedValueOnce(mockResponse({ appName: "QA Studio", count: 11 }));
 
     const { result } = renderHook(() => useInstall("qa-studio"), {
       wrapper: createWrapper(),
@@ -168,17 +160,11 @@ describe("useInstall", () => {
 
   it("optimistically updates uninstall state", async () => {
     // Initial status fetch: already installed
-    mockApiFetch.mockResolvedValueOnce(
-      mockResponse({ installed: true, count: 5 }),
-    );
+    mockApiFetch.mockResolvedValueOnce(mockResponse({ installed: true, count: 5 }));
     // Uninstall DELETE
-    mockApiFetch.mockResolvedValueOnce(
-      mockResponse({ appName: "QA Studio" }),
-    );
+    mockApiFetch.mockResolvedValueOnce(mockResponse({ appName: "QA Studio" }));
     // Re-fetch after invalidation
-    mockApiFetch.mockResolvedValueOnce(
-      mockResponse({ installed: false, count: 4 }),
-    );
+    mockApiFetch.mockResolvedValueOnce(mockResponse({ installed: false, count: 4 }));
 
     const { result } = renderHook(() => useInstall("qa-studio"), {
       wrapper: createWrapper(),
@@ -196,9 +182,7 @@ describe("useInstall", () => {
 
   it("rolls back optimistic install update on server error", async () => {
     // Initial status
-    mockApiFetch.mockResolvedValueOnce(
-      mockResponse({ installed: false, count: 3 }),
-    );
+    mockApiFetch.mockResolvedValueOnce(mockResponse({ installed: false, count: 3 }));
     // Install POST fails
     mockApiFetch.mockResolvedValueOnce(mockResponse({ error: "Unauthorized" }, 401));
 

@@ -77,6 +77,34 @@
     "whatWeDo": {
       "title": "Amit csinálunk - spike.land | MCP-első AI platform",
       "description": "Fedezd fel a spike.land 80+ MCP eszközét 11 területen. Kód intelligencia, kép stúdió, analitika, hitelesítés és még sok más — mind éles telepítéssel."
+    },
+    "cockpit": {
+      "title": "Irányítópult - spike.land",
+      "description": "Egységes irányítópult a spike.land MCP eszközök, telepítések és valós idejű rendszerállapot figyeléséhez."
+    },
+    "workshop": {
+      "title": "Műhely - spike.land",
+      "description": "Gyakorlati műhely környezet MCP eszközök interaktív építéséhez és teszteléséhez a spike.land-on."
+    },
+    "dashboard": {
+      "title": "Vezérlőpult - spike.land",
+      "description": "Személyes spike.land vezérlőpult — eszközhasználat, legutóbbi tevékenység és minőségi kapuk állapota egy pillantással."
+    },
+    "mcp": {
+      "title": "MCP futtatókörnyezet - spike.land",
+      "description": "Fedezd fel a spike.land MCP futtatókörnyezetet — 80+ hosztolt eszköz, OAuth engedélyezés és éles végrehajtás."
+    },
+    "support": {
+      "title": "Támogatás - spike.land",
+      "description": "Segítség a spike.land-hoz — dokumentáció, közösségi támogatás és közvetlen kapcsolat Pro és Business csomagokhoz."
+    },
+    "startChecklist": {
+      "title": "Kezdő ellenőrzőlista - spike.land",
+      "description": "Lépésről lépésre ellenőrzőlista a spike.land használatának megkezdéséhez — fiók beállítás, első eszköz és telepítés percek alatt."
+    },
+    "tools": {
+      "title": "Eszközök - spike.land",
+      "description": "Böngészd a spike.land 80+ MCP eszközét — keress, szűrj és telepíts eszközöket AI munkafolyamataidhoz."
     }
   }
 }

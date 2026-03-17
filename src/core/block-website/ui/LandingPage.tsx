@@ -1,4 +1,5 @@
 import { LandingHero } from "./LandingHero";
+import { PrdFilterDemo } from "./PrdFilterDemo";
 import { AppShowcase } from "../core-logic/AppShowcase";
 import { TryItNow } from "./TryItNow";
 import { TryItCta } from "./TryItCta";
@@ -45,6 +46,8 @@ export function LandingPage() {
   return (
     <div className="font-sans text-foreground selection:bg-primary selection:text-primary-foreground dark:selection:bg-primary/40 dark:selection:text-primary-light">
       <LandingHero />
+
+      <PrdFilterDemo />
 
       {/* Strange Loops warning banner */}
       <div className="rubik-container-wide px-4 pt-8 sm:pt-12">

@@ -152,23 +152,26 @@ function SingleQuestion({ question, index, selectedIndex, state, onSelect }: Sin
 }
 
 export function TopicQuiz({ questions, topicSlug: _topicSlug, onComplete }: TopicQuizProps) {
-  const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>(
-    () => new Array(questions.length).fill(null),
+  const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>(() =>
+    new Array(questions.length).fill(null),
   );
-  const [questionStates, setQuestionStates] = useState<QuestionState[]>(
-    () => new Array(questions.length).fill("unanswered"),
+  const [questionStates, setQuestionStates] = useState<QuestionState[]>(() =>
+    new Array(questions.length).fill("unanswered"),
   );
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState<number | null>(null);
 
-  const handleSelect = useCallback((questionIndex: number, optionIndex: number) => {
-    if (submitted) return;
-    setSelectedAnswers((prev) => {
-      const next = [...prev];
-      next[questionIndex] = optionIndex;
-      return next;
-    });
-  }, [submitted]);
+  const handleSelect = useCallback(
+    (questionIndex: number, optionIndex: number) => {
+      if (submitted) return;
+      setSelectedAnswers((prev) => {
+        const next = [...prev];
+        next[questionIndex] = optionIndex;
+        return next;
+      });
+    },
+    [submitted],
+  );
 
   const allAnswered = selectedAnswers.every((a) => a !== null);
 

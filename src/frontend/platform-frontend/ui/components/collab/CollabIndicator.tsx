@@ -20,10 +20,7 @@ function ConnectionIcon({ status, className }: { status: ConnectionStatus; class
   switch (status) {
     case "connected":
       return (
-        <Wifi
-          className={cn("h-3.5 w-3.5 text-green-500", className)}
-          aria-label="Connected"
-        />
+        <Wifi className={cn("h-3.5 w-3.5 text-green-500", className)} aria-label="Connected" />
       );
     case "connecting":
     case "reconnecting":
@@ -35,10 +32,7 @@ function ConnectionIcon({ status, className }: { status: ConnectionStatus; class
       );
     case "disconnected":
       return (
-        <WifiOff
-          className={cn("h-3.5 w-3.5 text-red-500", className)}
-          aria-label="Disconnected"
-        />
+        <WifiOff className={cn("h-3.5 w-3.5 text-red-500", className)} aria-label="Disconnected" />
       );
   }
 }
@@ -67,7 +61,10 @@ export const CollabIndicator = memo(function CollabIndicator({
 
   return (
     <div
-      className={cn("flex items-center gap-2 text-[11px] font-medium text-muted-foreground", className)}
+      className={cn(
+        "flex items-center gap-2 text-[11px] font-medium text-muted-foreground",
+        className,
+      )}
       aria-live="polite"
       aria-label="Collaboration status"
     >
@@ -79,9 +76,7 @@ export const CollabIndicator = memo(function CollabIndicator({
           {/* Viewer count */}
           <span className="flex items-center gap-1">
             <Users className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>
-              {viewerCount === 1 ? "Just you" : `${viewerCount} viewing`}
-            </span>
+            <span>{viewerCount === 1 ? "Just you" : `${viewerCount} viewing`}</span>
           </span>
 
           {/* Typing indicator — replaces viewer count when someone is typing */}
@@ -102,9 +97,7 @@ export const CollabIndicator = memo(function CollabIndicator({
         <span className="text-yellow-500">Reconnecting…</span>
       )}
 
-      {connectionStatus === "disconnected" && (
-        <span className="text-red-500">Offline</span>
-      )}
+      {connectionStatus === "disconnected" && <span className="text-red-500">Offline</span>}
     </div>
   );
 });
@@ -112,11 +105,7 @@ export const CollabIndicator = memo(function CollabIndicator({
 /** Three-dot animated typing indicator */
 function TypingDots() {
   return (
-    <span
-      aria-hidden="true"
-      className="flex items-center gap-[2px]"
-      style={{ height: 14 }}
-    >
+    <span aria-hidden="true" className="flex items-center gap-[2px]" style={{ height: 14 }}>
       {[0, 1, 2].map((i) => (
         <span
           key={i}

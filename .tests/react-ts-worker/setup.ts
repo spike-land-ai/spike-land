@@ -24,7 +24,9 @@ class TestMessagePort {
   close() {}
   addEventListener() {}
   removeEventListener() {}
-  dispatchEvent() { return false; }
+  dispatchEvent() {
+    return false;
+  }
 }
 
 class TestMessageChannel {

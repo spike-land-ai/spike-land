@@ -1,0 +1,13 @@
+---
+// Lightweight page-view beacon for standalone Astro pages (e.g. /zoltan).
+// The main SPA handles its own analytics via useAnalytics().
+---
+<script is:inline>
+  if (typeof navigator.sendBeacon === 'function') {
+    navigator.sendBeacon('/api/analytics/pageview', JSON.stringify({
+      path: location.pathname,
+      referrer: document.referrer || '',
+      ts: Date.now(),
+    }));
+  }
+</script>

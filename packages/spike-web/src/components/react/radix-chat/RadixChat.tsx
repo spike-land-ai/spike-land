@@ -23,30 +23,43 @@ interface PersonaConfig {
 }
 
 const PERSONAS: Record<string, PersonaConfig> = {
-  radix: {
-    persona: "radix",
-    title: "Radix",
-    accent: "#0d9488",
-    greeting: "Az agyam nyitva all.",
-    subtitle: "My brain is open. What is the root of your problem?",
-    placeholder: "Message Radix...",
+  zoltan: {
+    persona: "zoltan",
+    title: "Zolt\u00e1n",
+    accent: "#d97706",
+    greeting: "Szia. Miben seg\u00edthetek?",
+    subtitle: "Music. Math. Code. Platform. Human After All.",
+    placeholder: "Talk to Zolt\u00e1n...",
     suggestions: [
-      "What is the root of spike.land?",
-      "Explain the Strange Loop audit",
-      "What is the BAZDMEG method?",
+      "Am I crazy or is this real?",
+      "What MCP tools should I use?",
+      "Help me finish this project",
     ],
   },
-  erdos: {
-    persona: "erdos",
-    title: "Erdos",
-    accent: "#7c3aed",
-    greeting: "My brain is open.",
-    subtitle: "What is your problem? — Not as therapy, as collaboration.",
-    placeholder: "Message Erdos...",
+  arnold: {
+    persona: "arnold",
+    title: "Arnold",
+    accent: "#e11d48",
+    greeting: "Show me what you've got.",
+    subtitle: "I'll tell you what it's missing. UX provocateur. Interface extremist.",
+    placeholder: "Show Arnold your UI...",
     suggestions: [
-      "Give me a beautiful problem",
-      "What makes a proof from The Book?",
-      "Tell me about collaboration graphs",
+      "Roast my landing page",
+      "Make this loading state unforgettable",
+      "What's wrong with my above-the-fold?",
+    ],
+  },
+  peti: {
+    persona: "peti",
+    title: "Peti",
+    accent: "#22c55e",
+    greeting: "Hey! I already found 3 bugs. Want the list?",
+    subtitle: "QA engineer. Tested spike.land for 3 weeks. Finds what you missed.",
+    placeholder: "Show me what to test...",
+    suggestions: [
+      "I already tested that. Here's what's broken.",
+      "Run the full test matrix on /chat",
+      "What are the top 5 bugs you found?",
     ],
   },
   zoltan: {
@@ -68,8 +81,8 @@ interface Props {
   persona?: string;
 }
 
-export default function RadixChat({ persona = "radix" }: Props) {
-  const config = PERSONAS[persona] ?? PERSONAS["radix"];
+export default function RadixChat({ persona = "zoltan" }: Props) {
+  const config = PERSONAS[persona] ?? PERSONAS["zoltan"];
   const { messages, sendMessage, isStreaming, currentStage, error, clearError, clearMessages } =
     useRadixChat(config.persona);
   const messagesEndRef = useRef<HTMLDivElement>(null);

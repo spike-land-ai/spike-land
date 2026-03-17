@@ -157,13 +157,7 @@ function loadRecentlyViewed(): RecentTopic[] {
 
 // ─── Category Card ────────────────────────────────────────────────────────────
 
-function CategoryCard({
-  category,
-  progress,
-}: {
-  category: Category;
-  progress: number;
-}) {
+function CategoryCard({ category, progress }: { category: Category; progress: number }) {
   return (
     <Link
       to="/learnit/$topic"
@@ -221,9 +215,10 @@ function SearchBar() {
       return;
     }
     const lower = value.toLowerCase();
-    const filtered = AUTOCOMPLETE_SUGGESTIONS.filter((s) =>
-      s.toLowerCase().includes(lower),
-    ).slice(0, 6);
+    const filtered = AUTOCOMPLETE_SUGGESTIONS.filter((s) => s.toLowerCase().includes(lower)).slice(
+      0,
+      6,
+    );
     setSuggestions(filtered);
   }, []);
 
@@ -281,9 +276,7 @@ function SearchBar() {
             aria-label="Search topics"
             aria-autocomplete="list"
             aria-expanded={showSuggestions && suggestions.length > 0}
-            aria-activedescendant={
-              focusedIndex >= 0 ? `suggestion-${focusedIndex}` : undefined
-            }
+            aria-activedescendant={focusedIndex >= 0 ? `suggestion-${focusedIndex}` : undefined}
             aria-controls="autocomplete-list"
             className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
@@ -366,11 +359,7 @@ export function LearnitIndexPage() {
         </h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {CATEGORIES.map((cat) => (
-            <CategoryCard
-              key={cat.id}
-              category={cat}
-              progress={getCategoryProgress(cat.id)}
-            />
+            <CategoryCard key={cat.id} category={cat} progress={getCategoryProgress(cat.id)} />
           ))}
         </div>
       </section>

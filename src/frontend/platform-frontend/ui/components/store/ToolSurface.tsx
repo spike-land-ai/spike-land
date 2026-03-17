@@ -56,10 +56,7 @@ export function StoreToolSurface({
     (_tool: string, _input: Record<string, unknown>, result: unknown) => {
       // Capture result text for copy button
       try {
-        const text =
-          typeof result === "string"
-            ? result
-            : JSON.stringify(result, null, 2);
+        const text = typeof result === "string" ? result : JSON.stringify(result, null, 2);
         setLastResultText(text);
       } catch {
         setLastResultText(null);

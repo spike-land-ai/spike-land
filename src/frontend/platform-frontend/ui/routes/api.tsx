@@ -882,7 +882,7 @@ export function ApiPage() {
         <h1
           id="api-hero-heading"
           className={cn(
-            "relative max-w-5xl text-4xl font-black tracking-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl",
+            "relative max-w-5xl text-4xl font-black tracking-tight break-words sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl",
             "transition-all duration-700 delay-100",
             heroRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8",
           )}

@@ -95,6 +95,34 @@ function buildRouteMeta(t: (key: string) => string): Record<string, RouteMeta> {
       title: "App Store Categories — spike.land",
       description: "Browse apps by category in the spike.land open AI app store.",
     },
+    "/cockpit": {
+      title: r("cockpit"),
+      description: d("cockpit"),
+    },
+    "/workshop": {
+      title: r("workshop"),
+      description: d("workshop"),
+    },
+    "/dashboard": {
+      title: r("dashboard"),
+      description: d("dashboard"),
+    },
+    "/mcp": {
+      title: r("mcp"),
+      description: d("mcp"),
+    },
+    "/support": {
+      title: r("support"),
+      description: d("support"),
+    },
+    "/spike-land-start-checklist": {
+      title: r("startChecklist"),
+      description: d("startChecklist"),
+    },
+    "/tools": {
+      title: r("tools"),
+      description: d("tools"),
+    },
   };
 }
 

@@ -174,11 +174,9 @@ const prd = registry.resolve("/apps/chess-arena");
               <pre class="product-code"><code>{p.code}</code></pre>
               <div class="product-actions">
                 {p.status === 'live' ? (
-                  <a href="/login?redirect=/dashboard" class="btn-accent">Get API Key</a>
-                ) : p.status === 'beta' ? (
-                  <button class="btn-accent" data-waitlist={p.id} type="button">Join Beta</button>
+                  <a href="#donate" class="btn-accent">Get Started</a>
                 ) : (
-                  <button class="btn-accent" data-waitlist={p.id} type="button">Join Waitlist</button>
+                  <button class="btn-accent btn-disabled" type="button" disabled>Coming soon</button>
                 )}
                 {p.video && (
                   <a href="#video" class="btn-ghost-sm">Watch demo</a>
@@ -436,7 +434,12 @@ const prd = registry.resolve("/apps/chess-arena");
     transition: opacity 0.15s, transform 0.15s;
   }
 
-  .btn-accent:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-accent:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
   /* ── Product cards ───────────────────────────────────────────── */
   .products {
@@ -821,28 +824,6 @@ const prd = registry.resolve("/apps/chess-arena");
       btn.disabled = false;
       btn.textContent = 'Donate & Earn 10 Credits';
     }
-  });
-
-  // ── Waitlist buttons ────────────────────────────────────────
-  document.querySelectorAll('[data-waitlist]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const product = (btn as HTMLElement).dataset.waitlist;
-      const email = prompt(`Enter your email to join the ${product} waitlist:`);
-      if (!email) return;
-
-      // Track waitlist signup
-      fetch('/analytics/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'waitlist_signup',
-          properties: { product, email },
-        }),
-      }).catch(() => {});
-
-      (btn as HTMLButtonElement).textContent = 'Joined!';
-      (btn as HTMLButtonElement).disabled = true;
-    });
   });
 
   // ── Feedback form ───────────────────────────────────────────

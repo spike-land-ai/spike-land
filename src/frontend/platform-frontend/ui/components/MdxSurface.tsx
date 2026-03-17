@@ -101,7 +101,10 @@ export function MdxSurface({ appSlug, content: initialContent, className = "" }:
           "context-block": ({
             node: _node,
             ...props
-          }: { node?: unknown; [key: string]: unknown }) => {
+          }: {
+            node?: unknown;
+            [key: string]: unknown;
+          }) => {
             return <ContextBlock {...(props as Record<string, string>)} />;
           },
           // Interactive tool surface for executing MCP tools inline

@@ -9,7 +9,10 @@ import {
 } from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberNewContext.js";
 import { createContext } from "../../../../src/core/react-engine/core-logic/react/ReactContext.js";
 import type { Fiber } from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberTypes.js";
-import { NoLanes, SyncLane } from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberLane.js";
+import {
+  NoLanes,
+  SyncLane,
+} from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberLane.js";
 import { NoFlags } from "../../../../src/core/react-engine/core-logic/reconciler/ReactFiberFlags.js";
 import {
   FunctionComponent,

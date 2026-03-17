@@ -96,7 +96,11 @@ export function AudienceTab({ range }: { range: TimeRange }) {
                 type="button"
                 onClick={() =>
                   downloadCsv(
-                    geo.countries.map((c) => ({ country: c.country, users: c.users, sessions: c.sessions })),
+                    geo.countries.map((c) => ({
+                      country: c.country,
+                      users: c.users,
+                      sessions: c.sessions,
+                    })),
                     csvFilename("audience-countries", range),
                   )
                 }

@@ -4,6 +4,7 @@ date: "2026-03-15"
 description: "I posted about cognitive freedom on Hungary's oldest tech forum. They blocked my account. On March 15. The strange loop closed itself."
 tags: ["strange-loops", "hup-hu", "censorship", "cognitive-freedom", "march-15", "hungarian"]
 heroPrompt: "A closed door with a glowing keyhole, digital chains dissolving into light, a single figure standing outside looking at the door with calm resolve, Hungarian tricolor reflected in puddles on the ground, dramatic chiaroscuro, cinematic wide shot"
+heroImage: "/blog/hup-hu-blocked-the-loop-closes/hero.png"
 ---
 
 # They Blocked My Account — The Loop Closes

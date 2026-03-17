@@ -73,10 +73,7 @@ export function ErrorOverlay({ error, onDismiss, onGoToLine, className }: ErrorO
       <div className="flex items-start gap-3 p-3">
         {/* Icon */}
         <div className="mt-0.5 flex-shrink-0 rounded-full bg-destructive/10 p-1.5">
-          <AlertTriangle
-            className="h-3.5 w-3.5 text-destructive"
-            aria-hidden="true"
-          />
+          <AlertTriangle className="h-3.5 w-3.5 text-destructive" aria-hidden="true" />
         </div>
 
         {/* Content */}

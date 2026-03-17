@@ -1,0 +1,480 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import Analytics from '../../components/Analytics.astro';
+
+interface McpTool {
+  name: string;
+  description: string;
+  category: string;
+  inputSchema: {
+    type: 'object';
+    properties?: Record<string, unknown>;
+    required?: string[];
+  };
+}
+
+interface ToolsListResponse {
+  tools: McpTool[];
+}
+
+export async function getStaticPaths() {
+  try {
+    const res = await fetch('https://mcp.spike.land/tools');
+    if (!res.ok) return [];
+    const data: ToolsListResponse = await res.json();
+    return (data.tools ?? []).map((tool) => ({
+      params: { slug: tool.name },
+      props: { tool },
+    }));
+  } catch {
+    // If the MCP API is unreachable at build time, generate no static pages.
+    // The SPA will still handle /tool/:name dynamically.
+    return [];
+  }
+}
+
+const { slug } = Astro.params;
+const { tool } = Astro.props as { tool: McpTool };
+
+const displayName = tool.name
+  .replace(/[_-]/g, ' ')
+  .replace(/\b\w/g, (c) => c.toUpperCase());
+
+const pageTitle = `${displayName} — spike.land Tool Playground`;
+const pageDescription = tool.description
+  ? `${tool.description} Try it live on spike.land — no signup required.`
+  : `Run ${displayName} directly in your browser. Free MCP tool on spike.land.`;
+
+const canonicalUrl = `https://spike.land/playground/${slug}`;
+const spaUrl = `/tool/${slug}`;
+
+const schemaOrg = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: displayName,
+  description: tool.description,
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Web',
+  url: canonicalUrl,
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  provider: {
+    '@type': 'Organization',
+    name: 'spike.land',
+    url: 'https://spike.land',
+  },
+};
+---
+
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  canonicalUrl={canonicalUrl}
+  ogType="website"
+>
+  <Analytics slot="head" />
+
+  <!-- Preload: redirect to SPA after a brief moment so crawlers see the static page -->
+  <script is:inline define:vars={{ spaUrl }}>
+    // Redirect to the interactive SPA playground immediately.
+    // Crawlers will see the static markup below for SEO.
+    if (typeof window !== 'undefined') {
+      window.location.replace(spaUrl);
+    }
+  </script>
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json" set:html={JSON.stringify(schemaOrg)} slot="head" />
+
+  <div class="page-shell">
+    <Nav activePath="/tools" />
+
+    <main id="main-content" class="playground-main">
+      <div class="rubik-container playground-inner">
+
+        <!-- Back link -->
+        <a href="/tools" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          All Tools
+        </a>
+
+        <!-- Hero -->
+        <div class="tool-hero">
+          <div class="tool-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <div class="tool-meta">
+            <div class="tool-badges">
+              <span class="category-badge">{tool.category}</span>
+              <code class="tool-name-mono">{tool.name}</code>
+            </div>
+            <h1 class="tool-title">{displayName}</h1>
+            {tool.description && (
+              <p class="tool-description">{tool.description}</p>
+            )}
+          </div>
+        </div>
+
+        <!-- CTA to interactive playground -->
+        <div class="playground-cta rubik-panel">
+          <div class="cta-inner">
+            <div class="cta-text">
+              <p class="cta-heading">Interactive playground</p>
+              <p class="cta-sub">
+                Fill in the form, hit Execute, and see results in real time — powered by the live
+                mcp.spike.land runtime.
+              </p>
+            </div>
+            <a href={spaUrl} class="cta-btn">
+              Open Playground
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
+          <p class="cta-note">No login required. Free to use.</p>
+        </div>
+
+        <!-- Input schema preview (static) -->
+        {tool.inputSchema?.properties && Object.keys(tool.inputSchema.properties).length > 0 && (
+          <section class="schema-section">
+            <h2 class="schema-heading">Input parameters</h2>
+            <div class="schema-grid">
+              {Object.entries(tool.inputSchema.properties).map(([fieldName, fieldDef]) => {
+                const def = fieldDef as { type?: string; description?: string; enum?: string[] };
+                const isRequired = tool.inputSchema.required?.includes(fieldName);
+                return (
+                  <div class="schema-field rubik-panel">
+                    <div class="field-header">
+                      <code class="field-name">{fieldName}</code>
+                      <div class="field-badges">
+                        {def.type && <span class="type-badge">{def.type}</span>}
+                        {isRequired && <span class="required-badge">required</span>}
+                      </div>
+                    </div>
+                    {def.description && (
+                      <p class="field-desc">{def.description}</p>
+                    )}
+                    {def.enum && def.enum.length > 0 && (
+                      <div class="field-enum">
+                        {def.enum.map((v) => (
+                          <span class="enum-value">{v}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        <!-- Related: link back to the tools catalog -->
+        <div class="related-link">
+          <a href="/tools" class="browse-link">
+            Browse all {tool.category} tools
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+
+      </div>
+    </main>
+
+    <Footer />
+  </div>
+</Layout>
+
+<style>
+  .page-shell {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  .playground-main {
+    flex: 1;
+    padding-block: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .playground-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 52rem;
+  }
+
+  /* Back link */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted-fg);
+    text-decoration: none;
+    transition: color var(--duration-fast, 150ms) ease;
+  }
+  .back-link:hover { color: var(--fg); }
+
+  /* Hero */
+  .tool-hero {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+
+  .tool-icon-wrap {
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.875rem;
+    background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 15%, transparent);
+  }
+
+  .tool-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .tool-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .category-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--primary-color);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
+  }
+
+  .tool-name-mono {
+    font-size: 0.75rem;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    color: var(--muted-fg);
+  }
+
+  .tool-title {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--fg);
+    margin: 0;
+  }
+
+  .tool-description {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--muted-fg);
+    margin: 0;
+    max-width: 60ch;
+  }
+
+  /* CTA panel */
+  .playground-cta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    background: color-mix(in srgb, var(--primary-color) 4%, var(--card-bg));
+    border-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+  }
+
+  .cta-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .cta-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  .cta-heading {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--fg);
+    margin: 0;
+    letter-spacing: -0.015em;
+  }
+
+  .cta-sub {
+    font-size: 0.875rem;
+    color: var(--muted-fg);
+    margin: 0;
+    line-height: 1.5;
+    max-width: 44ch;
+  }
+
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: var(--primary-color);
+    color: var(--primary-fg);
+    border-radius: var(--radius-lg, 0.625rem);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: opacity 150ms ease, transform 150ms ease;
+  }
+  .cta-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .cta-btn:active { transform: none; }
+
+  .cta-note {
+    font-size: 0.75rem;
+    color: var(--muted-fg);
+    margin: 0;
+  }
+
+  /* Schema section */
+  .schema-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+
+  .schema-heading {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted-fg);
+    margin: 0;
+  }
+
+  .schema-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+    gap: 0.75rem;
+  }
+
+  .schema-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.875rem 1rem;
+  }
+
+  .field-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .field-name {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .field-badges {
+    display: flex;
+    gap: 0.375rem;
+  }
+
+  .type-badge {
+    font-size: 0.7rem;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.3rem;
+    background: var(--muted-bg);
+    color: var(--muted-fg);
+    border: 1px solid var(--border-color);
+  }
+
+  .required-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.3rem;
+    background: color-mix(in srgb, oklch(55% 0.17 27) 10%, transparent);
+    color: oklch(55% 0.17 27);
+    border: 1px solid color-mix(in srgb, oklch(55% 0.17 27) 20%, transparent);
+  }
+
+  .field-desc {
+    font-size: 0.8125rem;
+    color: var(--muted-fg);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .field-enum {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .enum-value {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.3rem;
+    background: var(--muted-bg);
+    color: var(--fg);
+    border: 1px solid var(--border-color);
+  }
+
+  /* Related link */
+  .related-link {
+    padding-top: 0.5rem;
+  }
+
+  .browse-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: gap 150ms ease;
+  }
+  .browse-link:hover { gap: 0.625rem; }
+
+  @media (max-width: 640px) {
+    .tool-hero { flex-direction: column; }
+    .cta-inner { flex-direction: column; align-items: flex-start; }
+    .cta-btn { width: 100%; justify-content: center; }
+  }
+</style>

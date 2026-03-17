@@ -77,8 +77,14 @@ function isInCheck(board: Board, color: ChessColor): boolean {
 
   // Check knights
   const knightDeltas = [
-    [-2, -1], [-2, 1], [-1, -2], [-1, 2],
-    [1, -2], [1, 2], [2, -1], [2, 1],
+    [-2, -1],
+    [-2, 1],
+    [-1, -2],
+    [-1, 2],
+    [1, -2],
+    [1, 2],
+    [2, -1],
+    [2, 1],
   ];
   for (const [df, dr] of knightDeltas) {
     const p = getPiece(board, kingFile + df, kingRank + dr);
@@ -86,8 +92,18 @@ function isInCheck(board: Board, color: ChessColor): boolean {
   }
 
   // Check sliding pieces (bishop/rook/queen)
-  const diagDirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
-  const straightDirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  const diagDirs = [
+    [-1, -1],
+    [-1, 1],
+    [1, -1],
+    [1, 1],
+  ];
+  const straightDirs = [
+    [-1, 0],
+    [1, 0],
+    [0, -1],
+    [0, 1],
+  ];
 
   for (const [df, dr] of diagDirs) {
     let f = kingFile + df;
@@ -171,15 +187,34 @@ function generatePseudoLegal(
           if (inBounds(file, pushRank) && !getPiece(board, file, pushRank)) {
             if (pushRank === promoRank) {
               for (const p of ["q", "r", "b", "n"] as PieceType[]) {
-                moves.push({ fromFile: file, fromRank: rank, toFile: file, toRank: pushRank, flags: "p", promotion: p });
+                moves.push({
+                  fromFile: file,
+                  fromRank: rank,
+                  toFile: file,
+                  toRank: pushRank,
+                  flags: "p",
+                  promotion: p,
+                });
               }
             } else {
-              moves.push({ fromFile: file, fromRank: rank, toFile: file, toRank: pushRank, flags: "n" });
+              moves.push({
+                fromFile: file,
+                fromRank: rank,
+                toFile: file,
+                toRank: pushRank,
+                flags: "n",
+              });
               // Double push
               if (rank === startRank) {
                 const dblRank = rank + dir * 2;
                 if (!getPiece(board, file, dblRank)) {
-                  moves.push({ fromFile: file, fromRank: rank, toFile: file, toRank: dblRank, flags: "n" });
+                  moves.push({
+                    fromFile: file,
+                    fromRank: rank,
+                    toFile: file,
+                    toRank: dblRank,
+                    flags: "n",
+                  });
                 }
               }
             }
@@ -194,7 +229,14 @@ function generatePseudoLegal(
             if (target && target.color === opp) {
               if (cr === promoRank) {
                 for (const p of ["q", "r", "b", "n"] as PieceType[]) {
-                  moves.push({ fromFile: file, fromRank: rank, toFile: cf, toRank: cr, flags: "pc", promotion: p });
+                  moves.push({
+                    fromFile: file,
+                    fromRank: rank,
+                    toFile: cf,
+                    toRank: cr,
+                    flags: "pc",
+                    promotion: p,
+                  });
                 }
               } else {
                 moves.push({ fromFile: file, fromRank: rank, toFile: cf, toRank: cr, flags: "c" });
@@ -209,27 +251,48 @@ function generatePseudoLegal(
         }
 
         case "n": {
-          const knightDeltas = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+          const knightDeltas = [
+            [-2, -1],
+            [-2, 1],
+            [-1, -2],
+            [-1, 2],
+            [1, -2],
+            [1, 2],
+            [2, -1],
+            [2, 1],
+          ];
           for (const [df, dr] of knightDeltas) {
             const tf = file + df;
             const tr = rank + dr;
             if (!inBounds(tf, tr)) continue;
             const target = getPiece(board, tf, tr);
             if (!target || target.color === opp) {
-              moves.push({ fromFile: file, fromRank: rank, toFile: tf, toRank: tr, flags: target ? "c" : "n" });
+              moves.push({
+                fromFile: file,
+                fromRank: rank,
+                toFile: tf,
+                toRank: tr,
+                flags: target ? "c" : "n",
+              });
             }
           }
           break;
         }
 
         case "b": {
-          for (const [df, dr] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) {
+          for (const [df, dr] of [
+            [-1, -1],
+            [-1, 1],
+            [1, -1],
+            [1, 1],
+          ]) {
             let f = file + df;
             let r = rank + dr;
             while (inBounds(f, r)) {
               const target = getPiece(board, f, r);
               if (target) {
-                if (target.color === opp) moves.push({ fromFile: file, fromRank: rank, toFile: f, toRank: r, flags: "c" });
+                if (target.color === opp)
+                  moves.push({ fromFile: file, fromRank: rank, toFile: f, toRank: r, flags: "c" });
                 break;
               }
               moves.push({ fromFile: file, fromRank: rank, toFile: f, toRank: r, flags: "n" });
@@ -241,13 +304,19 @@ function generatePseudoLegal(
         }
 
         case "r": {
-          for (const [df, dr] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+          for (const [df, dr] of [
+            [-1, 0],
+            [1, 0],
+            [0, -1],
+            [0, 1],
+          ]) {
             let f = file + df;
             let r = rank + dr;
             while (inBounds(f, r)) {
               const target = getPiece(board, f, r);
               if (target) {
-                if (target.color === opp) moves.push({ fromFile: file, fromRank: rank, toFile: f, toRank: r, flags: "c" });
+                if (target.color === opp)
+                  moves.push({ fromFile: file, fromRank: rank, toFile: f, toRank: r, flags: "c" });
                 break;
               }
               moves.push({ fromFile: file, fromRank: rank, toFile: f, toRank: r, flags: "n" });
@@ -259,13 +328,23 @@ function generatePseudoLegal(
         }
 
         case "q": {
-          for (const [df, dr] of [[-1, -1], [-1, 1], [1, -1], [1, 1], [-1, 0], [1, 0], [0, -1], [0, 1]]) {
+          for (const [df, dr] of [
+            [-1, -1],
+            [-1, 1],
+            [1, -1],
+            [1, 1],
+            [-1, 0],
+            [1, 0],
+            [0, -1],
+            [0, 1],
+          ]) {
             let f = file + df;
             let r = rank + dr;
             while (inBounds(f, r)) {
               const target = getPiece(board, f, r);
               if (target) {
-                if (target.color === opp) moves.push({ fromFile: file, fromRank: rank, toFile: f, toRank: r, flags: "c" });
+                if (target.color === opp)
+                  moves.push({ fromFile: file, fromRank: rank, toFile: f, toRank: r, flags: "c" });
                 break;
               }
               moves.push({ fromFile: file, fromRank: rank, toFile: f, toRank: r, flags: "n" });
@@ -285,7 +364,13 @@ function generatePseudoLegal(
               if (!inBounds(tf, tr)) continue;
               const target = getPiece(board, tf, tr);
               if (!target || target.color === opp) {
-                moves.push({ fromFile: file, fromRank: rank, toFile: tf, toRank: tr, flags: target ? "c" : "n" });
+                moves.push({
+                  fromFile: file,
+                  fromRank: rank,
+                  toFile: tf,
+                  toRank: tr,
+                  flags: target ? "c" : "n",
+                });
               }
             }
           }
@@ -300,7 +385,13 @@ function generatePseudoLegal(
               !getPiece(board, 5, backRank) &&
               !getPiece(board, 6, backRank)
             ) {
-              moves.push({ fromFile: 4, fromRank: backRank, toFile: 6, toRank: backRank, flags: "k" });
+              moves.push({
+                fromFile: 4,
+                fromRank: backRank,
+                toFile: 6,
+                toRank: backRank,
+                flags: "k",
+              });
             }
             // Queenside
             const qRight = color === "w" ? "Q" : "q";
@@ -310,7 +401,13 @@ function generatePseudoLegal(
               !getPiece(board, 2, backRank) &&
               !getPiece(board, 1, backRank)
             ) {
-              moves.push({ fromFile: 4, fromRank: backRank, toFile: 2, toRank: backRank, flags: "q" });
+              moves.push({
+                fromFile: 4,
+                fromRank: backRank,
+                toFile: 2,
+                toRank: backRank,
+                flags: "q",
+              });
             }
           }
           break;

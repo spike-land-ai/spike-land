@@ -116,9 +116,7 @@ function generateReducer(state: GenerateState, action: GenerateAction): Generate
       };
 
     case "STEP_DONE": {
-      const steps = state.steps.map((s, i) =>
-        i === action.stepIndex ? { ...s, done: true } : s,
-      );
+      const steps = state.steps.map((s, i) => (i === action.stepIndex ? { ...s, done: true } : s));
       return { ...state, steps };
     }
 
@@ -237,7 +235,8 @@ export function useGenerate() {
           description: raw.description ?? prompt.slice(0, 200),
           codespaceId: raw.codespaceId ?? slug,
           previewUrl: raw.previewUrl ?? `${edgeBase}/live/${slug}/index.html`,
-          editorUrl: raw.editorUrl ?? `/vibe-code?codeSpace=${slug}&prompt=${encodeURIComponent(prompt)}`,
+          editorUrl:
+            raw.editorUrl ?? `/vibe-code?codeSpace=${slug}&prompt=${encodeURIComponent(prompt)}`,
           template: raw.template ?? template ?? "blank-react",
           category: raw.category ?? "app",
           generatedAt: raw.generatedAt ?? new Date().toISOString(),
@@ -283,14 +282,16 @@ export function useGenerate() {
 // ---------------------------------------------------------------------------
 
 function buildFallbackSlug(prompt: string): string {
-  return prompt
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, " ")
-    .trim()
-    .split(/\s+/)
-    .filter((w) => w.length > 2)
-    .slice(0, 5)
-    .join("-") || "new-app";
+  return (
+    prompt
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, " ")
+      .trim()
+      .split(/\s+/)
+      .filter((w) => w.length > 2)
+      .slice(0, 5)
+      .join("-") || "new-app"
+  );
 }
 
 function toDisplayName(slug: string): string {

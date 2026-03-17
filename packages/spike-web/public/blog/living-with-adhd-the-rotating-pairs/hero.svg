@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0d0d1a"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff08" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <!-- Blue nodes (mathematical) -->
+  <circle cx="400" cy="200" r="28" fill="#3b82f6" opacity="0.9" filter="url(#glow)"/>
+  <circle cx="600" cy="120" r="28" fill="#60a5fa" opacity="0.85" filter="url(#glow)"/>
+  <circle cx="800" cy="200" r="28" fill="#93c5fd" opacity="0.8" filter="url(#glow)"/>
+  <!-- Amber nodes (engineering) -->
+  <circle cx="350" cy="400" r="28" fill="#f59e0b" opacity="0.9" filter="url(#glow)"/>
+  <circle cx="600" cy="480" r="28" fill="#fbbf24" opacity="0.85" filter="url(#glow)"/>
+  <circle cx="850" cy="400" r="28" fill="#fcd34d" opacity="0.8" filter="url(#glow)"/>
+  <!-- Synaptic arcs - rotation 1 -->
+  <path d="M 400 200 Q 375 300 350 400" stroke="#7c9cff" stroke-width="2" fill="none" opacity="0.5"/>
+  <path d="M 600 120 Q 725 300 850 400" stroke="#9cb8ff" stroke-width="2" fill="none" opacity="0.4"/>
+  <path d="M 800 200 Q 700 350 600 480" stroke="#bcd0ff" stroke-width="2" fill="none" opacity="0.35"/>
+  <!-- Synaptic arcs - rotation 2 -->
+  <path d="M 400 200 Q 500 350 600 480" stroke="#ffa64d" stroke-width="1.5" fill="none" opacity="0.35"/>
+  <path d="M 600 120 Q 475 260 350 400" stroke="#ffbf80" stroke-width="1.5" fill="none" opacity="0.3"/>
+  <path d="M 800 200 Q 825 300 850 400" stroke="#ffd699" stroke-width="1.5" fill="none" opacity="0.3"/>
+  <!-- Central hexagonal dance hint -->
+  <polygon points="600,180 520,300 520,420 600,540 680,420 680,300" fill="none" stroke="#ffffff10" stroke-width="1" stroke-dasharray="8 4"/>
+</svg>

@@ -117,13 +117,7 @@ function buildTimeSeries(events: RawEvent[], range: TimeRange): EventTimeSeries[
 
 // ─── ExportButton ─────────────────────────────────────────────────────────────
 
-function ExportButton({
-  onClick,
-  disabled,
-}: {
-  onClick: () => void;
-  disabled?: boolean;
-}) {
+function ExportButton({ onClick, disabled }: { onClick: () => void; disabled?: boolean }) {
   return (
     <button
       type="button"
@@ -204,9 +198,10 @@ export function EventsTab({ range, d1Data }: EventsTabProps) {
   // Time series for selected events
   const timeSeries = useMemo(() => buildTimeSeries(rawEvents, range), [rawEvents, range]);
 
-  const displayedSeries = selectedEvent === "all"
-    ? timeSeries.slice(0, 5) // top 5 when all selected
-    : timeSeries.filter((s) => s.eventType === selectedEvent);
+  const displayedSeries =
+    selectedEvent === "all"
+      ? timeSeries.slice(0, 5) // top 5 when all selected
+      : timeSeries.filter((s) => s.eventType === selectedEvent);
 
   // Export handlers
   const handleExportSummary = () => {
@@ -230,9 +225,8 @@ export function EventsTab({ range, d1Data }: EventsTabProps) {
     downloadCsv(rows, csvFilename("analytics-events-raw", range));
   };
 
-  const filteredEvents = selectedEvent === "all"
-    ? rawEvents
-    : rawEvents.filter((e) => e.event_type === selectedEvent);
+  const filteredEvents =
+    selectedEvent === "all" ? rawEvents : rawEvents.filter((e) => e.event_type === selectedEvent);
 
   return (
     <div className="space-y-6">
@@ -265,9 +259,7 @@ export function EventsTab({ range, d1Data }: EventsTabProps) {
                 }`}
               >
                 {e.type}
-                {e.count > 0 && (
-                  <span className="ml-1 opacity-60">{e.count.toLocaleString()}</span>
-                )}
+                {e.count > 0 && <span className="ml-1 opacity-60">{e.count.toLocaleString()}</span>}
               </button>
             ))}
         </div>
@@ -342,9 +334,7 @@ export function EventsTab({ range, d1Data }: EventsTabProps) {
                           {event.event_type}
                         </span>
                       </td>
-                      <td className="py-2 pr-4 text-xs text-muted-foreground">
-                        {event.source}
-                      </td>
+                      <td className="py-2 pr-4 text-xs text-muted-foreground">{event.source}</td>
                       <td className="py-2 pr-4 max-w-xs">
                         {meta ? (
                           <div className="flex flex-wrap gap-1">
@@ -355,8 +345,7 @@ export function EventsTab({ range, d1Data }: EventsTabProps) {
                                   key={k}
                                   className="inline-block rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
                                 >
-                                  <span className="font-medium">{k}:</span>{" "}
-                                  {String(v).slice(0, 30)}
+                                  <span className="font-medium">{k}:</span> {String(v).slice(0, 30)}
                                 </span>
                               ))}
                           </div>

@@ -101,9 +101,7 @@ describe("DrawerProvider", () => {
     expect(result.current.isOpen).toBe(true);
 
     act(() => {
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-      );
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
     });
     expect(result.current.isOpen).toBe(false);
   });

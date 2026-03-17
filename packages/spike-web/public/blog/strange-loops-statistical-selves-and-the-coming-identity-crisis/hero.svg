@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <radialGradient id="bg2" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#0c0a1d"/>
+    </radialGradient>
+    <filter id="glow2">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="face-clip">
+      <ellipse cx="600" cy="300" rx="180" ry="240"/>
+    </clipPath>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg2)"/>
+  <!-- Recursive mirror frames receding into depth -->
+  <rect x="180" y="60" width="840" height="510" rx="8" fill="none" stroke="#6366f180" stroke-width="2"/>
+  <rect x="240" y="100" width="720" height="430" rx="6" fill="none" stroke="#818cf860" stroke-width="1.5"/>
+  <rect x="300" y="140" width="600" height="350" rx="5" fill="none" stroke="#a5b4fc40" stroke-width="1.2"/>
+  <rect x="360" y="175" width="480" height="280" rx="4" fill="none" stroke="#c7d2fe30" stroke-width="1"/>
+  <rect x="420" y="205" width="360" height="220" rx="3" fill="none" stroke="#e0e7ff20" stroke-width="0.8"/>
+  <rect x="470" y="230" width="260" height="170" rx="2" fill="none" stroke="#e0e7ff15" stroke-width="0.6"/>
+  <!-- Abstract face silhouette - left (organic) -->
+  <ellipse cx="480" cy="300" rx="80" ry="110" fill="#4338ca" opacity="0.25" filter="url(#glow2)"/>
+  <circle cx="460" cy="270" r="8" fill="#a78bfa" opacity="0.6"/>
+  <circle cx="500" cy="270" r="8" fill="#a78bfa" opacity="0.6"/>
+  <path d="M 460 310 Q 480 330 500 310" stroke="#a78bfa" stroke-width="1.5" fill="none" opacity="0.5"/>
+  <!-- Abstract face silhouette - right (geometric) -->
+  <polygon points="720,190 650,300 680,410 760,410 790,300" fill="#312e81" opacity="0.25" filter="url(#glow2)"/>
+  <rect x="690" y="262" width="16" height="16" rx="1" fill="#818cf8" opacity="0.5"/>
+  <rect x="730" y="262" width="16" height="16" rx="1" fill="#818cf8" opacity="0.5"/>
+  <line x1="700" y1="320" x2="740" y2="320" stroke="#818cf8" stroke-width="1.5" opacity="0.4"/>
+  <!-- Dissolve particles between faces -->
+  <circle cx="560" cy="250" r="3" fill="#c4b5fd" opacity="0.6"/>
+  <circle cx="580" cy="280" r="2" fill="#c4b5fd" opacity="0.5"/>
+  <circle cx="570" cy="310" r="2.5" fill="#c4b5fd" opacity="0.45"/>
+  <circle cx="590" cy="340" r="2" fill="#c4b5fd" opacity="0.4"/>
+  <circle cx="620" cy="260" r="3" fill="#a5b4fc" opacity="0.5"/>
+  <circle cx="630" cy="290" r="2" fill="#a5b4fc" opacity="0.45"/>
+  <circle cx="610" cy="320" r="2.5" fill="#a5b4fc" opacity="0.4"/>
+  <circle cx="640" cy="350" r="2" fill="#a5b4fc" opacity="0.35"/>
+  <!-- Infinity symbol hint -->
+  <path d="M 540 300 C 540 260 580 260 600 300 C 620 340 660 340 660 300 C 660 260 620 260 600 300 C 580 340 540 340 540 300" stroke="#7c3aed" stroke-width="1" fill="none" opacity="0.3"/>
+</svg>

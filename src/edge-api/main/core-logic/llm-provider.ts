@@ -27,7 +27,9 @@ export interface ResolvedSynthesisTarget {
   provider: ProviderId;
   upstreamModel: string;
   apiKey: string;
-  keySource: "byok" | "platform";
+  keySource: "byok" | "platform" | "community";
+  /** Set when keySource is "community" — used for usage tracking */
+  communityTokenId?: string;
 }
 
 export interface UsageShape {
@@ -70,12 +72,12 @@ export const DEFAULT_PROVIDER_MODELS: Record<ProviderId, string> = {
   openai: "gpt-4.1",
   anthropic: "claude-sonnet-4-20250514",
   google: "gemini-2.5-flash",
-  xai: "grok-4-1",
+  xai: "grok-3-latest",
   ollama: "qwen3:8b",
 };
 
 export const AUTO_BYOK_PRIORITY: ByokProvider[] = ["openai", "anthropic", "google"];
-export const AUTO_PLATFORM_PRIORITY: ProviderId[] = ["xai", "anthropic", "google", "openai"]; // ollama excluded from auto: local-only
+export const AUTO_PLATFORM_PRIORITY: ProviderId[] = ["anthropic", "google", "openai", "xai"]; // ollama excluded from auto: local-only
 
 // ── Provider name / model inference ────────────────────────────────────
 
@@ -250,6 +252,7 @@ export async function resolveAutoSynthesisTarget(
   env: Env,
   userId: string | undefined,
 ): Promise<ResolvedSynthesisTarget | null> {
+  // 1. BYOK (user's own keys) — highest priority
   if (userId) {
     const byokResults = await Promise.all(
       AUTO_BYOK_PRIORITY.map(async (provider) => ({
@@ -269,6 +272,21 @@ export async function resolveAutoSynthesisTarget(
     }
   }
 
+  // 2. Community pool (donated tokens) — round-robin by least-recently-used
+  for (const provider of AUTO_PLATFORM_PRIORITY) {
+    const community = await resolveCommunityToken(env.DB, provider);
+    if (community) {
+      return {
+        provider,
+        upstreamModel: DEFAULT_PROVIDER_MODELS[provider],
+        apiKey: community.apiKey,
+        keySource: "community",
+        communityTokenId: community.tokenId,
+      };
+    }
+  }
+
+  // 3. Platform keys — fallback (CLAUDE_OAUTH_TOKEN, GEMINI_API_KEY, etc.)
   for (const provider of AUTO_PLATFORM_PRIORITY) {
     const platformKey = getPlatformKey(env, provider);
     if (platformKey) {
@@ -298,6 +316,150 @@ export async function resolveSynthesisTarget(
     selection.provider,
     selection.upstreamModel ?? DEFAULT_PROVIDER_MODELS[selection.provider],
   );
+}
+
+/** Resolve all available targets in priority order (for fallback). */
+export async function resolveAllPlatformTargets(
+  env: Env,
+  userId: string | undefined,
+): Promise<ResolvedSynthesisTarget[]> {
+  const targets: ResolvedSynthesisTarget[] = [];
+
+  // 1. BYOK first
+  if (userId) {
+    const byokResults = await Promise.all(
+      AUTO_BYOK_PRIORITY.map(async (provider) => ({
+        provider,
+        key: await resolveByokKey(env.MCP_SERVICE, userId, provider, env.MCP_INTERNAL_SECRET),
+      })),
+    );
+    for (const entry of byokResults) {
+      if (entry.key) {
+        targets.push({
+          provider: entry.provider,
+          upstreamModel: DEFAULT_PROVIDER_MODELS[entry.provider],
+          apiKey: entry.key,
+          keySource: "byok",
+        });
+      }
+    }
+  }
+
+  // 2. Community pool tokens
+  const communityTargets = await resolveCommunityTokensForProviders(env.DB, AUTO_PLATFORM_PRIORITY);
+  for (const ct of communityTargets) {
+    if (!targets.some((t) => t.provider === ct.provider)) {
+      targets.push(ct);
+    }
+  }
+
+  // 3. Platform keys as final fallback
+  for (const provider of AUTO_PLATFORM_PRIORITY) {
+    const platformKey = getPlatformKey(env, provider);
+    if (platformKey && !targets.some((t) => t.provider === provider)) {
+      targets.push({
+        provider,
+        upstreamModel: DEFAULT_PROVIDER_MODELS[provider],
+        apiKey: platformKey,
+        keySource: "platform",
+      });
+    }
+  }
+
+  return targets;
+}
+
+// ── Community token pool (donated keys) ───────────────────────────
+
+interface DonatedTokenRow {
+  id: string;
+  provider: string;
+  encrypted_key: string;
+}
+
+/**
+ * Fetch the least-recently-used active community token for a given provider.
+ * Returns null if no donated tokens are available.
+ */
+export async function resolveCommunityToken(
+  db: D1Database,
+  provider: ProviderId,
+): Promise<{ tokenId: string; apiKey: string } | null> {
+  try {
+    const row = await db
+      .prepare(
+        `SELECT id, encrypted_key FROM donated_tokens
+         WHERE provider = ? AND active = 1
+         ORDER BY COALESCE(last_used_at, 0) ASC, total_calls ASC
+         LIMIT 1`,
+      )
+      .bind(provider)
+      .first<DonatedTokenRow>();
+
+    if (!row) return null;
+    return { tokenId: row.id, apiKey: row.encrypted_key };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch all active community tokens for given providers, least-recently-used first.
+ */
+export async function resolveCommunityTokensForProviders(
+  db: D1Database,
+  providers: readonly ProviderId[],
+): Promise<ResolvedSynthesisTarget[]> {
+  const targets: ResolvedSynthesisTarget[] = [];
+
+  for (const provider of providers) {
+    const token = await resolveCommunityToken(db, provider);
+    if (token) {
+      targets.push({
+        provider,
+        upstreamModel: DEFAULT_PROVIDER_MODELS[provider],
+        apiKey: token.apiKey,
+        keySource: "community",
+        communityTokenId: token.tokenId,
+      });
+    }
+  }
+
+  return targets;
+}
+
+/**
+ * Record usage of a community token after an LLM call attempt.
+ */
+export async function recordCommunityTokenUsage(
+  db: D1Database,
+  tokenId: string,
+  success: boolean,
+  error?: string,
+): Promise<void> {
+  try {
+    if (success) {
+      await db
+        .prepare(
+          `UPDATE donated_tokens
+           SET total_calls = total_calls + 1, last_used_at = ?, last_error = NULL
+           WHERE id = ?`,
+        )
+        .bind(Date.now(), tokenId)
+        .run();
+    } else {
+      await db
+        .prepare(
+          `UPDATE donated_tokens
+           SET last_error = ?, last_used_at = ?
+           WHERE id = ?`,
+        )
+        .bind(error ?? "unknown error", Date.now(), tokenId)
+        .run();
+    }
+  } catch {
+    // Non-fatal — don't break the request over tracking
+  }
 }
 
 // ── Provider call functions ────────────────────────────────────────────
@@ -566,7 +728,7 @@ export async function streamCompletion(
     if (!res.ok) {
       const errText = await res.text();
       console.error(`[llm-provider] streaming failed ${res.status}: ${errText}`);
-      throw new Error(`AI service error (${res.status})`);
+      throw new Error(`AI service error (${res.status}): ${errText.slice(0, 200)}`);
     }
 
     return res;
@@ -605,4 +767,46 @@ export async function streamCompletion(
   return new Response(stream, {
     headers: { "Content-Type": "text/event-stream" },
   });
+}
+
+/**
+ * Stream a completion with automatic fallback to the next provider on failure.
+ * Tries each target in order; returns the first successful streaming response.
+ * If all targets fail, throws the last error.
+ */
+export async function streamCompletionWithFallback(
+  targets: ResolvedSynthesisTarget[],
+  messages: ProviderMessage[],
+  options: {
+    temperature?: number | undefined;
+    maxTokens?: number | undefined;
+    tools?: unknown[] | undefined;
+  },
+  db?: D1Database,
+): Promise<{ response: Response; usedTarget: ResolvedSynthesisTarget }> {
+  let lastError: Error | undefined;
+
+  for (const target of targets) {
+    try {
+      const response = await streamCompletion(target, messages, options);
+      // Track community token success
+      if (db && target.keySource === "community" && target.communityTokenId) {
+        recordCommunityTokenUsage(db, target.communityTokenId, true).catch(() => {});
+      }
+      return { response, usedTarget: target };
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      // Track community token failure
+      if (db && target.keySource === "community" && target.communityTokenId) {
+        recordCommunityTokenUsage(db, target.communityTokenId, false, lastError.message).catch(
+          () => {},
+        );
+      }
+      console.warn(
+        `[llm-provider] fallback: ${target.provider}/${target.upstreamModel} failed (${lastError.message}), trying next provider...`,
+      );
+    }
+  }
+
+  throw lastError ?? new Error("No LLM providers available.");
 }

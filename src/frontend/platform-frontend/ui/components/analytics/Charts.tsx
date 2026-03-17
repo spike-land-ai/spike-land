@@ -139,11 +139,7 @@ export function LineChart({
 
           return (
             <g key={s.label}>
-              <polygon
-                points={`${pts} ${areaClose}`}
-                fill={color}
-                opacity={0.08}
-              />
+              <polygon points={`${pts} ${areaClose}`} fill={color} opacity={0.08} />
               <polyline
                 points={pts}
                 fill="none"
@@ -173,17 +169,18 @@ export function LineChart({
         })}
 
         {/* Transparent overlay for hover detection */}
-        {series[0] && series[0].data.map((_, i) => (
-          <rect
-            key={i}
-            x={toX(i, series[0].data.length) - innerW / (2 * (series[0].data.length - 1 || 1))}
-            y={PAD.top}
-            width={innerW / Math.max(series[0].data.length - 1, 1)}
-            height={innerH}
-            fill="transparent"
-            onMouseEnter={() => setHovered({ seriesIdx: 0, pointIdx: i })}
-          />
-        ))}
+        {series[0] &&
+          series[0].data.map((_, i) => (
+            <rect
+              key={i}
+              x={toX(i, series[0].data.length) - innerW / (2 * (series[0].data.length - 1 || 1))}
+              y={PAD.top}
+              width={innerW / Math.max(series[0].data.length - 1, 1)}
+              height={innerH}
+              fill="transparent"
+              onMouseEnter={() => setHovered({ seriesIdx: 0, pointIdx: i })}
+            />
+          ))}
       </svg>
 
       {/* Tooltip */}
@@ -254,11 +251,7 @@ export function BarChart({
     const rowH = innerH / data.length;
 
     return (
-      <div
-        className={`relative ${className}`}
-        role="img"
-        aria-label="Horizontal bar chart"
-      >
+      <div className={`relative ${className}`} role="img" aria-label="Horizontal bar chart">
         <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height }}>
           {data.map((item, i) => {
             const barW = (item.value / maxVal) * innerW;
@@ -325,11 +318,7 @@ export function BarChart({
   const colW = innerW / data.length;
 
   return (
-    <div
-      className={`relative ${className}`}
-      role="img"
-      aria-label="Bar chart"
-    >
+    <div className={`relative ${className}`} role="img" aria-label="Bar chart">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="w-full"
@@ -427,12 +416,7 @@ interface DonutChartProps {
   className?: string;
 }
 
-export function DonutChart({
-  segments,
-  size = 160,
-  centerLabel,
-  className = "",
-}: DonutChartProps) {
+export function DonutChart({ segments, size = 160, centerLabel, className = "" }: DonutChartProps) {
   const [hovered, setHovered] = useState<number | null>(null);
   const total = segments.reduce((sum, s) => sum + s.value, 0);
 
@@ -521,7 +505,9 @@ export function DonutChart({
           fill="var(--color-foreground)"
           fontWeight="700"
         >
-          {hovered !== null ? (segments[hovered]?.value.toLocaleString() ?? total.toLocaleString()) : total.toLocaleString()}
+          {hovered !== null
+            ? (segments[hovered]?.value.toLocaleString() ?? total.toLocaleString())
+            : total.toLocaleString()}
         </text>
         <text
           x={cx}

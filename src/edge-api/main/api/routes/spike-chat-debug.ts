@@ -16,7 +16,7 @@ spikeChatDebug.get("/api/spike-chat/debug/providers", async (c) => {
     provider: ProviderId;
     model: string;
     available: boolean;
-    keySource: "byok" | "platform" | "none";
+    keySource: "byok" | "platform" | "community" | "none";
   }> = [];
 
   for (const provider of ["openai", "anthropic", "google", "xai"] as ProviderId[]) {

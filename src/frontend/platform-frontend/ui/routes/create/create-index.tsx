@@ -196,12 +196,10 @@ export function CreateIndexPage() {
           <Sparkles className="size-3" aria-hidden="true" />
           AI App Generator
         </div>
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          Build any app in seconds
-        </h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Build any app in seconds</h1>
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-          Describe what you want to build and AI generates a fully functional React application
-          — instantly editable, instantly deployable.
+          Describe what you want to build and AI generates a fully functional React application —
+          instantly editable, instantly deployable.
         </p>
       </div>
 

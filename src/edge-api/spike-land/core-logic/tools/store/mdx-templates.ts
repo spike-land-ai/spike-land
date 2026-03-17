@@ -131,9 +131,7 @@ export function generateAppMdx(ctx: AppMdxContext): string {
       : "";
 
   const pricingNote =
-    ctx.pricing && ctx.pricing !== "free"
-      ? `\n\n> **Pricing**: ${ctx.pricing}`
-      : "";
+    ctx.pricing && ctx.pricing !== "free" ? `\n\n> **Pricing**: ${ctx.pricing}` : "";
 
   const categoryNote = ctx.category ? `**Category**: ${ctx.category}` : "";
   const metaLine = [categoryNote, tagBadges].filter(Boolean).join(" &mdash; ");

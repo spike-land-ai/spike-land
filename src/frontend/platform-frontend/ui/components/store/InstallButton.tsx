@@ -15,7 +15,13 @@ interface UninstallDialogProps {
   onCancel: () => void;
 }
 
-function UninstallDialog({ appName, isOpen, isLoading, onConfirm, onCancel }: UninstallDialogProps) {
+function UninstallDialog({
+  appName,
+  isOpen,
+  isLoading,
+  onConfirm,
+  onCancel,
+}: UninstallDialogProps) {
   const cancelRef = useRef<HTMLButtonElement>(null);
 
   // Focus the cancel button when opened for keyboard accessibility
@@ -147,14 +153,11 @@ export function InstallButton({ slug, appName, size = "default", className }: In
     setTimeout(() => setJustInstalled(false), 2000);
   }, [install, isInstalling, isUninstalling]);
 
-  const handleUninstallRequest = useCallback(
-    (e: React.MouseEvent | React.KeyboardEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setShowConfirm(true);
-    },
-    [],
-  );
+  const handleUninstallRequest = useCallback((e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowConfirm(true);
+  }, []);
 
   const handleConfirmUninstall = useCallback(async () => {
     await uninstall();

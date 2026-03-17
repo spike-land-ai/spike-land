@@ -122,13 +122,13 @@ export function RealTimeMetrics() {
           <PulseDot active={!loading} />
           <span className="text-sm font-medium text-foreground">Live</span>
           {lastUpdated && (
-            <span className="text-xs text-muted-foreground">Updated {relativeTime(lastUpdated)}</span>
+            <span className="text-xs text-muted-foreground">
+              Updated {relativeTime(lastUpdated)}
+            </span>
           )}
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground">
-            Refreshes in {secondsUntilRefresh}s
-          </span>
+          <span className="text-xs text-muted-foreground">Refreshes in {secondsUntilRefresh}s</span>
           <button
             type="button"
             onClick={() => fetchAll()}

@@ -386,9 +386,7 @@ describe("CollabIndicator", () => {
       getLastWs().triggerEvent("close");
     });
 
-    await waitFor(() =>
-      expect(screen.getByText(/Reconnecting/i)).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText(/Reconnecting/i)).toBeInTheDocument());
   });
 
   it("shows 'Just you' viewer count when connected alone", async () => {
@@ -420,9 +418,7 @@ describe("CollabIndicator", () => {
       });
     });
 
-    await waitFor(() =>
-      expect(screen.getByText(/alice is typing/i)).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText(/alice is typing/i)).toBeInTheDocument());
   });
 
   it("shows 'N viewing' label when other users present", async () => {

@@ -52,7 +52,11 @@ const Avatar = memo(function Avatar({ user, onUserClick }: AvatarProps) {
   }, [onUserClick, user.userId]);
 
   return (
-    <div className="relative" onMouseEnter={() => setTooltipVisible(true)} onMouseLeave={() => setTooltipVisible(false)}>
+    <div
+      className="relative"
+      onMouseEnter={() => setTooltipVisible(true)}
+      onMouseLeave={() => setTooltipVisible(false)}
+    >
       <button
         type="button"
         aria-describedby={tooltipId}
@@ -134,9 +138,7 @@ export function PresenceBar({ onUserClick, className }: PresenceBarProps) {
     >
       {/* Viewing count label */}
       <span className="mr-1 text-[11px] font-medium text-muted-foreground">
-        {users.length === 0
-          ? "Just you"
-          : `${users.length + 1} viewing`}
+        {users.length === 0 ? "Just you" : `${users.length + 1} viewing`}
       </span>
 
       {/* Avatar stack */}

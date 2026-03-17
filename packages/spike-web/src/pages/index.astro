@@ -1,60 +1,98 @@
 ---
+import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
-import Crescendo from '../components/typography/Crescendo.astro';
 import Whisper from '../components/typography/Whisper.astro';
 import Analytics from '../components/Analytics.astro';
 import CookieConsent from '../components/CookieConsent.astro';
 import { appCatalog } from '../data/apps';
+import { PrdFilterDemo } from '../../../../src/core/block-website/ui/PrdFilterDemo';
 
 const features = appCatalog;
 
 const metrics = [
   { value: '80+', label: 'MCP Tools' },
-  { value: '16', label: 'AI Personas' },
+  { value: '1,200+', label: 'Clones' },
   { value: '<1s', label: 'Boot Time' },
-  { value: '∞', label: 'Scale' },
+  { value: '28', label: 'Packages' },
 ];
+
+// Fetch latest blog posts
+const allPosts = await getCollection('blog');
+const latestPosts = allPosts
+  .filter(post => !post.data.draft && !post.data.unlisted)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 6);
+
+const featuredPost = latestPosts[0];
+const morePosts = latestPosts.slice(1, 4);
 ---
 
 <Layout
-  title="spike.land - The Operating System for AI Development"
-  description="The complete operating system for modern AI development. Scaffold, test, and deploy multi-agent systems, data pipelines, and intelligent dashboards in seconds."
+  title="spike.land — Open AI App Store built on MCP"
+  description="80+ hosted MCP tools, edge-native runtime on Cloudflare Workers. Build, test, and deploy AI apps in seconds. Open source."
 >
   <Analytics slot="head" />
+  <link slot="head" rel="manifest" href="/site.webmanifest" />
+  <meta slot="head" name="apple-mobile-web-app-capable" content="yes" />
+  <meta slot="head" name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta slot="head" name="mobile-web-app-capable" content="yes" />
 
   <div class="page-shell">
     <Nav activePath="/" />
 
-    <main>
+    <main id="main-content">
       <!-- ── Hero ─────────────────────────────────────────────────────── -->
       <section class="hero-section">
         <div class="rubik-container hero-inner">
           <div class="hero-eyebrow">
-            <span class="rubik-chip">
+            <span class="rubik-chip chip-live">
               <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>
-              Now in open beta
+              Open beta — free to start
             </span>
           </div>
 
           <h1 class="hero-title">
-            <Crescendo text="Build AI apps at the speed of thought." />
+            Your old chats are already PRDs.
           </h1>
 
           <p class="rubik-lede hero-lede">
-            The complete operating system for modern AI development. Scaffold, test, and deploy
-            multi-agent systems, data pipelines, and intelligent dashboards in seconds.
+            11 messages become 5 executable fields. No more lost requirements.
+            spike.land extracts what matters from every AI conversation.
           </p>
 
           <div class="hero-ctas">
-            <a href="/login" class="cta-primary">
-              Start Building Free
+            <a href="/chat" class="cta-primary">
+              Try Spike Chat
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
             <a href="/apps" class="cta-secondary">
-              Explore Apps
+              Browse 80+ Tools
             </a>
+          </div>
+
+          <!-- PRD Filter hero image — the centerpiece -->
+          <div class="hero-image-wrap">
+            <img
+              src="/prd-filter-hero.jpg"
+              alt="PRD Filter: 11 chat messages distilled into 5 executable requirement fields"
+              class="hero-image"
+              loading="eager"
+              fetchpriority="high"
+            />
+          </div>
+
+          <!-- Social proof -->
+          <div class="social-proof">
+            <div class="proof-avatars">
+              <div class="avatar-stack">
+                <span class="avatar" style="--a-bg: #3b82f6">Z</span>
+                <span class="avatar" style="--a-bg: #10b981">R</span>
+                <span class="avatar" style="--a-bg: #f59e0b">E</span>
+              </div>
+              <span class="proof-text">1,200+ developers cloned this week</span>
+            </div>
           </div>
         </div>
       </section>
@@ -68,6 +106,90 @@ const metrics = [
               <span class="metric-label">{m.label}</span>
             </div>
           ))}
+        </div>
+      </section>
+
+      <!-- ── One-command connect ──────────────────────────────────────── -->
+      <section class="connect-section">
+        <div class="rubik-container connect-inner">
+          <p class="rubik-eyebrow">Zero config</p>
+          <h2 class="connect-title">Connect in one command</h2>
+          <div class="connect-terminal rubik-panel">
+            <div class="terminal-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <code class="terminal-cmd">
+              <span class="terminal-prompt">$</span>
+              claude mcp add spike-land --transport http https://spike.land/mcp
+            </code>
+          </div>
+          <p class="connect-sub">Works with Claude Code, Cursor, VS Code, and any MCP client.</p>
+        </div>
+      </section>
+
+      <!-- ── PRD Filter Interactive Demo ──────────────────────────────── -->
+      <PrdFilterDemo client:visible />
+
+      <!-- ── Free tokens hook ─────────────────────────────────────────── -->
+      <section class="hook-section hook-tokens">
+        <div class="rubik-container hook-inner">
+          <div class="hook-badge">Free forever</div>
+          <h2 class="hook-title">You get 1,000 free tokens. Every day.</h2>
+          <p class="hook-sub">
+            No credit card. No trial expiry. No "contact sales" wall.
+            Just open Spike Chat and start building. We pay what the AI costs.
+          </p>
+          <div class="hook-stats">
+            <div class="hook-stat">
+              <span class="hook-stat-value">$0</span>
+              <span class="hook-stat-label">markup on AI calls</span>
+            </div>
+            <div class="hook-stat">
+              <span class="hook-stat-value">5</span>
+              <span class="hook-stat-label">AI providers</span>
+            </div>
+            <div class="hook-stat">
+              <span class="hook-stat-value">0</span>
+              <span class="hook-stat-label">features behind paywall</span>
+            </div>
+          </div>
+          <a href="/chat" class="cta-primary">
+            Start chatting — it's free
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </section>
+
+      <!-- ── Meet the personas hook ───────────────────────────────────── -->
+      <section class="hook-section hook-personas">
+        <div class="rubik-container">
+          <div class="section-header">
+            <p class="rubik-eyebrow">AI Personas</p>
+            <h2 class="section-title">Talk to minds, not chatbots</h2>
+          </div>
+          <p class="hook-sub" style="text-align:center; margin-bottom: 2rem;">
+            Each persona has its own philosophy, voice, and expertise. No login required.
+          </p>
+          <div class="persona-grid">
+            <a href="/zoltan" class="persona-card rubik-panel" style="--p-accent: #d97706">
+              <div class="persona-avatar" style="background: #d97706">Z</div>
+              <h3 class="persona-name">Zolt&aacute;n</h3>
+              <p class="persona-role">The Arena</p>
+              <p class="persona-pitch">"Music. Math. Code. Human After All."</p>
+            </a>
+            <a href="/arnold" class="persona-card rubik-panel" style="--p-accent: #e11d48">
+              <div class="persona-avatar" style="background: #e11d48">A</div>
+              <h3 class="persona-name">Arnold</h3>
+              <p class="persona-role">UX Provocateur</p>
+              <p class="persona-pitch">"Show me what you've got. I'll tell you what it's missing."</p>
+            </a>
+            <a href="/peti" class="persona-card rubik-panel" style="--p-accent: #22c55e">
+              <div class="persona-avatar" style="background: #22c55e">P</div>
+              <h3 class="persona-name">Peti</h3>
+              <p class="persona-role">QA Engineer</p>
+              <p class="persona-pitch">"Tested spike.land for 3 weeks. Here's what's still broken."</p>
+            </a>
+          </div>
         </div>
       </section>
 
@@ -99,27 +221,234 @@ const metrics = [
         </div>
       </section>
 
+      <!-- ── Open source trust hook ───────────────────────────────────── -->
+      <section class="hook-section hook-opensource">
+        <div class="rubik-container hook-inner">
+          <div class="hook-badge">100% open source</div>
+          <h2 class="hook-title">Read every line. Fork the whole thing.</h2>
+          <p class="hook-sub">
+            28 packages. MIT license. No vendor lock-in. The code you see is the code that runs.
+            Not "open core" with the good parts hidden — genuinely, fully open.
+          </p>
+          <div class="hero-ctas" style="justify-content: center;">
+            <a href="https://github.com/spike-land-ai/spike.land" class="cta-secondary" target="_blank" rel="noopener">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 4.238 9.617 9.634 10.828.576.106.788-.25.788-.556 0-.273-.01-1.185-.015-2.171-4.037.876-4.889-1.731-4.889-1.731-.66-1.676-1.61-2.122-1.61-2.122-1.318-.9.1-.882.1-.882 1.457.102 2.224 1.496 2.224 1.496 1.296 2.218 3.39 1.577 4.216 1.206.13-.938.533-1.577.976-1.94-3.221-.366-6.608-1.61-6.608-7.17 0-1.583.565-2.877 1.492-3.892-.15-.366-.647-1.84.142-3.838 0 0 1.217-.422 3.992 1.486 1.157-.322 2.397-.483 3.633-.488 1.235.005 2.476.166 3.635.488 2.772-1.908 3.987-1.486 3.987-1.486.791 1.998.294 3.472.144 3.838.929 1.015 1.49 2.309 1.49 3.892 0 5.574-3.393 6.801-6.624 7.16.524.452.991 1.344.991 2.709 0 1.957-.014 3.532-.014 4.012 0 .31.209.669.799.554 5.393-1.213 9.629-5.526 9.629-10.828 0-6.627-5.373-12-12-12z"/></svg>
+              View on GitHub
+            </a>
+            <a href="/pricing" class="cta-secondary">
+              See pricing (spoiler: it's free)
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Blog: Latest Intelligence ────────────────────────────────── -->
+      <section class="blog-section">
+        <div class="rubik-container">
+          <div class="section-header">
+            <p class="rubik-eyebrow">Latest Intelligence</p>
+            <h2 class="section-title">From the engineering log</h2>
+          </div>
+
+          {featuredPost && (
+            <a href={`/blog/${featuredPost.id}`} class="featured-post rubik-panel">
+              {featuredPost.data.heroImage && (
+                <div class="fp-image-wrap">
+                  <img src={featuredPost.data.heroImage} alt={featuredPost.data.title} class="fp-image" loading="lazy" />
+                </div>
+              )}
+              <div class="fp-content">
+                <div class="fp-meta">
+                  <time datetime={featuredPost.data.date.toISOString()}>
+                    {featuredPost.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </time>
+                  {featuredPost.data.category && <span class="rubik-chip">{featuredPost.data.category}</span>}
+                </div>
+                <h3 class="fp-title">{featuredPost.data.title}</h3>
+                {featuredPost.data.primer && <p class="fp-primer">{featuredPost.data.primer}</p>}
+                {featuredPost.data.description && <p class="fp-desc">{featuredPost.data.description}</p>}
+                <span class="read-link">Read article <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+              </div>
+            </a>
+          )}
+
+          <div class="blog-grid">
+            {morePosts.map(post => (
+              <a href={`/blog/${post.id}`} class="blog-card rubik-panel">
+                {post.data.heroImage && (
+                  <div class="bc-image-wrap">
+                    <img src={post.data.heroImage} alt={post.data.title} class="bc-image" loading="lazy" />
+                  </div>
+                )}
+                <div class="bc-content">
+                  <div class="fp-meta">
+                    <time datetime={post.data.date.toISOString()}>
+                      {post.data.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </time>
+                    {post.data.category && <span class="rubik-chip">{post.data.category}</span>}
+                  </div>
+                  <h3 class="bc-title">{post.data.title}</h3>
+                  {post.data.primer && <p class="bc-primer">{post.data.primer}</p>}
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <div class="blog-cta">
+            <a href="/blog" class="cta-secondary">
+              View all articles
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </div>
+      </section>
+
       <!-- ── CTA band ────────────────────────────────────────────────── -->
       <section class="cta-band">
         <div class="rubik-container cta-band-inner">
           <div class="cta-band-content">
             <h2 class="cta-band-title">Ready to build?</h2>
             <p class="rubik-lede cta-band-lede">
-              Join thousands of developers shipping AI-powered apps on spike.land.
+              One command. 80+ tools. Ship today.
             </p>
           </div>
-          <a href="/login" class="cta-primary">
-            Get Started Free
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
+          <div class="cta-band-actions">
+            <a href="/chat" class="cta-primary">
+              Open Spike Chat
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="https://github.com/spike-land-ai/spike.land" class="cta-secondary" target="_blank" rel="noopener">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 4.238 9.617 9.634 10.828.576.106.788-.25.788-.556 0-.273-.01-1.185-.015-2.171-4.037.876-4.889-1.731-4.889-1.731-.66-1.676-1.61-2.122-1.61-2.122-1.318-.9.1-.882.1-.882 1.457.102 2.224 1.496 2.224 1.496 1.296 2.218 3.39 1.577 4.216 1.206.13-.938.533-1.577.976-1.94-3.221-.366-6.608-1.61-6.608-7.17 0-1.583.565-2.877 1.492-3.892-.15-.366-.647-1.84.142-3.838 0 0 1.217-.422 3.992 1.486 1.157-.322 2.397-.483 3.633-.488 1.235.005 2.476.166 3.635.488 2.772-1.908 3.987-1.486 3.987-1.486.791 1.998.294 3.472.144 3.838.929 1.015 1.49 2.309 1.49 3.892 0 5.574-3.393 6.801-6.624 7.16.524.452.991 1.344.991 2.709 0 1.957-.014 3.532-.014 4.012 0 .31.209.669.799.554 5.393-1.213 9.629-5.526 9.629-10.828 0-6.627-5.373-12-12-12z"/></svg>
+              Star on GitHub
+            </a>
+          </div>
         </div>
       </section>
     </main>
 
     <Footer />
     <CookieConsent />
+
+    <!-- PWA Install Banner -->
+    <div id="pwa-banner" class="pwa-banner" hidden>
+      <div class="pwa-inner">
+        <div class="pwa-content">
+          <svg class="pwa-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <div>
+            <p class="pwa-title">Install spike.land</p>
+            <p class="pwa-sub">Get instant access from your home screen</p>
+          </div>
+        </div>
+        <div class="pwa-actions">
+          <button id="pwa-install" class="pwa-btn-install">Install</button>
+          <button id="pwa-dismiss" class="pwa-btn-dismiss" aria-label="Dismiss">&times;</button>
+        </div>
+      </div>
+    </div>
   </div>
 </Layout>
+
+<!-- PWA Install + A/B tracking script -->
+<script is:inline>
+(function() {
+  // ── PWA Install Prompt ──
+  let deferredPrompt = null;
+  const banner = document.getElementById('pwa-banner');
+  const installBtn = document.getElementById('pwa-install');
+  const dismissBtn = document.getElementById('pwa-dismiss');
+
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!localStorage.getItem('pwa-dismissed')) {
+      setTimeout(function() {
+        banner.hidden = false;
+        banner.classList.add('pwa-visible');
+      }, 8000);
+    }
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(result) {
+          if (result.outcome === 'accepted') {
+            trackEvent('pwa_install', 'accepted');
+          }
+          deferredPrompt = null;
+          banner.hidden = true;
+        });
+      }
+    });
+  }
+
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', function() {
+      banner.hidden = true;
+      localStorage.setItem('pwa-dismissed', '1');
+    });
+  }
+
+  // ── Lightweight A/B experiment tracking ──
+  function getVariant(experimentId) {
+    var key = 'ab_' + experimentId;
+    var stored = localStorage.getItem(key);
+    if (stored) return stored;
+    var variant = Math.random() < 0.5 ? 'a' : 'b';
+    localStorage.setItem(key, variant);
+    return variant;
+  }
+
+  function trackEvent(event, detail) {
+    if (typeof navigator.sendBeacon === 'function') {
+      navigator.sendBeacon('/api/analytics/pageview', JSON.stringify({
+        path: location.pathname,
+        event: event,
+        detail: detail,
+        ts: Date.now(),
+      }));
+    }
+  }
+
+  // Track scroll depth for engagement
+  var maxScroll = 0;
+  var scrollTicks = [25, 50, 75, 100];
+  window.addEventListener('scroll', function() {
+    var pct = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+    if (pct > maxScroll) {
+      maxScroll = pct;
+      for (var i = 0; i < scrollTicks.length; i++) {
+        if (pct >= scrollTicks[i] && maxScroll - pct < 5) {
+          trackEvent('scroll_depth', scrollTicks[i] + '%');
+          scrollTicks.splice(i, 1);
+          break;
+        }
+      }
+    }
+  }, { passive: true });
+
+  // Track time on page
+  setTimeout(function() { trackEvent('engaged', '30s'); }, 30000);
+  setTimeout(function() { trackEvent('engaged', '60s'); }, 60000);
+
+  // iOS PWA hint (no beforeinstallprompt)
+  var isIos = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  if (isIos && !isStandalone && !localStorage.getItem('pwa-dismissed')) {
+    setTimeout(function() {
+      banner.hidden = false;
+      banner.classList.add('pwa-visible');
+      if (installBtn) {
+        installBtn.textContent = 'How to install';
+        installBtn.addEventListener('click', function() {
+          alert('Tap the Share button in Safari, then "Add to Home Screen"');
+        }, { once: true });
+      }
+    }, 12000);
+  }
+})();
+</script>
 
 <style>
   .page-shell {
@@ -131,7 +460,7 @@ const metrics = [
 
   /* ── Hero ──────────────────────────────────────────────────────────── */
   .hero-section {
-    padding-block: clamp(5rem, 12vw, 9rem);
+    padding-block: clamp(3rem, 8vw, 6rem) clamp(2rem, 4vw, 3rem);
     background: radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in srgb, var(--primary-color) 12%, transparent), transparent);
   }
 
@@ -140,65 +469,83 @@ const metrics = [
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 1.75rem;
+    gap: 1.5rem;
   }
 
-  .hero-eyebrow {
-    display: flex;
-    justify-content: center;
-  }
+  .hero-eyebrow { display: flex; justify-content: center; }
+
+  .chip-live { color: var(--primary-color); border-color: color-mix(in srgb, var(--primary-color) 30%, transparent); }
+  .chip-live svg { color: #22c55e; }
 
   .hero-title {
-    max-width: 18ch;
+    font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900;
+    letter-spacing: -0.04em; line-height: 1.1;
+    max-width: 100%; overflow-wrap: break-word;
   }
+  .hero-lede { margin-inline: auto; max-width: 44ch; }
 
-  .hero-lede {
-    margin-inline: auto;
+  .hero-image-wrap {
+    margin-top: 0.5rem; width: 100%; max-width: 56rem;
+    border-radius: var(--radius-xl, 1rem);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.06);
+    transition: transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.5s ease;
+  }
+  .hero-image-wrap:hover {
+    transform: translateY(-4px) scale(1.005);
+    box-shadow: 0 28px 80px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.1);
+  }
+  .hero-image {
+    width: 100%; height: auto; display: block;
   }
 
   .hero-ctas {
-    display: flex;
-    gap: 0.875rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding-top: 0.5rem;
+    display: flex; gap: 0.875rem; flex-wrap: wrap; justify-content: center; padding-top: 0.25rem;
+  }
+
+  .social-proof { margin-top: 0.5rem; }
+
+  .proof-avatars {
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+
+  .avatar-stack { display: flex; }
+
+  .avatar {
+    width: 1.75rem; height: 1.75rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700; color: white;
+    background: var(--a-bg); border: 2px solid var(--bg);
+    margin-left: -0.375rem;
+  }
+  .avatar:first-child { margin-left: 0; }
+
+  .proof-text {
+    font-size: 0.8125rem; color: var(--muted-fg); font-weight: 500;
   }
 
   /* ── CTAs ──────────────────────────────────────────────────────────── */
   .cta-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: var(--primary-color);
-    color: var(--primary-fg);
-    border-radius: var(--radius-lg);
-    font-weight: 600;
-    font-size: 0.9375rem;
-    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1.5rem; background: var(--primary-color);
+    color: var(--primary-fg); border-radius: var(--radius-lg);
+    font-weight: 600; font-size: 0.9375rem; text-decoration: none;
     letter-spacing: -0.01em;
     transition: opacity var(--duration-fast) var(--ease), transform var(--duration-fast) var(--ease);
     box-shadow: var(--shadow-md);
   }
-
   .cta-primary:hover { opacity: 0.88; transform: translateY(-1px); }
   .cta-primary:active { transform: translateY(0); }
 
   .cta-secondary {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    background: var(--card-bg);
-    color: var(--fg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    font-weight: 500;
-    font-size: 0.9375rem;
-    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1.5rem; background: var(--card-bg);
+    color: var(--fg); border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg); font-weight: 500;
+    font-size: 0.9375rem; text-decoration: none;
     transition: background var(--duration-fast) var(--ease), border-color var(--duration-fast) var(--ease);
     box-shadow: var(--shadow-sm);
   }
-
   .cta-secondary:hover {
     background: var(--muted-bg);
     border-color: color-mix(in srgb, var(--muted-fg) 40%, transparent);
@@ -207,129 +554,163 @@ const metrics = [
   /* ── Metrics strip ─────────────────────────────────────────────────── */
   .metrics-strip {
     border-block: 1px solid var(--border-color);
-    background: var(--card-bg);
-    padding-block: 1.75rem;
+    background: var(--card-bg); padding-block: 1.75rem;
   }
-
   .metrics-inner {
-    display: flex;
-    justify-content: center;
-    gap: clamp(2rem, 6vw, 5rem);
-    flex-wrap: wrap;
+    display: flex; justify-content: center; gap: clamp(2rem, 6vw, 5rem); flex-wrap: wrap;
   }
-
-  .metric-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
+  .metric-item { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; }
   .metric-value {
-    font-size: clamp(1.75rem, 3vw, 2.25rem);
-    font-weight: 900;
-    font-family: var(--font-display);
-    letter-spacing: -0.04em;
-    color: var(--fg);
-    font-variation-settings: "wght" 900;
+    font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 900;
+    font-family: var(--font-display); letter-spacing: -0.04em;
+    color: var(--fg); font-variation-settings: "wght" 900;
+  }
+  .metric-label {
+    font-size: 0.8125rem; color: var(--muted-fg); font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.06em;
   }
 
-  .metric-label {
-    font-size: 0.8125rem;
-    color: var(--muted-fg);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+  /* ── Connect section ────────────────────────────────────────────── */
+  .connect-section {
+    padding-block: clamp(3rem, 6vw, 5rem);
   }
+  .connect-inner {
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.25rem;
+  }
+  .connect-title {
+    font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.03em;
+  }
+  .connect-terminal {
+    width: 100%; max-width: 44rem; text-align: left;
+    padding: 1rem 1.25rem; font-family: ui-monospace, monospace;
+    font-size: 0.875rem; overflow-x: auto;
+    position: relative;
+  }
+  .terminal-dots {
+    display: flex; gap: 0.375rem; margin-bottom: 0.75rem;
+  }
+  .terminal-dots span {
+    width: 0.625rem; height: 0.625rem; border-radius: 50%;
+    background: var(--border-color);
+  }
+  .terminal-dots span:nth-child(1) { background: #ef4444aa; }
+  .terminal-dots span:nth-child(2) { background: #f59e0baa; }
+  .terminal-dots span:nth-child(3) { background: #22c55eaa; }
+  .terminal-prompt { color: var(--primary-color); margin-right: 0.5rem; }
+  .terminal-cmd { color: var(--fg); word-break: break-all; }
+  .connect-sub { font-size: 0.875rem; color: var(--muted-fg); }
 
   /* ── Apps section ──────────────────────────────────────────────────── */
-  .apps-section {
-    padding-block: clamp(4rem, 8vw, 6rem);
-  }
-
+  .apps-section { padding-block: clamp(4rem, 8vw, 6rem); }
   .section-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
+    text-align: center; margin-bottom: 3rem;
+    display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
   }
-
-  .section-title {
-    max-width: 24ch;
-  }
-
+  .section-title { max-width: 24ch; }
   .apps-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
-    gap: 1.25rem;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: 1.25rem;
   }
-
   .app-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.875rem;
-    text-decoration: none;
-    color: inherit;
+    display: flex; flex-direction: column; gap: 0.875rem;
+    text-decoration: none; color: inherit;
     transition: box-shadow var(--duration-normal) var(--ease),
                 border-color var(--duration-normal) var(--ease),
                 transform var(--duration-fast) var(--ease);
   }
-
   .app-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px); box-shadow: var(--shadow-lg);
     border-color: color-mix(in srgb, var(--app-accent) 40%, transparent);
   }
-
   .app-icon-wrap {
-    width: 3rem;
-    height: 3rem;
-    border-radius: var(--radius-md);
+    width: 3rem; height: 3rem; border-radius: var(--radius-md);
     background: var(--app-accent-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--app-accent);
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--app-accent); flex-shrink: 0;
   }
-
-  .app-icon {
-    width: 1.375rem;
-    height: 1.375rem;
-  }
-
-  .app-name {
-    font-size: 1.25rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--fg);
-    margin: 0;
-  }
-
-  .app-desc {
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    color: var(--muted-fg);
-    flex: 1;
-    margin: 0;
-  }
-
+  .app-icon { width: 1.375rem; height: 1.375rem; }
+  .app-name { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--fg); margin: 0; }
+  .app-desc { font-size: 0.9375rem; line-height: 1.6; color: var(--muted-fg); flex: 1; margin: 0; }
   .app-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--app-accent);
-    margin-top: 0.25rem;
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    font-size: 0.875rem; font-weight: 600; color: var(--app-accent);
+    margin-top: 0.25rem; transition: gap var(--duration-fast) var(--ease);
+  }
+  .app-card:hover .app-link { gap: 0.625rem; }
+
+  /* ── Blog section ──────────────────────────────────────────────────── */
+  .blog-section {
+    padding-block: clamp(4rem, 8vw, 6rem);
+    border-top: 1px solid var(--border-color);
+    background: color-mix(in srgb, var(--primary-color) 2%, var(--bg));
+  }
+
+  .featured-post {
+    display: grid; grid-template-columns: 1fr 1fr;
+    text-decoration: none; color: inherit; overflow: hidden; padding: 0;
+    margin-bottom: 1.5rem;
+    transition: box-shadow var(--duration-normal) var(--ease), transform var(--duration-fast) var(--ease);
+  }
+  .featured-post:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+  @media (max-width: 768px) { .featured-post { grid-template-columns: 1fr; } }
+
+  .fp-image-wrap { overflow: hidden; aspect-ratio: 16/10; }
+  .fp-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s var(--ease); }
+  .featured-post:hover .fp-image { transform: scale(1.03); }
+
+  .fp-content { padding: 2rem; display: flex; flex-direction: column; gap: 0.75rem; justify-content: center; }
+  .fp-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .fp-meta time { font-size: 0.8125rem; color: var(--muted-fg); }
+  .fp-title {
+    font-size: clamp(1.25rem, 2vw, 1.625rem); font-weight: 800;
+    letter-spacing: -0.025em; line-height: 1.25; margin: 0; color: var(--fg);
+    transition: color var(--duration-fast) var(--ease);
+  }
+  .featured-post:hover .fp-title { color: var(--primary-color); }
+  .fp-primer {
+    font-size: 0.9375rem; font-weight: 600; font-style: italic;
+    color: var(--primary-color); margin: 0;
+  }
+  .fp-desc {
+    font-size: 0.9rem; color: var(--muted-fg); line-height: 1.6; margin: 0;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .read-link {
+    display: inline-flex; align-items: center; gap: 0.375rem;
+    font-size: 0.875rem; font-weight: 600; color: var(--primary-color);
     transition: gap var(--duration-fast) var(--ease);
   }
+  .featured-post:hover .read-link { gap: 0.625rem; }
 
-  .app-card:hover .app-link {
-    gap: 0.625rem;
+  .blog-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: 1.25rem;
   }
+
+  .blog-card {
+    display: flex; flex-direction: column; text-decoration: none;
+    color: inherit; overflow: hidden; padding: 0;
+    transition: box-shadow var(--duration-normal) var(--ease),
+                border-color var(--duration-normal) var(--ease),
+                transform var(--duration-fast) var(--ease);
+  }
+  .blog-card:hover {
+    transform: translateY(-2px); box-shadow: var(--shadow-lg);
+    border-color: color-mix(in srgb, var(--primary-color) 30%, transparent);
+  }
+
+  .bc-image-wrap { overflow: hidden; aspect-ratio: 16/9; }
+  .bc-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s var(--ease); }
+  .blog-card:hover .bc-image { transform: scale(1.04); }
+  .bc-content { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+  .bc-title {
+    font-size: 1.0625rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3;
+    margin: 0; color: var(--fg); transition: color var(--duration-fast) var(--ease);
+  }
+  .blog-card:hover .bc-title { color: var(--primary-color); }
+  .bc-primer { font-size: 0.8125rem; font-style: italic; color: var(--muted-fg); margin: 0; }
+
+  .blog-cta { margin-top: 2rem; display: flex; justify-content: center; }
 
   /* ── CTA band ──────────────────────────────────────────────────────── */
   .cta-band {
@@ -337,26 +718,140 @@ const metrics = [
     background: color-mix(in srgb, var(--primary-color) 6%, var(--bg));
     border-block: 1px solid color-mix(in srgb, var(--primary-color) 15%, transparent);
   }
-
   .cta-band-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 2rem;
-    flex-wrap: wrap;
+    display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap;
+  }
+  .cta-band-content { display: flex; flex-direction: column; gap: 0.5rem; }
+  .cta-band-title { font-size: clamp(1.5rem, 2.5vw, 2.25rem); }
+  .cta-band-lede { margin: 0; }
+  .cta-band-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+  /* ── PWA Install Banner ─────────────────────────────────────────── */
+  .pwa-banner {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+    background: var(--card-bg); border-top: 1px solid var(--border-color);
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+    transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+  }
+  .pwa-banner.pwa-visible { transform: translateY(0); }
+  .pwa-inner {
+    max-width: 64rem; margin: 0 auto;
+    padding: 1rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .pwa-content { display: flex; align-items: center; gap: 0.75rem; }
+  .pwa-icon { color: var(--primary-color); flex-shrink: 0; }
+  .pwa-title { font-size: 0.9375rem; font-weight: 700; color: var(--fg); margin: 0; }
+  .pwa-sub { font-size: 0.8125rem; color: var(--muted-fg); margin: 0; }
+  .pwa-actions { display: flex; align-items: center; gap: 0.5rem; }
+  .pwa-btn-install {
+    padding: 0.5rem 1.25rem; background: var(--primary-color); color: var(--primary-fg);
+    border: none; border-radius: var(--radius-lg); font-weight: 600; font-size: 0.875rem;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .pwa-btn-install:hover { opacity: 0.88; }
+  .pwa-btn-dismiss {
+    width: 2rem; height: 2rem; border: none; background: transparent;
+    color: var(--muted-fg); font-size: 1.25rem; cursor: pointer; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .pwa-btn-dismiss:hover { background: var(--muted-bg); }
+
+  /* ── Hook sections (free tokens, personas, open source) ────────── */
+  .hook-section {
+    padding-block: clamp(3rem, 6vw, 5rem);
+    border-top: 1px solid var(--border-color);
+  }
+  .hook-inner {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; gap: 1.5rem;
+  }
+  .hook-badge {
+    display: inline-flex; align-items: center;
+    padding: 0.375rem 1rem; border-radius: 999px;
+    font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    color: var(--primary-color);
+    border: 1px solid color-mix(in srgb, var(--primary-color) 25%, transparent);
+  }
+  .hook-title {
+    font-size: clamp(1.5rem, 3.5vw, 2.5rem); font-weight: 900;
+    letter-spacing: -0.03em; line-height: 1.15;
+    max-width: 28ch;
+  }
+  .hook-sub {
+    font-size: 1.0625rem; line-height: 1.7; color: var(--muted-fg);
+    max-width: 52ch; margin: 0;
+  }
+  .hook-stats {
+    display: flex; gap: clamp(2rem, 5vw, 4rem); flex-wrap: wrap;
+    justify-content: center; padding-top: 0.5rem;
+  }
+  .hook-stat {
+    display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+  }
+  .hook-stat-value {
+    font-size: clamp(2rem, 4vw, 3rem); font-weight: 900;
+    font-family: var(--font-display); letter-spacing: -0.04em;
+    color: var(--fg);
+  }
+  .hook-stat-label {
+    font-size: 0.8125rem; color: var(--muted-fg); font-weight: 500;
   }
 
-  .cta-band-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  /* Tokens hook accent */
+  .hook-tokens {
+    background: color-mix(in srgb, var(--primary-color) 3%, var(--bg));
   }
 
-  .cta-band-title {
-    font-size: clamp(1.5rem, 2.5vw, 2.25rem);
+  /* Open source hook accent */
+  .hook-opensource {
+    background: color-mix(in srgb, var(--primary-color) 2%, var(--bg));
   }
 
-  .cta-band-lede {
-    margin: 0;
+  /* ── Persona grid ────────────────────────────────────────────────── */
+  .persona-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    gap: 1.25rem; width: 100%;
+  }
+  .persona-card {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.75rem; padding: 1.75rem 1.25rem;
+    text-decoration: none; color: inherit; text-align: center;
+    transition: transform var(--duration-fast) var(--ease),
+                box-shadow var(--duration-normal) var(--ease),
+                border-color var(--duration-normal) var(--ease);
+  }
+  .persona-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--p-accent, var(--primary-color));
+  }
+  .persona-avatar {
+    width: 3.5rem; height: 3.5rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; font-weight: 800; color: white;
+    flex-shrink: 0;
+  }
+  .persona-name {
+    font-size: 1.125rem; font-weight: 700; margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .persona-role {
+    font-size: 0.8125rem; font-weight: 600; margin: 0;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--p-accent, var(--primary-color));
+  }
+  .persona-pitch {
+    font-size: 0.875rem; color: var(--muted-fg);
+    font-style: italic; margin: 0; line-height: 1.5;
+  }
+
+  @media (max-width: 640px) {
+    .pwa-inner { flex-direction: column; text-align: center; gap: 0.75rem; }
+    .pwa-content { flex-direction: column; }
   }
 </style>

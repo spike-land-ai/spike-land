@@ -40,9 +40,7 @@ export function useInstalledApps() {
       return installs.map(
         (record): McpAppSummary => ({
           slug: record.app_slug,
-          name: record.app_slug
-            .replace(/-/g, " ")
-            .replace(/\b\w/g, (l) => l.toUpperCase()),
+          name: record.app_slug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
           description: "",
           emoji: "📦",
           category: "General Utility",
