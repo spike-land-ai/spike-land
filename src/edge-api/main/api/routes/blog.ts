@@ -36,20 +36,6 @@ interface BlogPostRow {
   updated_at: number;
 }
 
-interface ToolTextPart {
-  type: string;
-  text?: string;
-}
-
-interface ToolCallResult {
-  content?: ToolTextPart[];
-  isError?: boolean;
-}
-
-interface ToolApiResponse {
-  result?: ToolCallResult;
-}
-
 function stripQuotes(value: string): string {
   return value.replace(/^['"]|['"]$/g, "");
 }
@@ -414,11 +400,8 @@ const CONTENT_TYPES: Record<string, string> = {
   ogg: "audio/ogg",
 };
 
-const IMAGE_STUDIO_URL = "https://image-studio-mcp.spikeland.workers.dev/api/tool";
-const IMAGE_STUDIO_GENERATE_TOOL = "img_generate";
-const IMAGE_STUDIO_JOB_STATUS_TOOL = "img_job_status";
-const HERO_GENERATION_POLL_ATTEMPTS = 15;
-const HERO_GENERATION_POLL_DELAY_MS = 1_000;
+const IMAGE_STUDIO_GENERATE_URL =
+  "https://image-studio-mcp.spikeland.workers.dev/api/generate-image";
 
 function buildImageResponse(
   object: R2ObjectBody,
@@ -462,40 +445,6 @@ function shouldAllowProdImageFallback(hostname: string): boolean {
   );
 }
 
-async function callImageStudioTool<T>(name: string, args: Record<string, unknown>): Promise<T> {
-  const response = await fetch(IMAGE_STUDIO_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      name,
-      arguments: args,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Image Studio returned ${response.status}`);
-  }
-
-  const payload = (await response.json()) as ToolApiResponse;
-  const text = payload.result?.content
-    ?.map((item) => (typeof item.text === "string" ? item.text : ""))
-    .join("\n")
-    .trim();
-
-  if (payload.result?.isError) {
-    throw new Error(text || "Image Studio returned an error");
-  }
-
-  if (!text) {
-    throw new Error("Image Studio returned an empty payload");
-  }
-
-  return JSON.parse(text) as T;
-}
-
 async function generateHeroImageAsset(
   prompt: string,
   outputFormat: "png" | "jpeg" | "webp",
@@ -506,56 +455,19 @@ async function generateHeroImageAsset(
     "No typography, no captions, no logos, no watermarks, no border, no UI chrome.",
   ].join(" ");
 
-  const job = await callImageStudioTool<{ jobId?: string }>(IMAGE_STUDIO_GENERATE_TOOL, {
-    prompt: fullPrompt,
-    aspect_ratio: "21:9",
-    tier: "TIER_1K",
-    resolution: "1K",
-    model_preference: "latest",
-    output_format: outputFormat,
-    num_images: 1,
-  });
+  const url = new URL(IMAGE_STUDIO_GENERATE_URL);
+  url.searchParams.set("prompt", fullPrompt);
+  url.searchParams.set("aspect", "21:9");
 
-  if (!job.jobId) {
-    throw new Error("Generation job id missing");
-  }
+  const response = await fetch(url, { redirect: "follow" });
 
-  let outputUrl: string | null = null;
-  for (let attempt = 0; attempt < HERO_GENERATION_POLL_ATTEMPTS; attempt++) {
-    const status = await callImageStudioTool<{
-      outputUrl?: string;
-      status?: string;
-      error?: string;
-    }>(IMAGE_STUDIO_JOB_STATUS_TOOL, {
-      job_id: job.jobId,
-      job_type: "generation",
-    });
-
-    if (status.outputUrl) {
-      outputUrl = status.outputUrl;
-      break;
-    }
-
-    if (status.status === "FAILED") {
-      throw new Error(status.error || "Hero image generation failed");
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, HERO_GENERATION_POLL_DELAY_MS));
-  }
-
-  if (!outputUrl) {
-    throw new Error("Hero image generation did not finish in time");
-  }
-
-  const assetResponse = await fetch(outputUrl);
-  if (!assetResponse.ok) {
-    throw new Error(`Generated hero fetch failed with ${assetResponse.status}`);
+  if (!response.ok) {
+    throw new Error(`Image Studio generate returned ${response.status}`);
   }
 
   return {
-    body: await assetResponse.arrayBuffer(),
-    contentType:
-      assetResponse.headers.get("Content-Type") || CONTENT_TYPES[outputFormat] || "image/png",
+    body: await response.arrayBuffer(),
+    contentType: response.headers.get("Content-Type") || CONTENT_TYPES[outputFormat] || "image/png",
   };
 }
 
