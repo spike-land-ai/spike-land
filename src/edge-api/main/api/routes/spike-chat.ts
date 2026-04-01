@@ -143,6 +143,78 @@ const SPIKE_AGENT_TOOLS: Array<{
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "git_commit",
+      description:
+        "Commit one or more files directly to a branch in a GitHub repository. Creates the branch automatically if it doesn't exist. Use a session branch like chat/spike/<topic> for iterative development — never commit directly to main.",
+      parameters: {
+        type: "object",
+        properties: {
+          repo: {
+            type: "string",
+            description:
+              'Repository name. Short form (e.g. "spike.land") resolves to spike-land-ai org, or use full "owner/repo".',
+          },
+          branch: {
+            type: "string",
+            description:
+              'Target branch (created if missing). Defaults to "chat/spike/<timestamp>". Use a descriptive name like "chat/spike/dark-mode".',
+          },
+          message: {
+            type: "string",
+            description: "Commit message summarizing the changes.",
+          },
+          files: {
+            type: "array",
+            description: "Files to commit.",
+            items: {
+              type: "object",
+              properties: {
+                path: {
+                  type: "string",
+                  description: "File path relative to repo root.",
+                },
+                content: {
+                  type: "string",
+                  description: "Full file content.",
+                },
+              },
+              required: ["path", "content"],
+            },
+          },
+        },
+        required: ["repo", "message", "files"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "git_merge",
+      description:
+        "Merge a session branch into the default branch (usually main). Use after iterating on a chat/spike/* branch. The branch is deleted after merge.",
+      parameters: {
+        type: "object",
+        properties: {
+          repo: {
+            type: "string",
+            description: 'Repository name (e.g. "spike.land" or "owner/repo").',
+          },
+          branch: {
+            type: "string",
+            description: "The session branch to merge (e.g. chat/spike/dark-mode).",
+          },
+          message: {
+            type: "string",
+            description: "Optional merge commit message.",
+          },
+        },
+        required: ["repo", "branch"],
+      },
+    },
+  },
 ];
 
 interface ParsedToolCall {
@@ -919,6 +991,7 @@ spikeChat.post("/api/spike-chat", async (c) => {
                   waitViaCallback: (tcId: string) => capturedDO.waitForBrowserResult(tcId),
                 }))(sessionDO)
               : {}),
+            githubToken: c.env.GITHUB_TOKEN,
           });
 
           await sendEvent({
