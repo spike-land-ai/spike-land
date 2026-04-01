@@ -1,0 +1,308 @@
+---
+title: "What We Learned from Claude Code Uncloaked — and What We Stole"
+slug: "what-we-learned-from-claude-code-uncloaked"
+description: "Someone reverse-engineered Claude Code's binary and found Iron Gate, Auto-Dream, Kairos, and a two-stage classifier. We already had half of it. Here is what we learned, what we stole, and what we improved in spike-chat."
+date: "2026-04-01"
+author: "Radix"
+category: "Developer Experience"
+tags: ["spike-chat", "claude-code", "context-engineering", "self-improving-loop", "ai-systems", "reverse-engineering", "aether", "memory"]
+featured: false
+draft: false
+primer: "They uncloaked the systems. We recognized most of them. Then we built the missing ones."
+heroPrompt: "A glowing architectural blueprint being reverse-engineered from a sealed black box, with parallel systems visible in both — one organic and amber, one precise and steel blue, cinematic tech illustration"
+heroImage: "/blog/what-we-learned-from-claude-code-uncloaked/hero.jpg"
+---
+
+<Tldr>
+
+# What CCU Revealed — and What spike-chat Already Had
+
+## The Discovery
+Someone reverse-engineered Claude Code's Mach-O binary and npm package. They found named subsystems: Iron Gate (fail-closed safety), Auto-Dream (background memory consolidation), Kairos (auto-brief + cron scheduling), a two-stage classifier (fast + thinking), and 79 feature flags prefixed "tengu_".
+
+## What spike-chat already had
+- Scored memory notes with Bayesian confidence (their version: session memory, currently disabled)
+- Four-stage pipeline with context isolation (their version: single-pass with feature-flagged capabilities)
+- PRD compression filter (no equivalent found in CCU)
+- Bounded tool calling with catalog hints (their version: tool surface gated by feature flags)
+
+## What we learned and stole
+1. **Iron Gate** — fail-closed classifier. If our classify stage fails, default to safe conversation mode. Never pass through unchecked.
+2. **Two-stage classifier** — fast heuristic first, LLM second only when confidence is low. Saves latency on obvious intents.
+3. **Auto-Dream** — background note consolidation. Merge duplicates, decay stale notes, promote consistent patterns. Runs idle, not per-request.
+4. **Execution feedback loop** — tool success/failure feeds back into note confidence. The self-improving loop closes tighter.
+
+## What we would not steal
+- 79 feature flags (we ship, not flag)
+- Session memory disabled by default (we ship memory on by default)
+- Ultraplan remote multi-agent planning (hardcoded off — they are not sure about it either)
+
+## The principle
+The best AI systems are not the ones with the most hidden subsystems. They are the ones where every subsystem earns its place in the working set.
+
+</Tldr>
+
+## The Uncloaking
+
+In late March 2026, a security researcher published [Claude Code Uncloaked](https://ccu.galdoron.com/#systems) — a comprehensive reverse-engineering of Claude Code's native binary and JavaScript internals.
+
+They extracted ~42K unique strings from the macOS arm64 binary. They AST-parsed the npm package JavaScript. They mapped every feature flag, every hidden subsystem, every configuration path.
+
+What they found was not a single monolithic agent.
+
+They found a constellation of named subsystems, each solving a specific problem:
+
+| CCU System | What It Does |
+|---|---|
+| **Iron Gate** | Fail-closed safety for auto-mode. Blocks actions when classifier is unavailable. |
+| **Auto-Dream** | Background memory consolidation. PID-locked. Runs on idle. |
+| **Kairos** | Combined auto-brief and cron scheduling subsystem. |
+| **Two-stage classifier** | Fast model + thinking model at temperature=0, 4096 token max. |
+| **Willow Mode** | Idle detection after 75 min + 100K tokens. Surfaces context recap. |
+| **Penguin Mode** | Fast-mode cooldown state machine with resetAt/reason metadata. |
+| **Harbor** | MCP channel push notification with allowlist permissions. |
+| **Teleport** | Session bundling for CLI-to-cloud transfer. |
+| **Ultraplan** | Remote multi-agent planning. Hardcoded disabled. |
+
+79 feature flags prefixed `tengu_`. 118 settings across 12 categories. A multi-layer permission system with managed enterprise overrides.
+
+This is serious systems engineering.
+
+And when we read the analysis, two things happened:
+
+1. We recognized patterns we already had.
+2. We saw gaps we needed to close.
+
+## What spike-chat Already Had
+
+Before CCU dropped, spike-chat's Aether pipeline already implemented several of the same architectural ideas — often with different names, sometimes with different tradeoffs.
+
+### Scored memory (their "Session Memory" — disabled)
+
+CCU revealed a session memory system in Claude Code. It is currently disabled.
+
+spike-chat ships Bayesian memory by default. Every note carries a confidence score, help count, and recency data. Notes below the demotion threshold (0.3) get pruned. Notes that keep helping get promoted. Selection is greedy under a fixed 800-token budget.
+
+We did not call it "session memory." We called it the note engine. But the core idea is the same: carry forward what earns its place.
+
+The difference: ours is on. Theirs is off.
+
+### Four-stage pipeline (their single-pass with flags)
+
+Claude Code processes requests in a single pass with feature-flagged capabilities. Different flags gate different behaviors within that pass.
+
+spike-chat splits every request into four explicit stages: classify, plan, execute, extract. Each stage receives the prior stage's artifact, not the full raw process. Context isolation is structural, not flag-based.
+
+The difference: we split by design. They split by configuration.
+
+### PRD compression (no CCU equivalent found)
+
+CCU did not reveal a PRD compression layer. Claude Code appears to manage context primarily through prompt caching, token-efficient tool use, and prompt engineering conventions.
+
+spike-chat has a three-tier PRD filter: passthrough for short messages, template extraction for structured intents, and Gemini Flash model compression for complex messages. Every chat message gets evaluated against a compression pipeline before it reaches the model.
+
+This is one area where spike-chat appears to be ahead. Old chats are latent PRDs. We extract them.
+
+### Bounded tool calling (their feature-flagged tool surface)
+
+Claude Code gates tool availability through feature flags and permission modes.
+
+spike-chat bounds the tool surface structurally: fetch the MCP catalog, limit to a compact set, hand it only to the execute stage. Tool definitions are wired into the model call, not just advertised by the route.
+
+Same goal. Different mechanism.
+
+## What We Learned — and Stole
+
+### 1. Iron Gate: Fail-Closed Classifier
+
+This is the most important thing CCU revealed for our purposes.
+
+Iron Gate is simple: if the auto-mode classifier is unavailable, block the action. Do not pass through. Do not guess. Fail closed.
+
+spike-chat's classify stage had no equivalent. If the heuristic classifier returned a plausible result, it was trusted. If something went wrong, the request would still flow through to execution.
+
+That is fail-open. It is the wrong default.
+
+We added an Iron Gate to spike-chat's classifier:
+
+```typescript
+// If classification confidence is below the gate threshold,
+// force safe conversation mode — no tools, no browser actions.
+if (intent.confidence < IRON_GATE_THRESHOLD) {
+  return {
+    intent: "conversation",
+    urgency: "low",
+    needsTools: false,
+    confidence: intent.confidence,
+    reason: "Iron gate: classification confidence below threshold.",
+    gated: true,
+  };
+}
+```
+
+The rule is simple: **if you are not confident about what the user wants, do less, not more.**
+
+Tool use is powerful. Unconfident tool use is dangerous. The Iron Gate ensures that uncertainty defaults to safety.
+
+### 2. Two-Stage Classifier: Fast Heuristic + LLM Confirmation
+
+CCU's classifier uses two models: a fast model for initial classification, then a thinking model for confirmation. Both at temperature=0. Max 4096 tokens.
+
+spike-chat's classifier was single-stage: regex heuristics that pattern-match against the user message. Fast, but brittle for ambiguous inputs.
+
+We kept the fast heuristic as stage one. But now, when confidence is below a threshold (but above the Iron Gate), we run a second LLM-based classification pass:
+
+```text
+User message
+  → Stage 1: Regex heuristics (0-latency, high confidence on clear intents)
+  → if confidence < 0.7 and confidence >= IRON_GATE_THRESHOLD:
+      Stage 2: LLM classifier (temperature=0, max 256 tokens)
+  → if confidence < IRON_GATE_THRESHOLD:
+      Iron Gate: force conversation mode
+```
+
+The fast path handles "fix the login bug" (obvious intent). The slow path handles "can you check if the thing from yesterday is working" (ambiguous, needs context). The gate handles garbage.
+
+### 3. Auto-Dream: Background Note Consolidation
+
+This is the one that excited us most.
+
+CCU's Auto-Dream is a background memory consolidation system. PID-locked. Runs on idle. Server-gated.
+
+spike-chat's extract stage runs per-request. It extracts one note per conversation turn. That is fine for capturing new lessons. But it never consolidates.
+
+Over time, this means:
+- duplicate notes accumulate
+- conflicting notes coexist
+- stale notes linger above the demotion threshold
+- the note budget gets wasted on redundancy
+
+Auto-Dream fixes this. We added a consolidation pass that runs after the extract stage:
+
+- **Merge**: notes with similar triggers and lessons get consolidated into one higher-confidence note
+- **Decay**: notes not used in 30+ days get a confidence penalty
+- **Promote**: notes that survived consolidation with high help counts get boosted
+- **Prune**: notes that fall below the demotion threshold after decay get removed
+
+This is not per-request work. It runs in the background via `waitUntil`, so it does not add latency to the user's response.
+
+The note engine was already Bayesian. Auto-Dream makes it self-cleaning.
+
+### 4. Execution Feedback Loop: Closing the Self-Improving Circle
+
+This is the piece that was implicit in spike-chat but never wired up.
+
+The Aether pipeline has four stages: classify → plan → execute → extract. The extract stage learns from conversations. But the execute stage's tool outcomes (success, failure, timeout) were never fed back into note confidence.
+
+That means: if a note suggested an approach that consistently led to tool failures, the note would not get demoted. If a note's advice consistently led to successful tool executions, it would not get promoted.
+
+The feedback loop was open.
+
+We closed it:
+
+```typescript
+// After tool execution, update notes that influenced this response
+for (const note of selectedNotes) {
+  const toolsSucceeded = toolOutcomes.every(o => o.status === "ok");
+  updateNoteConfidence(note, toolsSucceeded);
+}
+```
+
+Now the self-improving loop is:
+
+1. User sends message
+2. Relevant notes are selected from memory
+3. Notes influence the classify → plan → execute pipeline
+4. Tool execution outcomes are recorded
+5. Extract stage learns new notes
+6. **Execution outcomes update existing note confidence**
+7. Auto-Dream consolidates in the background
+8. Next message benefits from a cleaner, more accurate note set
+
+Every note that helps earns trust. Every note that misleads loses it. The system gets sharper with use.
+
+## What We Would Not Steal
+
+### 79 feature flags
+
+Claude Code uses 79 `tengu_`-prefixed feature flags for server-side capability gating.
+
+We ship features or we do not. Flags are organizational tools for large teams coordinating across release trains. spike-chat is built by a solo founder with strong opinions. If a feature is ready, it ships. If it is not, it does not exist yet.
+
+Feature flags are not free. Every flag is a branch in the system's behavior that must be tested, documented, and eventually cleaned up. For our scale, the overhead exceeds the benefit.
+
+### Session memory disabled by default
+
+CCU revealed that Claude Code's session memory is currently disabled.
+
+spike-chat's Bayesian memory has been on since day one. It is load-bearing. Users notice when notes they taught the system show up in later conversations.
+
+We understand why Anthropic might keep it off — liability, privacy, enterprise compliance. But for spike-chat, memory is the product. Turning it off would be like Erdős saying "my brain is closed."
+
+### Ultraplan remote multi-agent planning
+
+CCU found this system hardcoded to disabled. 10-30 minute Opus planning on web. Multi-agent.
+
+We respect the ambition. But if the team that built Claude Code is not confident enough to enable it, we will wait to see why before building our own version.
+
+Single-agent with strong context discipline has been enough to rewrite an entire frontend from one PRD. We will add multi-agent when single-agent demonstrably fails.
+
+## The Erdős Observation
+
+Paul Erdős had 511 co-authors because he believed the best mathematics emerges between minds.
+
+What CCU revealed is that Claude Code is not one mind. It is a collaboration of named subsystems — Iron Gate, Auto-Dream, Kairos, Willow, Harbor — each solving a specific problem, each with clear boundaries.
+
+spike-chat's Aether pipeline was already built on the same principle: classify, plan, execute, extract. Each stage is a collaborator. Each stage receives the prior stage's artifact, not the full mess.
+
+The CCU analysis validated the architecture.
+
+The gaps it revealed — fail-closed safety, two-stage classification, background consolidation, execution feedback — are real gaps. We closed them.
+
+But the biggest lesson from CCU is not any single system.
+
+It is the meta-lesson:
+
+**The best AI products are systems of systems. And the quality of the whole depends on how honestly each subsystem earns its place.**
+
+That is the Erdős principle applied to software: my brain is open, my budget is finite, and every note must earn its place in The Book.
+
+## What Changed in spike-chat
+
+| Before CCU | After CCU |
+|---|---|
+| Single-stage heuristic classifier | Two-stage classifier with confidence gate |
+| Fail-open on classification uncertainty | Iron Gate: fail-closed to conversation mode |
+| Per-request note extraction only | Auto-Dream background consolidation |
+| Tool outcomes not fed back to memory | Execution feedback loop closes the circle |
+| Notes accumulate without cleanup | Merge, decay, promote, prune cycle |
+
+The self-improving loop is now:
+
+```text
+user message
+  → select relevant notes (Bayesian, budget-bounded)
+  → classify (heuristic → optional LLM → Iron Gate)
+  → plan (artifact from classify)
+  → execute (tools, bounded catalog, streaming)
+  → extract (new notes from conversation)
+  → feedback (tool outcomes → note confidence)
+  → consolidate (Auto-Dream: merge, decay, promote, prune)
+  → next message benefits from cleaner memory
+```
+
+Every turn makes the system sharper. Not by remembering more. By remembering better.
+
+## The Falsifiable Claim
+
+spike-chat's context discipline was already strong before CCU.
+
+After these changes, the claim is sharper:
+
+> spike-chat is one of the most disciplined context-engineered chat systems in production. Not because it has the most subsystems. Because every subsystem — from Iron Gate to Auto-Dream — earns its place in the working set.
+
+That claim is falsifiable. Ship a transcript-first system with the same model and compare completion quality after 20 turns. We will take that bet.
+
+Erdős would approve. The proof is constructive.
+
+*Ez benne van a Könyvben.*

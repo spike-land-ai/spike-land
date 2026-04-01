@@ -97,4 +97,115 @@ export function parseExtractedNote(
   }
 }
 
+/**
+ * Auto-Dream: Background note consolidation.
+ * Inspired by Claude Code's Auto-Dream subsystem (CCU).
+ *
+ * Runs three passes over the note set:
+ * 1. Decay — notes not used in 30+ days get a confidence penalty
+ * 2. Merge — notes with similar triggers/lessons are consolidated
+ * 3. Prune — notes below the demote threshold are removed
+ *
+ * Returns the consolidated note set and IDs of notes to delete.
+ */
+export interface ConsolidationResult {
+  surviving: AetherNote[];
+  merged: Array<{ kept: string; absorbed: string }>;
+  decayed: string[];
+  pruned: string[];
+}
+
+const DECAY_DAYS = 30;
+const DECAY_PENALTY = 0.08;
+const SIMILARITY_THRESHOLD = 0.6;
+
+/**
+ * Simple word-overlap similarity between two strings.
+ * Returns a score between 0 and 1.
+ */
+function wordOverlapSimilarity(a: string, b: string): number {
+  const wordsA = new Set(
+    a
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length > 2),
+  );
+  const wordsB = new Set(
+    b
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((w) => w.length > 2),
+  );
+  if (wordsA.size === 0 || wordsB.size === 0) return 0;
+
+  let overlap = 0;
+  for (const word of wordsA) {
+    if (wordsB.has(word)) overlap++;
+  }
+
+  return (2 * overlap) / (wordsA.size + wordsB.size);
+}
+
+export function consolidateNotes(notes: AetherNote[]): ConsolidationResult {
+  const now = Date.now();
+  const decayed: string[] = [];
+  const merged: Array<{ kept: string; absorbed: string }> = [];
+  const absorbedIds = new Set<string>();
+
+  // Pass 1: Decay stale notes
+  const afterDecay = notes.map((note) => {
+    const daysSinceUsed = (now - note.lastUsedAt) / (1000 * 60 * 60 * 24);
+    if (daysSinceUsed > DECAY_DAYS) {
+      decayed.push(note.id);
+      return {
+        ...note,
+        confidence: Math.max(0, note.confidence - DECAY_PENALTY),
+      };
+    }
+    return note;
+  });
+
+  // Pass 2: Merge similar notes (keep the one with higher confidence)
+  for (let i = 0; i < afterDecay.length; i++) {
+    const noteI = afterDecay[i];
+    if (!noteI || absorbedIds.has(noteI.id)) continue;
+
+    for (let j = i + 1; j < afterDecay.length; j++) {
+      const noteJ = afterDecay[j];
+      if (!noteJ || absorbedIds.has(noteJ.id)) continue;
+
+      const triggerSim = wordOverlapSimilarity(noteI.trigger, noteJ.trigger);
+      const lessonSim = wordOverlapSimilarity(noteI.lesson, noteJ.lesson);
+      const combinedSim = triggerSim * 0.4 + lessonSim * 0.6;
+
+      if (combinedSim >= SIMILARITY_THRESHOLD) {
+        // Keep the stronger note, absorb the weaker
+        const keeper = noteI.confidence >= noteJ.confidence ? noteI : noteJ;
+        const absorbed = noteI.confidence >= noteJ.confidence ? noteJ : noteI;
+
+        // Boost the keeper with a portion of the absorbed note's confidence
+        keeper.confidence = Math.min(1, keeper.confidence + absorbed.confidence * 0.1);
+        keeper.helpCount = keeper.helpCount + absorbed.helpCount;
+        absorbedIds.add(absorbed.id);
+        merged.push({ kept: keeper.id, absorbed: absorbed.id });
+      }
+    }
+  }
+
+  // Pass 3: Filter out absorbed and pruned notes
+  const surviving: AetherNote[] = [];
+  const pruned: string[] = [];
+
+  for (const note of afterDecay) {
+    if (absorbedIds.has(note.id)) continue;
+    if (note.confidence < DEMOTE_THRESHOLD) {
+      pruned.push(note.id);
+      continue;
+    }
+    surviving.push(note);
+  }
+
+  return { surviving, merged, decayed, pruned };
+}
+
 export { MAX_DYNAMIC_CHARS, DEMOTE_THRESHOLD };

@@ -11,6 +11,10 @@ import {
   selectNotes,
   saveNote,
   parseExtractedNote,
+  consolidateNotes,
+  updateNoteConfidence,
+  deleteNotesByIds,
+  batchUpdateNotes,
 } from "../../core-logic/aether-memory.js";
 import { fetchToolCatalog } from "../../core-logic/mcp-tools.js";
 import { safeJsonParse, executeAgentTool } from "../../core-logic/chat-tool-execution.js";
@@ -177,8 +181,15 @@ interface LocalIntentSummary {
   intent: "conversation" | "grounded_lookup" | "browser_action";
   urgency: "low" | "medium" | "high";
   needsTools: boolean;
+  confidence: number; // 0-1, heuristic or LLM-derived
   reason: string;
+  gated?: boolean; // true if Iron Gate forced safe mode
 }
+
+/** Iron Gate threshold — below this, force safe conversation mode (fail-closed). */
+const IRON_GATE_THRESHOLD = 0.25;
+/** Below this confidence, run a second LLM-based classification pass. */
+const TWO_STAGE_THRESHOLD = 0.7;
 
 interface HeuristicNoteCandidate {
   trigger: string;
@@ -238,6 +249,12 @@ function compressHistory(
   return compacted;
 }
 
+/**
+ * Stage 1: Fast heuristic classifier with confidence scoring.
+ * Returns a confidence-tagged intent summary. Downstream code uses the
+ * confidence to decide whether to run a second LLM pass (two-stage)
+ * or invoke the Iron Gate (fail-closed).
+ */
 function classifyIntent(
   userMessage: string,
   pageContext?: {
@@ -249,17 +266,39 @@ function classifyIntent(
 ): LocalIntentSummary {
   const compact = userMessage.replace(/\s+/g, " ").trim();
   const lower = compact.toLowerCase();
+
+  // Empty or very short messages → low confidence conversation
+  if (compact.length < 3) {
+    return {
+      intent: "conversation",
+      urgency: "low",
+      needsTools: false,
+      confidence: 0.1,
+      reason: "Message too short to classify reliably.",
+      gated: true,
+    };
+  }
+
   const mentionsPageContext =
     Boolean(pageContext?.title || pageContext?.url || pageContext?.slug) &&
     /\b(this|here|page|article|above|current)\b/i.test(compact);
-  const needsTools =
-    mentionsPageContext || TOOL_INTENT_PATTERNS.some((pattern) => pattern.test(lower));
+  const toolPatternMatches = TOOL_INTENT_PATTERNS.filter((pattern) => pattern.test(lower)).length;
+  const needsTools = mentionsPageContext || toolPatternMatches > 0;
+
+  // Confidence heuristic: more pattern matches → higher confidence
+  // Single match could be coincidental; multiple matches are strong signal
+  const baseConfidence = needsTools
+    ? Math.min(0.95, 0.5 + toolPatternMatches * 0.15 + (mentionsPageContext ? 0.2 : 0))
+    : 0.6; // conversation is the safe default, moderate confidence
 
   if (/\b(open|navigate|click|fill|screenshot|scroll|read)\b/i.test(lower)) {
+    // Browser action verbs are high-signal
+    const browserConfidence = Math.min(0.95, baseConfidence + 0.15);
     return {
       intent: "browser_action",
       urgency: /\bnow|urgent|asap|immediately\b/i.test(lower) ? "high" : "medium",
       needsTools,
+      confidence: browserConfidence,
       reason: "The request appears to require live navigation or browser interaction.",
     };
   }
@@ -269,6 +308,7 @@ function classifyIntent(
       intent: "grounded_lookup",
       urgency: /\bblocker|broken|incident|outage|failing\b/i.test(lower) ? "high" : "medium",
       needsTools: true,
+      confidence: baseConfidence,
       reason: "The request depends on live platform state, docs, tools, or page context.",
     };
   }
@@ -277,8 +317,101 @@ function classifyIntent(
     intent: "conversation",
     urgency: "low",
     needsTools: false,
+    confidence: baseConfidence,
     reason: "The request can be answered directly without live tool usage.",
   };
+}
+
+/**
+ * Iron Gate: fail-closed safety check. If classification confidence is below
+ * the gate threshold, force safe conversation mode — no tools, no browser actions.
+ * Inspired by Claude Code's Iron Gate subsystem (CCU).
+ */
+function applyIronGate(intent: LocalIntentSummary): LocalIntentSummary {
+  if (intent.confidence < IRON_GATE_THRESHOLD) {
+    return {
+      intent: "conversation",
+      urgency: "low",
+      needsTools: false,
+      confidence: intent.confidence,
+      reason: `Iron gate: classification confidence (${intent.confidence.toFixed(2)}) below threshold. Defaulting to safe conversation mode.`,
+      gated: true,
+    };
+  }
+  return intent;
+}
+
+/**
+ * Stage 2: LLM-based classifier for ambiguous messages.
+ * Only called when heuristic confidence is between IRON_GATE_THRESHOLD and TWO_STAGE_THRESHOLD.
+ * Uses a fast model at temperature=0 for deterministic classification.
+ */
+async function llmClassifyIntent(
+  target: ResolvedSynthesisTarget,
+  userMessage: string,
+  heuristicResult: LocalIntentSummary,
+): Promise<LocalIntentSummary> {
+  try {
+    const classifyPrompt = `Classify this user message into exactly one category. Respond with ONLY a JSON object.
+
+Message: "${userMessage.slice(0, 500)}"
+
+Heuristic guess: ${heuristicResult.intent} (confidence: ${heuristicResult.confidence.toFixed(2)})
+
+Respond with:
+{
+  "intent": "conversation" | "grounded_lookup" | "browser_action",
+  "urgency": "low" | "medium" | "high",
+  "needsTools": boolean,
+  "confidence": number between 0 and 1,
+  "reason": "brief explanation"
+}`;
+
+    const result = await synthesizeCompletion(
+      target,
+      [
+        {
+          role: "system",
+          content: "You are a message classifier. Respond with ONLY valid JSON. No other text.",
+        },
+        { role: "user", content: classifyPrompt },
+      ],
+      { temperature: 0, maxTokens: 256 },
+    );
+
+    const parsed = JSON.parse(result.content.trim()) as {
+      intent?: string;
+      urgency?: string;
+      needsTools?: boolean;
+      confidence?: number;
+      reason?: string;
+    };
+
+    const validIntents = ["conversation", "grounded_lookup", "browser_action"] as const;
+    const validUrgencies = ["low", "medium", "high"] as const;
+
+    const intent = validIntents.includes(parsed.intent as (typeof validIntents)[number])
+      ? (parsed.intent as LocalIntentSummary["intent"])
+      : heuristicResult.intent;
+    const urgency = validUrgencies.includes(parsed.urgency as (typeof validUrgencies)[number])
+      ? (parsed.urgency as LocalIntentSummary["urgency"])
+      : heuristicResult.urgency;
+
+    return {
+      intent,
+      urgency,
+      needsTools:
+        typeof parsed.needsTools === "boolean" ? parsed.needsTools : heuristicResult.needsTools,
+      confidence:
+        typeof parsed.confidence === "number"
+          ? Math.max(0, Math.min(1, parsed.confidence))
+          : heuristicResult.confidence,
+      reason: typeof parsed.reason === "string" ? parsed.reason : heuristicResult.reason,
+    };
+  } catch {
+    // LLM classification failed — fall back to heuristic result (fail-open to heuristic, not fail-open to tools)
+    return heuristicResult;
+  }
 }
 
 function buildPlanArtifact(
@@ -760,7 +893,20 @@ spikeChat.post("/api/spike-chat", async (c) => {
     fullSystemPrompt = `${fullSystemPrompt}\n\n${getJobsPersonaPrompt()}`;
   }
 
-  const intentSummary = classifyIntent(userMessage, body.pageContext);
+  // --- Two-stage classifier with Iron Gate ---
+  let intentSummary = classifyIntent(userMessage, body.pageContext);
+
+  // Stage 2: LLM classifier for ambiguous messages (between Iron Gate and confidence threshold)
+  if (
+    intentSummary.confidence >= IRON_GATE_THRESHOLD &&
+    intentSummary.confidence < TWO_STAGE_THRESHOLD
+  ) {
+    intentSummary = await llmClassifyIntent(llmTarget, rawMessage, intentSummary);
+  }
+
+  // Iron Gate: fail-closed safety — force safe mode if still low confidence
+  intentSummary = applyIronGate(intentSummary);
+
   // Persona chats are conversational — never pass tools, except daftpunk who needs music tools
   if (persona && persona !== "daftpunk") {
     intentSummary.needsTools = false;
@@ -838,6 +984,8 @@ spikeChat.post("/api/spike-chat", async (c) => {
         provider: llmTarget.provider,
         model: llmTarget.upstreamModel,
         keySource: llmTarget.keySource,
+        classifierConfidence: intentSummary.confidence,
+        classifierGated: intentSummary.gated ?? false,
       });
 
       if (compression.compressed && c.env.PRD_COMPRESSION_EXPOSE === "true") {
@@ -865,6 +1013,9 @@ spikeChat.post("/api/spike-chat", async (c) => {
         planArtifact,
       );
       let assistantResponse = "";
+
+      // Track tool execution outcomes for the feedback loop
+      const toolOutcomes: Array<{ status: string }> = [];
 
       for (let loop = 0; loop < MAX_TOOL_LOOPS; loop++) {
         const iteration = await streamLlmResponse(llmTarget, executionMessages, sendEvent, {
@@ -924,6 +1075,8 @@ spikeChat.post("/api/spike-chat", async (c) => {
                 }))(sessionDO)
               : {}),
           });
+
+          toolOutcomes.push({ status: toolResult.status });
 
           await sendEvent({
             type: "tool_call_end",
@@ -1022,6 +1175,78 @@ spikeChat.post("/api/spike-chat", async (c) => {
           // Note extraction is non-critical
         }
       })();
+
+      // --- Execution feedback loop: tool outcomes update note confidence ---
+      if (toolOutcomes.length > 0 && selectedNotes.length > 0) {
+        try {
+          const toolsSucceeded = toolOutcomes.every((o) => o.status === "ok");
+          const updates: Array<{ id: string; confidence: number; helpCount: number }> = [];
+
+          for (const note of selectedNotes) {
+            const updated = updateNoteConfidence(note, toolsSucceeded);
+            if (updated.confidence !== note.confidence || updated.helpCount !== note.helpCount) {
+              updates.push({
+                id: note.id,
+                confidence: updated.confidence,
+                helpCount: updated.helpCount,
+              });
+            }
+          }
+
+          if (updates.length > 0) {
+            await batchUpdateNotes(c.env.DB, userId, updates);
+          }
+        } catch {
+          // Feedback loop is non-critical
+        }
+      }
+
+      // --- Auto-Dream: background note consolidation ---
+      // Runs after extract, via waitUntil so it doesn't block the response.
+      // Only consolidates when the user has enough notes to benefit.
+      if (userNotes.length >= 8) {
+        try {
+          const consolidation = consolidateNotes(userNotes);
+          const toDelete = [
+            ...consolidation.pruned,
+            ...consolidation.merged.map((m) => m.absorbed),
+          ];
+
+          // Update surviving notes that were modified (decayed or merged)
+          const toUpdate = consolidation.surviving
+            .filter((note) => {
+              const original = userNotes.find((n) => n.id === note.id);
+              return (
+                original &&
+                (original.confidence !== note.confidence || original.helpCount !== note.helpCount)
+              );
+            })
+            .map((note) => ({
+              id: note.id,
+              confidence: note.confidence,
+              helpCount: note.helpCount,
+            }));
+
+          if (toDelete.length > 0) {
+            await deleteNotesByIds(c.env.DB, userId, toDelete);
+          }
+          if (toUpdate.length > 0) {
+            await batchUpdateNotes(c.env.DB, userId, toUpdate);
+          }
+
+          if (toDelete.length > 0 || toUpdate.length > 0) {
+            await sendEvent({
+              type: "auto_dream",
+              merged: consolidation.merged.length,
+              decayed: consolidation.decayed.length,
+              pruned: consolidation.pruned.length,
+              surviving: consolidation.surviving.length,
+            });
+          }
+        } catch {
+          // Auto-Dream consolidation is non-critical
+        }
+      }
     } catch (err) {
       try {
         await sendEvent({

@@ -5,7 +5,16 @@ export {
   updateNoteConfidence,
   pruneNotes,
   parseExtractedNote,
+  consolidateNotes,
   MAX_DYNAMIC_CHARS,
   DEMOTE_THRESHOLD,
 } from "../../../aether/core-logic/note-engine.js";
-export { fetchUserNotes, saveNote, pruneNotesInDb } from "../../../aether/db/notes.js";
+export type { ConsolidationResult } from "../../../aether/core-logic/note-engine.js";
+export {
+  fetchUserNotes,
+  saveNote,
+  pruneNotesInDb,
+  deleteNotesByIds,
+  batchUpdateNotes,
+  updateNoteConfidenceInDb,
+} from "../../../aether/db/notes.js";
