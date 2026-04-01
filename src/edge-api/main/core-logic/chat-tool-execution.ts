@@ -3,6 +3,7 @@
  */
 
 import { type ToolCatalogItem, searchToolCatalog, callMcpTool } from "./mcp-tools.js";
+import { executeGitCommit, executeGitMerge } from "./chat-git-tools.js";
 
 export function normalizeToolArgs(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -106,6 +107,8 @@ export async function executeAgentTool(params: {
   ) => Promise<void>;
   /** Optional DO-based callback to replace D1 polling for browser results. */
   waitViaCallback?: (toolCallId: string) => Promise<unknown>;
+  /** GitHub PAT for git_commit / git_merge tools. */
+  githubToken?: string;
 }): Promise<ToolExecutionResult> {
   const {
     mcpService,
@@ -122,6 +125,7 @@ export async function executeAgentTool(params: {
     maxSearchResults,
     onBrowserInsert,
     waitViaCallback,
+    githubToken,
   } = params;
 
   if (toolName.startsWith("browser_")) {
@@ -234,6 +238,31 @@ export async function executeAgentTool(params: {
       return {
         transport: "mcp",
         result: `Tool error: ${error instanceof Error ? error.message : "unknown"}`,
+        status: "error",
+      };
+    }
+  }
+
+  // ── Git tools (direct commit / merge via GitHub API) ──
+  if (toolName === "git_commit" || toolName === "git_merge") {
+    if (!githubToken) {
+      return {
+        transport: "mcp",
+        result: "Git tools are not configured (missing GitHub token).",
+        status: "error",
+      };
+    }
+
+    try {
+      const result =
+        toolName === "git_commit"
+          ? await executeGitCommit(githubToken, toolArgs)
+          : await executeGitMerge(githubToken, toolArgs);
+      return { transport: "mcp", result, status: "done" };
+    } catch (error) {
+      return {
+        transport: "mcp",
+        result: `Git error: ${error instanceof Error ? error.message : "unknown"}`,
         status: "error",
       };
     }

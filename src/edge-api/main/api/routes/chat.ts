@@ -444,6 +444,7 @@ async function executeTool(params: {
         args: ta,
       });
     },
+    githubToken: c.env.GITHUB_TOKEN,
   });
 }
 

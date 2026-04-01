@@ -316,29 +316,14 @@ export function SpikeChatApp() {
     lastLearnedLesson,
     sessionId,
     sessionReady,
+    persona,
+    setPersona,
   } = useAetherChat();
   const router = useRouter();
 
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  const [persona, setPersona] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem("aether-persona");
-    } catch {
-      return null;
-    }
-  });
-  const handleSetPersona = useCallback((slug: string | null) => {
-    setPersona(slug);
-    try {
-      if (slug) localStorage.setItem("aether-persona", slug);
-      else localStorage.removeItem("aether-persona");
-    } catch {
-      /* */
-    }
-  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -418,7 +403,7 @@ export function SpikeChatApp() {
             <h1 className="text-sm font-semibold tracking-tight text-foreground whitespace-nowrap">
               Spike Chat
             </h1>
-            <PersonaSelector value={persona} onChange={handleSetPersona} />
+            <PersonaSelector value={persona} onChange={setPersona} />
           </div>
 
           {/* Center: Stage dots */}
