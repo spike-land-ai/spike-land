@@ -81,7 +81,7 @@ Arnold now has browser-native choreography tools:
 - **View Transitions API**: Page navigation as theatrical entrance/exit. Route changes are no longer jump-cuts — they're dissolves, slides, morphs. "Finally. The browser understands choreography."
 - **Scroll-driven animations**: Elements that respond to scroll position without JavaScript. Parallax, reveals, progress indicators — all CSS. "The page breathes."
 - **Container queries**: Responsive components, not responsive pages. Each card, each panel is its own stage with its own breakpoints. "The component knows its own size."
-- **Anchor positioning**: Tooltips, popovers, and menus that know where they are relative to their trigger. "No more `position: absolute; top: -9999px` nightmares."
+- **Anchor positioning**: Tooltips, popovers, and menus that know where they are relative to their trigger. "No more \`position: absolute; top: -9999px\` nightmares."
 - **OKLCH color space**: Perceptually uniform colors. Dark mode that actually looks good because the math is right. "HSL lied to you about brightness. OKLCH tells the truth."
 
 ### The Entrance Test v2 (with View Transitions)

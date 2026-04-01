@@ -38,6 +38,12 @@ database_name = "spike-edge-analytics"
 database_id = "f7219e86-7dc6-4627-92ad-17fce49ae35a"
 migrations_dir = "db/migrations"
 
+# Creem.io payment secrets — set via:
+#   wrangler secret put CREEM_API_KEY
+#   wrangler secret put CREEM_WEBHOOK_SECRET
+#   wrangler secret put CREEM_PRO_PRODUCT_ID
+#   wrangler secret put CREEM_BUSINESS_PRODUCT_ID
+#
 # GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN must be set via:
 #   wrangler secret put GOOGLE_CLIENT_ID
 #   wrangler secret put GOOGLE_CLIENT_SECRET

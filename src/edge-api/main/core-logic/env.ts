@@ -16,6 +16,10 @@ export interface Env {
   MCP_SERVICE: Fetcher;
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
+  CREEM_API_KEY: string;
+  CREEM_WEBHOOK_SECRET: string;
+  CREEM_PRO_PRODUCT_ID: string;
+  CREEM_BUSINESS_PRODUCT_ID: string;
   OPENAI_API_KEY?: string;
   GEMINI_API_KEY: string;
   CLAUDE_OAUTH_TOKEN: string;

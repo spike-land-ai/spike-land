@@ -1,0 +1,450 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Analytics from '../components/Analytics.astro';
+import CookieConsent from '../components/CookieConsent.astro';
+---
+
+<Layout
+  title="Settings — spike.land"
+  description="Manage your spike.land account, billing, and subscription."
+  noindex={true}
+>
+  <Analytics slot="head" />
+
+  <div class="page-shell">
+    <Nav />
+
+    <main id="main-content" class="settings-main">
+      <div class="rubik-container">
+        <div class="settings-panel">
+          <h1 class="settings-title">Settings</h1>
+
+          <!-- Success banner (shown after checkout) -->
+          <div id="success-banner" class="success-banner" hidden>
+            Welcome to Pro! Your subscription is now active.
+          </div>
+
+          <!-- Tabs -->
+          <div class="tab-bar" role="tablist">
+            <button type="button" role="tab" id="tab-account" class="tab-btn tab-btn--active" aria-selected="true" aria-controls="panel-account">Account</button>
+            <button type="button" role="tab" id="tab-billing" class="tab-btn" aria-selected="false" aria-controls="panel-billing">Billing</button>
+          </div>
+
+          <!-- Account panel -->
+          <div id="panel-account" role="tabpanel" aria-labelledby="tab-account">
+            <div id="account-loading" class="panel-loading">Loading account…</div>
+            <div id="account-content" hidden>
+              <div class="user-header">
+                <div id="user-avatar" class="avatar-placeholder">?</div>
+                <div class="user-info">
+                  <p id="user-name" class="user-name"></p>
+                  <p id="user-email" class="user-email"></p>
+                </div>
+              </div>
+
+              <div class="info-card">
+                <div class="info-row">
+                  <span class="info-label">Name</span>
+                  <span class="info-value" id="info-name">—</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Email</span>
+                  <span class="info-value" id="info-email">—</span>
+                </div>
+              </div>
+
+              <button type="button" id="sign-out-btn" class="sign-out-btn">Sign out</button>
+            </div>
+
+            <div id="account-gate" hidden>
+              <p class="gate-text">Not signed in.</p>
+              <a href="/login?redirect=/settings" class="gate-cta">Sign in</a>
+            </div>
+          </div>
+
+          <!-- Billing panel -->
+          <div id="panel-billing" role="tabpanel" aria-labelledby="tab-billing" hidden>
+            <div id="billing-loading" class="panel-loading">Loading billing info…</div>
+            <div id="billing-content" hidden>
+              <div class="info-card">
+                <div class="info-row">
+                  <span class="info-label">Current plan</span>
+                  <span class="info-value" id="billing-plan">—</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-label">Status</span>
+                  <span class="info-value" id="billing-status">—</span>
+                </div>
+                <div class="info-row" id="billing-renews-row" hidden>
+                  <span class="info-label">Renews</span>
+                  <span class="info-value" id="billing-renews">—</span>
+                </div>
+              </div>
+
+              <div class="billing-actions">
+                <button type="button" id="manage-sub-btn" class="manage-btn" hidden>Manage Subscription</button>
+                <a href="/pricing" id="upgrade-btn" class="upgrade-btn" hidden>Upgrade to Pro</a>
+              </div>
+            </div>
+            <div id="billing-error" class="error-alert" hidden></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <Footer />
+    <CookieConsent />
+  </div>
+</Layout>
+
+<script is:inline>
+(function () {
+  'use strict';
+
+  // Tab switching
+  var tabs = document.querySelectorAll('.tab-btn');
+  var panels = {
+    account: document.getElementById('panel-account'),
+    billing: document.getElementById('panel-billing')
+  };
+
+  function switchTab(tabId) {
+    tabs.forEach(function (t) {
+      var isActive = t.id === 'tab-' + tabId;
+      t.classList.toggle('tab-btn--active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    Object.keys(panels).forEach(function (key) {
+      panels[key].hidden = key !== tabId;
+    });
+  }
+
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      var tabId = t.id.replace('tab-', '');
+      switchTab(tabId);
+      // Update URL without reload
+      var url = new URL(window.location.href);
+      if (tabId === 'account') { url.searchParams.delete('tab'); }
+      else { url.searchParams.set('tab', tabId); }
+      history.replaceState(null, '', url.toString());
+    });
+  });
+
+  // Check URL params
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('tab') === 'billing') { switchTab('billing'); }
+  if (params.get('success') === '1') {
+    document.getElementById('success-banner').hidden = false;
+  }
+
+  // Auth check
+  fetch('/api/auth/get-session', { credentials: 'include' })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (data) {
+      document.getElementById('account-loading').hidden = true;
+      if (data && data.user) {
+        var user = data.user;
+        document.getElementById('account-content').hidden = false;
+
+        // Avatar
+        var avatarEl = document.getElementById('user-avatar');
+        if (user.image || user.picture) {
+          var img = document.createElement('img');
+          img.src = user.image || user.picture;
+          img.alt = user.name || 'User avatar';
+          img.className = 'avatar-img';
+          avatarEl.replaceWith(img);
+        } else {
+          avatarEl.textContent = (user.name || user.email || '?').charAt(0).toUpperCase();
+        }
+
+        var name = user.name || '—';
+        var email = user.email || '—';
+        document.getElementById('user-name').textContent = name;
+        document.getElementById('user-email').textContent = email;
+        document.getElementById('info-name').textContent = name;
+        document.getElementById('info-email').textContent = email;
+
+        // Sign out
+        document.getElementById('sign-out-btn').addEventListener('click', function () {
+          fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' })
+            .then(function () { window.location.href = '/'; })
+            .catch(function () { window.location.href = '/'; });
+        });
+
+        // Load billing
+        loadBilling();
+      } else {
+        document.getElementById('account-gate').hidden = false;
+      }
+    })
+    .catch(function () {
+      document.getElementById('account-loading').hidden = true;
+      document.getElementById('account-gate').hidden = false;
+    });
+
+  function loadBilling() {
+    fetch('/api/billing/status', { credentials: 'include' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        document.getElementById('billing-loading').hidden = true;
+        document.getElementById('billing-content').hidden = false;
+
+        var plan = data.plan || 'free';
+        document.getElementById('billing-plan').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+        document.getElementById('billing-status').textContent = data.status || '—';
+
+        if (data.currentPeriodEnd) {
+          document.getElementById('billing-renews-row').hidden = false;
+          document.getElementById('billing-renews').textContent = new Date(data.currentPeriodEnd).toLocaleDateString();
+        }
+
+        if (plan !== 'free') {
+          var manageBtn = document.getElementById('manage-sub-btn');
+          manageBtn.hidden = false;
+          manageBtn.addEventListener('click', function () {
+            manageBtn.disabled = true;
+            manageBtn.textContent = 'Opening…';
+            fetch('/api/billing/portal', { method: 'POST', credentials: 'include' })
+              .then(function (r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+              })
+              .then(function (d) { window.location.href = d.url; })
+              .catch(function (err) {
+                manageBtn.disabled = false;
+                manageBtn.textContent = 'Manage Subscription';
+                document.getElementById('billing-error').hidden = false;
+                document.getElementById('billing-error').textContent = err.message;
+              });
+          });
+        } else {
+          document.getElementById('upgrade-btn').hidden = false;
+        }
+      })
+      .catch(function (err) {
+        document.getElementById('billing-loading').hidden = true;
+        document.getElementById('billing-error').hidden = false;
+        document.getElementById('billing-error').textContent = err.message || 'Failed to load billing info';
+      });
+  }
+})();
+</script>
+
+<style>
+  .page-shell {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+  }
+
+  .settings-main {
+    flex: 1;
+    padding-block: clamp(2rem, 5vw, 3rem);
+  }
+
+  .settings-panel {
+    max-width: 36rem;
+    margin: 0 auto;
+  }
+
+  .settings-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 5vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: var(--fg);
+    margin: 0 0 1.5rem;
+  }
+
+  .success-banner {
+    border: 1px solid color-mix(in srgb, var(--primary-color) 20%, transparent);
+    background: color-mix(in srgb, var(--primary-color) 10%, transparent);
+    color: var(--primary-color);
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-lg);
+    margin-bottom: 1.5rem;
+  }
+
+  .tab-bar {
+    display: flex;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+  }
+
+  .tab-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted-fg);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .tab-btn:hover { color: var(--fg); }
+  .tab-btn--active { color: var(--primary-color); border-bottom-color: var(--primary-color); font-weight: 600; }
+
+  .panel-loading {
+    padding: 2rem 0;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--muted-fg);
+  }
+
+  .user-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .avatar-placeholder {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background: var(--muted-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--muted-fg);
+    flex-shrink: 0;
+  }
+
+  .avatar-img {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .user-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--fg);
+    margin: 0;
+  }
+
+  .user-email {
+    font-size: 0.875rem;
+    color: var(--muted-fg);
+    margin: 0.125rem 0 0;
+  }
+
+  .info-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.125rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    padding: 0.5rem 0;
+  }
+
+  .info-row + .info-row {
+    border-top: 1px solid var(--border-color);
+  }
+
+  .info-label { color: var(--muted-fg); }
+  .info-value { font-weight: 500; color: var(--fg); }
+
+  .sign-out-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .sign-out-btn:hover { border-color: #dc2626; color: #dc2626; }
+
+  .billing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .manage-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .manage-btn:hover { border-color: color-mix(in srgb, var(--primary-color) 40%, transparent); color: var(--primary-color); }
+  .manage-btn:disabled { opacity: 0.5; cursor: default; }
+
+  .upgrade-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--fg);
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+
+  .upgrade-btn:hover { opacity: 0.88; }
+
+  .gate-text {
+    font-size: 0.9375rem;
+    color: var(--muted-fg);
+    margin: 0 0 1rem;
+    text-align: center;
+    padding-top: 1rem;
+  }
+
+  .gate-cta {
+    display: inline-flex;
+    padding: 0.625rem 1.5rem;
+    background: var(--fg);
+    color: var(--bg);
+    border-radius: var(--radius-lg);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+
+  .gate-cta:hover { opacity: 0.88; }
+
+  .error-alert {
+    border: 1px solid color-mix(in srgb, #dc2626 20%, transparent);
+    background: color-mix(in srgb, #dc2626 10%, transparent);
+    color: #dc2626;
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-lg);
+  }
+</style>
