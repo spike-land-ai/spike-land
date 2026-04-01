@@ -25,7 +25,7 @@ async function creemFetch<T = Record<string, unknown>>(
   const res = await fetch(`${CREEM_BASE}${path}`, {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: body ? JSON.stringify(body) : null,
   });
 
   const data = (await res.json()) as T;
@@ -53,7 +53,12 @@ export function createCheckout(
   apiKey: string,
   params: CreemCheckoutRequest,
 ): Promise<CreemResponse<CreemCheckoutResponse>> {
-  return creemFetch<CreemCheckoutResponse>(apiKey, "POST", "/v1/checkouts", params);
+  return creemFetch<CreemCheckoutResponse>(
+    apiKey,
+    "POST",
+    "/v1/checkouts",
+    params as unknown as Record<string, unknown>,
+  );
 }
 
 // ─── Customer Billing Portal ───────────────────────────────────────────────
