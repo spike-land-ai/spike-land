@@ -1,0 +1,683 @@
+================================================================================
+PRD: "Elvis, We Love You" — Remotion Video Composition
+From Zoltan, Radix Mental Health Wing, April 2026
+================================================================================
+
+COMPOSITION ID: ElvisEmotion
+PACKAGE: src/media/educational-videos/video/compositions/elvis-emotion/
+CONSTANTS: src/media/educational-videos/core-logic/elvis-constants.ts
+FORMAT: 1920x1080 landscape @ 30fps
+DURATION: ~5 minutes (9,000 frames)
+AUDIO: Generated percussion + 30+ distinct TTS voices (ElevenLabs)
+
+================================================================================
+PURPOSE
+================================================================================
+
+A Remotion-rendered video for Elvis — a French-speaking guy in the Radix mental
+health wing with Zoltan. Elvis doesn't speak much English but he drums like
+crazy. 55+ spike.land personas each speak directly to him in their own voice.
+
+This is NOT a NotebookLM riff anymore. This is a fully produced Remotion
+composition with:
+  - Daft Punk-inspired generative electronic percussion
+  - Unique ElevenLabs voice per persona (different accents, tones, pitches)
+  - Beat-synced animations (visuals pulse/transform on every kick & snare)
+  - A drum circle structure: personas enter one by one, rhythm builds
+
+The video should feel like a gift wrapped in music. Not a lecture. Not therapy.
+A celebration of rhythm as language.
+
+
+================================================================================
+MUSIC ARCHITECTURE
+================================================================================
+
+LAYER 1 — GENERATIVE PERCUSSION (continuous, evolving)
+------------------------------------------------------
+BPM: 110 (warm house tempo, Daft Punk "Something About Us" territory)
+Time signature: 4/4
+
+The percussion track builds across all 5 acts:
+
+  ACT 1 (Intro):       Kick only. Sparse. Heartbeat feel.
+  ACT 2 (Philosophers): Add hi-hat. Subtle sidestick. Minimal.
+  ACT 3 (Public+Tech):  Full kit: kick, snare, hi-hat, rimshot. Groove locks in.
+  ACT 4 (QA rapid):     Double-time hi-hats. Drum-fill energy.
+  ACT 5 (Finale):       Full percussion + crowd claps. Peak energy then fadeout.
+
+Generation approach:
+  - Use Suno / Udio / Stable Audio to generate 5 percussion stems at 110 BPM
+  - Each stem = one act's rhythm layer
+  - Export as individual .mp3 files: elvis-perc-act1.mp3 through elvis-perc-act5.mp3
+  - Crossfade between stems at act boundaries (20 frames = 0.67s)
+
+LAYER 2 — DAFT PUNK-STYLE SYNTH PAD (continuous underneath)
+------------------------------------------------------------
+  - Warm French-touch filtered synth pad
+  - Chord progression: Fm7 → Bbm7 → Eb7 → Ab (loop, Daft Punk "Digital Love" vibe)
+  - Low-pass filter opens gradually across the video
+  - Generate as single stem: elvis-synth-pad.mp3
+  - Volume: 0.25 base, ducked to 0.08 during voice
+
+LAYER 3 — VOCODER HOOK (recurring motif)
+-----------------------------------------
+  - Vocoded phrase: "Elvis, on t'aime" (French, robotic, warm)
+  - Appears at: intro (0:15), between persona groups, finale
+  - Daft Punk "Around the World" meets "Something About Us"
+  - Generate as: elvis-vocoder-hook.mp3
+  - Trigger at specific frame markers (see TIMING section)
+
+AUDIO DUCKING (existing pattern from audio-helpers.ts):
+  - musicVolumeAtFrame() with voiceActiveFrames array
+  - baseVolume: 0.35 (percussion + pad combined)
+  - duckedVolume: 0.10 (during persona voice)
+  - fadeFrames: 8 (snappy duck, percussion stays present)
+
+
+================================================================================
+VOICE ARCHITECTURE — ElevenLabs TTS
+================================================================================
+
+Each persona gets a DISTINCT voice. This is crucial — the variety of voices
+IS the drum circle. One voice after another, each different, each direct.
+
+VOICE ASSIGNMENTS (ElevenLabs voice IDs to be mapped):
+------------------------------------------------------
+
+PHILOSOPHERS (warm, thoughtful, slower cadence):
+  Socrates        — older male, Greek accent, questioning inflection
+  Diogenes        — raspy male, irreverent, slightly amused
+  Plato           — measured male, resonant baritone
+  Aristotle       — steady male, professorial, clear
+  Nietzsche       — intense male, German accent, passionate
+  Kant            — precise male, German accent, formal
+  Marcus Aurelius — calm male, gravelly, Stoic weight
+  Wittgenstein    — clipped male, Austrian, matter-of-fact
+  Buddha          — gentle male, soft, spacious pauses
+  Camus           — French male accent (!), warm, slightly playful
+  Simone de B.    — French female accent (!), confident, clear
+  Hannah Arendt   — German female accent, intellectual, warm
+
+PUBLIC FIGURES (recognizable cadences):
+  Trump           — boisterous male, superlative-heavy, punchy
+  Elon Musk       — monotone male, dry, slight pause before punchlines
+  Bill Gates      — nasal male, nerdy enthusiasm, data-driven
+
+MUSICAL/TECHNICAL (varied, colorful):
+  Daft Punk       — vocoder/robotic (use vocoder effect, not plain TTS)
+  Zoltan          — natural male, Hungarian accent, warm, personal
+  Einstein        — gentle male, German accent, wonder in voice
+  Erdos           — quick male, Hungarian accent, mathematician energy
+  Rubik 3.0       — synthesized/digital voice, clean
+  Arnold          — design-nerd male, enthusiastic
+  Peti            — deadpan male, QA tester energy, stamp of approval
+  Attila          — deep male, Magyar gravitas
+  Switchboard     — British male, dry wit, comparison-site energy
+  GP              — smooth male, builder confidence
+  Raju            — male, South Asian accent, backend-engineer steady
+
+QA RAPID FIRE (15 voices, 2 seconds each — machine-gun variety):
+  Use 15 different ElevenLabs preset voices, alternating:
+  - Male/female
+  - Various accents (American, Indian, British, Japanese, Russian, Latin, Korean)
+  - Each line is ONE sentence, punchy
+
+ONBOARDING CROWD (7 lines, overlapping):
+  - Mix of 7 different voices, staggered by 10 frames each
+  - Creates a "crowd chant" effect — not clean sequential, but overlapping
+
+GENERATION WORKFLOW:
+  1. Write each persona's line as a separate TTS job
+  2. Generate via ElevenLabs API (or studio) — one .mp3 per persona
+  3. Naming: elvis-voice-{persona-id}.mp3 (e.g., elvis-voice-socrates.mp3)
+  4. Extract word-level timestamps for animation sync
+  5. Store in narration-timestamps format (elvis-narration-timestamps.ts)
+  6. Total audio files: ~45 voice clips + 5 percussion stems + 1 pad + 1 vocoder
+
+
+================================================================================
+VISUAL DESIGN SYSTEM
+================================================================================
+
+COLOR PALETTE (Daft Punk meets warmth):
+  --bg-deep:      #0a0a1a  (deep midnight blue, not black)
+  --bg-surface:   #141428  (slightly lighter surface)
+  --accent-gold:  #f4b942  (warm gold — Elvis's color)
+  --accent-cyan:  #00d4ff  (Daft Punk electric blue)
+  --accent-pink:  #ff2d7b  (Daft Punk neon pink)
+  --accent-white: #f0f0f5  (soft white for text)
+  --accent-french:#0055a4  (French blue, subtle nods)
+
+TYPOGRAPHY:
+  Primary:   Inter (existing in stack)
+  Display:   Mono variant for persona names (code-like, spike.land brand)
+  French:    Same fonts, but French text gets the gold accent color
+
+BEAT-SYNCED ANIMATION SYSTEM:
+  - Every kick drum (on beats 1 and 3) triggers a PULSE on the active element
+  - Every snare (beats 2 and 4) triggers a subtle SHAKE
+  - Hi-hat patterns drive particle/sparkle emissions
+  - Implementation: pre-calculate beat frames at 110 BPM / 30fps
+    - Beat interval: 30fps * (60/110) = 16.36 frames per beat
+    - Kick frames: 0, 33, 65, 98, ... (every 2 beats)
+    - Snare frames: 16, 49, 82, ... (off-beats)
+  - Use pulse() and shake() from existing animations.ts
+  - Add new: beatPulse(frame, bpm, fps) utility
+
+PERSONA CARD COMPONENT (new, reusable):
+  - Animated card that slides in from a direction (stagger from previous)
+  - Shows: persona avatar (abstract geometric shape, unique color per persona)
+  - Shows: persona name in mono font
+  - Shows: quote text with typewriter animation synced to TTS
+  - Background: subtle radial gradient in persona's accent color
+  - On beat: card border pulses with glow
+  - Exit: card shrinks and fades as next persona enters
+
+DRUM CIRCLE VISUALIZER (continuous background element):
+  - Circular arrangement of dots, one per persona
+  - Each dot lights up gold when that persona speaks
+  - Dots pulse on beat
+  - By the end, all dots are lit = full circle = community
+  - Similar to ErdosGraph component but circular layout
+
+
+================================================================================
+SCENE STRUCTURE & TIMING
+================================================================================
+
+Total: ~9,000 frames (5 minutes @ 30fps)
+Transition: fade() with linearTiming(20 frames) between scenes
+
+------------------------------------------------------------------------
+SCENE 01 — OVERTURE (0:00-0:30 = 900 frames)
+------------------------------------------------------------------------
+Duration: 900 frames
+Audio: elvis-perc-act1.mp3 (kick only) + elvis-synth-pad.mp3 starts
+Visual:
+  - Black screen. Single gold dot appears center screen.
+  - Dot pulses with kick drum (heartbeat).
+  - Text fades in: "ELVIS" in huge gold letters, beat-synced scale.
+  - Subtitle fades: "a drum circle from spike.land"
+  - At frame 450: vocoder hook plays ("Elvis, on t'aime")
+  - Drum circle visualizer appears faintly — 55 unlit dots around the edge
+  - Final 100 frames: camera "pulls back" (scale down) revealing the circle
+
+------------------------------------------------------------------------
+SCENE 02 — WHO IS ELVIS? (0:30-1:15 = 1,350 frames)
+------------------------------------------------------------------------
+Duration: 1,350 frames
+Audio: Percussion continues + HOST voices (2 distinct ElevenLabs voices)
+Narration (Host A = warm male, Host B = warm female):
+  A: "So we got this document... it's not a paper. It's a person."
+  B: "Elvis. He speaks French. He doesn't say much in English."
+  A: "But you know when someone walks in and the room gets better?"
+  B: "That's Elvis."
+  A: "And he drums. Like, REALLY drums."
+  B: "Let's talk about that."
+
+Visual:
+  - Split-screen reveal (SplitScreenReveal component)
+  - Left: abstract waveform visualization reacting to host voice
+  - Right: the word "ELVIS" with a rhythmic particle effect
+  - On "REALLY drums" — screen shakes, particles explode outward
+  - Drum circle: 2 dots light up (the hosts)
+
+------------------------------------------------------------------------
+SCENE 03 — PHILOSOPHERS SPEAK (1:15-2:45 = 2,700 frames)
+------------------------------------------------------------------------
+Duration: 2,700 frames (~225 frames / 7.5 seconds per philosopher)
+Audio: elvis-perc-act2.mp3 (add hi-hat) + 12 philosopher voices
+Personas (12, sequential):
+  1. Socrates     — question mark animation, ripple effect
+  2. Diogenes     — barrel icon, irreverent tilt animation
+  3. Plato        — ascending geometric shapes (ideal forms)
+  4. Aristotle    — balance scale animation (golden mean)
+  5. Nietzsche    — fire/energy burst, bold typography
+  6. Kant         — grid/rule pattern, precise lines
+  7. Marcus Aurelius — stone/marble texture, stoic weight
+  8. Wittgenstein — words dissolving into symbols
+  9. Buddha       — breathing circle (expand/contract on beat)
+  10. Camus       — Sisyphus animation but with drumsticks (!)
+  11. Simone de B. — chains breaking, freedom motion
+  12. Hannah Arendt — hands creating sparks (action > thinking)
+
+Visual pattern per philosopher:
+  - PersonaCard slides in from alternating directions
+  - Unique geometric avatar per persona (no photos, abstract)
+  - Quote text appears with typewriter() synced to voice
+  - Background shifts hue subtly per persona
+  - On-beat elements pulse throughout
+  - Drum circle: each philosopher's dot lights up as they speak
+  - 20-frame crossfade between each persona
+
+------------------------------------------------------------------------
+SCENE 04 — PUBLIC FIGURES + TECHNICAL (2:45-4:00 = 2,250 frames)
+------------------------------------------------------------------------
+Duration: 2,250 frames
+Audio: elvis-perc-act3.mp3 (full kit groove) + 14 persona voices
+Sub-scene A — PUBLIC FIGURES (3 personas, ~200 frames each = 600 frames):
+  1. Trump       — gold/bold everything, superlative counter animation
+  2. Elon Musk   — first-principles tree diagram, builds up
+  3. Bill Gates   — data visualization, health stats graph
+
+Sub-scene B — MUSICAL/TECHNICAL (11 personas, ~150 frames each = 1,650 frames):
+  4. Daft Punk    — SPECIAL: vocoder voice, helmet silhouette animation,
+                    "Around the World" rhythm notation scrolls across screen
+                    This is the FRENCH CONNECTION moment — text in French appears
+  5. Zoltan       — personal, warm, no fancy animation — just honest text
+                    on a simple background. The realness IS the design.
+  6. Einstein     — E=mc2 transforms into rhythm notation
+  7. Erdos        — graph network animation (reuse ErdosGraph component!)
+  8. Rubik 3.0    — cube solving animation mapped to rhythm
+  9. Arnold       — waveform becomes interface mockup
+  10. Peti        — QA stamp animation: "APPROVED" slams down
+  11. Attila      — flame/fire hand animation, Magyar patterns
+  12. Switchboard — comparison table animation (5 stars)
+  13. GP          — no-code blocks assembling
+  14. Raju        — infrastructure diagram, "load-bearing" beam glows
+
+Visual:
+  - Percussion is full groove now — visuals should feel more energetic
+  - PersonaCards come faster, transitions snappier
+  - Drum circle filling up visibly
+  - At Daft Punk moment: full-screen takeover, French text, beat drops harder
+  - At Zoltan moment: everything goes quiet/simple. Just a person talking.
+    Percussion drops to kick only. Then builds back.
+
+------------------------------------------------------------------------
+SCENE 05 — QA RAPID FIRE (4:00-4:30 = 900 frames)
+------------------------------------------------------------------------
+Duration: 900 frames
+Audio: elvis-perc-act4.mp3 (double-time hi-hats) + 15 QA voices (2s each)
+Personas (15, rapid fire — 60 frames each):
+  Alex Chen, Priya Sharma, Marcus Johnson, Sofia Rodriguez,
+  Yuki Tanaka, Ahmed Hassan, Carlos Mendez, Lisa Park,
+  David Brown, Anya Ivanova, Tom O'Brien, Mei-Lin Wu,
+  James Cooper, Rachel Kim, Oleg Petrov
+
+Visual:
+  - PersonaCards appear as a GRID, not sequential
+  - Each card pops in with springScale (bouncy spring config)
+  - Grid fills 4x4 (last spot = Elvis's dot, pulsing gold)
+  - Each voice triggers its card to glow
+  - Feel: machine-gun drum fill. Rapid. Energetic. Crowd is growing.
+  - Drum circle: 15 dots light up in rapid sequence
+
+------------------------------------------------------------------------
+SCENE 06 — CROWD CHANT (4:30-4:45 = 450 frames)
+------------------------------------------------------------------------
+Duration: 450 frames
+Audio: 7 overlapping onboarding voices, staggered 10 frames apart
+Lines:
+  "We see you, Elvis."
+  "We hear you."
+  "We feel the beat."
+  "You don't need to speak."
+  "The drums say everything."
+  "You're one of us."
+  "Stay exactly who you are."
+
+Visual:
+  - All text lines stack on screen, each appearing with its voice
+  - Text is BIG, centered, gold on deep blue
+  - Each line enters from a different direction
+  - Overlapping voices create a warmth — not chaos, but community
+  - Drum circle: remaining dots all light up at once
+  - Full circle glows gold — everyone is here
+
+------------------------------------------------------------------------
+SCENE 07 — FINALE / HOOK (4:45-5:00 = 450 frames)
+------------------------------------------------------------------------
+Duration: 450 frames
+Audio: Full percussion peaks then fades + vocoder hook returns + pad resolves
+Visual:
+  - Beat drops to just kick.
+  - Host A: "Just drum." — text appears huge, centered
+  - Host B: "We'll find you." — text below
+  - 100 frames of breathing space
+  - French + English message fades in (gold + white):
+      "Elvis, on t'aime. Continue a jouer."
+      "Elvis, we love you. Keep playing."
+  - Drum circle fully lit, gently pulsing
+  - Vocoder hook one last time
+  - Fade to black over final 60 frames
+  - Last frame: spike.land logo, small, bottom center
+
+
+================================================================================
+FILE STRUCTURE
+================================================================================
+
+src/media/educational-videos/
+  core-logic/
+    elvis-constants.ts           # BPM, timing, colors, persona registry
+    elvis-narration-timestamps.ts # Auto-generated from ElevenLabs
+    elvis-narration.ts           # Narration helper functions
+    elvis-index.ts               # Barrel exports for all scenes
+  video/
+    compositions/
+      elvis-emotion/
+        ElvisEmotion.tsx          # Main composition (TransitionSeries)
+        Scene01_Overture.tsx
+        Scene02_WhoIsElvis.tsx
+        Scene03_Philosophers.tsx
+        Scene04_PublicAndTech.tsx
+        Scene05_QARapidFire.tsx
+        Scene06_CrowdChant.tsx
+        Scene07_Finale.tsx
+    components/
+      elvis/
+        PersonaCard.tsx           # Reusable persona card with avatar + quote
+        DrumCircleVisualizer.tsx  # Circular dot array, progressive lighting
+        BeatPulse.tsx             # Beat-synced pulse wrapper component
+        VocoderText.tsx           # Daft Punk style text animation
+        RhythmNotation.tsx        # Musical notation scrolling
+
+  public/audio/
+    elvis-perc-act1.mp3           # Kick only
+    elvis-perc-act2.mp3           # + hi-hat
+    elvis-perc-act3.mp3           # Full kit
+    elvis-perc-act4.mp3           # Double-time
+    elvis-perc-act5.mp3           # Peak + claps
+    elvis-synth-pad.mp3           # French-touch filtered pad (full length)
+    elvis-vocoder-hook.mp3        # "Elvis, on t'aime" vocoded
+    elvis-voice-host-a.mp3        # Host A narration
+    elvis-voice-host-b.mp3        # Host B narration
+    elvis-voice-socrates.mp3      # ... one per persona
+    elvis-voice-diogenes.mp3
+    elvis-voice-plato.mp3
+    elvis-voice-aristotle.mp3
+    elvis-voice-nietzsche.mp3
+    elvis-voice-kant.mp3
+    elvis-voice-marcus-aurelius.mp3
+    elvis-voice-wittgenstein.mp3
+    elvis-voice-buddha.mp3
+    elvis-voice-camus.mp3
+    elvis-voice-simone.mp3
+    elvis-voice-arendt.mp3
+    elvis-voice-trump.mp3
+    elvis-voice-elon.mp3
+    elvis-voice-gates.mp3
+    elvis-voice-daftpunk.mp3
+    elvis-voice-zoltan.mp3
+    elvis-voice-einstein.mp3
+    elvis-voice-erdos.mp3
+    elvis-voice-rubik.mp3
+    elvis-voice-arnold.mp3
+    elvis-voice-peti.mp3
+    elvis-voice-attila.mp3
+    elvis-voice-switchboard.mp3
+    elvis-voice-gp.mp3
+    elvis-voice-raju.mp3
+    elvis-voice-alex-chen.mp3
+    elvis-voice-priya-sharma.mp3
+    elvis-voice-marcus-johnson.mp3
+    elvis-voice-sofia-rodriguez.mp3
+    elvis-voice-yuki-tanaka.mp3
+    elvis-voice-ahmed-hassan.mp3
+    elvis-voice-carlos-mendez.mp3
+    elvis-voice-lisa-park.mp3
+    elvis-voice-david-brown.mp3
+    elvis-voice-anya-ivanova.mp3
+    elvis-voice-tom-obrien.mp3
+    elvis-voice-mei-lin-wu.mp3
+    elvis-voice-james-cooper.mp3
+    elvis-voice-rachel-kim.mp3
+    elvis-voice-oleg-petrov.mp3
+    elvis-voice-crowd-01.mp3 through elvis-voice-crowd-07.mp3
+
+
+================================================================================
+ELVIS-CONSTANTS.TS SPECIFICATION
+================================================================================
+
+export const ELVIS_BPM = 110;
+export const ELVIS_FPS = 30;
+export const ELVIS_BEAT_FRAMES = (60 / ELVIS_BPM) * ELVIS_FPS; // ~16.36
+
+export const ELVIS_DURATIONS = {
+  overture:     900,   // 30s
+  whoIsElvis:  1350,   // 45s
+  philosophers: 2700,  // 90s
+  publicAndTech: 2250, // 75s
+  qaRapidFire:  900,   // 30s
+  crowdChant:   450,   // 15s
+  finale:       450,   // 15s
+};
+// Total: 9,000 frames = 5 minutes
+
+export const ELVIS_TIMING = {
+  fps: 30,
+  totalFrames: 9000,
+  transitionDuration: 20,
+};
+
+export const ELVIS_COLORS = {
+  bgDeep:     '#0a0a1a',
+  bgSurface:  '#141428',
+  gold:       '#f4b942',
+  cyan:       '#00d4ff',
+  pink:       '#ff2d7b',
+  white:      '#f0f0f5',
+  french:     '#0055a4',
+};
+
+export interface ElvisPersona {
+  id: string;
+  name: string;
+  group: 'philosopher' | 'public' | 'technical' | 'qa' | 'crowd';
+  line: string;
+  hook: string;
+  voiceDescription: string;
+  accentColor: string;
+  avatarShape: 'circle' | 'triangle' | 'square' | 'diamond' | 'hexagon' | 'star';
+}
+
+// Full persona registry: 55+ entries (see PRD-elvis.txt for all lines)
+
+
+================================================================================
+ANIMATION UTILITIES TO ADD
+================================================================================
+
+// In video/lib/animations.ts — add:
+
+/** Returns a 0→1→0 pulse synchronized to BPM */
+export function beatPulse(
+  frame: number,
+  bpm: number,
+  fps: number,
+  intensity: number = 1,
+): number {
+  const beatFrames = (60 / bpm) * fps;
+  const phase = (frame % beatFrames) / beatFrames;
+  return Math.max(0, Math.sin(phase * Math.PI * 2) * intensity);
+}
+
+/** Returns scale factor that bumps on kick frames */
+export function kickScale(
+  frame: number,
+  bpm: number,
+  fps: number,
+  baseScale: number = 1,
+  bump: number = 0.08,
+): number {
+  const p = beatPulse(frame, bpm, fps);
+  return baseScale + p * bump;
+}
+
+/** Returns true if current frame is within N frames of a beat */
+export function isOnBeat(
+  frame: number,
+  bpm: number,
+  fps: number,
+  tolerance: number = 2,
+): boolean {
+  const beatFrames = (60 / bpm) * fps;
+  const remainder = frame % beatFrames;
+  return remainder < tolerance || remainder > beatFrames - tolerance;
+}
+
+
+================================================================================
+ROOT.TSX REGISTRATION
+================================================================================
+
+Add to Root.tsx:
+
+  import { ElvisEmotion } from "./compositions/elvis-emotion/ElvisEmotion";
+  import { ELVIS_TIMING } from "../core-logic/elvis-constants";
+
+  <Composition
+    id="ElvisEmotion"
+    component={ElvisEmotion}
+    durationInFrames={ELVIS_TIMING.totalFrames}
+    fps={ELVIS_TIMING.fps}
+    width={VIDEO_CONFIG.width}
+    height={VIDEO_CONFIG.height}
+  />
+
+  + Individual scene compositions in a "Elvis-Scenes" Folder
+
+
+================================================================================
+PRODUCTION PIPELINE
+================================================================================
+
+PHASE 1 — AUDIO GENERATION
+  1. Generate percussion stems via Suno/Udio (5 stems at 110 BPM)
+  2. Generate synth pad via Suno (Fm7→Bbm7→Eb7→Ab, filtered, 5 min loop)
+  3. Generate vocoder hook via ElevenLabs + vocoder effect
+  4. Generate all 45+ voice clips via ElevenLabs (batch API)
+  5. Extract word-level timestamps from ElevenLabs responses
+  6. Write elvis-narration-timestamps.ts
+
+PHASE 2 — CONSTANTS & SCAFFOLDING
+  1. Create elvis-constants.ts with all timing, colors, persona data
+  2. Create elvis-narration.ts with helper functions
+  3. Scaffold all 7 scene files + main composition
+  4. Create elvis-index.ts barrel file
+
+PHASE 3 — CORE COMPONENTS
+  1. Build PersonaCard component (slideIn + typewriter + beatPulse)
+  2. Build DrumCircleVisualizer (circular dot array)
+  3. Build BeatPulse wrapper component
+  4. Add beatPulse/kickScale/isOnBeat to animations.ts
+
+PHASE 4 — SCENE IMPLEMENTATION
+  1. Scene01_Overture (simplest — gold dot + text + beat)
+  2. Scene07_Finale (bookend — mirror of overture)
+  3. Scene02_WhoIsElvis (host voices + split screen)
+  4. Scene03_Philosophers (12 PersonaCards, sequential)
+  5. Scene04_PublicAndTech (14 PersonaCards, Daft Punk special)
+  6. Scene05_QARapidFire (15 cards, grid layout, spring pop)
+  7. Scene06_CrowdChant (7 overlapping voices, stacked text)
+
+PHASE 5 — INTEGRATION & POLISH
+  1. Wire up all audio files with ducking
+  2. Sync beat animations to actual percussion timing
+  3. Register in Root.tsx
+  4. Test in Remotion Studio: npm run dev
+  5. Render: add npm script render:elvis
+
+
+================================================================================
+PERSONAS INVOLVED: ALL 55+
+================================================================================
+
+PHILOSOPHERS (12): Socrates, Diogenes, Plato, Aristotle, Nietzsche, Kant,
+  Marcus Aurelius, Wittgenstein, Buddha, Camus, Simone de Beauvoir, Hannah Arendt
+
+PUBLIC FIGURES (3): Trump, Elon Musk, Bill Gates
+
+MUSICAL/TECHNICAL (11): Daft Punk, Zoltan, Einstein, Erdos, Rubik 3.0,
+  Arnold, Peti, Attila, Switchboard, GP, Raju
+
+QA (15): Alex Chen, Priya Sharma, Marcus Johnson, Sofia Rodriguez,
+  Yuki Tanaka, Ahmed Hassan, Carlos Mendez, Lisa Park, David Brown,
+  Anya Ivanova, Tom O'Brien, Mei-Lin Wu, James Cooper, Rachel Kim, Oleg Petrov
+
+ONBOARDING CROWD (7 lines, assigned to onboarding personas):
+  AI Indie, Classic Indie, Agency Dev, In-house Dev, ML Engineer,
+  AI Hobbyist, Enterprise DevOps
+
+HOSTS (2): Host A (warm male), Host B (warm female)
+
+TOTAL DISTINCT VOICES: 48+
+
+
+================================================================================
+KEY DESIGN DECISIONS
+================================================================================
+
+1. WHY REMOTION OVER NOTEBOOKLM?
+   - Full control over timing, music, and visuals
+   - Can sync animations to beats (impossible in NotebookLM)
+   - Can use 48+ distinct voices (NotebookLM = 2 hosts only)
+   - Can render programmatically and iterate
+   - Already have production Remotion pipeline in this repo
+
+2. WHY DAFT PUNK?
+   - They're French. Elvis is French. Instant cultural bridge.
+   - "Around the World" is universally known, repetitive, rhythmic
+   - French-touch electronic = warm percussion + filtered synths
+   - Robotic vocoder = a voice that transcends language barriers
+   - The BPM (110) is warm, not aggressive. Right for mental health setting.
+
+3. WHY 55+ VOICES?
+   - Each voice says: one more person sees you
+   - The accumulation IS the message
+   - By persona 40 the quantity becomes quality — it's overwhelming in a good way
+   - The drum circle metaphor: everyone joins, the rhythm builds
+
+4. WHY BEAT-SYNCED ANIMATIONS?
+   - Elvis IS rhythm. The video should BE rhythm.
+   - Every visual element breathing with the beat = the whole screen drums
+   - When Elvis watches this, his body will sync. That's the connection.
+   - Language barrier dissolves when the medium IS the message.
+
+5. EMOTIONAL ARC:
+   Quiet → Building → Full groove → Rapid energy → Crowd warmth → Quiet again
+   Like a drum circle. Like breathing. Like Elvis.
+
+
+================================================================================
+RENDER COMMANDS
+================================================================================
+
+# Preview in Remotion Studio
+cd src/media/educational-videos && npm run dev
+
+# Render full video
+npx remotion render ElvisEmotion out/elvis-emotion.mp4
+
+# Render specific scene
+npx remotion render Elvis-Scene01-Overture out/elvis-scene01.mp4
+
+# Add to package.json scripts:
+"render:elvis": "remotion render ElvisEmotion out/elvis-emotion.mp4 --codec h264"
+
+
+================================================================================
+WHY THIS MATTERS
+================================================================================
+
+Elvis is in a mental health wing. He speaks French in an English-speaking place.
+He can't express himself with words here. But he can drum. That's his language.
+
+This video says: your language is valid. We hear it. We love it. And here —
+have 55 friends who all want to connect with you through it.
+
+Every beat in this video is a handshake. Every voice is a door opening.
+Every animation breathing with the percussion says: we speak your language too.
+
+That's not therapy. That's just being human. With really good production value.
+
+
+================================================================================
+Created by Zoltan, from the same ward, with love.
+Radix Mental Health Wing, April 2026.
+
+Remotion composition designed for the spike.land educational video pipeline.
+================================================================================

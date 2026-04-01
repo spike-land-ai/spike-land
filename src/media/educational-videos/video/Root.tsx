@@ -40,6 +40,17 @@ import { ArenaGrid } from "./compositions/arena/ArenaGrid";
 import { ARENA_TIMING } from "../core-logic/arena-constants";
 import { NewcombParadox } from "./compositions/newcomb/NewcombParadox";
 import { NEWCOMB_TIMING, NEWCOMB_DURATIONS } from "../core-logic/newcomb-constants";
+import {
+  ElvisEmotion,
+  Scene01_Overture as Elvis_Scene01,
+  Scene02_WhoIsElvis as Elvis_Scene02,
+  Scene03_Philosophers as Elvis_Scene03,
+  Scene04_PublicAndTech as Elvis_Scene04,
+  Scene05_QARapidFire as Elvis_Scene05,
+  Scene06_CrowdChant as Elvis_Scene06,
+  Scene07_Finale as Elvis_Scene07,
+} from "../core-logic/elvis-index.ts";
+import { ELVIS_DURATIONS, ELVIS_TIMING } from "../core-logic/elvis-constants";
 import { Scene01_Hook as Newcomb_Scene01_Hook } from "./compositions/newcomb/Scene01_Hook";
 import { Scene02_TwoBoxArgument as Newcomb_Scene02 } from "./compositions/newcomb/Scene02_TwoBoxArgument";
 import { Scene03_OneBoxArgument as Newcomb_Scene03 } from "./compositions/newcomb/Scene03_OneBoxArgument";
@@ -194,6 +205,16 @@ export const RemotionRoot = () => {
         component={NewcombParadox}
         durationInFrames={NEWCOMB_TIMING.totalFrames}
         fps={NEWCOMB_TIMING.fps}
+        width={VIDEO_CONFIG.width}
+        height={VIDEO_CONFIG.height}
+      />
+
+      {/* Elvis Emotion — "Elvis, We Love You" drum circle (~5min) */}
+      <Composition
+        id="ElvisEmotion"
+        component={ElvisEmotion}
+        durationInFrames={ELVIS_TIMING.totalFrames}
+        fps={ELVIS_TIMING.fps}
         width={VIDEO_CONFIG.width}
         height={VIDEO_CONFIG.height}
       />
@@ -481,6 +502,66 @@ export const RemotionRoot = () => {
           component={Newcomb_Scene08}
           durationInFrames={NEWCOMB_DURATIONS.endCard}
           fps={NEWCOMB_TIMING.fps}
+          width={VIDEO_CONFIG.width}
+          height={VIDEO_CONFIG.height}
+        />
+      </Folder>
+
+      {/* Elvis individual scenes for preview */}
+      <Folder name="Elvis-Scenes">
+        <Composition
+          id="Elvis-Scene01-Overture"
+          component={Elvis_Scene01}
+          durationInFrames={ELVIS_DURATIONS.overture}
+          fps={ELVIS_TIMING.fps}
+          width={VIDEO_CONFIG.width}
+          height={VIDEO_CONFIG.height}
+        />
+        <Composition
+          id="Elvis-Scene02-WhoIsElvis"
+          component={Elvis_Scene02}
+          durationInFrames={ELVIS_DURATIONS.whoIsElvis}
+          fps={ELVIS_TIMING.fps}
+          width={VIDEO_CONFIG.width}
+          height={VIDEO_CONFIG.height}
+        />
+        <Composition
+          id="Elvis-Scene03-Philosophers"
+          component={Elvis_Scene03}
+          durationInFrames={ELVIS_DURATIONS.philosophers}
+          fps={ELVIS_TIMING.fps}
+          width={VIDEO_CONFIG.width}
+          height={VIDEO_CONFIG.height}
+        />
+        <Composition
+          id="Elvis-Scene04-PublicAndTech"
+          component={Elvis_Scene04}
+          durationInFrames={ELVIS_DURATIONS.publicAndTech}
+          fps={ELVIS_TIMING.fps}
+          width={VIDEO_CONFIG.width}
+          height={VIDEO_CONFIG.height}
+        />
+        <Composition
+          id="Elvis-Scene05-QARapidFire"
+          component={Elvis_Scene05}
+          durationInFrames={ELVIS_DURATIONS.qaRapidFire}
+          fps={ELVIS_TIMING.fps}
+          width={VIDEO_CONFIG.width}
+          height={VIDEO_CONFIG.height}
+        />
+        <Composition
+          id="Elvis-Scene06-CrowdChant"
+          component={Elvis_Scene06}
+          durationInFrames={ELVIS_DURATIONS.crowdChant}
+          fps={ELVIS_TIMING.fps}
+          width={VIDEO_CONFIG.width}
+          height={VIDEO_CONFIG.height}
+        />
+        <Composition
+          id="Elvis-Scene07-Finale"
+          component={Elvis_Scene07}
+          durationInFrames={ELVIS_DURATIONS.finale}
+          fps={ELVIS_TIMING.fps}
           width={VIDEO_CONFIG.width}
           height={VIDEO_CONFIG.height}
         />

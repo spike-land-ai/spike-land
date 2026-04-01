@@ -1,4 +1,4 @@
-import { type FC, Fragment } from "react";
+import { type FC, type ReactNode } from "react";
 import { AbsoluteFill, Audio, Sequence, staticFile } from "remotion";
 import { linearTiming, TransitionSeries } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
@@ -65,23 +65,25 @@ export const ErdosToErdos: FC = () => {
       ))}
 
       <TransitionSeries>
-        {SCENES.map((scene, index) => {
+        {SCENES.flatMap((scene, index) => {
           const SceneComponent = scene.component;
-          return (
-            <Fragment key={index}>
-              <TransitionSeries.Sequence durationInFrames={scene.duration}>
-                <SceneComponent />
-              </TransitionSeries.Sequence>
-              {index < SCENES.length - 1 && (
-                <TransitionSeries.Transition
-                  presentation={fade()}
-                  timing={linearTiming({
-                    durationInFrames: transitionDuration,
-                  })}
-                />
-              )}
-            </Fragment>
-          );
+          const elements: ReactNode[] = [
+            <TransitionSeries.Sequence key={`s-${index}`} durationInFrames={scene.duration}>
+              <SceneComponent />
+            </TransitionSeries.Sequence>,
+          ];
+          if (index < SCENES.length - 1) {
+            elements.push(
+              <TransitionSeries.Transition
+                key={`t-${index}`}
+                presentation={fade()}
+                timing={linearTiming({
+                  durationInFrames: transitionDuration,
+                })}
+              />,
+            );
+          }
+          return elements;
         })}
       </TransitionSeries>
     </AbsoluteFill>

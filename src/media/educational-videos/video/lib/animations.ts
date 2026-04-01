@@ -258,3 +258,43 @@ export function radialClipPath(
   const radius = progress * 150; // 150% to fully cover corners
   return `circle(${radius}% at ${centerX}% ${centerY}%)`;
 }
+
+// ── Beat-sync utilities (for Elvis Emotion and rhythm-driven compositions) ──
+
+/**
+ * Returns a 0→1→0 pulse synchronized to BPM.
+ * Peaks on beat, decays exponentially between beats.
+ */
+export function beatPulse(frame: number, fps: number, bpm: number, intensity: number = 1): number {
+  const framesPerBeat = (60 / bpm) * fps;
+  const distanceToBeat = frame % framesPerBeat;
+  const halfBeat = framesPerBeat / 2;
+  // Distance from nearest beat (wraps around)
+  const dist = distanceToBeat <= halfBeat ? distanceToBeat : framesPerBeat - distanceToBeat;
+  // Exponential decay from beat
+  const decay = 4 / framesPerBeat;
+  return Math.exp(-decay * dist * 6) * intensity;
+}
+
+/**
+ * Returns a scale factor that bumps on kick frames and settles.
+ */
+export function kickScale(
+  frame: number,
+  fps: number,
+  bpm: number,
+  baseScale: number = 1,
+  bump: number = 0.08,
+): number {
+  const p = beatPulse(frame, fps, bpm);
+  return baseScale + p * bump;
+}
+
+/**
+ * Returns true if current frame is within tolerance frames of a beat.
+ */
+export function isOnBeat(frame: number, fps: number, bpm: number, tolerance: number = 2): boolean {
+  const framesPerBeat = (60 / bpm) * fps;
+  const remainder = frame % framesPerBeat;
+  return remainder < tolerance || remainder > framesPerBeat - tolerance;
+}
