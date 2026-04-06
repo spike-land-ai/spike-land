@@ -105,7 +105,12 @@ export function createAuth(env: Env) {
             // userId alone is sufficient for funnel attribution.
             // Sending email would violate GDPR Art. 5(1)(c) data minimisation
             // and could expose PII if the analytics store is ever breached.
-            fetch(`${appUrl}/analytics/ingest`, {
+            //
+            // NOTE: This fetch is deliberately not awaited so it does not block
+            // sign-up completion, but callers in a Cloudflare Worker MUST pass
+            // the returned Promise to ctx.waitUntil() to prevent the runtime
+            // from killing the request before delivery.
+            void fetch(`${appUrl}/analytics/ingest`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify([

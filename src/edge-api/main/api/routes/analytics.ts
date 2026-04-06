@@ -38,7 +38,7 @@ const VALID_RANGES: Record<string, number> = {
 
 const VALID_RANGE_KEYS = Object.keys(VALID_RANGES).join(", ");
 
-const ADMIN_EMAILS = new Set(["hello@spike.land", "hello@spike.land"]);
+const ADMIN_EMAILS = new Set(["hello@spike.land"]);
 
 /**
  * Dual auth check: accepts either X-Internal-Secret (service-to-service)

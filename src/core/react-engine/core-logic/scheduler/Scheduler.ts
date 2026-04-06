@@ -170,11 +170,7 @@ let frameInterval: number = frameYieldMs;
 let startTime = -1;
 
 function shouldYieldToHost(): boolean {
-  const timeElapsed = getCurrentTime() - startTime;
-  if (timeElapsed < frameInterval) {
-    return false;
-  }
-  return true;
+  return getCurrentTime() - startTime >= frameInterval;
 }
 
 const performWorkUntilDeadline = (): void => {

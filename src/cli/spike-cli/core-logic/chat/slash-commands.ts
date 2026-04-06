@@ -117,7 +117,7 @@ export async function handleSlashCommand(
 
   // Built-in commands
   if (BUILTIN_COMMANDS.has(command)) {
-    return Promise.resolve(handleBuiltinCommand(command, argsRaw, ctx));
+    return handleBuiltinCommand(command, argsRaw, ctx);
   }
 
   // Direct tool invocation

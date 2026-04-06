@@ -22,21 +22,23 @@ export function createGeminiGeneration(
     "gemini-3.1-flash-image-preview",
   ];
 
+  async function createAiClient() {
+    const { GoogleGenAI } = await import("@google/genai");
+    return new GoogleGenAI({
+      apiKey: userApiKey || env.GEMINI_API_KEY,
+      ...(useGateway
+        ? { httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() } }
+        : {}),
+    });
+  }
+
   async function callGeminiOnce(
     model: string,
     prompt: string,
     imageBase64?: string,
     imageMimeType?: string,
   ): Promise<{ base64: string; mimeType: string }> {
-    const { GoogleGenAI } = await import("@google/genai");
-    const ai = new GoogleGenAI({
-      apiKey: userApiKey || env.GEMINI_API_KEY,
-      ...(useGateway
-        ? {
-            httpOptions: { baseUrl: AI_GATEWAY_BASE, headers: gatewayHeaders() },
-          }
-        : {}),
-    });
+    const ai = await createAiClient();
 
     const contents: Array<Record<string, unknown>> = [];
 
@@ -271,19 +273,7 @@ export function createGeminiGeneration(
         const imageData = await storage.download(image.originalR2Key);
         const base64 = imageData.toString("base64");
 
-        const { GoogleGenAI } = await import("@google/genai");
-        const ai = new GoogleGenAI({
-          apiKey: userApiKey || env.GEMINI_API_KEY,
-          ...(useGateway
-            ? {
-                httpOptions: {
-                  baseUrl: AI_GATEWAY_BASE,
-                  headers: gatewayHeaders(),
-                },
-              }
-            : {}),
-        });
-
+        const ai = await createAiClient();
         const response = await ai.models.generateContent({
           model: "gemini-2.0-flash",
           contents: [
@@ -331,19 +321,7 @@ export function createGeminiGeneration(
         const imageData = await storage.download(image.originalR2Key);
         const base64 = imageData.toString("base64");
 
-        const { GoogleGenAI } = await import("@google/genai");
-        const ai = new GoogleGenAI({
-          apiKey: userApiKey || env.GEMINI_API_KEY,
-          ...(useGateway
-            ? {
-                httpOptions: {
-                  baseUrl: AI_GATEWAY_BASE,
-                  headers: gatewayHeaders(),
-                },
-              }
-            : {}),
-        });
-
+        const ai = await createAiClient();
         const response = await ai.models.generateContent({
           model: "gemini-2.0-flash",
           contents: [
@@ -381,19 +359,7 @@ export function createGeminiGeneration(
 
     async compareImages(opts) {
       try {
-        const { GoogleGenAI } = await import("@google/genai");
-        const ai = new GoogleGenAI({
-          apiKey: userApiKey || env.GEMINI_API_KEY,
-          ...(useGateway
-            ? {
-                httpOptions: {
-                  baseUrl: AI_GATEWAY_BASE,
-                  headers: gatewayHeaders(),
-                },
-              }
-            : {}),
-        });
-
+        const ai = await createAiClient();
         const parts: Array<Record<string, unknown>> = [];
 
         // Load both images

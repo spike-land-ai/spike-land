@@ -25,14 +25,12 @@ export async function createMcpServer(
 
   const registry = new ToolRegistry(mcpServer, userId);
   await registerAllTools(registry, userId, db, {
-    ...(options?.kv !== undefined ? { kv: options.kv } : {}),
-    ...(options?.vaultSecret !== undefined ? { vaultSecret: options.vaultSecret } : {}),
-    ...(options?.mcpInternalSecret !== undefined
-      ? { mcpInternalSecret: options.mcpInternalSecret }
-      : {}),
-    ...(options?.spikeEdge !== undefined ? { spikeEdge: options.spikeEdge } : {}),
-    ...(options?.spaAssets !== undefined ? { spaAssets: options.spaAssets } : {}),
-    ...(options?.geminiApiKey !== undefined ? { geminiApiKey: options.geminiApiKey } : {}),
+    kv: options?.kv,
+    vaultSecret: options?.vaultSecret,
+    mcpInternalSecret: options?.mcpInternalSecret,
+    spikeEdge: options?.spikeEdge,
+    spaAssets: options?.spaAssets,
+    geminiApiKey: options?.geminiApiKey,
   });
 
   if (options?.enabledCategories && options.enabledCategories.length > 0) {

@@ -133,6 +133,158 @@ function isInternalProxyRequest(
   );
 }
 
+interface PostRequestContext {
+  env: Env;
+  executionCtx: ExecutionContext;
+  userId: string;
+  agentId: string | undefined;
+  isAgent: boolean;
+  rpcMethod: string;
+  body: unknown;
+  startTime: number;
+}
+
+/**
+ * Read and inspect a JSON-RPC response body to determine the call outcome.
+ * Returns the consumed text body (so it can be replayed) and the outcome.
+ */
+async function inspectOutcome(
+  response: Response,
+  isToolCall: boolean,
+): Promise<{ responseBody: string | null; outcome: "success" | "error" }> {
+  let outcome: "success" | "error" = response.status >= 400 ? "error" : "success";
+  let responseBody: string | null = null;
+
+  if (isToolCall && outcome === "success") {
+    try {
+      responseBody = await response.text();
+    } catch {
+      // Body read failed — responseBody stays null
+    }
+    if (responseBody) {
+      try {
+        const parsed = JSON.parse(responseBody) as Record<string, unknown>;
+        if ("error" in parsed) {
+          outcome = "error";
+        } else if (
+          parsed["result"] &&
+          typeof parsed["result"] === "object" &&
+          (parsed["result"] as Record<string, unknown>)["isError"]
+        ) {
+          outcome = "error";
+        }
+      } catch {
+        // JSON parse failed — keep outcome as success
+      }
+    }
+  }
+
+  return { responseBody, outcome };
+}
+
+/**
+ * Fire-and-forget analytics and abuse reporting after every MCP POST request.
+ * All side-effects are dispatched via executionCtx.waitUntil so they never
+ * block the response.
+ */
+async function dispatchPostRequestAnalytics(
+  ctx: PostRequestContext,
+  response: Response,
+): Promise<{
+  finalBody: string | ReadableStream | null;
+  responseStatus: number;
+  responseHeaders: Headers;
+}> {
+  const { env, executionCtx, userId, agentId, isAgent, rpcMethod, body, startTime } = ctx;
+  const durationMs = Date.now() - startTime;
+  const isToolCall = rpcMethod === "tools/call";
+  const toolName = isToolCall
+    ? ((body as { params?: { name?: string } })?.params?.name ?? "unknown")
+    : undefined;
+
+  const { responseBody, outcome } = await inspectOutcome(response, isToolCall);
+
+  // Abuse detection
+  const isFlagged = await detectAbuse(env.KV, agentId ?? userId, outcome);
+  if (isFlagged) {
+    const endpoint = isAgent ? "/internal/agent-elo/event" : "/internal/elo/event";
+    const payload = isAgent
+      ? { agentId, ownerUserId: userId, eventType: "abuse_flag" }
+      : { userId, eventType: "abuse_flag" };
+    executionCtx.waitUntil(
+      env.SPIKE_EDGE.fetch(`https://edge.spike.land${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-secret": env.MCP_INTERNAL_SECRET,
+        },
+        body: JSON.stringify(payload),
+      }).catch((err) => console.error("[mcp] Failed to report abuse:", err)),
+    );
+  }
+
+  // GA4
+  const ga4Events: GA4Event[] = [
+    {
+      name: "mcp_request",
+      params: { method: rpcMethod, user_id: userId, duration_ms: durationMs },
+    },
+  ];
+  if (isToolCall && toolName) {
+    ga4Events.push({
+      name: "mcp_tool_call",
+      params: {
+        tool_name: toolName,
+        server_name: "spike-land-mcp",
+        outcome,
+        user_id: userId,
+        duration_ms: durationMs,
+      },
+    });
+  }
+  executionCtx.waitUntil(
+    hashClientId(userId)
+      .then((clientId) => sendGA4Events(env, clientId, ga4Events))
+      .catch((err) => console.error("[GA4] Failed to send events:", err)),
+  );
+
+  // Analytics Engine + D1 rollup
+  if (isToolCall && toolName) {
+    trackMcpToolCall(env.ANALYTICS, toolName, durationMs, outcome === "success");
+
+    executionCtx.waitUntil(
+      recordSkillCall(
+        env.DB,
+        { userId, toolName, serverName: "spike-land-mcp", outcome, durationMs },
+        env.SPIKE_EDGE,
+      ).catch((err) => console.error("[skill-tracker] Failed to record:", err)),
+    );
+  }
+
+  // Platform analytics (spike-edge)
+  const platformEvents: AnalyticsEvent[] = [
+    {
+      source: "spike-land-mcp",
+      eventType: "mcp_request",
+      metadata: { method: rpcMethod, durationMs },
+    },
+  ];
+  if (isToolCall && toolName) {
+    platformEvents.push({
+      source: "spike-land-mcp",
+      eventType: "tool_use",
+      metadata: { toolName, serverName: "spike-land-mcp", outcome, durationMs },
+    });
+  }
+  executionCtx.waitUntil(trackPlatformEvents(env.SPIKE_EDGE, platformEvents));
+
+  return {
+    finalBody: responseBody ?? response.body,
+    responseStatus: response.status,
+    responseHeaders: new Headers(response.headers),
+  };
+}
+
 async function handleStatelessPost(
   c: Context<{ Bindings: Env; Variables: AuthVariables }>,
   userId: string,
@@ -356,120 +508,20 @@ mcpRoute.post("/", async (c) => {
         userRole,
       );
 
-      const durationMs = Date.now() - startTime;
-      const isToolCall = rpcMethod === "tools/call";
-      const toolName = isToolCall
-        ? ((body as { params?: { name?: string } })?.params?.name ?? "unknown")
-        : undefined;
-
-      let outcome: "success" | "error" = response.status >= 400 ? "error" : "success";
-      let responseBody: string | null = null;
-      if (isToolCall && outcome === "success") {
-        try {
-          responseBody = await response.text();
-        } catch {
-          // Keep responseBody null when the body stream fails.
-        }
-        if (responseBody) {
-          try {
-            const parsed = JSON.parse(responseBody) as Record<string, unknown>;
-            if ("error" in parsed) {
-              outcome = "error";
-            } else if (
-              parsed["result"] &&
-              typeof parsed["result"] === "object" &&
-              (parsed["result"] as Record<string, unknown>)["isError"]
-            ) {
-              outcome = "error";
-            }
-          } catch {
-            // JSON parse failed — keep outcome as success
-          }
-        }
-      }
-
-      const isFlagged = await detectAbuse(c.env.KV, agentId ?? userId, outcome);
-      if (isFlagged) {
-        const endpoint = isAgent ? "/internal/agent-elo/event" : "/internal/elo/event";
-        const payload = isAgent
-          ? { agentId, ownerUserId: userId, eventType: "abuse_flag" }
-          : { userId, eventType: "abuse_flag" };
-        c.executionCtx.waitUntil(
-          c.env.SPIKE_EDGE.fetch(`https://edge.spike.land${endpoint}`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-internal-secret": c.env.MCP_INTERNAL_SECRET,
-            },
-            body: JSON.stringify(payload),
-          }).catch((err) => console.error("[mcp] Failed to report abuse:", err)),
-        );
-      }
-
-      const ga4Events: GA4Event[] = [
+      const { finalBody, responseStatus, responseHeaders } = await dispatchPostRequestAnalytics(
         {
-          name: "mcp_request",
-          params: { method: rpcMethod, user_id: userId, duration_ms: durationMs },
+          env: c.env,
+          executionCtx: c.executionCtx,
+          userId,
+          agentId,
+          isAgent,
+          rpcMethod,
+          body,
+          startTime,
         },
-      ];
-      if (isToolCall && toolName) {
-        ga4Events.push({
-          name: "mcp_tool_call",
-          params: {
-            tool_name: toolName,
-            server_name: "spike-land-mcp",
-            outcome,
-            user_id: userId,
-            duration_ms: durationMs,
-          },
-        });
-      }
-      c.executionCtx.waitUntil(
-        hashClientId(userId)
-          .then((clientId) => sendGA4Events(c.env, clientId, ga4Events))
-          .catch((err) => console.error("[GA4] Failed to send events:", err)),
+        response,
       );
-
-      if (isToolCall && toolName) {
-        // Analytics Engine write (fire-and-forget, cheap, no D1 quota used)
-        trackMcpToolCall(c.env.ANALYTICS, toolName, durationMs, outcome === "success");
-
-        c.executionCtx.waitUntil(
-          recordSkillCall(
-            c.env.DB,
-            {
-              userId,
-              toolName,
-              serverName: "spike-land-mcp",
-              outcome,
-              durationMs,
-            },
-            c.env.SPIKE_EDGE,
-          ).catch((err) => console.error("[skill-tracker] Failed to record:", err)),
-        );
-      }
-
-      const platformEvents: AnalyticsEvent[] = [
-        {
-          source: "spike-land-mcp",
-          eventType: "mcp_request",
-          metadata: { method: rpcMethod, durationMs },
-        },
-      ];
-      if (isToolCall && toolName) {
-        platformEvents.push({
-          source: "spike-land-mcp",
-          eventType: "tool_use",
-          metadata: { toolName, serverName: "spike-land-mcp", outcome, durationMs },
-        });
-      }
-      c.executionCtx.waitUntil(trackPlatformEvents(c.env.SPIKE_EDGE, platformEvents));
-
-      const finalBody = responseBody ?? response.body;
-      return new Response(finalBody, {
-        status: response.status,
-        headers: new Headers(response.headers),
-      });
+      return new Response(finalBody, { status: responseStatus, headers: responseHeaders });
     } catch (error) {
       const detail = error instanceof Error ? error.message : "Unknown";
       console.error("MCP stateless fallback error", { userId, rpcMethod, detail, error });
@@ -499,130 +551,20 @@ mcpRoute.post("/", async (c) => {
       await disposeSession(session);
     }
 
-    // Track MCP request via GA4 and platform analytics
-    const durationMs = Date.now() - startTime;
-    const isToolCall = rpcMethod === "tools/call";
-    const toolName = isToolCall
-      ? ((body as { params?: { name?: string } })?.params?.name ?? "unknown")
-      : undefined;
-
-    // Determine outcome by inspecting the JSON-RPC response body.
-    // MCP returns HTTP 200 even for tool errors — the error is in the body.
-    let outcome: "success" | "error" = response.status >= 400 ? "error" : "success";
-    let responseBody: string | null = null;
-    if (isToolCall && outcome === "success") {
-      // Read body first — must succeed before we attempt to parse
-      try {
-        responseBody = await response.text();
-      } catch {
-        // Body read failed — responseBody stays null, response.body is consumed
-      }
-      // Parse separately so responseBody is always set if text() succeeded
-      if (responseBody) {
-        try {
-          const parsed = JSON.parse(responseBody) as Record<string, unknown>;
-          if ("error" in parsed) {
-            outcome = "error";
-          } else if (
-            parsed["result"] &&
-            typeof parsed["result"] === "object" &&
-            (parsed["result"] as Record<string, unknown>)["isError"]
-          ) {
-            outcome = "error";
-          }
-        } catch {
-          // JSON parse failed — keep outcome as success
-        }
-      }
-    }
-
-    // Determine if flagged for abuse
-    const isFlagged = await detectAbuse(c.env.KV, agentId ?? userId, outcome);
-    if (isFlagged) {
-      const endpoint = isAgent ? "/internal/agent-elo/event" : "/internal/elo/event";
-      const payload = isAgent
-        ? { agentId, ownerUserId: userId, eventType: "abuse_flag" }
-        : { userId, eventType: "abuse_flag" };
-      c.executionCtx.waitUntil(
-        c.env.SPIKE_EDGE.fetch(`https://edge.spike.land${endpoint}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-internal-secret": c.env.MCP_INTERNAL_SECRET,
-          },
-          body: JSON.stringify(payload),
-        }).catch((err) => console.error("[mcp] Failed to report abuse:", err)),
-      );
-    }
-
-    // 1. Send to GA4
-    const ga4Events: GA4Event[] = [
+    const { finalBody, responseStatus, responseHeaders } = await dispatchPostRequestAnalytics(
       {
-        name: "mcp_request",
-        params: { method: rpcMethod, user_id: userId, duration_ms: durationMs },
+        env: c.env,
+        executionCtx: c.executionCtx,
+        userId,
+        agentId,
+        isAgent,
+        rpcMethod,
+        body,
+        startTime,
       },
-    ];
-    if (isToolCall && toolName) {
-      ga4Events.push({
-        name: "mcp_tool_call",
-        params: {
-          tool_name: toolName,
-          server_name: "spike-land-mcp",
-          outcome,
-          user_id: userId,
-          duration_ms: durationMs,
-        },
-      });
-    }
-    c.executionCtx.waitUntil(
-      hashClientId(userId)
-        .then((clientId) => sendGA4Events(c.env, clientId, ga4Events))
-        .catch((err) => console.error("[GA4] Failed to send events:", err)),
+      response,
     );
-
-    // 2. Analytics Engine write + D1 rollup tables
-    if (isToolCall && toolName) {
-      // Analytics Engine write (fire-and-forget, synchronous CF binding call)
-      trackMcpToolCall(c.env.ANALYTICS, toolName, durationMs, outcome === "success");
-
-      c.executionCtx.waitUntil(
-        recordSkillCall(
-          c.env.DB,
-          {
-            userId,
-            toolName,
-            serverName: "spike-land-mcp",
-            outcome,
-            durationMs,
-          },
-          c.env.SPIKE_EDGE,
-        ).catch((err) => console.error("[skill-tracker] Failed to record:", err)),
-      );
-    }
-
-    // 3. Send to platform analytics (D1 via spike-edge)
-    const platformEvents: AnalyticsEvent[] = [
-      {
-        source: "spike-land-mcp",
-        eventType: "mcp_request",
-        metadata: { method: rpcMethod, durationMs },
-      },
-    ];
-    if (isToolCall && toolName) {
-      platformEvents.push({
-        source: "spike-land-mcp",
-        eventType: "tool_use",
-        metadata: { toolName, serverName: "spike-land-mcp", outcome, durationMs },
-      });
-    }
-    c.executionCtx.waitUntil(trackPlatformEvents(c.env.SPIKE_EDGE, platformEvents));
-
-    // Return response — re-create if body was consumed for outcome detection
-    const finalBody = responseBody ?? response.body;
-    return new Response(finalBody, {
-      status: response.status,
-      headers: new Headers(response.headers),
-    });
+    return new Response(finalBody, { status: responseStatus, headers: responseHeaders });
   } catch (error) {
     if (isNewSession && session) {
       await disposeSession(session);

@@ -850,7 +850,7 @@ describe("game-manager", () => {
 
       expect(mockPrisma.chessGame.update).toHaveBeenCalledWith({
         where: { id: "game-1" },
-        data: { status: "RESIGNED", winnerId: "black-player" },
+        data: { status: "EXPIRED", winnerId: "black-player" },
       });
     });
 
@@ -864,7 +864,7 @@ describe("game-manager", () => {
 
       expect(mockPrisma.chessGame.update).toHaveBeenCalledWith({
         where: { id: "game-1" },
-        data: { status: "RESIGNED", winnerId: "white-player" },
+        data: { status: "EXPIRED", winnerId: "white-player" },
       });
     });
 
@@ -886,7 +886,7 @@ describe("game-manager", () => {
 
       expect(mockPrisma.chessGame.update).toHaveBeenCalledWith({
         where: { id: "game-1" },
-        data: { status: "RESIGNED", winnerId: null },
+        data: { status: "EXPIRED", winnerId: null },
       });
     });
   });

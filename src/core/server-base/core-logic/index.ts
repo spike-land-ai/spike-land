@@ -241,8 +241,9 @@ export function wrapServerWithLogging(
   // McpServer.tool() has multiple overloads. We intercept by wrapping the
   // function itself and detecting the handler (last argument that's a function).
   server.tool = ((...args: unknown[]) => {
-    // Find the handler — it's always the last function argument
-    const handlerIdx = args.findIndex((a, i) => typeof a === "function" && i === args.length - 1);
+    // The handler is always the last argument when present
+    const lastIdx = args.length - 1;
+    const handlerIdx = typeof args[lastIdx] === "function" ? lastIdx : -1;
 
     if (handlerIdx === -1) {
       // No handler found — pass through unchanged
@@ -280,7 +281,9 @@ export function wrapServerWithLogging(
         if (onLog) {
           onLog(entry);
         } else {
-          console.error(`[mcp-analytics] ${serverName}/${toolName} ${outcome} ${durationMs}ms`);
+          process.stderr.write(
+            `[mcp-analytics] ${serverName}/${toolName} ${outcome} ${durationMs}ms\n`,
+          );
         }
       }
     };

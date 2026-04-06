@@ -65,13 +65,9 @@ export async function acceptChallenge(
     whitePlayerId = challenge.receiverId;
     blackPlayerId = challenge.senderId;
   } else {
-    if (Math.random() < 0.5) {
-      whitePlayerId = challenge.senderId;
-      blackPlayerId = challenge.receiverId;
-    } else {
-      whitePlayerId = challenge.receiverId;
-      blackPlayerId = challenge.senderId;
-    }
+    const senderIsWhite = Math.random() < 0.5;
+    whitePlayerId = senderIsWhite ? challenge.senderId : challenge.receiverId;
+    blackPlayerId = senderIsWhite ? challenge.receiverId : challenge.senderId;
   }
 
   const timeControlMs = (await import("./types")).TIME_CONTROL_MS[challenge.timeControl] ?? 300_000;

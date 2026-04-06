@@ -24,6 +24,32 @@ import {
 // CORS configuration for Better Auth and MCP
 const ALLOWED_ORIGINS = [...AUTH_ALLOWED_ORIGINS];
 
+/**
+ * Constant-time string comparison to prevent timing-based secret leakage.
+ * OWASP A07:2021 — Identification and Authentication Failures.
+ *
+ * We compare two UTF-8 byte arrays element-by-element without short-circuiting
+ * so that the response time does not vary with how many characters match.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const bytesA = enc.encode(a);
+  const bytesB = enc.encode(b);
+  if (bytesA.length !== bytesB.length) {
+    // Still iterate to avoid length-based timing leak
+    let diff = 0;
+    for (let i = 0; i < bytesA.length; i++) {
+      diff |= (bytesA[i] ?? 0) ^ (bytesB[i % bytesB.length] ?? 0);
+    }
+    return false;
+  }
+  let diff = 0;
+  for (let i = 0; i < bytesA.length; i++) {
+    diff |= (bytesA[i] ?? 0) ^ (bytesB[i] ?? 0);
+  }
+  return diff === 0;
+}
+
 function getCorsOrigin(request: Request): string {
   const origin = request.headers.get("Origin") ?? "";
   return ALLOWED_ORIGINS.includes(origin) ? origin : (ALLOWED_ORIGINS[0] ?? "");
@@ -250,9 +276,13 @@ export default Sentry.withSentry((env: Env) => createWorkerSentryOptions("mcp-au
         return withCors(new Response("Not found", { status: 404 }), request);
       }
 
-      // Gate MCP endpoint with internal secret to prevent user enumeration
+      // Gate MCP endpoint with internal secret to prevent user enumeration.
+      // Use constant-time comparison to prevent timing attacks (OWASP A07:2021).
       const internalSecret = request.headers.get("X-Internal-Secret");
-      if (!internalSecret || internalSecret !== instrumentedEnv.MCP_INTERNAL_SECRET) {
+      if (
+        !internalSecret ||
+        !timingSafeEqual(internalSecret, instrumentedEnv.MCP_INTERNAL_SECRET)
+      ) {
         return withCors(
           new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,

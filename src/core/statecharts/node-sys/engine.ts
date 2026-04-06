@@ -80,16 +80,14 @@ function resolveEntry(
     case "parallel":
       results = [
         ...results,
-        ...state.children.flatMap((childId: string) =>
-          resolveEntry(machineId, childId, new Set(visited)),
-        ),
+        ...state.children.flatMap((childId) => resolveEntry(machineId, childId, new Set(visited))),
       ];
       break;
 
     case "history": {
       const remembered = instance.history[stateId];
       if (remembered && remembered.length > 0) {
-        results = remembered.flatMap((id: string) => resolveEntry(machineId, id, new Set(visited)));
+        results = remembered.flatMap((id) => resolveEntry(machineId, id, new Set(visited)));
       } else if (state.parent) {
         // Fall back to initial of parent
         const parent = instance.definition.states[state.parent];
@@ -273,20 +271,20 @@ export function removeState(machineId: string, stateId: string): void {
   if (state.parent) {
     const parent = instance.definition.states[state.parent];
     if (parent) {
-      parent.children = parent.children.filter((id: string) => id !== stateId);
+      parent.children = parent.children.filter((id) => id !== stateId);
     }
   }
 
   // Remove all transitions referencing this state
   instance.definition.transitions = instance.definition.transitions.filter(
-    (t: Transition) => t.source !== stateId && t.target !== stateId,
+    (t) => t.source !== stateId && t.target !== stateId,
   );
 
   // Remove the state
   delete instance.definition.states[stateId];
 
   // Remove from active states if present
-  instance.currentStates = instance.currentStates.filter((id: string) => id !== stateId);
+  instance.currentStates = instance.currentStates.filter((id) => id !== stateId);
 }
 
 /** Add a transition to a machine. */
@@ -318,7 +316,7 @@ export function removeTransition(machineId: string, transitionId: string): void 
   const instance = getMachine(machineId);
   const before = instance.definition.transitions.length;
   instance.definition.transitions = instance.definition.transitions.filter(
-    (t: Transition) => t.id !== transitionId,
+    (t) => t.id !== transitionId,
   );
   if (instance.definition.transitions.length === before) {
     throw new Error(`Transition "${transitionId}" not found in machine "${machineId}"`);
@@ -336,7 +334,7 @@ function getLCA(instance: MachineInstance, s1: string, s2: string): string | und
   const anc2 = [s2, ...getAncestors(instance, s2)];
 
   let common: string | undefined;
-  for (const a of anc1.reverse()) {
+  for (const a of [...anc1].reverse()) {
     if (anc2.includes(a)) {
       common = a;
       break;
@@ -356,12 +354,12 @@ export function sendEvent(
 
   // Merge payload into context temporarily for guard evaluation
   if (payload) {
-    Object.assign(instance.context, { ["_event"]: payload });
+    Object.assign(instance.context, { _event: payload });
   }
 
   // Find matching transitions from any active state
   const candidateTransitions = instance.definition.transitions.filter(
-    (t: Transition) => t.event === event && activeSet.has(t.source),
+    (t) => t.event === event && activeSet.has(t.source),
   );
 
   // Evaluate guards and pick first matching
@@ -554,8 +552,7 @@ export function validateMachine(machineId: string): ValidationIssue[] {
   }
 
   // Check compound states have initial child and that initial child exists
-  for (const [stateId, stateNode] of Object.entries(states)) {
-    const state = stateNode as StateNode;
+  for (const [stateId, state] of Object.entries(states)) {
     if (state.type === "compound") {
       if (!state.initial) {
         issues.push({
@@ -607,13 +604,12 @@ export function validateMachine(machineId: string): ValidationIssue[] {
   }
 
   // Check for unreachable states (no incoming transitions and not initial)
-  const targetedStates = new Set(transitions.map((t: Transition) => t.target));
+  const targetedStates = new Set(transitions.map((t) => t.target));
   const initialStates = new Set<string>();
   if (instance.definition.initial) {
     initialStates.add(instance.definition.initial);
   }
-  for (const stateNode of Object.values(states)) {
-    const state = stateNode as StateNode;
+  for (const state of Object.values(states)) {
     if (state.initial) {
       initialStates.add(state.initial);
     }
@@ -626,8 +622,8 @@ export function validateMachine(machineId: string): ValidationIssue[] {
   }
 
   for (const stateId of stateIds) {
-    const state = states[stateId] as StateNode;
-    if (!targetedStates.has(stateId) && !initialStates.has(stateId) && state.type !== "history") {
+    const state = states[stateId];
+    if (!targetedStates.has(stateId) && !initialStates.has(stateId) && state?.type !== "history") {
       issues.push({
         level: "warning",
         message: `State "${stateId}" is unreachable (no incoming transitions and not an initial state)`,
@@ -637,10 +633,11 @@ export function validateMachine(machineId: string): ValidationIssue[] {
   }
 
   // Check for dead-end states (no outgoing transitions and not final)
-  const sourceStates = new Set(transitions.map((t: Transition) => t.source));
+  const sourceStates = new Set(transitions.map((t) => t.source));
   for (const stateId of stateIds) {
-    const state = states[stateId] as StateNode;
+    const state = states[stateId];
     if (
+      state &&
       !sourceStates.has(stateId) &&
       state.type !== "final" &&
       state.type !== "history" &&

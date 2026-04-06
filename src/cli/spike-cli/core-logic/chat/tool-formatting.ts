@@ -109,11 +109,10 @@ export function formatAppGroupedTools(
 
     for (const tool of visible) {
       const displayName = stripNamespace(tool.namespacedName, tool.serverName, separator);
-      const defaults = extractDefaults(tool.inputSchema);
       const requiredParams = getRequiredParams(tool.inputSchema);
 
-      const hasAllDefaults = requiredParams.length === 0 && Object.keys(defaults).length >= 0;
-      const readyBadge = hasAllDefaults ? dim(" (ready)") : "";
+      const isReady = requiredParams.length === 0;
+      const readyBadge = isReady ? dim(" (ready)") : "";
 
       lines.push(`  ${cyan("/" + displayName)}${readyBadge}  ${dim(tool.description ?? "")}`);
     }

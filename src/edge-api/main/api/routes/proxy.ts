@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type { Env, Variables } from "../../core-logic/env.js";
 import { getClientId, sendGA4Events } from "../../lazy-imports/ga4.js";
 import { resolveByokKey, type ByokProvider } from "../../core-logic/byok.js";
@@ -354,7 +355,10 @@ proxy.post("/proxy/tts", async (c) => {
 
   if (!response.ok) {
     const errorText = await response.text();
-    return c.json({ error: "TTS generation failed", detail: errorText }, response.status as 400);
+    return c.json(
+      { error: "TTS generation failed", detail: errorText },
+      response.status as ContentfulStatusCode,
+    );
   }
 
   return new Response(response.body, {

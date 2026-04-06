@@ -163,7 +163,7 @@ export class ServerManager {
     if (existing) {
       await existing.close();
     }
-    const serverConfig = config ?? (existing as unknown as { config: ServerConfig })?.config;
+    const serverConfig = config ?? existing?.getConfig();
     if (!serverConfig) {
       throw new Error(`Unknown server: ${serverName}`);
     }
@@ -234,7 +234,7 @@ export class ServerManager {
   }
 
   /** Expose config for status command (via the upstream client). */
-  getServerConfig(_serverName: string): ServerConfig | undefined {
-    return undefined;
+  getServerConfig(serverName: string): ServerConfig | undefined {
+    return this.clients.get(serverName)?.getConfig();
   }
 }

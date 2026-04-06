@@ -25,7 +25,7 @@ export function extractMentions(text: string): Mention[] {
     if (prefix === "#") {
       mentions.push({ type: "channel", id: id, raw });
     } else if (prefix === "@") {
-      if (id?.startsWith("/")) {
+      if (id.startsWith("/")) {
         mentions.push({ type: "file", id: id, raw });
       } else {
         // Just assuming user for now unless it's a known role like "here" or "channel"

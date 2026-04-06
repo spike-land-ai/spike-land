@@ -81,7 +81,7 @@ export function createCorsErrorResponse(
 }
 
 export function isChunk(link: string) {
-  const chunkRegExp = /[.]{1}[a-f0-9]{10}[.]+/gm;
+  const chunkRegExp = /\.[a-f0-9]{10}\./m;
   return link.indexOf("chunk-") !== -1 || chunkRegExp.test(link);
 }
 

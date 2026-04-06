@@ -90,7 +90,7 @@ function ensureRootIsScheduled(root: FiberRoot): void {
   }
 
   // Schedule new callback
-  let newCallbackNode;
+  let newCallbackNode: Task | null;
 
   if (newCallbackPriority === SyncLane) {
     // Sync work - schedule immediately

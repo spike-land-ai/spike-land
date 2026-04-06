@@ -91,7 +91,7 @@ export class PresenceDurableObject extends DurableObject {
     }
   }
 
-  override async webSocketMessage(ws: WebSocket, msg: string | ArrayBuffer) {
+  override webSocketMessage(ws: WebSocket, msg: string | ArrayBuffer): void {
     if (typeof msg !== "string") return;
 
     try {
@@ -110,12 +110,12 @@ export class PresenceDurableObject extends DurableObject {
       ) {
         this.updatePresence(attachment.userId, data.status);
       }
-    } catch (e) {
-      console.error("Invalid WS message", e);
+    } catch (err) {
+      console.error("Invalid WS message", err);
     }
   }
 
-  override async webSocketClose(ws: WebSocket) {
+  override webSocketClose(ws: WebSocket): void {
     const attachment = ws.deserializeAttachment() as { userId: string } | null;
     if (attachment) {
       // Check if user has other active websockets
@@ -126,7 +126,7 @@ export class PresenceDurableObject extends DurableObject {
     }
   }
 
-  override async webSocketError(ws: WebSocket) {
+  override webSocketError(ws: WebSocket): void {
     const attachment = ws.deserializeAttachment() as { userId: string } | null;
     if (attachment) {
       const userSockets = this.ctx.getWebSockets(attachment.userId);

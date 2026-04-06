@@ -52,18 +52,12 @@ export async function handleChatStream(
 
   const tools = [{ functionDeclarations }];
 
-  // Prepare history (long term from request)
-  // We only include text parts for history to avoid complex multi-part/thought issues
-  const history = (request.history || []).map((h) => ({
-    role: h.role === "assistant" ? "model" : "user",
-    parts: [{ text: h.content }],
-  }));
-
-  // Current message
+  // Prepare conversation history + current message.
+  // Only text parts are included for history to avoid multi-part/thought issues.
   const contents: Array<{ role: string; parts: Record<string, unknown>[] }> = [
-    ...history.map((h) => ({
-      ...h,
-      parts: h.parts as unknown as Record<string, unknown>[],
+    ...(request.history ?? []).map((h) => ({
+      role: h.role === "assistant" ? "model" : "user",
+      parts: [{ text: h.content }] as Record<string, unknown>[],
     })),
     { role: "user", parts: [{ text: request.message }] },
   ];
@@ -126,8 +120,6 @@ export async function handleChatStream(
           let hasToolCalls = false;
           const toolResponsesInThisTurn: Record<string, unknown>[] = [];
           const modelPartsInThisTurn: Record<string, unknown>[] = [];
-          let _assistantText = "";
-          let _thoughts = "";
 
           for await (const chunk of streamResult) {
             const candidates = chunk.candidates;
@@ -140,13 +132,9 @@ export async function handleChatStream(
               modelPartsInThisTurn.push(part as Record<string, unknown>);
 
               if (part.text) {
-                _assistantText += part.text;
                 controller.enqueue(sseEvent({ type: "text_delta", text: part.text }));
               } else if (part.thought) {
-                if (part.thought) {
-                  _thoughts += String(part.thought);
-                  controller.enqueue(sseEvent({ type: "thought", text: String(part.thought) }));
-                }
+                controller.enqueue(sseEvent({ type: "thought", text: String(part.thought) }));
               } else if (part.functionCall) {
                 const fnName = part.functionCall.name;
                 if (!fnName) continue;

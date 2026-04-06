@@ -125,31 +125,19 @@ export const ToneDescriptorsSchema = z.array(z.string().max(100)).max(20);
 
 export type ToneDescriptors = z.infer<typeof ToneDescriptorsSchema>;
 
+/** Hex color string schema — matches exactly #RRGGBB */
+const HexColorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
+
 /**
  * Color palette for brand
  * @see BrandProfile.colorPalette
  */
 export const ColorPaletteSchema = z.object({
-  primary: z
-    .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/)
-    .optional(),
-  secondary: z
-    .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/)
-    .optional(),
-  accent: z
-    .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/)
-    .optional(),
-  background: z
-    .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/)
-    .optional(),
-  text: z
-    .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/)
-    .optional(),
+  primary: HexColorSchema.optional(),
+  secondary: HexColorSchema.optional(),
+  accent: HexColorSchema.optional(),
+  background: HexColorSchema.optional(),
+  text: HexColorSchema.optional(),
 });
 
 export type ColorPalette = z.infer<typeof ColorPaletteSchema>;

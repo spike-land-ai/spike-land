@@ -3,8 +3,13 @@ import type { DrizzleDB } from "../db/db-index";
 import { channels, channelMembers } from "../db/schema";
 import type { Env } from "./env";
 
+/** Minimal env shape required by checkWorkspaceMembership. */
+export interface WorkspaceAccessEnv {
+  MCP_SERVICE: Env["MCP_SERVICE"];
+}
+
 export async function checkWorkspaceMembership(
-  env: Env,
+  env: WorkspaceAccessEnv,
   userId: string,
   workspaceId: string,
 ): Promise<boolean> {
@@ -35,9 +40,8 @@ export async function checkWorkspaceMembership(
  * Accepts a pre-constructed DrizzleDB so callers control db creation,
  * making the function unit-testable without module mocking.
  */
-export interface ChannelAccessEnv {
+export interface ChannelAccessEnv extends WorkspaceAccessEnv {
   DB: DrizzleDB;
-  MCP_SERVICE: Env["MCP_SERVICE"];
 }
 
 /**
@@ -70,7 +74,7 @@ export async function checkChannelAccess(
       if (userId.startsWith("visitor-")) {
         return true;
       }
-      return checkWorkspaceMembership(env as unknown as Env, userId, channel.workspaceId);
+      return checkWorkspaceMembership(env, userId, channel.workspaceId);
     }
 
     // private and dm: visitors are never allowed; check channel_members

@@ -8,7 +8,7 @@
 
 export type UserRole = "USER" | "ADMIN" | "SUPER_ADMIN";
 
-export type EnhancementTier = "FREE" | "TIER_1K" | "TIER_2K" | "TIER_4K";
+export type EnhancementTier = "FREE" | "TIER_0_5K" | "TIER_1K" | "TIER_2K" | "TIER_4K";
 
 export type JobStatus =
   | "PENDING"

@@ -1,5 +1,3 @@
-import type { Env } from "../env";
-
 interface AbuseState {
   calls: number;
   errors: number;
@@ -48,16 +46,4 @@ export async function detectAbuse(
   await kv.put(windowKey, JSON.stringify(state), { expirationTtl: 60 });
 
   return shouldFlag;
-}
-
-export async function reportAbuseFlag(_env: Env, _userId: string, isAgent: boolean) {
-  try {
-    if (isAgent) {
-      // Find the agent's owner
-      // Wait, if it's an agent, the caller passed the agentId as userId or in header.
-      // In routes/mcp.ts, we have `userId` and `agentId`. Let's just use the appropriate endpoint.
-    }
-  } catch (err) {
-    console.error("[abuse-detector] Failed to report abuse:", err);
-  }
 }

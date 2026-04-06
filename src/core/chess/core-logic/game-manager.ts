@@ -54,9 +54,7 @@ export async function createGameRecord(
   whitePlayerId: string,
   timeControl: string = "BLITZ_5",
 ): Promise<{ id: string }> {
-  const timeMs = TIME_CONTROL_MS[timeControl] ?? TIME_CONTROL_MS["BLITZ_5"];
-
-  const resolvedTimeMs = timeMs ?? 300_000;
+  const resolvedTimeMs = TIME_CONTROL_MS[timeControl] ?? 300_000;
   const game = (await prisma.chessGame.create({
     data: {
       whitePlayerId,
@@ -131,15 +129,15 @@ export async function makeGameMove(
   const state = getGameState(chess);
   const newMoveCount = game.moveCount + 1;
 
-  let newStatus: ChessGameStatus = "ACTIVE" as ChessGameStatus;
+  let newStatus: ChessGameStatus = "ACTIVE";
   if (state.isCheckmate) {
-    newStatus = "CHECKMATE" as ChessGameStatus;
+    newStatus = "CHECKMATE";
   } else if (state.isStalemate) {
-    newStatus = "STALEMATE" as ChessGameStatus;
+    newStatus = "STALEMATE";
   } else if (state.isDraw) {
-    newStatus = "DRAW" as ChessGameStatus;
+    newStatus = "DRAW";
   } else if (state.isCheck) {
-    newStatus = "CHECK" as ChessGameStatus;
+    newStatus = "CHECK";
   }
 
   await prisma.chessMove.create({
@@ -349,7 +347,7 @@ export async function handleTimeExpiry(gameId: string, playerId: string): Promis
 
   await prisma.chessGame.update({
     where: { id: gameId },
-    data: { status: "RESIGNED", winnerId },
+    data: { status: "EXPIRED", winnerId },
   });
 
   await finalizeGame(gameId, result, winnerId ?? undefined);

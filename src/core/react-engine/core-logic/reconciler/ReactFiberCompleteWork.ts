@@ -23,6 +23,14 @@ import { NoFlags, Ref, RefStatic, Update } from "./ReactFiberFlags.js";
 import { popProvider } from "./ReactFiberNewContext.js";
 import { getHostContext, popHostContainer, popHostContext } from "./ReactFiberHostContext.js";
 
+function getFiberRoot(fiber: Fiber): FiberRoot {
+  let node: Fiber | null = fiber;
+  while (node !== null && node.tag !== HostRoot) {
+    node = node.return;
+  }
+  return (node as Fiber).stateNode as FiberRoot;
+}
+
 function bubbleProperties(completedWork: Fiber): void {
   let subtreeFlags = NoFlags;
   let child = completedWork.child;
@@ -98,12 +106,7 @@ export function completeWork(
       const hostContext = getHostContext();
       const type = workInProgress.type;
 
-      // Get host config from root
-      let root: Fiber | null = workInProgress;
-      while (root !== null && root.tag !== HostRoot) {
-        root = root.return;
-      }
-      const fiberRoot = root?.stateNode as FiberRoot;
+      const fiberRoot = getFiberRoot(workInProgress);
       const hostConfig = fiberRoot.hostConfig;
 
       if (current !== null && workInProgress.stateNode != null) {
@@ -150,11 +153,7 @@ export function completeWork(
     case HostText: {
       const newText = newProps;
 
-      let root: Fiber | null = workInProgress;
-      while (root !== null && root.tag !== HostRoot) {
-        root = root.return;
-      }
-      const fiberRoot = root?.stateNode as FiberRoot;
+      const fiberRoot = getFiberRoot(workInProgress);
       const hostConfig = fiberRoot.hostConfig;
 
       if (current !== null && workInProgress.stateNode != null) {

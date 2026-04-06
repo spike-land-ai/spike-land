@@ -1,10 +1,39 @@
 import { drizzle } from "drizzle-orm/d1";
+import { z } from "zod";
 import type { Env } from "../db-auth/auth";
 import type { AuthResult } from "./auth-guard";
 import { logAudit } from "./audit";
 import * as queries from "./queries";
 import * as platformQueries from "./platform-queries";
 import * as schema from "../db/schema";
+
+// ── Request body schemas ─────────────────────────────────────────────────────
+// All inbound JSON is parsed through Zod so that unknown fields are stripped
+// and malformed payloads are rejected before reaching the database layer.
+// OWASP A03:2021 — Injection / A08:2021 — Software and Data Integrity Failures.
+
+const userPatchSchema = z.object({
+  role: z.string().optional(),
+  emailVerified: z.boolean().optional(),
+});
+
+const bulkUserPatchSchema = z.object({
+  ids: z.array(z.string()).min(1),
+  patch: userPatchSchema,
+});
+
+const exportUsersSchema = z.object({
+  role: z.string().optional(),
+  search: z.string().optional(),
+});
+
+const bulkRevokeSessionsSchema = z.object({
+  ids: z.array(z.string()).min(1),
+});
+
+const impersonateSchema = z.object({
+  userId: z.string().min(1),
+});
 
 type Handler = (
   request: Request,
@@ -69,7 +98,9 @@ route("PATCH", "/dashboard/api/users/:id", async (req, env, auth, params) => {
   const db = drizzle(env.AUTH_DB, { schema });
   const id = params["id"];
   if (!id) return json({ error: "Missing id" }, 400);
-  const body = (await req.json()) as { role?: string; emailVerified?: boolean };
+  const parsed = userPatchSchema.safeParse(await req.json());
+  if (!parsed.success) return json({ error: parsed.error.flatten() }, 400);
+  const body = parsed.data;
 
   const before = await queries.getUserDetail(db, id);
   const updated = await queries.updateUser(db, id, body);
@@ -91,14 +122,9 @@ route("PATCH", "/dashboard/api/users/:id", async (req, env, auth, params) => {
 
 route("POST", "/dashboard/api/users/bulk", async (req, env, auth) => {
   const db = drizzle(env.AUTH_DB, { schema });
-  const body = (await req.json()) as {
-    ids: string[];
-    patch: { role?: string; emailVerified?: boolean };
-  };
-
-  if (!Array.isArray(body.ids) || body.ids.length === 0) {
-    return json({ error: "ids array required" }, 400);
-  }
+  const parsed = bulkUserPatchSchema.safeParse(await req.json());
+  if (!parsed.success) return json({ error: parsed.error.flatten() }, 400);
+  const body = parsed.data;
 
   const result = await queries.bulkUpdateUsers(db, body.ids, body.patch);
 
@@ -116,8 +142,9 @@ route("POST", "/dashboard/api/users/bulk", async (req, env, auth) => {
 
 route("POST", "/dashboard/api/users/export", async (req, env) => {
   const db = drizzle(env.AUTH_DB, { schema });
-  const body = (await req.json()) as { role?: string; search?: string };
-  const users = await queries.exportUsers(db, body);
+  const parsed = exportUsersSchema.safeParse(await req.json());
+  if (!parsed.success) return json({ error: parsed.error.flatten() }, 400);
+  const users = await queries.exportUsers(db, parsed.data);
   return json(users);
 });
 
@@ -152,11 +179,9 @@ route("DELETE", "/dashboard/api/sessions/:id", async (req, env, auth, params) =>
 
 route("POST", "/dashboard/api/sessions/bulk-revoke", async (req, env, auth) => {
   const db = drizzle(env.AUTH_DB, { schema });
-  const body = (await req.json()) as { ids: string[] };
-
-  if (!Array.isArray(body.ids) || body.ids.length === 0) {
-    return json({ error: "ids array required" }, 400);
-  }
+  const parsed = bulkRevokeSessionsSchema.safeParse(await req.json());
+  if (!parsed.success) return json({ error: parsed.error.flatten() }, 400);
+  const body = parsed.data;
 
   const result = await queries.bulkRevokeSessions(db, body.ids);
 
@@ -262,9 +287,9 @@ route("GET", "/dashboard/api/system", async (_req, env) => {
 // --- Impersonation ---
 route("POST", "/dashboard/api/impersonate", async (req, env, auth) => {
   const db = drizzle(env.AUTH_DB, { schema });
-  const body = (await req.json()) as { userId: string };
-
-  if (!body.userId) return json({ error: "userId required" }, 400);
+  const parsed = impersonateSchema.safeParse(await req.json());
+  if (!parsed.success) return json({ error: parsed.error.flatten() }, 400);
+  const body = parsed.data;
 
   const target = await queries.getUserDetail(db, body.userId);
   if (!target) return json({ error: "User not found" }, 404);

@@ -220,11 +220,7 @@ export function registerImageStudioTools(
 ): void {
   const notify = options?.onNotify ?? (() => {});
   const reportProgress =
-    options?.onProgress ??
-    ((progress: number, total: number, _message?: string) => {
-      void progress;
-      void total;
-    });
+    options?.onProgress ?? ((_progress: number, _total: number, _message?: string) => {});
   const context: ToolContext = { userId, deps, notify, reportProgress };
 
   // Collect all tool exports from all modules

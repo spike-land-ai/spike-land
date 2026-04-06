@@ -30,15 +30,7 @@ export function registerFeedbackTool(server: McpServer, options: RegisterFeedbac
       error_code: z.string().optional().describe("Optional error code associated with the bug"),
       metadata: z.string().optional().describe("Optional JSON string with additional metadata"),
     },
-    async handler(args) {
-      const { title, description, severity, error_code, metadata } = args as {
-        title: string;
-        description: string;
-        severity?: string;
-        error_code?: string;
-        metadata?: string;
-      };
-
+    async handler({ title, description, severity, error_code, metadata }) {
       try {
         const response = await fetch(`${baseUrl}/bugbook/report`, {
           method: "POST",

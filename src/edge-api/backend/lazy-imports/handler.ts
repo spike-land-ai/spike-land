@@ -358,7 +358,7 @@ export class McpHandler {
     toolName: string,
     args: Record<string, unknown>,
   ): Promise<CallToolResult> {
-    const requestedCodeSpace = args["codeSpace"] as string;
+    const requestedCodeSpace = typeof args["codeSpace"] === "string" ? args["codeSpace"] : "";
     if (!requestedCodeSpace) {
       throw new Error(`codeSpace parameter is required for tool '${toolName}'`);
     }

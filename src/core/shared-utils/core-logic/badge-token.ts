@@ -33,8 +33,20 @@ export function verifyBadgeToken(token: string, secret: string): BadgePayload | 
 
   try {
     const payloadStr = atob(payloadB64);
-    const payload = JSON.parse(payloadStr) as BadgePayload;
+    const parsed: unknown = JSON.parse(payloadStr);
 
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      typeof (parsed as Record<string, unknown>)["sid"] !== "string" ||
+      typeof (parsed as Record<string, unknown>)["topic"] !== "string" ||
+      typeof (parsed as Record<string, unknown>)["score"] !== "number" ||
+      typeof (parsed as Record<string, unknown>)["ts"] !== "number"
+    ) {
+      return null;
+    }
+
+    const payload = parsed as BadgePayload;
     const expectedToken = generateBadgeToken(payload, secret);
     const expectedSig = expectedToken.split(".")[1];
     if (sigB64 !== expectedSig) return null;

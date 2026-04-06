@@ -1,5 +1,5 @@
 import type { Env } from "../db-auth/auth";
-import { requireSuperAdmin, type AuthResult } from "./auth-guard";
+import { requireSuperAdmin } from "./auth-guard";
 import { handleDashboardApi } from "./api";
 import { renderDashboard } from "./html";
 
@@ -10,7 +10,8 @@ export async function handleDashboard(request: Request, env: Env): Promise<Respo
   const authResult = await requireSuperAdmin(request, env);
   if (authResult instanceof Response) return authResult;
 
-  const auth = authResult as AuthResult;
+  // TypeScript narrows authResult to AuthResult after the Response guard above.
+  const auth = authResult;
 
   // API routes
   if (url.pathname.startsWith("/dashboard/api/")) {

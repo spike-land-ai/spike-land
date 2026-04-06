@@ -462,10 +462,8 @@ spikeApi.post("/v1/donate-token", async (c) => {
     ? await validateDonatedKey(provider, apiKey)
     : await validateToken(apiKey, provider as TokenProvider);
 
-  const validationValid = isDonatedProvider(provider)
-    ? (validation as { valid: boolean }).valid
-    : (validation as { valid: boolean }).valid;
-  const validationError = (validation as { error?: string }).error;
+  const validationValid = validation.valid;
+  const validationError = validation.error;
 
   if (!validationValid) {
     if (validationError === "network_error") {

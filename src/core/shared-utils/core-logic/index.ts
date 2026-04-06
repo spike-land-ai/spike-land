@@ -32,6 +32,10 @@ export { Button, buttonVariants, Link } from "./ui-index.js";
 // Async Utilities
 export { tryCatch, type Result as TryCatchResult } from "./try-catch.js";
 
+// Hashing & Statistics
+export { fnv1a } from "./hash.js";
+export { randn, sampleGamma, sampleBeta } from "./stats.js";
+
 // ELO Rating
 export {
   expectedScore,

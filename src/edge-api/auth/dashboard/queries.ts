@@ -138,7 +138,7 @@ export async function getUserDetail(db: DB, id: string) {
 export async function updateUser(
   db: DB,
   id: string,
-  patch: { role?: string; emailVerified?: boolean },
+  patch: { role?: string | undefined; emailVerified?: boolean | undefined },
 ) {
   const values: Record<string, unknown> = {
     updatedAt: new Date(),
@@ -154,7 +154,7 @@ export async function updateUser(
 export async function bulkUpdateUsers(
   db: DB,
   ids: string[],
-  patch: { role?: string; emailVerified?: boolean },
+  patch: { role?: string | undefined; emailVerified?: boolean | undefined },
 ) {
   const values: Record<string, unknown> = { updatedAt: new Date() };
   if (patch.role !== undefined) values.role = patch.role;
@@ -404,7 +404,10 @@ export async function getSystemHealth(statusDb: D1Database, authDb: D1Database) 
   };
 }
 
-export async function exportUsers(db: DB, opts: { role?: string; search?: string }) {
+export async function exportUsers(
+  db: DB,
+  opts: { role?: string | undefined; search?: string | undefined },
+) {
   const conditions = [];
   if (opts.search) {
     const term = `%${opts.search}%`;

@@ -28,6 +28,14 @@ export interface IDBAdapterOptions {
   tables?: string[];
 }
 
+/** Wrap an IDBRequest in a Promise */
+function idbRequest<T>(request: IDBRequest<T>): Promise<T> {
+  return new Promise((resolve, reject) => {
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
 function openDB(name: string, version: number, tables: string[]): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(name, version);
@@ -59,26 +67,19 @@ function createIDBKV(dbPromise: Promise<IDBDatabase>): KVAdapter {
     return db.transaction("__kv__", mode).objectStore("__kv__");
   }
 
-  function req<T>(request: IDBRequest<T>): Promise<T> {
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
   return {
     async get<T = unknown>(key: string): Promise<T | null> {
       const store = await tx("readonly");
-      const result = await req(store.get(key));
+      const result = await idbRequest(store.get(key));
       return (result ?? null) as T | null;
     },
     async put<T = unknown>(key: string, value: T): Promise<void> {
       const store = await tx("readwrite");
-      await req(store.put(value, key));
+      await idbRequest(store.put(value, key));
     },
     async delete(key: string): Promise<boolean> {
       const store = await tx("readwrite");
-      await req(store.delete(key));
+      await idbRequest(store.delete(key));
       return true;
     },
     async list(prefix?: string): Promise<Array<{ key: string; value: unknown }>> {
@@ -116,24 +117,13 @@ function createIDBSQL(dbPromise: Promise<IDBDatabase>): SQLAdapter {
   let sqliteDb: Database | null = null;
   let initPromise: Promise<void> | null = null;
 
-  function idbReq<T>(request: IDBRequest<T>): Promise<T> {
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
   async function getStore(table: string, mode: IDBTransactionMode): Promise<IDBObjectStore> {
     const db = await dbPromise;
     return db.transaction(table, mode).objectStore(table);
   }
 
   function getAllRows(store: IDBObjectStore): Promise<Row[]> {
-    return new Promise((resolve, reject) => {
-      const request = store.getAll();
-      request.onsuccess = () => resolve(request.result as Row[]);
-      request.onerror = () => reject(request.error);
-    });
+    return idbRequest(store.getAll()) as Promise<Row[]>;
   }
 
   async function ensureInitialized(): Promise<Database> {
@@ -202,7 +192,7 @@ function createIDBSQL(dbPromise: Promise<IDBDatabase>): SQLAdapter {
     return match?.[1] ?? null;
   }
 
-  async function syncInsertToIDB(table: string, db: Database, _params: unknown[]): Promise<void> {
+  async function syncInsertToIDB(table: string, db: Database): Promise<void> {
     // Get the last inserted row by rowid
     const result = db.exec(`SELECT * FROM "${table}" WHERE rowid = last_insert_rowid()`);
     const firstResult = result[0];
@@ -219,7 +209,7 @@ function createIDBSQL(dbPromise: Promise<IDBDatabase>): SQLAdapter {
       // Only write to IDB if row has an id (IDB store uses keyPath: "id")
       if (row["id"] !== undefined) {
         const store = await getStore(table, "readwrite");
-        await idbReq(store.put(row));
+        await idbRequest(store.put(row));
       }
     }
   }
@@ -229,13 +219,13 @@ function createIDBSQL(dbPromise: Promise<IDBDatabase>): SQLAdapter {
     const whereMatch = sql.match(/WHERE\s+"?id"?\s*=\s*\?/i);
     if (whereMatch && params.length > 0) {
       const store = await getStore(table, "readwrite");
-      await idbReq(store.delete(params[params.length - 1] as IDBValidKey));
+      await idbRequest(store.delete(params[params.length - 1] as IDBValidKey));
       return;
     }
     // For DELETE without WHERE (clear all), clear the store
     if (!/WHERE/i.test(sql)) {
       const store = await getStore(table, "readwrite");
-      await idbReq(store.clear());
+      await idbRequest(store.clear());
     }
   }
 
@@ -268,7 +258,7 @@ function createIDBSQL(dbPromise: Promise<IDBDatabase>): SQLAdapter {
         }
         if (row["id"] !== undefined) {
           const store = await getStore(table, "readwrite");
-          await idbReq(store.put(row));
+          await idbRequest(store.put(row));
         }
       }
     }
@@ -314,7 +304,7 @@ function createIDBSQL(dbPromise: Promise<IDBDatabase>): SQLAdapter {
 
     if (table) {
       if (op === "insert") {
-        await syncInsertToIDB(table, db, params ?? []);
+        await syncInsertToIDB(table, db);
       } else if (op === "delete") {
         await syncDeleteToIDB(table, query, params ?? []);
       } else if (op === "update") {
@@ -341,13 +331,6 @@ function createIDBSQL(dbPromise: Promise<IDBDatabase>): SQLAdapter {
 }
 
 function createIDBBlobs(dbPromise: Promise<IDBDatabase>): BlobAdapter {
-  function req<T>(request: IDBRequest<T>): Promise<T> {
-    return new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
   return {
     async put(key: string, data: ArrayBuffer | Uint8Array | ReadableStream): Promise<void> {
       const db = await dbPromise;
@@ -378,18 +361,18 @@ function createIDBBlobs(dbPromise: Promise<IDBDatabase>): BlobAdapter {
         }
         buffer = buf.buffer;
       }
-      await req(store.put(buffer, key));
+      await idbRequest(store.put(buffer, key));
     },
     async get(key: string): Promise<ArrayBuffer | null> {
       const db = await dbPromise;
       const store = db.transaction("__blobs__", "readonly").objectStore("__blobs__");
-      const result = await req(store.get(key));
+      const result = await idbRequest(store.get(key));
       return (result as ArrayBuffer) ?? null;
     },
     async delete(key: string): Promise<boolean> {
       const db = await dbPromise;
       const store = db.transaction("__blobs__", "readwrite").objectStore("__blobs__");
-      await req(store.delete(key));
+      await idbRequest(store.delete(key));
       return true;
     },
     async list(prefix?: string): Promise<string[]> {

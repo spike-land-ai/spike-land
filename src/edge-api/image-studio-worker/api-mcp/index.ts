@@ -353,7 +353,7 @@ app.get("/api/gallery", async (c) => {
 // GET /api/gallery/albums — list user's albums (enriched with cover URLs)
 app.get("/api/gallery/albums", async (c) => {
   const { userId, deps } = await buildDeps(c);
-  const limit = c.req.query("limit") ? Number(c.req.query("limit")) : undefined;
+  const limit = c.req.query("limit") ? parseInt(c.req.query("limit")!, 10) : undefined;
   const albums = await deps.db.albumFindMany({ userId, limit });
 
   // Enrich with coverUrl: resolve cover image URL or fall back to first album image

@@ -390,15 +390,12 @@ export class LiveRoutes {
     const origin: string = this.code.getOrigin();
 
     const code = `import App from "${origin}/live/${codeSpace}/index";
-    import { jsx } from "@emotion/react/jsx-runtime";
-     import { renderToString } from "react-dom/server";
-    
-    const str = renderToString( /*#__PURE__*/_jsx(App, {}));
-    
+    import { jsx as _jsx } from "@emotion/react/jsx-runtime";
+    import { renderToString } from "react-dom/server";
+
+    const str = renderToString(/*#__PURE__*/_jsx(App, {}));
+
     globalThis.renderedStr = str;
-
-
-  }
     `;
 
     return new Response(code, {

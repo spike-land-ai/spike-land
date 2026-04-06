@@ -160,18 +160,14 @@ export async function updatePlayerElo(
   newElo: number,
   result: "win" | "loss" | "draw",
 ): Promise<void> {
-  const winIncrement = result === "win" ? 1 : 0;
-  const lossIncrement = result === "loss" ? 1 : 0;
-  const drawIncrement = result === "draw" ? 1 : 0;
-
   const count = await prisma.$executeRaw`
     UPDATE "ChessPlayer"
     SET
       elo = ${newElo},
       "bestElo" = GREATEST("bestElo", ${newElo}),
-      wins = wins + ${winIncrement},
-      losses = losses + ${lossIncrement},
-      draws = draws + ${drawIncrement},
+      wins = wins + ${result === "win" ? 1 : 0},
+      losses = losses + ${result === "loss" ? 1 : 0},
+      draws = draws + ${result === "draw" ? 1 : 0},
       streak = CASE
         WHEN ${result} = 'win' THEN CASE WHEN streak > 0 THEN streak + 1 ELSE 1 END
         WHEN ${result} = 'loss' THEN CASE WHEN streak < 0 THEN streak - 1 ELSE -1 END

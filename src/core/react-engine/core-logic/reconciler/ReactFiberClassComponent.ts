@@ -82,37 +82,36 @@ export function processClassUpdateQueue<S>(
 
   if (firstBaseUpdate !== null) {
     let newState: S = queue.baseState;
-    const newBaseState: S = newState;
     let update: ClassUpdate<S> | null = firstBaseUpdate;
 
     do {
-      // Process update
-      if (update?.tag === UpdateState) {
-        const payload = update?.payload;
+      // Process update — update is non-null here: the loop invariant ensures
+      // we only continue when update !== null (checked at end of each iteration).
+      if (update.tag === UpdateState) {
+        const payload = update.payload;
         if (typeof payload === "function") {
           newState = payload.call(instance, newState, props);
         } else {
           newState = assign({}, newState, payload);
         }
-      } else if (update?.tag === ReplaceState) {
-        newState = update?.payload as S;
-      } else if (update?.tag === ForceUpdate) {
-        // Force update doesn't change state
+      } else if (update.tag === ReplaceState) {
+        newState = update.payload as S;
       }
+      // ForceUpdate: no state change
 
-      if (update?.callback !== null) {
+      if (update.callback !== null) {
         fiber.flags |= Callback;
         if (queue.callbacks === null) {
           queue.callbacks = [];
         }
-        queue.callbacks.push(update?.callback);
+        queue.callbacks.push(update.callback);
       }
 
-      update = update?.next;
+      update = update.next;
       if (update === null) break;
     } while (true);
 
-    queue.baseState = newBaseState;
+    queue.baseState = newState;
     queue.firstBaseUpdate = null;
     queue.lastBaseUpdate = null;
     fiber.memoizedState = newState;

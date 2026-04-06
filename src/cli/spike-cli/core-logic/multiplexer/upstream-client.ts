@@ -30,6 +30,10 @@ export class UpstreamClient {
     return this._connected;
   }
 
+  getConfig(): ServerConfig {
+    return this.config;
+  }
+
   async connect(): Promise<void> {
     // Implementation would spawn a subprocess or connect to HTTP endpoint.
     // Kept minimal — real behaviour is provided via mocks in tests.

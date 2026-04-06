@@ -173,6 +173,26 @@ function resolvePath(obj: unknown, path: string[]): unknown {
   return value;
 }
 
+function parseStringLiteral(p: Parser, quote: '"' | "'"): string {
+  p.pos++; // skip opening quote
+  let str = "";
+  while (p.pos < p.input.length && p.input[p.pos] !== quote) {
+    if (p.input[p.pos] === "\\") {
+      p.pos++;
+      if (p.pos >= p.input.length) {
+        throw new Error("Guard parse error: unterminated string escape");
+      }
+    }
+    str += p.input[p.pos];
+    p.pos++;
+  }
+  if (p.pos >= p.input.length) {
+    throw new Error("Guard parse error: unterminated string literal");
+  }
+  p.pos++; // skip closing quote
+  return str;
+}
+
 function parsePrimary(p: Parser): unknown {
   skipWhitespace(p);
 
@@ -184,46 +204,9 @@ function parsePrimary(p: Parser): unknown {
     return val;
   }
 
-  // String literal (double-quoted)
-  if (p.pos < p.input.length && p.input[p.pos] === '"') {
-    p.pos++; // skip opening quote
-    let str = "";
-    while (p.pos < p.input.length && p.input[p.pos] !== '"') {
-      if (p.input[p.pos] === "\\") {
-        p.pos++;
-        if (p.pos >= p.input.length) {
-          throw new Error("Guard parse error: unterminated string escape");
-        }
-      }
-      str += p.input[p.pos];
-      p.pos++;
-    }
-    if (p.pos >= p.input.length) {
-      throw new Error("Guard parse error: unterminated string literal");
-    }
-    p.pos++; // skip closing quote
-    return str;
-  }
-
-  // String literal (single-quoted)
-  if (p.pos < p.input.length && p.input[p.pos] === "'") {
-    p.pos++; // skip opening quote
-    let str = "";
-    while (p.pos < p.input.length && p.input[p.pos] !== "'") {
-      if (p.input[p.pos] === "\\") {
-        p.pos++;
-        if (p.pos >= p.input.length) {
-          throw new Error("Guard parse error: unterminated string escape");
-        }
-      }
-      str += p.input[p.pos];
-      p.pos++;
-    }
-    if (p.pos >= p.input.length) {
-      throw new Error("Guard parse error: unterminated string literal");
-    }
-    p.pos++; // skip closing quote
-    return str;
+  // String literal (double- or single-quoted)
+  if (p.pos < p.input.length && (p.input[p.pos] === '"' || p.input[p.pos] === "'")) {
+    return parseStringLiteral(p, p.input[p.pos] as '"' | "'");
   }
 
   // Number literal

@@ -71,7 +71,7 @@ channelsRouter.post("/:id/join", async (c) => {
       role: "member",
       joinedAt: Date.now(),
     });
-  } catch (_e) {
+  } catch {
     // ignore duplicate
   }
 

@@ -96,11 +96,12 @@ export async function handleAILogsRequest(env: Env) {
     .map(async (i) => {
       const log = await env.KV.get(`ai:${i}`);
       if (log !== null) {
-        return JSON.parse(log);
+        return JSON.parse(log) as unknown;
       }
+      return null;
     });
 
-  const resolvedLogs = await Promise.all(logs);
+  const resolvedLogs = (await Promise.all(logs)).filter((entry) => entry !== null);
 
   return new Response(JSON.stringify(resolvedLogs), {
     headers: {

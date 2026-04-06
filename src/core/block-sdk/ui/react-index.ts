@@ -50,7 +50,6 @@ export interface BlockClientOptions {
 /**
  * Create a BlockClient for a given block and storage adapter.
  *
- * The client handles procedure dispatch and storage subscriptions.
  * The client handles procedure dispatch and storage subscriptions via polling.
  */
 export function createBlockClient<

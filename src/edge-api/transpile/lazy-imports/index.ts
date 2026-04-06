@@ -11,12 +11,6 @@ import {
 // The Vite ?url import in the code package doesn't work in wrangler's bundler.
 import wasmModule from "esbuild-wasm/esbuild.wasm";
 
-Object.assign(globalThis, {
-  performance: {
-    now: () => Date.now(),
-  },
-});
-
 const getCorsHeaders = (requestOrigin?: string | null) => {
   // Restrict the CORS origin to our app or specific subdomains for safety,
   // falling back to the default spike.land origin if there is no match.
@@ -34,9 +28,6 @@ const getCorsHeaders = (requestOrigin?: string | null) => {
     "cache-control": "no-cache",
   } as const;
 };
-
-const initAndTransform = (code: string, origin: string) =>
-  transpile({ code, originToUse: origin, wasmModule });
 
 export const handleGetRequest = async (codeSpace: string, origin: string) => {
   try {
@@ -111,7 +102,7 @@ export const handlePostRequest = async (request: Request, ctx?: ExecutionContext
       });
     }
 
-    const respText = await initAndTransform(code, origin);
+    const respText = await transpile({ code, originToUse: origin, wasmModule });
 
     const response = new Response(respText, {
       headers: {
