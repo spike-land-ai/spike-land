@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0805"/>
+      <stop offset="60%" style="stop-color:#1a0e06"/>
+      <stop offset="100%" style="stop-color:#0d0a08"/>
+    </linearGradient>
+    <linearGradient id="horizonGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#b45309;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#78350f;stop-opacity:0.2"/>
+    </linearGradient>
+    <linearGradient id="roadGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#374151"/>
+      <stop offset="100%" style="stop-color:#111827"/>
+    </linearGradient>
+    <linearGradient id="sunGrad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%" id="sunG" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.9"/>
+      <stop offset="60%" style="stop-color:#d97706;stop-opacity:0.5"/>
+      <stop offset="100%" style="stop-color:#92400e;stop-opacity:0"/>
+    </linearGradient>
+    <radialGradient id="sunG" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#fbbf24"/>
+      <stop offset="50%" style="stop-color:#d97706;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#92400e;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="dusty">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply" result="blended"/>
+      <feComposite in="blended" in2="SourceGraphic" operator="in"/>
+    </filter>
+    <filter id="blur4">
+      <feGaussianBlur stdDeviation="4"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Desert sky gradient -->
+  <rect width="1200" height="350" fill="url(#horizonGrad)" opacity="0.4"/>
+
+  <!-- Sun/explosion at horizon -->
+  <circle cx="600" cy="320" r="120" fill="url(#sunG)" opacity="0.35" filter="url(#blur4)"/>
+  <circle cx="600" cy="320" r="60" fill="#fbbf24" opacity="0.15"/>
+
+  <!-- Horizon line -->
+  <line x1="0" y1="320" x2="1200" y2="320" stroke="#d97706" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Road perspective lines -->
+  <g opacity="0.7">
+    <polygon points="600,320 480,630 720,630" fill="url(#roadGrad)" opacity="0.5"/>
+    <!-- Road center dashes -->
+    <g stroke="#d97706" stroke-width="2" opacity="0.6">
+      <line x1="600" y1="330" x2="599" y2="355"/>
+      <line x1="598" y1="370" x2="596" y2="405"/>
+      <line x1="594" y1="420" x2="591" y2="460"/>
+      <line x1="588" y1="475" x2="584" y2="520"/>
+      <line x1="580" y1="535" x2="575" y2="580"/>
+      <line x1="602" y1="330" x2="603" y2="355"/>
+      <line x1="604" y1="370" x2="606" y2="405"/>
+      <line x1="608" y1="420" x2="611" y2="460"/>
+      <line x1="614" y1="475" x2="618" y2="520"/>
+      <line x1="622" y1="535" x2="627" y2="580"/>
+    </g>
+  </g>
+
+  <!-- Geometric chrome/rust frame - left side decorative -->
+  <g stroke="#7c2d12" stroke-width="1.5" fill="none" opacity="0.7">
+    <polygon points="80,120 140,80 200,120 200,200 140,240 80,200"/>
+    <line x1="140" y1="80" x2="140" y2="240"/>
+    <line x1="80" y1="160" x2="200" y2="160"/>
+    <!-- Small accent triangles -->
+    <polygon points="60,150 85,130 85,170" fill="#92400e" stroke="none" opacity="0.5"/>
+    <polygon points="220,150 195,130 195,170" fill="#92400e" stroke="none" opacity="0.5"/>
+  </g>
+
+  <!-- Geometric chrome/rust frame - right side decorative -->
+  <g stroke="#7c2d12" stroke-width="1.5" fill="none" opacity="0.7">
+    <polygon points="1000,120 1060,80 1120,120 1120,200 1060,240 1000,200"/>
+    <line x1="1060" y1="80" x2="1060" y2="240"/>
+    <line x1="1000" y1="160" x2="1120" y2="160"/>
+    <polygon points="980,150 1005,130 1005,170" fill="#92400e" stroke="none" opacity="0.5"/>
+    <polygon points="1140,150 1115,130 1115,170" fill="#92400e" stroke="none" opacity="0.5"/>
+  </g>
+
+  <!-- Chrome scratches/lines -->
+  <g stroke="#d1d5db" stroke-width="0.5" opacity="0.15">
+    <line x1="0" y1="50" x2="350" y2="80"/>
+    <line x1="0" y1="60" x2="300" y2="85"/>
+    <line x1="850" y1="75" x2="1200" y2="55"/>
+    <line x1="900" y1="85" x2="1200" y2="68"/>
+  </g>
+
+  <!-- Speed lines from vanishing point -->
+  <g stroke="#d97706" stroke-width="0.5" opacity="0.2">
+    <line x1="600" y1="320" x2="0" y2="200"/>
+    <line x1="600" y1="320" x2="0" y2="280"/>
+    <line x1="600" y1="320" x2="0" y2="350"/>
+    <line x1="600" y1="320" x2="1200" y2="200"/>
+    <line x1="600" y1="320" x2="1200" y2="280"/>
+    <line x1="600" y1="320" x2="1200" y2="350"/>
+    <line x1="600" y1="320" x2="200" y2="0"/>
+    <line x1="600" y1="320" x2="400" y2="0"/>
+    <line x1="600" y1="320" x2="800" y2="0"/>
+    <line x1="600" y1="320" x2="1000" y2="0"/>
+  </g>
+
+  <!-- Rust texture overlay dots -->
+  <g fill="#92400e" opacity="0.3">
+    <circle cx="150" cy="400" r="3"/>
+    <circle cx="180" cy="450" r="2"/>
+    <circle cx="220" cy="380" r="4"/>
+    <circle cx="1000" cy="410" r="3"/>
+    <circle cx="1050" cy="460" r="2"/>
+    <circle cx="980" cy="385" r="4"/>
+  </g>
+
+  <!-- Title block -->
+  <rect x="300" y="430" width="600" height="90" rx="2" fill="#0a0805" opacity="0.7"/>
+  <rect x="300" y="430" width="600" height="2" fill="#d97706" opacity="0.8"/>
+  <rect x="300" y="518" width="600" height="2" fill="#d97706" opacity="0.8"/>
+  <text x="600" y="482" font-family="'Arial Black', Impact, sans-serif" font-size="46" font-weight="900" fill="#fbbf24" text-anchor="middle" letter-spacing="6">THE MAD MAX PROTOCOL</text>
+  <text x="600" y="510" font-family="'Courier New', monospace" font-size="15" fill="#d97706" text-anchor="middle" letter-spacing="8" opacity="0.8">FIELD REPORT: DAY 1</text>
+</svg>

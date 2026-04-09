@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0f12"/>
+      <stop offset="100%" style="stop-color:#111820"/>
+    </linearGradient>
+    <linearGradient id="leverGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#94a3b8"/>
+      <stop offset="50%" style="stop-color:#e2e8f0"/>
+      <stop offset="100%" style="stop-color:#64748b"/>
+    </linearGradient>
+    <radialGradient id="pivotGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#f8fafc;stop-opacity:0.1"/>
+      <stop offset="100%" style="stop-color:#f8fafc;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="glow4">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow10">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle dot grid -->
+  <g fill="#334155" opacity="0.3">
+    <circle cx="120" cy="90" r="1.5"/>
+    <circle cx="240" cy="90" r="1.5"/>
+    <circle cx="360" cy="90" r="1.5"/>
+    <circle cx="480" cy="90" r="1.5"/>
+    <circle cx="600" cy="90" r="1.5"/>
+    <circle cx="720" cy="90" r="1.5"/>
+    <circle cx="840" cy="90" r="1.5"/>
+    <circle cx="960" cy="90" r="1.5"/>
+    <circle cx="1080" cy="90" r="1.5"/>
+    <circle cx="120" cy="180" r="1.5"/>
+    <circle cx="240" cy="180" r="1.5"/>
+    <circle cx="360" cy="180" r="1.5"/>
+    <circle cx="480" cy="180" r="1.5"/>
+    <circle cx="600" cy="180" r="1.5"/>
+    <circle cx="720" cy="180" r="1.5"/>
+    <circle cx="840" cy="180" r="1.5"/>
+    <circle cx="960" cy="180" r="1.5"/>
+    <circle cx="1080" cy="180" r="1.5"/>
+    <circle cx="120" cy="270" r="1.5"/>
+    <circle cx="240" cy="270" r="1.5"/>
+    <circle cx="360" cy="270" r="1.5"/>
+    <circle cx="480" cy="270" r="1.5"/>
+    <circle cx="720" cy="270" r="1.5"/>
+    <circle cx="840" cy="270" r="1.5"/>
+    <circle cx="960" cy="270" r="1.5"/>
+    <circle cx="1080" cy="270" r="1.5"/>
+    <circle cx="120" cy="360" r="1.5"/>
+    <circle cx="240" cy="360" r="1.5"/>
+    <circle cx="360" cy="360" r="1.5"/>
+    <circle cx="480" cy="360" r="1.5"/>
+    <circle cx="720" cy="360" r="1.5"/>
+    <circle cx="840" cy="360" r="1.5"/>
+    <circle cx="960" cy="360" r="1.5"/>
+    <circle cx="1080" cy="360" r="1.5"/>
+  </g>
+
+  <!-- Ground line -->
+  <line x1="100" y1="400" x2="1100" y2="400" stroke="#475569" stroke-width="2" opacity="0.6"/>
+
+  <!-- Lever beam - tilted slightly, pivot is invisible/ghosted -->
+  <rect x="180" y="290" width="840" height="18" rx="4" fill="url(#leverGrad)" transform="rotate(-8, 600, 300)"/>
+
+  <!-- Heavy load on left (visible) -->
+  <rect x="185" y="250" width="80" height="70" rx="3" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+  <text x="225" y="292" font-family="'Courier New', monospace" font-size="14" fill="#94a3b8" text-anchor="middle">LOAD</text>
+
+  <!-- Light force on right (visible) -->
+  <circle cx="980" cy="210" r="25" fill="#0f172a" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="980" y="216" font-family="'Courier New', monospace" font-size="11" fill="#94a3b8" text-anchor="middle">F</text>
+  <!-- Force arrow down -->
+  <line x1="980" y1="235" x2="980" y2="270" stroke="#94a3b8" stroke-width="1.5"/>
+  <polygon points="975,268 985,268 980,280" fill="#94a3b8" opacity="0.8"/>
+
+  <!-- Pivot point - dashed/ghosted (the invisible leverage point) -->
+  <g filter="url(#glow10)" opacity="0.4">
+    <circle cx="600" cy="300" r="40" fill="url(#pivotGlow)"/>
+  </g>
+  <!-- Dashed pivot indicator -->
+  <circle cx="600" cy="400" r="18" fill="none" stroke="#f8fafc" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.25"/>
+  <line x1="600" y1="382" x2="600" y2="340" stroke="#f8fafc" stroke-width="1" stroke-dasharray="3,3" opacity="0.2"/>
+  <!-- Triangle pivot ghost -->
+  <polygon points="600,395 580,415 620,415" fill="none" stroke="#f8fafc" stroke-width="1" stroke-dasharray="3,4" opacity="0.2"/>
+
+  <!-- Question mark at pivot -->
+  <text x="600" y="285" font-family="Georgia, serif" font-size="32" fill="#f8fafc" text-anchor="middle" opacity="0.15">?</text>
+
+  <!-- Annotation - dashed label line -->
+  <line x1="600" y1="415" x2="600" y2="450" stroke="#94a3b8" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+  <text x="600" y="468" font-family="'Courier New', monospace" font-size="13" fill="#64748b" text-anchor="middle" opacity="0.7">pivot (invisible)</text>
+
+  <!-- Small system arrows emanating from pivot area -->
+  <g stroke="#334155" stroke-width="1" opacity="0.4" fill="none">
+    <path d="M560,270 C520,220 480,230 460,260"/>
+    <polygon points="462,259 455,271 470,270" fill="#334155"/>
+    <path d="M640,270 C680,220 720,230 740,260"/>
+    <polygon points="738,259 745,271 730,270" fill="#334155"/>
+  </g>
+
+  <!-- Title -->
+  <text x="600" y="530" font-family="Georgia, serif" font-size="34" font-weight="700" fill="#e2e8f0" text-anchor="middle" letter-spacing="0.5">The Leverage Point You Cannot See</text>
+  <text x="600" y="568" font-family="Georgia, serif" font-size="16" fill="#64748b" text-anchor="middle" letter-spacing="5" opacity="0.8">THINKING IN SYSTEMS</text>
+</svg>

@@ -21,6 +21,7 @@ const spa = new Hono<{ Bindings: Env }>();
 
 spa.get("/*", async (c) => {
   const path = new URL(c.req.url).pathname;
+  const normalizedPath = path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
   const key = normalizeSpaAssetKey(path);
   const staticAssetPolicy = getSpaStaticAssetPolicy(key);
 
@@ -78,7 +79,7 @@ spa.get("/*", async (c) => {
     }
 
     // API-like prefixes must not serve SPA shell unless they are explicit product pages.
-    if (!shouldServeSpaShell(path)) {
+    if (!shouldServeSpaShell(normalizedPath)) {
       return c.json({ error: "Not Found", path }, 404);
     }
 
@@ -108,7 +109,9 @@ spa.get("/*", async (c) => {
 
     // Inject dynamic metadata for /apps/:appId routes
     const appId =
-      path.startsWith("/apps/") && path !== "/apps/new" ? path.split("/")[2] : undefined;
+      normalizedPath.startsWith("/apps/") && normalizedPath !== "/apps/new"
+        ? normalizedPath.split("/")[2]
+        : undefined;
     if (appId) {
       const url = new URL(c.req.url);
       const tab = escapeHtml(url.searchParams.get("tab") || "App");
@@ -120,7 +123,7 @@ spa.get("/*", async (c) => {
 
       const title = `${appName} (${tab}) — spike.land`;
       const description = `Explore ${appName} on spike.land — the AI multi-agent operating system.`;
-      const canonicalPath = escapeHtml(path);
+      const canonicalPath = escapeHtml(normalizedPath);
       const canonicalSearch = "";
 
       // Replace title and inject meta tags
@@ -143,24 +146,26 @@ spa.get("/*", async (c) => {
     }
 
     // Inject blog post metadata + content for crawlers on /blog/:slug routes
-    const blogSlugMatch = path.match(/^\/blog\/([a-z0-9-]+)$/);
+    const blogSlugMatch = normalizedPath.match(/^\/blog\/([a-z0-9-]+)$/);
     const blogSlug = blogSlugMatch?.[1];
     if (blogSlug) {
       try {
-        const row = await getBlogPostRow(c.env.DB, blogSlug);
+        const row = await getBlogPostRow(c.env.DB, blogSlug, { allowSourceFallback: false });
         if (!row) {
           // No matching blog post — serve 404 shell with noindex
           html = html.replace(
             "</head>",
             `<meta name="robots" content="noindex, nofollow" />\n</head>`,
           );
-          return new Response(html, {
+          const notFoundResponse = new Response(html, {
             status: 404,
             headers: {
               "content-type": "text/html; charset=utf-8",
               "cache-control": "public, max-age=0, must-revalidate",
             },
           });
+          notFoundResponse.headers.set("X-Robots-Tag", "noindex, nofollow");
+          return notFoundResponse;
         }
         {
           const postTitle = escapeHtml(row.title);
@@ -173,7 +178,7 @@ spa.get("/*", async (c) => {
           const postImage = row.hero_image
             ? `https://spike.land${row.hero_image}${heroPrompt ? `?v=${hashImagePrompt(heroPrompt)}` : ""}`
             : "https://spike.land/android-chrome-512x512.png";
-          const postUrl = `https://spike.land${path}`;
+          const postUrl = `https://spike.land${normalizedPath}`;
 
           html = html.replace(/<title>[^<]*<\/title>/, `<title>${postTitle} — spike.land</title>`);
           html = html.replace(
@@ -332,7 +337,7 @@ spa.get("/*", async (c) => {
               "<h1>Migration Services</h1><p>Migrate your legacy stack to edge-first, MCP-native architecture. Blog, Script, and full MCP server tiers available.</p>",
           },
         };
-      const meta = routeMeta[path];
+      const meta = routeMeta[normalizedPath];
       if (meta) {
         html = html.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(meta.title)}</title>`);
         html = html.replace(
@@ -415,20 +420,22 @@ spa.get("/*", async (c) => {
       "/mcp/authorize",
     ];
     // Set X-Robots-Tag header for noindex paths
-    const isNoindexPath = noindexPaths.includes(path);
-    if (isNoindexPath) {
+    const isMissingLearnDetailRoute =
+      normalizedPath.startsWith("/learn/") && normalizedPath !== "/learn";
+    const isNoindexPath = noindexPaths.includes(normalizedPath);
+    if (isNoindexPath || isMissingLearnDetailRoute) {
       html = html.replace("</head>", `<meta name="robots" content="noindex, nofollow" />\n</head>`);
     }
 
     const response = new Response(html, {
-      status: getSpaShellStatusCode(path),
+      status: isMissingLearnDetailRoute ? 404 : getSpaShellStatusCode(normalizedPath),
       headers: {
         "content-type": "text/html; charset=utf-8",
         "cache-control": getSpaResponseCacheControl(true),
       },
     });
 
-    if (isNoindexPath) {
+    if (isNoindexPath || isMissingLearnDetailRoute) {
       response.headers.set("X-Robots-Tag", "noindex, nofollow");
     }
 

@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const CONTENT_DIR = resolve(__dirname, "../../../../../content/blog");
+const SPIKE_WEB_PUBLIC_DIR = resolve(__dirname, "../../../../../packages/spike-web/public");
 
 function parseFrontmatter(content: string): Record<string, string> {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -34,6 +35,13 @@ describe("blog hero image path validation", () => {
 
       const heroImage = fm["heroImage"];
       if (!heroImage || !heroImage.startsWith("/blog/")) return; // no hero image or external URL — skip
+
+      const productionHeroImagePath = join(SPIKE_WEB_PUBLIC_DIR, heroImage.replace(/^\//, ""));
+      expect(
+        existsSync(productionHeroImagePath),
+        `heroImage path "${heroImage}" does not exist in packages/spike-web/public. ` +
+          `Add the asset to the deployable public directory so production can serve it.`,
+      ).toBe(true);
 
       const slug = fm["slug"] || fileSlug;
       const heroPrompt = fm["heroPrompt"];

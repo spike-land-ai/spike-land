@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070707"/>
+      <stop offset="100%" stop-color="#120a00"/>
+    </linearGradient>
+    <radialGradient id="flare" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="25%" stop-color="#fde68a" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur8">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <g stroke="#f59e0b" stroke-opacity="0.24" stroke-width="2">
+    <path d="M60 80 L600 315"/>
+    <path d="M180 40 L600 315"/>
+    <path d="M320 20 L600 315"/>
+    <path d="M1140 80 L600 315"/>
+    <path d="M1020 40 L600 315"/>
+    <path d="M880 20 L600 315"/>
+    <path d="M0 180 L600 315"/>
+    <path d="M0 450 L600 315"/>
+    <path d="M1200 180 L600 315"/>
+    <path d="M1200 450 L600 315"/>
+  </g>
+
+  <g fill="#f59e0b" fill-opacity="0.92" font-family="'Arial Black', Arial, sans-serif" text-anchor="middle">
+    <text x="220" y="132" font-size="34" transform="rotate(-18 220 132)">AGENTS</text>
+    <text x="330" y="206" font-size="42" transform="rotate(-14 330 206)">PROMPTS</text>
+    <text x="190" y="302" font-size="28" transform="rotate(-10 190 302)">TOOLS</text>
+    <text x="286" y="412" font-size="38" transform="rotate(-8 286 412)">SEARCH</text>
+    <text x="420" y="120" font-size="24" transform="rotate(-12 420 120)">MEMORY</text>
+    <text x="910" y="132" font-size="34" transform="rotate(18 910 132)">MODELS</text>
+    <text x="812" y="214" font-size="40" transform="rotate(14 812 214)">CONTEXT</text>
+    <text x="1010" y="308" font-size="30" transform="rotate(8 1010 308)">ROUTERS</text>
+    <text x="870" y="412" font-size="38" transform="rotate(10 870 412)">DEPLOY</text>
+    <text x="760" y="112" font-size="24" transform="rotate(12 760 112)">EVALS</text>
+    <text x="228" y="516" font-size="24" transform="rotate(-6 228 516)">WORKFLOWS</text>
+    <text x="972" y="518" font-size="24" transform="rotate(6 972 518)">AUTOMATION</text>
+  </g>
+
+  <circle cx="600" cy="315" r="16" fill="#ffffff"/>
+  <circle cx="600" cy="315" r="52" fill="url(#flare)" filter="url(#blur8)"/>
+  <circle cx="600" cy="315" r="110" fill="none" stroke="#fcd34d" stroke-opacity="0.45" stroke-width="2"/>
+  <circle cx="600" cy="315" r="176" fill="none" stroke="#f59e0b" stroke-opacity="0.18" stroke-width="2" stroke-dasharray="4 12"/>
+
+  <g fill="#fde68a" opacity="0.8">
+    <circle cx="516" cy="278" r="3"/>
+    <circle cx="548" cy="240" r="2"/>
+    <circle cx="640" cy="252" r="3"/>
+    <circle cx="708" cy="302" r="2"/>
+    <circle cx="674" cy="364" r="3"/>
+    <circle cx="560" cy="384" r="2"/>
+  </g>
+</svg>

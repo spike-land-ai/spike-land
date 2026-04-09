@@ -10,9 +10,22 @@ const publishedPosts = allPosts
   .filter(post => !post.data.draft && !post.data.unlisted)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
+function normalizeCategory(value: string | undefined | null): string {
+  return (value ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
 const categories = [...new Set(publishedPosts.map(p => p.data.category).filter(Boolean))];
-const featuredPost = publishedPosts[0];
-const remainingPosts = publishedPosts.slice(1);
+const selectedCategoryParam = Astro.url.searchParams.get('category');
+const normalizedSelectedCategory = normalizeCategory(selectedCategoryParam);
+const matchedCategory =
+  categories.find(cat => normalizeCategory(cat) === normalizedSelectedCategory) ?? null;
+const activeCategory =
+  matchedCategory ?? (normalizedSelectedCategory ? selectedCategoryParam?.trim() ?? null : null);
+const visiblePosts = normalizedSelectedCategory
+  ? publishedPosts.filter(post => normalizeCategory(post.data.category) === normalizeCategory(activeCategory))
+  : publishedPosts;
+const featuredPost = visiblePosts[0];
+const remainingPosts = visiblePosts.slice(1);
 ---
 
 <Layout
@@ -34,9 +47,23 @@ const remainingPosts = publishedPosts.slice(1);
 
           {categories.length > 0 && (
             <div class="category-chips">
-              <a href="/blog" class="rubik-chip chip-active">All</a>
+              <a
+                href="/blog"
+                data-category-chip
+                data-category=""
+                class:list={['rubik-chip', { 'chip-active': activeCategory === null }]}
+              >
+                All
+              </a>
               {categories.map(cat => (
-                <a href={`/blog?category=${cat}`} class="rubik-chip">{cat}</a>
+                <a
+                  href={`/blog?category=${encodeURIComponent(cat)}`}
+                  data-category-chip
+                  data-category={cat}
+                  class:list={['rubik-chip', { 'chip-active': activeCategory === cat }]}
+                >
+                  {cat}
+                </a>
               ))}
             </div>
           )}
@@ -46,7 +73,11 @@ const remainingPosts = publishedPosts.slice(1);
       <div class="rubik-container posts-container">
         <!-- Featured post -->
         {featuredPost && (
-          <a href={`/blog/${featuredPost.id}`} class="featured-post rubik-panel">
+          <a
+            href={`/blog/${featuredPost.id}`}
+            class="featured-post rubik-panel"
+            data-post-category={featuredPost.data.category ?? ''}
+          >
             {featuredPost.data.heroImage && (
               <div class="featured-image-wrap">
                 <img src={featuredPost.data.heroImage} alt={featuredPost.data.title} class="featured-image" loading="eager" />
@@ -78,7 +109,11 @@ const remainingPosts = publishedPosts.slice(1);
         {remainingPosts.length > 0 && (
           <div class="posts-grid">
             {remainingPosts.map(post => (
-              <a href={`/blog/${post.id}`} class="post-card rubik-panel">
+              <a
+                href={`/blog/${post.id}`}
+                class="post-card rubik-panel"
+                data-post-category={post.data.category ?? ''}
+              >
                 {post.data.heroImage && (
                   <div class="card-image-wrap">
                     <img src={post.data.heroImage} alt={post.data.title} class="card-image" loading="lazy" />
@@ -102,6 +137,11 @@ const remainingPosts = publishedPosts.slice(1);
             ))}
           </div>
         )}
+
+        <div id="blog-empty-state" class="rubik-panel empty-state" hidden={visiblePosts.length > 0}>
+          <p>No posts found for this category.</p>
+          <a href="/blog" class="rubik-chip chip-active">Show all posts</a>
+        </div>
       </div>
     </main>
 
@@ -261,6 +301,15 @@ const remainingPosts = publishedPosts.slice(1);
     gap: 1.25rem;
   }
 
+  .empty-state {
+    display: grid;
+    place-items: center;
+    gap: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    color: var(--muted-fg);
+  }
+
   .post-card {
     display: flex;
     flex-direction: column;
@@ -324,3 +373,46 @@ const remainingPosts = publishedPosts.slice(1);
     overflow: hidden;
   }
 </style>
+
+<script type="module">
+  const normalizeCategory = (value) => (value ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
+
+  const params = new URLSearchParams(window.location.search);
+  const requestedCategory = normalizeCategory(params.get('category'));
+  const chips = Array.from(document.querySelectorAll('[data-category-chip]'));
+  const postCards = Array.from(document.querySelectorAll('[data-post-category]'));
+  const emptyState = document.getElementById('blog-empty-state');
+
+  const activeChip = chips.find((chip) => {
+    const value = chip.getAttribute('data-category');
+    return value && normalizeCategory(value) === requestedCategory;
+  });
+
+  const hasRequestedCategory = requestedCategory !== '';
+  const activeCategory = activeChip
+    ? normalizeCategory(activeChip.getAttribute('data-category'))
+    : requestedCategory;
+
+  chips.forEach((chip) => {
+    const chipCategory = normalizeCategory(chip.getAttribute('data-category'));
+    const isActive = hasRequestedCategory ? chipCategory === activeCategory : chipCategory === '';
+    chip.classList.toggle('chip-active', isActive);
+  });
+
+  if (!hasRequestedCategory) {
+    postCards.forEach((card) => {
+      card.hidden = false;
+    });
+    if (emptyState) emptyState.hidden = true;
+  } else {
+    let visibleCount = 0;
+
+    postCards.forEach((card) => {
+      const isMatch = normalizeCategory(card.getAttribute('data-post-category')) === activeCategory;
+      card.hidden = !isMatch;
+      if (isMatch) visibleCount += 1;
+    });
+
+    if (emptyState) emptyState.hidden = visibleCount !== 0;
+  }
+</script>

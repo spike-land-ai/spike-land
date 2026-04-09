@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a1c1f"/><stop offset="1" stop-color="#123a3f"/></linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect x="220" y="120" width="1160" height="660" rx="28" fill="#f4f7ef"/>
+  <line x1="340" y1="120" x2="340" y2="780" stroke="#d35f5f" stroke-width="6"/>
+  <g stroke="#a7b69f" stroke-width="3">
+    <line x1="220" y1="220" x2="1380" y2="220"/><line x1="220" y1="300" x2="1380" y2="300"/>
+    <line x1="220" y1="380" x2="1380" y2="380"/><line x1="220" y1="460" x2="1380" y2="460"/>
+    <line x1="220" y1="540" x2="1380" y2="540"/><line x1="220" y1="620" x2="1380" y2="620"/>
+  </g>
+  <text x="390" y="305" font-family="Arial, sans-serif" font-size="82" fill="#173538" font-weight="700">Notepad Guide Arena</text>
+  <text x="390" y="400" font-family="Arial, sans-serif" font-size="48" fill="#345f62">210 words. 6 minds. 1 canvas.</text>
+  <text x="390" y="495" font-family="Arial, sans-serif" font-size="42" fill="#345f62">Click. Write. Connect. Think spatially.</text>
+</svg>

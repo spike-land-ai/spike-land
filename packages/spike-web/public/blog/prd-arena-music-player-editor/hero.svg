@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="w" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="50%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <clipPath id="bubble">
+      <rect x="180" y="160" width="840" height="310" rx="32"/>
+    </clipPath>
+  </defs>
+  <rect width="1200" height="630" fill="#0f0a1a"/>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#g)" opacity="0.08"/>
+  <!-- chat bubble -->
+  <rect x="180" y="160" width="840" height="310" rx="32" fill="#1a1030" stroke="url(#g)" stroke-width="2" opacity="0.9"/>
+  <polygon points="280,470 320,470 260,510" fill="#1a1030" stroke="url(#g)" stroke-width="2"/>
+  <rect x="255" y="464" width="70" height="12" fill="#1a1030"/>
+  <!-- waveform inside bubble -->
+  <g clip-path="url(#bubble)">
+    <path d="M180,315 Q220,315 240,280 Q260,245 280,300 Q300,355 320,270 Q340,185 360,310 Q380,435 400,290 Q420,195 440,320 Q460,390 480,285 Q500,180 520,315 Q540,400 560,275 Q580,200 600,320 Q620,410 640,270 Q660,190 680,315 Q700,380 720,290 Q740,210 760,325 Q780,400 800,280 Q820,195 840,310 Q860,370 880,295 Q900,220 920,315 Q940,380 960,285 Q980,210 1000,320 Q1020,390 1020,315" fill="none" stroke="url(#w)" stroke-width="3" opacity="0.9"/>
+    <path d="M180,315 Q220,315 240,295 Q260,275 280,305 Q300,335 320,290 Q340,250 360,312 Q380,370 400,300 Q420,260 440,318 Q460,345 480,298 Q500,255 520,315 Q540,350 560,295 Q580,265 600,318 Q620,355 640,290 Q660,255 680,315 Q700,345 720,300 Q740,265 760,320 Q780,350 800,295 Q820,260 840,312 Q860,340 880,302 Q900,270 920,315 Q940,340 960,298 Q980,268 1000,318 Q1020,340 1020,315" fill="none" stroke="url(#w)" stroke-width="2" opacity="0.5"/>
+  </g>
+  <!-- fader lines in background -->
+  <g opacity="0.12">
+    <rect x="100" y="200" width="4" height="180" rx="2" fill="#7c3aed"/>
+    <rect x="120" y="240" width="4" height="140" rx="2" fill="#8b5cf6"/>
+    <rect x="140" y="220" width="4" height="160" rx="2" fill="#a78bfa"/>
+    <rect x="1060" y="210" width="4" height="170" rx="2" fill="#06b6d4"/>
+    <rect x="1080" y="250" width="4" height="130" rx="2" fill="#22d3ee"/>
+    <rect x="1100" y="230" width="4" height="150" rx="2" fill="#67e8f9"/>
+  </g>
+  <!-- play button -->
+  <circle cx="260" cy="315" r="24" fill="none" stroke="url(#w)" stroke-width="2" opacity="0.7"/>
+  <polygon points="253,302 253,328 275,315" fill="url(#w)" opacity="0.7"/>
+</svg>

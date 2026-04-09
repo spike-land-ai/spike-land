@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a1628"/>
+      <stop offset="50%" style="stop-color:#0f2040"/>
+      <stop offset="100%" style="stop-color:#1a2a10"/>
+    </linearGradient>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a5f;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#7c4b00;stop-opacity:0.4"/>
+    </linearGradient>
+    <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#fbbf24"/>
+      <stop offset="40%" style="stop-color:#f59e0b;stop-opacity:0.7"/>
+      <stop offset="70%" style="stop-color:#d97706;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#92400e;stop-opacity:0"/>
+    </radialGradient>
+    <linearGradient id="seaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1d4ed8;stop-opacity:0.5"/>
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:0.2"/>
+    </linearGradient>
+    <filter id="glow6">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow15">
+      <feGaussianBlur stdDeviation="15" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Sky gradient overlay -->
+  <rect width="1200" height="400" fill="url(#skyGrad)" opacity="0.6"/>
+
+  <!-- Sun -->
+  <circle cx="600" cy="200" r="90" fill="url(#sunGrad)" filter="url(#glow15)"/>
+  <circle cx="600" cy="200" r="50" fill="#fbbf24" opacity="0.7"/>
+  <circle cx="600" cy="200" r="30" fill="#fef3c7"/>
+
+  <!-- Sun rays -->
+  <g stroke="#fbbf24" stroke-width="1.5" opacity="0.4">
+    <line x1="600" y1="90" x2="600" y2="60"/>
+    <line x1="664" y1="136" x2="688" y2="112"/>
+    <line x1="690" y1="200" x2="720" y2="200"/>
+    <line x1="664" y1="264" x2="688" y2="288"/>
+    <line x1="536" y1="136" x2="512" y2="112"/>
+    <line x1="510" y1="200" x2="480" y2="200"/>
+    <line x1="536" y1="264" x2="512" y2="288"/>
+  </g>
+
+  <!-- Horizon / sea -->
+  <rect x="0" y="360" width="1200" height="80" fill="url(#seaGrad)"/>
+  <!-- Sea shimmer line -->
+  <line x1="0" y1="360" x2="1200" y2="360" stroke="#60a5fa" stroke-width="1" opacity="0.5"/>
+  <!-- Sea sparkle dots -->
+  <g fill="#93c5fd" opacity="0.5">
+    <circle cx="200" cy="375" r="2"/>
+    <circle cx="450" cy="370" r="1.5"/>
+    <circle cx="700" cy="378" r="2"/>
+    <circle cx="950" cy="368" r="1.5"/>
+    <circle cx="1100" cy="374" r="2"/>
+  </g>
+
+  <!-- Ground/park -->
+  <rect x="0" y="390" width="1200" height="240" fill="#1a2a10" opacity="0.5"/>
+  <line x1="0" y1="390" x2="1200" y2="390" stroke="#4ade80" stroke-width="1" opacity="0.3"/>
+
+  <!-- Dog 1 - smaller dog (left side) -->
+  <g transform="translate(340, 430)" fill="#d97706" opacity="0.85">
+    <!-- Body -->
+    <ellipse cx="0" cy="0" rx="40" ry="22" fill="#b45309"/>
+    <!-- Head -->
+    <circle cx="38" cy="-15" r="18" fill="#d97706"/>
+    <!-- Snout -->
+    <ellipse cx="52" cy="-12" rx="10" ry="7" fill="#b45309"/>
+    <!-- Ear floppy -->
+    <ellipse cx="32" cy="-28" rx="8" ry="14" fill="#92400e" transform="rotate(-20,32,-28)"/>
+    <!-- Legs (simplified) -->
+    <rect x="-25" y="18" width="9" height="22" rx="4" fill="#b45309"/>
+    <rect x="-5" y="18" width="9" height="22" rx="4" fill="#b45309"/>
+    <rect x="12" y="18" width="9" height="20" rx="4" fill="#b45309"/>
+    <!-- Tail -->
+    <path d="M-40,0 C-60,-15 -55,-30 -45,-25" fill="none" stroke="#d97706" stroke-width="7" stroke-linecap="round"/>
+    <!-- Nose -->
+    <circle cx="58" cy="-14" r="4" fill="#1c1917"/>
+    <!-- Eye -->
+    <circle cx="44" cy="-18" r="4" fill="#1c1917"/>
+    <circle cx="45" cy="-19" r="1.5" fill="white" opacity="0.6"/>
+  </g>
+
+  <!-- Dog 2 - larger dog (right side) -->
+  <g transform="translate(780, 420)" fill="#78716c" opacity="0.85">
+    <!-- Body -->
+    <ellipse cx="0" cy="0" rx="55" ry="28" fill="#57534e"/>
+    <!-- Head -->
+    <circle cx="50" cy="-20" r="24" fill="#78716c"/>
+    <!-- Snout -->
+    <ellipse cx="68" cy="-15" rx="14" ry="9" fill="#57534e"/>
+    <!-- Ear floppy -->
+    <ellipse cx="42" cy="-38" rx="10" ry="18" fill="#44403c" transform="rotate(-15,42,-38)"/>
+    <!-- Legs -->
+    <rect x="-35" y="22" width="12" height="28" rx="5" fill="#57534e"/>
+    <rect x="-10" y="22" width="12" height="28" rx="5" fill="#57534e"/>
+    <rect x="15" y="22" width="12" height="26" rx="5" fill="#57534e"/>
+    <!-- Tail -->
+    <path d="M-55,0 C-80,-20 -75,-40 -62,-35" fill="none" stroke="#78716c" stroke-width="9" stroke-linecap="round"/>
+    <!-- Nose -->
+    <circle cx="76" cy="-18" r="5" fill="#1c1917"/>
+    <!-- Eye -->
+    <circle cx="58" cy="-24" r="5" fill="#1c1917"/>
+    <circle cx="59" cy="-25" r="2" fill="white" opacity="0.6"/>
+  </g>
+
+  <!-- Sun arc path (sinusoidal suggestion) -->
+  <path d="M50,310 C200,100 400,80 600,200 C800,320 1000,100 1150,280" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="8,6" opacity="0.25"/>
+
+  <!-- Title text -->
+  <text x="600" y="558" font-family="Georgia, serif" font-size="36" font-weight="700" fill="#fef9c3" text-anchor="middle" letter-spacing="0.5">The Perfect Day</text>
+  <text x="600" y="598" font-family="Georgia, serif" font-size="18" fill="#93c5fd" text-anchor="middle" letter-spacing="2" opacity="0.85">Two Dogs, One Sun, Zero Office Hours</text>
+</svg>

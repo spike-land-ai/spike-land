@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1d0b0f"/><stop offset="1" stop-color="#0b1726"/></linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect x="180" y="120" width="420" height="660" rx="36" fill="#0f243a" stroke="#7ac7ff" stroke-width="4"/>
+  <rect x="220" y="200" width="340" height="70" rx="12" fill="#1d3959"/>
+  <rect x="220" y="300" width="340" height="70" rx="12" fill="#1d3959"/>
+  <rect x="220" y="400" width="340" height="70" rx="12" fill="#a21f3d"/>
+  <text x="860" y="280" font-family="Arial, sans-serif" font-size="72" fill="#ffd7e0" font-weight="700">EE Mobile Billing Trap</text>
+  <text x="860" y="380" font-family="Arial, sans-serif" font-size="44" fill="#fff0f4">Family plan charge failed</text>
+  <text x="860" y="460" font-family="Arial, sans-serif" font-size="40" fill="#ff9ab0">Notification damage: \"You were removed\"</text>
+  <circle cx="1330" cy="190" r="70" fill="#ff4a6e"/>
+  <text x="1305" y="206" font-family="Arial, sans-serif" font-size="72" fill="#fff" font-weight="700">!</text>
+</svg>

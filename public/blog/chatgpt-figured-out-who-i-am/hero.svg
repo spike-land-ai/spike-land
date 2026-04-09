@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050816"/>
+      <stop offset="55%" stop-color="#0c1228"/>
+      <stop offset="100%" stop-color="#140f24"/>
+    </linearGradient>
+    <radialGradient id="lensGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7dd3fc" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#7dd3fc" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="halo" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#22d3ee" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#c084fc" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <g stroke="#60a5fa" stroke-opacity="0.08" stroke-width="1">
+    <path d="M0 90 H1200"/>
+    <path d="M0 180 H1200"/>
+    <path d="M0 270 H1200"/>
+    <path d="M0 360 H1200"/>
+    <path d="M0 450 H1200"/>
+    <path d="M0 540 H1200"/>
+    <path d="M120 0 V630"/>
+    <path d="M240 0 V630"/>
+    <path d="M360 0 V630"/>
+    <path d="M480 0 V630"/>
+    <path d="M600 0 V630"/>
+    <path d="M720 0 V630"/>
+    <path d="M840 0 V630"/>
+    <path d="M960 0 V630"/>
+    <path d="M1080 0 V630"/>
+  </g>
+
+  <text x="112" y="330" font-family="'Arial Black', Arial, sans-serif" font-size="82" fill="#e2e8f0" opacity="0.12" letter-spacing="2">spike.land</text>
+
+  <circle cx="720" cy="280" r="150" fill="url(#lensGlow)" filter="url(#soft)"/>
+  <circle cx="720" cy="280" r="122" fill="none" stroke="#7dd3fc" stroke-width="12"/>
+  <circle cx="720" cy="280" r="138" fill="none" stroke="#c084fc" stroke-width="2" stroke-dasharray="8 10" opacity="0.5"/>
+  <path d="M812 372 L928 490" stroke="#cbd5e1" stroke-width="20" stroke-linecap="round"/>
+  <path d="M812 372 L928 490" stroke="#60a5fa" stroke-width="6" stroke-linecap="round" opacity="0.4"/>
+
+  <g transform="translate(720 278)">
+    <path d="M0 -78 C32 -78 54 -55 54 -21 C54 4 43 27 27 44 C18 54 13 72 13 95 L-13 95 C-13 72 -18 54 -27 44 C-43 27 -54 4 -54 -21 C-54 -55 -32 -78 0 -78 Z" fill="#d8b4fe" fill-opacity="0.16" stroke="#c084fc" stroke-width="3"/>
+    <circle cx="0" cy="-104" r="36" fill="#f8fafc" fill-opacity="0.12" stroke="#bae6fd" stroke-width="3"/>
+    <path d="M-44 16 C-16 6 18 6 44 16" fill="none" stroke="#93c5fd" stroke-width="3" stroke-linecap="round"/>
+    <path d="M-40 38 C-10 28 12 28 40 38" fill="none" stroke="#67e8f9" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+    <path d="M-26 -8 L-4 12 L24 -16" fill="none" stroke="#f9fafb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  </g>
+
+  <g font-family="'Courier New', monospace" font-size="20" fill="#93c5fd" opacity="0.8">
+    <text x="864" y="186">city: brighton</text>
+    <text x="835" y="214">rank: #1</text>
+    <text x="848" y="242">origin: HU</text>
+  </g>
+
+  <g transform="translate(852 265)">
+    <rect x="0" y="0" width="56" height="12" rx="2" fill="#ef4444"/>
+    <rect x="0" y="12" width="56" height="12" rx="2" fill="#f8fafc"/>
+    <rect x="0" y="24" width="56" height="12" rx="2" fill="#22c55e"/>
+  </g>
+
+  <g stroke="url(#halo)" stroke-width="2" opacity="0.7">
+    <path d="M164 300 C298 260 420 250 580 272"/>
+    <path d="M260 350 C398 326 500 322 604 334"/>
+    <path d="M310 218 C432 208 548 214 610 236"/>
+  </g>
+
+  <g fill="#e879f9" opacity="0.55">
+    <circle cx="638" cy="174" r="4"/>
+    <circle cx="600" cy="232" r="3"/>
+    <circle cx="790" cy="176" r="3"/>
+    <circle cx="836" cy="316" r="4"/>
+    <circle cx="686" cy="364" r="3"/>
+    <circle cx="754" cy="386" r="2"/>
+  </g>
+
+  <rect width="1200" height="630" fill="none" stroke="#38bdf8" stroke-opacity="0.12" stroke-width="2"/>
+</svg>

@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0900"/>
+      <stop offset="100%" style="stop-color:#1a1400"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24"/>
+      <stop offset="100%" style="stop-color:#92400e"/>
+    </linearGradient>
+    <linearGradient id="stockFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:0.02"/>
+    </linearGradient>
+    <linearGradient id="flowIn" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0"/>
+      <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:0.8"/>
+    </linearGradient>
+    <linearGradient id="flowOut" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:0"/>
+    </linearGradient>
+    <filter id="glow5">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow12">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Faint grid for stock/flow diagram feel -->
+  <g opacity="0.05" stroke="#fbbf24" stroke-width="0.5">
+    <line x1="0" y1="105" x2="1200" y2="105"/>
+    <line x1="0" y1="210" x2="1200" y2="210"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="420" x2="1200" y2="420"/>
+    <line x1="0" y1="525" x2="1200" y2="525"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+
+  <!-- Eye symbol - central motif -->
+  <g transform="translate(600,240)" filter="url(#glow5)">
+    <!-- Eye outline -->
+    <ellipse cx="0" cy="0" rx="120" ry="55" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.7"/>
+    <!-- Iris -->
+    <circle cx="0" cy="0" r="38" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.9"/>
+    <circle cx="0" cy="0" r="22" fill="#92400e" opacity="0.6"/>
+    <!-- Pupil -->
+    <circle cx="0" cy="0" r="12" fill="#fbbf24" opacity="0.8"/>
+    <circle cx="0" cy="0" r="6" fill="#0a0900"/>
+    <!-- Lash marks -->
+    <line x1="-120" y1="0" x2="-90" y2="0" stroke="#fbbf24" stroke-width="1.5" opacity="0.5"/>
+    <line x1="90" y1="0" x2="120" y2="0" stroke="#fbbf24" stroke-width="1.5" opacity="0.5"/>
+    <!-- Highlight -->
+    <circle cx="8" cy="-8" r="5" fill="white" opacity="0.2"/>
+  </g>
+
+  <!-- Stock box -->
+  <rect x="430" y="340" width="340" height="100" rx="4" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.7"/>
+  <rect x="430" y="340" width="340" height="100" rx="4" fill="#fbbf24" opacity="0.06"/>
+  <text x="600" y="398" font-family="'Courier New', monospace" font-size="20" fill="#fbbf24" text-anchor="middle" opacity="0.9">ATTENTION</text>
+  <text x="600" y="422" font-family="'Courier New', monospace" font-size="13" fill="#d97706" text-anchor="middle" opacity="0.7">stock: 847 units</text>
+
+  <!-- Inflow arrow left -->
+  <line x1="200" y1="390" x2="428" y2="390" stroke="url(#flowIn)" stroke-width="3"/>
+  <polygon points="428,385 445,390 428,395" fill="#fbbf24" opacity="0.7"/>
+  <rect x="240" y="370" width="80" height="40" rx="3" fill="#1a1400" stroke="#fbbf24" stroke-width="1" opacity="0.6"/>
+  <text x="280" y="393" font-family="'Courier New', monospace" font-size="10" fill="#fbbf24" text-anchor="middle" opacity="0.8">inflow</text>
+  <text x="280" y="404" font-family="'Courier New', monospace" font-size="9" fill="#d97706" text-anchor="middle" opacity="0.6">focus</text>
+
+  <!-- Outflow arrow right -->
+  <line x1="772" y1="390" x2="1000" y2="390" stroke="url(#flowOut)" stroke-width="3"/>
+  <polygon points="1000,385 1017,390 1000,395" fill="#fbbf24" opacity="0.4"/>
+  <rect x="880" y="370" width="80" height="40" rx="3" fill="#1a1400" stroke="#fbbf24" stroke-width="1" opacity="0.6"/>
+  <text x="920" y="393" font-family="'Courier New', monospace" font-size="10" fill="#fbbf24" text-anchor="middle" opacity="0.8">outflow</text>
+  <text x="920" y="404" font-family="'Courier New', monospace" font-size="9" fill="#d97706" text-anchor="middle" opacity="0.6">distraction</text>
+
+  <!-- Feedback loop arc -->
+  <path d="M600,440 C600,490 700,510 750,480 C790,455 800,420 780,395" fill="none" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.5"/>
+  <polygon points="780,395 793,400 785,387" fill="#d97706" opacity="0.5"/>
+  <text x="720" y="500" font-family="'Courier New', monospace" font-size="11" fill="#d97706" opacity="0.5">feedback</text>
+
+  <!-- Small sparkle dots - attention particles -->
+  <g fill="#fbbf24" filter="url(#glow5)">
+    <circle cx="350" cy="390" r="3" opacity="0.5"/>
+    <circle cx="320" cy="375" r="2" opacity="0.4"/>
+    <circle cx="340" cy="405" r="2" opacity="0.45"/>
+    <circle cx="870" cy="390" r="3" opacity="0.4"/>
+    <circle cx="900" cy="375" r="2" opacity="0.35"/>
+  </g>
+
+  <!-- Title -->
+  <text x="600" y="555" font-family="Georgia, serif" font-size="44" font-weight="700" fill="#fbbf24" text-anchor="middle" letter-spacing="1">The Attention Stock</text>
+  <text x="600" y="592" font-family="Georgia, serif" font-size="17" fill="#d97706" text-anchor="middle" letter-spacing="5" opacity="0.7">THINKING IN SYSTEMS</text>
+</svg>

@@ -144,13 +144,19 @@ async function fetchBlogPostSource(slug: string): Promise<BlogPostRow | null> {
   }
 }
 
-function rowToPost(row: BlogPostRow, includeContent = false, lang: SupportedLang | null = null) {
-  let tags: unknown = [];
+function parseStoredTags(rawTags: string): string[] {
   try {
-    tags = JSON.parse(row.tags);
+    const parsed = JSON.parse(rawTags);
+    return Array.isArray(parsed)
+      ? parsed.filter((tag): tag is string => typeof tag === "string")
+      : [];
   } catch {
-    /* default to empty */
+    return [];
   }
+}
+
+function rowToPost(row: BlogPostRow, includeContent = false, lang: SupportedLang | null = null) {
+  const tags = parseStoredTags(row.tags);
 
   const heroPrompt =
     normalizePrompt(row.hero_prompt) ??
@@ -187,6 +193,42 @@ function rowToPost(row: BlogPostRow, includeContent = false, lang: SupportedLang
     post["lang"] = resolvedLang;
   }
   return post;
+}
+
+function rowToMarkdown(row: BlogPostRow, lang: SupportedLang | null = null): string {
+  const tags = parseStoredTags(row.tags);
+  const heroPrompt =
+    normalizePrompt(row.hero_prompt) ??
+    (row.hero_image ? inferPromptFromRow(row, row.hero_image) : null) ??
+    (row.hero_image ? buildFallbackHeroPrompt(row) : null);
+  const field = lang ? LANG_CONTENT_FIELDS[lang] : null;
+  const translatedContent = field ? (row[field] as string | null | undefined) : null;
+  const content = translatedContent ?? row.content;
+  const frontmatterLines = [
+    "---",
+    `title: ${JSON.stringify(row.title)}`,
+    `slug: ${JSON.stringify(row.slug)}`,
+    `description: ${JSON.stringify(row.description)}`,
+    `primer: ${JSON.stringify(row.primer)}`,
+    `date: ${JSON.stringify(row.date)}`,
+    `author: ${JSON.stringify(row.author)}`,
+    `category: ${JSON.stringify(row.category)}`,
+    `tags: [${tags.map((tag) => JSON.stringify(tag)).join(", ")}]`,
+    `featured: ${Boolean(row.featured)}`,
+    `draft: ${Boolean(row.draft)}`,
+    `unlisted: ${Boolean(row.unlisted)}`,
+  ];
+
+  if (row.hero_image) {
+    frontmatterLines.push(`heroImage: ${JSON.stringify(row.hero_image)}`);
+  }
+  if (heroPrompt) {
+    frontmatterLines.push(`heroPrompt: ${JSON.stringify(heroPrompt)}`);
+  }
+
+  frontmatterLines.push("---", "", content);
+
+  return frontmatterLines.join("\n");
 }
 
 function buildFallbackHeroPrompt(row: Pick<BlogPostRow, "title" | "description">): string | null {
@@ -312,20 +354,15 @@ blog.get("/api/blog", async (c) => {
 blog.get("/api/blog/:slug", async (c) => {
   // Normalise: strip accidental .mdx suffix so old links still resolve
   const slug = c.req.param("slug").replace(/\.mdx$/i, "");
+  const lang = detectLang(c.req.raw, c.req.query("lang"));
 
   // Content negotiation: return raw MDX source (with frontmatter) for agents
   if (acceptsMarkdown(c)) {
     if (!BLOG_SLUG_RE.test(slug)) return c.json({ error: "Post not found" }, 404);
 
     try {
-      const res = await fetch(`${GITHUB_RAW_BASE}/content/blog/${slug}.mdx`, {
-        headers: { "User-Agent": "spike-edge/1.0" },
-        cf: { cacheTtl: 300, cacheEverything: true },
-      });
-
-      if (!res.ok) return c.json({ error: "Post not found" }, 404);
-
-      const body = await res.text();
+      const row = await getBlogPostRow(c.env.DB, slug, { allowSourceFallback: false });
+      if (!row) return c.json({ error: "Post not found" }, 404);
 
       // Fire analytics in the background
       try {
@@ -343,14 +380,13 @@ blog.get("/api/blog/:slug", async (c) => {
         /* no ExecutionContext in some environments */
       }
 
-      return markdownResponse(body, "public, max-age=300");
+      return markdownResponse(rowToMarkdown(row, lang), "public, max-age=300");
     } catch {
       return c.json({ error: "Post not found" }, 404);
     }
   }
 
   const showDrafts = isLocalDev(c);
-  const lang = detectLang(c.req.raw, c.req.query("lang"));
 
   let cached: Response | null = null;
   try {
@@ -358,7 +394,7 @@ blog.get("/api/blog/:slug", async (c) => {
       c.req.raw,
       safeCtx(c),
       async () => {
-        const row = await getBlogPostRow(c.env.DB, slug);
+        const row = await getBlogPostRow(c.env.DB, slug, { allowSourceFallback: false });
 
         if (!row) return null;
 
@@ -370,7 +406,7 @@ blog.get("/api/blog/:slug", async (c) => {
     );
   } catch {
     // Cache API unavailable — fall back to direct D1
-    const row = await getBlogPostRow(c.env.DB, slug);
+    const row = await getBlogPostRow(c.env.DB, slug, { allowSourceFallback: false });
 
     if (row) {
       cached = new Response(JSON.stringify(rowToPost(row, true, lang)), {
@@ -699,7 +735,12 @@ blog.get("/blog/:slug/:filename", async (c, next) => {
 });
 
 /** Fetch a single blog post row from D1 (no caching, for SSR injection). */
-async function getBlogPostRow(db: D1Database, slug: string): Promise<BlogPostRow | null> {
+async function getBlogPostRow(
+  db: D1Database,
+  slug: string,
+  options: { allowSourceFallback?: boolean } = {},
+): Promise<BlogPostRow | null> {
+  const { allowSourceFallback = true } = options;
   const normalizedSlug = slug.replace(/\.mdx$/i, "");
 
   try {
@@ -713,6 +754,10 @@ async function getBlogPostRow(db: D1Database, slug: string): Promise<BlogPostRow
     }
   } catch {
     // Fall through to the canonical MDX source when D1 is unavailable or stale.
+  }
+
+  if (!allowSourceFallback) {
+    return null;
   }
 
   return fetchBlogPostSource(normalizedSlug);

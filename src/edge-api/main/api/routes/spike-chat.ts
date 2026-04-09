@@ -800,12 +800,30 @@ spikeChat.post("/api/spike-chat", async (c) => {
     // DO binding unavailable (local dev without DO support)
   }
 
-  // Resolve LLM provider (BYOK → platform fallback)
-  const llmTarget = await resolveSynthesisTarget(c.env, userId, {
-    publicModel: "spike-agent-v1",
-    provider: "auto",
-    upstreamModel: undefined,
-  });
+  // Persona → model override: some personas have a preferred LLM.
+  // Default for all: gemini-3-flash-preview (via DEFAULT_PROVIDER_MODELS.google).
+  // Radix gets gemma-4-e4b as its primary model.
+  const PERSONA_MODEL_OVERRIDES: Record<
+    string,
+    { provider: "google" | "anthropic" | "openai"; model: string }
+  > = {
+    radix: { provider: "google", model: "gemma-4-e4b" },
+  };
+  const personaOverride = persona ? PERSONA_MODEL_OVERRIDES[persona] : undefined;
+
+  // Resolve LLM provider (persona override → BYOK → platform fallback)
+  // All personas default to Google (gemini-3-flash-preview) with gemma-4 fallback.
+  const llmTarget = await resolveSynthesisTarget(
+    c.env,
+    userId,
+    personaOverride
+      ? {
+          publicModel: personaOverride.model,
+          provider: personaOverride.provider,
+          upstreamModel: personaOverride.model,
+        }
+      : { publicModel: "spike-agent-v1", provider: "google", upstreamModel: undefined },
+  );
   if (!llmTarget) {
     return c.json(
       { error: "No LLM provider available. Add a BYOK key or configure a platform provider." },

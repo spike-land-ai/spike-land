@@ -51,6 +51,7 @@ import {
   Scene07_Finale as Elvis_Scene07,
 } from "../core-logic/elvis-index.ts";
 import { ELVIS_DURATIONS, ELVIS_TIMING } from "../core-logic/elvis-constants";
+import { MATH_ARENA_TOTAL_FRAMES, MATH_ARENA_FPS } from "../core-logic/math-arena-index";
 import { Scene01_Hook as Newcomb_Scene01_Hook } from "./compositions/newcomb/Scene01_Hook";
 import { Scene02_TwoBoxArgument as Newcomb_Scene02 } from "./compositions/newcomb/Scene02_TwoBoxArgument";
 import { Scene03_OneBoxArgument as Newcomb_Scene03 } from "./compositions/newcomb/Scene03_OneBoxArgument";
@@ -71,6 +72,30 @@ import {
   Scene09_Agents as N404_Scene09_Agents,
   Scene10_EndCard as N404_Scene10_EndCard,
 } from "../core-logic/no-more-404s-index.ts";
+
+// Math Arena placeholder (composition scenes to be built)
+const MathArenaPlaceholder: FC = () => (
+  <AbsoluteFill
+    style={{
+      backgroundColor: "#1a2a1a",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      fontFamily: TYPOGRAPHY.fontFamily.sans,
+    }}
+  >
+    <div style={{ fontSize: 72, color: "#DAA520", fontWeight: 900 }}>42 Rounds to The Book</div>
+    <div style={{ fontSize: 36, color: "#F5F5DC", marginTop: 20, display: "flex", gap: 40 }}>
+      <span style={{ color: "#00E5FF" }}>√ Radix</span>
+      <span style={{ color: "#DAA520" }}>∮ Erdos</span>
+      <span style={{ color: "#4A9EFF" }}>◊ Zoltan</span>
+    </div>
+    <div style={{ fontSize: 24, color: "#F5F5DC80", marginTop: 40 }}>
+      7 domains x 6 levels = 42 rounds | Docker BuildKit parallel execution
+    </div>
+  </AbsoluteFill>
+);
 
 // Component imports for preview compositions
 import { TokenVisualization } from "./components/animations/TokenVisualization";
@@ -215,6 +240,16 @@ export const RemotionRoot = () => {
         component={ElvisEmotion}
         durationInFrames={ELVIS_TIMING.totalFrames}
         fps={ELVIS_TIMING.fps}
+        width={VIDEO_CONFIG.width}
+        height={VIDEO_CONFIG.height}
+      />
+
+      {/* Math Arena — 42 Rounds to The Book (~36min full, preview mode) */}
+      <Composition
+        id="MathArena"
+        component={MathArenaPlaceholder}
+        durationInFrames={MATH_ARENA_TOTAL_FRAMES}
+        fps={MATH_ARENA_FPS}
         width={VIDEO_CONFIG.width}
         height={VIDEO_CONFIG.height}
       />

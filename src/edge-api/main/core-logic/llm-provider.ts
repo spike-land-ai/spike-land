@@ -74,10 +74,12 @@ export const PUBLIC_MODEL_ID = "spike-agent-v1";
 export const DEFAULT_PROVIDER_MODELS: Record<ProviderId, string> = {
   openai: "gpt-4.1",
   anthropic: "claude-sonnet-4-20250514",
-  google: "gemini-2.5-flash",
+  google: "gemini-3-flash-preview",
   xai: "grok-4.20-0309-reasoning",
   ollama: "qwen3:8b",
 };
+
+export const GOOGLE_FALLBACK_MODEL = "gemma-4-e4b";
 
 export const AUTO_BYOK_PRIORITY: ByokProvider[] = ["openai", "anthropic", "google"];
 export const AUTO_PLATFORM_PRIORITY: ProviderId[] = ["anthropic", "google", "openai", "xai"]; // ollama excluded from auto: local-only
@@ -103,7 +105,12 @@ export function inferProviderFromRawModel(model: string): ProviderId | undefined
     return "openai";
   }
   if (normalized.startsWith("claude") || normalized.includes("anthropic")) return "anthropic";
-  if (normalized.startsWith("gemini") || normalized.includes("google")) return "google";
+  if (
+    normalized.startsWith("gemini") ||
+    normalized.startsWith("gemma") ||
+    normalized.includes("google")
+  )
+    return "google";
   if (normalized.startsWith("grok") || normalized.includes("xai")) return "xai";
   if (
     normalized.startsWith("ollama") ||
@@ -814,7 +821,17 @@ export async function streamCompletionWithFallback(
 ): Promise<{ response: Response; usedTarget: ResolvedSynthesisTarget }> {
   let lastError: Error | undefined;
 
+  // Expand targets: for each Google target using the primary model, inject a
+  // Gemma 4 fallback immediately after it (same key, different model).
+  const expandedTargets: ResolvedSynthesisTarget[] = [];
   for (const target of targets) {
+    expandedTargets.push(target);
+    if (target.provider === "google" && target.upstreamModel !== GOOGLE_FALLBACK_MODEL) {
+      expandedTargets.push({ ...target, upstreamModel: GOOGLE_FALLBACK_MODEL });
+    }
+  }
+
+  for (const target of expandedTargets) {
     try {
       const response = await streamCompletion(target, messages, options);
       // Track community token success

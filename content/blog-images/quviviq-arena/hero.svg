@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="65%"><stop offset="0" stop-color="#1e2d63"/><stop offset="1" stop-color="#090f1f"/></radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <ellipse cx="760" cy="460" rx="360" ry="250" fill="#243f8f" opacity="0.7"/>
+  <ellipse cx="760" cy="460" rx="170" ry="120" fill="#6fa1ff" opacity="0.9"/>
+  <circle cx="900" cy="430" r="74" fill="#ff9c42"/>
+  <text x="865" y="445" font-family="Arial, sans-serif" font-size="24" fill="#1a1220" font-weight="700">OREXIN</text>
+  <rect x="1020" y="390" width="220" height="40" rx="20" fill="#7a8ec8"/>
+  <circle cx="1090" cy="410" r="26" fill="#e8eefb"/>
+  <text x="1020" y="310" font-family="Arial, sans-serif" font-size="72" fill="#e8eeff" font-weight="700">Quviviq Arena</text>
+  <text x="1020" y="380" font-family="Arial, sans-serif" font-size="40" fill="#bfcfff">Silence wakefulness, not consciousness</text>
+</svg>

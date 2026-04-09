@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#04041a"/>
+      <stop offset="100%" style="stop-color:#0a0f2e"/>
+    </linearGradient>
+    <linearGradient id="loopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="50%" style="stop-color:#06b6d4"/>
+      <stop offset="100%" style="stop-color:#6366f1"/>
+    </linearGradient>
+    <radialGradient id="eyeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:0.8"/>
+      <stop offset="40%" style="stop-color:#0891b2;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="glow4">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow15">
+      <feGaussianBlur stdDeviation="15" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle star field -->
+  <g fill="#6366f1" opacity="0.3">
+    <circle cx="100" cy="80" r="1"/>
+    <circle cx="250" cy="50" r="1.5"/>
+    <circle cx="400" cy="100" r="1"/>
+    <circle cx="180" cy="150" r="1"/>
+    <circle cx="950" cy="80" r="1.5"/>
+    <circle cx="1050" cy="50" r="1"/>
+    <circle cx="1100" cy="130" r="1"/>
+    <circle cx="870" cy="150" r="1.5"/>
+    <circle cx="150" cy="500" r="1"/>
+    <circle cx="300" cy="550" r="1.5"/>
+    <circle cx="900" cy="520" r="1"/>
+    <circle cx="1080" cy="480" r="1.5"/>
+  </g>
+
+  <!-- Ambient glow behind loop -->
+  <ellipse cx="600" cy="290" rx="260" ry="200" fill="#312e81" opacity="0.25" filter="url(#glow15)"/>
+
+  <!-- Mobius-like feedback loop - two overlapping arcs forming a loop -->
+  <!-- Outer arc going clockwise -->
+  <path d="M380,290 C380,140 600,80 760,180 C880,260 900,360 820,430 C740,500 600,500 480,440 C380,390 340,330 380,290"
+        fill="none" stroke="#6366f1" stroke-width="3" opacity="0.7" filter="url(#glow4)"/>
+
+  <!-- Inner arc completing the loop (offset) -->
+  <path d="M820,290 C820,440 600,500 440,400 C320,320 300,220 380,150 C460,80 600,60 720,120 C820,180 860,240 820,290"
+        fill="none" stroke="#06b6d4" stroke-width="2.5" opacity="0.6" filter="url(#glow4)"/>
+
+  <!-- Arrow heads on loop -->
+  <!-- On outer arc - clockwise arrow -->
+  <polygon points="760,178 773,192 747,190" fill="#6366f1" opacity="0.8" filter="url(#glow4)"/>
+  <!-- On inner arc - counterclockwise arrow -->
+  <polygon points="440,402 428,390 453,388" fill="#06b6d4" opacity="0.7" filter="url(#glow4)"/>
+
+  <!-- Eye at center of loop -->
+  <g transform="translate(600,290)" filter="url(#glow4)">
+    <!-- Eye glow -->
+    <circle cx="0" cy="0" r="60" fill="url(#eyeGlow)" opacity="0.4"/>
+    <!-- Eye shape -->
+    <ellipse cx="0" cy="0" rx="70" ry="32" fill="none" stroke="#06b6d4" stroke-width="1.5" opacity="0.8"/>
+    <!-- Iris -->
+    <circle cx="0" cy="0" r="22" fill="#0a0f2e" stroke="#06b6d4" stroke-width="1.5"/>
+    <!-- Iris rings -->
+    <circle cx="0" cy="0" r="16" fill="none" stroke="#0891b2" stroke-width="1" opacity="0.6"/>
+    <!-- Pupil -->
+    <circle cx="0" cy="0" r="9" fill="#06b6d4" opacity="0.9"/>
+    <circle cx="0" cy="0" r="5" fill="#04041a"/>
+    <!-- Highlight -->
+    <circle cx="5" cy="-5" r="4" fill="white" opacity="0.2"/>
+    <!-- Eye lash tips -->
+    <line x1="-70" y1="0" x2="-55" y2="0" stroke="#06b6d4" stroke-width="1.5" opacity="0.5"/>
+    <line x1="55" y1="0" x2="70" y2="0" stroke="#06b6d4" stroke-width="1.5" opacity="0.5"/>
+  </g>
+
+  <!-- Feedback label -->
+  <text x="600" y="118" font-family="'Courier New', monospace" font-size="13" fill="#6366f1" text-anchor="middle" opacity="0.6" letter-spacing="3">FEEDBACK</text>
+
+  <!-- Self-reference label -->
+  <text x="600" y="465" font-family="'Courier New', monospace" font-size="13" fill="#06b6d4" text-anchor="middle" opacity="0.6" letter-spacing="3">SELF-REFERENCE</text>
+
+  <!-- Title -->
+  <text x="600" y="548" font-family="Georgia, serif" font-size="40" font-weight="700" fill="#a5b4fc" text-anchor="middle" letter-spacing="0.5">The Loop That Looks Back</text>
+  <text x="600" y="588" font-family="Georgia, serif" font-size="16" fill="#22d3ee" text-anchor="middle" letter-spacing="5" opacity="0.7">THINKING IN SYSTEMS</text>
+</svg>

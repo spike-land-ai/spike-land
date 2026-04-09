@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0800"/>
+      <stop offset="100%" style="stop-color:#0f0c00"/>
+    </linearGradient>
+    <linearGradient id="terminalBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#111006;stop-opacity:0.97"/>
+      <stop offset="100%" style="stop-color:#0a0800;stop-opacity:0.9"/>
+    </linearGradient>
+    <linearGradient id="uncloakGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#D97706;stop-opacity:0"/>
+      <stop offset="40%" style="stop-color:#D97706;stop-opacity:0.8"/>
+      <stop offset="60%" style="stop-color:#fbbf24;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#D97706;stop-opacity:0"/>
+    </linearGradient>
+    <radialGradient id="orangeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#D97706;stop-opacity:0.4"/>
+      <stop offset="100%" style="stop-color:#D97706;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="glow4">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow10">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="terminalClip">
+      <rect x="180" y="80" width="840" height="430" rx="8"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Ambient orange glow -->
+  <ellipse cx="600" cy="295" rx="350" ry="250" fill="url(#orangeGlow)" filter="url(#glow10)"/>
+
+  <!-- Terminal window frame -->
+  <rect x="180" y="80" width="840" height="430" rx="8" fill="#0f0c00" stroke="#D97706" stroke-width="1.5" opacity="0.9"/>
+
+  <!-- Terminal title bar -->
+  <rect x="180" y="80" width="840" height="36" rx="8" fill="#1c1700"/>
+  <rect x="180" y="100" width="840" height="16" fill="#1c1700"/>
+  <!-- Traffic lights -->
+  <circle cx="210" cy="98" r="7" fill="#ff5f57" opacity="0.8"/>
+  <circle cx="232" cy="98" r="7" fill="#febc2e" opacity="0.8"/>
+  <circle cx="254" cy="98" r="7" fill="#28c840" opacity="0.8"/>
+  <!-- Title bar text -->
+  <text x="600" y="103" font-family="'Courier New', monospace" font-size="13" fill="#D97706" text-anchor="middle" opacity="0.7">claude-code — reverse-engineering session</text>
+
+  <!-- Terminal content lines (code) -->
+  <g font-family="'Courier New', monospace" font-size="13" clip-path="url(#terminalClip)">
+    <!-- Line 1 - prompt -->
+    <text x="200" y="148" fill="#D97706">$</text>
+    <text x="216" y="148" fill="#e5e7eb"> strings claude-code-binary | grep -i "gate\|dream\|kairos"</text>
+    <!-- Line 2 - output -->
+    <text x="200" y="168" fill="#4ade80">IronGate_classifier_v2</text>
+    <text x="200" y="188" fill="#4ade80">AutoDream_scheduler</text>
+    <text x="200" y="208" fill="#4ade80">Kairos_timing_engine</text>
+    <text x="200" y="228" fill="#fbbf24">two_stage_filter_pipeline</text>
+    <!-- Line 3 -->
+    <text x="200" y="256" fill="#D97706">$</text>
+    <text x="216" y="256" fill="#e5e7eb"> grep "context" claude.js | head -20</text>
+    <!-- Code lines -->
+    <text x="200" y="276" fill="#60a5fa">const</text>
+    <text x="240" y="276" fill="#e5e7eb"> contextWindow = new IronGate({</text>
+    <text x="200" y="296" fill="#e5e7eb">  maxTokens: 200_000,</text>
+    <text x="200" y="316" fill="#e5e7eb">  classifier: AutoDream.stage1,</text>
+    <text x="200" y="336" fill="#fbbf24">  // we already had this</text>
+    <text x="200" y="356" fill="#e5e7eb">  timing: Kairos.optimize,</text>
+    <text x="200" y="376" fill="#e5e7eb">});</text>
+    <!-- Cursor -->
+    <text x="200" y="400" fill="#D97706">$</text>
+    <rect x="216" y="385" width="9" height="16" fill="#D97706" opacity="0.9">
+      <animate attributeName="opacity" values="0.9;0;0.9" dur="1.2s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+
+  <!-- "Uncloaked" reveal effect - semi-transparent overlay peeling back -->
+  <rect x="180" y="80" width="840" height="430" rx="8" fill="url(#uncloakGrad)" opacity="0.08"/>
+  <!-- Scan line across terminal -->
+  <rect x="180" y="220" width="840" height="2" fill="url(#uncloakGrad)" opacity="0.3"/>
+
+  <!-- Ghost/transparent version of terminal behind (the "cloaked" state) -->
+  <rect x="240" y="50" width="840" height="430" rx="8" fill="none" stroke="#D97706" stroke-width="0.5" stroke-dasharray="6,4" opacity="0.2"/>
+
+  <!-- Title -->
+  <text x="600" y="555" font-family="Georgia, serif" font-size="30" font-weight="700" fill="#fbbf24" text-anchor="middle" letter-spacing="0.5">Claude Code Uncloaked</text>
+  <text x="600" y="592" font-family="Georgia, serif" font-size="16" fill="#D97706" text-anchor="middle" letter-spacing="4" opacity="0.8">WHAT WE LEARNED. WHAT WE STOLE.</text>
+</svg>

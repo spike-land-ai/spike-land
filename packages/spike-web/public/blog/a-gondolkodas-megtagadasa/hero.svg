@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="100%" style="stop-color:#1a0f2e"/>
+    </linearGradient>
+    <linearGradient id="brainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3d2b5e;stop-opacity:0.9"/>
+      <stop offset="60%" style="stop-color:#2a1a45;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#1a0f2e;stop-opacity:0.6"/>
+    </linearGradient>
+    <linearGradient id="crackGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0"/>
+      <stop offset="50%" style="stop-color:#a78bfa;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softglow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid -->
+  <g opacity="0.06" stroke="#7c3aed" stroke-width="0.5">
+    <line x1="0" y1="63" x2="1200" y2="63"/>
+    <line x1="0" y1="126" x2="1200" y2="126"/>
+    <line x1="0" y1="189" x2="1200" y2="189"/>
+    <line x1="0" y1="252" x2="1200" y2="252"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="378" x2="1200" y2="378"/>
+    <line x1="0" y1="441" x2="1200" y2="441"/>
+    <line x1="0" y1="504" x2="1200" y2="504"/>
+    <line x1="0" y1="567" x2="1200" y2="567"/>
+    <line x1="120" y1="0" x2="120" y2="630"/>
+    <line x1="240" y1="0" x2="240" y2="630"/>
+    <line x1="360" y1="0" x2="360" y2="630"/>
+    <line x1="480" y1="0" x2="480" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="720" y1="0" x2="720" y2="630"/>
+    <line x1="840" y1="0" x2="840" y2="630"/>
+    <line x1="960" y1="0" x2="960" y2="630"/>
+    <line x1="1080" y1="0" x2="1080" y2="630"/>
+  </g>
+
+  <!-- Brain silhouette - abstract shape -->
+  <g transform="translate(600,290)" filter="url(#softglow)">
+    <!-- Main brain body -->
+    <path d="M-160,-120 C-200,-130 -220,-80 -210,-40 C-230,-20 -240,20 -220,60 C-210,90 -180,110 -150,115 C-130,130 -80,140 -40,135 C0,145 40,145 80,135 C110,140 150,130 170,115 C200,110 220,90 215,60 C235,20 225,-20 210,-40 C220,-80 200,-130 160,-120 C140,-150 90,-160 40,-150 C20,-165 -20,-165 -40,-150 C-90,-160 -140,-150 -160,-120 Z" fill="url(#brainGrad)" stroke="#4c1d95" stroke-width="1.5"/>
+    <!-- Brain fold lines -->
+    <path d="M-80,-60 C-60,-80 -20,-70 0,-50 C20,-30 60,-40 80,-60" fill="none" stroke="#5b21b6" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+    <path d="M-120,0 C-90,-10 -50,10 -20,0 C10,-10 50,10 80,0 C110,-10 140,5 150,20" fill="none" stroke="#5b21b6" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+    <path d="M-100,50 C-70,40 -30,60 0,50 C30,40 70,60 100,50" fill="none" stroke="#5b21b6" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+  </g>
+
+  <!-- Fracture cracks -->
+  <g filter="url(#glow)">
+    <path d="M520,200 L560,240 L540,270 L580,310 L555,350 L600,400" stroke="url(#crackGlow)" stroke-width="2" fill="none"/>
+    <path d="M560,240 L530,250 L510,280" stroke="#a78bfa" stroke-width="1" fill="none" opacity="0.5"/>
+    <path d="M580,310 L610,295 L640,320" stroke="#a78bfa" stroke-width="1" fill="none" opacity="0.5"/>
+    <path d="M620,180 L640,220 L620,255 L660,290 L640,330 L670,370" stroke="url(#crackGlow)" stroke-width="1.5" fill="none" opacity="0.7"/>
+    <path d="M580,160 L590,190 L570,220 L605,250" stroke="#c4b5fd" stroke-width="1" fill="none" opacity="0.4"/>
+  </g>
+
+  <!-- Particle dots around cracks -->
+  <g fill="#a78bfa" opacity="0.6">
+    <circle cx="558" cy="238" r="2"/>
+    <circle cx="580" cy="308" r="1.5"/>
+    <circle cx="602" cy="398" r="2.5"/>
+    <circle cx="638" cy="218" r="1.5"/>
+    <circle cx="542" cy="270" r="1"/>
+    <circle cx="612" cy="295" r="2"/>
+    <circle cx="555" cy="350" r="1.5"/>
+  </g>
+
+  <!-- Vignette overlay -->
+  <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+    <stop offset="0%" style="stop-color:transparent"/>
+    <stop offset="100%" style="stop-color:#0a0a0f;stop-opacity:0.7"/>
+  </radialGradient>
+  <rect width="1200" height="630" fill="url(#vignette)"/>
+
+  <!-- Title text -->
+  <text x="600" y="530" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-weight="700" fill="#e2d9f3" text-anchor="middle" letter-spacing="2" opacity="0.95">A gondolkod&#225;s megtag ad&#225;sa</text>
+  <text x="600" y="572" font-family="Georgia, 'Times New Roman', serif" font-size="20" fill="#9b8ec4" text-anchor="middle" letter-spacing="4" opacity="0.7">DENIAL OF THINKING</text>
+</svg>

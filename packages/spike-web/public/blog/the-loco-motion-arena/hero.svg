@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d0014"/>
+      <stop offset="50%" style="stop-color:#150020"/>
+      <stop offset="100%" style="stop-color:#0a000f"/>
+    </linearGradient>
+    <linearGradient id="floorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4c0070;stop-opacity:0.5"/>
+      <stop offset="100%" style="stop-color:#0d0014;stop-opacity:0.9"/>
+    </linearGradient>
+    <radialGradient id="discoGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#f472b6;stop-opacity:0.6"/>
+      <stop offset="50%" style="stop-color:#c026d3;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#f472b6;stop-opacity:0"/>
+    </radialGradient>
+    <filter id="glow5">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow12">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Stage/arena floor perspective -->
+  <polygon points="100,630 1100,630 900,380 300,380" fill="url(#floorGrad)" opacity="0.7"/>
+
+  <!-- Floor tiles (grid effect) -->
+  <g stroke="#6b21a8" stroke-width="0.5" opacity="0.4">
+    <!-- Vertical lines converging -->
+    <line x1="300" y1="380" x2="100" y2="630"/>
+    <line x1="375" y1="380" x2="162" y2="630"/>
+    <line x1="450" y1="380" x2="225" y2="630"/>
+    <line x1="525" y1="380" x2="387" y2="630"/>
+    <line x1="600" y1="380" x2="600" y2="630"/>
+    <line x1="675" y1="380" x2="813" y2="630"/>
+    <line x1="750" y1="380" x2="975" y2="630"/>
+    <line x1="825" y1="380" x2="1038" y2="630"/>
+    <line x1="900" y1="380" x2="1100" y2="630"/>
+    <!-- Horizontal lines -->
+    <line x1="252" y1="430" x2="948" y2="430"/>
+    <line x1="192" y1="490" x2="1008" y2="490"/>
+    <line x1="147" y1="545" x2="1053" y2="545"/>
+  </g>
+
+  <!-- Disco ball at top center -->
+  <g transform="translate(600,140)" filter="url(#glow12)">
+    <circle cx="0" cy="0" r="55" fill="#1a0028" stroke="#d946ef" stroke-width="1.5"/>
+    <!-- Disco facets -->
+    <g stroke="#f0abfc" stroke-width="0.5" opacity="0.7">
+      <line x1="-55" y1="0" x2="55" y2="0"/>
+      <line x1="0" y1="-55" x2="0" y2="55"/>
+      <line x1="-39" y1="-39" x2="39" y2="39"/>
+      <line x1="39" y1="-39" x2="-39" y2="39"/>
+      <line x1="-55" y1="-18" x2="55" y2="-18"/>
+      <line x1="-55" y1="18" x2="55" y2="18"/>
+      <line x1="-18" y1="-55" x2="-18" y2="55"/>
+      <line x1="18" y1="-55" x2="18" y2="55"/>
+    </g>
+    <!-- Glow aura -->
+    <circle cx="0" cy="0" r="70" fill="url(#discoGlow)"/>
+  </g>
+
+  <!-- Light beams from disco ball -->
+  <g opacity="0.25" filter="url(#glow5)">
+    <line x1="600" y1="195" x2="200" y2="400" stroke="#f472b6" stroke-width="2"/>
+    <line x1="600" y1="195" x2="400" y2="380" stroke="#e879f9" stroke-width="1.5"/>
+    <line x1="600" y1="195" x2="800" y2="380" stroke="#f472b6" stroke-width="1.5"/>
+    <line x1="600" y1="195" x2="1000" y2="400" stroke="#e879f9" stroke-width="2"/>
+    <line x1="600" y1="195" x2="150" y2="300" stroke="#c084fc" stroke-width="1"/>
+    <line x1="600" y1="195" x2="1050" y2="300" stroke="#c084fc" stroke-width="1"/>
+  </g>
+
+  <!-- Musical notes scattered -->
+  <g font-family="serif" font-size="36" fill="#f472b6" opacity="0.8" filter="url(#glow5)">
+    <text x="180" y="200">&#9835;</text>
+    <text x="280" y="150">&#9834;</text>
+    <text x="860" y="180">&#9835;</text>
+    <text x="960" y="240">&#9834;</text>
+    <text x="120" y="320">&#9834;</text>
+    <text x="1040" y="310">&#9835;</text>
+  </g>
+
+  <!-- Motion lines for dance energy -->
+  <g stroke="#c026d3" stroke-width="1.5" opacity="0.4" fill="none">
+    <path d="M450,260 C470,240 490,255 510,240"/>
+    <path d="M690,255 C710,235 730,250 750,238"/>
+    <path d="M420,310 C450,285 480,305 510,285"/>
+    <path d="M700,305 C730,280 760,300 790,282"/>
+  </g>
+
+  <!-- Silhouette dancer center (abstract) -->
+  <g transform="translate(600,300)" fill="#f472b6" opacity="0.7" filter="url(#glow5)">
+    <!-- Head -->
+    <circle cx="0" cy="-55" r="14"/>
+    <!-- Body/arms raised in motion -->
+    <path d="M0,-40 L0,10 M-30,-15 L0,-25 L30,-15 M0,10 L-20,45 M0,10 L20,45" stroke="#f472b6" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- Arena text top -->
+  <text x="600" y="50" font-family="'Arial Black', Impact, sans-serif" font-size="16" fill="#c026d3" text-anchor="middle" letter-spacing="12" opacity="0.6">THE MATH ARENA</text>
+
+  <!-- Title -->
+  <text x="600" y="558" font-family="'Arial Black', Impact, sans-serif" font-size="42" fill="#f472b6" text-anchor="middle" letter-spacing="2">THE LOCO-MOTION</text>
+  <text x="600" y="600" font-family="Georgia, serif" font-size="17" fill="#c084fc" text-anchor="middle" letter-spacing="4" opacity="0.8">HARDER BETTER FASTER ZOLT&#193;N</text>
+</svg>

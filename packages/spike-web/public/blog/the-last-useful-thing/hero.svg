@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#20130a"/>
+      <stop offset="50%" stop-color="#0d1320"/>
+      <stop offset="100%" stop-color="#08131c"/>
+    </linearGradient>
+    <linearGradient id="split" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.26"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.28"/>
+    </linearGradient>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#split)"/>
+
+  <ellipse cx="450" cy="316" rx="210" ry="210" fill="#f59e0b" fill-opacity="0.08" filter="url(#soft)"/>
+  <ellipse cx="780" cy="316" rx="240" ry="210" fill="#38bdf8" fill-opacity="0.08" filter="url(#soft)"/>
+
+  <g transform="translate(430 315)" fill="none" stroke="#f8fafc" stroke-linecap="round">
+    <path d="M0 -170 C-92 -160 -150 -92 -150 0 C-150 96 -76 170 0 170 C78 170 150 96 150 0 C150 -92 92 -160 0 -170" stroke-width="7" opacity="0.9"/>
+    <path d="M0 -130 C-62 -122 -110 -66 -110 0 C-110 72 -52 128 0 136 C54 128 110 72 110 0 C110 -66 66 -122 0 -130" stroke-width="6" opacity="0.82"/>
+    <path d="M0 -94 C-42 -88 -74 -44 -74 0 C-74 48 -36 92 0 98 C38 92 74 48 74 0 C74 -44 46 -88 0 -94" stroke-width="5" opacity="0.78"/>
+    <path d="M0 -58 C-24 -54 -42 -24 -42 0 C-42 26 -22 52 0 58 C24 52 42 26 42 0 C42 -24 26 -54 0 -58" stroke-width="4" opacity="0.74"/>
+    <path d="M0 -170 L0 170" stroke-width="4" opacity="0.5"/>
+    <path d="M-150 0 L150 0" stroke-width="3" opacity="0.25"/>
+  </g>
+
+  <g font-family="'Courier New', monospace" font-size="20" fill="#7dd3fc" opacity="0.8">
+    <text x="710" y="178">01001101</text>
+    <text x="792" y="214">10100111</text>
+    <text x="872" y="250">11001010</text>
+    <text x="760" y="286">00101110</text>
+    <text x="858" y="328">11100010</text>
+    <text x="734" y="370">00010101</text>
+    <text x="822" y="412">10111100</text>
+    <text x="912" y="454">01010011</text>
+  </g>
+
+  <g fill="#7dd3fc">
+    <circle cx="682" cy="184" r="3"/>
+    <circle cx="764" cy="220" r="4"/>
+    <circle cx="850" cy="254" r="3"/>
+    <circle cx="724" cy="312" r="5"/>
+    <circle cx="906" cy="334" r="4"/>
+    <circle cx="786" cy="392" r="3"/>
+    <circle cx="948" cy="470" r="5"/>
+  </g>
+
+  <path d="M552 312 C622 302 680 300 738 302" fill="none" stroke="#f8fafc" stroke-width="3" stroke-dasharray="3 14" opacity="0.45"/>
+  <rect x="70" y="70" width="1060" height="490" rx="24" fill="none" stroke="#f8fafc" stroke-opacity="0.08" stroke-width="2"/>
+</svg>

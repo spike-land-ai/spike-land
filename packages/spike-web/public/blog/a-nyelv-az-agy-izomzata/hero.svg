@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1a1a"/>
+      <stop offset="100%" style="stop-color:#1a0f0a"/>
+    </linearGradient>
+    <linearGradient id="brainWarm" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c2410c;stop-opacity:0.4"/>
+      <stop offset="50%" style="stop-color:#0d9488;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#c2410c;stop-opacity:0.2"/>
+    </linearGradient>
+    <linearGradient id="wordGlow" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f97316"/>
+      <stop offset="100%" style="stop-color:#14b8a6"/>
+    </linearGradient>
+    <filter id="blur2">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+    <filter id="blur6">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Ambient glow behind brain -->
+  <ellipse cx="600" cy="295" rx="280" ry="200" fill="#c2410c" opacity="0.08" filter="url(#blur6)"/>
+  <ellipse cx="600" cy="295" rx="180" ry="140" fill="#0d9488" opacity="0.07" filter="url(#blur6)"/>
+
+  <!-- Brain outline made of word-shapes (abstract text blocks) -->
+  <!-- Brain silhouette as clipping path approximation via interlocked rectangles/words -->
+  <g transform="translate(600,295)" opacity="0.9">
+    <!-- Word-texture fills arranged in brain shape -->
+    <!-- Left hemisphere word blocks -->
+    <g fill="none">
+      <!-- Warm orange word-lines left -->
+      <rect x="-180" y="-90" width="55" height="12" rx="2" fill="#f97316" opacity="0.7"/>
+      <rect x="-175" y="-72" width="70" height="12" rx="2" fill="#fb923c" opacity="0.6"/>
+      <rect x="-185" y="-54" width="80" height="12" rx="2" fill="#f97316" opacity="0.75"/>
+      <rect x="-180" y="-36" width="65" height="12" rx="2" fill="#ea580c" opacity="0.6"/>
+      <rect x="-175" y="-18" width="75" height="12" rx="2" fill="#f97316" opacity="0.5"/>
+      <rect x="-165" y="0" width="60" height="12" rx="2" fill="#fb923c" opacity="0.65"/>
+      <rect x="-160" y="18" width="50" height="12" rx="2" fill="#f97316" opacity="0.55"/>
+      <rect x="-150" y="36" width="45" height="12" rx="2" fill="#ea580c" opacity="0.5"/>
+      <rect x="-135" y="54" width="40" height="12" rx="2" fill="#f97316" opacity="0.4"/>
+      <rect x="-115" y="72" width="35" height="12" rx="2" fill="#fb923c" opacity="0.35"/>
+      <!-- Teal word-lines left upper -->
+      <rect x="-140" y="-108" width="50" height="12" rx="2" fill="#0d9488" opacity="0.6"/>
+      <rect x="-155" y="-126" width="40" height="12" rx="2" fill="#14b8a6" opacity="0.5"/>
+      <!-- Center connecting bridge -->
+      <rect x="-15" y="-105" width="30" height="8" rx="2" fill="#f97316" opacity="0.4"/>
+      <rect x="-20" y="-95" width="40" height="8" rx="2" fill="#14b8a6" opacity="0.3"/>
+    </g>
+    <!-- Right hemisphere word blocks -->
+    <g fill="none">
+      <rect x="125" y="-90" width="55" height="12" rx="2" fill="#14b8a6" opacity="0.7"/>
+      <rect x="105" y="-72" width="70" height="12" rx="2" fill="#0d9488" opacity="0.6"/>
+      <rect x="105" y="-54" width="80" height="12" rx="2" fill="#14b8a6" opacity="0.75"/>
+      <rect x="115" y="-36" width="65" height="12" rx="2" fill="#0f766e" opacity="0.6"/>
+      <rect x="100" y="-18" width="75" height="12" rx="2" fill="#14b8a6" opacity="0.5"/>
+      <rect x="105" y="0" width="60" height="12" rx="2" fill="#0d9488" opacity="0.65"/>
+      <rect x="110" y="18" width="50" height="12" rx="2" fill="#14b8a6" opacity="0.55"/>
+      <rect x="105" y="36" width="45" height="12" rx="2" fill="#0f766e" opacity="0.5"/>
+      <rect x="95" y="54" width="40" height="12" rx="2" fill="#14b8a6" opacity="0.4"/>
+      <rect x="80" y="72" width="35" height="12" rx="2" fill="#0d9488" opacity="0.35"/>
+      <!-- Orange word-lines right upper -->
+      <rect x="90" y="-108" width="50" height="12" rx="2" fill="#f97316" opacity="0.6"/>
+      <rect x="115" y="-126" width="40" height="12" rx="2" fill="#fb923c" opacity="0.5"/>
+    </g>
+    <!-- Center/corpus word blocks -->
+    <rect x="-55" y="-80" width="110" height="12" rx="2" fill="#f97316" opacity="0.5"/>
+    <rect x="-65" y="-62" width="130" height="12" rx="2" fill="#14b8a6" opacity="0.55"/>
+    <rect x="-70" y="-44" width="140" height="12" rx="2" fill="#f97316" opacity="0.6"/>
+    <rect x="-65" y="-26" width="130" height="12" rx="2" fill="#14b8a6" opacity="0.5"/>
+    <rect x="-60" y="-8" width="120" height="12" rx="2" fill="#fb923c" opacity="0.55"/>
+    <rect x="-55" y="10" width="110" height="12" rx="2" fill="#0d9488" opacity="0.5"/>
+    <rect x="-45" y="28" width="90" height="12" rx="2" fill="#f97316" opacity="0.45"/>
+    <rect x="-35" y="46" width="70" height="12" rx="2" fill="#14b8a6" opacity="0.4"/>
+    <rect x="-25" y="64" width="50" height="12" rx="2" fill="#f97316" opacity="0.35"/>
+  </g>
+
+  <!-- Thin SVG text labels scattered as "words" -->
+  <g font-family="'Courier New', monospace" font-size="11" opacity="0.4">
+    <text x="390" y="210" fill="#f97316">nyelv</text>
+    <text x="450" y="230" fill="#14b8a6">gondolat</text>
+    <text x="520" y="218" fill="#fb923c">sz&#243;</text>
+    <text x="680" y="208" fill="#0d9488">agy</text>
+    <text x="740" y="228" fill="#f97316">izom</text>
+    <text x="420" y="310" fill="#14b8a6">k&#233;pess&#233;g</text>
+    <text x="740" y="308" fill="#fb923c">hat&#225;r</text>
+    <text x="490" y="380" fill="#f97316">Wittgenstein</text>
+    <text x="660" y="375" fill="#14b8a6">tudat</text>
+  </g>
+
+  <!-- Spine connector line -->
+  <line x1="600" y1="120" x2="600" y2="480" stroke="url(#wordGlow)" stroke-width="1" opacity="0.15"/>
+
+  <!-- Title -->
+  <text x="600" y="548" font-family="Georgia, serif" font-size="40" font-weight="700" fill="#fdba74" text-anchor="middle" letter-spacing="1">A nyelv az agy izomzata</text>
+  <text x="600" y="590" font-family="Georgia, serif" font-size="18" fill="#5eead4" text-anchor="middle" letter-spacing="5" opacity="0.75">LANGUAGE IS THE BRAIN'S MUSCLE</text>
+</svg>
